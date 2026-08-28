@@ -1,0 +1,990 @@
+/* Reversible reference-typography experiment. These immutable font assets
+   are the exact faces used by the supplied live reference. */
+@font-face {
+  font-family: "Reference Outfit";
+  src: url("https://aayushbharti.in/_next/static/immutable/media/1b99372b3eaef0c8-s.p.1ay-qk1u8nydy.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Reference Core Mono";
+  src: url("https://aayushbharti.in/_next/static/immutable/media/CoreMono_Beta01Regular-s.p.1d0e8tars77x7.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Reference Bluu Next";
+  src: url("https://aayushbharti.in/_next/static/immutable/media/e41d5df559864f9e-s.p.2rlzm4mj5kw8e.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===========================================
+   Z-INDEX SCALE (site-wide — keep consistent)
+   0–50      local stacking inside components (cards, tooltips, overlays)
+   z-[999]   in-card hover badges (BentoCard arrow)
+   z-[4000]  chatbot widget (above content, below nav/modals)
+   z-[5000]  navbar (fixed pill header)
+   z-[6000]  ReadingProgress bar (thin, may sit above navbar)
+   6500      fixed hover popovers (.link-preview-popover)
+   z-[7000]  modals & full-screen overlays (SearchModal, ReachOutModal,
+             CommunityWallModal, MediaPickerModal, SignInWithGitHub)
+   Nothing may render above z-[7000].
+   =========================================== */
+
+body.modal-open {
+  overflow: hidden;
+}
+
+.wrapper {
+  display: grid;
+  grid-template-columns:
+    1fr
+    min(75ch, 100%)
+    1fr;
+}
+
+.blog-container {
+  width: min(65ch, 100%);
+}
+
+.wrapper > * {
+  grid-column: 2;
+}
+
+::selection {
+  background-color: #47a3f3;
+  color: #fefefe;
+}
+
+/* styles.css */
+html,
+body {
+  overflow-x: clip;
+}
+
+:root {
+  --sh-class: #0d9488;
+  --sh-identifier: #2252d9;
+  --sh-sign: #334155;
+  --sh-property: #0d9488;
+  --sh-entity: #0885c7;
+  --sh-jsxliterals: #6266d1;
+  --sh-string: #00a99a;
+  --sh-keyword: #7e3ced;
+  --sh-comment: #64758b;
+
+  --bg-primary: #F7F7F8;
+  --border-primary: #D6DADE;
+  --dark-primary: #3C3C3F;
+  --purple-primary: #6C47FF;
+  --purple-secondary: #E6E2F9;
+  --text-primary: #0f172a; /* slate-900 */
+  --text-secondary: #5E5F6E;
+  --text-tertiary: #A5AEB8;
+  --rule-color: #AEB5BD;
+}
+
+.dark {
+  --bg-primary: #0a0a0a;
+  --border-primary: #4d4d4d;
+  --dark-primary: #f7f7f8;
+  --purple-primary: #7c7fff;
+  --purple-secondary: #1b1c26;
+  --text-primary: #fafafa;
+  --text-secondary: #a1a1a1;
+  --text-tertiary: #737373;
+  --rule-color: #404040;
+}
+
+/* ===== Display / accent typography (aayush-style design language) =====
+   `font-display` is provided by tailwind.config.ts (fontFamily.display) —
+   a duplicate class here previously shadowed the utility; removed. */
+
+.text-gradient-accent {
+  background: linear-gradient(100deg, #60a5fa 0%, #8b5cf6 45%, #ec4899 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Hero "engineer" gradient — purple → magenta → pink (no blue stop) */
+.text-gradient-hero {
+  background: linear-gradient(90deg, #a855f7 0%, #d946ef 45%, #ec4899 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.text-gradient-pink {
+  background: linear-gradient(95deg, #f472b6 10%, #ec4899 60%, #db2777 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Animated gradient text (guide spec §2.2 / §5) */
+.text-gradient-animated {
+  background: linear-gradient(90deg, #f472b6, #a78bfa, #60a5fa, #f472b6);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradient-x 6s ease infinite;
+}
+
+.text-colorfull {
+  -webkit-text-fill-color: transparent;
+  background: linear-gradient(288deg, #ff8000, #ff00cc 53.24%, #0044ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.animate-gradient-x {
+  background-size: 200% 200%;
+  animation: gradient-x 6s infinite linear;
+}
+
+@keyframes gradient-x {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .text-gradient-animated,
+  .animate-gradient-x {
+    animation: none;
+  }
+}
+
+/* Animated gradient fill for bars/lines — same palette as .text-gradient-animated */
+.bg-gradient-animated {
+  background: linear-gradient(180deg, #f472b6, #a78bfa, #60a5fa, #f472b6);
+  background-size: 200% 200%;
+  animation: gradient-x 6s ease infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-gradient-animated {
+    animation: none;
+  }
+}
+
+/* Heading glow — dark mode only (guide spec §2.2) */
+.dark .heading-glow {
+  text-shadow:
+    0 4px 8px rgba(255, 255, 255, 0.05),
+    0 8px 30px rgba(255, 255, 255, 0.2);
+}
+
+/* Top light-edge hairline on dark cards (guide spec §2.3). Parent must be relative. */
+.dark .card-light-edge::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  opacity: 0.25;
+  background: linear-gradient(
+    90deg,
+    transparent 5%,
+    rgba(255, 255, 255, 0.8) 35%,
+    #fff 50%,
+    rgba(255, 255, 255, 0.8) 65%,
+    transparent 95%
+  );
+}
+
+.kicker {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+html {
+  min-width: 360px;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+/* NOTE: the `animate-marquee` / `animate-marquee-reverse` utilities are
+   defined in tailwind.config.ts (with var(--marquee-duration)). Do NOT
+   redefine `.animate-marquee` here — a previous duplicate rule overrode the
+   utility with a 0s, paused animation and froze the forward marquee rows. */
+
+/* This addresses the issue of the iframe being too close to the bottom of the article pages or other elements */
+iframe {
+  margin-bottom: 2rem;
+}
+
+.drama-shadow {
+  @apply relative shadow-md ring-1 ring-indigo-500/15;
+}
+
+.drama-shadow::after {
+  @apply pointer-events-none absolute inset-0 rounded-[inherit] shadow-[inset_0_0_2px_1px_#ffffff4d];
+  content: "";
+}
+
+pre {
+  @apply drama-shadow mb-12 rounded-xl;
+}
+
+.code-frame {
+  @apply flex h-9 items-center justify-between overflow-hidden rounded-t-xl border-b border-border-primary bg-bg-primary px-4;
+}
+
+.code-frame-content {
+  @apply flex w-full items-center justify-start space-x-3;
+}
+
+.code-frame-filename {
+  @apply max-w-[50%] truncate font-mono text-sm text-slate-400;
+}
+
+.code-container {
+  @apply overflow-auto rounded-b-xl bg-bg-primary p-6;
+}
+
+.frame-controls {
+  @apply flex h-full items-center justify-start space-x-1.5;
+}
+
+.frame-control {
+  @apply h-[10px] w-[10px] rounded-full bg-[#E2E3E5];
+}
+
+pre code {
+  @apply py-0.5 leading-7;
+  counter-reset: sh-line-number;
+  letter-spacing: 0.1em;
+  font-size: 15px;
+}
+
+code:not(pre code) {
+  /* @apply bg-indigo-100 rounded-md px-1.5 py-0.5 whitespace-nowrap font-mono; */
+  /* --sh-class: #4f46e5;
+  --sh-identifier: #4f46e5;
+  --sh-sign: #4f46e5;
+  --sh-property: #4f46e5;
+  --sh-entity: #4f46e5;
+  --sh-jsxliterals: #4f46e5;
+  --sh-string: #4f46e5;
+  --sh-keyword: #4f46e5;
+  --sh-comment: #4f46e5; */
+
+  font-size: 15px;
+  font-variant-ligatures: none;
+
+  --sh-class: #0f172a;
+  --sh-identifier: #0f172a;
+  --sh-sign: #0f172a;
+  --sh-property: #0f172a;
+  --sh-entity: #0f172a;
+  --sh-jsxliterals: #0f172a;
+  --sh-string: #0f172a;
+  --sh-keyword: #0f172a;
+  --sh-comment: #0f172a;
+}
+
+code:not(pre code)::before,
+code:not(pre code)::after {
+  content: "`";
+}
+
+pre code .sh__line::before {
+  counter-increment: sh-line-number 1;
+  content: counter(sh-line-number);
+  margin-right: 24px;
+  text-align: right;
+  color: #cccccc;
+  font-size: 14px;
+}
+
+.prose code span {
+  @apply font-medium;
+}
+
+.prose img {
+  /* Don't apply styles to next/image */
+  @apply m-0;
+}
+
+.prose h2,
+.prose h3,
+.prose h4 {
+  @apply font-medium tracking-tighter !important;
+}
+
+.prose strong {
+  @apply font-medium;
+}
+
+.prose > :first-child {
+  /* Override removing top margin, causing layout shift */
+  margin-top: 1.25em !important;
+  margin-bottom: 1.25em !important;
+}
+
+pre::-webkit-scrollbar {
+  display: none;
+}
+
+pre {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* Remove Safari input shadow on mobile */
+input[type="text"],
+input[type="email"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.prose .tweet a {
+  text-decoration: inherit;
+  font-weight: 500;
+}
+
+/* Scoped to article prose only — a previous global `table` rule leaked into
+   admin/stats tables (display:block + fit-content broke their w-full layout) */
+.prose table {
+  display: block;
+  max-width: fit-content;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.prose .callout > p {
+  margin: 0 !important;
+}
+
+.title {
+  text-wrap: balance;
+}
+
+blockquote p {
+  margin: 0 !important;
+}
+
+/* Wide layout utility for breaking out of blog content constraints while staying in grid */
+.wide-layout {
+  grid-column: 1 / -1;
+}
+
+.wide-layout > * {
+  max-width: min(95vw, 1400px);
+  margin: 0 auto;
+}
+
+/* Hide CodeSandbox button in Sandpack */
+.wide-layout button[title="Open in CodeSandbox"] {
+  display: none !important;
+}
+
+/* Sandpack line highlighting */
+.sandpack-highlight {
+  background-color: #fef3c7 !important;
+  border-left: 3px solid #f59e0b !important;
+  margin-left: -1rem !important;
+  padding-left: calc(1rem - 3px) !important;
+}
+
+/* ===========================================
+   Table of Contents - CSS Anchor Positioning
+   =========================================== */
+
+.toc-container {
+  --toc-text-primary: #0f172a;
+  --toc-text-secondary: #5e5f6e;
+  --toc-text-tertiary: #94a3b8;
+  --toc-accent: #6c47ff;
+  --toc-accent-glow: rgba(108, 71, 255, 0.15);
+  --toc-border: #e2e8f0;
+  --toc-transition: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  position: fixed;
+  /* Position further left to avoid overlap - account for container width */
+  left: max(1rem, calc((100vw - 1280px) / 2 - 200px));
+  /* top is set dynamically via inline style */
+  width: 180px;
+  max-height: calc(100vh - 200px);
+  overflow: visible;
+  z-index: 40;
+}
+
+/* Hide on smaller viewports - need enough space outside container */
+@media (max-width: 1536px) {
+  .toc-container {
+    display: none !important;
+  }
+}
+
+/* The content wrapper */
+.toc-content {
+  position: relative;
+  padding-left: 20px;
+}
+
+/* SVG container for the path line */
+.toc-path-svg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+/* The path line styling */
+.toc-path-line {
+  stroke: #cbd5e1;
+  stroke-width: 1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ===========================================
+   The Animated Dot Indicator
+   =========================================== */
+
+.toc-indicator {
+  position: absolute;
+  left: -3px;
+  width: 7px;
+  height: 7px;
+  background-color: var(--toc-accent);
+  border-radius: 50%;
+
+  /* Glow effect */
+  box-shadow:
+    0 0 0 3px var(--toc-accent-glow),
+    0 0 12px var(--toc-accent-glow);
+
+  /* Smooth animation with overshoot for both vertical and horizontal movement */
+  transition:
+    top 0.4s var(--toc-transition),
+    left 0.4s var(--toc-transition),
+    opacity 0.2s ease;
+
+  /* Start hidden until first section is active */
+  opacity: 0;
+}
+
+.toc-indicator--visible {
+  opacity: 1;
+}
+
+/* Pulse animation when dot moves */
+@keyframes toc-dot-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 3px var(--toc-accent-glow),
+      0 0 12px var(--toc-accent-glow);
+  }
+  50% {
+    box-shadow:
+      0 0 0 5px var(--toc-accent-glow),
+      0 0 16px var(--toc-accent-glow);
+  }
+}
+
+.toc-indicator--moving {
+  animation: toc-dot-pulse 0.6s ease-out;
+}
+
+/* ===========================================
+   CSS Anchor Positioning (Progressive Enhancement)
+   =========================================== */
+
+@supports (anchor-name: --toc-active) {
+  .toc-indicator {
+    position-anchor: --toc-active;
+    top: anchor(center);
+    transform: translateY(-50%);
+  }
+}
+
+/* ===========================================
+   Section Label
+   =========================================== */
+
+.toc-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--toc-text-tertiary);
+  margin-bottom: 16px;
+  padding-left: 0;
+}
+
+/* ===========================================
+   TOC Links - Typography & Hierarchy
+   =========================================== */
+
+.toc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.toc-item {
+  margin: 0;
+}
+
+/* Base link styles */
+.toc-link {
+  display: block;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--toc-text-secondary);
+  text-decoration: none;
+  padding: 5px 0;
+  transition:
+    color 0.15s ease,
+    transform 0.15s ease;
+  user-select: none;
+}
+
+/* H2 headings - Main sections */
+.toc-link--h2 {
+  font-weight: 500;
+  color: var(--toc-text-primary);
+}
+
+/* H3 headings - Subsections (indented) */
+.toc-link--h3 {
+  font-weight: 400;
+  font-size: 11px;
+  color: var(--toc-text-secondary);
+  padding-left: 14px;
+}
+
+/* ===========================================
+   Interactive States
+   =========================================== */
+
+.toc-link:hover {
+  color: var(--toc-text-primary);
+}
+
+.toc-link--h3:hover {
+  color: var(--toc-text-primary);
+}
+
+/* Active/Current section */
+.toc-link--active {
+  color: var(--toc-accent) !important;
+}
+
+/* Focus state for accessibility */
+.toc-link:focus-visible {
+  outline: 2px solid var(--toc-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ===========================================
+   Scrollbar Styling
+   =========================================== */
+
+.toc-container::-webkit-scrollbar {
+  width: 3px;
+}
+
+.toc-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.toc-container::-webkit-scrollbar-thumb {
+  background: var(--toc-border);
+  border-radius: 3px;
+}
+
+.toc-container::-webkit-scrollbar-thumb:hover {
+  background: var(--toc-text-tertiary);
+}
+
+/* ===========================================
+   Reduced Motion Preference
+   =========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .toc-indicator {
+    transition:
+      top 0.1s ease,
+      left 0.1s ease,
+      opacity 0.1s ease;
+  }
+
+  .toc-link {
+    transition: color 0.1s ease;
+  }
+
+  .toc-indicator--moving {
+    animation: none;
+  }
+}
+
+/* ===========================================
+   Link Preview Popover - Native Popover API
+   =========================================== */
+
+.link-preview-popover {
+  /* Reset popover defaults */
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  overflow: visible;
+
+  /* Positioning via JS */
+  position: fixed;
+  inset: unset;
+  z-index: 6500; /* z-scale: fixed hover popovers — below modals (7000) */
+
+  /* Animation setup */
+  opacity: 0;
+  transform: translateY(8px) scale(0.96);
+  transition:
+    opacity 0.15s ease-out,
+    transform 0.15s ease-out,
+    overlay 0.15s ease-out allow-discrete,
+    display 0.15s ease-out allow-discrete;
+}
+
+/* Open state */
+.link-preview-popover:popover-open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Entry animation - starting styles */
+@starting-style {
+  .link-preview-popover:popover-open {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+}
+
+/* ===========================================
+   Popover Card Styles
+   =========================================== */
+
+.link-preview-card {
+  width: 320px;
+  max-width: calc(100vw - 32px);
+}
+
+/* ===========================================
+   CSS Anchor Positioning (Progressive Enhancement)
+   Supported in Chrome 125+, Edge 125+
+   =========================================== */
+
+@supports (anchor-name: --test) {
+  .link-preview-popover.anchor-positioned {
+    /* Use CSS Anchor Positioning instead of JS */
+    position: absolute;
+    position-try-fallbacks: flip-block;
+
+    /* Position above the anchor, centered horizontally */
+    bottom: anchor(top);
+    left: anchor(center);
+    transform: translateX(-50%);
+    margin-bottom: 12px;
+  }
+}
+
+/* ===========================================
+   Responsive & Accessibility
+   =========================================== */
+
+/* Hide on touch devices since hover doesn't work well */
+@media (hover: none) and (pointer: coarse) {
+  .link-preview-popover {
+    display: none !important;
+  }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .link-preview-popover {
+    transition: none;
+  }
+
+  @starting-style {
+    .link-preview-popover:popover-open {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+/* Reach-out / search modals: shrink-to-fit on shorter viewports (kept off the
+   framer-motion element so animated transforms don't override it).
+   Fine-grained steps so browser zoom / OS scaling transitions stay smooth. */
+.reachout-scale {
+  transform-origin: top center;
+}
+@media (max-height: 940px) {
+  .reachout-scale { transform: scale(0.96); }
+}
+@media (max-height: 880px) {
+  .reachout-scale { transform: scale(0.92); }
+}
+@media (max-height: 820px) {
+  .reachout-scale { transform: scale(0.87); }
+}
+@media (max-height: 770px) {
+  .reachout-scale { transform: scale(0.82); }
+}
+@media (max-height: 720px) {
+  .reachout-scale { transform: scale(0.77); }
+}
+@media (max-height: 680px) {
+  .reachout-scale { transform: scale(0.72); }
+}
+@media (max-height: 645px) {
+  .reachout-scale { transform: scale(0.67); }
+}
+@media (max-height: 610px) {
+  .reachout-scale { transform: scale(0.62); }
+}
+/* Very short screens (landscape phones): keep shrinking so the card never
+   clips off the top of the viewport. */
+@media (max-height: 560px) {
+  .reachout-scale { transform: scale(0.55); }
+}
+@media (max-height: 500px) {
+  .reachout-scale { transform: scale(0.48); }
+}
+@media (max-height: 440px) {
+  .reachout-scale { transform: scale(0.42); }
+}
+@media (max-height: 390px) {
+  .reachout-scale { transform: scale(0.37); }
+}
+/* Phones: render the modal card as an exact miniature of the laptop layout.
+   The card keeps its full 660px desktop layout and is scaled down to fit the
+   viewport width, so every element looks identical to large screens.
+   (Owner-approved exception to the locked zoom steps — see LOCKED_PERFECT.md) */
+@media (max-width: 640px) {
+  .reachout-scale {
+    width: 660px;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%) scale(0.88);
+  }
+}
+@media (max-width: 600px) {
+  .reachout-scale { transform: translateX(-50%) scale(0.82); }
+}
+@media (max-width: 560px) {
+  .reachout-scale { transform: translateX(-50%) scale(0.76); }
+}
+@media (max-width: 520px) {
+  .reachout-scale { transform: translateX(-50%) scale(0.70); }
+}
+@media (max-width: 480px) {
+  .reachout-scale { transform: translateX(-50%) scale(0.645); }
+}
+@media (max-width: 440px) {
+  .reachout-scale { transform: translateX(-50%) scale(0.60); }
+}
+@media (max-width: 412px) {
+  .reachout-scale { transform: translateX(-50%) scale(0.575); }
+}
+@media (max-width: 390px) {
+  .reachout-scale { transform: translateX(-50%) scale(0.555); }
+}
+@media (max-width: 375px) {
+  .reachout-scale { transform: translateX(-50%) scale(0.53); }
+}
+@media (max-width: 360px) {
+  .reachout-scale { transform: translateX(-50%) scale(0.49); }
+}
+@media (max-width: 330px) {
+  .reachout-scale { transform: translateX(-50%) scale(0.45); }
+}
+
+/* Hero headline: living gradient — the color slowly drifts through the text */
+@keyframes hero-gradient-drift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.hero-gradient-animate {
+  background-size: 220% 220%;
+  animation: hero-gradient-drift 5s ease-in-out infinite;
+}
+
+/* Hero headline typing caret */
+@keyframes hero-caret-blink {
+  0%, 45% { opacity: 1; }
+  50%, 95% { opacity: 0; }
+  100% { opacity: 1; }
+}
+.hero-caret {
+  animation: hero-caret-blink 1.1s steps(1) infinite;
+}
+
+/* Hero portrait: sonar-style ripple rings expanding outward like water waves */
+@keyframes hero-ripple {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(1.65);
+    opacity: 0;
+  }
+}
+
+/* Battery saver: pause the hero's ambient CSS animations (ripple rings,
+   ping dots, caret, gradient sweep) while the section is out of view.
+   Toggled by an IntersectionObserver in HomeHero; JS-driven motion
+   (framer) is unaffected. */
+.hero-offscreen * {
+  animation-play-state: paused !important;
+}
+
+/* MySiteGrid Stats card — sparkline redraws itself on card hover. */
+@keyframes sparkline-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Blog article reference treatment. Scoped so locked pages keep their current presentation. */
+.blog-article-shell :not(pre) > code {
+  border-radius: 2px;
+  background: #e5e5e5;
+  padding: 0.125rem 0.375rem;
+  color: #3f3f46;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.875em;
+  font-weight: 400;
+}
+
+.dark .blog-article-shell :not(pre) > code {
+  background: #262626;
+  color: #d4d4d8;
+}
+
+.blog-article-shell :not(pre) > code::before,
+.blog-article-shell :not(pre) > code::after {
+  content: none;
+}
+
+.blog-article-shell .code-frame {
+  height: auto;
+  min-height: 2.5rem;
+  border: 1px solid rgb(229 229 229 / 0.8);
+  border-bottom: 0;
+  border-radius: 0.75rem 0.75rem 0 0;
+  background: #f6f6f8;
+  padding: 0.625rem 1rem;
+}
+
+.dark .blog-article-shell .code-frame {
+  border-color: #262626;
+  background: #101010;
+}
+
+.blog-article-shell .code-container {
+  border: 1px solid rgb(229 229 229 / 0.8);
+  border-top: 0;
+  border-radius: 0 0 0.75rem 0.75rem;
+  background: #f6f6f8;
+  padding: 0.75rem 1rem 1rem;
+}
+
+.dark .blog-article-shell .code-container {
+  border-color: #262626;
+  background: #101010;
+}
+
+.blog-article-shell .code-frame + .code-container,
+.blog-article-shell .code-frame {
+  box-shadow: none;
+}
+
+.blog-article-shell > div:has(> .code-frame) {
+  margin: 1.5rem 0;
+  max-width: none;
+  border: 1px solid #e5e5e5;
+  border-radius: 1rem;
+  background: rgb(229 229 229 / 0.5);
+  padding: 0.25rem;
+}
+
+.dark .blog-article-shell > div:has(> .code-frame) {
+  border-color: #262626;
+  background: rgb(23 23 23 / 0.5);
+}
+
+.blog-article-shell blockquote {
+  border-left-color: #a3a3a3;
+  color: #525252;
+  font-style: normal;
+}
+
+.dark .blog-article-shell blockquote {
+  border-left-color: #525252;
+  color: #a3a3a3;
+}
+
+.blog-article-shell table {
+  display: block;
+  width: 100%;
+  min-width: 500px;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.blog-article-shell th,
+.blog-article-shell td {
+  border: 1px solid #e5e5e5;
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.dark .blog-article-shell th,
+.dark .blog-article-shell td {
+  border-color: #262626;
+}

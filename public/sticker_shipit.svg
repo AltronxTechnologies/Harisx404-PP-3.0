@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="196" height="212" viewBox="0 0 196 212">
+  <defs>
+    <linearGradient id="spBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#312e81"/>
+      <stop offset="1" stop-color="#1e1b4b"/>
+    </linearGradient>
+    <linearGradient id="spFlame" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f0abfc"/>
+      <stop offset="1" stop-color="#8b5cf6"/>
+    </linearGradient>
+    <linearGradient id="spShip" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e0e7ff"/>
+      <stop offset="1" stop-color="#a5b4fc"/>
+    </linearGradient>
+  </defs>
+  <g transform="rotate(5 98 106)">
+    <!-- perforated stamp border -->
+    <rect x="14" y="16" width="168" height="180" rx="10" fill="#ffffff" stroke="#000000" stroke-opacity="0.08" stroke-width="1.5"/>
+    <g fill="#0b0d16">
+      <circle cx="14" cy="40" r="5"/><circle cx="14" cy="70" r="5"/><circle cx="14" cy="100" r="5"/><circle cx="14" cy="130" r="5"/><circle cx="14" cy="160" r="5"/>
+      <circle cx="182" cy="40" r="5"/><circle cx="182" cy="70" r="5"/><circle cx="182" cy="100" r="5"/><circle cx="182" cy="130" r="5"/><circle cx="182" cy="160" r="5"/>
+      <circle cx="44" cy="16" r="5"/><circle cx="74" cy="16" r="5"/><circle cx="104" cy="16" r="5"/><circle cx="134" cy="16" r="5"/><circle cx="164" cy="16" r="5"/>
+      <circle cx="44" cy="196" r="5"/><circle cx="74" cy="196" r="5"/><circle cx="104" cy="196" r="5"/><circle cx="134" cy="196" r="5"/><circle cx="164" cy="196" r="5"/>
+    </g>
+    <!-- inner panel -->
+    <rect x="24" y="26" width="148" height="160" rx="7" fill="url(#spBody)" stroke="#818cf8" stroke-opacity="0.45" stroke-width="1.2"/>
+    <!-- stars -->
+    <g fill="#c7d2fe" opacity="0.8">
+      <circle cx="46" cy="48" r="1.4"/><circle cx="146" cy="42" r="1.2"/><circle cx="60" cy="88" r="1.1"/>
+      <circle cx="150" cy="96" r="1.4"/><circle cx="40" cy="120" r="1.2"/><circle cx="140" cy="70" r="1"/>
+    </g>
+    <!-- rocket -->
+    <g transform="rotate(38 98 88)">
+      <path d="M98 44 C 110 58, 112 84, 106 102 H90 C 84 84, 86 58, 98 44 Z" fill="url(#spShip)" stroke="#6366f1" stroke-width="1.4"/>
+      <circle cx="98" cy="74" r="7.5" fill="#1e1b4b" stroke="#818cf8" stroke-width="2"/>
+      <path d="M90 92 L76 108 L88 106 Z" fill="#8b5cf6"/>
+      <path d="M106 92 L120 108 L108 106 Z" fill="#8b5cf6"/>
+      <path d="M93 104 C 94 116, 102 116, 103 104 C 101 112, 95 112, 93 104 Z" fill="url(#spFlame)"/>
+      <path d="M96 104 L98 122 L100 104 Z" fill="url(#spFlame)" opacity="0.9"/>
+    </g>
+    <!-- wordmark -->
+    <text x="98" y="150" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="800" letter-spacing="3.5" fill="#e0e7ff" text-anchor="middle">SHIP IT</text>
+    <line x1="52" y1="160" x2="144" y2="160" stroke="#818cf8" stroke-opacity="0.4"/>
+    <text x="98" y="174" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9" letter-spacing="1.7" fill="#b0bcfd" text-anchor="middle">BUILD → BREAK → LEARN</text>
+  </g>
+</svg>
