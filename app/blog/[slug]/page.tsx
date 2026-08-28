@@ -5,6 +5,8 @@ import readingDuration from "reading-duration";
 import { Metadata, ResolvingMetadata } from "next";
 import { MDXContent } from "@/app/components/mdx";
 import { BlogGridCard } from "@/app/components/blog/BlogGridCard";
+import { NewsletterSignUp } from "@/app/components/NewsletterSignUp";
+import { CtaSection } from "@/app/components/home/CtaSection";
 import { CopyUrlButton } from "@/app/components/blog/CopyUrlButton";
 import { TableOfContents } from "@/app/components/TableOfContents";
 import {
@@ -66,6 +68,15 @@ export default async function BlogPage({ params }: BlogPageProps) {
 
   return (
     <div className="relative min-w-0 pb-20">
+      {/* Decorative hatched side rails — reference frame: 12px mobile / 32px desktop */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 left-0 hidden w-3 border-r border-border-primary sm:block lg:w-8 [background-image:repeating-linear-gradient(45deg,var(--tw-shadow-color,rgba(0,0,0,0.04))_0px,var(--tw-shadow-color,rgba(0,0,0,0.04))_1px,transparent_1px,transparent_7px)] dark:[background-image:repeating-linear-gradient(45deg,rgba(255,255,255,0.05)_0px,rgba(255,255,255,0.05)_1px,transparent_1px,transparent_7px)]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 right-0 hidden w-3 border-l border-border-primary sm:block lg:w-8 [background-image:repeating-linear-gradient(45deg,var(--tw-shadow-color,rgba(0,0,0,0.04))_0px,var(--tw-shadow-color,rgba(0,0,0,0.04))_1px,transparent_1px,transparent_7px)] dark:[background-image:repeating-linear-gradient(45deg,rgba(255,255,255,0.05)_0px,rgba(255,255,255,0.05)_1px,transparent_1px,transparent_7px)]"
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -150,6 +161,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
             className="cursor-help text-neutral-500 dark:text-neutral-500"
             title={`Published ${formatDate(post.publishedAt)}`}
           >
+            <span className="hidden sm:inline">Updated </span>
             <time dateTime={post.publishedAt}>{longDate(post.publishedAt)}</time>
           </span>
         </div>
@@ -196,6 +208,19 @@ export default async function BlogPage({ params }: BlogPageProps) {
           <div aria-hidden="true" className="w-full border-t border-border-primary" />
         </div>
       )}
+
+      {/* Newsletter — stay in the loop after reading */}
+      <div className="relative mx-auto mt-10 w-full max-w-3xl px-4 md:px-6">
+        <NewsletterSignUp
+          title="Enjoyed this write-up?"
+          description="Get new articles on web, security, and AI/ML straight to your inbox. No spam, unsubscribe anytime."
+        />
+      </div>
+
+      {/* Contact CTA — same section used across the site */}
+      <div className="relative mt-6">
+        <CtaSection />
+      </div>
     </div>
   );
 }
