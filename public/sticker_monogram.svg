@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="mgRing" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#818cf8"/>
+      <stop offset="0.5" stop-color="#c084fc"/>
+      <stop offset="1" stop-color="#f0abfc"/>
+    </linearGradient>
+    <linearGradient id="mgCore" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1e1b4b"/>
+      <stop offset="1" stop-color="#0f0d26"/>
+    </linearGradient>
+    <linearGradient id="mgGloss" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.32"/>
+      <stop offset="0.45" stop-color="#ffffff" stop-opacity="0.04"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <g transform="rotate(-5 100 100)">
+    <!-- die-cut white border -->
+    <circle cx="100" cy="100" r="92" fill="#ffffff" stroke="#000000" stroke-opacity="0.08" stroke-width="1.5"/>
+    <!-- holo ring -->
+    <circle cx="100" cy="100" r="82" fill="url(#mgRing)"/>
+    <!-- tick marks on ring -->
+    <g stroke="#ffffff" stroke-opacity="0.6" stroke-width="2">
+      <line x1="100" y1="21" x2="100" y2="29"/><line x1="100" y1="171" x2="100" y2="179"/>
+      <line x1="21" y1="100" x2="29" y2="100"/><line x1="171" y1="100" x2="179" y2="100"/>
+      <line x1="44.6" y1="44.6" x2="50.2" y2="50.2"/><line x1="149.8" y1="149.8" x2="155.4" y2="155.4"/>
+      <line x1="155.4" y1="44.6" x2="149.8" y2="50.2"/><line x1="50.2" y1="149.8" x2="44.6" y2="155.4"/>
+    </g>
+    <!-- core -->
+    <circle cx="100" cy="100" r="64" fill="url(#mgCore)" stroke="#a5b4fc" stroke-opacity="0.5" stroke-width="1.5"/>
+    <circle cx="100" cy="100" r="64" fill="url(#mgGloss)"/>
+    <!-- monogram -->
+    <text x="100" y="118" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="58" font-weight="500" fill="#e0e7ff" text-anchor="middle">H.</text>
+    <!-- sparks -->
+    <path d="M138 66 l2.4 6 6 2.4 -6 2.4 -2.4 6 -2.4 -6 -6 -2.4 6 -2.4 Z" fill="#f0abfc"/>
+    <path d="M60 128 l1.8 4.5 4.5 1.8 -4.5 1.8 -1.8 4.5 -1.8 -4.5 -4.5 -1.8 4.5 -1.8 Z" fill="#a5b4fc"/>
+    <!-- caption arc substitute -->
+    <text x="100" y="146" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10" letter-spacing="2" fill="#a5b4fc" fill-opacity="0.85" text-anchor="middle">EST. 2022</text>
+  </g>
+</svg>

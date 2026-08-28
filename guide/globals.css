@@ -1,0 +1,83 @@
+:root {
+    --background: #121212;
+    --foreground: #fafafa;
+    --surface: #171717;
+    --surface-muted: #0f0f0f;
+    --card: #171717;
+    --hairline: #ffffff24;
+    --overlay-soft: #ffffff0d;
+    --primary: #e5e5e5;
+    --secondary: #27272a;
+    --muted: #262626;
+    --muted-foreground: #a1a1a1;
+    --accent: #262626;
+    --border: #262626;
+    --input: #ffffff26;
+    --ring: #737373;
+}
+
+body {
+    background: #000;
+    color: var(--foreground);
+}
+
+/* Animated gradient heading text */
+.text-colorfull {
+    background: linear-gradient(90deg, #f472b6, #a78bfa, #60a5fa, #f472b6);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.animate-gradient-x {
+    animation: gradient-x 6s ease infinite;
+}
+
+@keyframes gradient-x {
+
+    0%,
+    100% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .animate-gradient-x {
+        animation: none;
+    }
+}
+
+/* Marquee */
+@keyframes marquee {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-33.333%);
+    }
+}
+
+.marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee 30s linear infinite;
+}
+
+.marquee-reverse {
+    animation-direction: reverse;
+}
+
+/* Diagonal hatch rails */
+.grid-edge {
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    background-size: 5px 5px;
+    background-image: linear-gradient(45deg, #262626 12.5%, transparent 12.5%,
+            transparent 50%, #262626 50%, #262626 62.5%, transparent 62.5%, transparent 100%);
+}

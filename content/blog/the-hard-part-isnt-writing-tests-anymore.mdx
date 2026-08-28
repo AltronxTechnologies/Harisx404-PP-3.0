@@ -1,0 +1,76 @@
+---
+title: The Hard Part Isn't Writing Tests Anymore
+publishedAt: 2026-07-07T12:00:00Z
+summary: AI has made writing tests cheap — hundreds of assertions in seconds. But it hasn't made deciding what deserves to be tested any easier, and that judgment is quickly becoming the more valuable engineering skill.
+imageName: the_hard_part_isnt_writing_tests_anymore.jpeg
+categories: ["testing", "programming", "personal"]
+draft: false
+---
+
+I've been thinking a lot about how our frontend test suite has grown over the last six months. I don't have any hard numbers to back this up, but it genuinely feels like we're writing more tests than ever before.
+
+My first reaction was, _"That's awesome."_
+
+More tests usually means more confidence, and if our coverage is increasing, that's probably a sign we're moving in the right direction.
+
+The more I thought about it, though, the more I realized that AI has fundamentally changed the economics of writing tests. One of the best side effects of tools like Claude Code is that they're exceptionally good at generating them. Need to cover a handful of edge cases? Ask Claude. Need tests for a new component? Claude will happily produce a suite in a matter of seconds.
+
+**Writing tests just isn't the expensive part anymore.**
+
+## The economics flipped overnight
+
+For most of my career, tests were something you had to budget for. Writing a good suite for a non-trivial component could take as long as building the component itself, so teams made trade-offs. We wrote tests for the scary paths, skipped the tedious ones, and told ourselves we'd come back later. Coverage was a scarce resource because *effort* was the constraint.
+
+That constraint is gone. The marginal cost of one more test is now close to zero. You can point an agent at a file and get forty assertions back before your coffee is done. Mocks, fixtures, edge cases, the boring permutations nobody wanted to type out by hand — all of it appears instantly and most of it even passes.
+
+When something becomes free, you get a lot more of it. That's exactly what's happening to test suites everywhere right now. The interesting question is whether all that new volume is actually buying us anything.
+
+## Code review is shifting targets
+
+A coworker recently made an observation that I haven't been able to shake: as AI gets better, our attention during code review may naturally shift away from implementation and toward the tests themselves.
+
+That sounded backwards to me at first. Aren't the tests supposed to validate the implementation?
+
+More often than not, the implementation is... *fine*. AI has gotten remarkably good at translating requirements into code. Where I find myself slowing down is the test suite. Did the AI actually capture the behavior we care about? Did it invent assumptions that were never part of the feature? Is it testing implementation details instead of observable behavior? Does this test actually communicate the intent of the product requirement?
+
+Those questions have started taking more of my attention than the implementation itself.
+
+<Callout emoji="💡">
+  The tests have quietly become the spec. If a generated test encodes the wrong
+  assumption, that assumption gets *protected* by CI forever — every future
+  change has to satisfy a requirement nobody actually asked for.
+</Callout>
+
+That's been an interesting shift because I don't think it's really about AI writing bad tests. It's about AI making tests so cheap to produce that quantity is no longer the bottleneck. We can generate hundreds of assertions without much effort, but that doesn't necessarily buy us confidence.
+
+Confidence still comes from choosing the right behaviors to protect.
+
+## What a healthy suite looks like now
+
+I think that's changed how I evaluate the health of a test suite. Six months ago I would have been excited to see the number of tests growing as quickly as they are today. Now, I'm much more interested in whether those tests faithfully encode the product requirements. A thousand assertions that validate the wrong behavior aren't nearly as valuable as a handful that capture the guarantees your users actually depend on.
+
+Bloated suites have real costs, too, even when every test is green:
+
+- **They slow the feedback loop.** CI time grows linearly with test count, and generated tests tend to multiply fast.
+- **They entrench accidents.** A snapshot of today's behavior — bugs included — becomes tomorrow's contract.
+- **They bury the signal.** When a refactor breaks 60 tests, the two failures that matter are hiding among 58 that are just brittle.
+- **They create false confidence.** A big green number feels safe. It says nothing about whether the *right* behaviors are covered.
+
+## The questions I ask before keeping a test
+
+These days, when a generated test lands in a pull request, I run it through a quick mental filter:
+
+1. **Would a user notice if this behavior broke?** If not, why are we protecting it?
+2. **Does it test behavior or implementation?** Asserting on internal state or mock call counts usually means the test will break on the next harmless refactor.
+3. **Can I trace it to a requirement?** Every good test is a sentence in the product spec, written in code. If I can't finish the sentence "this test exists because...", it's a candidate for deletion.
+4. **Would it fail for the right reason?** A test that only fails when the file it lives next to changes isn't protecting anything.
+
+Deleting a passing test used to feel reckless. Now it feels like part of the job. Curation is the new authorship.
+
+## The skill that actually matters
+
+AI has made writing tests cheap. It hasn't made deciding what deserves to be tested any easier.
+
+If anything, that's becoming the more valuable engineering skill — knowing which behaviors form the real contract with your users, saying no to the other five hundred assertions, and keeping the suite small enough that a failure still *means* something.
+
+The bottleneck moved. It's not typing anymore. It's judgment.
