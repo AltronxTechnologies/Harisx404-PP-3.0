@@ -130,27 +130,30 @@ function SocialLinkCard({ link }: { link: SocialLink }) {
     <Wrapper
       href={link.href}
       {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-      className="group relative flex items-center gap-4 rounded-xl border border-neutral-200 bg-white p-4 transition-all hover:border-neutral-300 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900/30 dark:hover:border-neutral-700 dark:hover:bg-neutral-900"
+      className="group relative flex items-center gap-4 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm transition-all duration-150 active:scale-[0.98] hover:border-neutral-300 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900/50 dark:hover:border-neutral-700 dark:hover:bg-neutral-900 sm:shadow-none sm:dark:bg-neutral-900/30"
     >
-      <span className="flex size-12 shrink-0 items-center justify-center rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-600 transition-colors group-hover:bg-white dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:group-hover:bg-neutral-800">
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-900 transition-colors group-hover:bg-white dark:border-neutral-700 dark:bg-neutral-800 dark:text-white sm:size-12 sm:text-neutral-600 sm:dark:text-neutral-400 sm:dark:group-hover:bg-neutral-800">
         <span className="transition-transform duration-300 group-hover:scale-110">{link.icon}</span>
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-semibold text-neutral-900 dark:text-white">{link.title}</span>
-        <span className="block truncate font-mono text-[10px] text-neutral-500 dark:text-neutral-400">{link.handle}</span>
+        <span className="block truncate text-sm font-medium text-neutral-900 dark:text-white sm:font-semibold">{link.title}</span>
+        <span className="hidden truncate font-mono text-[10px] text-neutral-500 dark:text-neutral-400 sm:block">{link.handle}</span>
       </span>
-      <ArrowUpRight className="absolute right-3 top-3 size-3 -translate-x-1 text-neutral-400 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
+      {/* Mobile: static trailing arrow */}
+      <ArrowUpRight className="ml-auto size-4 shrink-0 text-neutral-400 sm:hidden" />
+      {/* Desktop: slide-in hover arrow */}
+      <ArrowUpRight className="absolute right-3 top-3 hidden size-3 -translate-x-1 text-neutral-400 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100 sm:block" />
     </Wrapper>
   );
 }
 
 function GroupHeader({ label }: { label: string }) {
   return (
-    <div className="mb-6 flex items-center gap-4">
-      <span className="font-mono text-xs font-bold uppercase tracking-wider text-neutral-400 dark:text-neutral-600">
+    <div className="mb-3 flex items-center justify-center gap-4 sm:mb-6 sm:justify-start">
+      <span className="font-mono text-xs font-bold uppercase tracking-wider text-neutral-400 sm:dark:text-neutral-600">
         {label}
       </span>
-      <span aria-hidden="true" className="h-px flex-1 border-t border-dashed border-neutral-200 dark:border-neutral-800" />
+      <span aria-hidden="true" className="hidden h-px flex-1 border-t border-dashed border-neutral-200 dark:border-neutral-800 sm:block" />
     </div>
   );
 }
@@ -172,8 +175,8 @@ export default function LinksPage() {
 
       <HeroTexture />
 
-      {/* Hero */}
-      <h1 className="relative z-[2] mx-auto mt-20 mb-14 max-w-xl text-balance text-center font-medium text-5xl tracking-tight [text-shadow:rgba(255,255,255,0.05)_0px_4px_8px,rgba(255,255,255,0.2)_0px_8px_30px] max-sm:px-5 md:mt-28 md:text-6xl">
+      {/* Hero — hidden on mobile per reference (profile card is the mobile hero) */}
+      <h1 className="relative z-[2] mx-auto mt-20 mb-14 hidden max-w-xl text-balance text-center font-medium text-5xl tracking-tight [text-shadow:rgba(255,255,255,0.05)_0px_4px_8px,rgba(255,255,255,0.2)_0px_8px_30px] max-sm:px-5 md:mt-28 md:block md:text-6xl">
         <p className="mb-4 font-mono font-normal text-black/80 text-xs uppercase tracking-widest dark:text-white/70">
           Connect
         </p>
@@ -194,11 +197,11 @@ export default function LinksPage() {
       </h1>
 
       {/* Split layout */}
-      <div className="relative mx-auto w-full max-w-6xl border-t border-dashed border-neutral-200 px-4 dark:border-neutral-800 sm:px-8 lg:px-12">
+      <div className="relative mx-auto mt-24 w-full max-w-6xl border-t border-dashed border-neutral-200 px-4 max-md:border-t-0 dark:border-neutral-800 sm:px-8 md:mt-0 lg:px-12">
         <div className="grid grid-cols-1 lg:grid-cols-12">
           {/* Left: sticky profile card */}
           <div className="p-4 lg:sticky lg:top-32 lg:col-span-3 lg:self-start lg:p-6 lg:pl-0">
-            <div className="rounded-2xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
+            <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 lg:shadow-none">
               <div className="relative mx-auto size-24">
                 <Image
                   src={siteMetadata.avatarImage}
@@ -212,7 +215,7 @@ export default function LinksPage() {
                   <span className="relative inline-flex size-2.5 rounded-full bg-green-500 ring-2 ring-white dark:ring-neutral-900" />
                 </span>
               </div>
-              <h2 className="mt-4 text-center font-display text-2xl font-bold text-neutral-900 dark:text-white">
+              <h2 className="mt-4 text-center font-display text-3xl font-bold text-neutral-900 dark:text-white lg:text-2xl">
                 Muhammad Haris
               </h2>
               <div className="mt-2 flex flex-wrap items-center justify-center gap-1.5">
@@ -237,47 +240,61 @@ export default function LinksPage() {
                 </p>
               </div>
 
+              {/* Desktop in-card CTA */}
               <Link
                 href="/contact"
-                className="group mt-6 flex w-full items-center justify-center gap-1.5 rounded-lg bg-neutral-900 px-3 py-2.5 text-sm font-medium text-white transition-colors hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
+                className="group mt-6 hidden w-full items-center justify-center gap-1.5 rounded-lg bg-neutral-900 px-3 py-2.5 text-sm font-medium text-white transition-colors hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 lg:flex"
               >
                 Book a Call
                 <ArrowUpRight className="size-3.5 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
               </Link>
 
-              <div className="mt-3 grid grid-cols-2 gap-3">
-                <Link
-                  href="/"
-                  className="rounded-lg border border-neutral-200 bg-neutral-50 py-2.5 text-center text-xs font-medium text-neutral-900 transition-colors hover:bg-white dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700"
-                >
-                  Website
-                </Link>
+              <div className="mt-6 grid grid-cols-2 gap-3 lg:mt-3">
                 <a
                   href={siteMetadata.email}
                   className="rounded-lg border border-neutral-200 bg-neutral-50 py-2.5 text-center text-xs font-medium text-neutral-900 transition-colors hover:bg-white dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700"
                 >
                   Email
                 </a>
+                <Link
+                  href="/"
+                  className="rounded-lg border border-neutral-200 bg-neutral-50 py-2.5 text-center text-xs font-medium text-neutral-900 transition-colors hover:bg-white dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700"
+                >
+                  Full Website
+                </Link>
               </div>
             </div>
+
+            {/* Mobile standalone primary CTA — reference: full-width py-6 button below card */}
+            <Link
+              href="/contact"
+              className="group mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-neutral-900 px-4 py-6 text-base font-medium text-white shadow-md transition-all hover:bg-neutral-800 active:scale-[0.98] dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 lg:hidden"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" className="size-4" aria-hidden="true">
+                <rect x="3" y="4" width="18" height="18" rx="2" />
+                <path d="M16 2v4M8 2v4M3 10h18" />
+              </svg>
+              Book a Call
+              <ArrowUpRight className="size-4 opacity-50 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
+            </Link>
           </div>
 
           {/* Middle: dashed structural spacer */}
           <div aria-hidden="true" className="hidden border-x border-dashed border-neutral-200 dark:border-neutral-800 lg:col-span-1 lg:block" />
 
           {/* Right: link groups */}
-          <div className="space-y-12 p-4 lg:col-span-8 lg:p-6 lg:pr-0">
+          <nav aria-label="Social links" className="mt-8 space-y-6 p-4 pt-0 lg:col-span-8 lg:mt-0 lg:space-y-12 lg:p-6 lg:pr-0">
             {linkGroups.map((group) => (
               <section key={group.label}>
                 <GroupHeader label={group.label} />
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
                   {group.links.map((link) => (
                     <SocialLinkCard key={link.title} link={link} />
                   ))}
                 </div>
               </section>
             ))}
-          </div>
+          </nav>
         </div>
       </div>
 

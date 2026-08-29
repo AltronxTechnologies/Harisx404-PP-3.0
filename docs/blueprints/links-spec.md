@@ -58,3 +58,17 @@ H1 48px; rails 12px; sm:grid-cols-2 for cards.
 ## 5. Interactions
 Card hover (border, shadow-md, icon scale-110, arrow slide-in); beacon ping;
 Book-a-Call arrow nudge; hero shimmer; shared CTA/footer effects.
+
+## 6. Mobile capture refinements (applied)
+- Hero H1 hidden on mobile — profile card is the mobile hero (`hidden md:block`).
+- Profile name 30px mobile (`text-3xl lg:text-2xl`); card `shadow-sm` mobile.
+- Secondary buttons: "Email" + "Full Website".
+- Book a Call: standalone full-width `py-6` button below card on mobile with
+  calendar icon + arrow (opacity-50), `shadow-md active:scale-[0.98]`; in-card
+  py-2.5 version desktop-only.
+- Link cards mobile: icon box size-10, handle hidden (title only, font-medium),
+  static trailing arrow `ml-auto size-4`, `shadow-sm active:scale-[0.98]`,
+  gap-3 stack, dark bg neutral-900/50.
+- Category headers centered on mobile (`text-center mb-3`), no dashed rule.
+- Groups `space-y-6` mobile / `space-y-12` desktop; right column is
+  `<nav aria-label="Social links">`.
