@@ -86,17 +86,39 @@ function SkillRow({ name, detail }: { name: string; detail: string }) {
 
 export default function ResumePage() {
   return (
-    <div className="relative">
+    <div className="relative min-w-0">
+      {/* Decorative hatched side rails */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 left-0 hidden w-3 border-r border-border-primary sm:block lg:w-8 [background-image:repeating-linear-gradient(45deg,rgba(0,0,0,0.04)_0px,rgba(0,0,0,0.04)_1px,transparent_1px,transparent_7px)] dark:[background-image:repeating-linear-gradient(45deg,rgba(255,255,255,0.05)_0px,rgba(255,255,255,0.05)_1px,transparent_1px,transparent_7px)]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 right-0 hidden w-3 border-l border-border-primary sm:block lg:w-8 [background-image:repeating-linear-gradient(45deg,rgba(0,0,0,0.04)_0px,rgba(0,0,0,0.04)_1px,transparent_1px,transparent_7px)] dark:[background-image:repeating-linear-gradient(45deg,rgba(255,255,255,0.05)_0px,rgba(255,255,255,0.05)_1px,transparent_1px,transparent_7px)]"
+      />
       <HeroTexture />
       <GridWrapper>
         <div className="mx-auto max-w-4xl px-2 pb-24 pt-20 sm:px-4 md:pt-28">
-          {/* Page header */}
+          {/* Page header — site blueprint hero pattern */}
           <div className="text-center">
-            <p className="font-mono text-xs uppercase tracking-[0.35em] text-text-tertiary">
-              Resume
-            </p>
-            <h1 className="mx-auto mt-3 font-display text-4xl leading-[1.05] text-text-primary md:text-6xl">
-              The paper <em className="text-gradient-accent italic">version</em>
+            <h1 className="relative z-[2] mx-auto max-w-xl text-balance text-center font-medium text-5xl tracking-tight [text-shadow:rgba(255,255,255,0.05)_0px_4px_8px,rgba(255,255,255,0.2)_0px_8px_30px] max-sm:px-5 md:text-6xl">
+              <p className="mb-4 font-mono font-normal text-black/80 text-xs uppercase tracking-widest dark:text-white/70">
+                Resume
+              </p>
+              <span className="inline-block text-neutral-900 dark:text-white [font-family:var(--font-instrument-serif),serif]">
+                The Paper{" "}
+                <span
+                  className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]"
+                  style={{
+                    maskImage: "linear-gradient(to right, black 70%, transparent 100%)",
+                    maskSize: "200% 100%",
+                    maskPosition: "left center",
+                    maskRepeat: "no-repeat",
+                  }}
+                >
+                  Version
+                </span>
+              </span>
             </h1>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <a
