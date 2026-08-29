@@ -4,7 +4,8 @@ import Link from "next/link";
 import readingDuration from "reading-duration";
 import { Metadata, ResolvingMetadata } from "next";
 import { MDXContent } from "@/app/components/mdx";
-import { BlogGridCard } from "@/app/components/blog/BlogGridCard";
+import { RelatedPostCard } from "@/app/components/blog/RelatedPostCard";
+import { ImageLightbox } from "@/app/components/blog/ImageLightbox";
 import { NewsletterSignUp } from "@/app/components/NewsletterSignUp";
 import { CtaSection } from "@/app/components/home/CtaSection";
 import { CopyUrlButton } from "@/app/components/blog/CopyUrlButton";
@@ -178,6 +179,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
       </div>
 
       <TableOfContents headings={post.headings} />
+      <ImageLightbox />
 
       {/* More posts — reference: mono label between hairline dividers + 3-col grid */}
       {similarPosts.length > 0 && (
@@ -187,20 +189,14 @@ export default async function BlogPage({ params }: BlogPageProps) {
           </p>
           <div aria-hidden="true" className="w-full border-t border-border-primary" />
           <div className="px-2 py-4 sm:px-4">
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-              {similarPosts.slice(0, 3).map((related, idx) => (
-                <BlogGridCard
+            <div className="mx-auto grid max-w-6xl grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+              {similarPosts.slice(0, 3).map((related) => (
+                <RelatedPostCard
                   key={related.slug}
                   slug={related.slug}
                   title={related.title}
                   summary={related.summary}
-                  readingTime={readingDuration(related.content || "", {
-                    wordsPerMinute: 200,
-                    emoji: false,
-                  })}
-                  formattedDate={longDate(related.publishedAt)}
                   imageName={related.imageName}
-                  index={idx}
                 />
               ))}
             </div>

@@ -19,7 +19,9 @@ interface MDXProps {
 
 function Table({ data }) {
   let headers = data.headers.map((header, index) => (
-    <th key={index}>{header}</th>
+    <th key={index}>
+      <span className="th-badge">{header}</span>
+    </th>
   ));
   let rows = data.rows.map((row, index) => (
     <tr key={index}>
@@ -30,12 +32,36 @@ function Table({ data }) {
   ));
 
   return (
-    <table>
-      <thead>
-        <tr>{headers}</tr>
-      </thead>
-      <tbody>{rows}</tbody>
-    </table>
+    <figure className="table-card">
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>{headers}</tr>
+          </thead>
+          <tbody>{rows}</tbody>
+        </table>
+      </div>
+    </figure>
+  );
+}
+
+/** Markdown-native <table> wrapper — reference double-border card treatment. */
+function TableWrapper({ children }: { children?: React.ReactNode }) {
+  return (
+    <figure className="table-card">
+      <div className="table-scroll">
+        <table>{children}</table>
+      </div>
+    </figure>
+  );
+}
+
+/** Markdown-native <th> — reference wraps header text in a mono badge pill. */
+function TableHeadCell({ children }: { children?: React.ReactNode }) {
+  return (
+    <th>
+      <span className="th-badge">{children}</span>
+    </th>
   );
 }
 
@@ -537,6 +563,8 @@ export const MdxH5 = createHeading(5);
 export const MdxH6 = createHeading(6);
 export {
   Table as MdxTable,
+  TableWrapper as MdxTableWrapper,
+  TableHeadCell as MdxTh,
   CustomLink as MdxLink,
   RoundedImage as MdxImage,
   Callout as MdxCallout,
@@ -573,6 +601,8 @@ export const sharedComponents = {
   Warningquote: WarningQuote,
   code: Code,
   Table,
+  table: TableWrapper,
+  th: TableHeadCell,
   CodePlayground,
   Details,
   DetailsSummary,
