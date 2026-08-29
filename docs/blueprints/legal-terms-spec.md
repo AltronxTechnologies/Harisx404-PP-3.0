@@ -23,3 +23,16 @@ Reference: terms-of-use page. Route: `/legal/terms`. Same skeleton as privacy pa
 ## Typography/colors/spacing/responsive
 Identical to `legal-privacy-spec.md` (H1 60/48, H2 30/24, sticky top-32 lg only,
 double border-t dividers gap-4, space-y-8 content, rails 32/12, cards 1-col mobile).
+
+## Mobile capture cross-check (verified against implementation)
+- H1 48px mobile / 60px desktop (`text-5xl md:text-6xl`) ✓
+- Section headers static `p-4` above content; sticky only at lg
+  (measured: static @390px, sticky/128px @1440px) ✓
+- Middle dashed spacer hidden below lg ✓
+- Rights red/green cards: 1-col mobile (measured 1) → md:grid-cols-2 (measured 2) ✓
+- Disclaimer sub-grid 1-col mobile → 2-col md ✓
+- H2 24px mobile (measured) / 30px desktop (measured) ✓
+- Double border-t dividers ×2, effective-date <time datetime>, mailto link ✓
+- Rails 12px mobile / 32px desktop; no horizontal overflow at either size ✓
+- Exact dark-mode semantic colors measured: red border rgba(127,29,29,.3),
+  green border rgba(20,83,45,.3) ✓
