@@ -41,3 +41,16 @@ mailto link (medium, hover:underline) + clock icon revision date (mono meta).
 - 02 Measure — Supabase (data + auth), self-hosted view counter, Cloudinary (images),
   no ad trackers / no data sale.
 - 03 Yours — ownership & deletion promise; contact itsharis.tech@gmail.com; last-revised date.
+
+## Mobile capture cross-check (verified against implementation)
+- Hero visible on mobile, H1 48px (`text-5xl md:text-6xl`) ✓
+- Section headers static `p-4` blocks above content (sticky only at lg) ✓
+- Middle dashed spacer hidden below lg ✓
+- Feature cards 1-col `gap-6` mobile → `md:grid-cols-2` ✓
+- Tool cards `gap-4`, dashed border, hover tint ✓
+- H2 24px mobile (`text-2xl md:text-3xl`), measured 24px at 390px ✓
+- Double border-t dividers `gap-4` ✓
+- Rails 12px mobile / 32px desktop ✓
+- Ownership callout p-8, dashed divider, mailto + clock meta ✓
+- Programmatic test results: overflow none, header position static @390px,
+  sticky/128px @1440px.
