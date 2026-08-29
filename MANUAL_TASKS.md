@@ -197,3 +197,16 @@ To show the embedded scheduling calendar there:
 3. Until then the page shows an email-based "request a call" card instead.
 
 - [ ] Step 9 — Cal.com account created + `contact.calLink` filled in
+
+## Community Wall — GitHub OAuth setup (required for posting notes)
+
+- [x] `messages` table migration run in Supabase (2026_community_wall_messages.sql)
+- [ ] GitHub OAuth App created (github.com → Settings → Developer settings → OAuth Apps → New):
+      - Authorization callback URL (exact): `https://ripmzkazzihyafqhtapv.supabase.co/auth/v1/callback`
+      - Copy Client ID + generate Client Secret
+- [ ] Supabase → Authentication → Providers → GitHub: toggle ON, paste Client ID + Secret, Save
+- [ ] Supabase → Authentication → URL Configuration:
+      - Site URL: production domain (use `http://localhost:3000` while developing)
+      - Redirect URLs: add `http://localhost:3000/auth/callback` and `http://localhost:3000/**`
+        (add the production equivalents at deploy time)
+- [ ] Test: /community-wall → "Write a message..." → authorize on GitHub → composer appears → post a note
