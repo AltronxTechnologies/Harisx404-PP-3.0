@@ -74,7 +74,7 @@ export function MySiteGrid() {
         Built in the open,{" "}
         {/* Line break only where there's room for two clean lines —
             on small screens the text wraps naturally instead. */}
-        <span className="text-gradient-animated font-display italic md:block">
+        <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none] md:block">
           explore &amp;&amp; say hello
         </span>
       </SectionHeading>

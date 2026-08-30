@@ -111,7 +111,7 @@ export function Writings({
       >
         <SectionHeading kicker="The Blog">
           Latest{" "}
-          <span className="text-gradient-animated font-display italic">
+          <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
             write-ups
           </span>
         </SectionHeading>

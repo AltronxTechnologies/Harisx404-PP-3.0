@@ -24,15 +24,7 @@ export function HomeFaq() {
     <section aria-labelledby="faq-heading" className="mx-auto w-full max-w-3xl px-4 md:px-6">
       <SectionHeading kicker="Questions" className="mb-12">
         Frequently asked,{" "}
-        <span
-          className="animate-gradient-x text-colorfull px-1 italic [text-shadow:none]"
-          style={{
-            maskImage: "linear-gradient(to right, black 70%, transparent 100%)",
-            maskSize: "200% 100%",
-            maskPosition: "left center",
-            maskRepeat: "no-repeat",
-          }}
-        >
+        <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
           answered
         </span>
       </SectionHeading>

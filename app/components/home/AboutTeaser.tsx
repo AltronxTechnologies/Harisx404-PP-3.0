@@ -96,7 +96,7 @@ export function AboutTeaser() {
       <motion.div {...entrance}>
         <SectionHeading kicker={aboutTeaser.kicker}>
           {aboutTeaser.heading}{" "}
-          <span className="text-gradient-accent font-display italic">
+          <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
             {aboutTeaser.headingAccent}
           </span>
         </SectionHeading>

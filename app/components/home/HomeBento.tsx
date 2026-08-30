@@ -925,7 +925,7 @@ export function HomeBento({
       {/* Section header — identical system to every other homepage section */}
       <SectionHeading kicker="Proof of work" animateWords>
         Straight from the{" "}
-        <span className="text-gradient-animated font-display italic">
+        <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
           source
         </span>
       </SectionHeading>
