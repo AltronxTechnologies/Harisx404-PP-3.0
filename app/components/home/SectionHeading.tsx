@@ -66,11 +66,11 @@ export function SectionHeading({
   const centered = align === "center";
   return (
     <div className={`${centered ? "text-center" : "text-left"} ${className}`}>
-      <p className="font-mono text-xs font-medium uppercase tracking-[0.35em] text-text-tertiary dark:text-neutral-400">
+      <p className="font-mono text-xs font-normal uppercase tracking-widest text-black/80 dark:text-white/70">
         {kicker}
       </p>
       <h2
-        className={`heading-glow mt-4 font-display text-4xl font-medium leading-[1.05] text-text-primary md:text-[56px] ${
+        className={`heading-glow mt-2 [font-family:var(--font-instrument-serif),serif] text-5xl font-medium leading-none tracking-tight text-black dark:text-white md:text-6xl md:tracking-[-1.5px] ${
           centered ? "mx-auto" : ""
         }`}
       >
