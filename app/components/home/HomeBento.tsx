@@ -935,7 +935,7 @@ export function HomeBento({
           Both stacks sum to the same height (220+300 vs 300+220) so the
           section closes on a clean baseline. */}
       <motion.div
-        initial="hidden"
+        initial="show"
         whileInView="show"
         viewport={{ once: true, margin: "-60px" }}
         variants={{ hidden: {}, show: { transition: { staggerChildren: 0.08 } } }}

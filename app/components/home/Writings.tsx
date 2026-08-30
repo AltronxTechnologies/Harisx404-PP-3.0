@@ -81,7 +81,7 @@ export function Writings({
   const entrance = reduced
     ? {}
     : {
-        initial: { opacity: 0, y: 24 },
+        initial: false,
         whileInView: { opacity: 1, y: 0 },
         viewport: { once: true, margin: "-60px" },
       };
@@ -104,7 +104,7 @@ export function Writings({
   return (
     <section className="px-2 sm:px-4">
       <motion.div
-        initial={reduced ? undefined : { opacity: 0, y: 16 }}
+        initial={false}
         whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-80px" }}
         transition={{ duration: 0.6 }}

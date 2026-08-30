@@ -81,7 +81,7 @@ export function MySiteGrid() {
 
       <motion.div
         variants={gridVariants}
-        initial="hidden"
+        initial="show"
         whileInView="show"
         viewport={{ once: true, margin: "-60px" }}
         className="mx-auto mt-16 grid w-full max-w-md grid-cols-1 gap-4 md:max-w-none md:grid-cols-3"

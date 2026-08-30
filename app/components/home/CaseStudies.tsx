@@ -328,7 +328,7 @@ export function CaseStudyCard({
   return (
     <motion.article
       key={project.slug}
-      initial={{ opacity: 0, y: 24 }}
+      initial={false}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-10%" }}
       transition={{ duration: 0.6, ease: "easeOut" }}
@@ -888,7 +888,7 @@ export function CaseStudies({ projects }: { projects: HomeProject[] }) {
   return (
     <section className="px-2 sm:px-4">
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
+        initial={false}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-80px" }}
         transition={{ duration: 0.6 }}

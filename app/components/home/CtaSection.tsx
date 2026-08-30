@@ -32,7 +32,7 @@ export function CtaSection() {
       />
 
       <motion.div
-        initial={prefersReducedMotion ? false : { opacity: 0, y: 24 }}
+        initial={false}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-80px" }}
         transition={{ duration: 0.7, ease: "easeOut" }}
@@ -52,7 +52,7 @@ export function CtaSection() {
           {cta.line1},
           <motion.span
             className="text-gradient-animated block italic"
-            initial={prefersReducedMotion ? undefined : { opacity: 0, y: 14 }}
+            initial={false}
             whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.7, ease: "easeOut", delay: 0.05 }}
