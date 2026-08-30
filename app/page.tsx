@@ -211,7 +211,7 @@ export default async function Home() {
       <div className="bg-bg-primary">
         <HomeHero latestLaunch={latestLaunch} />
         <StatusRow data={statusData} />
-        <div className="mt-16 space-y-28 md:mt-24">
+        <div className="mt-16 space-y-32 md:mt-24">
           <HomeBento site={siteStats} projectTech={projectTech} />
           <CaseStudies projects={projects} />
           <Writings posts={posts} formattedDates={formattedDates} />

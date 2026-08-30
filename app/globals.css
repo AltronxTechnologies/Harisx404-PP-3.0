@@ -95,8 +95,8 @@ body {
 }
 
 .dark {
-  --bg-primary: #0a0a0a;
-  --border-primary: #4d4d4d;
+  --bg-primary: #0d0d0f;
+  --border-primary: rgba(255, 255, 255, 0.1);
   --dark-primary: #f7f7f8;
   --purple-primary: #7c7fff;
   --purple-secondary: #1b1c26;

@@ -147,7 +147,7 @@ export function Testimonials({ items: itemsProp }: { items?: Testimonial[] }) {
       </SectionHeading>
 
       <div
-        className="mt-14"
+        className="mt-16"
         aria-live="polite"
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}

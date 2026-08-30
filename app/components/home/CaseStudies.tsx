@@ -901,7 +901,7 @@ export function CaseStudies({ projects }: { projects: HomeProject[] }) {
         </SectionHeading>
       </motion.div>
 
-      <div className="mt-14 grid grid-cols-1 xl:grid-cols-12 xl:gap-10">
+      <div className="mt-16 grid grid-cols-1 xl:grid-cols-12 xl:gap-10">
         <div className="min-w-0 space-y-20 xl:col-span-7">
           {projects.map((project, i) => (
             <div

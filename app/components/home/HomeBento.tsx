@@ -921,7 +921,7 @@ export function HomeBento({
   projectTech?: ProjectTech | null;
 }) {
   return (
-    <section className="relative space-y-14 px-2 sm:px-4">
+    <section className="relative space-y-16 px-2 sm:px-4">
       {/* Section header — identical system to every other homepage section */}
       <SectionHeading kicker="Proof of work" animateWords>
         Straight from the{" "}
