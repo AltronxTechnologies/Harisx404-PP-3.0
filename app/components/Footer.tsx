@@ -39,6 +39,7 @@ const footerSections: FooterSection[] = [
       { href: "/stats", label: "Stats" },
       { href: "/buildlog", label: "Buildlog" },
       { href: "/community-wall", label: "Community\nWall" },
+      { href: "/test", label: "Test Page" },
     ],
   },
 ];
