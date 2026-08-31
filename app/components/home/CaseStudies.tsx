@@ -497,11 +497,13 @@ export function CaseStudyCard({
               <span
                 aria-hidden
                 className={clsx(
-                  "shrink-0 text-[22px] leading-none text-white transition-transform duration-300 group-hover:translate-x-1",
-                  /* Projects page: same two-layer shadow as the title so the
-                     arrow sits on the gradient with matching depth. */
-                  coverHeading === "title" &&
-                    "[text-shadow:0_1px_2px_rgba(0,0,0,0.35),0_4px_14px_rgba(0,0,0,0.22)]",
+                  "shrink-0 leading-none transition-transform duration-300 group-hover:translate-x-1",
+                  /* Home: arrow mirrors the tagline exactly — same sans size
+                     ramp, weight and white/85, no shadow. Projects keeps the
+                     bigger shadowed arrow that pairs with its serif title. */
+                  bodyHiddenOnXl || coverHeading !== "title"
+                    ? "text-lg font-medium text-white/85 md:text-xl"
+                    : "text-[22px] text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.35),0_4px_14px_rgba(0,0,0,0.22)]",
                   active && "translate-x-1"
                 )}
               >
