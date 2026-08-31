@@ -75,7 +75,7 @@ function TechChip({ name, pill = false }: { name: string; pill?: boolean }) {
   const icon = techIconMap[normalizeTech(name)];
   const base = pill
     ? "group/chip flex items-center gap-1.5 rounded-full border border-border-primary px-3 py-1 font-mono text-xs text-text-secondary transition-colors duration-300 hover:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25"
-    : "group/chip flex items-center gap-1.5 rounded-md bg-black/[0.05] px-2.5 py-[5px] font-mono text-xs uppercase tracking-widest text-text-secondary ring-1 ring-black/[0.06] transition-colors duration-300 hover:text-text-primary dark:bg-white/5 dark:ring-white/[0.06]";
+    : "group/chip flex items-center gap-1.5 rounded-md bg-black/[0.05] px-2.5 py-[5px] font-mono text-[10px] uppercase tracking-widest text-text-secondary ring-1 ring-black/[0.06] transition-colors duration-300 hover:text-text-primary dark:bg-white/5 dark:ring-white/[0.06]";
   return (
     <span
       className={base}
