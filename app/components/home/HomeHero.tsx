@@ -133,6 +133,23 @@ function HeadlineRotator({
   const lastHoverRef = useRef(0);
   const busyRef = useRef(false);
   busyRef.current = busy;
+  /* Pause the rotation while the hero is scrolled off-screen: the cycle
+     waits (500ms polls) until the headline is visible again before
+     decoding or advancing — no wasted work in background. */
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const visibleRef = useRef(true);
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        visibleRef.current = entry.isIntersecting;
+      },
+      { threshold: 0 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
   const handleHover = () => {
     if (typeof window === "undefined") return;
     if (!window.matchMedia("(pointer: fine)").matches) return;
@@ -148,11 +165,21 @@ function HeadlineRotator({
     let cancelled = false;
     const t1 = headlines[index].line1;
     const t2 = headlines[index].line2;
-    onDomainChange?.(headlines[index].accent);
+    /* Illustration swaps 300ms into the decode so the text appears to
+       "summon" the visual rather than both flipping at once. */
+    const domainTimer = setTimeout(
+      () => onDomainChange?.(headlines[index].accent),
+      firstRun.current ? 0 : 300
+    );
 
     const reduced = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
+
+    /* Off-screen pause: resolve only once the headline is visible. */
+    const waitVisible = async () => {
+      while (!cancelled && !visibleRef.current) await wait(500);
+    };
 
     /* rAF-driven decode: both lines morph toward their targets; line 2
        starts 130ms later and runs 150ms longer (staggered, per the
@@ -191,6 +218,8 @@ function HeadlineRotator({
       // First cycle: SSR already shows the full phrase - hold, then morph.
       // Hover replays also decode (snappier 650ms via fastRef).
       if (!firstRun.current) {
+        await waitVisible();
+        if (cancelled) return;
         setBusy(true);
         await decode();
         setBusy(false);
@@ -199,12 +228,14 @@ function HeadlineRotator({
       firstRun.current = false;
 
       await wait(HOLD_MS);
+      await waitVisible();
       if (cancelled) return;
       setIndex((prev) => (prev + 1) % headlines.length);
     })();
 
     return () => {
       cancelled = true;
+      clearTimeout(domainTimer);
     };
   }, [index, replay]);
 
@@ -212,7 +243,7 @@ function HeadlineRotator({
   const domain = domainStyles[current.accent] ?? domainStyles.ai;
 
   return (
-    <div className="relative">
+    <div ref={rootRef} className="relative">
       {/* Ambient glow removed — the domain color already reads through
          the gradient text, caret, and illustration; cleaner without it. */}
 
@@ -229,9 +260,9 @@ function HeadlineRotator({
           PROFESSIONAL
         </span>
         <span className="absolute inset-0 block" aria-hidden>
-          <span className="block whitespace-nowrap leading-[0.96]">{line1}</span>
+          <span className="block whitespace-nowrap leading-[0.96] [will-change:contents]">{line1}</span>
           <span
-            className={`hero-gradient-animate ${domain.gradient} block whitespace-nowrap leading-[0.96]`}
+            className={`hero-gradient-animate ${domain.gradient} block whitespace-nowrap leading-[0.96] [will-change:contents]`}
           >
             {line2}
             <span
