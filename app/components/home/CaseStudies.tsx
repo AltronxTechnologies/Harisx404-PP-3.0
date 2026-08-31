@@ -374,7 +374,7 @@ export function CaseStudyCard({
           </div>
         </div>
         {project.year && (
-          <span className="shrink-0 rounded-lg border border-border-primary bg-bg-secondary/60 px-3 py-1 font-mono text-xs text-text-secondary">
+          <span className="inline-flex h-[26.5px] shrink-0 items-center rounded-lg border border-border-primary bg-bg-secondary/60 px-3 font-mono text-xs text-text-secondary">
             {project.year}
           </span>
         )}
