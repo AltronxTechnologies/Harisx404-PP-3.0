@@ -24,7 +24,7 @@ export function SectionHeading({
   const centered = align === "center";
   return (
     <div className={`${centered ? "text-center" : "text-left"} ${className}`}>
-      <p className="font-mono text-xs font-normal uppercase tracking-widest text-black/80 dark:text-white/70">
+      <p className="font-mono text-xs font-normal uppercase tracking-widest text-text-secondary">
         {kicker}
       </p>
       <h2
