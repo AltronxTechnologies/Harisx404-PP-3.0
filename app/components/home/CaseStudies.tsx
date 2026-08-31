@@ -657,7 +657,7 @@ export function CaseStudyCard({
         {coverHeading !== "title" && (
           <Link
             href={`/projects/${project.slug}`}
-            className="font-display text-2xl font-medium text-text-primary transition-colors hover:text-text-secondary"
+            className="font-display text-2xl font-bold text-text-primary transition-colors hover:text-text-secondary"
           >
             {project.title}
           </Link>
@@ -670,7 +670,7 @@ export function CaseStudyCard({
                  sticky panel already names the project). */
               <Link
                 href={`/projects/${project.slug}`}
-                className="mb-2 block font-display text-2xl font-medium leading-tight text-text-primary transition-colors hover:text-text-secondary"
+                className="mb-2 block font-display text-2xl font-bold leading-tight text-text-primary transition-colors hover:text-text-secondary"
               >
                 {project.title}
               </Link>
@@ -825,7 +825,7 @@ function StickyProjectPanel({
           aria-hidden
           className={`h-[3px] w-8 shrink-0 rounded-full ${hueBg[index % hueBg.length]}`}
         />
-        <h3 className="font-display text-3xl font-semibold leading-tight text-text-primary">
+        <h3 className="font-display text-3xl font-bold leading-tight text-text-primary">
           {project.title}
         </h3>
       </div>
