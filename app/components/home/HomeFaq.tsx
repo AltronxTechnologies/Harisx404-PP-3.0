@@ -35,7 +35,7 @@ export function HomeFaq() {
             name="home-faq"
             className="group rounded-xl transition-colors open:bg-white/50 dark:open:bg-neutral-800/[0.14]"
           >
-            <summary className="flex cursor-pointer items-center justify-between gap-4 px-5 py-4 text-[15px] font-medium leading-snug text-neutral-800 dark:text-neutral-200 [&::-webkit-details-marker]:hidden">
+            <summary className="flex cursor-pointer items-center justify-between gap-4 px-5 py-4 text-[15px] font-medium leading-snug text-text-primary [&::-webkit-details-marker]:hidden">
               {f.q}
               <span className="flex size-7 shrink-0 items-center justify-center rounded-full border border-neutral-200/80 bg-white text-neutral-500 transition-all duration-300 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] group-open:rotate-180 dark:border-white/10 dark:bg-white/[0.06] dark:text-white/60">
               <svg
@@ -51,7 +51,7 @@ export function HomeFaq() {
                 </svg>
               </span>
             </summary>
-            <p className="px-5 pb-5 text-[14px] leading-relaxed text-neutral-600 dark:text-neutral-400">
+            <p className="px-5 pb-5 text-[14px] leading-relaxed text-text-secondary">
               {f.a}
             </p>
           </details>
