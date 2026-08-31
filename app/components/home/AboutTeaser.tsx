@@ -202,7 +202,7 @@ export function AboutTeaser() {
       <motion.div {...entrance} className="mt-16 flex justify-center">
         <Link
           href="/about"
-          className="group inline-flex items-center gap-3 font-mono text-xs uppercase tracking-[0.25em] text-text-secondary transition-colors hover:text-text-primary"
+          className="group inline-flex items-center gap-3 font-mono text-xs font-normal uppercase tracking-widest text-black/80 transition-colors hover:text-black dark:text-white/70 dark:hover:text-white"
         >
           More about me
           <span className="inline-flex size-8 items-center justify-center rounded-full border border-border-primary">
