@@ -193,7 +193,7 @@ export function AccountsBento() {
               />
             </RecessedTile>
             {/* Handle reveals under the tile on hover */}
-            <span className="mt-1.5 block font-mono text-[10px] uppercase tracking-widest text-text-tertiary opacity-0 transition-all duration-300 group-hover/acct:opacity-100">
+            <span className="mt-1.5 block font-mono text-[10px] uppercase tracking-widest text-text-secondary opacity-0 transition-all duration-300 group-hover/acct:opacity-100">
               {item.title}
             </span>
           </a>
@@ -520,7 +520,7 @@ function GlobeBento() {
       </div>
       {/* Availability pill floats over the globe's horizon */}
       <div className="pointer-events-none absolute inset-x-0 bottom-5 z-20 flex justify-center">
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-border-primary bg-bg-primary/80 px-3 py-1 font-mono text-[11px] text-text-secondary shadow-sm backdrop-blur">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-border-primary bg-bg-primary/80 px-3 py-1 font-mono text-xs text-text-secondary shadow-sm backdrop-blur">
           <span className="relative flex size-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
             <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
@@ -714,7 +714,7 @@ function TechChip({ item }: { item: TechItem }) {
           className="size-1.5 shrink-0 rounded-full bg-neutral-600 transition-colors duration-300 ease-out group-hover/chip:bg-[var(--brand)] dark:bg-neutral-300 dark:group-hover/chip:bg-[var(--brand-dark)]"
         />
       )}
-      <span className="whitespace-nowrap font-mono text-[13px] text-text-secondary transition-colors duration-300 group-hover/chip:text-text-primary">
+      <span className="whitespace-nowrap font-mono text-xs text-text-secondary transition-colors duration-300 group-hover/chip:text-text-primary">
         {item.title}
       </span>
     </span>
@@ -876,14 +876,14 @@ export function SiteStatsBento({
                   )}
                   aria-hidden
                 />
-                <span className="text-base font-semibold leading-none text-text-primary">
+                <span className="text-[15px] font-medium leading-none text-text-primary">
                   {value !== null ? (
                     <CountUpValue to={value} pad={2} />
                   ) : (
                     <span className="text-text-tertiary">—</span>
                   )}
                 </span>
-                <span className="text-center font-mono text-[10px] uppercase tracking-widest text-text-tertiary transition-colors duration-300 group-hover/tile:text-text-secondary">
+                <span className="text-center font-mono text-[10px] uppercase tracking-widest text-text-secondary transition-colors duration-300 group-hover/tile:text-text-primary">
                   {stat.label}
                 </span>
               </div>
