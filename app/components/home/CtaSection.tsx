@@ -48,7 +48,7 @@ export function CtaSection() {
         </p>
 
         {/* Heading — the site's signature serif + gradient-italic style. */}
-        <h2 className="mt-5 max-w-3xl font-display text-4xl font-medium leading-tight tracking-tight text-text-primary [text-wrap:balance] sm:text-5xl md:text-6xl">
+        <h2 className="heading-glow mt-5 max-w-3xl [font-family:var(--font-instrument-serif),serif] text-4xl font-medium leading-none tracking-tight text-text-primary [text-wrap:balance] sm:text-5xl md:text-6xl md:tracking-[-1.5px]">
           {cta.line1},
           <motion.span
             className="animate-gradient-x text-colorfull block px-1 pb-1 italic [text-shadow:none]"
