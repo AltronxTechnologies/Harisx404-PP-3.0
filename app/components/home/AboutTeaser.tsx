@@ -106,7 +106,7 @@ export function AboutTeaser() {
           card. Not clickable, so no hover lift (unlike the link cards). */}
       <motion.div
         {...entrance}
-        className="mt-16 rounded-3xl border border-border-primary bg-white p-3 dark:bg-white/[0.02]"
+        className="mt-14 rounded-3xl border border-border-primary bg-white p-3 dark:bg-white/[0.02]"
       >
         <div className="flex flex-col px-2 pb-2 pt-5 sm:px-3 lg:px-5 lg:pt-7">
           <div className="hyphens-auto break-words text-pretty text-base font-light leading-6 text-neutral-600 dark:text-neutral-300">

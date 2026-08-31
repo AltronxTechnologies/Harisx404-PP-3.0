@@ -117,7 +117,7 @@ export function Writings({
         </SectionHeading>
       </motion.div>
 
-      <div className="mt-16 grid grid-cols-1 gap-2 lg:grid-cols-10">
+      <div className="mt-14 grid grid-cols-1 gap-2 lg:grid-cols-10">
         {/* Featured — latest post, hero treatment with the inset cover */}
         <motion.div
           {...entrance}

@@ -22,7 +22,7 @@ const faqs = [
 export function HomeFaq() {
   return (
     <section aria-labelledby="faq-heading" className="mx-auto w-full max-w-3xl px-4 md:px-6">
-      <SectionHeading kicker="Questions" className="mb-16">
+      <SectionHeading kicker="Questions" className="mb-14">
         Frequently asked,{" "}
         <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
           answered

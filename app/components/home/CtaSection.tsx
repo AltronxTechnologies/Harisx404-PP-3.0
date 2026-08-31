@@ -39,7 +39,7 @@ export function CtaSection() {
         className="relative flex flex-col items-center"
       >
         {/* Availability kicker — matches the site-wide mono kicker pattern. */}
-        <p className="inline-flex items-center gap-2.5 font-mono text-xs font-normal uppercase tracking-widest text-text-secondary">
+        <p className="inline-flex items-center gap-2.5 font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
           <span aria-hidden className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75 motion-reduce:animate-none" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
@@ -48,7 +48,7 @@ export function CtaSection() {
         </p>
 
         {/* Heading — the site's signature serif + gradient-italic style. */}
-        <h2 className="heading-glow mt-5 max-w-3xl [font-family:var(--font-instrument-serif),serif] text-4xl font-medium leading-none tracking-tight text-text-primary [text-wrap:balance] sm:text-5xl md:text-6xl md:tracking-[-1.5px]">
+        <h2 className="heading-glow mt-5 max-w-3xl [font-family:var(--font-instrument-serif),serif] text-4xl font-medium leading-none tracking-tight text-text-primary [text-wrap:balance] sm:text-5xl md:text-[56px] md:tracking-[-1.5px]">
           {cta.line1},
           <motion.span
             className="animate-gradient-x text-colorfull block px-1 pb-1 italic [text-shadow:none]"
