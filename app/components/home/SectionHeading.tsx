@@ -28,7 +28,7 @@ export function SectionHeading({
         {kicker}
       </p>
       <h2
-        className={`heading-glow mt-4 max-w-xl text-balance [font-family:var(--font-instrument-serif),serif] text-5xl font-medium leading-none tracking-tight text-black dark:text-white md:text-6xl md:tracking-[-1.5px] ${
+        className={`heading-glow mt-4 max-w-xl text-balance [font-family:var(--font-instrument-serif),serif] text-5xl font-medium leading-none tracking-tight text-text-primary md:text-6xl md:tracking-[-1.5px] ${
           centered ? "mx-auto" : ""
         }`}
       >
