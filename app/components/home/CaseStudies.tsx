@@ -107,7 +107,7 @@ function TechChip({ name, pill = false }: { name: string; pill?: boolean }) {
           className="size-1.5 shrink-0 rounded-full bg-[var(--brand)] dark:bg-[var(--brand-dark)]"
         />
       )}
-      {name}
+      <span className="leading-none">{name}</span>
     </span>
   );
 }
