@@ -139,7 +139,7 @@ export const siteContent = {
     kicker: "Know about me",
 
     // Heading — the italic accent word is appended by the component.
-    heading: "I solve hard problems —",
+    heading: "I solve hard problems:",
     headingAccent: "build, secure, evolve.",
 
     // Bio paragraphs (one array item per <p>).

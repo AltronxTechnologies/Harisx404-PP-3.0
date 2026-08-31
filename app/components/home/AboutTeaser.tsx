@@ -109,7 +109,7 @@ export function AboutTeaser() {
         className="mt-14 rounded-3xl border border-border-primary bg-white p-3 dark:bg-white/[0.02]"
       >
         <div className="flex flex-col px-2 pb-2 pt-5 sm:px-3 lg:px-5 lg:pt-7">
-          <div className="hyphens-auto break-words text-pretty text-base font-light leading-6 text-neutral-600 dark:text-neutral-300">
+          <div className="hyphens-auto break-words text-justify text-base font-light leading-6 text-neutral-600 dark:text-neutral-300">
             {/* Portrait + both paragraphs. items-stretch makes the image
                 span the full height of the text column, and both paragraphs
                 share the same left edge beside it. */}
