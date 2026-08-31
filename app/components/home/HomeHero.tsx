@@ -213,18 +213,8 @@ function HeadlineRotator({
 
   return (
     <div className="relative">
-      {/* Ambient glow that breathes in the current domain color */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={`glow-${current.accent}`}
-          initial={{ opacity: 0, scale: 0.85 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 1.1 }}
-          transition={{ duration: 1.1, ease: "easeInOut" }}
-          aria-hidden
-          className={`pointer-events-none absolute -inset-x-10 -inset-y-8 -z-10 rounded-full blur-3xl ${domain.glow}`}
-        />
-      </AnimatePresence>
+      {/* Ambient glow removed — the domain color already reads through
+         the gradient text, caret, and illustration; cleaner without it. */}
 
       <h1
         onPointerEnter={handleHover}
