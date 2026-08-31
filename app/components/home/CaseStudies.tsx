@@ -727,7 +727,7 @@ export function CaseStudyCard({
               View case study
               <span
                 aria-hidden
-                className="transition-transform duration-300 group-hover/cta:translate-x-1"
+                className="inline-block leading-none transition-transform duration-300 group-hover/cta:translate-x-1"
               >
                 →
               </span>
@@ -794,7 +794,7 @@ export function CaseStudyCard({
             View case study
             <span
               aria-hidden
-              className="transition-transform duration-300 group-hover/cta:translate-x-1"
+              className="inline-block leading-none transition-transform duration-300 group-hover/cta:translate-x-1"
             >
               →
             </span>
@@ -825,7 +825,7 @@ function StickyProjectPanel({
           aria-hidden
           className={`h-[3px] w-8 shrink-0 rounded-full ${hueBg[index % hueBg.length]}`}
         />
-        <h3 className="font-display text-3xl font-medium leading-tight text-text-primary">
+        <h3 className="font-display text-3xl font-semibold leading-tight text-text-primary">
           {project.title}
         </h3>
       </div>
@@ -865,7 +865,7 @@ function StickyProjectPanel({
         View case study
         <span
           aria-hidden
-          className="transition-transform duration-300 group-hover/cta:translate-x-1"
+          className="inline-block leading-none transition-transform duration-300 group-hover/cta:translate-x-1"
         >
           →
         </span>
