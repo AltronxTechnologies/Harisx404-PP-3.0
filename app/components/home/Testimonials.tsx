@@ -212,7 +212,7 @@ export function Testimonials({ items: itemsProp }: { items?: Testimonial[] }) {
                   <span className="block truncate text-sm font-medium text-text-primary">
                     {t.name}
                   </span>
-                  <span className="block truncate text-xs text-text-tertiary">
+                  <span className="block truncate text-xs text-text-secondary">
                     {t.role}
                   </span>
                 </span>
