@@ -513,7 +513,7 @@ export function CaseStudyCard({
                     viewBox="0 0 24 16"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth={1.5}
+                    strokeWidth={2.2}
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     className="h-4 w-6"
