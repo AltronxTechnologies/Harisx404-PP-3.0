@@ -144,7 +144,7 @@ export function AboutTeaser() {
                   <div className="font-display text-xl font-medium text-text-primary sm:text-2xl">
                     {stat.value}
                   </div>
-                  <div className="mt-1 font-mono text-[9px] uppercase tracking-widest text-black/80 dark:text-white/70 sm:text-[11px]">
+                  <div className="mt-1 font-mono text-[9px] uppercase tracking-widest text-text-tertiary sm:text-[11px]">
                     {stat.label}
                   </div>
                 </div>

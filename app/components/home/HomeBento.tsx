@@ -193,7 +193,7 @@ export function AccountsBento() {
               />
             </RecessedTile>
             {/* Handle reveals under the tile on hover */}
-            <span className="mt-1.5 block font-mono text-[10px] uppercase tracking-widest text-black/80 dark:text-white/70 opacity-0 transition-all duration-300 group-hover/acct:opacity-100">
+            <span className="mt-1.5 block font-mono text-[10px] uppercase tracking-widest text-text-tertiary opacity-0 transition-all duration-300 group-hover/acct:opacity-100">
               {item.title}
             </span>
           </a>
@@ -883,7 +883,7 @@ export function SiteStatsBento({
                     <span className="text-text-tertiary">—</span>
                   )}
                 </span>
-                <span className="text-center font-mono text-[10px] uppercase tracking-widest text-black/80 dark:text-white/70 transition-colors duration-300">
+                <span className="text-center font-mono text-[10px] uppercase tracking-widest text-text-tertiary transition-colors duration-300 group-hover/tile:text-text-secondary">
                   {stat.label}
                 </span>
               </div>
@@ -895,7 +895,7 @@ export function SiteStatsBento({
       {/* Footer — live view total + link to the full breakdown */}
       <Link
         href="/stats"
-        className="z-20 mt-2 block py-1.5 -my-1.5 text-center font-mono text-[11px] text-black/80 dark:text-white/70 transition-colors duration-300 hover:text-black dark:hover:text-white"
+        className="z-20 mt-2 block py-1.5 -my-1.5 text-center font-mono text-[11px] text-text-tertiary transition-colors duration-300 hover:text-text-primary"
       >
         {site?.views != null && (
           <>{site.views.toLocaleString("en-US")} article views · </>

@@ -36,7 +36,7 @@ function TaglineRotator() {
 
   return (
     <div
-      className="flex items-center gap-2.5 font-mono text-xs font-normal uppercase tracking-widest text-black/80 dark:text-white/70"
+      className="flex items-center gap-2.5 font-mono text-xs font-normal uppercase tracking-widest text-text-secondary"
       aria-live="polite"
     >
       {/* Dot lives outside the clipped rotator so its ping ring never cuts */}
@@ -357,7 +357,7 @@ export function HomeHero({
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
                   <span className="relative inline-flex size-1.5 rounded-full bg-blue-500" />
                 </span>
-                <span className="whitespace-nowrap font-mono text-xs uppercase tracking-widest text-black/80 dark:text-white/70">
+                <span className="whitespace-nowrap font-mono text-xs uppercase tracking-widest text-text-secondary">
                   New launch
                 </span>
                 <span
@@ -376,7 +376,7 @@ export function HomeHero({
                 />
               </span>
               <span className="mt-1.5 flex w-full items-center justify-between gap-3 lg:mt-2">
-                <span className="font-mono text-xs uppercase tracking-widest text-black/80 dark:text-white/70">
+                <span className="font-mono text-xs uppercase tracking-widest text-text-tertiary">
                   {hero.newLaunch.subline}
                 </span>
                 <span className="flex size-5 shrink-0 items-center justify-center rounded-full border border-border-primary text-text-secondary transition-colors group-hover:bg-text-primary group-hover:text-bg-primary">

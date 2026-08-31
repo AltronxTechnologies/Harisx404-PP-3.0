@@ -38,7 +38,7 @@ function formatShortDate(iso: string): string {
    the label to "Read" on phones where horizontal space is tight. */
 function ReadCta({ compact = false }: { compact?: boolean }) {
   return (
-    <span className="inline-flex shrink-0 items-center gap-2 font-mono text-xs uppercase tracking-widest text-black/80 dark:text-white/70 transition-colors group-hover:text-black dark:group-hover:text-white">
+    <span className="inline-flex shrink-0 items-center gap-2 font-mono text-xs uppercase tracking-widest text-text-secondary transition-colors group-hover:text-text-primary">
       {compact ? (
         <>
           <span className="sm:hidden">Read</span>
@@ -59,7 +59,7 @@ function ReadCta({ compact = false }: { compact?: boolean }) {
 
 function Meta({ text }: { text: string }) {
   return (
-    <span className="font-mono text-xs uppercase tracking-widest text-black/80 dark:text-white/70">
+    <span className="font-mono text-xs uppercase tracking-widest text-text-tertiary">
       {text}
     </span>
   );
@@ -242,7 +242,7 @@ export function Writings({
                         {post.summary}
                       </p>
                       <div className="mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-                        <span className="font-mono text-xs uppercase tracking-widest text-black/80 dark:text-white/70">
+                        <span className="font-mono text-xs uppercase tracking-widest text-text-tertiary">
                           {post.readingTime}
                           <span className="hidden md:inline lg:hidden">
                             {" "}
