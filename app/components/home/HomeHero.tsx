@@ -260,11 +260,11 @@ export function HomeHero({
             custom={0}
             className="font-display text-5xl font-medium leading-[0.95] max-[374px]:text-[2.5rem] sm:text-6xl md:text-5xl lg:text-7xl"
           >
-            <span className="block bg-gradient-to-t from-text-primary from-25% via-text-secondary via-70% to-text-tertiary bg-clip-text pb-[0.08em] text-transparent">
+            <span className="block bg-gradient-to-t from-text-primary from-40% via-text-secondary via-70% to-text-tertiary bg-clip-text pb-[0.08em] text-transparent">
               {hero.firstName}
             </span>
             {hero.lastName && (
-              <span className="block bg-gradient-to-t from-text-primary from-25% via-text-secondary via-70% to-text-tertiary bg-clip-text pb-[0.08em] text-transparent">
+              <span className="block bg-gradient-to-t from-text-primary from-40% via-text-secondary via-70% to-text-tertiary bg-clip-text pb-[0.08em] text-transparent">
                 {hero.lastName}
               </span>
             )}
