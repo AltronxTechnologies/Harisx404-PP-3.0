@@ -923,7 +923,7 @@ export function HomeBento({
   return (
     <section className="relative space-y-14 px-2 sm:px-4">
       {/* Section header — identical system to every other homepage section */}
-      <SectionHeading kicker="Connect" animateWords>
+      <SectionHeading kicker="Let's connect" animateWords>
         Find me across the{" "}
         <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
           web
