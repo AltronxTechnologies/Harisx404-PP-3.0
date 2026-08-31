@@ -334,7 +334,7 @@ export function HomeHero({
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
                   <span className="relative inline-flex size-1.5 rounded-full bg-blue-500" />
                 </span>
-                <span className="whitespace-nowrap font-mono text-[9px] uppercase tracking-[0.18em] text-blue-600 dark:text-blue-300">
+                <span className="whitespace-nowrap font-mono text-[9px] uppercase tracking-widest text-blue-600 dark:text-blue-300">
                   New launch
                 </span>
               </span>
@@ -357,7 +357,7 @@ export function HomeHero({
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
                   <span className="relative inline-flex size-1.5 rounded-full bg-blue-500" />
                 </span>
-                <span className="whitespace-nowrap font-mono text-[10px] uppercase tracking-[0.25em] text-text-secondary lg:text-[11px]">
+                <span className="whitespace-nowrap font-mono text-xs uppercase tracking-widest text-text-secondary">
                   New launch
                 </span>
                 <span
@@ -376,7 +376,7 @@ export function HomeHero({
                 />
               </span>
               <span className="mt-1.5 flex w-full items-center justify-between gap-3 lg:mt-2">
-                <span className="font-mono text-[11px] uppercase tracking-widest text-text-tertiary lg:text-xs">
+                <span className="font-mono text-xs uppercase tracking-widest text-text-tertiary">
                   {hero.newLaunch.subline}
                 </span>
                 <span className="flex size-5 shrink-0 items-center justify-center rounded-full border border-border-primary text-text-secondary transition-colors group-hover:bg-text-primary group-hover:text-bg-primary">

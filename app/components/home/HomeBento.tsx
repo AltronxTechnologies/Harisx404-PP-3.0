@@ -193,7 +193,7 @@ export function AccountsBento() {
               />
             </RecessedTile>
             {/* Handle reveals under the tile on hover */}
-            <span className="mt-1.5 block font-mono text-[10px] uppercase tracking-wider text-text-tertiary opacity-0 transition-all duration-300 group-hover/acct:opacity-100">
+            <span className="mt-1.5 block font-mono text-[10px] uppercase tracking-widest text-text-tertiary opacity-0 transition-all duration-300 group-hover/acct:opacity-100">
               {item.title}
             </span>
           </a>
@@ -510,7 +510,7 @@ function GlobeBento() {
               className="absolute left-0 top-0 z-20 flex flex-col items-center will-change-transform"
               style={{ opacity: 0 }}
             >
-              <span className="whitespace-nowrap rounded-[4px] bg-[#1d2445] px-1.5 py-[2px] font-mono text-[9px] font-medium tracking-[0.12em] text-white shadow-md ring-1 ring-white/15">
+              <span className="whitespace-nowrap rounded-[4px] bg-[#1d2445] px-1.5 py-[2px] font-mono text-[9px] font-medium tracking-widest text-white shadow-md ring-1 ring-white/15">
                 {city.name}
               </span>
               <span className="h-[5px] w-px bg-white/40" />
@@ -883,7 +883,7 @@ export function SiteStatsBento({
                     <span className="text-text-tertiary">—</span>
                   )}
                 </span>
-                <span className="text-center font-mono text-[10px] uppercase tracking-wider text-text-tertiary transition-colors duration-300 group-hover/tile:text-text-secondary">
+                <span className="text-center font-mono text-[10px] uppercase tracking-widest text-text-tertiary transition-colors duration-300 group-hover/tile:text-text-secondary">
                   {stat.label}
                 </span>
               </div>

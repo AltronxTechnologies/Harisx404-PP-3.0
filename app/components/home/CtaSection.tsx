@@ -39,7 +39,7 @@ export function CtaSection() {
         className="relative flex flex-col items-center"
       >
         {/* Availability kicker — matches the site-wide mono kicker pattern. */}
-        <p className="inline-flex items-center gap-2.5 font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
+        <p className="inline-flex items-center gap-2.5 font-mono text-xs font-normal uppercase tracking-widest text-text-secondary">
           <span aria-hidden className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75 motion-reduce:animate-none" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
