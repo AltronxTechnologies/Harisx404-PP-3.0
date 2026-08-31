@@ -92,7 +92,7 @@ export function Footer(): JSX.Element {
                   className="hidden h-10 w-10 object-contain dark:block"
                 />
               </Link>
-              <p className="mt-6 max-w-xs leading-6 text-gray-500 dark:text-gray-400">
+              <p className="mt-6 max-w-xs leading-6 text-text-secondary">
                 I&apos;m Muhammad Haris &mdash; I build for the web, secure
                 what I ship, and teach machines to think. Three domains, one
                 mission: solving hard problems.
@@ -116,7 +116,7 @@ export function Footer(): JSX.Element {
                     <ul className="space-y-2 sm:space-y-2.5">
                       {section.links.map((link) => (
                         <li key={link.href}>
-                          <span className="inline-block py-1 text-sm text-gray-500 transition-colors hover:text-text-primary dark:text-gray-400">
+                          <span className="inline-block py-1 text-sm text-text-secondary transition-colors hover:text-text-primary">
                             {renderFooterLink(link)}
                           </span>
                         </li>
@@ -130,7 +130,7 @@ export function Footer(): JSX.Element {
 
           {/* Bottom bar — copyright + meta links, above the hatch strip */}
           <div className="max-w-6xl border-t border-gray-200 px-4 dark:border-white/10 lg:mx-auto xl:px-0">
-            <div className="flex flex-col items-center justify-between gap-3 py-5 font-mono text-xs tracking-wide text-gray-500 dark:text-gray-400 sm:flex-row">
+            <div className="flex flex-col items-center justify-between gap-3 py-5 font-mono text-xs tracking-wide text-text-secondary sm:flex-row">
               <p>&copy; {new Date().getFullYear()} Harisx404. All rights reserved.</p>
               <div className="flex flex-wrap items-center justify-center gap-2">
                 {metaLinks.map((link, index) => {
