@@ -471,18 +471,18 @@ export function CaseStudyCard({
                   "line-clamp-2 max-w-xl",
                   coverHeading === "title"
                     ? bodyHiddenOnXl
-                      ? /* Home: softer cover title — serif 500, white/85,
-                           no shadow, 20/22px. */
-                        "font-display text-xl font-medium leading-snug text-white/85 md:text-[22px]"
+                      ? /* Home: cover tagline in the body sans (same family
+                           as the card description) — softer, 18/20px. */
+                        "text-lg font-medium leading-snug text-white/85 md:text-xl"
                       : /* Identical type to the home projects-section title
                          (font-display text-3xl font-medium leading-tight) —
                          white for contrast on the gradient panel, lifted by a
                          two-layer text shadow (tight contact + soft ambient)
                          so it stays crisp on any cover hue. */
                       "font-display text-[22px] font-medium leading-tight text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.35),0_4px_14px_rgba(0,0,0,0.22)] max-[380px]:text-[19px] sm:text-[26px] md:text-3xl"
-                    : /* Home: projects-title font/weight, but softer —
-                         white/70, no shadow — sized for two clamped lines. */
-                      "font-display text-xl font-medium leading-snug text-white/85 md:text-[22px]"
+                    : /* Home: body-sans tagline, softer — white/70,
+                         no shadow — sized for two clamped lines. */
+                      "text-lg font-medium leading-snug text-white/85 md:text-xl"
                 )}
               >
                 {coverHeading === "title"
