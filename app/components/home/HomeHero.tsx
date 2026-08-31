@@ -245,7 +245,7 @@ function HeadlineRotator({
           >
             {line2}
             <span
-              className={`${busy ? "" : "hero-caret"} ml-[0.12em] inline-block h-[0.78em] w-[0.42em] translate-y-[0.08em] rounded-[1px] align-baseline ${domain.caret}`}
+              className={`${busy ? "" : "hero-caret"} ml-[0.12em] inline-block h-[0.72em] w-[0.12em] rounded-[1px] align-baseline ${domain.caret}`}
             />
           </span>
         </span>
