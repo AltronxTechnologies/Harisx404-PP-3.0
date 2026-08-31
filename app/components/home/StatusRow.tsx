@@ -44,7 +44,7 @@ function LiveClock({ timeZone }: { timeZone: string }) {
     <>
       <span className="tabular-nums">{time}</span>
       {zone && (
-        <span className="ml-1.5 font-mono text-[10px] uppercase tracking-widest text-text-tertiary">
+        <span className="ml-1.5 font-mono text-[10px] uppercase tracking-widest text-text-secondary">
           {zone}
         </span>
       )}
