@@ -825,7 +825,7 @@ function StickyProjectPanel({
           aria-hidden
           className={`h-[3px] w-8 shrink-0 rounded-full ${hueBg[index % hueBg.length]}`}
         />
-        <h3 className="font-display text-[32px] font-medium leading-tight text-text-primary">
+        <h3 className="font-display text-3xl font-medium leading-tight text-text-primary">
           {project.title}
         </h3>
       </div>
