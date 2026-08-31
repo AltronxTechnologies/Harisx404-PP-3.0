@@ -36,7 +36,7 @@ function TaglineRotator() {
 
   return (
     <div
-      className="flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.22em] text-text-secondary lg:text-[13px] lg:tracking-[0.28em]"
+      className="flex items-center gap-2.5 font-mono text-xs font-normal uppercase tracking-widest text-black/80 dark:text-white/70"
       aria-live="polite"
     >
       {/* Dot lives outside the clipped rotator so its ping ring never cuts */}
