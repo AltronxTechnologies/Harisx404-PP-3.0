@@ -6,7 +6,7 @@ import { Footer } from "./components/Footer";
 import { cx } from "./lib/utils";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
-import { Instrument_Serif, Source_Serif_4, Space_Grotesk } from "next/font/google";
+import { Instrument_Serif, JetBrains_Mono, Source_Serif_4, Space_Grotesk } from "next/font/google";
 import Script from "next/script";
 
 const instrumentSerif = Instrument_Serif({
@@ -22,6 +22,15 @@ const sourceSerif = Source_Serif_4({
   weight: "600",
   subsets: ["latin"],
   variable: "--font-source-serif",
+  display: "swap",
+});
+
+// Hero scramble headline — exact font from the decode reference; mono
+// metrics keep the glyph scramble perfectly width-stable.
+const jetbrainsMono = JetBrains_Mono({
+  weight: "700",
+  subsets: ["latin"],
+  variable: "--font-jetbrains-mono",
   display: "swap",
 });
 
@@ -111,7 +120,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`bg-bg-primary ${GeistMono.variable} ${GeistSans.variable} ${instrumentSerif.variable} ${sourceSerif.variable} ${spaceGrotesk.variable}`}
+      className={`bg-bg-primary ${GeistMono.variable} ${GeistSans.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} ${sourceSerif.variable} ${spaceGrotesk.variable}`}
     >
       <body className="flex min-h-screen flex-col font-sans md:max-w-7xl lg:mx-auto lg:flex-row" suppressHydrationWarning>
         <script

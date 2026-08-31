@@ -228,7 +228,7 @@ function HeadlineRotator({
 
       <h1
         onPointerEnter={handleHover}
-        className="relative font-mono text-[2.1rem] font-bold uppercase leading-[0.96] tracking-[-0.045em] text-text-primary sm:text-5xl md:text-[2.5rem] lg:text-[3.6rem]"
+        className="relative [font-family:var(--font-jetbrains-mono),monospace] text-[2.1rem] font-bold uppercase leading-[0.96] tracking-[-0.045em] text-text-primary sm:text-5xl md:text-[2.5rem] lg:text-[3.6rem]"
         aria-live="polite"
         aria-label={`${current.line1} ${current.line2}`}
       >
