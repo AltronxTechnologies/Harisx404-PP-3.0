@@ -144,7 +144,7 @@ export function AboutTeaser() {
                   <div className="font-display text-xl font-medium text-text-primary sm:text-2xl">
                     {stat.value}
                   </div>
-                  <div className="mt-1 font-mono text-[9px] uppercase tracking-widest text-text-tertiary sm:text-[11px]">
+                  <div className="mt-1 font-mono text-[9px] uppercase tracking-widest text-text-secondary sm:text-[11px]">
                     {stat.label}
                   </div>
                 </div>
@@ -155,7 +155,7 @@ export function AboutTeaser() {
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3 pb-1">
               {socials.map((social) => {
                 const pillClass =
-                  "inline-flex items-center gap-2 rounded-full border border-border-primary bg-white px-4 py-2.5 text-sm font-medium text-text-secondary transition-all hover:border-text-tertiary hover:text-text-primary hover:shadow-md dark:bg-white/[0.04] sm:px-5 sm:py-2";
+                  "inline-flex items-center gap-2 rounded-full border border-border-primary bg-white px-4 py-2.5 text-sm font-medium text-text-secondary transition-all hover:border-neutral-400/70 hover:text-text-primary hover:shadow-md dark:hover:border-white/25 dark:bg-white/[0.04] sm:px-5 sm:py-2";
                 const inner = (
                   <>
                     <PillIcon label={social.label} />
