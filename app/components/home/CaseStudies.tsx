@@ -717,7 +717,7 @@ export function CaseStudyCard({
               </span>
               {detailsOpen ? "Hide details" : "Details"}
             </button>
-            <span aria-hidden className="text-text-tertiary">
+            <span aria-hidden className="text-text-secondary">
               ·
             </span>
             <Link
