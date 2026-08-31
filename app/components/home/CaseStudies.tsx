@@ -473,7 +473,7 @@ export function CaseStudyCard({
                     ? bodyHiddenOnXl
                       ? /* Home: cover tagline in the body sans (same family
                            as the card description) — softer, 18/20px. */
-                        "text-lg font-medium leading-snug text-white/85 md:text-xl"
+                        "text-base font-medium leading-snug text-white/85 md:text-xl"
                       : /* Identical type to the home projects-section title
                          (font-display text-3xl font-medium leading-tight) —
                          white for contrast on the gradient panel, lifted by a
@@ -482,7 +482,7 @@ export function CaseStudyCard({
                       "font-display text-[22px] font-medium leading-tight text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.35),0_4px_14px_rgba(0,0,0,0.22)] max-[380px]:text-[19px] sm:text-[26px] md:text-3xl"
                     : /* Home: body-sans tagline, softer — white/70,
                          no shadow — sized for two clamped lines. */
-                      "text-lg font-medium leading-snug text-white/85 md:text-xl"
+                      "text-base font-medium leading-snug text-white/85 md:text-xl"
                 )}
               >
                 {coverHeading === "title"
@@ -682,13 +682,13 @@ export function CaseStudyCard({
                 a short description sits naturally with no reserved gap. */}
             <Link
               href={`/projects/${project.slug}`}
-              className="line-clamp-3 block max-w-xl text-base leading-relaxed text-text-secondary md:text-sm xl:min-h-[46px]"
+              className="line-clamp-3 block max-w-xl text-sm leading-relaxed text-text-secondary xl:min-h-[46px]"
             >
               {highlightMatches(project.description, highlight)}
             </Link>
           </>
         ) : (
-          <p className="mt-2 line-clamp-3 text-base leading-relaxed text-text-secondary md:text-sm">
+          <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-text-secondary">
             {project.description}
           </p>
         )}
