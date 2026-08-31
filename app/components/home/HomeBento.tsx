@@ -140,7 +140,7 @@ const accountItems = [
 
 export function AccountsBento() {
   return (
-    <BentoCard height="h-[240px] lg:h-[220px]">
+    <BentoCard height="h-auto sm:h-[240px] lg:h-[220px]">
       <div className="z-20 text-center">
         <h2 className="text-base font-medium text-text-primary">
           Learn more about me
@@ -173,7 +173,7 @@ export function AccountsBento() {
                   ? "h-16 w-16 sm:h-[84px] sm:w-[84px]"
                   : "h-14 w-14 sm:h-[72px] sm:w-[72px]"
               )}
-              className="group-hover/acct:-translate-y-2 group-hover/acct:border-indigo-400"
+              className="group-hover/acct:-translate-y-2 group-hover/acct:border-neutral-400 dark:group-hover/acct:border-white/30"
             >
               {/* Brand mark as a mask → gray at rest, true brand color on hover.
                   Decorative: the parent <a> already carries the label. */}
@@ -682,7 +682,7 @@ function buildStackRows(projectTech?: ProjectTech | null): TechItem[][] {
 function TechChip({ item }: { item: TechItem }) {
   return (
     <span
-      className="group/chip flex shrink-0 items-center gap-2 rounded-xl border border-border-primary bg-[#EDEEF0] px-3.5 py-2 transition-colors duration-300 hover:border-indigo-400/60 dark:bg-white/5"
+      className="group/chip flex shrink-0 items-center gap-2 rounded-xl border border-border-primary bg-[#EDEEF0] px-3.5 py-2 transition-colors duration-300 hover:border-neutral-400/70 dark:bg-white/5 dark:hover:border-white/25"
       style={
         {
           boxShadow: "0px 2px 1.5px 0px #A5AEB852 inset",
@@ -863,7 +863,7 @@ export function SiteStatsBento({
               key={stat.key}
               href={stat.href}
               title={`${stat.label} →`}
-              className="group/tile block rounded-[14px] border border-border-primary p-1 transition-all duration-500 hover:-translate-y-1 hover:border-indigo-400"
+              className="group/tile block rounded-[14px] border border-border-primary p-1 transition-all duration-500 hover:-translate-y-1 hover:border-neutral-400 dark:hover:border-white/30"
             >
               <div
                 className="flex h-full flex-col items-center justify-center gap-1 rounded-[10px] border-2 border-[#A5AEB81F]/10 bg-[#EDEEF0] px-2 py-2.5 dark:bg-white/5"

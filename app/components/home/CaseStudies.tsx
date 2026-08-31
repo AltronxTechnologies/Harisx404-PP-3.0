@@ -74,7 +74,7 @@ const techIconMap: Record<
 function TechChip({ name, pill = false }: { name: string; pill?: boolean }) {
   const icon = techIconMap[normalizeTech(name)];
   const base = pill
-    ? "group/chip flex items-center gap-1.5 rounded-full border border-border-primary px-3 py-1 font-mono text-[11px] text-text-secondary transition-colors duration-300 hover:border-indigo-400/60 hover:text-text-primary"
+    ? "group/chip flex items-center gap-1.5 rounded-full border border-border-primary px-3 py-1 font-mono text-[11px] text-text-secondary transition-colors duration-300 hover:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25"
     : "group/chip flex items-center gap-1.5 rounded-md bg-text-primary/5 px-2.5 py-[5px] font-mono text-xs uppercase tracking-widest text-text-secondary transition-colors duration-300 hover:text-text-primary dark:bg-white/5";
   return (
     <span
