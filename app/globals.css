@@ -24,18 +24,6 @@
   font-display: swap;
 }
 
-/* Same Bluu Next file, but declared as 400-only so the browser applies
-   synthetic (faux) bold when 700 is requested. The base family above claims
-   400–700, which makes font-bold render identical glyphs — use this family
-   wherever a visibly bolder display title is wanted. */
-@font-face {
-  font-family: "Reference Bluu Next Bold";
-  src: url("https://aayushbharti.in/_next/static/immutable/media/e41d5df559864f9e-s.p.2rlzm4mj5kw8e.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-}
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
