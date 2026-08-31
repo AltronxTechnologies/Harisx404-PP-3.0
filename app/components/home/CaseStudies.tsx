@@ -74,7 +74,7 @@ const techIconMap: Record<
 function TechChip({ name, pill = false }: { name: string; pill?: boolean }) {
   const icon = techIconMap[normalizeTech(name)];
   const base = pill
-    ? "group/chip flex items-center gap-1.5 rounded-full border border-border-primary px-3 py-1 font-mono text-[11px] text-text-secondary transition-colors duration-300 hover:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25"
+    ? "group/chip flex items-center gap-1.5 rounded-full border border-border-primary px-3 py-1 font-mono text-xs text-text-secondary transition-colors duration-300 hover:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25"
     : "group/chip flex items-center gap-1.5 rounded-md bg-text-primary/5 px-2.5 py-[5px] font-mono text-xs uppercase tracking-widest text-text-secondary transition-colors duration-300 hover:text-text-primary dark:bg-white/5";
   return (
     <span
@@ -349,7 +349,7 @@ export function CaseStudyCard({
       {/* Header: `01 ─── tags-in-pills` left, year pill right. */}
       <div className="mb-5 flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
-          <span className="shrink-0 font-mono text-sm text-text-tertiary">
+          <span className="shrink-0 font-mono text-xs text-text-secondary">
             {String(i + 1).padStart(2, "0")}
           </span>
           <span aria-hidden className="h-px w-4 shrink-0 bg-border-primary sm:w-7" />
@@ -374,7 +374,7 @@ export function CaseStudyCard({
           </div>
         </div>
         {project.year && (
-          <span className="shrink-0 rounded-lg border border-border-primary bg-bg-secondary/60 px-3 py-1 font-mono text-[11px] text-text-secondary">
+          <span className="shrink-0 rounded-lg border border-border-primary bg-bg-secondary/60 px-3 py-1 font-mono text-xs text-text-secondary">
             {project.year}
           </span>
         )}
@@ -760,7 +760,7 @@ export function CaseStudyCard({
                 {coverHeading === "title" && project.tech.length > 5 && (
                   /* Cap at five chips — the full stack lives on the case
                      study page. Keeps the panel tidy and even per project. */
-                  <span className="inline-flex items-center rounded-full border border-dashed border-border-primary px-3 py-1 font-mono text-[11px] text-text-tertiary">
+                  <span className="inline-flex items-center rounded-full border border-dashed border-border-primary px-3 py-1 font-mono text-xs text-text-secondary">
                     +{project.tech.length - 5}
                   </span>
                 )}
