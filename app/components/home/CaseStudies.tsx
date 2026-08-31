@@ -498,16 +498,32 @@ export function CaseStudyCard({
                 aria-hidden
                 className={clsx(
                   "shrink-0 leading-none transition-transform duration-300 group-hover:translate-x-1",
-                  /* Home: arrow mirrors the tagline exactly — same sans size
-                     ramp, weight and white/85, no shadow. Projects keeps the
-                     bigger shadowed arrow that pairs with its serif title. */
+                  /* Home: thin line-arrow (long shaft + chevron) drawn as an
+                     SVG in the tagline's white/85 — matches the reference
+                     shape. Projects keeps the shadowed glyph arrow that
+                     pairs with its serif title. */
                   bodyHiddenOnXl || coverHeading !== "title"
-                    ? "text-lg font-medium text-white/85 md:text-xl"
+                    ? "mt-1 text-white/85"
                     : "text-[22px] text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.35),0_4px_14px_rgba(0,0,0,0.22)]",
                   active && "translate-x-1"
                 )}
               >
-                →
+                {bodyHiddenOnXl || coverHeading !== "title" ? (
+                  <svg
+                    viewBox="0 0 24 16"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={1.5}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-4 w-6"
+                  >
+                    <path d="M2 8h19" />
+                    <path d="m15 2 6 6-6 6" />
+                  </svg>
+                ) : (
+                  "→"
+                )}
               </span>
             </div>
 
