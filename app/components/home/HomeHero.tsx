@@ -376,7 +376,7 @@ export function HomeHero({
                 />
               </span>
               <span className="mt-1.5 flex w-full items-center justify-between gap-3 lg:mt-2">
-                <span className="font-mono text-xs uppercase tracking-widest text-text-tertiary">
+                <span className="font-mono text-xs uppercase tracking-widest text-text-secondary">
                   {hero.newLaunch.subline}
                 </span>
                 <span className="flex size-5 shrink-0 items-center justify-center rounded-full border border-border-primary text-text-secondary transition-colors group-hover:bg-text-primary group-hover:text-bg-primary">
