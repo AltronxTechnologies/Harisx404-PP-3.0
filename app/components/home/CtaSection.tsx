@@ -51,7 +51,7 @@ export function CtaSection() {
         <h2 className="mt-5 max-w-3xl font-display text-4xl font-medium leading-tight tracking-tight text-text-primary [text-wrap:balance] sm:text-5xl md:text-6xl">
           {cta.line1},
           <motion.span
-            className="text-gradient-animated block italic"
+            className="animate-gradient-x text-colorfull block px-1 pb-1 italic [text-shadow:none]"
             initial={false}
             whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
