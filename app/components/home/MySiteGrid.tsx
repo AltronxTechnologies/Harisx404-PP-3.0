@@ -124,7 +124,7 @@ export function MySiteGrid() {
               ))}
             </div>
             <div>
-              <p className="font-mono text-xs uppercase tracking-widest text-text-secondary">
+              <p className="font-mono text-xs uppercase tracking-widest text-black/80 dark:text-white/70">
                 BUILDLOG
               </p>
               <h3 className="mt-2 font-display text-xl font-medium leading-snug text-text-primary md:text-lg lg:text-2xl">
@@ -186,7 +186,7 @@ export function MySiteGrid() {
               </div>
             </div>
             <div>
-              <p className="font-mono text-xs uppercase tracking-widest text-text-secondary">
+              <p className="font-mono text-xs uppercase tracking-widest text-black/80 dark:text-white/70">
                 STATS
               </p>
               <h3 className="mt-2 font-display text-xl font-medium leading-snug text-text-primary md:text-lg lg:text-2xl">
@@ -211,7 +211,7 @@ export function MySiteGrid() {
               ))}
             </div>
             <div>
-              <p className="font-mono text-xs uppercase tracking-widest text-text-secondary">
+              <p className="font-mono text-xs uppercase tracking-widest text-black/80 dark:text-white/70">
                 COMMUNITY WALL
               </p>
               <h3 className="mt-2 font-display text-xl font-medium leading-snug text-text-primary md:text-lg lg:text-2xl">

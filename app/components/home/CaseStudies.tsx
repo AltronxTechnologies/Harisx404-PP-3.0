@@ -75,7 +75,7 @@ function TechChip({ name, pill = false }: { name: string; pill?: boolean }) {
   const icon = techIconMap[normalizeTech(name)];
   const base = pill
     ? "group/chip flex items-center gap-1.5 rounded-full border border-border-primary px-3 py-1 font-mono text-[11px] text-text-secondary transition-colors duration-300 hover:border-indigo-400/60 hover:text-text-primary"
-    : "group/chip flex items-center gap-1.5 rounded-md bg-text-primary/5 px-2.5 py-[5px] font-mono text-xs uppercase tracking-widest text-text-secondary transition-colors duration-300 hover:text-text-primary dark:bg-white/5";
+    : "group/chip flex items-center gap-1.5 rounded-md bg-text-primary/5 px-2.5 py-[5px] font-mono text-xs uppercase tracking-widest text-black/80 transition-colors duration-300 hover:text-black dark:text-white/70 dark:hover:text-white dark:bg-white/5";
   return (
     <span
       className={base}
@@ -366,7 +366,7 @@ export function CaseStudyCard({
                 title={tag}
                 /* Same height as the quarter pill (26.5px = 11px/1.5 line
                    + py-1 + border) on every screen. */
-                className="inline-block h-[26.5px] max-w-[8.5rem] shrink-0 truncate whitespace-nowrap rounded-full border border-border-primary px-2 font-mono text-[8px] uppercase leading-[24.5px] tracking-widest text-text-secondary sm:max-w-[12rem] sm:px-3 sm:text-[10px]"
+                className="inline-block h-[26.5px] max-w-[8.5rem] shrink-0 truncate whitespace-nowrap rounded-full border border-border-primary px-2 font-mono text-[8px] uppercase leading-[24.5px] tracking-widest text-black/80 dark:text-white/70 sm:max-w-[12rem] sm:px-3 sm:text-[10px]"
               >
                 {tag}
               </span>
@@ -685,7 +685,7 @@ export function CaseStudyCard({
               aria-expanded={detailsOpen}
               aria-controls={`project-details-${project.slug}`}
               onClick={toggleDetails}
-              className="group/toggle inline-flex items-center gap-2 py-1.5 -my-1.5 font-mono text-xs uppercase tracking-widest text-text-secondary transition-colors hover:text-text-primary"
+              className="group/toggle inline-flex items-center gap-2 py-1.5 -my-1.5 font-mono text-xs uppercase tracking-widest text-black/80 transition-colors hover:text-black dark:text-white/70 dark:hover:text-white"
             >
               <span
                 aria-hidden
@@ -704,7 +704,7 @@ export function CaseStudyCard({
             </span>
             <Link
               href={`/projects/${project.slug}`}
-              className="group/cta inline-flex items-center gap-2 py-1.5 -my-1.5 font-mono text-xs uppercase tracking-widest text-text-secondary transition-colors hover:text-text-primary"
+              className="group/cta inline-flex items-center gap-2 py-1.5 -my-1.5 font-mono text-xs uppercase tracking-widest text-black/80 transition-colors hover:text-black dark:text-white/70 dark:hover:text-white"
             >
               View case study
               <span
@@ -771,7 +771,7 @@ export function CaseStudyCard({
         {coverHeading !== "title" && (
           <Link
             href={`/projects/${project.slug}`}
-            className="group/cta mt-5 inline-flex items-center gap-2 py-1.5 -my-1.5 font-mono text-xs uppercase tracking-widest text-text-secondary transition-colors hover:text-text-primary"
+            className="group/cta mt-5 inline-flex items-center gap-2 py-1.5 -my-1.5 font-mono text-xs uppercase tracking-widest text-black/80 transition-colors hover:text-black dark:text-white/70 dark:hover:text-white"
           >
             View case study
             <span
@@ -842,7 +842,7 @@ function StickyProjectPanel({
       <Link
         href={`/projects/${project.slug}`}
         tabIndex={-1}
-        className="group/cta mt-6 inline-flex items-center gap-2 py-1.5 -my-1.5 font-mono text-xs uppercase tracking-widest text-text-secondary transition-colors hover:text-text-primary"
+        className="group/cta mt-6 inline-flex items-center gap-2 py-1.5 -my-1.5 font-mono text-xs uppercase tracking-widest text-black/80 transition-colors hover:text-black dark:text-white/70 dark:hover:text-white"
       >
         View case study
         <span
