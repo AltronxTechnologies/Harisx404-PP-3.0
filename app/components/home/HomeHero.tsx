@@ -366,7 +366,7 @@ export function HomeHero({
                 />
               </span>
               <span className="mt-2.5 inline-block lg:mt-3">
-                <span className="block font-display text-[26px] leading-tight text-text-primary md:text-[32px] lg:text-4xl">
+                <span className="block font-display text-[26px] leading-tight text-text-primary md:text-[30px]">
                   {launch.name}
                 </span>
                 {/* Blue stroke that sweeps in on hover (per reference) */}
