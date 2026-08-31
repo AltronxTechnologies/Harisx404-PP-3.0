@@ -423,11 +423,11 @@ export function CaseStudyCard({
         </div>
       )}
 
-      <Link href={`/projects/${project.slug}`} className="group block">
+      <Link href={`/projects/${project.slug}`} className="frame-light-edge group relative block">
         <div
           ref={panelRef}
           className={clsx(
-            "card-light-edge relative flex flex-col overflow-hidden rounded-[22px] border-8 border-white shadow-[0_0_0_0.8px_rgba(0,0,0,0.2),0_9.5px_28.5px_-11.4px_rgba(0,0,0,0.4)] dark:border-zinc-800 dark:shadow-[0_0_0_1px_#4d4d4d,0_9.5px_28.5px_-11.4px_rgba(0,0,0,0.4)]",
+            "relative flex flex-col overflow-hidden rounded-[22px] border-8 border-white shadow-[0_0_0_0.8px_rgba(0,0,0,0.2),0_9.5px_28.5px_-11.4px_rgba(0,0,0,0.4)] dark:border-zinc-800 dark:shadow-[0_0_0_1px_#4d4d4d,0_9.5px_28.5px_-11.4px_rgba(0,0,0,0.4)]",
             coverMinHClass,
             /* Projects page: the whole-card lift is disabled there, so the
                hover response lives on the cover panel alone — structural

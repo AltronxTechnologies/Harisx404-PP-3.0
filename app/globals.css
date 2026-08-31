@@ -211,6 +211,32 @@ body {
   );
 }
 
+/* Frame variant — same specular top sheen, but drawn on a WRAPPER so it
+   sits on the outer edge of a thick-bordered child card (the child's own
+   overflow-hidden would clip a pseudo placed above its border). Slightly
+   softer (2px + blur) so it reads as light catching the frame itself. */
+.dark .frame-light-edge::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 6%;
+  right: 6%;
+  height: 2px;
+  border-radius: 9999px;
+  opacity: 0.35;
+  filter: blur(0.5px);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.8) 30%,
+    #fff 50%,
+    rgba(255, 255, 255, 0.8) 70%,
+    transparent 100%
+  );
+}
+
 .kicker {
   font-family: var(--font-geist-mono), monospace;
   font-size: 0.75rem;
