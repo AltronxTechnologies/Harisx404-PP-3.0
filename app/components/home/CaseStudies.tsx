@@ -75,7 +75,7 @@ function TechChip({ name, pill = false }: { name: string; pill?: boolean }) {
   const icon = techIconMap[normalizeTech(name)];
   const base = pill
     ? "group/chip flex items-center gap-1.5 rounded-full border border-border-primary px-3 py-1 font-mono text-xs text-text-secondary transition-colors duration-300 hover:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25"
-    : "group/chip flex items-center gap-1.5 rounded-md bg-text-primary/5 px-2.5 py-[5px] font-mono text-xs uppercase tracking-widest text-text-secondary transition-colors duration-300 hover:text-text-primary dark:bg-white/5";
+    : "group/chip flex items-center gap-1.5 rounded-md bg-black/[0.05] px-2.5 py-[5px] font-mono text-xs uppercase tracking-widest text-text-secondary ring-1 ring-black/[0.06] transition-colors duration-300 hover:text-text-primary dark:bg-white/5 dark:ring-white/[0.06]";
   return (
     <span
       className={base}
@@ -682,13 +682,13 @@ export function CaseStudyCard({
                 a short description sits naturally with no reserved gap. */}
             <Link
               href={`/projects/${project.slug}`}
-              className="line-clamp-3 block max-w-xl text-sm leading-relaxed text-text-secondary xl:min-h-[46px]"
+              className="line-clamp-3 block max-w-xl text-base leading-relaxed text-text-secondary md:text-sm xl:min-h-[46px]"
             >
               {highlightMatches(project.description, highlight)}
             </Link>
           </>
         ) : (
-          <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-text-secondary">
+          <p className="mt-2 line-clamp-3 text-base leading-relaxed text-text-secondary md:text-sm">
             {project.description}
           </p>
         )}
@@ -759,7 +759,7 @@ export function CaseStudyCard({
                   >
                     <span
                       aria-hidden="true"
-                      className={`mr-2 shrink-0 font-mono ${hueText[i % hueText.length]}`}
+                      className={`mr-2 flex h-6 shrink-0 items-center font-mono ${hueText[i % hueText.length]}`}
                     >
                       ✦
                     </span>
@@ -840,7 +840,7 @@ function StickyProjectPanel({
           <li key={i} className="flex text-sm leading-6 text-text-secondary">
             <span
               aria-hidden="true"
-              className={`mr-2 shrink-0 font-mono ${hueText[index % hueText.length]}`}
+              className={`mr-2 flex h-6 shrink-0 items-center font-mono ${hueText[index % hueText.length]}`}
             >
               ✦
             </span>
