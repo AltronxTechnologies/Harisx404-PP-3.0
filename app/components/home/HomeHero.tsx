@@ -125,6 +125,24 @@ function HeadlineRotator({
   const [line2, setLine2] = useState<string>(headlines[0].line2);
   const [busy, setBusy] = useState(false);
   const firstRun = useRef(true);
+  /* Hover re-scramble (per the decode reference): pointerenter replays a
+     snappier 650ms decode of the current phrase, throttled to one replay
+     per 2.6s, fine pointers only. */
+  const [replay, setReplay] = useState(0);
+  const fastRef = useRef(false);
+  const lastHoverRef = useRef(0);
+  const busyRef = useRef(false);
+  busyRef.current = busy;
+  const handleHover = () => {
+    if (typeof window === "undefined") return;
+    if (!window.matchMedia("(pointer: fine)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const now = Date.now();
+    if (busyRef.current || now - lastHoverRef.current < 2600) return;
+    lastHoverRef.current = now;
+    fastRef.current = true;
+    setReplay((r) => r + 1);
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -143,8 +161,8 @@ function HeadlineRotator({
       new Promise<void>((resolve) => {
         let t0: number | null = null;
         let raf = 0;
-        const d1 = DECODE_MS;
-        const d2 = DECODE_MS + 150;
+        const d1 = fastRef.current ? 650 : DECODE_MS;
+        const d2 = (fastRef.current ? 650 : DECODE_MS) + 150;
         const offset2 = 130;
         const frame = (now: number) => {
           if (cancelled) return resolve();
@@ -171,10 +189,12 @@ function HeadlineRotator({
       }
 
       // First cycle: SSR already shows the full phrase - hold, then morph.
+      // Hover replays also decode (snappier 650ms via fastRef).
       if (!firstRun.current) {
         setBusy(true);
         await decode();
         setBusy(false);
+        fastRef.current = false;
       }
       firstRun.current = false;
 
@@ -186,7 +206,7 @@ function HeadlineRotator({
     return () => {
       cancelled = true;
     };
-  }, [index]);
+  }, [index, replay]);
 
   const current = headlines[index];
   const domain = domainStyles[current.accent] ?? domainStyles.ai;
@@ -207,7 +227,8 @@ function HeadlineRotator({
       </AnimatePresence>
 
       <h1
-        className="relative font-mono text-[2.1rem] font-bold uppercase leading-[1.04] tracking-tight text-text-primary sm:text-5xl md:text-[2.5rem] lg:text-[3.6rem]"
+        onPointerEnter={handleHover}
+        className="relative font-mono text-[2.1rem] font-bold uppercase leading-[0.96] tracking-[-0.045em] text-text-primary sm:text-5xl md:text-[2.5rem] lg:text-[3.6rem]"
         aria-live="polite"
         aria-label={`${current.line1} ${current.line2}`}
       >
@@ -218,13 +239,13 @@ function HeadlineRotator({
           PROFESSIONAL
         </span>
         <span className="absolute inset-0 block" aria-hidden>
-          <span className="block whitespace-nowrap leading-[1.04]">{line1}</span>
+          <span className="block whitespace-nowrap leading-[0.96]">{line1}</span>
           <span
-            className={`hero-gradient-animate ${domain.gradient} block whitespace-nowrap leading-[1.04]`}
+            className={`hero-gradient-animate ${domain.gradient} block whitespace-nowrap leading-[0.96]`}
           >
             {line2}
             <span
-              className={`${busy ? "" : "hero-caret"} ml-[0.12em] inline-block h-[0.72em] w-[0.12em] rounded-[1px] align-baseline ${domain.caret}`}
+              className={`${busy ? "" : "hero-caret"} ml-[0.12em] inline-block h-[0.78em] w-[0.42em] translate-y-[0.08em] rounded-[1px] align-baseline ${domain.caret}`}
             />
           </span>
         </span>
