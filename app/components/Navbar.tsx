@@ -422,7 +422,7 @@ export default function Navbar() {
                             className="group relative flex h-full w-full flex-col justify-end overflow-hidden rounded-[18px] bg-neutral-900 p-4 ring-1 ring-black/5 dark:ring-white/10 hover:ring-black/15 dark:hover:ring-white/25 transition-all duration-300 shadow-sm hover:shadow-md"
                           >
                             <Image 
-                              src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=800&auto=format&fit=crop"
+                              src="/images/nav-community-wall.jpg"
                               alt="Community Wall"
                               fill
                               sizes="(max-width: 768px) 92vw, 250px"
@@ -450,7 +450,7 @@ export default function Navbar() {
                             className="group relative flex h-full w-full flex-col justify-end overflow-hidden rounded-[18px] bg-neutral-900 p-4 ring-1 ring-black/5 dark:ring-white/10 hover:ring-black/15 dark:hover:ring-white/25 transition-all duration-300 shadow-sm hover:shadow-md"
                           >
                             <Image 
-                              src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800&auto=format&fit=crop"
+                              src="/images/nav-stats.jpg"
                               alt="Stats"
                               fill
                               sizes="(max-width: 768px) 92vw, 250px"
