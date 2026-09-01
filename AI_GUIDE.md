@@ -11,6 +11,20 @@
 > there were approved as PERFECT by the owner and are FROZEN — never modify
 > them (or shared CSS/constants they rely on) without the owner's explicit
 > permission in the current conversation.
+>
+> 🔒 **`LOCKED_PERFECT.md` entry 22 is a HARD FREEZE** covering the Home page,
+> Navbar, Search modal, Reach Out modal and Footer. Treat those as the design
+> reference for everything else — match them, do not change them.
+>
+> 🧪 **`AUDIT_TESTING.md`** is the pre-lock audit protocol. The owner polishes
+> and locks the site one page/component at a time; when they say
+> **"Audit testing &lt;target&gt;"**, run all 12 phases in that file. It also holds
+> the reference baseline (radius tiers, colour tokens, icon sizes, shared
+> modules) extracted from the locked components.
+>
+> 🐛 **`DESIGN_DEBT.md`** lists known unfixed issues **and** an explicit list of
+> differences that are *intentional* and must NOT be "fixed". Read it before
+> any consistency work.
 
 ---
 
