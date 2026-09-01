@@ -85,6 +85,11 @@ export async function generateMetadata(): Promise<Metadata> {
       template: `%s | ${title.split(' | ')[0]}`
     },
     description: description,
+    // Self-referencing canonical: "./" resolves per-page against
+    // metadataBase, so every route gets its own canonical URL.
+    alternates: {
+      canonical: "./",
+    },
     icons: {
       icon: "/brand/harisx404 favicon transparent.png",
       apple: "/brand/harisx404 favicon transparent.png",

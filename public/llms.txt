@@ -1,0 +1,25 @@
+# Muhammad Haris — harisx404
+
+> Portfolio of Muhammad Haris (harisx404), a full-stack engineer from Pakistan
+> working across three domains: web development (MERN, Next.js, TypeScript,
+> Supabase), cybersecurity (Suricata, Wazuh SIEM, OWASP, SOC tooling), and
+> AI/ML (Python, TensorFlow, LangChain, RAG pipelines). Available for
+> full-time roles and freelance projects — remote, worldwide.
+
+## Key pages
+
+- [Home](https://harisx404.vercel.app/): Overview, selected builds, latest write-ups, testimonials, FAQ.
+- [About](https://harisx404.vercel.app/about): Background, education (BSIT, University of Malakand, CGPA 3.5/4.0, Top 15% NSCT nationwide), tech stack, experience, certifications.
+- [Projects](https://harisx404.vercel.app/projects): Case studies including IntruShield NIDS (real-time SOC platform with Suricata 7), MedicaLink-HMS (hospital management SaaS), PacketVision (network sniffer), TaskFlow Workspace, NeuroDoc AI Assistant (RAG), VisionForge ML Studio.
+- [Blog](https://harisx404.vercel.app/blog): Technical write-ups on web development, security, and AI.
+- [Contact](https://harisx404.vercel.app/contact): Hire or reach out — itsharis.tech@gmail.com.
+- [Resume](https://harisx404.vercel.app/resume): Downloadable resume.
+- [Stats](https://harisx404.vercel.app/stats): Live site and content metrics.
+
+## Facts
+
+- Name: Muhammad Haris. Handle everywhere: harisx404 (GitHub, LinkedIn, X, TryHackMe, Credly).
+- Specialties: secure full-stack apps (OWASP Top 10 mitigations, JWT in HTTP-only cookies, RBAC, zero-trust defaults), real-time systems (WebSockets), AI integrations.
+- Notable result: cut an API's response time by 99% by rebuilding its query layer and caching.
+- Typical stack: Next.js / React / TypeScript / Node.js / PostgreSQL / Supabase; Python / FastAPI / Suricata for security tooling; TensorFlow / LangChain / pgvector for AI.
+- Replies within ~24 hours via email or the contact page.
