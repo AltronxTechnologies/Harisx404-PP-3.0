@@ -75,31 +75,31 @@ export default function ContactPage() {
                   <span className="absolute inline-flex size-full animate-ping rounded-full bg-green-400 opacity-75 motion-reduce:animate-none" />
                   <span className="relative inline-flex size-2.5 rounded-full bg-green-500" />
                 </span>
-                <p className="font-mono text-xs uppercase tracking-wider text-neutral-600 dark:text-neutral-400">
+                <p className="font-mono text-xs uppercase tracking-wider text-text-secondary">
                   Available for work
                 </p>
               </div>
               <h2 className="mt-3 font-display text-2xl font-bold leading-snug text-neutral-900 dark:text-white">
                 Open to new projects
               </h2>
-              <p className="mt-2 text-sm leading-relaxed text-neutral-500">
+              <p className="mt-2 text-sm leading-relaxed text-text-secondary">
                 Full-time roles &amp; freelance — web, security, and AI/ML work, remote from anywhere.
               </p>
 
               <div className="mt-6 space-y-3 border-t border-dashed border-neutral-100 pt-6 dark:border-neutral-800">
-                <p className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+                <p className="flex items-center gap-2 text-sm text-text-secondary">
                   <span className="text-neutral-400">{icons.clock}</span>
                   Replies within 24 hours
                 </p>
-                <p className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+                <p className="flex items-center gap-2 text-sm text-text-secondary">
                   <span className="text-neutral-400">{icons.globe}</span>
                   Pakistan · every timezone
                 </p>
-                <p className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+                <p className="flex items-center gap-2 text-sm text-text-secondary">
                   <span className="text-neutral-400">{icons.briefcase}</span>
                   Freelance &amp; full-time
                 </p>
-                <p className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+                <p className="flex items-center gap-2 text-sm text-text-secondary">
                   <span className="text-neutral-400">{icons.mail}</span>
                   <a href="mailto:itsharis.tech@gmail.com" className="truncate hover:underline">
                     itsharis.tech@gmail.com

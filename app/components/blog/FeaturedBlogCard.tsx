@@ -50,12 +50,12 @@ export function FeaturedBlogCard({
       {/* Right: Details Panel */}
       <div className="flex flex-1 flex-col justify-center px-5 py-4 md:px-8 md:py-6">
         {/* Featured badge */}
-        <span className="mb-4 font-mono text-[11px] text-neutral-600 uppercase tracking-wide dark:text-neutral-400">
+        <span className="mb-4 font-mono text-[11px] text-text-secondary uppercase tracking-wide">
           Featured
         </span>
 
         {/* Read Time & Date */}
-        <div className="mb-4 font-mono text-neutral-600 text-xs uppercase tracking-wide dark:text-neutral-400">
+        <div className="mb-4 font-mono text-text-secondary text-xs uppercase tracking-wide">
           <span>{readingTime}</span>
           <span className="mx-1.5">·</span>
           <time>{formattedDate}</time>
@@ -67,7 +67,7 @@ export function FeaturedBlogCard({
         </h2>
 
         {/* Excerpt */}
-        <p className="mt-4 line-clamp-3 text-neutral-600 text-sm leading-relaxed md:text-base dark:text-neutral-400">
+        <p className="mt-4 line-clamp-3 text-text-secondary text-sm leading-relaxed md:text-base">
           {summary}
         </p>
 
@@ -86,7 +86,7 @@ export function FeaturedBlogCard({
         )}
 
         {/* Sliding Dual-Arrow Action Pill — exact reference structure */}
-        <div className="mt-8 flex items-center gap-2.5 self-end text-neutral-600 text-sm tracking-wide transition-colors duration-300 group-hover:text-neutral-900 dark:text-neutral-400 dark:group-hover:text-white">
+        <div className="mt-8 flex items-center gap-2.5 self-end text-text-secondary text-sm tracking-wide transition-colors duration-300 group-hover:text-neutral-900 dark:group-hover:text-white">
           <span>Read article</span>
           <div className="size-[25px] overflow-hidden rounded-lg border border-neutral-300 border-dashed bg-[#f9f9fa80] transition-all duration-500 group-hover:bg-neutral-200 dark:border-white/10 dark:bg-white/5 dark:group-hover:bg-white/10">
             <div className="flex w-12 -translate-x-1/2 transition-transform duration-500 ease-in-out group-hover:translate-x-0 motion-reduce:transition-none">

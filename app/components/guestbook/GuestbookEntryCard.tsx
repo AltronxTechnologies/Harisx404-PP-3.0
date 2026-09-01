@@ -99,7 +99,7 @@ export function GuestbookEntryCard({
           )}
           <div className="min-w-0">
             <p className="truncate font-medium text-xs text-neutral-800 dark:text-neutral-200">{author}</p>
-            <time dateTime={createdAt} className="block font-mono text-[10px] text-neutral-400 dark:text-neutral-500">
+            <time dateTime={createdAt} className="block font-mono text-[10px] text-text-secondary">
               {formatEntryDate(createdAt)}
             </time>
           </div>

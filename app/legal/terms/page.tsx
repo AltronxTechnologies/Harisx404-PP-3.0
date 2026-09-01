@@ -35,7 +35,7 @@ const icons = {
 function SectionHeader({ index, title, subtitle }: { index: string; title: string; subtitle: string }) {
   return (
     <div className="p-4 lg:sticky lg:top-32 lg:col-span-3 lg:self-start lg:p-6">
-      <p className="font-mono text-xs font-bold text-neutral-400 dark:text-neutral-600">{index}</p>
+      <p className="font-mono text-xs font-bold text-text-secondary">{index}</p>
       <h2 className="mt-1 font-display text-2xl font-bold leading-snug text-neutral-900 dark:text-neutral-100 md:text-3xl">
         {title}
       </h2>
@@ -103,7 +103,7 @@ export default function TermsOfUsePage() {
           <SectionHeader index="01" title="Terms." subtitle="The Agreement" />
           <Spacer />
           <div className="space-y-8 p-4 lg:col-span-8 lg:p-6">
-            <p className="text-lg leading-relaxed text-neutral-600 dark:text-neutral-300">
+            <p className="text-lg leading-relaxed text-text-secondary">
               By browsing this site you agree to these terms. They exist to keep things fair for
               both of us — written in plain language, no legalese required.
             </p>
@@ -113,12 +113,12 @@ export default function TermsOfUsePage() {
               </span>
               <div>
                 <p className="text-sm font-semibold text-neutral-900 dark:text-white">Effective Date</p>
-                <p className="font-mono text-xs text-neutral-500 dark:text-neutral-400">
+                <p className="font-mono text-xs text-text-secondary">
                   <time dateTime="2026-08-01">AUG 01, 2026</time> — applies to every page on this site
                 </p>
               </div>
             </div>
-            <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
+            <p className="text-sm leading-relaxed text-text-secondary">
               These terms may be updated as the site evolves. Meaningful changes will be reflected
               in the effective date above; continued use of the site means you accept the current
               version.
@@ -133,7 +133,7 @@ export default function TermsOfUsePage() {
           <SectionHeader index="02" title="Rights." subtitle="Use & Reuse" />
           <Spacer />
           <div className="space-y-8 p-4 lg:col-span-8 lg:p-6">
-            <p className="text-lg leading-relaxed text-neutral-600 dark:text-neutral-300">
+            <p className="text-lg leading-relaxed text-text-secondary">
               Content and code on this site are my original work unless credited otherwise.
               Here&apos;s exactly what you can and can&apos;t do with them.
             </p>
@@ -146,7 +146,7 @@ export default function TermsOfUsePage() {
                 <p className="mb-2 mt-4 font-mono text-xs font-bold uppercase tracking-wider text-neutral-900 dark:text-white">
                   Restrictions on Use
                 </p>
-                <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
+                <p className="text-sm leading-relaxed text-text-secondary">
                   The site&apos;s codebase, design, and written content are proprietary. Don&apos;t
                   republish articles wholesale, clone the design as your own, or use my name,
                   photos, or projects to imply endorsement.
@@ -160,7 +160,7 @@ export default function TermsOfUsePage() {
                 <p className="mb-2 mt-4 font-mono text-xs font-bold uppercase tracking-wider text-neutral-900 dark:text-white">
                   Limited Use
                 </p>
-                <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
+                <p className="text-sm leading-relaxed text-text-secondary">
                   You may quote short excerpts, share links, and reference code snippets from
                   articles in your own work — with a visible link back to the original page as
                   attribution.
@@ -177,7 +177,7 @@ export default function TermsOfUsePage() {
           <SectionHeader index="03" title="Limits." subtitle="Of Liability" />
           <Spacer />
           <div className="space-y-8 p-4 lg:col-span-8 lg:p-6">
-            <p className="text-lg leading-relaxed text-neutral-600 dark:text-neutral-300">
+            <p className="text-lg leading-relaxed text-text-secondary">
               This is a personal site, shared in good faith. A few sensible limits apply.
             </p>
 
@@ -187,7 +187,7 @@ export default function TermsOfUsePage() {
                 <span className="text-neutral-500">{icons.chat}</span>
                 <h3 className="text-base font-semibold text-neutral-900 dark:text-white">User-Generated Content</h3>
               </div>
-              <p className="mt-3 text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
+              <p className="mt-3 text-sm leading-relaxed text-text-secondary">
                 Notes on the community wall and testimonial submissions remain your words, but by
                 posting you grant permission to display them here. Spam, abuse, or anything illegal
                 will be removed without notice — moderation decisions are final.
@@ -199,7 +199,7 @@ export default function TermsOfUsePage() {
                     {icons.shield}
                     No Warranty
                   </p>
-                  <p className="leading-relaxed text-neutral-600 dark:text-neutral-400">
+                  <p className="leading-relaxed text-text-secondary">
                     Everything here — articles, code snippets, tools — is provided &quot;as is&quot;
                     without warranties of any kind. Test before you ship.
                   </p>
@@ -209,14 +209,14 @@ export default function TermsOfUsePage() {
                     {icons.gavel}
                     Limitation of Liability
                   </p>
-                  <p className="leading-relaxed text-neutral-600 dark:text-neutral-400">
+                  <p className="leading-relaxed text-text-secondary">
                     I&apos;m not liable for damages arising from your use of this site or anything
                     you build with what you learn here.
                   </p>
                 </div>
               </div>
               <div className="my-8 border-t border-dashed border-neutral-200 dark:border-neutral-800" />
-              <p className="text-sm text-neutral-600 dark:text-neutral-400">
+              <p className="text-sm text-text-secondary">
                 Questions about these terms?{" "}
                 <a href="mailto:itsharis.tech@gmail.com" className="font-medium text-neutral-900 hover:underline dark:text-white">
                   itsharis.tech@gmail.com

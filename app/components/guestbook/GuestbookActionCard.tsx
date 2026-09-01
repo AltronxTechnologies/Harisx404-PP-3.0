@@ -124,7 +124,7 @@ export function GuestbookActionCard({ user, action }: GuestbookActionCardProps) 
         </div>
 
         {/* Provider footer */}
-        <div className="flex items-center justify-center gap-3 px-4 pt-2 pb-3 text-neutral-400 dark:text-neutral-500">
+        <div className="flex items-center justify-center gap-3 px-4 pt-2 pb-3 text-text-secondary">
           {!user ? (
             <GitHubIcon />
           ) : (

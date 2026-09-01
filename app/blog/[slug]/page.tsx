@@ -128,7 +128,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
           {post.title}
         </h1>
         {post.summary && (
-          <p className="max-w-2xl text-pretty text-base text-neutral-500 leading-relaxed dark:text-neutral-400 sm:text-lg">
+          <p className="max-w-2xl text-pretty text-base text-text-secondary leading-relaxed sm:text-lg">
             {post.summary}
           </p>
         )}
@@ -136,7 +136,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
 
       {/* Meta row — reading time + copy URL on the left, date on the right */}
       <div className="relative mt-16 px-4 md:px-6">
-        <div className="mx-auto flex w-full max-w-3xl flex-wrap items-center justify-between gap-x-4 gap-y-2 text-neutral-600 text-sm dark:text-neutral-400">
+        <div className="mx-auto flex w-full max-w-3xl flex-wrap items-center justify-between gap-x-4 gap-y-2 text-text-secondary text-sm">
           <div className="flex items-center gap-x-4 gap-y-2">
             <div className="flex items-center gap-1.5">
               <svg
@@ -159,7 +159,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
             <CopyUrlButton />
           </div>
           <span
-            className="cursor-help text-neutral-500 dark:text-neutral-500"
+            className="cursor-help text-text-secondary"
             title={`Published ${formatDate(post.publishedAt)}`}
           >
             <span className="hidden sm:inline">Updated </span>
@@ -184,7 +184,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
       {/* More posts — reference: mono label between hairline dividers + 3-col grid */}
       {similarPosts.length > 0 && (
         <div className="relative py-10">
-          <p className="mb-6 text-center font-mono text-[10px] text-neutral-400 uppercase tracking-widest dark:text-neutral-600">
+          <p className="mb-6 text-center font-mono text-[10px] text-text-secondary uppercase tracking-widest">
             More posts
           </p>
           <div aria-hidden="true" className="w-full border-t border-border-primary" />

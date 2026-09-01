@@ -56,7 +56,7 @@ export default function BuildlogPage() {
           >
             {/* Sticky project header */}
             <div className="p-4 lg:sticky lg:top-32 lg:col-span-3 lg:self-start lg:p-6">
-              <p className="font-mono text-xs font-bold text-neutral-400 dark:text-neutral-600">
+              <p className="font-mono text-xs font-bold text-text-secondary">
                 {String(projectIndex + 1).padStart(2, "0")}
               </p>
               <h2 className="mt-1 font-display text-2xl font-bold leading-snug text-neutral-900 dark:text-neutral-100 md:text-3xl">
@@ -65,7 +65,7 @@ export default function BuildlogPage() {
               <p className="font-display text-2xl font-bold leading-snug text-neutral-400 dark:text-[#777B84] md:text-3xl">
                 {project.tagline}
               </p>
-              <p className="mt-3 max-w-[26ch] text-[13px] leading-[1.6] text-neutral-500">
+              <p className="mt-3 max-w-[26ch] text-[13px] leading-[1.6] text-text-secondary">
                 {project.info}
               </p>
               <span className="mt-3 inline-block shrink-0 whitespace-nowrap rounded-full border border-border-primary bg-black/5 px-3 py-1 font-mono text-[10px] text-neutral-600 dark:bg-neutral-900 dark:text-neutral-400">
@@ -97,7 +97,7 @@ export default function BuildlogPage() {
                         {item.title}
                       </h3>
                       {item.description && (
-                        <p className="text-[13px] leading-[1.6] text-neutral-500">{item.description}</p>
+                        <p className="text-[13px] leading-[1.6] text-text-secondary">{item.description}</p>
                       )}
                     </div>
                     <span className="shrink-0 whitespace-nowrap rounded-full border border-border-primary bg-black/5 px-3 py-1 font-mono text-[10px] text-neutral-600 dark:bg-neutral-900 dark:text-neutral-400">
