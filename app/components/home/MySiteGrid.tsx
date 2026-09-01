@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { SectionHeading } from "./SectionHeading";
 
@@ -51,8 +52,34 @@ const heatmapLevelClass = [
   "bg-neutral-400/80 group-hover:bg-neutral-500 group-active:bg-neutral-500 dark:bg-white/[0.28] dark:group-hover:bg-white/[0.45] dark:group-active:bg-white/[0.45]",
   "bg-emerald-500/45 group-hover:bg-emerald-500/85 group-active:bg-emerald-500/85 dark:bg-emerald-400/40 dark:group-hover:bg-emerald-400/75 dark:group-active:bg-emerald-400/75",
 ];
+/* Lit state (card centered in the viewport): same target colors the
+   hover/press wave uses, applied without needing a pointer. */
+const heatmapLitClass = [
+  "bg-neutral-300 dark:bg-white/[0.12]",
+  "bg-neutral-400/70 dark:bg-white/[0.24]",
+  "bg-neutral-500 dark:bg-white/[0.45]",
+  "bg-emerald-500/85 dark:bg-emerald-400/75",
+];
 
 function StatsHeatmap() {
+  const gridRef = useRef<HTMLDivElement | null>(null);
+  const [lit, setLit] = useState(false);
+
+  /* Scroll-driven activation: the diagonal wave plays when the card
+     crosses the middle band of the viewport (and reverses on the way
+     out), so touch users see it without tapping. The band is the
+     central ~26% of the screen. */
+  useEffect(() => {
+    const el = gridRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => setLit(entry.isIntersecting),
+      { rootMargin: "-37% 0px -37% 0px" }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   return (
     <div className="flex h-28 items-center" aria-hidden>
       {/* Responsive density (same idea as the accounts bento tiles): the
@@ -60,16 +87,19 @@ function StatsHeatmap() {
           there — bigger squares, no "thin strip" — and shows all 18
           columns on mobile (single, wide card) and lg+. Touch devices get
           the brightness wave on press via the group-active variants. */}
-      <div className="grid w-full gap-1 [grid-template-columns:repeat(18,minmax(0,1fr))] md:[grid-template-columns:repeat(10,minmax(0,1fr))] lg:[grid-template-columns:repeat(18,minmax(0,1fr))]">
+      <div
+        ref={gridRef}
+        className="grid w-full gap-1 [grid-template-columns:repeat(18,minmax(0,1fr))] md:[grid-template-columns:repeat(10,minmax(0,1fr))] lg:[grid-template-columns:repeat(18,minmax(0,1fr))]"
+      >
         {heatmapLevels.map((level, i) => {
           const row = Math.floor(i / HEATMAP_COLS);
           const col = i % HEATMAP_COLS;
           return (
             <span
               key={i}
-              className={`aspect-square w-full rounded-[3px] transition-colors duration-500 ease-out motion-reduce:transition-none ${heatmapLevelClass[level]} ${
-                col >= 10 ? "md:hidden lg:block" : ""
-              }`}
+              className={`aspect-square w-full rounded-[3px] transition-colors duration-500 ease-out motion-reduce:transition-none ${
+                lit ? heatmapLitClass[level] : heatmapLevelClass[level]
+              } ${col >= 10 ? "md:hidden lg:block" : ""}`}
               style={{ transitionDelay: `${(row + col) * 25}ms` }}
             />
           );
