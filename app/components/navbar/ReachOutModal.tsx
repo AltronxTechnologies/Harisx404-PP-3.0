@@ -30,7 +30,7 @@ const cardSurface =
   "hover:bg-neutral-200/80 dark:hover:bg-white/[0.1] transition";
 
 const circleBtn =
-  "flex size-[72px] shrink-0 items-center justify-center rounded-2xl bg-white dark:bg-[#1c1c1c] " +
+  "flex size-[72px] shrink-0 items-center justify-center rounded-3xl bg-white dark:bg-[#1c1c1c] " +
   "text-neutral-600 dark:text-white/80 shadow-lg shadow-black/5 dark:shadow-none " +
   "transition-colors hover:text-neutral-900 dark:hover:text-white active:scale-95";
 
@@ -47,18 +47,44 @@ export function ReachOutModal({
   const [message, setMessage] = useState("");
   const [isCopied, setIsCopied] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
-  // Escape closes + body scroll lock while open
+  // Escape closes, Tab is trapped inside the dialog, body scroll locked while open
   useEffect(() => {
     if (!isOpen) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const root = dialogRef.current;
+      if (!root) return;
+      const focusable = Array.from(
+        root.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => el.offsetParent !== null);
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+      if (e.shiftKey && (active === first || !root.contains(active))) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    textareaRef.current?.focus();
     document.addEventListener("keydown", onKey);
     document.body.classList.add("modal-open");
     return () => {
       document.removeEventListener("keydown", onKey);
       document.body.classList.remove("modal-open");
+      previouslyFocused?.focus?.();
     };
   }, [isOpen, onClose]);
 
@@ -97,6 +123,7 @@ export function ReachOutModal({
     <AnimatePresence>
       {isOpen && (
         <div
+          ref={dialogRef}
           className="fixed inset-0 z-[7000] flex items-end justify-center px-4 pt-4 pb-[15px]"
           role="dialog"
           aria-modal="true"
@@ -138,7 +165,7 @@ export function ReachOutModal({
             >
             {/* Top bar — detached row above the card */}
             <div className="mb-4 flex items-center gap-[7px]">
-              <div className="flex h-[72px] min-w-0 flex-1 items-center gap-2.5 rounded-2xl bg-white px-5 shadow-lg shadow-black/5 dark:bg-[#1c1c1c] dark:shadow-none">
+              <div className="flex h-[72px] min-w-0 flex-1 items-center gap-2.5 rounded-3xl bg-white px-5 shadow-lg shadow-black/5 dark:bg-[#1c1c1c] dark:shadow-none">
                 <button
                   onClick={onClose}
                   aria-label="Back"
