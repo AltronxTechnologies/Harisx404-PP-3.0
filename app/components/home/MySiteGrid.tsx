@@ -39,11 +39,10 @@ const noteTints = [
 const HEATMAP_COLS = 16;
 // prettier-ignore
 const heatmapLevels = [
-  0, 1, 0, 2, 1, 0, 1, 2, 1, 3, 2, 1, 2, 3, 2, 3,
-  1, 0, 1, 1, 2, 1, 0, 1, 2, 2, 3, 2, 3, 2, 3, 2,
-  0, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 3, 2, 3, 3, 3,
-  1, 2, 1, 1, 0, 1, 2, 1, 2, 2, 1, 2, 3, 2, 3, 3,
-  0, 0, 1, 2, 1, 0, 1, 0, 1, 2, 2, 1, 2, 3, 2, 3,
+  1, 0, 2, 1, 3, 0, 1, 2, 0, 1, 2, 0, 3, 1, 0, 2,
+  0, 2, 1, 3, 0, 1, 2, 0, 1, 3, 0, 2, 1, 0, 2, 1,
+  2, 0, 1, 0, 2, 3, 0, 1, 2, 0, 1, 2, 0, 3, 1, 0,
+  0, 1, 3, 1, 0, 2, 1, 3, 0, 2, 0, 1, 2, 0, 2, 3,
 ];
 const heatmapLevelClass = [
   "bg-neutral-200 group-hover:bg-neutral-300 group-active:bg-neutral-300 dark:bg-white/[0.06] dark:group-hover:bg-white/[0.12] dark:group-active:bg-white/[0.12]",
@@ -56,7 +55,7 @@ function StatsHeatmap() {
   return (
     <div className="flex h-28 items-center" aria-hidden>
       <div
-        className="mx-auto grid w-full max-w-[320px] gap-1"
+        className="grid w-full gap-1"
         style={{ gridTemplateColumns: `repeat(${HEATMAP_COLS}, minmax(0, 1fr))` }}
       >
         {heatmapLevels.map((level, i) => {
