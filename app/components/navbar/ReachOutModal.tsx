@@ -38,7 +38,7 @@ const cardSurface =
 
 /* v1-scale control buttons (size-12) on the reference glass surface */
 const circleBtn =
-  `${glass} flex size-12 sm:size-14 shrink-0 cursor-pointer items-center justify-center rounded-2xl ` +
+  `${glass} flex size-12 sm:size-[72px] shrink-0 cursor-pointer items-center justify-center rounded-2xl ` +
   "text-neutral-600 dark:text-white/80 " +
   "transition duration-200 hover:bg-white/85 dark:hover:bg-white/15 " +
   "hover:text-neutral-900 dark:hover:text-white active:scale-95";
@@ -125,7 +125,7 @@ export function ReachOutModal({
             onDragEnd={(_, info) => {
               if (info.offset.y > 120 || info.velocity.y > 800) onClose();
             }}
-            className="relative z-10 mx-3 w-[92vw] max-w-[720px]"
+            className="relative z-10 mx-3 w-[94vw] max-w-[860px]"
             onClick={(e) => {
               if (e.target === e.currentTarget) onClose();
             }}
@@ -139,15 +139,15 @@ export function ReachOutModal({
             >
             {/* Top bar — reference glass surface */}
             <div className="mb-3 flex items-center gap-2.5 sm:gap-3">
-              <div className={`${glass} flex h-14 sm:h-16 flex-1 items-center gap-2 rounded-2xl px-4`}>
+              <div className={`${glass} flex h-14 sm:h-[72px] flex-1 items-center gap-2.5 rounded-2xl px-5`}>
                 <button
                   onClick={onClose}
                   aria-label="Back"
                   className="flex size-8 cursor-pointer items-center justify-center rounded-full text-neutral-500 transition-colors duration-200 hover:text-neutral-900 dark:text-white/60 dark:hover:text-white"
                 >
-                  <ChevronLeft className="size-5 sm:size-6" />
+                  <ChevronLeft className="size-5 sm:size-7" />
                 </button>
-                <span className="text-base font-medium text-neutral-900 dark:text-white sm:text-xl">
+                <span className="text-base font-medium text-neutral-900 dark:text-white sm:text-2xl">
                   Reach out
                 </span>
               </div>
@@ -160,7 +160,7 @@ export function ReachOutModal({
                 aria-label="Search"
                 className={`${circleBtn} flex`}
               >
-                <Search className="size-6 sm:size-7" />
+                <Search className="size-6 sm:size-8" />
               </button>
 
               <ThemeToggle
@@ -168,7 +168,7 @@ export function ReachOutModal({
               />
 
               <button onClick={onClose} aria-label="Close" className={circleBtn}>
-                <X className="size-6 sm:size-7" />
+                <X className="size-6 sm:size-8" />
               </button>
             </div>
 
@@ -177,26 +177,26 @@ export function ReachOutModal({
               initial="hidden"
               animate="show"
               variants={{ show: { transition: { staggerChildren: 0.05 } } }}
-              className={`${glass} flex h-[min(900px,80dvh)] min-h-[460px] flex-col rounded-3xl p-3 overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden max-sm:p-2.5`}
+              className={`${glass} flex h-[min(1000px,80dvh)] min-h-[480px] flex-col rounded-3xl p-3 sm:p-4 overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden max-sm:p-2.5`}
             >
               {/* Message panel — grows to fill the card's height */}
               <motion.div
                 variants={item}
-                className="flex min-h-[220px] flex-1 flex-col rounded-2xl bg-white/60 p-5 dark:bg-white/[0.07] border border-white/60 dark:border-white/[0.08]"
+                className="flex min-h-[220px] flex-1 flex-col rounded-2xl bg-white/60 p-5 sm:p-7 dark:bg-white/[0.07] border border-white/60 dark:border-white/[0.08]"
               >
                 <div className="flex items-center gap-3">
                   <Image
                     src="/harisx404.png"
                     alt="Muhammad Haris"
-                    width={36}
-                    height={36}
-                    className="size-9 rounded-full object-cover"
+                    width={48}
+                    height={48}
+                    className="size-9 sm:size-12 rounded-full object-cover"
                   />
                   <div>
-                    <h3 className="text-base font-semibold text-neutral-900 dark:text-white">
+                    <h3 className="text-base sm:text-xl font-semibold text-neutral-900 dark:text-white">
                       Send Haris a message
                     </h3>
-                    <p className="text-sm text-text-tertiary">I read every one</p>
+                    <p className="text-sm sm:text-base text-text-tertiary">I read every one</p>
                   </div>
                 </div>
 
@@ -212,7 +212,7 @@ export function ReachOutModal({
                     }
                   }}
                   placeholder="Hey Haris, I have a project idea..."
-                  className="mt-4 min-h-[88px] w-full flex-1 resize-none bg-transparent text-lg text-neutral-900 placeholder-neutral-400 focus:outline-none dark:text-white dark:placeholder-white/30 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                  className="mt-4 min-h-[88px] w-full flex-1 resize-none bg-transparent text-lg sm:text-xl text-neutral-900 placeholder-neutral-400 focus:outline-none dark:text-white dark:placeholder-white/30 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                 />
 
                 <div className="mt-auto flex items-center justify-between gap-3 pt-2">
@@ -230,7 +230,7 @@ export function ReachOutModal({
                     onClick={handleContinue}
                     disabled={!message.trim()}
                     aria-label="Continue"
-                    className="ml-auto flex items-center gap-1.5 rounded-xl border border-white/70 bg-white/70 px-4 py-2 text-base text-neutral-900 transition duration-200 hover:bg-white active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
+                    className="ml-auto flex items-center gap-1.5 rounded-xl border border-white/70 bg-white/70 px-5 py-2.5 text-base sm:text-lg text-neutral-900 transition duration-200 hover:bg-white active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
                   >
                     Continue <ArrowRight className="size-4" />
                   </button>
@@ -246,11 +246,11 @@ export function ReachOutModal({
                   className={`${cardSurface} group flex flex-col items-center`}
                 >
                   <div className="mb-4 flex items-center justify-center pt-2">
-                    <div className="flex size-14 items-center justify-center rounded-full bg-neutral-200/80 text-neutral-700 transition-colors group-hover:bg-neutral-300/80 dark:bg-white/10 dark:text-white/80 dark:group-hover:bg-white/15">
-                      <FileText className="size-6" />
+                    <div className="flex size-14 sm:size-16 items-center justify-center rounded-full bg-neutral-200/80 text-neutral-700 transition-colors group-hover:bg-neutral-300/80 dark:bg-white/10 dark:text-white/80 dark:group-hover:bg-white/15">
+                      <FileText className="size-6 sm:size-7" />
                     </div>
                   </div>
-                  <h4 className="text-[22px] font-semibold text-neutral-900 dark:text-white max-sm:text-lg">
+                  <h4 className="text-[22px] sm:text-2xl font-semibold text-neutral-900 dark:text-white max-sm:text-lg">
                     View my resume
                   </h4>
                   <p className="text-base text-text-tertiary">Experience · skills · work</p>
@@ -263,15 +263,15 @@ export function ReachOutModal({
                 >
                   <div className="mb-4 flex size-14 items-center justify-center pt-2">
                     {isCopied ? (
-                      <Check className="size-11 text-emerald-500" />
+                      <Check className="size-11 sm:size-12 text-emerald-500" />
                     ) : (
-                      <Mail className="size-11 text-text-tertiary" strokeWidth={1.5} />
+                      <Mail className="size-11 sm:size-12 text-text-tertiary" strokeWidth={1.5} />
                     )}
                   </div>
-                  <h4 className="text-xl font-semibold text-neutral-900 dark:text-white max-sm:text-lg">
+                  <h4 className="text-xl sm:text-2xl font-semibold text-neutral-900 dark:text-white max-sm:text-lg">
                     {isCopied ? "Copied!" : "Email me"}
                   </h4>
-                  <p className="max-w-full break-all font-mono text-[15px] text-text-tertiary max-sm:text-[13px]">
+                  <p className="max-w-full break-all font-mono text-[15px] sm:text-base text-text-tertiary max-sm:text-[13px]">
                     {OWNER_EMAIL}
                   </p>
                 </button>
@@ -288,7 +288,7 @@ export function ReachOutModal({
                     className={`${cardSurface} flex flex-col items-center gap-2`}
                   >
                     <SocialIcon label={s.label} />
-                    <span className="text-sm font-medium text-neutral-700 dark:text-white/80">
+                    <span className="text-sm sm:text-base font-medium text-neutral-700 dark:text-white/80">
                       {s.label}
                     </span>
                   </a>
@@ -304,7 +304,7 @@ export function ReachOutModal({
 }
 
 function SocialIcon({ label }: { label: string }) {
-  const cls = "size-6 fill-current text-text-tertiary";
+  const cls = "size-6 sm:size-7 fill-current text-text-tertiary";
   if (label === "LinkedIn") {
     return (
       <svg className={cls} viewBox="0 0 24 24" aria-hidden="true">
