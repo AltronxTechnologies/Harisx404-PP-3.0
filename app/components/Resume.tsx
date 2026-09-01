@@ -245,7 +245,7 @@ function Highlights({
         aria-controls={panelId}
         className="flex items-center gap-2 rounded-full border border-border-primary px-3.5 py-1.5 font-mono text-xs font-medium uppercase tracking-[0.2em] text-text-secondary transition-colors hover:border-text-tertiary hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:border-white/20 dark:hover:border-white/40"
       >
-        <span aria-hidden className="text-text-tertiary">
+        <span aria-hidden className="text-text-secondary">
           ✦
         </span>
         {open ? "Hide highlights" : `Show highlights (${count})`}
@@ -280,7 +280,7 @@ function Highlights({
             >
               <span
                 aria-hidden
-                className="mr-2 shrink-0 font-mono text-text-tertiary"
+                className="mr-2 shrink-0 font-mono text-text-secondary"
               >
                 ✦
               </span>
@@ -366,13 +366,13 @@ export function Resume({ experiences }: { experiences?: Experience[] }) {
                     <div className="mt-5 space-y-2">
                       {experience.location ? (
                         <p className="flex items-center gap-2 text-xs font-medium text-text-secondary">
-                          <MapPin aria-hidden className="h-3.5 w-3.5 shrink-0 text-text-tertiary" />
+                          <MapPin aria-hidden className="h-3.5 w-3.5 shrink-0 text-text-secondary" />
                           {experience.location}
                         </p>
                       ) : null}
                       {typeMeta ? (
                         <p className="flex items-center gap-2 text-xs font-medium text-text-secondary">
-                          <Briefcase aria-hidden className="h-3.5 w-3.5 shrink-0 text-text-tertiary" />
+                          <Briefcase aria-hidden className="h-3.5 w-3.5 shrink-0 text-text-secondary" />
                           {typeMeta}
                         </p>
                       ) : null}
@@ -395,13 +395,13 @@ export function Resume({ experiences }: { experiences?: Experience[] }) {
                       <div className="mt-4 space-y-2">
                         {experience.location ? (
                           <p className="flex items-center gap-2 text-xs font-medium text-text-secondary">
-                            <MapPin aria-hidden className="h-3.5 w-3.5 shrink-0 text-text-tertiary" />
+                            <MapPin aria-hidden className="h-3.5 w-3.5 shrink-0 text-text-secondary" />
                             {experience.location}
                           </p>
                         ) : null}
                         {typeMeta ? (
                           <p className="flex items-center gap-2 text-xs font-medium text-text-secondary">
-                            <Briefcase aria-hidden className="h-3.5 w-3.5 shrink-0 text-text-tertiary" />
+                            <Briefcase aria-hidden className="h-3.5 w-3.5 shrink-0 text-text-secondary" />
                             {typeMeta}
                           </p>
                         ) : null}

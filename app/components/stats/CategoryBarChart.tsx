@@ -55,7 +55,7 @@ export function CategoryBarChart({
                     <span className="truncate text-xs font-medium text-text-secondary">
                       {category.name}
                     </span>
-                    <span className="ml-2 shrink-0 text-xs font-semibold tabular-nums text-text-tertiary">
+                    <span className="ml-2 shrink-0 text-xs font-semibold tabular-nums text-text-secondary">
                       {category.count}
                     </span>
                   </div>
@@ -71,7 +71,7 @@ export function CategoryBarChart({
           </div>
 
           {categories.length > 6 && (
-            <p className="mt-4 text-xs text-text-tertiary opacity-60">
+            <p className="mt-4 text-xs text-text-secondary opacity-60">
               +{categories.length - 6} more categories
             </p>
           )}
@@ -159,7 +159,7 @@ export function CategoryBarChart({
         {categories.length > 6 && (
           <motion.p
             animate={{ opacity: isHovered ? 1 : 0.6 }}
-            className="mt-4 text-xs text-text-tertiary"
+            className="mt-4 text-xs text-text-secondary"
           >
             +{categories.length - 6} more categories
           </motion.p>

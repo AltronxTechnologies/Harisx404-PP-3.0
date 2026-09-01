@@ -7,7 +7,7 @@ import { motion, AnimatePresence, MotionConfig } from "framer-motion";
 import Image from "next/image";
 import { ReachOutModal } from "./navbar/ReachOutModal";
 import { SearchModal } from "./navbar/SearchModal";
-import { ThemeToggle } from "./ThemeToggle";
+import { ThemeToggle, navCircleSurface } from "./ThemeToggle";
 
 const NAV_LINKS = [
   { name: "Home", href: "/" },
@@ -111,6 +111,18 @@ export default function Navbar() {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // The blog filter bar's search button dispatches "open-search-modal". Nothing
+  // listened for it, so that button silently did nothing. The search modal
+  // state lives here, so this is where the listener belongs.
+  useEffect(() => {
+    const openSearch = () => {
+      setIsReachOutOpen(false);
+      setIsCommandPaletteOpen(true);
+    };
+    window.addEventListener("open-search-modal", openSearch);
+    return () => window.removeEventListener("open-search-modal", openSearch);
   }, []);
 
   // Close the More dropdown on outside tap/click (touch has no mouse-leave)
@@ -593,7 +605,7 @@ export default function Navbar() {
                 transition={{ delay: 2.2, duration: 0.4 }}
                 onClick={() => setIsCommandPaletteOpen(true)}
                 aria-label="Open search (⌘K)"
-                className="relative inline-flex size-10 cursor-pointer items-center justify-center rounded-full text-neutral-700 transition-all duration-150 hover:text-neutral-900 active:scale-95 dark:text-white/85 dark:hover:text-white bg-white/90 shadow-[0_10px_30px_-14px_rgba(0,0,0,0.22),0_3px_8px_-4px_rgba(0,0,0,0.08)] shadow-border dark:bg-[#1c1c1c]/90 dark:shadow-none mt-0.5"
+                className={`${navCircleSurface} mt-0.5`}
                 type="button"
               >
                 <svg className="size-[18px]" fill="currentColor" viewBox="0 0 256 256">
@@ -608,7 +620,7 @@ export default function Navbar() {
                 transition={{ delay: 2.2, duration: 0.4 }}
                 className="inline-flex mt-0.5"
               >
-                <ThemeToggle className="relative flex size-10 cursor-pointer items-center justify-center rounded-full text-neutral-700 transition-all duration-150 hover:text-neutral-900 active:scale-95 dark:text-white/85 dark:hover:text-white bg-white/90 shadow-[0_10px_30px_-14px_rgba(0,0,0,0.22),0_3px_8px_-4px_rgba(0,0,0,0.08)] shadow-border dark:bg-[#1c1c1c]/90 dark:shadow-none" />
+                <ThemeToggle />
               </motion.div>
             </div>
             

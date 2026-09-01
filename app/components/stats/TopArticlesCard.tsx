@@ -51,7 +51,7 @@ export function TopArticlesCard({
                         {article.title}
                       </span>
                     </div>
-                    <span className="shrink-0 text-xs font-semibold tabular-nums text-text-tertiary">
+                    <span className="shrink-0 text-xs font-semibold tabular-nums text-text-secondary">
                       {article.count.toLocaleString()}
                     </span>
                   </Link>
@@ -59,7 +59,7 @@ export function TopArticlesCard({
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-text-tertiary">No data available yet</p>
+            <p className="text-sm text-text-secondary">No data available yet</p>
           )}
         </div>
       </div>
@@ -131,7 +131,7 @@ export function TopArticlesCard({
                     animate={{
                       scale: hoveredItem === index ? 1.1 : 1,
                     }}
-                    className="shrink-0 text-xs font-semibold tabular-nums text-text-tertiary"
+                    className="shrink-0 text-xs font-semibold tabular-nums text-text-secondary"
                   >
                     {article.count.toLocaleString()}
                   </motion.span>
@@ -140,7 +140,7 @@ export function TopArticlesCard({
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-text-tertiary">No data available yet</p>
+          <p className="text-sm text-text-secondary">No data available yet</p>
         )}
       </div>
     </motion.div>

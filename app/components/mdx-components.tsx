@@ -322,7 +322,7 @@ function Code({ children, ...props }) {
             </svg>
           ) : (
             <svg
-              className="h-5 w-5 text-text-tertiary hover:text-[#64758B]"
+              className="h-5 w-5 text-text-secondary hover:text-[#64758B]"
               fill="none"
               viewBox="0 0 24 24"
             >

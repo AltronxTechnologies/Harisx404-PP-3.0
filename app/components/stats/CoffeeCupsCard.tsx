@@ -97,7 +97,7 @@ export function CoffeeCupsCard({ cups, delay = 0 }: CoffeeCupsCardProps) {
               </span>
               <span className="text-sm text-text-secondary">cups</span>
             </div>
-            <p className="mt-2 text-xs text-text-tertiary">
+            <p className="mt-2 text-xs text-text-secondary">
               1 cup per 500 words
             </p>
           </div>
@@ -174,7 +174,7 @@ export function CoffeeCupsCard({ cups, delay = 0 }: CoffeeCupsCardProps) {
             </span>
             <span className="text-sm text-text-secondary">cups</span>
           </motion.div>
-          <p className="mt-2 text-xs text-text-tertiary">
+          <p className="mt-2 text-xs text-text-secondary">
             1 cup per 500 words
           </p>
         </div>

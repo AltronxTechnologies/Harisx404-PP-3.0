@@ -69,7 +69,7 @@ function MenuIcon({ type }: { type: "link" | "copy" | "markdown" | "chatgpt" | "
 function Fact({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="min-w-0">
-      <p className="mb-1.5 font-mono text-[10px] uppercase tracking-wider text-text-tertiary">{label}</p>
+      <p className="mb-1.5 font-mono text-[10px] uppercase tracking-wider text-text-secondary">{label}</p>
       <div className="break-words text-sm font-medium text-text-primary">{children}</div>
     </div>
   );
@@ -97,7 +97,7 @@ function StorySection({
     <section className="grid grid-cols-1 lg:grid-cols-12">
       <div className="px-4 pt-8 sm:px-6 lg:col-span-3 lg:py-16">
         <div className="space-y-2 lg:sticky lg:top-32">
-          <span className="font-mono text-xs font-bold text-text-tertiary">{number}</span>
+          <span className="font-mono text-xs font-bold text-text-secondary">{number}</span>
           <h2 className="font-display text-2xl font-medium tracking-wide text-text-primary sm:text-3xl">{title}</h2>
         </div>
       </div>
@@ -201,7 +201,7 @@ export function ProjectDetail({
 
         <motion.header {...reveal} className="relative px-4 pb-7 pt-56 sm:px-6">
           <nav aria-label="Breadcrumb">
-            <ol className="flex min-w-0 items-center gap-1.5 text-xs text-text-tertiary">
+            <ol className="flex min-w-0 items-center gap-1.5 text-xs text-text-secondary">
               <li><Link href="/" className="transition-colors hover:text-text-primary">Home</Link></li>
               <li aria-hidden><Chevron /></li>
               <li><Link href="/projects" className="transition-colors hover:text-text-primary">Projects</Link></li>
@@ -250,10 +250,10 @@ export function ProjectDetail({
                     <MenuIcon type="markdown" /> View as Markdown
                   </button>
                   <a role="menuitem" href={`https://chatgpt.com/?q=${encodeURIComponent(`Review this project case study: ${canonicalUrl}`)}`} target="_blank" rel="noreferrer" className="flex min-h-10 items-center gap-4 rounded-xl px-2.5 text-base font-medium text-text-primary transition-colors hover:bg-text-primary/5 focus:bg-text-primary/5 focus:outline-none">
-                    <MenuIcon type="chatgpt" /> <span className="flex-1">Open in ChatGPT</span><span aria-hidden className="text-text-tertiary">↗</span>
+                    <MenuIcon type="chatgpt" /> <span className="flex-1">Open in ChatGPT</span><span aria-hidden className="text-text-secondary">↗</span>
                   </a>
                   <a role="menuitem" href="https://claude.ai/new" target="_blank" rel="noreferrer" className="flex min-h-10 items-center gap-4 rounded-xl px-2.5 text-base font-medium text-text-primary transition-colors hover:bg-text-primary/5 focus:bg-text-primary/5 focus:outline-none">
-                    <MenuIcon type="claude" /> <span className="flex-1">Open in Claude</span><span aria-hidden className="text-text-tertiary">↗</span>
+                    <MenuIcon type="claude" /> <span className="flex-1">Open in Claude</span><span aria-hidden className="text-text-secondary">↗</span>
                   </a>
                 </motion.div>
               )}
@@ -273,19 +273,19 @@ export function ProjectDetail({
                   <a href={project.live_url} target="_blank" rel="noreferrer" className="group inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
                     Live site <ExternalArrow />
                   </a>
-                ) : <span className="text-text-tertiary">Not public</span>}
+                ) : <span className="text-text-secondary">Not public</span>}
               </Fact>
               <Fact label="Source">
                 {project.github_url ? (
                   <a href={project.github_url} target="_blank" rel="noreferrer" className="group inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
                     GitHub <ExternalArrow />
                   </a>
-                ) : <span className="text-text-tertiary">Private</span>}
+                ) : <span className="text-text-secondary">Private</span>}
               </Fact>
             </div>
 
             <div className="border-t border-border-primary px-4 py-[30px] sm:px-6 lg:border-l lg:border-t-0">
-              <p className="mb-3 font-mono text-[10px] uppercase tracking-wider text-text-tertiary">Tech Stack</p>
+              <p className="mb-3 font-mono text-[10px] uppercase tracking-wider text-text-secondary">Tech Stack</p>
               <div className="flex flex-wrap gap-2">
                 {project.tech.map((tech) => (
                   <span key={tech} className="rounded-md bg-text-primary/5 px-2.5 py-[5px] font-mono text-[11px] uppercase tracking-wide text-text-secondary dark:bg-white/5">
@@ -350,7 +350,7 @@ export function ProjectDetail({
 
       {upNext && (
         <Link href={`/projects/${upNext.slug}`} className="group flex flex-col items-center px-4 py-16 text-center sm:px-6 md:py-20">
-          <div className="flex w-full max-w-xl items-center gap-4 text-text-tertiary">
+          <div className="flex w-full max-w-xl items-center gap-4 text-text-secondary">
             <span className="h-px flex-1 bg-border-primary" />
             <span aria-hidden className="font-display text-2xl">⌁</span>
             <p className="font-mono text-[10px] uppercase tracking-[0.25em]">Up Next</p>
@@ -360,7 +360,7 @@ export function ProjectDetail({
           <h2 className="mt-8 max-w-3xl font-display text-4xl font-medium text-text-primary transition-colors group-hover:text-text-secondary md:text-5xl">{upNext.title}</h2>
           {upNext.tagline && <p className="mt-4 max-w-xl text-sm leading-relaxed text-text-secondary">{upNext.tagline}</p>}
           <div className="mt-7 flex items-center gap-3">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-text-tertiary">{upNext.category}</span>
+            <span className="font-mono text-[10px] uppercase tracking-widest text-text-secondary">{upNext.category}</span>
             <span className="flex size-9 items-center justify-center rounded-full border border-dashed border-border-primary transition-colors group-hover:border-text-tertiary">↗</span>
           </div>
         </Link>

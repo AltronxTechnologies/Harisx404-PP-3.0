@@ -82,7 +82,7 @@ export function BlogCard({
           </h3>
           <p className="line-clamp-2 text-sm text-text-secondary">{summary}</p>
           <div className="mt-auto flex items-center justify-between pt-2">
-            <span className="font-mono text-[11px] text-text-tertiary">
+            <span className="font-mono text-[11px] text-text-secondary">
               {readingTime} · {formattedDate}
             </span>
             <span className="text-sm text-text-secondary">

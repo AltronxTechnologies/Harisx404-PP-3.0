@@ -6,7 +6,7 @@ export default function NotFound() {
       {/* Background glow */}
       <div className="pointer-events-none absolute left-1/2 top-1/3 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-500/10 blur-3xl" />
 
-      <p className="font-mono text-xs uppercase tracking-[0.35em] text-text-tertiary">
+      <p className="font-mono text-xs uppercase tracking-[0.35em] text-text-secondary">
         ERROR
       </p>
       <h1 className="mt-4 font-display text-8xl leading-none text-text-primary md:text-9xl">
