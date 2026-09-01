@@ -818,6 +818,80 @@
   homepage section component requires explicit owner permission in
   the current conversation.
 
+---
+
+### 22. PRODUCTION FREEZE — Home page, Navbar, Search modal, Reach Out modal, Footer ✅✅
+- **Date locked:** 2026-09-01
+- **Locked at commit:** `c04f17f`
+- **Declared by the owner:** "i do completely polish the home page, nav bar,
+  search model, lets connect model, footer ; so make these perfect locked and
+  dont touch anything untill i approved or permission"
+
+> **🚫 HARD FREEZE.** These five areas are production-signed-off. Do **NOT**
+> modify, refactor, restyle, rename, reorder or "improve" any of them —
+> including indirectly via shared modules, tokens, global CSS or parent
+> layout — without the owner's explicit permission **in the current
+> conversation**. If a requested change would touch them, STOP and ask.
+
+#### Frozen scope
+| Area | Files |
+|---|---|
+| Home page | `app/page.tsx` + all of `app/components/home/**` (incl. `TestimonialSubmitModal.tsx`) |
+| Navbar | `app/components/Navbar.tsx`, `app/components/ThemeToggle.tsx` |
+| Search modal | `app/components/navbar/SearchModal.tsx` |
+| Reach Out modal | `app/components/navbar/ReachOutModal.tsx` |
+| Footer | `app/components/Footer.tsx`, `app/components/SocialPill.tsx` |
+| Shared by the above | `app/components/navbar/modalSurfaces.ts`, `app/components/BrandGlyph.tsx` |
+
+Entries 1 (Reach Out v5), 2 (Search modal v2), 3–18 and 21 remain in force and
+are subsumed by this freeze.
+
+#### Pre-lock cleanup performed (commit `c04f17f`)
+- Navbar: all arbitrary radii moved onto the Tailwind scale — `rounded-[24px]`
+  → `rounded-3xl`, `rounded-[16px]` → `rounded-2xl`, `rounded-[12px]` →
+  `rounded-xl` (exact-value renames), and the off-scale `rounded-[18px]` →
+  `rounded-2xl` (−2px, the only visual change). Verified live: panel 24px,
+  media cards 16px, tiles 16px, icon squares 12px, morph intact.
+- Reach Out modal: Continue button `rounded-xl` → `rounded-2xl`, restoring the
+  strict 24/16 two-tier rule.
+- TestimonialSubmitModal: `h-9 w-9`/`h-4 w-4` → `size-*`; inputs `rounded-xl`
+  → `rounded-2xl` so the 16px inner tier exists.
+- Search modal: local `SectionHeading` → `ResultGroupHeading` (name collision
+  with the shared component).
+
+#### Intentional variations inside the frozen scope — do NOT "fix" these
+These were each checked in context and are correct. A future consistency pass
+must not flatten them:
+1. **HomeBento recessed tiles** use two radius pairs: 20px frame + `p-1.5/2` +
+   12px inner, and 14px frame + `p-1` + 10px inner. Both obey the
+   concentric-radius rule (inner = outer − padding) at different tile sizes.
+   Equalising them would make one visually wrong.
+2. **CaseStudies chips**: `TechChip` takes a `pill` prop — the two class
+   strings are designed variants. The project tag is deliberately
+   height-matched to the quarter pill (26.5px), per its own code comment.
+3. **Reach Out kbd chips** stay `rounded-md` (6px): proportionally correct on a
+   ~20px keycap.
+4. **Navbar animated radii** (clip-path `round 22px`/`round 24px`, framer
+   `borderRadius` 22px→24px) are morph endpoints, not design tokens. The
+   collapsed pill is 22px, the open panel 24px. Do not "unify" them.
+5. **AboutTeaser avatar** is `rounded-2xl` while other avatars are round — a
+   square editorial portrait, an intentional choice.
+6. **StatusRow** hover arrows and the **TestimonialSubmitModal** placeholder
+   keep `text-text-tertiary`: decorative/placeholder, exempt from the AA sweep.
+7. **Footer "Test Page" link** to `/test` is retained at the owner's explicit
+   request ("i am using it for testing pages") despite `/test` being a
+   throwaway prototype. Do not remove it.
+8. **SocialPill** icons keep `text-gray-400`: they sit on an always-dark
+   `#3C3C3F` chip, so the page-background token would be near-invisible.
+
+#### Known non-design debt still open in this scope
+Recorded in `DESIGN_DEBT.md`; needs owner permission to action:
+- `ProfilePicture.tsx` and `ConnectionsBento.tsx` duplicate a 148px
+  profile-ring widget pointing at **two different images** (Cloudinary
+  `haris_primary_photo.png` vs `/harisx404.png`) — likely a real bug.
+- Navbar search icon is **Phosphor** while both modals use **lucide**:
+  different stroke weight at the same nominal px.
+
 ## Entry template (copy for new locks)
 
 ```markdown
