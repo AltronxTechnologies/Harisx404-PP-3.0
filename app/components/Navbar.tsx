@@ -416,6 +416,17 @@ export default function Navbar() {
               {/* Dropdown Menu — absolute overlay panel: never affects layout, covers side buttons */}
               <AnimatePresence>
                 {isDropdownOpen && (
+                  /* Outer wrapper carries the drop-shadow: a parent's filter
+                     wraps the CLIPPED silhouette of its children, so the
+                     shadow stretches and shrinks with the morphing box
+                     (filter on the clipped element itself gets clipped away,
+                     because clip-path applies after filter). */
+                  <motion.div
+                    initial={{ x: "-50%" }}
+                    animate={{ x: "-50%" }}
+                    exit={{ x: "-50%" }}
+                    className="absolute top-0 left-1/2 z-0 w-[740px] max-w-[92vw] [filter:drop-shadow(0_10px_18px_rgba(0,0,0,0.14))_drop-shadow(0_2px_5px_rgba(0,0,0,0.06))] dark:[filter:none]"
+                  >
                   <motion.div
                     /* Pure geometry morph: the panel starts clipped to the
                        pill's exact measured rect (no fade, same bg/radius),
@@ -423,15 +434,12 @@ export default function Navbar() {
                        fold back into it on close — one continuous surface. */
                     initial={{
                       clipPath: pillClip,
-                      x: "-50%",
                     }}
                     animate={{
                       clipPath: "inset(0px 0px 0px 0px round 24px)",
-                      x: "-50%",
                     }}
                     exit={{
                       clipPath: pillClip,
-                      x: "-50%",
                       transition: {
                         clipPath: { duration: 0.65, ease: [0.4, 0, 0.2, 1] },
                       },
@@ -440,7 +448,7 @@ export default function Navbar() {
                       clipPath: { duration: 0.9, ease: [0.19, 1, 0.22, 1] },
                     }}
                     style={{ transformOrigin: "top center", willChange: "clip-path" }}
-                    className="absolute top-0 left-1/2 z-0 w-[740px] max-w-[92vw] rounded-[24px] bg-white/90 [filter:drop-shadow(0_10px_18px_rgba(0,0,0,0.14))_drop-shadow(0_2px_5px_rgba(0,0,0,0.06))] dark:bg-[#1c1c1c]/90 dark:[filter:none] backdrop-blur-md pt-[52px] max-h-[calc(100dvh-40px)] overflow-y-auto overflow-x-hidden"
+                    className="w-full rounded-[24px] bg-white/90 dark:bg-[#1c1c1c]/90 backdrop-blur-md pt-[52px] max-h-[calc(100dvh-40px)] overflow-y-auto overflow-x-hidden"
                   >
                       <motion.div 
                         initial="hidden"
@@ -571,6 +579,7 @@ export default function Navbar() {
                         </motion.div>
 
                       </motion.div>
+                  </motion.div>
                   </motion.div>
                 )}
               </AnimatePresence>
