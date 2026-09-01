@@ -30,7 +30,7 @@ const cardSurface =
   "hover:bg-neutral-200/80 dark:hover:bg-white/[0.1] transition";
 
 const circleBtn =
-  "flex size-[58px] shrink-0 items-center justify-center rounded-2xl bg-white dark:bg-[#1c1c1c] " +
+  "flex size-[72px] shrink-0 items-center justify-center rounded-2xl bg-white dark:bg-[#1c1c1c] " +
   "text-neutral-600 dark:text-white/80 shadow-lg shadow-black/5 dark:shadow-none " +
   "transition-colors hover:text-neutral-900 dark:hover:text-white active:scale-95";
 
@@ -97,7 +97,7 @@ export function ReachOutModal({
     <AnimatePresence>
       {isOpen && (
         <div
-          className="fixed inset-0 z-[7000] flex items-end justify-center px-4 pt-4 pb-2.5"
+          className="fixed inset-0 z-[7000] flex items-end justify-center px-4 pt-4 pb-[15px]"
           role="dialog"
           aria-modal="true"
           aria-label="Reach out"
@@ -137,8 +137,8 @@ export function ReachOutModal({
               }}
             >
             {/* Top bar — detached row above the card */}
-            <div className="mb-4 flex items-center gap-3.5">
-              <div className="flex h-[68px] flex-1 items-center gap-2.5 rounded-2xl bg-white px-4 shadow-lg shadow-black/5 dark:bg-[#1c1c1c] dark:shadow-none">
+            <div className="mb-4 flex items-center justify-between gap-3.5">
+              <div className="flex h-[72px] w-[60%] shrink-0 items-center gap-2.5 rounded-2xl bg-white px-5 shadow-lg shadow-black/5 dark:bg-[#1c1c1c] dark:shadow-none">
                 <button
                   onClick={onClose}
                   aria-label="Back"
@@ -159,7 +159,7 @@ export function ReachOutModal({
                 aria-label="Search"
                 className={`${circleBtn} flex`}
               >
-                <Search className="size-7" />
+                <Search className="size-8" />
               </button>
 
               <ThemeToggle
@@ -167,7 +167,7 @@ export function ReachOutModal({
               />
 
               <button onClick={onClose} aria-label="Close" className={circleBtn}>
-                <X className="size-7" />
+                <X className="size-8" />
               </button>
             </div>
 
@@ -240,7 +240,7 @@ export function ReachOutModal({
               </motion.div>
 
               {/* Action cards */}
-              <motion.div variants={item} className="mt-4 grid grid-cols-[1.3fr_1fr] gap-4">
+              <motion.div variants={item} className="mt-4 grid grid-cols-2 gap-4">
                 {/* Resume card */}
                 <Link
                   href="/resume"
