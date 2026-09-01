@@ -31,9 +31,9 @@ function BentoCard({
       )}
     >
       {linkTo && (
-        <div className="absolute bottom-3.5 right-3.5 z-[999] flex h-7 w-7 rotate-6 items-center justify-center rounded-full bg-indigo-200 opacity-0 transition-all duration-300 ease-in-out group-hover:translate-y-[-6px] group-hover:rotate-0 group-hover:opacity-100 dark:bg-indigo-900/80">
+        <div className="absolute bottom-3.5 right-3.5 z-[999] flex h-7 w-7 rotate-6 items-center justify-center rounded-full bg-neutral-200 opacity-0 transition-all duration-300 ease-in-out group-hover:translate-y-[-6px] group-hover:rotate-0 group-hover:opacity-100 dark:bg-white/10">
           <svg
-            className="h-4 w-4 text-indigo-600 dark:text-indigo-300"
+            className="h-4 w-4 text-neutral-600 dark:text-neutral-300"
             fill="none"
             viewBox="0 0 24 24"
           >
@@ -54,7 +54,7 @@ function BentoCard({
           </svg>
         </div>
       )}
-      <div className="pointer-events-none absolute inset-0 z-30 select-none bg-gradient-to-tl from-indigo-400/10 via-transparent to-transparent opacity-0 transition-opacity duration-300 ease-in-out group-hover:opacity-100" />
+      <div className="pointer-events-none absolute inset-0 z-30 select-none bg-gradient-to-tl from-neutral-400/10 via-transparent to-transparent opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100 dark:from-white/[0.05]" />
       {children}
     </div>
   );
@@ -81,7 +81,7 @@ function RecessedTile({
   return (
     <div
       className={clsx(
-        "rounded-[20px] border border-border-primary p-1.5 transition-all duration-500 sm:p-2",
+        "rounded-[20px] border border-border-primary p-1.5 transition-all duration-300 sm:p-2",
         sizeClass,
         className
       )}
@@ -863,7 +863,7 @@ export function SiteStatsBento({
               key={stat.key}
               href={stat.href}
               title={`${stat.label} →`}
-              className="group/tile block rounded-[14px] border border-border-primary p-1 transition-all duration-500 hover:-translate-y-1 hover:border-neutral-400 dark:hover:border-white/30"
+              className="group/tile block rounded-[14px] border border-border-primary p-1 transition-all duration-300 hover:-translate-y-1 hover:border-neutral-400 dark:hover:border-white/30"
             >
               <div
                 className="flex h-full flex-col items-center justify-center gap-1 rounded-[10px] border-2 border-[#A5AEB81F]/10 bg-[#EDEEF0] px-2 py-2.5 dark:bg-white/5"
@@ -871,7 +871,7 @@ export function SiteStatsBento({
               >
                 <Icon
                   className={clsx(
-                    "size-4 text-neutral-600 transition-all duration-500 ease-out group-hover/tile:scale-110 dark:text-neutral-300",
+                    "size-4 text-neutral-600 transition-all duration-300 ease-out group-hover/tile:scale-110 dark:text-neutral-300",
                     stat.hoverClass
                   )}
                   aria-hidden
