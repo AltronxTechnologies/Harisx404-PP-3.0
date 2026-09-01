@@ -81,6 +81,8 @@ export default function Navbar() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
+        // Only one overlay at a time — ⌘K over the Reach Out modal swaps to search.
+        setIsReachOutOpen(false);
         setIsCommandPaletteOpen((prev) => !prev);
       }
     };
@@ -423,7 +425,8 @@ export default function Navbar() {
                               src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=800&auto=format&fit=crop"
                               alt="Community Wall"
                               fill
-                              className="object-cover transition-transform duration-700 ease-out group-hover:scale-108 opacity-60 group-hover:opacity-80"
+                              sizes="(max-width: 768px) 92vw, 250px"
+                              className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.08] opacity-60 group-hover:opacity-80"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                             <div className="relative z-10 flex flex-col items-start">
@@ -450,7 +453,8 @@ export default function Navbar() {
                               src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800&auto=format&fit=crop"
                               alt="Stats"
                               fill
-                              className="object-cover transition-transform duration-700 ease-out group-hover:scale-108 opacity-60 group-hover:opacity-80"
+                              sizes="(max-width: 768px) 92vw, 250px"
+                              className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.08] opacity-60 group-hover:opacity-80"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                             <div className="relative z-10 flex flex-col items-start">
