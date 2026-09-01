@@ -44,10 +44,10 @@ export function RelatedPostCard({ slug, title, summary, imageName }: RelatedPost
         <h3 className="line-clamp-2 text-lg font-semibold leading-[1.375] text-neutral-900 dark:text-white">
           {title}
         </h3>
-        <p className="line-clamp-2 text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">{summary}</p>
+        <p className="line-clamp-2 text-sm leading-relaxed text-text-secondary">{summary}</p>
 
         {/* Footer */}
-        <div className="mt-auto flex items-center justify-between pt-3 text-sm text-neutral-600 dark:text-neutral-400">
+        <div className="mt-auto flex items-center justify-between pt-3 text-sm text-text-secondary">
           <span>Read article</span>
           <span
             aria-hidden="true"

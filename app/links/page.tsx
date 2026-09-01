@@ -129,7 +129,7 @@ function SocialLinkCard({ link }: { link: SocialLink }) {
       </span>
       <span className="min-w-0 flex-1">
         <span className="block truncate text-sm font-medium text-neutral-900 dark:text-white sm:font-semibold">{link.title}</span>
-        <span className="hidden truncate font-mono text-[10px] text-neutral-500 dark:text-neutral-400 sm:block">{link.handle}</span>
+        <span className="hidden truncate font-mono text-[10px] text-text-secondary sm:block">{link.handle}</span>
       </span>
       {/* Mobile: static trailing arrow */}
       <ArrowUpRight className="ml-auto size-4 shrink-0 text-neutral-400 sm:hidden" />
@@ -142,7 +142,7 @@ function SocialLinkCard({ link }: { link: SocialLink }) {
 function GroupHeader({ label }: { label: string }) {
   return (
     <div className="mb-3 flex items-center justify-center gap-4 sm:mb-6 sm:justify-start">
-      <span className="font-mono text-xs font-bold uppercase tracking-wider text-neutral-400 sm:dark:text-neutral-600">
+      <span className="font-mono text-xs font-bold uppercase tracking-wider text-text-secondary">
         {label}
       </span>
       <span aria-hidden="true" className="hidden h-px flex-1 border-t border-dashed border-neutral-200 dark:border-neutral-800 sm:block" />
@@ -222,11 +222,11 @@ export default function LinksPage() {
               </div>
 
               <div className="mt-6 space-y-3 border-t border-dashed border-neutral-100 pt-6 dark:border-neutral-800">
-                <p className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+                <p className="flex items-center gap-2 text-sm text-text-secondary">
                   <GlobeIcon className="size-4 shrink-0" />
                   Remote from Pakistan
                 </p>
-                <p className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+                <p className="flex items-center gap-2 text-sm text-text-secondary">
                   <MailIcon className="size-4 shrink-0" />
                   <span className="truncate">itsharis.tech@gmail.com</span>
                 </p>

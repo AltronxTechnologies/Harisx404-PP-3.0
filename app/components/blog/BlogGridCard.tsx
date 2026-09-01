@@ -68,21 +68,21 @@ export function BlogGridCard({
           {title}
         </h3>
 
-        <p className="mt-2 line-clamp-3 text-neutral-600 text-sm leading-relaxed dark:text-neutral-400">
+        <p className="mt-2 line-clamp-3 text-text-secondary text-sm leading-relaxed">
           {summary}
         </p>
 
         {/* Footer Row */}
         <div className="mt-auto flex items-center justify-between gap-3 pt-4">
           {/* Read time & date — exact reference classes */}
-          <div className="font-mono text-[11px] text-neutral-600 uppercase tracking-wide dark:text-neutral-400">
+          <div className="font-mono text-[11px] text-text-secondary uppercase tracking-wide">
             <span>{readingTime}</span>
             <span className="mx-1.5">·</span>
             <time>{formattedDate}</time>
           </div>
 
           {/* Dual-arrow action pill — exact reference structure */}
-          <div className="flex shrink-0 items-center gap-2 text-neutral-600 text-xs tracking-wide transition-colors duration-300 group-hover:text-neutral-900 dark:text-neutral-400 dark:group-hover:text-white">
+          <div className="flex shrink-0 items-center gap-2 text-text-secondary text-xs tracking-wide transition-colors duration-300 group-hover:text-neutral-900 dark:group-hover:text-white">
             <span>Read article</span>
             <div className="size-[25px] overflow-hidden rounded-lg border border-neutral-300 border-dashed bg-[#f9f9fa80] transition-all duration-500 group-hover:bg-neutral-200 dark:border-white/10 dark:bg-white/5 dark:group-hover:bg-white/10">
               <div className="flex w-12 -translate-x-1/2 transition-transform duration-500 ease-in-out group-hover:translate-x-0 motion-reduce:transition-none">

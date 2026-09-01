@@ -85,7 +85,7 @@ export function Details({
         role="region"
         aria-label="Expandable content"
       >
-        <div className="px-5 pb-5 pt-0 text-[14px] leading-[1.625] text-neutral-600 dark:text-neutral-400 [&>pre:last-child]:mb-0 [&>*:last-child>pre:last-child]:mb-0">
+        <div className="px-5 pb-5 pt-0 text-[14px] leading-[1.625] text-text-secondary [&>pre:last-child]:mb-0 [&>*:last-child>pre:last-child]:mb-0">
           {contentChildren}
         </div>
       </div>

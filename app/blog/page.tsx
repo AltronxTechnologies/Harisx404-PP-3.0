@@ -137,7 +137,7 @@ export default async function BlogPage({
           {/* Featured articles kicker + card */}
           {featuredPost && (
             <>
-              <h4 className="py-5 text-center font-mono text-neutral-400 text-xs uppercase tracking-widest dark:text-neutral-600">
+              <h4 className="py-5 text-center font-mono text-text-secondary text-xs uppercase tracking-widest">
                 Featured articles
               </h4>
               <div aria-hidden="true" className="w-full border-t border-border-primary" />
@@ -160,7 +160,7 @@ export default async function BlogPage({
           {latestPosts.length > 0 && (
             <>
               <div aria-hidden="true" className="w-full border-t border-border-primary" />
-              <h4 className="py-5 text-center font-mono text-neutral-400 text-xs uppercase tracking-widest dark:text-neutral-600">
+              <h4 className="py-5 text-center font-mono text-text-secondary text-xs uppercase tracking-widest">
                 Latest articles
               </h4>
               <div aria-hidden="true" className="w-full border-t border-border-primary" />
@@ -187,10 +187,10 @@ export default async function BlogPage({
           {/* Empty State */}
           {filteredPosts.length === 0 && (
             <div className="py-20 text-center">
-              <p className="font-mono text-xs uppercase tracking-widest text-neutral-400">
+              <p className="font-mono text-xs uppercase tracking-widest text-text-secondary">
                 No articles found
               </p>
-              <p className="mt-2 text-sm text-neutral-500">
+              <p className="mt-2 text-sm text-text-secondary">
                 No published articles match the selected category &quot;{categoryParam}&quot;.
               </p>
             </div>

@@ -18,7 +18,7 @@ export function ShadowBox({ children, label, width, height }: ShadowBoxProps) {
           {children ? children : null}
         </div>
       </div>
-      {label ? <p className="mt-3 text-sm text-gray-500">{label}</p> : null}
+      {label ? <p className="mt-3 text-sm text-text-secondary">{label}</p> : null}
     </div>
   );
 }

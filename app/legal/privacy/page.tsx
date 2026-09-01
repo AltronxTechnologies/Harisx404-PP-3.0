@@ -39,7 +39,7 @@ const icons = {
 function SectionHeader({ index, title, subtitle }: { index: string; title: string; subtitle: string }) {
   return (
     <div className="p-4 lg:sticky lg:top-32 lg:col-span-3 lg:self-start lg:p-6">
-      <p className="font-mono text-xs font-bold text-neutral-400 dark:text-neutral-600">{index}</p>
+      <p className="font-mono text-xs font-bold text-text-secondary">{index}</p>
       <h2 className="mt-1 font-display text-2xl font-bold leading-snug text-neutral-900 dark:text-neutral-100 md:text-3xl">
         {title}
       </h2>
@@ -71,7 +71,7 @@ function FeatureCard({ icon, tag, children }: { icon: ReactNode; tag: string; ch
       </span>
       <div>
         <p className="mb-2 font-mono text-xs font-bold uppercase tracking-wider text-neutral-900 dark:text-white">{tag}</p>
-        <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">{children}</p>
+        <p className="text-sm leading-relaxed text-text-secondary">{children}</p>
       </div>
     </div>
   );
@@ -83,7 +83,7 @@ function ToolCard({ icon, title, children }: { icon: ReactNode; title: string; c
       <span className="mt-1 shrink-0 text-neutral-400">{icon}</span>
       <div>
         <p className="text-sm font-semibold text-neutral-900 dark:text-white">{title}</p>
-        <p className="text-sm text-neutral-500">{children}</p>
+        <p className="text-sm text-text-secondary">{children}</p>
       </div>
     </div>
   );
@@ -133,7 +133,7 @@ export default function PrivacyPolicyPage() {
           <SectionHeader index="01" title="Collect." subtitle="Only What's Needed" />
           <Spacer />
           <div className="space-y-8 p-4 lg:col-span-8 lg:p-6">
-            <p className="text-lg leading-relaxed text-neutral-600 dark:text-neutral-300">
+            <p className="text-lg leading-relaxed text-text-secondary">
               This is a personal portfolio — not an ad platform. The only data stored is what you
               knowingly hand over, and each piece exists for one visible feature.
             </p>
@@ -165,7 +165,7 @@ export default function PrivacyPolicyPage() {
           <SectionHeader index="02" title="Measure." subtitle="With Honest Tools" />
           <Spacer />
           <div className="space-y-8 p-4 lg:col-span-8 lg:p-6">
-            <p className="text-lg leading-relaxed text-neutral-600 dark:text-neutral-300">
+            <p className="text-lg leading-relaxed text-text-secondary">
               A short, complete list of the services this site runs on — and what each one touches.
             </p>
             <div className="grid gap-4">
@@ -195,7 +195,7 @@ export default function PrivacyPolicyPage() {
           <SectionHeader index="03" title="Yours." subtitle="Always & Entirely" />
           <Spacer />
           <div className="space-y-8 p-4 lg:col-span-8 lg:p-6">
-            <p className="text-lg leading-relaxed text-neutral-600 dark:text-neutral-300">
+            <p className="text-lg leading-relaxed text-text-secondary">
               Anything you put on this site remains yours. Ask, and it&apos;s gone.
             </p>
             <div className="rounded-xl border border-neutral-200 bg-neutral-50/50 p-8 dark:border-neutral-800 dark:bg-neutral-900/20">
@@ -203,7 +203,7 @@ export default function PrivacyPolicyPage() {
                 <span className="text-neutral-600 dark:text-neutral-300">{icons.shield}</span>
                 <h3 className="text-lg font-bold text-neutral-900 dark:text-white">Ownership &amp; Deletion</h3>
               </div>
-              <p className="mt-4 text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
+              <p className="mt-4 text-sm leading-relaxed text-text-secondary">
                 You can request a copy or the permanent deletion of anything you&apos;ve submitted —
                 a wall note, a contact message, or a newsletter subscription — at any time. Requests
                 are handled personally, usually within a few days, with no forms and no friction.
@@ -216,7 +216,7 @@ export default function PrivacyPolicyPage() {
                 >
                   itsharis.tech@gmail.com
                 </a>
-                <span className="flex items-center gap-1.5 font-mono text-[10px] text-neutral-500 dark:text-neutral-400">
+                <span className="flex items-center gap-1.5 font-mono text-[10px] text-text-secondary">
                   {icons.clock}
                   Last revised Aug 2026
                 </span>

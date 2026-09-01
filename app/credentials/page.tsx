@@ -92,14 +92,14 @@ export default async function CredentialsPage() {
       <div className="relative mx-auto w-full max-w-6xl border-t border-dashed border-neutral-200 px-4 dark:border-neutral-800 sm:px-8 lg:px-12">
         <div className="grid grid-cols-1 lg:grid-cols-12">
           <div className="p-4 lg:sticky lg:top-32 lg:col-span-3 lg:self-start lg:p-6 lg:pl-0">
-            <p className="font-mono text-xs font-bold text-neutral-400 dark:text-neutral-600">01</p>
+            <p className="font-mono text-xs font-bold text-text-secondary">01</p>
             <h2 className="mt-1 font-display text-2xl font-bold leading-snug text-neutral-900 dark:text-neutral-100 md:text-3xl">
               Certs.
             </h2>
             <p className="font-display text-2xl font-bold leading-snug text-neutral-400 dark:text-[#777B84] md:text-3xl">
               Earned, Not Given
             </p>
-            <p className="mt-3 max-w-[26ch] text-[13px] leading-[1.6] text-neutral-500">
+            <p className="mt-3 max-w-[26ch] text-[13px] leading-[1.6] text-text-secondary">
               Licenses and certifications across web development, cybersecurity, and AI/ML — every
               one independently verifiable.
             </p>
@@ -128,7 +128,7 @@ export default async function CredentialsPage() {
                       <span className="block text-sm font-semibold leading-snug text-neutral-900 dark:text-white">
                         {cert.title}
                       </span>
-                      <span className="mt-0.5 block truncate font-mono text-[10px] text-neutral-500 dark:text-neutral-400">
+                      <span className="mt-0.5 block truncate font-mono text-[10px] text-text-secondary">
                         {cert.issuer}
                         {cert.issue_date ? ` · ${cert.issue_date}` : ""}
                       </span>

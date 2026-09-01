@@ -547,7 +547,7 @@ export default function Navbar() {
                             </div>
                             <div>
                               <h4 className="text-[14px] font-semibold text-neutral-900 dark:text-white/90">Credentials</h4>
-                              <p className="text-[12px] text-neutral-500 dark:text-white/50">Certifications & badges</p>
+                              <p className="text-[12px] text-text-secondary">Certifications & badges</p>
                             </div>
                           </Link>
 
@@ -563,7 +563,7 @@ export default function Navbar() {
                             </div>
                             <div>
                               <h4 className="text-[14px] font-semibold text-neutral-900 dark:text-white/90">Contact</h4>
-                              <p className="text-[12px] text-neutral-500 dark:text-white/50">Let&apos;s work together</p>
+                              <p className="text-[12px] text-text-secondary">Let&apos;s work together</p>
                             </div>
                           </Link>
 
@@ -579,7 +579,7 @@ export default function Navbar() {
                             </div>
                             <div>
                               <h4 className="text-[14px] font-semibold text-neutral-900 dark:text-white/90">Links</h4>
-                              <p className="text-[12px] text-neutral-500 dark:text-white/50">All my links are here</p>
+                              <p className="text-[12px] text-text-secondary">All my links are here</p>
                             </div>
                           </Link>
                         </motion.div>
