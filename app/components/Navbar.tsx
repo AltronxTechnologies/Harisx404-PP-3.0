@@ -383,16 +383,16 @@ export default function Navbar() {
               <AnimatePresence>
                 {isDropdownOpen && (
                   <motion.div
-                    initial={{ opacity: 0, scale: 0.96, y: -8, x: "-50%" }}
+                    initial={{ opacity: 0, scale: 0.97, y: -12, x: "-50%" }}
                     animate={{ opacity: 1, scale: 1, y: 0, x: "-50%" }}
                     exit={{
                       opacity: 0,
-                      scale: 0.96,
-                      y: -8,
+                      scale: 0.97,
+                      y: -12,
                       x: "-50%",
-                      transition: { duration: 0.28, ease: [0.4, 0, 0.2, 1] },
+                      transition: { duration: 0.45, ease: [0.32, 0, 0.67, 0] },
                     }}
-                    transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                    transition={{ duration: 0.65, ease: [0.19, 1, 0.22, 1] }}
                     style={{ transformOrigin: "top center", willChange: "transform, opacity" }}
                     className="absolute top-0 left-1/2 z-0 w-[740px] max-w-[92vw] rounded-[24px] bg-white/90 shadow-[0_10px_30px_-14px_rgba(0,0,0,0.22),0_3px_8px_-4px_rgba(0,0,0,0.08)] shadow-border dark:bg-[#1c1c1c]/90 dark:shadow-none backdrop-blur-md pt-[52px] max-h-[calc(100dvh-40px)] overflow-y-auto overflow-x-hidden"
                   >
@@ -403,8 +403,8 @@ export default function Navbar() {
                           hidden: {},
                           visible: {
                             transition: {
-                              staggerChildren: 0.05,
-                              delayChildren: 0.03,
+                              staggerChildren: 0.07,
+                              delayChildren: 0.08,
                             }
                           }
                         }}
@@ -415,7 +415,7 @@ export default function Navbar() {
                         <motion.div
                           variants={{
                             hidden: { opacity: 0, y: 10, scale: 0.97 },
-                            visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } }
+                            visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.55, ease: [0.19, 1, 0.22, 1] } }
                           }}
                           className="flex-1 min-h-[160px] max-md:flex-none max-md:h-40"
                         >
@@ -443,7 +443,7 @@ export default function Navbar() {
                         <motion.div
                           variants={{
                             hidden: { opacity: 0, y: 10, scale: 0.97 },
-                            visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } }
+                            visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.55, ease: [0.19, 1, 0.22, 1] } }
                           }}
                           className="flex-1 min-h-[160px] max-md:flex-none max-md:h-40"
                         >
@@ -471,7 +471,7 @@ export default function Navbar() {
                         <motion.div 
                           variants={{
                             hidden: { opacity: 0, y: 10, scale: 0.97 },
-                            visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } }
+                            visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.55, ease: [0.19, 1, 0.22, 1] } }
                           }}
                           className="flex flex-col gap-2 w-full md:w-[220px]"
                         >
