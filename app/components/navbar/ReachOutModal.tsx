@@ -27,12 +27,17 @@ interface ReachOutModalProps {
 const cardSurface =
   "rounded-2xl bg-neutral-100/90 dark:bg-white/[0.07] p-5 text-center " +
   "border border-neutral-200/60 dark:border-white/[0.06] " +
-  "hover:bg-neutral-200/80 dark:hover:bg-white/[0.1] transition";
+  "hover:bg-neutral-200/80 dark:hover:bg-white/[0.1] transition duration-200";
 
+/* Same surface system as SearchModal's control buttons:
+   85% white / #1c1c1c + blur + hairline ring, with press feedback. */
 const circleBtn =
-  "flex size-12 shrink-0 items-center justify-center rounded-2xl bg-white dark:bg-[#1c1c1c] " +
+  "flex size-12 shrink-0 cursor-pointer items-center justify-center rounded-2xl " +
+  "bg-white/85 backdrop-blur-xl dark:bg-[#1c1c1c]/85 " +
+  "ring-1 ring-neutral-200/60 dark:ring-white/10 " +
   "text-neutral-600 dark:text-white/80 shadow-lg shadow-black/5 dark:shadow-none " +
-  "transition-colors hover:text-neutral-900 dark:hover:text-white active:scale-95";
+  "transition duration-200 hover:bg-white dark:hover:bg-white/15 " +
+  "hover:text-neutral-900 dark:hover:text-white active:scale-95";
 
 const item = {
   hidden: { opacity: 0, y: 12 },
@@ -136,17 +141,17 @@ export function ReachOutModal({
                 if (e.target === e.currentTarget) onClose();
               }}
             >
-            {/* Top bar — detached row above the card */}
-            <div className="mb-3 flex items-center gap-3">
-              <div className="flex h-14 flex-1 items-center gap-2 rounded-2xl bg-white px-3 shadow-lg shadow-black/5 dark:bg-[#1c1c1c] dark:shadow-none">
+            {/* Top bar — same surface as SearchModal's bar */}
+            <div className="mb-3 flex items-center gap-2.5 sm:gap-3">
+              <div className="flex h-14 flex-1 items-center gap-2 rounded-2xl bg-white/85 px-3 shadow-lg shadow-black/5 backdrop-blur-xl ring-1 ring-neutral-200/60 dark:bg-[#1c1c1c]/85 dark:shadow-none dark:ring-white/10">
                 <button
                   onClick={onClose}
                   aria-label="Back"
-                  className="flex size-8 items-center justify-center rounded-full text-neutral-500 transition-colors hover:text-neutral-900 dark:text-white/60 dark:hover:text-white"
+                  className="flex size-8 cursor-pointer items-center justify-center rounded-full text-neutral-500 transition-colors duration-200 hover:text-neutral-900 dark:text-white/60 dark:hover:text-white"
                 >
-                  <ChevronLeft className="size-6" />
+                  <ChevronLeft className="size-5" />
                 </button>
-                <span className="text-lg font-medium text-neutral-900 dark:text-white">
+                <span className="text-base font-medium text-neutral-900 dark:text-white sm:text-lg">
                   Reach out
                 </span>
               </div>
@@ -176,7 +181,7 @@ export function ReachOutModal({
               initial="hidden"
               animate="show"
               variants={{ show: { transition: { staggerChildren: 0.05 } } }}
-              className="rounded-3xl bg-white p-3 shadow-2xl ring-1 ring-neutral-200/70 dark:bg-[#1a1a1a] dark:ring-white/[0.08]"
+              className="rounded-3xl bg-white/85 p-3 shadow-2xl ring-1 ring-neutral-200/70 backdrop-blur-xl dark:bg-[#1a1a1a]/85 dark:ring-white/[0.08] max-h-[78dvh] overflow-y-auto overscroll-contain max-sm:p-2.5"
             >
               {/* Message panel */}
               <motion.div
@@ -240,7 +245,7 @@ export function ReachOutModal({
               </motion.div>
 
               {/* Action cards */}
-              <motion.div variants={item} className="mt-3 grid grid-cols-[1.3fr_1fr] gap-3">
+              <motion.div variants={item} className="mt-3 grid grid-cols-[1.3fr_1fr] gap-3 max-sm:grid-cols-1 max-sm:gap-2.5">
                 {/* Resume card */}
                 <Link
                   href="/resume"
@@ -252,7 +257,7 @@ export function ReachOutModal({
                       <FileText className="size-6" />
                     </div>
                   </div>
-                  <h4 className="text-[22px] font-semibold text-neutral-900 dark:text-white">
+                  <h4 className="text-[22px] font-semibold text-neutral-900 dark:text-white max-sm:text-lg">
                     View my resume
                   </h4>
                   <p className="text-base text-text-tertiary">Experience · skills · work</p>
@@ -270,17 +275,17 @@ export function ReachOutModal({
                       <Mail className="size-11 text-text-tertiary" strokeWidth={1.5} />
                     )}
                   </div>
-                  <h4 className="text-xl font-semibold text-neutral-900 dark:text-white">
+                  <h4 className="text-xl font-semibold text-neutral-900 dark:text-white max-sm:text-lg">
                     {isCopied ? "Copied!" : "Email me"}
                   </h4>
-                  <p className="max-w-full break-all font-mono text-[15px] text-text-tertiary">
+                  <p className="max-w-full break-all font-mono text-[15px] text-text-tertiary max-sm:text-[13px]">
                     {OWNER_EMAIL}
                   </p>
                 </button>
               </motion.div>
 
               {/* Social row */}
-              <motion.div variants={item} className="mt-3 grid grid-cols-3 gap-3">
+              <motion.div variants={item} className="mt-3 grid grid-cols-3 gap-3 max-sm:gap-2.5">
                 {socials.map((s) => (
                   <a
                     key={s.label}
