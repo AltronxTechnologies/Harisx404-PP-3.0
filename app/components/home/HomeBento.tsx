@@ -25,7 +25,7 @@ function BentoCard({
   const cardContent = (
     <div
       className={clsx(
-        "group relative flex flex-col overflow-hidden rounded-2xl border border-border-primary bg-bg-primary p-6 transition-all duration-300 hover:bg-white dark:hover:bg-white/[0.04]",
+        "card-light-edge group relative flex flex-col overflow-hidden rounded-2xl border border-border-primary bg-bg-primary p-6 transition-all duration-300 hover:bg-white dark:hover:bg-white/[0.04]",
         height,
         className
       )}
