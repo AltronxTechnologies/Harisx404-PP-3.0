@@ -38,7 +38,7 @@ const cardSurface =
 
 /* v1-scale control buttons (size-12) on the reference glass surface */
 const circleBtn =
-  `${glass} flex size-12 shrink-0 cursor-pointer items-center justify-center rounded-2xl ` +
+  `${glass} flex size-12 sm:size-14 shrink-0 cursor-pointer items-center justify-center rounded-2xl ` +
   "text-neutral-600 dark:text-white/80 " +
   "transition duration-200 hover:bg-white/85 dark:hover:bg-white/15 " +
   "hover:text-neutral-900 dark:hover:text-white active:scale-95";
@@ -125,7 +125,7 @@ export function ReachOutModal({
             onDragEnd={(_, info) => {
               if (info.offset.y > 120 || info.velocity.y > 800) onClose();
             }}
-            className="relative z-10 mx-3 w-[92vw] max-w-[660px]"
+            className="relative z-10 mx-3 w-[92vw] max-w-[720px]"
             onClick={(e) => {
               if (e.target === e.currentTarget) onClose();
             }}
@@ -139,15 +139,15 @@ export function ReachOutModal({
             >
             {/* Top bar — reference glass surface */}
             <div className="mb-3 flex items-center gap-2.5 sm:gap-3">
-              <div className={`${glass} flex h-14 flex-1 items-center gap-2 rounded-2xl px-3`}>
+              <div className={`${glass} flex h-14 sm:h-16 flex-1 items-center gap-2 rounded-2xl px-4`}>
                 <button
                   onClick={onClose}
                   aria-label="Back"
                   className="flex size-8 cursor-pointer items-center justify-center rounded-full text-neutral-500 transition-colors duration-200 hover:text-neutral-900 dark:text-white/60 dark:hover:text-white"
                 >
-                  <ChevronLeft className="size-5" />
+                  <ChevronLeft className="size-5 sm:size-6" />
                 </button>
-                <span className="text-base font-medium text-neutral-900 dark:text-white sm:text-lg">
+                <span className="text-base font-medium text-neutral-900 dark:text-white sm:text-xl">
                   Reach out
                 </span>
               </div>
@@ -160,7 +160,7 @@ export function ReachOutModal({
                 aria-label="Search"
                 className={`${circleBtn} flex`}
               >
-                <Search className="size-6" />
+                <Search className="size-6 sm:size-7" />
               </button>
 
               <ThemeToggle
@@ -168,7 +168,7 @@ export function ReachOutModal({
               />
 
               <button onClick={onClose} aria-label="Close" className={circleBtn}>
-                <X className="size-6" />
+                <X className="size-6 sm:size-7" />
               </button>
             </div>
 
@@ -177,7 +177,7 @@ export function ReachOutModal({
               initial="hidden"
               animate="show"
               variants={{ show: { transition: { staggerChildren: 0.05 } } }}
-              className={`${glass} flex h-[min(700px,68dvh)] min-h-[420px] flex-col rounded-3xl p-3 overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden max-sm:p-2.5`}
+              className={`${glass} flex h-[min(900px,80dvh)] min-h-[460px] flex-col rounded-3xl p-3 overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden max-sm:p-2.5`}
             >
               {/* Message panel — grows to fill the card's height */}
               <motion.div
