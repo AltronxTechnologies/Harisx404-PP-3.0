@@ -29,6 +29,52 @@ const noteTints = [
   { tint: "rotate-[-3deg] bg-rose-500/15", vis: "hidden lg:inline-block" },
 ];
 
+/* ── Stats card visual: contribution heatmap ─────────────────────────
+   GitHub-style activity grid, 5 rows × 16 weeks. Deterministic pattern
+   (SSR-safe, no Math.random) that trends busier toward the right —
+   "recent activity". Neutral token grays for levels 0–2; level 3 uses
+   the site's emerald "live" accent (same hue as the LIVE badge and
+   status pings). On hover a diagonal wave brightens every cell, each
+   delayed by its row+column — decorative; real numbers live on /stats. */
+const HEATMAP_COLS = 16;
+// prettier-ignore
+const heatmapLevels = [
+  0, 1, 0, 2, 1, 0, 1, 2, 1, 3, 2, 1, 2, 3, 2, 3,
+  1, 0, 1, 1, 2, 1, 0, 1, 2, 2, 3, 2, 3, 2, 3, 2,
+  0, 1, 2, 0, 1, 2, 1, 2, 0, 1, 2, 3, 2, 3, 3, 3,
+  1, 2, 1, 1, 0, 1, 2, 1, 2, 2, 1, 2, 3, 2, 3, 3,
+  0, 0, 1, 2, 1, 0, 1, 0, 1, 2, 2, 1, 2, 3, 2, 3,
+];
+const heatmapLevelClass = [
+  "bg-neutral-200 group-hover:bg-neutral-300 group-active:bg-neutral-300 dark:bg-white/[0.06] dark:group-hover:bg-white/[0.12] dark:group-active:bg-white/[0.12]",
+  "bg-neutral-300 group-hover:bg-neutral-400/70 group-active:bg-neutral-400/70 dark:bg-white/[0.14] dark:group-hover:bg-white/[0.24] dark:group-active:bg-white/[0.24]",
+  "bg-neutral-400/80 group-hover:bg-neutral-500 group-active:bg-neutral-500 dark:bg-white/[0.28] dark:group-hover:bg-white/[0.45] dark:group-active:bg-white/[0.45]",
+  "bg-emerald-500/45 group-hover:bg-emerald-500/85 group-active:bg-emerald-500/85 dark:bg-emerald-400/40 dark:group-hover:bg-emerald-400/75 dark:group-active:bg-emerald-400/75",
+];
+
+function StatsHeatmap() {
+  return (
+    <div className="flex h-28 items-center" aria-hidden>
+      <div
+        className="mx-auto grid w-full max-w-[320px] gap-1"
+        style={{ gridTemplateColumns: `repeat(${HEATMAP_COLS}, minmax(0, 1fr))` }}
+      >
+        {heatmapLevels.map((level, i) => {
+          const row = Math.floor(i / HEATMAP_COLS);
+          const col = i % HEATMAP_COLS;
+          return (
+            <span
+              key={i}
+              className={`aspect-square w-full rounded-[3px] transition-colors duration-500 ease-out motion-reduce:transition-none ${heatmapLevelClass[level]}`}
+              style={{ transitionDelay: `${(row + col) * 25}ms` }}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function Ambient() {
   return (
     <>
@@ -138,53 +184,9 @@ export function MySiteGrid() {
         <motion.div {...cardMotion}>
           <Link href="/stats" className={`${cardBase} hover:ring-neutral-400/70 active:ring-neutral-400/70 dark:hover:ring-white/25 dark:active:ring-white/25`}>
             <Ambient />
-            {/* Analytics sparkline — gradient line + soft area fill; the
-                line redraws itself on hover. Decorative; numbers live
-                on /stats. */}
-            <div className="flex h-28 items-center" aria-hidden>
-              <div className="relative w-full">
-              <svg viewBox="0 0 220 72" fill="none" preserveAspectRatio="none" className="h-[88px] w-full">
-                <defs>
-                  <linearGradient id="msg-spark-stroke" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stopColor="#3b82f6" />
-                    <stop offset="50%" stopColor="#8b5cf6" />
-                    <stop offset="100%" stopColor="#ec4899" />
-                  </linearGradient>
-                  <linearGradient id="msg-spark-fill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.22" />
-                    <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-                {/* faint baseline grid */}
-                <line x1="2" y1="66" x2="218" y2="66" vectorEffect="non-scaling-stroke" className="stroke-border-primary" strokeWidth="1" strokeDasharray="3 4" />
-                {/* area fill */}
-                <path
-                  d="M2,54 C30,50 40,28 62,32 C84,36 92,14 116,20 C140,26 150,40 168,30 C186,20 202,12 216,9 L216,66 L2,66 Z"
-                  fill="url(#msg-spark-fill)"
-                  className="opacity-30 transition-opacity duration-500 group-hover:opacity-90 group-active:opacity-90"
-                />
-                {/* line — redraws on hover */}
-                <path
-                  d="M2,54 C30,50 40,28 62,32 C84,36 92,14 116,20 C140,26 150,40 168,30 C186,20 202,12 216,9"
-                  stroke="url(#msg-spark-stroke)"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  pathLength={1}
-                  className="opacity-45 transition-opacity duration-500 group-hover:opacity-100 group-active:opacity-100 [stroke-dasharray:1] [stroke-dashoffset:0] motion-safe:group-hover:animate-[sparkline-draw_1.1s_ease-out] motion-safe:group-active:animate-[sparkline-draw_1.1s_ease-out]"
-                />
-                {/* endpoint dot with pulse halo */}
-                <circle
-                  cx="216"
-                  cy="9"
-                  r="3.5"
-                  fill="#ec4899"
-                  className="animate-ping opacity-25 transition-opacity duration-500 group-hover:opacity-60 group-active:opacity-60 motion-reduce:animate-none"
-                  style={{ transformBox: "fill-box", transformOrigin: "center" }}
-                />
-                <circle cx="216" cy="9" r="3.5" fill="#ec4899" className="opacity-50 transition-opacity duration-500 group-hover:opacity-100 group-active:opacity-100" />
-              </svg>
-              </div>
-            </div>
+            {/* Contribution heatmap — activity grid that brightens in a
+                diagonal wave on hover. Decorative; numbers live on /stats. */}
+            <StatsHeatmap />
             <div>
               <p className="font-mono text-xs uppercase tracking-widest text-text-secondary">
                 STATS
