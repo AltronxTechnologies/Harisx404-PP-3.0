@@ -62,7 +62,11 @@
     ~570px at 1440), `bg-white dark:bg-[#1c1c1c]`, `px-5`, label `text-xl font-medium`
   - Control buttons (Search / Theme / Close): `size-[72px]`, icons `size-8`,
     `shadow-lg shadow-black/5 dark:shadow-none`, `active:scale-95`
-  - Back chevron inside the pill: `size-10` hit area, `size-7` icon
+  - Back chevron inside the pill: `size-10` visual box, `size-7` icon, plus
+    `relative before:absolute before:-inset-1.5 before:content-['']` which extends
+    the **hit area** to a 52px box with no visual or layout change. This is what
+    keeps the control above the WCAG 2.5.8 24px floor once the phone miniature
+    scales it down — **do not remove the pseudo-element.**
 
 **Message panel**
   - `rounded-2xl bg-neutral-100/90 p-6 dark:bg-white/[0.07]` + matching border
@@ -79,10 +83,16 @@
 **Action cards** — `mt-4 grid grid-cols-2 gap-4` (equal width, always side-by-side)
   - Shared surface: `rounded-2xl bg-neutral-100/90 dark:bg-white/[0.07] p-6 text-center`
     + `border-neutral-200/60 dark:border-white/[0.06]` + hover step
-  - Resume card → `/resume`: heading `text-[26px] font-semibold`, sub `text-lg`,
-    FileText `size-7` in a `size-[68px]` circle
-  - Email card: heading `text-2xl font-semibold`, mono email `text-base break-all`,
-    Mail/Check `size-[54px]`, copy-to-clipboard with 2s "Copied!" state
+  - **Both cards share one type scale and one icon box so they align exactly**
+    (fixed 2026-09-01 — they were 7.7px / 14.4px out of line before):
+    - icon block: `mb-4 flex h-[68px] items-center justify-center` in BOTH cards
+    - heading: `text-2xl font-semibold` in BOTH cards
+    - sub-line: `text-base` in BOTH cards
+    - **Never give one card a different heading/sub size or icon-box height.**
+  - Resume card → `/resume`: FileText `size-7` inside a `size-[68px]` circle,
+    sub-line "Experience · skills · work"
+  - Email card: Mail/Check `size-[54px]` (no circle), mono email `break-all`,
+    copy-to-clipboard with a 2s "Copied!" state
   - **Both card headings use the kicker colour `text-text-secondary`** (owner request
     2026-09-01) — hierarchy is carried by size + weight, not colour
 
@@ -135,14 +145,28 @@
     all padding/margin on the 4px grid apart from the intentional 7px and 15px.
   - **Viewports verified:** 1440×900, 390×844, 375×667, 360×640 — both themes.
     No clipping, no horizontal overflow, email address on one line everywhere.
-  - **Known accepted trade-offs (not defects, do not "fix" without asking):**
-    1. Back chevron hit area is 40px intrinsic (38px after the height scale).
-       Passes WCAG 2.5.8 AA (24px min), below the 44px AAA ideal. It duplicates
-       the Close button, so it is a convenience control, not the only exit.
-    2. On a 375px phone the miniature renders the email address at ~8.5px and
-       card headings at ~13.8px. This is inherent to the owner-approved miniature
-       approach and is the size the owner signed off on.
+  - **Known accepted trade-off (not a defect, do not "fix" without asking):**
+    On a 375px phone the miniature renders the email address and social labels at
+    ~8.5px and card headings at ~13.8px. This is inherent to the owner-approved
+    miniature approach and is the size the owner signed off on. The email *tap
+    target* is 162x111px, so the copy action is unaffected — only the confirmation
+    text is small.
   - `tsc --noEmit` clean. No console errors attributable to this component.
+
+#### Corrections & fixes after the initial lock (2026-09-01, same day)
+  - **Action-card alignment — FIXED.** The two cards were measurably out of line:
+    icon block heights 73px vs 65.3px, headings 7.7px apart, sub-lines 14.4px
+    apart, caused by different icon-wrapper structures (`pt-2` + auto height vs a
+    fixed `size-[68px]` box) and different type sizes (26/18 vs 24/16). Both cards
+    now use `h-[68px]` icon blocks, `text-2xl` headings and `text-base` sub-lines.
+    Re-measured: **all four deltas are 0.0px** at 1440 and at 375.
+  - **Back chevron hit area — FIXED.** The original audit note claiming it "passes
+    WCAG 2.5.8 AA" was **wrong**: it measured the 40px CSS box, not the rendered
+    size. Under the 0.53 phone scale it rendered at **21.2px**, below the 24px AA
+    floor. An invisible `before:-inset-1.5` pseudo-element now extends the hit area
+    to a 52px box → **28.2px rendered**, verified by hit-testing with
+    `elementFromPoint` (registers up to 3px outside the visual box). No visual or
+    layout change.
 
 > **⚠️ Entry 2 is stale.** The Search modal has not yet been brought in line with
 > the v5 Reach Out lock above. When it is reworked, **entry 1 is the reference** —

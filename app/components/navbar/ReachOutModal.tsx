@@ -179,7 +179,7 @@ export function ReachOutModal({
                 <button
                   onClick={onClose}
                   aria-label="Back"
-                  className="flex size-10 items-center justify-center rounded-full text-neutral-500 transition-colors hover:text-neutral-900 dark:text-white/60 dark:hover:text-white"
+                  className="relative flex size-10 items-center justify-center rounded-full text-neutral-500 transition-colors before:absolute before:-inset-1.5 before:content-[''] hover:text-neutral-900 dark:text-white/60 dark:hover:text-white"
                 >
                   <ChevronLeft className="size-7" />
                 </button>
@@ -286,15 +286,15 @@ export function ReachOutModal({
                   onClick={onClose}
                   className={`${cardSurface} group flex flex-col items-center`}
                 >
-                  <div className="mb-4 flex items-center justify-center pt-2">
+                  <div className="mb-4 flex h-[68px] items-center justify-center">
                     <div className="flex size-[68px] items-center justify-center rounded-full bg-neutral-200/80 text-neutral-700 transition-colors group-hover:bg-neutral-300/80 dark:bg-white/10 dark:text-white/80 dark:group-hover:bg-white/15">
                       <FileText className="size-7" />
                     </div>
                   </div>
-                  <h4 className="text-[26px] font-semibold text-text-secondary">
+                  <h4 className="text-2xl font-semibold text-text-secondary">
                     View my resume
                   </h4>
-                  <p className="text-lg text-text-secondary">Experience · skills · work</p>
+                  <p className="text-base text-text-secondary">Experience · skills · work</p>
                 </Link>
 
                 <button
@@ -302,7 +302,7 @@ export function ReachOutModal({
                   aria-label="Copy email address"
                   className={`${cardSurface} flex flex-col items-center`}
                 >
-                  <div className="mb-4 flex size-[68px] items-center justify-center pt-2">
+                  <div className="mb-4 flex h-[68px] items-center justify-center">
                     {isCopied ? (
                       <Check className="size-[54px] text-emerald-500" />
                     ) : (
