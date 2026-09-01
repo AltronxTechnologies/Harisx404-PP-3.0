@@ -161,6 +161,12 @@ export default function Navbar() {
                 setHoveredTab(null);
               }}
             >
+              {/* Pre-decode the dropdown card images so the first open never
+                  paints an empty card while the file streams in. */}
+              <div aria-hidden className="pointer-events-none absolute h-px w-px overflow-hidden opacity-0">
+                <Image src="/images/nav-community-wall.jpg" alt="" width={250} height={160} priority />
+                <Image src="/images/nav-stats.jpg" alt="" width={250} height={160} priority />
+              </div>
               {/* The main morphing pill container. While the dropdown is
                   open, the pill's own surface (bg/shadow) fades out so the
                   expanding panel is the ONLY visible box — the nav links
@@ -448,11 +454,18 @@ export default function Navbar() {
                       clipPath: { duration: 0.9, ease: [0.19, 1, 0.22, 1] },
                     }}
                     style={{ transformOrigin: "top center", willChange: "clip-path" }}
-                    className="w-full rounded-[24px] bg-white/90 dark:bg-[#1c1c1c]/90 backdrop-blur-md pt-[52px] max-h-[calc(100dvh-40px)] overflow-y-auto overflow-x-hidden"
+                    /* Solid surface: backdrop-blur can't apply here (the
+                       drop-shadow filter on the wrapper resets the backdrop
+                       root), so translucency would just let the page bleed
+                       through. Opaque bg keeps the panel crisp and readable. */
+                    className="w-full rounded-[24px] bg-white dark:bg-[#1c1c1c] pt-[52px] max-h-[calc(100dvh-40px)] overflow-y-auto overflow-x-hidden"
                   >
                       <motion.div 
                         initial="hidden"
                         animate="visible"
+                        /* Fade the cards out fast before the clip folds shut,
+                           so images are never sliced mid-collapse. */
+                        exit={{ opacity: 0, transition: { duration: 0.16, ease: "easeOut" } }}
                         variants={{
                           hidden: {},
                           visible: {
@@ -468,8 +481,8 @@ export default function Navbar() {
                         {/* Community Wall Card */}
                         <motion.div
                           variants={{
-                            hidden: { opacity: 0, y: 10, scale: 0.97 },
-                            visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.55, ease: [0.19, 1, 0.22, 1] } }
+                            hidden: { opacity: 0, y: 10 },
+                            visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.19, 1, 0.22, 1] } }
                           }}
                           className="flex-1 min-h-[160px] max-md:flex-none max-md:h-40"
                         >
@@ -496,8 +509,8 @@ export default function Navbar() {
                         {/* Stats Card */}
                         <motion.div
                           variants={{
-                            hidden: { opacity: 0, y: 10, scale: 0.97 },
-                            visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.55, ease: [0.19, 1, 0.22, 1] } }
+                            hidden: { opacity: 0, y: 10 },
+                            visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.19, 1, 0.22, 1] } }
                           }}
                           className="flex-1 min-h-[160px] max-md:flex-none max-md:h-40"
                         >
@@ -524,8 +537,8 @@ export default function Navbar() {
                         {/* Links Column */}
                         <motion.div 
                           variants={{
-                            hidden: { opacity: 0, y: 10, scale: 0.97 },
-                            visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.55, ease: [0.19, 1, 0.22, 1] } }
+                            hidden: { opacity: 0, y: 10 },
+                            visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.19, 1, 0.22, 1] } }
                           }}
                           className="flex flex-col gap-2 w-full md:w-[220px]"
                         >
