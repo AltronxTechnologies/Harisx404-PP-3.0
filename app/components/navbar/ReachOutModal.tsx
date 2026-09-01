@@ -197,7 +197,7 @@ export function ReachOutModal({
                     <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">
                       Send Haris a message
                     </h3>
-                    <p className="text-base text-text-tertiary">I read every one</p>
+                    <p className="text-base text-text-secondary">I read every one</p>
                   </div>
                 </div>
 
@@ -220,7 +220,7 @@ export function ReachOutModal({
                 />
 
                 <div className="mt-2 flex items-center justify-between gap-3">
-                  <span className="flex items-center gap-1.5 text-sm text-text-tertiary">
+                  <span className="flex items-center gap-1.5 text-sm text-text-secondary">
                     <kbd className="rounded-md border border-neutral-300 bg-white px-1.5 py-0.5 font-mono text-[13px] leading-none text-neutral-500 dark:border-white/15 dark:bg-white/10 dark:text-white/60">
                       ⏎
                     </kbd>
@@ -254,10 +254,10 @@ export function ReachOutModal({
                       <FileText className="size-7" />
                     </div>
                   </div>
-                  <h4 className="text-[26px] font-semibold text-neutral-900 dark:text-white">
+                  <h4 className="text-[26px] font-semibold text-text-secondary">
                     View my resume
                   </h4>
-                  <p className="text-lg text-text-tertiary">Experience · skills · work</p>
+                  <p className="text-lg text-text-secondary">Experience · skills · work</p>
                 </Link>
 
                 <button
@@ -269,13 +269,13 @@ export function ReachOutModal({
                     {isCopied ? (
                       <Check className="size-[54px] text-emerald-500" />
                     ) : (
-                      <Mail className="size-[54px] text-text-tertiary" strokeWidth={1.5} />
+                      <Mail className="size-[54px] text-text-secondary" strokeWidth={1.5} />
                     )}
                   </div>
-                  <h4 className="text-2xl font-semibold text-neutral-900 dark:text-white">
+                  <h4 className="text-2xl font-semibold text-text-secondary">
                     {isCopied ? "Copied!" : "Email me"}
                   </h4>
-                  <p className="max-w-full break-all font-mono text-base text-text-tertiary">
+                  <p className="max-w-full break-all font-mono text-base text-text-secondary">
                     {OWNER_EMAIL}
                   </p>
                 </button>
@@ -308,7 +308,7 @@ export function ReachOutModal({
 }
 
 function SocialIcon({ label }: { label: string }) {
-  const cls = "size-7 fill-current text-text-tertiary";
+  const cls = "size-7 fill-current text-text-secondary";
   if (label === "LinkedIn") {
     return (
       <svg className={cls} viewBox="0 0 24 24" aria-hidden="true">

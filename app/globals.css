@@ -834,46 +834,46 @@ blockquote p {
   .reachout-scale { transform: scale(0.37); }
 }
 /* Phones: render the modal card as an exact miniature of the laptop layout.
-   The card keeps its full 660px desktop layout and is scaled down to fit the
+   The card keeps its full 792px desktop layout and is scaled down to fit the
    viewport width, so every element looks identical to large screens.
    (Owner-approved exception to the locked zoom steps — see LOCKED_PERFECT.md) */
 @media (max-width: 640px) {
   .reachout-scale {
-    width: 660px;
+    width: 792px;
     position: relative;
     left: 50%;
-    transform: translateX(-50%) scale(0.88);
+    transform: translateX(-50%) scale(0.733);
   }
 }
 @media (max-width: 600px) {
-  .reachout-scale { transform: translateX(-50%) scale(0.82); }
+  .reachout-scale { transform: translateX(-50%) scale(0.683); }
 }
 @media (max-width: 560px) {
-  .reachout-scale { transform: translateX(-50%) scale(0.76); }
+  .reachout-scale { transform: translateX(-50%) scale(0.633); }
 }
 @media (max-width: 520px) {
-  .reachout-scale { transform: translateX(-50%) scale(0.70); }
+  .reachout-scale { transform: translateX(-50%) scale(0.583); }
 }
 @media (max-width: 480px) {
-  .reachout-scale { transform: translateX(-50%) scale(0.645); }
+  .reachout-scale { transform: translateX(-50%) scale(0.5375); }
 }
 @media (max-width: 440px) {
-  .reachout-scale { transform: translateX(-50%) scale(0.60); }
+  .reachout-scale { transform: translateX(-50%) scale(0.50); }
 }
 @media (max-width: 412px) {
-  .reachout-scale { transform: translateX(-50%) scale(0.575); }
+  .reachout-scale { transform: translateX(-50%) scale(0.479); }
 }
 @media (max-width: 390px) {
-  .reachout-scale { transform: translateX(-50%) scale(0.555); }
+  .reachout-scale { transform: translateX(-50%) scale(0.4625); }
 }
 @media (max-width: 375px) {
-  .reachout-scale { transform: translateX(-50%) scale(0.53); }
+  .reachout-scale { transform: translateX(-50%) scale(0.4417); }
 }
 @media (max-width: 360px) {
-  .reachout-scale { transform: translateX(-50%) scale(0.49); }
+  .reachout-scale { transform: translateX(-50%) scale(0.4083); }
 }
 @media (max-width: 330px) {
-  .reachout-scale { transform: translateX(-50%) scale(0.45); }
+  .reachout-scale { transform: translateX(-50%) scale(0.375); }
 }
 
 /* Hero headline: living gradient — the color slowly drifts through the text */
