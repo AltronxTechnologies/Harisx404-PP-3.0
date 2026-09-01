@@ -137,8 +137,8 @@ export function ReachOutModal({
               }}
             >
             {/* Top bar — detached row above the card */}
-            <div className="mb-4 flex items-center justify-between gap-3.5">
-              <div className="flex h-[72px] w-[60%] shrink-0 items-center gap-2.5 rounded-2xl bg-white px-5 shadow-lg shadow-black/5 dark:bg-[#1c1c1c] dark:shadow-none">
+            <div className="mb-4 flex items-center gap-3.5">
+              <div className="flex h-[72px] min-w-0 flex-1 items-center gap-2.5 rounded-2xl bg-white px-5 shadow-lg shadow-black/5 dark:bg-[#1c1c1c] dark:shadow-none">
                 <button
                   onClick={onClose}
                   aria-label="Back"
@@ -151,24 +151,26 @@ export function ReachOutModal({
                 </span>
               </div>
 
-              <button
-                onClick={() => {
-                  onClose();
-                  onOpenSearch();
-                }}
-                aria-label="Search"
-                className={`${circleBtn} flex`}
-              >
-                <Search className="size-8" />
-              </button>
+              <div className="flex shrink-0 items-center gap-1.5">
+                <button
+                  onClick={() => {
+                    onClose();
+                    onOpenSearch();
+                  }}
+                  aria-label="Search"
+                  className={`${circleBtn} flex`}
+                >
+                  <Search className="size-8" />
+                </button>
 
-              <ThemeToggle
-                className={`${circleBtn} flex cursor-pointer`}
-              />
+                <ThemeToggle
+                  className={`${circleBtn} flex cursor-pointer`}
+                />
 
-              <button onClick={onClose} aria-label="Close" className={circleBtn}>
-                <X className="size-8" />
-              </button>
+                <button onClick={onClose} aria-label="Close" className={circleBtn}>
+                  <X className="size-8" />
+                </button>
+              </div>
             </div>
 
             {/* Main card */}
