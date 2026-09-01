@@ -161,11 +161,19 @@ export default function Navbar() {
                 setHoveredTab(null);
               }}
             >
-              {/* The main morphing pill container */}
+              {/* The main morphing pill container. While the dropdown is
+                  open, the pill's own surface (bg/shadow) fades out so the
+                  expanding panel is the ONLY visible box — the nav links
+                  simply live inside its top edge. That makes the whole
+                  thing read as the navbar itself enlarging. */}
               <motion.div
                 layout
                 ref={pillRef}
-                className="relative z-10 flex flex-col items-center justify-start p-1.5 bg-white/90 max-md:bg-white/40 shadow-[0_10px_30px_-14px_rgba(0,0,0,0.22),0_3px_8px_-4px_rgba(0,0,0,0.08)] shadow-border dark:bg-[#1c1c1c]/90 max-md:dark:bg-[#1c1c1c]/40 dark:shadow-none overflow-hidden backdrop-blur-md max-md:backdrop-blur-xl max-md:!rounded-full max-md:p-1 max-md:ring-1 max-md:ring-neutral-300/60 max-md:dark:ring-white/15"
+                className={`relative z-10 flex flex-col items-center justify-start p-1.5 transition-[background-color,box-shadow] duration-300 ${
+                  isDropdownOpen
+                    ? "md:!bg-transparent md:!shadow-none"
+                    : "bg-white/90 max-md:bg-white/40 shadow-[0_10px_30px_-14px_rgba(0,0,0,0.22),0_3px_8px_-4px_rgba(0,0,0,0.08)] shadow-border dark:bg-[#1c1c1c]/90 max-md:dark:bg-[#1c1c1c]/40 dark:shadow-none"
+                } overflow-hidden backdrop-blur-md max-md:backdrop-blur-xl max-md:!rounded-full max-md:p-1 max-md:ring-1 max-md:ring-neutral-300/60 max-md:dark:ring-white/15`}
                 initial={{ borderRadius: "22px" }}
                 animate={{ borderRadius: isDropdownOpen ? "24px" : "22px" }}
                 transition={{ type: "spring", stiffness: 400, damping: 30 }}
