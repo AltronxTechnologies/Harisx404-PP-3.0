@@ -22,10 +22,10 @@ const faqs = [
 export function HomeFaq() {
   return (
     <section aria-labelledby="faq-heading" className="mx-auto w-full max-w-3xl px-2 sm:px-4">
-      <SectionHeading kicker="Questions" className="mb-14">
+      <SectionHeading kicker="FAQ's" className="mb-14">
         Frequently asked,{" "}
         <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
-          answered
+          questions
         </span>
       </SectionHeading>
       <div className="space-y-2">
@@ -35,7 +35,7 @@ export function HomeFaq() {
             name="home-faq"
             className="group rounded-xl transition-colors open:bg-white/50 dark:open:bg-neutral-800/[0.14]"
           >
-            <summary className="flex cursor-pointer items-center justify-between gap-4 px-5 py-4 text-[15px] font-medium leading-snug text-text-primary [&::-webkit-details-marker]:hidden">
+            <summary className="flex cursor-pointer items-center justify-between gap-4 px-5 py-4 text-[15px] font-medium leading-snug text-text-secondary transition-colors duration-300 hover:text-text-primary group-open:text-text-primary [&::-webkit-details-marker]:hidden">
               {f.q}
               <span className="flex size-7 shrink-0 items-center justify-center rounded-full border border-neutral-200/80 bg-white text-neutral-500 transition-all duration-300 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] group-open:rotate-180 dark:border-white/10 dark:bg-white/[0.06] dark:text-white/60">
               <svg
