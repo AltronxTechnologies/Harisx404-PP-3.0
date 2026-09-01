@@ -169,7 +169,7 @@ export default function Navbar() {
               <motion.div
                 layout
                 ref={pillRef}
-                className={`relative z-10 flex flex-col items-center justify-start p-1.5 transition-[background-color,box-shadow] duration-300 ${
+                className={`relative z-10 flex flex-col items-center justify-start p-1.5 transition-[background-color,box-shadow] duration-[400ms] ${
                   isDropdownOpen
                     ? "md:!bg-transparent md:!shadow-none"
                     : "bg-white/90 max-md:bg-white/40 shadow-[0_10px_30px_-14px_rgba(0,0,0,0.22),0_3px_8px_-4px_rgba(0,0,0,0.08)] shadow-border dark:bg-[#1c1c1c]/90 max-md:dark:bg-[#1c1c1c]/40 dark:shadow-none"
@@ -433,14 +433,14 @@ export default function Navbar() {
                       clipPath: pillClip,
                       x: "-50%",
                       transition: {
-                        clipPath: { duration: 0.5, ease: [0.4, 0, 0.2, 1] },
+                        clipPath: { duration: 0.65, ease: [0.4, 0, 0.2, 1] },
                       },
                     }}
                     transition={{
-                      clipPath: { duration: 0.7, ease: [0.19, 1, 0.22, 1] },
+                      clipPath: { duration: 0.9, ease: [0.19, 1, 0.22, 1] },
                     }}
                     style={{ transformOrigin: "top center", willChange: "clip-path" }}
-                    className="absolute top-0 left-1/2 z-0 w-[740px] max-w-[92vw] rounded-[24px] bg-white/90 shadow-[0_10px_30px_-14px_rgba(0,0,0,0.22),0_3px_8px_-4px_rgba(0,0,0,0.08)] shadow-border dark:bg-[#1c1c1c]/90 dark:shadow-none backdrop-blur-md pt-[52px] max-h-[calc(100dvh-40px)] overflow-y-auto overflow-x-hidden"
+                    className="absolute top-0 left-1/2 z-0 w-[740px] max-w-[92vw] rounded-[24px] bg-white/90 [filter:drop-shadow(0_10px_18px_rgba(0,0,0,0.14))_drop-shadow(0_2px_5px_rgba(0,0,0,0.06))] dark:bg-[#1c1c1c]/90 dark:[filter:none] backdrop-blur-md pt-[52px] max-h-[calc(100dvh-40px)] overflow-y-auto overflow-x-hidden"
                   >
                       <motion.div 
                         initial="hidden"
