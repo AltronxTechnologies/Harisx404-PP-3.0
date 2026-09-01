@@ -64,7 +64,7 @@ function BrandIcon({ name }: { name: string }) {
       "M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z",
   };
   return (
-    <svg className="size-[22px] fill-current" viewBox="0 0 24 24" aria-hidden="true">
+    <svg className="size-6 fill-current" viewBox="0 0 24 24" aria-hidden="true">
       <path d={paths[name] ?? paths.GitHub} />
     </svg>
   );
@@ -95,21 +95,25 @@ interface ContentResult {
 
 /* Shared surface styles (identical to ReachOutModal top bar) */
 const circleBtn =
-  "flex size-[72px] shrink-0 items-center justify-center rounded-3xl bg-white/85 backdrop-blur-xl dark:bg-[#1c1c1c]/85 ring-1 ring-neutral-200/60 dark:ring-white/10 " +
+  "flex size-[72px] shrink-0 items-center justify-center rounded-3xl bg-white dark:bg-[#1c1c1c] " +
   "text-neutral-600 dark:text-white/80 shadow-lg shadow-black/5 dark:shadow-none " +
   "transition-colors hover:text-neutral-900 dark:hover:text-white active:scale-95";
 
+/* Row tile — inner 16px radius tier and the same hover step as the Reach Out
+   action cards. Sizes are the Reach Out scale (x1.2 of the old 660px shell). */
 const itemTile =
-  "flex items-center gap-3 rounded-xl px-2.5 py-2.5 max-sm:py-3.5 text-[17px] max-sm:text-[23px] font-medium transition-colors " +
-  "text-neutral-700 hover:bg-neutral-100 dark:text-white/80 dark:hover:bg-white/[0.07] dark:hover:text-white";
+  "flex items-center gap-4 rounded-2xl px-3 py-3 text-xl font-medium transition-colors " +
+  "text-neutral-700 hover:bg-neutral-200/80 dark:text-white/80 dark:hover:bg-white/[0.1] dark:hover:text-white";
 
+/* Icon tile — identical recipe to the Reach Out action-card circle (filled, no
+   ring), sized for a list row. Reach Out: 68px circle / 28px glyph. */
 const iconTile =
-  "flex size-10 max-sm:size-[52px] shrink-0 items-center justify-center rounded-full " +
-  "ring-1 ring-neutral-200 text-neutral-500 dark:ring-white/15 dark:text-white/60";
+  "flex size-12 shrink-0 items-center justify-center rounded-full " +
+  "bg-neutral-200/80 text-neutral-700 dark:bg-white/10 dark:text-white/80";
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="px-3 pb-1.5 pt-3 text-[15px] max-sm:text-[19px] font-medium text-neutral-400 dark:text-white/40">
+    <h3 className="px-4 pb-2 pt-4 text-lg font-medium text-text-secondary">
       {children}
     </h3>
   );
@@ -122,6 +126,8 @@ export function SearchModal({
 }: SearchModalProps) {
   const { resolvedTheme, setTheme } = useTheme();
   const pathname = usePathname();
+
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<ContentResult[]>([]);
@@ -267,11 +273,37 @@ export function SearchModal({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
+    // Trap Tab inside the dialog — identical behaviour to ReachOutModal.
+    const trap = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      const root = dialogRef.current;
+      if (!root) return;
+      const focusable = Array.from(
+        root.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => el.offsetParent !== null);
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+      if (e.shiftKey && (active === first || !root.contains(active))) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    const previouslyFocused = document.activeElement as HTMLElement | null;
     window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keydown", trap);
     document.body.classList.add("modal-open");
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keydown", trap);
       document.body.classList.remove("modal-open");
+      previouslyFocused?.focus?.();
     };
   }, [isOpen, onClose]);
 
@@ -282,6 +314,8 @@ export function SearchModal({
     <AnimatePresence>
       {isOpen && (
       <div
+        ref={dialogRef}
+        tabIndex={-1}
         className="fixed inset-0 z-[7000] flex items-end justify-center px-4 pt-4 pb-[15px] outline-none"
         onClick={(e) => {
           if (e.target === e.currentTarget) onClose();
@@ -326,8 +360,8 @@ export function SearchModal({
           >
           {/* Top bar — detached search pill + action buttons (same row as ReachOutModal) */}
           <div className="mb-4 flex items-center gap-[7px]">
-            <div className="flex h-[72px] min-w-0 flex-1 items-center gap-2.5 rounded-3xl bg-white/85 backdrop-blur-xl px-5 shadow-lg shadow-black/5 dark:bg-[#1c1c1c]/85 dark:shadow-none ring-1 ring-neutral-200/60 dark:ring-white/10">
-              <Search className="size-7 shrink-0 text-neutral-400 dark:text-white/40" />
+            <div className="flex h-[72px] min-w-0 flex-1 items-center gap-2.5 rounded-3xl bg-white px-5 shadow-lg shadow-black/5 dark:bg-[#1c1c1c] dark:shadow-none">
+              <Search className="size-7 shrink-0 text-text-secondary" />
               <input
                 ref={inputRef}
                 type="text"
@@ -335,15 +369,15 @@ export function SearchModal({
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={PLACEHOLDERS[placeholderIndex]}
                 aria-label="Search"
-                className="w-full bg-transparent text-xl text-neutral-900 placeholder-neutral-400 focus:outline-none dark:text-white dark:placeholder-white/35"
+                className="w-full bg-transparent text-xl text-neutral-900 placeholder-neutral-400 focus:outline-none dark:text-white dark:placeholder-white/30"
               />
               {query && (
                 <button
                   onClick={() => setQuery("")}
                   aria-label="Clear search"
-                  className="text-neutral-400 transition-colors hover:text-neutral-700 dark:hover:text-white"
+                  className="text-text-secondary transition-colors hover:text-neutral-900 dark:hover:text-white"
                 >
-                  <X className="size-4" />
+                  <X className="size-5" />
                 </button>
               )}
             </div>
@@ -375,7 +409,7 @@ export function SearchModal({
           </div>
 
           {/* Results panel — same card shell as ReachOutModal */}
-          <div className="overflow-hidden rounded-3xl bg-white/85 max-sm:bg-white/55 backdrop-blur-xl shadow-2xl ring-1 ring-neutral-200/70 max-sm:ring-neutral-300/70 dark:bg-[#1a1a1a]/85 max-sm:dark:bg-[#1a1a1a]/55 dark:ring-white/[0.08] max-sm:dark:ring-white/20">
+          <div className="overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-neutral-200/70 dark:bg-[#1a1a1a] dark:ring-white/[0.08]">
           {/* Single scroll area — sized so the whole modal is the EXACT same height
               as the Reach Out modal (locked reference). 634px is measured, not
               guessed: with the cap at 559 the wrapper was 647px tall vs Reach Out's
@@ -388,15 +422,15 @@ export function SearchModal({
               <>
                 {isSearching && (
                   <div className="flex items-center gap-2 px-3 pb-1.5 pt-3">
-                    <Loader2 className="size-4 animate-spin text-neutral-400 dark:text-white/40" />
-                    <span className="text-[15px] font-medium text-neutral-400 dark:text-white/40">
+                    <Loader2 className="size-5 animate-spin text-text-secondary" />
+                    <span className="text-[15px] font-medium text-text-secondary">
                       Searching&hellip;
                     </span>
                   </div>
                 )}
 
                 {searchError && (
-                  <p className="px-3 py-3 text-sm text-neutral-400 dark:text-white/40">
+                  <p className="px-4 py-3 text-base text-text-secondary">
                     {searchError}
                   </p>
                 )}
@@ -406,7 +440,7 @@ export function SearchModal({
                   <section aria-label="Projects">
                     <SectionHeading>
                       Projects{" "}
-                      <span className="text-neutral-300 dark:text-white/25">
+                      <span className="text-text-secondary">
                         ({projectResults.length})
                       </span>
                     </SectionHeading>
@@ -419,12 +453,12 @@ export function SearchModal({
                           className={itemTile}
                         >
                           <span className={iconTile}>
-                            <Folder className="size-[22px] max-sm:size-[30px]" />
+                            <Folder className="size-6" />
                           </span>
                           <span className="min-w-0 flex-1 truncate">
                             {result.title}
                           </span>
-                          <span className="shrink-0 text-[11px] font-medium uppercase tracking-wider text-neutral-400 dark:text-white/35">
+                          <span className="shrink-0 text-[13px] font-medium uppercase tracking-wider text-text-secondary">
                             Project
                           </span>
                         </Link>
@@ -438,7 +472,7 @@ export function SearchModal({
                   <section aria-label="Blog Posts">
                     <SectionHeading>
                       Blog Posts{" "}
-                      <span className="text-neutral-300 dark:text-white/25">
+                      <span className="text-text-secondary">
                         ({postResults.length})
                       </span>
                     </SectionHeading>
@@ -451,12 +485,12 @@ export function SearchModal({
                           className={itemTile}
                         >
                           <span className={iconTile}>
-                            <FileText className="size-[22px] max-sm:size-[30px]" />
+                            <FileText className="size-6" />
                           </span>
                           <span className="min-w-0 flex-1 truncate">
                             {result.title}
                           </span>
-                          <span className="shrink-0 text-[11px] font-medium uppercase tracking-wider text-neutral-400 dark:text-white/35">
+                          <span className="shrink-0 text-[13px] font-medium uppercase tracking-wider text-text-secondary">
                             Post
                           </span>
                         </Link>
@@ -489,11 +523,11 @@ export function SearchModal({
                         <span
                           className={`${iconTile} ${
                             isActive
-                              ? "bg-neutral-300/60 ring-neutral-400/60 text-neutral-700 dark:bg-white/[0.12] dark:ring-white/25 dark:text-white"
+                              ? "bg-neutral-300/60 text-neutral-700 dark:bg-white/[0.12] dark:text-white"
                               : ""
                           }`}
                         >
-                          <Icon className="size-[22px] max-sm:size-[30px]" />
+                          <Icon className="size-6" />
                         </span>
                         <span className="min-w-0 flex-1 truncate">
                           {page.name}
@@ -528,7 +562,7 @@ export function SearchModal({
                       <span className="min-w-0 flex-1 truncate">
                         {item.name}
                       </span>
-                      <ArrowUpRight className="size-4 shrink-0 text-neutral-300 transition-colors group-hover:text-neutral-500 dark:text-white/25 dark:group-hover:text-white/60" />
+                      <ArrowUpRight className="size-5 shrink-0 text-text-secondary transition-colors group-hover:text-neutral-700 dark:group-hover:text-white" />
                     </a>
                   ))}
                 </div>
@@ -550,7 +584,7 @@ export function SearchModal({
                         className={itemTile}
                       >
                         <span className={iconTile}>
-                          <Icon className="size-[22px] max-sm:size-[30px]" />
+                          <Icon className="size-6" />
                         </span>
                         <span className="min-w-0 flex-1 truncate">
                           {item.name}
@@ -579,12 +613,12 @@ export function SearchModal({
                         className={`${itemTile} group`}
                       >
                         <span className={iconTile}>
-                          <Icon className="size-[22px] max-sm:size-[30px]" />
+                          <Icon className="size-6" />
                         </span>
                         <span className="min-w-0 flex-1 truncate">
                           {item.name}
                         </span>
-                        <ArrowUpRight className="size-4 shrink-0 text-neutral-300 transition-colors group-hover:text-neutral-500 dark:text-white/25 dark:group-hover:text-white/60" />
+                        <ArrowUpRight className="size-5 shrink-0 text-text-secondary transition-colors group-hover:text-neutral-700 dark:group-hover:text-white" />
                       </a>
                     );
                   })}
@@ -594,14 +628,14 @@ export function SearchModal({
 
             {nothingFound && (
               <div className="flex flex-col items-center gap-4 px-6 py-10 text-center">
-                <span className="flex size-14 items-center justify-center rounded-full ring-1 ring-neutral-200 text-neutral-400 dark:ring-white/15 dark:text-white/40">
+                <span className="flex size-[68px] items-center justify-center rounded-full bg-neutral-200/80 text-neutral-700 dark:bg-white/10 dark:text-white/80">
                   <SearchX className="size-7" />
                 </span>
                 <div className="space-y-1">
                   <p className="text-lg font-semibold text-neutral-900 dark:text-white">
                     No results for &ldquo;{query.trim()}&rdquo;
                   </p>
-                  <p className="text-[15px] text-neutral-400 dark:text-white/40">
+                  <p className="text-[15px] text-text-secondary">
                     Try a different keyword, or explore these instead
                   </p>
                 </div>
@@ -611,21 +645,21 @@ export function SearchModal({
                     onClick={onClose}
                     className="flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-100/90 px-4 py-2 text-[15px] font-medium text-neutral-700 transition hover:bg-neutral-200/80 dark:border-white/[0.08] dark:bg-white/[0.07] dark:text-white/80 dark:hover:bg-white/[0.12] dark:hover:text-white"
                   >
-                    <Folder className="size-4" /> Browse Projects
+                    <Folder className="size-5" /> Browse Projects
                   </Link>
                   <Link
                     href="/blog"
                     onClick={onClose}
                     className="flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-100/90 px-4 py-2 text-[15px] font-medium text-neutral-700 transition hover:bg-neutral-200/80 dark:border-white/[0.08] dark:bg-white/[0.07] dark:text-white/80 dark:hover:bg-white/[0.12] dark:hover:text-white"
                   >
-                    <FileText className="size-4" /> Browse Posts
+                    <FileText className="size-5" /> Browse Posts
                   </Link>
                   <Link
                     href="/contact"
                     onClick={onClose}
                     className="flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-100/90 px-4 py-2 text-[15px] font-medium text-neutral-700 transition hover:bg-neutral-200/80 dark:border-white/[0.08] dark:bg-white/[0.07] dark:text-white/80 dark:hover:bg-white/[0.12] dark:hover:text-white"
                   >
-                    <Mail className="size-4" /> Get in Touch
+                    <Mail className="size-5" /> Get in Touch
                   </Link>
                 </div>
               </div>
