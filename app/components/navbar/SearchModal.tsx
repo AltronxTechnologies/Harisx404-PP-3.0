@@ -95,7 +95,7 @@ interface ContentResult {
 
 /* Shared surface styles (identical to ReachOutModal top bar) */
 const circleBtn =
-  "flex size-12 max-sm:size-auto max-sm:h-[60px] max-sm:flex-1 shrink-0 items-center justify-center rounded-2xl bg-white/85 max-sm:bg-white/55 backdrop-blur-xl dark:bg-[#1c1c1c]/85 max-sm:dark:bg-[#1c1c1c]/55 ring-1 ring-neutral-200/60 dark:ring-white/10 max-sm:ring-neutral-300/70 max-sm:dark:ring-white/20 " +
+  "flex size-[72px] shrink-0 items-center justify-center rounded-3xl bg-white/85 backdrop-blur-xl dark:bg-[#1c1c1c]/85 ring-1 ring-neutral-200/60 dark:ring-white/10 " +
   "text-neutral-600 dark:text-white/80 shadow-lg shadow-black/5 dark:shadow-none " +
   "transition-colors hover:text-neutral-900 dark:hover:text-white active:scale-95";
 
@@ -282,7 +282,7 @@ export function SearchModal({
     <AnimatePresence>
       {isOpen && (
       <div
-        className="fixed inset-0 z-[7000] flex items-end justify-center p-4 pb-[6vh] sm:pb-[8vh]"
+        className="fixed inset-0 z-[7000] flex items-end justify-center px-4 pt-4 pb-[15px] outline-none"
         onClick={(e) => {
           if (e.target === e.currentTarget) onClose();
         }}
@@ -312,7 +312,7 @@ export function SearchModal({
           onDragEnd={(_, info) => {
             if (info.offset.y > 120 || info.velocity.y > 800) onClose();
           }}
-          className="relative z-10 mx-3 w-[92vw] max-w-[660px]"
+          className="relative z-10 mx-3 w-[92vw] max-w-[792px]"
           onClick={(e) => {
             if (e.target === e.currentTarget) onClose();
           }}
@@ -325,9 +325,9 @@ export function SearchModal({
             }}
           >
           {/* Top bar — detached search pill + action buttons (same row as ReachOutModal) */}
-          <div className="mb-3 max-sm:mb-6 flex items-center gap-3 max-sm:gap-4">
-            <div className="flex h-14 max-sm:h-[60px] flex-1 max-sm:flex-none max-sm:basis-[65%] items-center gap-2.5 rounded-2xl bg-white/85 max-sm:bg-white/55 backdrop-blur-xl px-4 shadow-lg shadow-black/5 dark:bg-[#1c1c1c]/85 max-sm:dark:bg-[#1c1c1c]/55 dark:shadow-none ring-1 ring-neutral-200/60 dark:ring-white/10 max-sm:ring-neutral-300/70 max-sm:dark:ring-white/20">
-              <Search className="size-6 max-sm:size-7 shrink-0 text-neutral-400 dark:text-white/40" />
+          <div className="mb-4 flex items-center gap-[7px]">
+            <div className="flex h-[72px] min-w-0 flex-1 items-center gap-2.5 rounded-3xl bg-white/85 backdrop-blur-xl px-5 shadow-lg shadow-black/5 dark:bg-[#1c1c1c]/85 dark:shadow-none ring-1 ring-neutral-200/60 dark:ring-white/10">
+              <Search className="size-7 shrink-0 text-neutral-400 dark:text-white/40" />
               <input
                 ref={inputRef}
                 type="text"
@@ -335,7 +335,7 @@ export function SearchModal({
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={PLACEHOLDERS[placeholderIndex]}
                 aria-label="Search"
-                className="w-full bg-transparent text-lg max-sm:text-[22px] text-neutral-900 placeholder-neutral-400 focus:outline-none dark:text-white dark:placeholder-white/35"
+                className="w-full bg-transparent text-xl text-neutral-900 placeholder-neutral-400 focus:outline-none dark:text-white dark:placeholder-white/35"
               />
               {query && (
                 <button
@@ -348,35 +348,41 @@ export function SearchModal({
               )}
             </div>
 
-            <button
-              onClick={() => {
-                onClose();
-                onOpenReachOut();
-              }}
-              aria-label="Reach out"
-              className={`${circleBtn} flex`}
-            >
-              <MessageSquare className="size-6 max-sm:size-9" />
-            </button>
+            <div className="flex shrink-0 items-center gap-[7px]">
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenReachOut();
+                }}
+                aria-label="Reach out"
+                className={`${circleBtn} flex`}
+              >
+                <MessageSquare className="size-8" />
+              </button>
 
-            <button
-              onClick={() => setTheme(isDark ? "light" : "dark")}
-              aria-label="Toggle theme"
-              className={`${circleBtn} flex`}
-            >
-              {isDark ? <Moon className="size-6 max-sm:size-9" /> : <Sun className="size-6 max-sm:size-9" />}
-            </button>
+              <button
+                onClick={() => setTheme(isDark ? "light" : "dark")}
+                aria-label="Toggle theme"
+                className={`${circleBtn} flex`}
+              >
+                {isDark ? <Moon className="size-8" /> : <Sun className="size-8" />}
+              </button>
 
-            <button onClick={onClose} aria-label="Close" className={circleBtn}>
-              <X className="size-6 max-sm:size-9" />
-            </button>
+              <button onClick={onClose} aria-label="Close" className={circleBtn}>
+                <X className="size-8" />
+              </button>
+            </div>
           </div>
 
           {/* Results panel — same card shell as ReachOutModal */}
           <div className="overflow-hidden rounded-3xl bg-white/85 max-sm:bg-white/55 backdrop-blur-xl shadow-2xl ring-1 ring-neutral-200/70 max-sm:ring-neutral-300/70 dark:bg-[#1a1a1a]/85 max-sm:dark:bg-[#1a1a1a]/55 dark:ring-white/[0.08] max-sm:dark:ring-white/20">
-          {/* Single scroll area — sized so Pages + Connect are fully visible */}
-          {/* 559px = exact ReachOutModal card height; Legal/Discover reachable by scrolling */}
-          <div className="max-h-[559px] overflow-y-auto p-3">
+          {/* Single scroll area — sized so the whole modal is the EXACT same height
+              as the Reach Out modal (locked reference). 634px is measured, not
+              guessed: with the cap at 559 the wrapper was 647px tall vs Reach Out's
+              722px, so 559 + (722-647) = 634. Confirmed independently: a cap of 606
+              gave 694 (694 + 28 = 722). Card padding p-4 also matches Reach Out's
+              shell. Do not change one without re-measuring the other. */}
+          <div className="max-h-[634px] overflow-y-auto p-4">
             {/* Content search results, grouped professionally */}
             {q.length >= 2 && (
               <>
