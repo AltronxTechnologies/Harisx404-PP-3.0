@@ -204,6 +204,8 @@ export function ReachOutModal({
 
                 <ThemeToggle
                   className={`${circleBtn} flex cursor-pointer`}
+                  iconClassName="size-8"
+                  strokeWidth={2}
                 />
 
                 <button onClick={onClose} aria-label="Close" className={circleBtn}>

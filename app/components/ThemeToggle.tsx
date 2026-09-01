@@ -8,8 +8,21 @@ import { Sun, Moon } from "lucide-react";
 /**
  * Circular theme toggle button. Styled to match the navbar's
  * floating search circle so they sit as a pair.
+ *
+ * `iconClassName` / `strokeWidth` let callers scale the glyph with the button:
+ * the navbar uses a size-10 button with 18px glyphs, while the Reach Out and
+ * Search modals use size-[72px] buttons whose glyphs must be size-8 (32px) to
+ * match their Search/Close siblings.
  */
-export function ThemeToggle({ className }: { className?: string }) {
+export function ThemeToggle({
+  className,
+  iconClassName = "size-4.5",
+  strokeWidth = 1.75,
+}: {
+  className?: string;
+  iconClassName?: string;
+  strokeWidth?: number;
+}) {
   const [mounted, setMounted] = useState(false);
   const { resolvedTheme, setTheme } = useTheme();
 
@@ -26,7 +39,7 @@ export function ThemeToggle({ className }: { className?: string }) {
   if (!mounted) {
     return (
       <div className={baseClasses} aria-hidden="true">
-        <div className="size-4.5 opacity-0" />
+        <div className={`${iconClassName} opacity-0`} />
       </div>
     );
   }
@@ -47,7 +60,7 @@ export function ThemeToggle({ className }: { className?: string }) {
         transition={{ duration: 0.2 }}
         className="absolute inline-flex"
       >
-        <Sun className="size-4.5" strokeWidth={1.75} />
+        <Sun className={iconClassName} strokeWidth={strokeWidth} />
       </motion.span>
       <motion.span
         initial={false}
@@ -55,7 +68,7 @@ export function ThemeToggle({ className }: { className?: string }) {
         transition={{ duration: 0.2 }}
         className="absolute inline-flex"
       >
-        <Moon className="size-4.5" strokeWidth={1.75} />
+        <Moon className={iconClassName} strokeWidth={strokeWidth} />
       </motion.span>
     </motion.button>
   );
