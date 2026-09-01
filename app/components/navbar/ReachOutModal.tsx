@@ -78,7 +78,16 @@ export function ReachOutModal({
       }
     };
     const previouslyFocused = document.activeElement as HTMLElement | null;
-    textareaRef.current?.focus();
+    // Only auto-focus the textarea on pointer devices — focusing it on a
+    // touch screen pops the on-screen keyboard open before the user asks.
+    const isPointerDevice =
+      typeof window !== "undefined" &&
+      window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    if (isPointerDevice) {
+      textareaRef.current?.focus();
+    } else {
+      dialogRef.current?.focus();
+    }
     document.addEventListener("keydown", onKey);
     document.body.classList.add("modal-open");
     return () => {
@@ -124,7 +133,8 @@ export function ReachOutModal({
       {isOpen && (
         <div
           ref={dialogRef}
-          className="fixed inset-0 z-[7000] flex items-end justify-center px-4 pt-4 pb-[15px]"
+          tabIndex={-1}
+          className="fixed inset-0 z-[7000] flex items-end justify-center px-4 pt-4 pb-[15px] outline-none"
           role="dialog"
           aria-modal="true"
           aria-label="Reach out"
@@ -261,7 +271,7 @@ export function ReachOutModal({
                     onClick={handleContinue}
                     disabled={!message.trim()}
                     aria-label="Continue"
-                    className="ml-auto flex items-center gap-1.5 rounded-xl border border-neutral-200 bg-white px-5 py-2.5 text-lg text-neutral-900 transition hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
+                    className="ml-auto flex items-center gap-1.5 rounded-xl border border-neutral-900 bg-neutral-900 px-5 py-2.5 text-lg font-medium text-white shadow-sm transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:border-neutral-300 disabled:bg-neutral-200 disabled:text-neutral-500 disabled:shadow-none dark:border-white/15 dark:bg-white/15 dark:text-white dark:hover:bg-white/25 dark:disabled:border-white/10 dark:disabled:bg-white/[0.06] dark:disabled:text-white/40"
                   >
                     Continue <ArrowRight className="size-5" />
                   </button>
