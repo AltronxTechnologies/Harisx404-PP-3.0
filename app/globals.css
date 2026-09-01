@@ -674,6 +674,24 @@ blockquote p {
   background: var(--toc-text-tertiary);
 }
 
+/* Reach Out composer — the textarea is pinned to exactly 3 rows so the modal
+   height is constant; overflow scrolls inside the field. Thin scrollbar matching
+   the TOC treatment so it reads as intentional rather than a browser default. */
+.composer-scroll::-webkit-scrollbar {
+  width: 3px;
+}
+.composer-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.composer-scroll::-webkit-scrollbar-thumb {
+  background: var(--text-tertiary);
+  border-radius: 3px;
+}
+.composer-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--text-tertiary) transparent;
+}
+
 /* ===========================================
    Reduced Motion Preference
    =========================================== */

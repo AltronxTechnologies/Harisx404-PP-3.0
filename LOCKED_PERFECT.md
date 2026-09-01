@@ -71,7 +71,14 @@
 **Message panel**
   - `rounded-2xl bg-neutral-100/90 p-6 dark:bg-white/[0.07]` + matching border
   - Avatar `size-11`, heading `text-lg font-semibold`, "I read every one" `text-base`
-  - Textarea `mt-5 text-xl`, auto-grow, Enter submits / Shift+Enter newline, mailto
+  - Textarea `mt-5 text-xl`, **fixed at exactly `rows={3}`** with
+    `overflow-y-auto` + `.composer-scroll` (thin 3px thumb, matches the TOC
+    treatment). Enter submits / Shift+Enter newline, mailto.
+    **There is deliberately NO auto-grow.** The original `autoGrow` set
+    `height = scrollHeight` with no cap, so a 4th line grew the whole modal
+    (and a single line collapsed the field from 3 rows to 1). The field height —
+    and therefore the modal height — is now constant; overflow scrolls inside
+    the field. Do not reintroduce auto-grow.
   - kbd hints `text-sm` with `text-[13px]` mono keycaps
   - **Continue button** — filled, clearly visible in both themes:
     - enabled light: `border-neutral-900 bg-neutral-900 text-white font-medium shadow-sm`,
@@ -178,6 +185,11 @@
     unmounted subtree. Now tracked in a ref, cleared on re-copy and on unmount.
   - **BUG: copy confirmation was silent to screen readers — FIXED.** The label
     swap to "Copied!" had no live region; added `aria-live="polite"`.
+  - **BUG: message field grew the whole modal — FIXED (owner-reported).** Typing a
+    4th line pushed the modal taller and eventually past the viewport. The field is
+    now pinned to 3 rows with internal scrolling. Verified: modal height constant
+    at 722px across empty / 1 / 3 / 4 / 12 lines and 1800 wrapped characters;
+    scrollbar appears from the 4th line onward.
   - **Back chevron hit area — FIXED.** The original audit note claiming it "passes
     WCAG 2.5.8 AA" was **wrong**: it measured the 40px CSS box, not the rendered
     size. Under the 0.53 phone scale it rendered at **21.2px**, below the 24px AA
