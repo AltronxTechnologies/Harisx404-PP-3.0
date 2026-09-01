@@ -274,7 +274,7 @@ export function TestimonialSubmitModal({
                   <div>
                     <label htmlFor="ts-email" className={labelClasses}>
                       Email <span className="text-red-500">*</span>{" "}
-                      <span className="font-normal text-text-tertiary">
+                      <span className="font-normal text-text-secondary">
                         (private — used to verify it&apos;s you &amp; fetch
                         your Gravatar photo)
                       </span>
@@ -300,7 +300,7 @@ export function TestimonialSubmitModal({
                       <label htmlFor="ts-headline" className={labelClasses}>
                         Headline <span className="text-red-500">*</span>
                       </label>
-                      <span className="text-[11px] tabular-nums text-text-tertiary">
+                      <span className="text-[11px] tabular-nums text-text-secondary">
                         {headlineLen}/{HEADLINE_MAX}
                       </span>
                     </div>
@@ -326,7 +326,7 @@ export function TestimonialSubmitModal({
                       <label htmlFor="ts-quote" className={labelClasses}>
                         Your testimonial <span className="text-red-500">*</span>
                       </label>
-                      <span className="text-[11px] tabular-nums text-text-tertiary">
+                      <span className="text-[11px] tabular-nums text-text-secondary">
                         {quoteLen}/{QUOTE_MAX}
                       </span>
                     </div>
