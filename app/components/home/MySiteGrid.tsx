@@ -36,13 +36,14 @@ const noteTints = [
    the site's emerald "live" accent (same hue as the LIVE badge and
    status pings). On hover a diagonal wave brightens every cell, each
    delayed by its row+column — decorative; real numbers live on /stats. */
-const HEATMAP_COLS = 16;
+const HEATMAP_COLS = 18;
 // prettier-ignore
 const heatmapLevels = [
-  1, 3, 2, 1, 3, 0, 1, 2, 0, 3, 2, 0, 3, 1, 0, 2,
-  0, 2, 1, 3, 0, 1, 2, 0, 1, 3, 0, 2, 1, 0, 3, 1,
-  2, 0, 3, 0, 2, 3, 0, 1, 2, 0, 1, 3, 0, 3, 1, 0,
-  0, 1, 3, 1, 0, 2, 1, 3, 0, 2, 0, 1, 3, 0, 2, 3,
+  1, 3, 2, 1, 3, 0, 1, 2, 0, 3, 2, 0, 3, 1, 0, 2, 3, 1,
+  0, 2, 1, 3, 0, 1, 2, 0, 1, 3, 0, 2, 1, 0, 3, 1, 0, 2,
+  2, 0, 3, 0, 2, 3, 0, 1, 2, 0, 1, 3, 0, 3, 1, 0, 2, 3,
+  0, 1, 3, 1, 0, 2, 1, 3, 0, 2, 0, 1, 3, 0, 2, 3, 1, 0,
+  3, 0, 1, 2, 3, 0, 2, 0, 3, 1, 2, 0, 1, 3, 0, 2, 0, 3,
 ];
 const heatmapLevelClass = [
   "bg-neutral-200 group-hover:bg-neutral-300 group-active:bg-neutral-300 dark:bg-white/[0.06] dark:group-hover:bg-white/[0.12] dark:group-active:bg-white/[0.12]",
@@ -56,9 +57,10 @@ function StatsHeatmap() {
     <div className="flex h-28 items-center" aria-hidden>
       {/* Responsive density (same idea as the accounts bento tiles): the
           md 3-col row squeezes each card, so the grid drops to 10 columns
-          there — bigger squares, no "thin strip" — and restores the full
-          16 columns on mobile (single, wide card) and lg+. */}
-      <div className="grid w-full gap-1 [grid-template-columns:repeat(16,minmax(0,1fr))] md:[grid-template-columns:repeat(10,minmax(0,1fr))] lg:[grid-template-columns:repeat(16,minmax(0,1fr))]">
+          there — bigger squares, no "thin strip" — and shows all 18
+          columns on mobile (single, wide card) and lg+. Touch devices get
+          the brightness wave on press via the group-active variants. */}
+      <div className="grid w-full gap-1 [grid-template-columns:repeat(18,minmax(0,1fr))] md:[grid-template-columns:repeat(10,minmax(0,1fr))] lg:[grid-template-columns:repeat(18,minmax(0,1fr))]">
         {heatmapLevels.map((level, i) => {
           const row = Math.floor(i / HEATMAP_COLS);
           const col = i % HEATMAP_COLS;
