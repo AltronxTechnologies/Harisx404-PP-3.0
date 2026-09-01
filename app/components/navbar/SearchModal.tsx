@@ -6,8 +6,6 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
-  Moon,
-  Sun,
   X,
   MessageSquare,
   Home,
@@ -27,7 +25,7 @@ import {
   SearchX,
   Mail,
 } from "lucide-react";
-import { useTheme } from "next-themes";
+import { ThemeToggle } from "../ThemeToggle";
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -124,7 +122,6 @@ export function SearchModal({
   onClose,
   onOpenReachOut,
 }: SearchModalProps) {
-  const { resolvedTheme, setTheme } = useTheme();
   const pathname = usePathname();
 
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -160,10 +157,6 @@ export function SearchModal({
     );
     return () => clearInterval(id);
   }, [isOpen, query, PLACEHOLDERS.length]);
-
-  // resolvedTheme handles theme="system" correctly (raw `theme` would
-  // report "system" and make the first toggle click a no-op in dark mode).
-  const isDark = resolvedTheme === "dark";
 
   // Focus the input only on desktop-style devices — on phones the keyboard
   // must not pop open by itself; it opens when the user taps the search bar.
@@ -394,13 +387,11 @@ export function SearchModal({
                 <MessageSquare className="size-8" />
               </button>
 
-              <button
-                onClick={() => setTheme(isDark ? "light" : "dark")}
-                aria-label="Toggle theme"
-                className={`${circleBtn} flex`}
-              >
-                {isDark ? <Moon className="size-8" /> : <Sun className="size-8" />}
-              </button>
+              <ThemeToggle
+                className={`${circleBtn} flex cursor-pointer`}
+                iconClassName="size-8"
+                strokeWidth={2}
+              />
 
               <button onClick={onClose} aria-label="Close" className={circleBtn}>
                 <X className="size-8" />
