@@ -11,6 +11,11 @@
 > When the owner says something new is "perfect", append a new entry here (with date,
 > files, exact values, and the commit hash) in the same change.
 
+> **See also: [`DESIGN_DEBT.md`](./DESIGN_DEBT.md)** — audited but not-yet-fixed
+> design inconsistencies (radius tiers, duplicated controls, page-hero kickers),
+> plus an explicit list of differences that are **intentional** and must NOT be
+> "fixed". Read it before starting any consistency work.
+
 ---
 
 ## How to use this file
