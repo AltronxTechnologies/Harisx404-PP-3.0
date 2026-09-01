@@ -235,6 +235,17 @@
     it clips the scroll area to the 24px radius so the corners are never
     flattened and the scrollbar sits at the panel edge. 634px is measured to make
     total modal height equal Reach Out's (722px at 1440×900, 15px bottom gap).
+  - **Category dividers** (owner-requested 2026-09-01): the scroll container
+    carries `[&>section+section]:border-t [&>section+section]:border-border-primary`
+    — a 1px rule between category groups (Pages / Connect / Legal / Discover and
+    the Projects / Blog Posts result groups). Uses the project-wide divider token
+    `border-border-primary` (`#D6DADE` light / `rgba(255,255,255,0.1)` dark), not
+    an ad-hoc colour. The `section + section` selector is load-bearing: the first
+    visible group must never get a leading rule, so filtering by a query cannot
+    leave a stray divider at the top. Fragments render no DOM node, which is why
+    every `<section>` is a direct child of the scroll container. Do not convert
+    this to `divide-y` — that would also draw lines above the loader, the error
+    message and the empty state.
   - Radii: two tiers only — 24px outer (overlay card, pill, controls),
     16px inner (`rounded-2xl` row tiles). Gaps: 7px control row, 16px elsewhere.
   - Surfaces are **opaque**. No `backdrop-blur` and no `/85` translucency
