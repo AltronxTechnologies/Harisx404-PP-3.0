@@ -31,9 +31,9 @@ const glass =
   "[box-shadow:inset_0_1px_1px_0_rgba(255,255,255,0.9),inset_0_0_0_1px_rgba(255,255,255,0.5),0_12px_32px_-12px_rgba(0,0,0,0.25)] " +
   "dark:[box-shadow:inset_0_1px_1px_0_rgba(255,255,255,0.1),inset_0_0_0_1px_rgba(255,255,255,0.07),0_12px_32px_-12px_rgba(0,0,0,0.6)]";
 
-/* size-11 rounded-2xl glass control buttons (search / theme / close) */
+/* size-11 (mobile) → size-12 (desktop, v1 scale) rounded-2xl glass control buttons */
 const controlBtn =
-  `${glass} flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-2xl ` +
+  `${glass} flex size-11 sm:size-12 shrink-0 cursor-pointer items-center justify-center rounded-2xl ` +
   "text-neutral-700 dark:text-white/80 transition duration-200 " +
   "hover:bg-white/80 dark:hover:bg-white/15 hover:text-neutral-900 dark:hover:text-white active:scale-95";
 
@@ -133,7 +133,7 @@ export function ReachOutModal({
             onDragEnd={(_, info) => {
               if (info.offset.y > 120 || info.velocity.y > 800) onClose();
             }}
-            className="relative z-10 w-full px-3 pb-3 sm:w-[92vw] sm:max-w-[620px] sm:px-0 sm:pb-0"
+            className="relative z-10 w-full px-3 pb-3 sm:w-[92vw] sm:max-w-[660px] sm:px-0 sm:pb-0"
             onClick={(e) => {
               if (e.target === e.currentTarget) onClose();
             }}
@@ -145,14 +145,14 @@ export function ReachOutModal({
                 if (e.target === e.currentTarget) onClose();
               }}
             >
-              {/* Top action bar — h-13 row, gap-2.5 */}
-              <div className="mb-2.5 flex h-13 items-center gap-2.5">
+              {/* Top action bar — h-13 (mobile) / v1 scale on desktop */}
+              <div className="mb-2.5 flex h-13 items-center gap-2.5 sm:mb-3 sm:h-14 sm:gap-3">
                 <button
                   onClick={onClose}
-                  className={`${glass} flex h-11 flex-1 cursor-pointer items-center gap-2 rounded-2xl px-4 text-left transition duration-200 hover:bg-white/80 dark:hover:bg-white/15 active:scale-[0.98]`}
+                  className={`${glass} flex h-11 flex-1 cursor-pointer items-center gap-2 rounded-2xl px-4 text-left transition duration-200 hover:bg-white/80 dark:hover:bg-white/15 active:scale-[0.98] sm:h-12`}
                 >
-                  <ChevronLeft className="size-4 text-neutral-500 dark:text-white/60" />
-                  <span className="text-sm font-medium text-neutral-900 dark:text-white">
+                  <ChevronLeft className="size-4 text-neutral-500 dark:text-white/60 sm:size-5" />
+                  <span className="text-sm font-medium text-neutral-900 dark:text-white sm:text-lg">
                     Reach out
                   </span>
                 </button>
@@ -165,13 +165,13 @@ export function ReachOutModal({
                   aria-label="Search"
                   className={controlBtn}
                 >
-                  <Search className="size-5" />
+                  <Search className="size-5 sm:size-6" />
                 </button>
 
                 <ThemeToggle className={controlBtn} />
 
                 <button onClick={onClose} aria-label="Close" className={controlBtn}>
-                  <X className="size-5" />
+                  <X className="size-5 sm:size-6" />
                 </button>
               </div>
 
