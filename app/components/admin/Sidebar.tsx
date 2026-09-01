@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FileText, Briefcase, Settings, LogOut, Activity, Image, User, List, Quote, History, Award } from "lucide-react";
+import { LayoutDashboard, FileText, Briefcase, Settings, LogOut, Activity, Image, User, List, Quote, History, Award, HelpCircle } from "lucide-react";
 import { logout } from "@/app/lib/supabase/auth";
 
 const navItems = [
@@ -11,6 +11,7 @@ const navItems = [
   { name: "Projects", href: "/admin/projects", icon: Briefcase },
   { name: "Changelogs", href: "/admin/changelogs", icon: List },
   { name: "Testimonials", href: "/admin/testimonials", icon: Quote },
+  { name: "FAQs", href: "/admin/faqs", icon: HelpCircle },
   { name: "Experience", href: "/admin/experience", icon: History },
   { name: "Certifications", href: "/admin/certifications", icon: Award },
   { name: "Media", href: "/admin/media", icon: Image },

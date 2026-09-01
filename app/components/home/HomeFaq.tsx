@@ -1,6 +1,12 @@
+import { getPublicSupabase } from "@/app/lib/supabase/safe";
 import { SectionHeading } from "./SectionHeading";
 
-const faqs = [
+type Faq = { q: string; a: string };
+
+// Built-in defaults: shown until the `faqs` table exists (see
+// migrations/2026_faqs.sql) or when Supabase isn't configured, so the
+// homepage never renders an empty section by accident.
+const fallbackFaqs: Faq[] = [
   {
     q: "What kind of work are you available for?",
     a: "Full-time roles and freelance projects across web development, cybersecurity, and AI/ML — remote from Pakistan, shipping across every timezone.",
@@ -19,7 +25,41 @@ const faqs = [
   },
 ];
 
-export function HomeFaq() {
+/** Admin-managed FAQ data + section switch, resolved server-side (ISR). */
+async function getFaqData(): Promise<{ hidden: boolean; faqs: Faq[] }> {
+  const supabase = getPublicSupabase();
+  if (!supabase) return { hidden: false, faqs: fallbackFaqs };
+
+  try {
+    const [settingRes, faqsRes] = await Promise.all([
+      supabase.from("site_settings").select("value").eq("key", "show_faq_section").maybeSingle(),
+      supabase
+        .from("faqs")
+        .select("question, answer, display_order, created_at")
+        .eq("is_visible", true)
+        .order("display_order", { ascending: true })
+        .order("created_at", { ascending: true }),
+    ]);
+
+    // Section switch: any value other than the explicit 'false' shows it.
+    if (settingRes.data?.value === "false") return { hidden: true, faqs: [] };
+
+    // Table missing (migration not applied yet) → keep the defaults.
+    if (faqsRes.error) return { hidden: false, faqs: fallbackFaqs };
+
+    // Table exists: the admin list is the source of truth. If every
+    // question is hidden or deleted, hide the whole section too.
+    const faqs = (faqsRes.data ?? []).map((row) => ({ q: row.question, a: row.answer }));
+    return { hidden: faqs.length === 0, faqs };
+  } catch {
+    return { hidden: false, faqs: fallbackFaqs };
+  }
+}
+
+export async function HomeFaq() {
+  const { hidden, faqs } = await getFaqData();
+  if (hidden) return null;
+
   return (
     <section aria-labelledby="faq-heading" className="mx-auto w-full max-w-3xl px-2 sm:px-4">
       <SectionHeading kicker="FAQ's" className="mb-14">
@@ -51,7 +91,8 @@ export function HomeFaq() {
                 </svg>
               </span>
             </summary>
-            <p className="px-5 pb-5 text-[14px] leading-relaxed text-text-secondary">
+            {/* whitespace-pre-line keeps admin-entered line breaks */}
+            <p className="whitespace-pre-line px-5 pb-5 text-[14px] leading-relaxed text-text-secondary">
               {f.a}
             </p>
           </details>
