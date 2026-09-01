@@ -198,7 +198,7 @@ export function MySiteGrid() {
                     className={`inline-flex items-center gap-1 rounded-full border border-border-primary px-2 py-0.5 font-mono text-[10px] ${
                       row.live
                         ? "text-text-primary"
-                        : "text-text-tertiary"
+                        : "text-text-secondary"
                     }`}
                   >
                     {row.live && (

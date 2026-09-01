@@ -880,7 +880,7 @@ export function SiteStatsBento({
                   {value !== null ? (
                     <CountUpValue to={value} pad={2} />
                   ) : (
-                    <span className="text-text-tertiary">—</span>
+                    <span className="text-text-secondary">—</span>
                   )}
                 </span>
                 <span className="text-center font-mono text-[10px] uppercase tracking-widest text-text-secondary transition-colors duration-300 group-hover/tile:text-text-primary">
@@ -895,7 +895,7 @@ export function SiteStatsBento({
       {/* Footer — live view total + link to the full breakdown */}
       <Link
         href="/stats"
-        className="z-20 mt-2 block py-1.5 -my-1.5 text-center font-mono text-[11px] text-text-tertiary transition-colors duration-300 hover:text-text-primary"
+        className="z-20 mt-2 block py-1.5 -my-1.5 text-center font-mono text-[11px] text-text-secondary transition-colors duration-300 hover:text-text-primary"
       >
         {site?.views != null && (
           <>{site.views.toLocaleString("en-US")} article views · </>
