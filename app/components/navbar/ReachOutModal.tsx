@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -97,14 +97,6 @@ export function ReachOutModal({
       previouslyFocused?.focus?.();
     };
   }, [isOpen, onClose]);
-
-  // Auto-grow textarea
-  const autoGrow = useCallback(() => {
-    const el = textareaRef.current;
-    if (!el) return;
-    el.style.height = "auto";
-    el.style.height = `${el.scrollHeight}px`;
-  }, []);
 
   const handleContinue = () => {
     if (!message.trim()) return;
@@ -252,10 +244,7 @@ export function ReachOutModal({
                   ref={textareaRef}
                   value={message}
                   rows={3}
-                  onChange={(e) => {
-                    setMessage(e.target.value);
-                    autoGrow();
-                  }}
+                  onChange={(e) => setMessage(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
@@ -263,7 +252,7 @@ export function ReachOutModal({
                     }
                   }}
                   placeholder="Hey Haris, I have a project idea..."
-                  className="mt-5 w-full resize-none bg-transparent text-xl text-neutral-900 placeholder-neutral-400 focus:outline-none dark:text-white dark:placeholder-white/30"
+                  className="composer-scroll mt-5 w-full resize-none overflow-y-auto bg-transparent text-xl text-neutral-900 placeholder-neutral-400 focus:outline-none dark:text-white dark:placeholder-white/30"
                 />
 
                 <div className="mt-2 flex items-center justify-between gap-3">
