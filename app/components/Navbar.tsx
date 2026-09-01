@@ -431,7 +431,7 @@ export default function Navbar() {
                     initial={{ x: "-50%" }}
                     animate={{ x: "-50%" }}
                     exit={{ x: "-50%" }}
-                    className="absolute top-0 left-1/2 z-0 w-[740px] max-w-[92vw] [filter:drop-shadow(0_10px_18px_rgba(0,0,0,0.14))_drop-shadow(0_2px_5px_rgba(0,0,0,0.06))] dark:[filter:none]"
+                    className="absolute top-0 left-1/2 z-0 w-[740px] max-w-[92vw] [filter:drop-shadow(0_10px_15px_rgba(0,0,0,0.13))_drop-shadow(0_3px_4px_rgba(0,0,0,0.05))] dark:[filter:none]"
                   >
                   <motion.div
                     /* Pure geometry morph: the panel starts clipped to the
@@ -461,29 +461,18 @@ export default function Navbar() {
                     className="w-full rounded-[24px] bg-white dark:bg-[#1c1c1c] pt-[52px] max-h-[calc(100dvh-40px)] overflow-y-auto overflow-x-hidden"
                   >
                       <motion.div 
-                        initial="hidden"
-                        animate="visible"
-                        /* Fade the cards out fast before the clip folds shut,
-                           so images are never sliced mid-collapse. */
+                        /* Content is completely STATIC — it never moves or
+                           staggers. The expanding clip simply reveals it, so
+                           the whole thing reads as the navbar itself
+                           enlarging (matching the reference). Only a fast
+                           fade on close so images are never sliced while the
+                           clip folds shut. */
                         exit={{ opacity: 0, transition: { duration: 0.16, ease: "easeOut" } }}
-                        variants={{
-                          hidden: {},
-                          visible: {
-                            transition: {
-                              staggerChildren: 0.07,
-                              delayChildren: 0.12,
-                            }
-                          }
-                        }}
                         className="flex flex-col md:flex-row gap-2.5 p-2 pt-4 min-h-[240px]"
                       >
                         
                         {/* Community Wall Card */}
                         <motion.div
-                          variants={{
-                            hidden: { opacity: 0, y: 10 },
-                            visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.19, 1, 0.22, 1] } }
-                          }}
                           className="flex-1 min-h-[160px] max-md:flex-none max-md:h-40"
                         >
                           <Link 
@@ -508,10 +497,6 @@ export default function Navbar() {
 
                         {/* Stats Card */}
                         <motion.div
-                          variants={{
-                            hidden: { opacity: 0, y: 10 },
-                            visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.19, 1, 0.22, 1] } }
-                          }}
                           className="flex-1 min-h-[160px] max-md:flex-none max-md:h-40"
                         >
                           <Link 
@@ -536,10 +521,6 @@ export default function Navbar() {
 
                         {/* Links Column */}
                         <motion.div 
-                          variants={{
-                            hidden: { opacity: 0, y: 10 },
-                            visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.19, 1, 0.22, 1] } }
-                          }}
                           className="flex flex-col gap-2 w-full md:w-[220px]"
                         >
                           <Link 
