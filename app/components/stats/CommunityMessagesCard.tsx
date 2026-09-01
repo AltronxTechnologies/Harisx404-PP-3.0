@@ -180,7 +180,7 @@ export function CommunityMessagesCard({
               <span className="text-3xl font-bold tabular-nums tracking-tight text-purple-primary">
                 {displayCount.toLocaleString()}
               </span>
-              <span className="text-sm text-text-tertiary">messages</span>
+              <span className="text-sm text-text-secondary">messages</span>
             </div>
           </div>
 
@@ -362,7 +362,7 @@ export function CommunityMessagesCard({
             >
               {displayCount.toLocaleString()}
             </motion.span>
-            <span className="text-sm text-text-tertiary">messages</span>
+            <span className="text-sm text-text-secondary">messages</span>
           </div>
         </div>
 

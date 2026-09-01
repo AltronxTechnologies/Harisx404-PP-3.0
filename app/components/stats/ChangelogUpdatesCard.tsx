@@ -103,7 +103,7 @@ export function ChangelogUpdatesCard({
                     </p>
                     <time
                       dateTime={item.publishedAt}
-                      className="text-[9px] text-text-tertiary"
+                      className="text-[9px] text-text-secondary"
                     >
                       {new Date(item.publishedAt).toLocaleDateString("en-US", {
                         month: "short",
@@ -129,7 +129,7 @@ export function ChangelogUpdatesCard({
               <span className="text-2xl font-bold tabular-nums tracking-tight text-purple-primary">
                 {displayCount}
               </span>
-              <span className="text-sm text-text-tertiary">updates</span>
+              <span className="text-sm text-text-secondary">updates</span>
             </div>
           </div>
 
@@ -211,7 +211,7 @@ export function ChangelogUpdatesCard({
                   </p>
                   <time
                     dateTime={item.publishedAt}
-                    className="text-[9px] text-text-tertiary"
+                    className="text-[9px] text-text-secondary"
                   >
                     {new Date(item.publishedAt).toLocaleDateString("en-US", {
                       month: "short",
@@ -241,7 +241,7 @@ export function ChangelogUpdatesCard({
             >
               {displayCount}
             </motion.span>
-            <span className="text-sm text-text-tertiary">updates</span>
+            <span className="text-sm text-text-secondary">updates</span>
           </div>
         </div>
 

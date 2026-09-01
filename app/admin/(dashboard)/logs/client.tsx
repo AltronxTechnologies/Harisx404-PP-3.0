@@ -99,7 +99,7 @@ export default function LogsDashboardClient({ initialLogs }: { initialLogs: LogE
                         <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${getLevelBadgeClass(log.level)}`}>
                           {log.level.toUpperCase()}
                         </span>
-                        <span className="text-xs text-text-tertiary">
+                        <span className="text-xs text-text-secondary">
                           {formatDistanceToNow(new Date(log.created_at), { addSuffix: true })}
                         </span>
                         {log.resolved && (

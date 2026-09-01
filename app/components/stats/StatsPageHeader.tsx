@@ -13,7 +13,7 @@ export function StatsPageHeader() {
       <section>
         <GridWrapper>
           <div className="text-center">
-            <span className="font-mono text-xs uppercase tracking-[0.35em] text-text-tertiary">STATS</span>
+            <span className="font-mono text-xs uppercase tracking-[0.35em] text-text-secondary">STATS</span>
           </div>
         </GridWrapper>
         <GridWrapper>
@@ -41,7 +41,7 @@ export function StatsPageHeader() {
           transition={{ duration: 0.5 }}
           className="text-center"
         >
-          <span className="font-mono text-xs uppercase tracking-[0.35em] text-text-tertiary">STATS</span>
+          <span className="font-mono text-xs uppercase tracking-[0.35em] text-text-secondary">STATS</span>
         </motion.div>
       </GridWrapper>
       <GridWrapper>

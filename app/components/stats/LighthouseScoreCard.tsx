@@ -168,7 +168,7 @@ function RadarBackground({
               fill="none"
               stroke="currentColor"
               strokeWidth={scale === 1 ? 1.5 : 1}
-              className="text-text-tertiary"
+              className="text-text-secondary"
               opacity={0.25}
             />
           ))}
@@ -182,7 +182,7 @@ function RadarBackground({
               y2={center + maxRadius}
               stroke="currentColor"
               strokeWidth={1}
-              className="text-text-tertiary"
+              className="text-text-secondary"
             />
             <line
               x1={center - maxRadius}
@@ -191,7 +191,7 @@ function RadarBackground({
               y2={center}
               stroke="currentColor"
               strokeWidth={1}
-              className="text-text-tertiary"
+              className="text-text-secondary"
             />
           </g>
 
@@ -254,7 +254,7 @@ function RadarBackground({
             fill="none"
             stroke="currentColor"
             strokeWidth={scale === 1 ? 1.5 : 1}
-            className="text-text-tertiary"
+            className="text-text-secondary"
             initial={{ opacity: 0 }}
             animate={{
               opacity: isHovered ? 0.5 : 0.25,
@@ -277,7 +277,7 @@ function RadarBackground({
             y2={center + maxRadius}
             stroke="currentColor"
             strokeWidth={1}
-            className="text-text-tertiary"
+            className="text-text-secondary"
           />
           <line
             x1={center - maxRadius}
@@ -286,7 +286,7 @@ function RadarBackground({
             y2={center}
             stroke="currentColor"
             strokeWidth={1}
-            className="text-text-tertiary"
+            className="text-text-secondary"
           />
         </motion.g>
 
@@ -473,7 +473,7 @@ export function LighthouseScoreCard({
             <h2 className="text-sm font-semibold text-text-primary">
               {strategy === "mobile" ? "Mobile" : "Desktop"}
             </h2>
-            <p className="text-[10px] text-text-tertiary">Lighthouse</p>
+            <p className="text-[10px] text-text-secondary">Lighthouse</p>
           </div>
         </div>
 
@@ -565,7 +565,7 @@ export function LighthouseScoreCard({
           <h2 className="text-sm font-semibold text-text-primary">
             {strategy === "mobile" ? "Mobile" : "Desktop"}
           </h2>
-          <p className="text-[10px] text-text-tertiary">Lighthouse</p>
+          <p className="text-[10px] text-text-secondary">Lighthouse</p>
         </div>
       </div>
 

@@ -16,7 +16,7 @@ export default function AttributionPage() {
       <HeroTexture />
       <div className="pt-14 text-center md:pt-16">
         <GridWrapper>
-          <p className="font-mono text-xs uppercase tracking-[0.35em] text-text-tertiary">
+          <p className="font-mono text-xs uppercase tracking-[0.35em] text-text-secondary">
             ATTRIBUTION
           </p>
           <h1 className="mx-auto mt-3 max-w-2xl font-display text-4xl leading-[1.05] text-text-primary md:text-5xl">

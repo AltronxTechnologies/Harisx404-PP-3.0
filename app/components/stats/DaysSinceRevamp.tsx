@@ -85,7 +85,7 @@ export function DaysSinceRevamp({
               </span>
               <span className="text-lg text-text-secondary">days</span>
             </div>
-            <p className="mt-2 text-xs text-text-tertiary">
+            <p className="mt-2 text-xs text-text-secondary">
               Launched{" "}
               {revampDate.toLocaleDateString("en-US", {
                 month: "short",
@@ -140,7 +140,7 @@ export function DaysSinceRevamp({
             </span>
             <span className="text-lg text-text-secondary">days</span>
           </motion.div>
-          <p className="mt-2 text-xs text-text-tertiary">
+          <p className="mt-2 text-xs text-text-secondary">
             Launched{" "}
             {revampDate.toLocaleDateString("en-US", {
               month: "short",

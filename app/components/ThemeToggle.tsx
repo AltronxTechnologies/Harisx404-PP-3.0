@@ -6,6 +6,15 @@ import { motion } from "framer-motion";
 import { Sun, Moon } from "lucide-react";
 
 /**
+ * The navbar's floating circular button surface. Exported so the navbar search
+ * circle can share it verbatim instead of keeping a copy-pasted duplicate that
+ * silently drops classes (it had already lost `border border-transparent`,
+ * making its content box 1px larger than the same button elsewhere).
+ */
+export const navCircleSurface =
+  "relative flex size-10 cursor-pointer items-center justify-center rounded-full border border-transparent text-neutral-700 transition-all duration-150 hover:text-neutral-900 active:scale-95 dark:text-white/85 dark:hover:text-white bg-white/90 shadow-[0_10px_30px_-14px_rgba(0,0,0,0.22),0_3px_8px_-4px_rgba(0,0,0,0.08)] shadow-border dark:bg-[#1c1c1c]/90 dark:shadow-none";
+
+/**
  * Circular theme toggle button. Styled to match the navbar's
  * floating search circle so they sit as a pair.
  *
@@ -31,9 +40,7 @@ export function ThemeToggle({
     setMounted(true);
   }, []);
 
-  const baseClasses =
-    className ??
-    "relative flex size-10 cursor-pointer items-center justify-center rounded-full border border-transparent text-neutral-700 transition-all duration-150 hover:text-neutral-900 active:scale-95 dark:text-white/85 dark:hover:text-white bg-white/90 shadow-[0_10px_30px_-14px_rgba(0,0,0,0.22),0_3px_8px_-4px_rgba(0,0,0,0.08)] shadow-border dark:bg-[#1c1c1c]/90 dark:shadow-none";
+  const baseClasses = className ?? navCircleSurface;
 
   // Reserve identical space pre-mount: no layout shift, no wrong icon flash
   if (!mounted) {

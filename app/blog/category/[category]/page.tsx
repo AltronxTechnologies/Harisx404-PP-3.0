@@ -39,7 +39,7 @@ export default async function CategoryPage({
 
       {/* Header */}
       <div className="px-2 sm:px-4">
-        <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-text-tertiary">
+        <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-text-secondary">
           From the desk
         </p>
         <h1 className="mt-3 font-display text-5xl text-text-primary md:text-6xl">

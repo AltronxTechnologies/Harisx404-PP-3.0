@@ -25,7 +25,7 @@ export default function GlobalError({
     <html className="dark">
       <body>
         <div className="flex min-h-screen flex-col items-center justify-center bg-bg-primary p-6 text-center text-text-primary">
-          <p className="mb-4 font-mono text-xs uppercase tracking-[0.35em] text-text-tertiary">
+          <p className="mb-4 font-mono text-xs uppercase tracking-[0.35em] text-text-secondary">
             Error
           </p>
           <h2 className="mb-4 font-display text-4xl text-text-primary">

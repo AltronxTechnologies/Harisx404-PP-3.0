@@ -281,7 +281,7 @@ export function InfiniteCanvas({ messages, children }: InfiniteCanvasProps) {
             height="24"
             fill="none"
             viewBox="0 0 24 24"
-            className="text-text-tertiary"
+            className="text-text-secondary"
           >
             <path
               stroke="currentColor"

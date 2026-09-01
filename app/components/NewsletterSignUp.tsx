@@ -104,7 +104,7 @@ export function NewsletterSignUp({
             <div className="absolute bottom-[44.5px] right-[48px] z-20 hidden h-2 w-px bg-zinc-300 md:block"></div>
 
             <h2 className="mb-4 text-3xl font-medium text-slate-50">{title}</h2>
-            <p className="z-50 mb-8 max-w-[336px] text-base leading-8 text-text-tertiary md:mb-12">
+            <p className="z-50 mb-8 max-w-[336px] text-base leading-8 text-text-secondary md:mb-12">
               {description}
             </p>
             <div className="z-50 mb-4 space-y-4">
@@ -177,7 +177,7 @@ export function NewsletterSignUp({
                 )}
               </div>
             </div>
-            <p className="text-base text-text-tertiary">
+            <p className="text-base text-text-secondary">
               <span className="font-bold text-white">NO SPAM.</span> I never
               send spam. You can unsubscribe at any time!
             </p>

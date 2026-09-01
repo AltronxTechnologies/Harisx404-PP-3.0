@@ -264,7 +264,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
             aria-hidden
             viewBox="0 0 20 20"
             fill="none"
-            className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-text-tertiary"
+            className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-text-secondary"
           >
             <circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="1.5" />
             <path d="m13.5 13.5 3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -284,13 +284,13 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
                 else (e.target as HTMLInputElement).blur();
               }
             }}
-            className="h-[2rem] w-full rounded-full border border-border-primary bg-white pl-10 pr-9 font-mono text-xs text-text-primary outline-none transition-colors placeholder:text-text-tertiary hover:border-text-tertiary/60 focus:border-text-tertiary dark:bg-white/[0.03] [&::-webkit-search-cancel-button]:hidden"
+            className="h-[2rem] w-full rounded-full border border-border-primary bg-white pl-10 pr-9 font-mono text-xs text-text-primary outline-none transition-colors placeholder:text-text-secondary hover:border-text-tertiary/60 focus:border-text-tertiary dark:bg-white/[0.03] [&::-webkit-search-cancel-button]:hidden"
           />
           {!query && (
             /* Keyboard hint — press "/" anywhere to jump to search. */
             <kbd
               aria-hidden
-              className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded border border-border-primary px-1.5 py-px font-mono text-[10px] leading-4 text-text-tertiary"
+              className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded border border-border-primary px-1.5 py-px font-mono text-[10px] leading-4 text-text-secondary"
             >
               /
             </kbd>
@@ -300,7 +300,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
               type="button"
               aria-label="Clear search"
               onClick={() => setQuery("")}
-              className="absolute right-2.5 top-1/2 flex size-5 -translate-y-1/2 items-center justify-center rounded-full text-text-tertiary transition-colors hover:bg-black/5 hover:text-text-primary dark:hover:bg-white/10"
+              className="absolute right-2.5 top-1/2 flex size-5 -translate-y-1/2 items-center justify-center rounded-full text-text-secondary transition-colors hover:bg-black/5 hover:text-text-primary dark:hover:bg-white/10"
             >
               <svg aria-hidden viewBox="0 0 12 12" fill="none" className="size-3">
                 <path d="m3 3 6 6M9 3l-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -377,10 +377,10 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
                   {/* Blueprint header — kicker + live count, closed by the
                       same open-dot rule the grid uses. */}
                   <div className="flex items-baseline justify-between px-3.5 pb-2 pt-3">
-                    <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-text-tertiary">
+                    <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-text-secondary">
                       More tags
                     </span>
-                    <span className="font-mono text-[10px] text-text-tertiary">
+                    <span className="font-mono text-[10px] text-text-secondary">
                       {String(overflowTags.length).padStart(2, "0")}
                     </span>
                   </div>
@@ -430,7 +430,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
                             </span>
                             <span
                               className={
-                                active ? "text-bg-primary/70" : "text-text-tertiary"
+                                active ? "text-bg-primary/70" : "text-text-secondary"
                               }
                             >
                               {String(count).padStart(2, "0")}
@@ -574,7 +574,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
 
       {filtered.length === 0 && (
         <div className="mt-10 rounded-2xl border border-dashed border-border-primary px-6 py-16 text-center">
-          <p className="font-mono text-xs uppercase tracking-[0.25em] text-text-tertiary">
+          <p className="font-mono text-xs uppercase tracking-[0.25em] text-text-secondary">
             Nothing here yet
           </p>
           <p className="mt-3 text-sm text-text-secondary">
@@ -585,7 +585,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
             /* The search DOES match projects — they're just hidden behind
                another tag. Offer one-click jumps that keep the query. */
             <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
-              <span className="font-mono text-[11px] uppercase tracking-widest text-text-tertiary">
+              <span className="font-mono text-[11px] uppercase tracking-widest text-text-secondary">
                 Matches found under:
               </span>
               {rescueTags.map((tag) => (
@@ -637,7 +637,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
                 <span
                   key={`gap-${idx}`}
                   aria-hidden
-                  className="flex size-[2rem] items-center justify-center font-mono text-xs text-text-tertiary"
+                  className="flex size-[2rem] items-center justify-center font-mono text-xs text-text-secondary"
                 >
                   …
                 </span>
@@ -691,7 +691,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
           </div>
           <p
             aria-live="polite"
-            className="flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.25em] text-text-tertiary"
+            className="flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.25em] text-text-secondary"
           >
             <span
               aria-hidden

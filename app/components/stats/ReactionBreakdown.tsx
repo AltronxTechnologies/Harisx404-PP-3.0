@@ -151,7 +151,7 @@ export function ReactionBreakdown({
           <h2 className="mb-2 font-medium text-text-primary">Reactions</h2>
           <p className="mb-4 text-3xl font-bold tabular-nums tracking-tight text-purple-primary">
             {total.toLocaleString()}
-            <span className="ml-2 text-sm font-normal text-text-tertiary">total</span>
+            <span className="ml-2 text-sm font-normal text-text-secondary">total</span>
           </p>
 
           <div className="grid flex-1 grid-cols-2 gap-3">
@@ -165,7 +165,7 @@ export function ReactionBreakdown({
                     <config.Icon isHovered={false} shouldReduceAnimations={shouldReduceAnimations} />
                   </div>
                   <span className="text-lg font-semibold tabular-nums text-text-primary">{count.toLocaleString()}</span>
-                  <span className="text-xs text-text-tertiary">{config.label}</span>
+                  <span className="text-xs text-text-secondary">{config.label}</span>
                 </div>
               );
             })}
@@ -195,7 +195,7 @@ export function ReactionBreakdown({
           className="mb-4 text-3xl font-bold tabular-nums tracking-tight text-purple-primary"
         >
           {total.toLocaleString()}
-          <span className="ml-2 text-sm font-normal text-text-tertiary">total</span>
+          <span className="ml-2 text-sm font-normal text-text-secondary">total</span>
         </motion.p>
 
         <div className="grid flex-1 grid-cols-2 gap-3">
@@ -231,7 +231,7 @@ export function ReactionBreakdown({
                 >
                   {count.toLocaleString()}
                 </motion.span>
-                <span className="text-xs text-text-tertiary">{config.label}</span>
+                <span className="text-xs text-text-secondary">{config.label}</span>
               </motion.div>
             );
           })}

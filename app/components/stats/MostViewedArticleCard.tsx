@@ -160,7 +160,7 @@ export function MostViewedArticleCard({
               <span className="text-3xl font-bold tabular-nums tracking-tight text-purple-primary">
                 {effectiveDisplayCount.toLocaleString()}
               </span>
-              <span className="text-sm text-text-tertiary">views</span>
+              <span className="text-sm text-text-secondary">views</span>
             </div>
           </div>
 
@@ -300,7 +300,7 @@ export function MostViewedArticleCard({
             >
               {effectiveDisplayCount.toLocaleString()}
             </motion.span>
-            <span className="text-sm text-text-tertiary">views</span>
+            <span className="text-sm text-text-secondary">views</span>
           </div>
         </div>
 

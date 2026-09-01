@@ -107,7 +107,7 @@ export const LinkPreviewPopover = forwardRef<
 
           {/* External Link Icon */}
           <svg
-            className="ml-auto h-3 w-3 shrink-0 text-text-tertiary"
+            className="ml-auto h-3 w-3 shrink-0 text-text-secondary"
             viewBox="0 0 12 12"
             fill="none"
             aria-hidden="true"

@@ -142,7 +142,7 @@ export function ContributionGraphCard({
           <span className="text-2xl font-semibold tracking-tight text-purple-primary">
             {displayCount.toLocaleString()}
           </span>
-          <p className="text-xs text-text-tertiary">contributions</p>
+          <p className="text-xs text-text-secondary">contributions</p>
         </div>
       </div>
 
@@ -153,7 +153,7 @@ export function ContributionGraphCard({
           <div className="w-fit">
             {/* Month labels */}
             <div
-              className="mb-1 flex text-[10px] text-text-tertiary"
+              className="mb-1 flex text-[10px] text-text-secondary"
               style={{ paddingLeft: "28px" }}
             >
               <div className="flex" style={{ gap: "2px" }}>
@@ -178,7 +178,7 @@ export function ContributionGraphCard({
             {/* Graph grid */}
             <div className="flex gap-[2px]">
               <div
-                className="flex w-6 shrink-0 flex-col text-[9px] text-text-tertiary"
+                className="flex w-6 shrink-0 flex-col text-[9px] text-text-secondary"
                 style={{ gap: "2px" }}
               >
                 <div className="h-[10px]" />
@@ -226,7 +226,7 @@ export function ContributionGraphCard({
         <div className="hidden md:block">
           {/* Month labels */}
           <div
-            className="mb-1 flex text-[10px] text-text-tertiary"
+            className="mb-1 flex text-[10px] text-text-secondary"
             style={{ paddingLeft: "28px" }}
           >
             <div className="flex flex-1 justify-between">
@@ -238,7 +238,7 @@ export function ContributionGraphCard({
 
           {/* Graph grid */}
           <div className="flex gap-[3px]">
-            <div className="flex w-6 shrink-0 flex-col justify-between py-[2px] text-[9px] text-text-tertiary">
+            <div className="flex w-6 shrink-0 flex-col justify-between py-[2px] text-[9px] text-text-secondary">
               <span></span>
               <span>Mon</span>
               <span></span>
@@ -286,7 +286,7 @@ export function ContributionGraphCard({
       </div>
 
       {/* Legend */}
-      <div className="relative z-20 mt-3 flex items-center justify-center gap-1 text-[10px] text-text-tertiary md:justify-end">
+      <div className="relative z-20 mt-3 flex items-center justify-center gap-1 text-[10px] text-text-secondary md:justify-end">
         <span>Less</span>
         {(
           [
@@ -318,7 +318,7 @@ export function ContributionGraphCard({
             {tooltip.day.contributionCount} contribution
             {tooltip.day.contributionCount !== 1 ? "s" : ""}
           </div>
-          <div className="text-text-tertiary">{formatDate(tooltip.day.date)}</div>
+          <div className="text-text-secondary">{formatDate(tooltip.day.date)}</div>
           <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
         </div>
       )}
@@ -365,14 +365,14 @@ export function ContributionGraphCard({
           <span className="text-2xl font-semibold tracking-tight text-purple-primary">
             {displayCount.toLocaleString()}
           </span>
-          <p className="text-xs text-text-tertiary">contributions</p>
+          <p className="text-xs text-text-secondary">contributions</p>
         </motion.div>
       </div>
 
       <div className="relative z-20 mt-2 flex-1">
         <div className="overflow-x-auto md:hidden">
           <div className="w-fit">
-            <div className="mb-1 flex text-[10px] text-text-tertiary" style={{ paddingLeft: "28px" }}>
+            <div className="mb-1 flex text-[10px] text-text-secondary" style={{ paddingLeft: "28px" }}>
               <div className="flex" style={{ gap: "2px" }}>
                 {contributions.weeks.map((week, weekIndex) => {
                   const showMonth = monthLabels.some((m) => m.index === weekIndex);
@@ -387,7 +387,7 @@ export function ContributionGraphCard({
             </div>
 
             <div className="flex gap-[2px]">
-              <div className="flex w-6 shrink-0 flex-col text-[9px] text-text-tertiary" style={{ gap: "2px" }}>
+              <div className="flex w-6 shrink-0 flex-col text-[9px] text-text-secondary" style={{ gap: "2px" }}>
                 <div className="h-[10px]" />
                 <div className="flex h-[10px] items-center">Mon</div>
                 <div className="h-[10px]" />
@@ -431,7 +431,7 @@ export function ContributionGraphCard({
         </div>
 
         <div className="hidden md:block">
-          <div className="mb-1 flex text-[10px] text-text-tertiary" style={{ paddingLeft: "28px" }}>
+          <div className="mb-1 flex text-[10px] text-text-secondary" style={{ paddingLeft: "28px" }}>
             <div className="flex flex-1 justify-between">
               {monthLabels.map((month, i) => (
                 <span key={i}>{month.label}</span>
@@ -440,7 +440,7 @@ export function ContributionGraphCard({
           </div>
 
           <div className="flex gap-[3px]">
-            <div className="flex w-6 shrink-0 flex-col justify-between py-[2px] text-[9px] text-text-tertiary">
+            <div className="flex w-6 shrink-0 flex-col justify-between py-[2px] text-[9px] text-text-secondary">
               <span></span>
               <span>Mon</span>
               <span></span>
@@ -482,7 +482,7 @@ export function ContributionGraphCard({
         </div>
       </div>
 
-      <div className="relative z-20 mt-3 flex items-center justify-center gap-1 text-[10px] text-text-tertiary md:justify-end">
+      <div className="relative z-20 mt-3 flex items-center justify-center gap-1 text-[10px] text-text-secondary md:justify-end">
         <span>Less</span>
         {(["NONE", "FIRST_QUARTILE", "SECOND_QUARTILE", "THIRD_QUARTILE", "FOURTH_QUARTILE"] as const).map((level) => (
           <div key={level} className={`h-[10px] w-[10px] rounded-[2px] ${levelColors[level]}`} />
@@ -498,7 +498,7 @@ export function ContributionGraphCard({
           <div className="font-medium">
             {tooltip.day.contributionCount} contribution{tooltip.day.contributionCount !== 1 ? "s" : ""}
           </div>
-          <div className="text-text-tertiary">{formatDate(tooltip.day.date)}</div>
+          <div className="text-text-secondary">{formatDate(tooltip.day.date)}</div>
           <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
         </div>
       )}
