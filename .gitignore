@@ -44,3 +44,6 @@ next-env.d.ts
 
 # link preview content hash (local optimization only)
 public/previews/.content-hash/.next-build/
+
+# Alloy preview validation artifact — never commit
+screenshot.png

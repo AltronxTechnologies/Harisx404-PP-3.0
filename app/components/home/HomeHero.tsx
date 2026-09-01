@@ -36,7 +36,7 @@ function TaglineRotator() {
 
   return (
     <div
-      className="flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.22em] text-text-secondary lg:text-[13px] lg:tracking-[0.28em]"
+      className="flex items-center gap-2.5 font-mono text-xs font-normal uppercase tracking-widest text-text-secondary"
       aria-live="polite"
     >
       {/* Dot lives outside the clipped rotator so its ping ring never cuts */}
@@ -89,14 +89,27 @@ const domainStyles: Record<
   },
 };
 
-const DECODE_GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ<>/[]{}#$%&*+=";
-const FRAME_MS = 28;
-const FRAMES_PER_CHAR = 3;
+/* Terminal glyph set (per the decode reference) — symbols only, so the
+   scramble reads as "machine noise" rather than letter soup. */
+const DECODE_GLYPHS = "#</>{}[]=+*^:~10";
+const DECODE_MS = 850; // line 1 duration; line 2 runs +150ms and starts +130ms later
 const HOLD_MS = 2600;
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const randGlyph = () =>
   DECODE_GLYPHS[Math.floor(Math.random() * DECODE_GLYPHS.length)];
+
+/* Duration-based scramble of one string: characters lock left-to-right
+   as progress advances; spaces are preserved. Driven by rAF, so it is
+   frame-rate independent (60/120/144Hz) and jitter-free. */
+function scrambleAt(target: string, progress: number) {
+  const settled = Math.floor(progress * target.length);
+  let out = target.slice(0, settled);
+  for (let i = settled; i < target.length; i++) {
+    out += target[i] === " " ? " " : randGlyph();
+  }
+  return out;
+}
 
 /* Matrix-style decode (per the reference site): every character cycles
    through random glyphs, then locks into place left-to-right. Phrases
@@ -112,40 +125,86 @@ function HeadlineRotator({
   const [line2, setLine2] = useState<string>(headlines[0].line2);
   const [busy, setBusy] = useState(false);
   const firstRun = useRef(true);
+  /* Hover re-scramble (per the decode reference): pointerenter replays a
+     snappier 650ms decode of the current phrase, throttled to one replay
+     per 2.6s, fine pointers only. */
+  const [replay, setReplay] = useState(0);
+  const fastRef = useRef(false);
+  const lastHoverRef = useRef(0);
+  const busyRef = useRef(false);
+  busyRef.current = busy;
+  /* Pause the rotation while the hero is scrolled off-screen: the cycle
+     waits (500ms polls) until the headline is visible again before
+     decoding or advancing — no wasted work in background. */
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const visibleRef = useRef(true);
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        visibleRef.current = entry.isIntersecting;
+      },
+      { threshold: 0 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+  const handleHover = () => {
+    if (typeof window === "undefined") return;
+    if (!window.matchMedia("(pointer: fine)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const now = Date.now();
+    if (busyRef.current || now - lastHoverRef.current < 2600) return;
+    lastHoverRef.current = now;
+    fastRef.current = true;
+    setReplay((r) => r + 1);
+  };
 
   useEffect(() => {
     let cancelled = false;
     const t1 = headlines[index].line1;
     const t2 = headlines[index].line2;
-    onDomainChange?.(headlines[index].accent);
+    /* Illustration swaps 300ms into the decode so the text appears to
+       "summon" the visual rather than both flipping at once. */
+    const domainTimer = setTimeout(
+      () => onDomainChange?.(headlines[index].accent),
+      firstRun.current ? 0 : 300
+    );
 
     const reduced = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
 
-    /* Decode both lines simultaneously toward their targets. */
-    const decode = async () => {
-      const len = Math.max(t1.length, t2.length);
-      const totalFrames = len * FRAMES_PER_CHAR + 4;
-      for (let f = 0; f <= totalFrames; f++) {
-        if (cancelled) return;
-        const locked = Math.floor(f / FRAMES_PER_CHAR);
-        const scramble = (target: string) =>
-          target
-            .split("")
-            .map((ch, i) => {
-              if (ch === " ") return " ";
-              if (i < locked) return ch;
-              return randGlyph();
-            })
-            .join("");
-        setLine1(scramble(t1));
-        setLine2(scramble(t2));
-        await wait(FRAME_MS);
-      }
-      setLine1(t1);
-      setLine2(t2);
+    /* Off-screen pause: resolve only once the headline is visible. */
+    const waitVisible = async () => {
+      while (!cancelled && !visibleRef.current) await wait(500);
     };
+
+    /* rAF-driven decode: both lines morph toward their targets; line 2
+       starts 130ms later and runs 150ms longer (staggered, per the
+       decode reference). Resolves when both lines are fully settled. */
+    const decode = () =>
+      new Promise<void>((resolve) => {
+        let t0: number | null = null;
+        let raf = 0;
+        const d1 = fastRef.current ? 650 : DECODE_MS;
+        const d2 = (fastRef.current ? 650 : DECODE_MS) + 150;
+        const offset2 = 130;
+        const frame = (now: number) => {
+          if (cancelled) return resolve();
+          if (t0 === null) t0 = now;
+          const el = now - t0;
+          const p1 = Math.min(el / d1, 1);
+          const p2 = Math.min(Math.max(el - offset2, 0) / d2, 1);
+          setLine1(p1 < 1 ? scrambleAt(t1, p1) : t1);
+          setLine2(p2 < 1 ? scrambleAt(t2, p2) : t2);
+          if (p1 < 1 || p2 < 1) raf = requestAnimationFrame(frame);
+          else resolve();
+        };
+        raf = requestAnimationFrame(frame);
+        return () => cancelAnimationFrame(raf);
+      });
 
     (async () => {
       if (reduced) {
@@ -157,43 +216,40 @@ function HeadlineRotator({
       }
 
       // First cycle: SSR already shows the full phrase - hold, then morph.
+      // Hover replays also decode (snappier 650ms via fastRef).
       if (!firstRun.current) {
+        await waitVisible();
+        if (cancelled) return;
         setBusy(true);
         await decode();
         setBusy(false);
+        fastRef.current = false;
       }
       firstRun.current = false;
 
       await wait(HOLD_MS);
+      await waitVisible();
       if (cancelled) return;
       setIndex((prev) => (prev + 1) % headlines.length);
     })();
 
     return () => {
       cancelled = true;
+      clearTimeout(domainTimer);
     };
-  }, [index]);
+  }, [index, replay]);
 
   const current = headlines[index];
   const domain = domainStyles[current.accent] ?? domainStyles.ai;
 
   return (
-    <div className="relative">
-      {/* Ambient glow that breathes in the current domain color */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={`glow-${current.accent}`}
-          initial={{ opacity: 0, scale: 0.85 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 1.1 }}
-          transition={{ duration: 1.1, ease: "easeInOut" }}
-          aria-hidden
-          className={`pointer-events-none absolute -inset-x-10 -inset-y-8 -z-10 rounded-full blur-3xl ${domain.glow}`}
-        />
-      </AnimatePresence>
+    <div ref={rootRef} className="relative">
+      {/* Ambient glow removed — the domain color already reads through
+         the gradient text, caret, and illustration; cleaner without it. */}
 
       <h1
-        className="relative font-grotesk text-[2.5rem] font-bold uppercase leading-[1.04] tracking-tight text-text-primary sm:text-6xl md:text-[2.85rem] lg:text-[4.25rem]"
+        onPointerEnter={handleHover}
+        className="relative [font-family:var(--font-jetbrains-mono),monospace] text-[2.1rem] font-bold uppercase leading-[0.96] tracking-[-0.045em] text-text-primary sm:text-5xl md:text-[2.5rem] lg:text-[3.6rem]"
         aria-live="polite"
         aria-label={`${current.line1} ${current.line2}`}
       >
@@ -204,9 +260,9 @@ function HeadlineRotator({
           PROFESSIONAL
         </span>
         <span className="absolute inset-0 block" aria-hidden>
-          <span className="block whitespace-nowrap leading-[1.04]">{line1}</span>
+          <span className="block whitespace-nowrap leading-[0.96] [will-change:contents]">{line1}</span>
           <span
-            className={`hero-gradient-animate ${domain.gradient} block whitespace-nowrap leading-[1.04]`}
+            className={`hero-gradient-animate ${domain.gradient} block whitespace-nowrap leading-[0.96] [will-change:contents]`}
           >
             {line2}
             <span
@@ -334,7 +390,7 @@ export function HomeHero({
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
                   <span className="relative inline-flex size-1.5 rounded-full bg-blue-500" />
                 </span>
-                <span className="whitespace-nowrap font-mono text-[9px] uppercase tracking-[0.18em] text-blue-600 dark:text-blue-300">
+                <span className="whitespace-nowrap font-mono text-[9px] uppercase tracking-widest text-blue-600 dark:text-blue-300">
                   New launch
                 </span>
               </span>
@@ -357,7 +413,7 @@ export function HomeHero({
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
                   <span className="relative inline-flex size-1.5 rounded-full bg-blue-500" />
                 </span>
-                <span className="whitespace-nowrap font-mono text-[10px] uppercase tracking-[0.25em] text-text-secondary lg:text-[11px]">
+                <span className="whitespace-nowrap font-mono text-xs uppercase tracking-widest text-text-secondary">
                   New launch
                 </span>
                 <span
@@ -366,7 +422,7 @@ export function HomeHero({
                 />
               </span>
               <span className="mt-2.5 inline-block lg:mt-3">
-                <span className="block font-display text-[26px] leading-tight text-text-primary md:text-[32px] lg:text-4xl">
+                <span className="block font-display text-[26px] leading-tight text-text-primary md:text-[30px]">
                   {launch.name}
                 </span>
                 {/* Blue stroke that sweeps in on hover (per reference) */}
@@ -376,7 +432,7 @@ export function HomeHero({
                 />
               </span>
               <span className="mt-1.5 flex w-full items-center justify-between gap-3 lg:mt-2">
-                <span className="font-mono text-[11px] uppercase tracking-widest text-text-tertiary lg:text-xs">
+                <span className="font-mono text-xs uppercase tracking-widest text-text-secondary">
                   {hero.newLaunch.subline}
                 </span>
                 <span className="flex size-5 shrink-0 items-center justify-center rounded-full border border-border-primary text-text-secondary transition-colors group-hover:bg-text-primary group-hover:text-bg-primary">

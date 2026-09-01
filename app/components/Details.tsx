@@ -47,51 +47,31 @@ export function Details({
 
   return (
     <details
-      className={`group relative mb-8 overflow-hidden rounded-xl border bg-bg-primary transition-all duration-300 ease-out focus-within:ring-2 focus-within:ring-slate-400/30 focus-within:ring-offset-2 focus-within:ring-offset-bg-primary ${
-        isOpen
-          ? "drama-shadow border-border-primary"
-          : "border-border-primary/60 hover:border-border-primary"
-      }`}
+      className="group relative mb-4 overflow-hidden rounded-xl border border-border-primary/60 bg-transparent transition-colors duration-300 hover:bg-black/[0.02] focus-within:ring-2 focus-within:ring-blue-500/20 open:border-border-primary dark:hover:bg-white/[0.02]"
       open={isOpen}
       onToggle={(e) => setIsOpen((e.target as HTMLDetailsElement).open)}
     >
       <summary
-        className="relative flex cursor-pointer select-none items-center gap-3 px-5 py-4 text-base text-text-primary transition-colors duration-200 [&::-webkit-details-marker]:hidden"
+        className="relative flex cursor-pointer select-none items-center justify-between gap-3 px-5 py-4 text-[15px] font-medium leading-[1.375] text-neutral-800 dark:text-neutral-200 [&::-webkit-details-marker]:hidden"
         aria-expanded={isOpen}
       >
-        {/* Expand/collapse indicator */}
-        <span
-          className={`flex h-5 w-5 shrink-0 items-center justify-center rounded transition-all duration-300 ${
-            isOpen
-              ? "bg-slate-800 dark:bg-slate-200"
-              : "bg-slate-200 group-hover:bg-slate-300 dark:bg-slate-700 dark:group-hover:bg-slate-600"
-          }`}
-          aria-hidden="true"
-        >
+        <span className="flex-1">{summaryContent}</span>
+
+        {/* Rotating chevron — reference: 180° over 300ms cubic-bezier(0.23,1,0.32,1) */}
+        <span aria-hidden="true" className="flex size-5 shrink-0 items-center justify-center text-neutral-400 dark:text-neutral-500">
           <svg
-            className={`h-3 w-3 transition-all duration-300 ease-out ${
-              isOpen
-                ? "text-white dark:text-slate-800"
-                : "text-slate-500 dark:text-text-tertiary"
-            }`}
-            style={{ transform: isOpen ? "rotate(90deg)" : "rotate(0deg)" }}
+            className="size-4"
+            style={{
+              transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+              transition: "transform 300ms cubic-bezier(0.23, 1, 0.32, 1)",
+            }}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
-            strokeWidth={2.5}
+            strokeWidth={2}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M9 5l7 7-7 7"
-            />
+            <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
           </svg>
-        </span>
-
-        <span
-          className={`flex-1 leading-relaxed ${isOpen ? "font-medium" : "font-normal"}`}
-        >
-          {summaryContent}
         </span>
       </summary>
 
@@ -105,13 +85,7 @@ export function Details({
         role="region"
         aria-label="Expandable content"
       >
-        {/* Subtle top border */}
-        <div
-          className="absolute left-5 right-5 top-0 h-px bg-border-primary/50"
-          aria-hidden="true"
-        />
-
-        <div className="px-5 pb-5 pt-4 text-base leading-7 text-text-secondary [&>pre:last-child]:mb-0 [&>*:last-child>pre:last-child]:mb-0">
+        <div className="px-5 pb-5 pt-0 text-[14px] leading-[1.625] text-neutral-600 dark:text-neutral-400 [&>pre:last-child]:mb-0 [&>*:last-child>pre:last-child]:mb-0">
           {contentChildren}
         </div>
       </div>

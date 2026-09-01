@@ -611,19 +611,8 @@ export function DomainShowcase({ domain }: { domain: string }) {
       onMouseLeave={() => setHovered(false)}
       className="group relative h-[150px] w-full max-w-[280px] sm:h-[156px] sm:max-w-[300px] md:max-w-[280px] lg:h-[172px] lg:max-w-[320px]"
     >
-      {/* fixed shared glow — dark mode mirrors the hero headline's ambient
-          glow: flat color, blur-3xl, oversized so the falloff finishes far
-          outside the illustration (no visible rim) */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={`glow-${domain}`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.5, ease: "easeInOut" }}
-          className={`absolute inset-4 rounded-full blur-2xl transition-opacity duration-300 dark:-inset-x-10 dark:-inset-y-8 dark:blur-3xl ${domainGlow[domain] ?? domainGlow.ai} opacity-80 group-hover:opacity-100`}
-        />
-      </AnimatePresence>
+      {/* Backdrop glow removed (matches the headline) — the illustration's
+         own colored strokes and dots carry the domain identity. */}
       <AnimatePresence mode="wait">
         <motion.div
           key={`${domain}-${idx}`}

@@ -80,20 +80,9 @@ export function ContactClient() {
   ];
 
   return (
-    <div className="mx-auto max-w-3xl py-16 sm:py-24">
-      {/* Heading */}
-      <div className="text-center">
-        <p className="font-mono text-xs uppercase tracking-[0.35em] text-text-tertiary">
-          {contact.kicker}
-        </p>
-        <h1 className="mx-auto mt-3 max-w-2xl font-display text-4xl leading-[1.05] text-text-primary md:text-6xl">
-          {contact.heading}{" "}
-          <em className="text-gradient-accent italic">{contact.headingAccent}</em>
-        </h1>
-      </div>
-
+    <div className="w-full">
       {/* Tabs + socials */}
-      <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+      <div className="flex flex-wrap items-center justify-center gap-3 lg:justify-start">
         <div
           role="tablist"
           aria-label="Contact options"

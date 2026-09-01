@@ -24,6 +24,7 @@ import { AboutTeaser } from "./components/home/AboutTeaser";
 import { Testimonials } from "./components/home/Testimonials";
 import { MySiteGrid } from "./components/home/MySiteGrid";
 import { CtaSection } from "./components/home/CtaSection";
+import { HomeFaq } from "./components/home/HomeFaq";
 
 export const revalidate = 3600;
 
@@ -217,6 +218,7 @@ export default async function Home() {
           <AboutTeaser />
           <Testimonials items={dbTestimonials} />
           <MySiteGrid />
+          <HomeFaq />
           <CtaSection />
         </div>
       </div>

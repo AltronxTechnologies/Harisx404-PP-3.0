@@ -74,8 +74,8 @@ const techIconMap: Record<
 function TechChip({ name, pill = false }: { name: string; pill?: boolean }) {
   const icon = techIconMap[normalizeTech(name)];
   const base = pill
-    ? "group/chip flex items-center gap-1.5 rounded-full border border-border-primary px-3 py-1 font-mono text-[11px] text-text-secondary transition-colors duration-300 hover:border-indigo-400/60 hover:text-text-primary"
-    : "group/chip flex items-center gap-1.5 rounded-md bg-text-primary/5 px-2.5 py-[5px] font-mono text-[11px] uppercase tracking-wide text-text-secondary transition-colors duration-300 hover:text-text-primary dark:bg-white/5";
+    ? "group/chip flex items-center gap-1.5 rounded-full border border-border-primary px-3 py-1 font-mono text-xs text-text-secondary transition-colors duration-300 hover:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25"
+    : "group/chip flex items-center gap-1.5 rounded-md bg-black/[0.05] px-2.5 py-[5px] font-mono text-[10px] uppercase tracking-widest text-text-secondary ring-1 ring-black/[0.06] transition-colors duration-300 hover:text-text-primary dark:bg-white/5 dark:ring-white/[0.06]";
   return (
     <span
       className={base}
@@ -107,7 +107,7 @@ function TechChip({ name, pill = false }: { name: string; pill?: boolean }) {
           className="size-1.5 shrink-0 rounded-full bg-[var(--brand)] dark:bg-[var(--brand-dark)]"
         />
       )}
-      {name}
+      <span className="leading-none">{name}</span>
     </span>
   );
 }
@@ -328,7 +328,7 @@ export function CaseStudyCard({
   return (
     <motion.article
       key={project.slug}
-      initial={{ opacity: 0, y: 24 }}
+      initial={false}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-10%" }}
       transition={{ duration: 0.6, ease: "easeOut" }}
@@ -349,7 +349,7 @@ export function CaseStudyCard({
       {/* Header: `01 ─── tags-in-pills` left, year pill right. */}
       <div className="mb-5 flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
-          <span className="shrink-0 font-mono text-sm text-text-tertiary">
+          <span className="shrink-0 font-mono text-xs text-text-secondary">
             {String(i + 1).padStart(2, "0")}
           </span>
           <span aria-hidden className="h-px w-4 shrink-0 bg-border-primary sm:w-7" />
@@ -374,7 +374,7 @@ export function CaseStudyCard({
           </div>
         </div>
         {project.year && (
-          <span className="shrink-0 rounded-lg border border-border-primary bg-bg-secondary/60 px-3 py-1 font-mono text-[11px] text-text-secondary">
+          <span className="inline-flex h-[26.5px] shrink-0 items-center rounded-lg border border-border-primary bg-bg-secondary/60 px-3 font-mono text-xs text-text-secondary">
             {project.year}
           </span>
         )}
@@ -423,7 +423,15 @@ export function CaseStudyCard({
         </div>
       )}
 
-      <Link href={`/projects/${project.slug}`} className="group block">
+      <Link
+        href={`/projects/${project.slug}`}
+        className={clsx(
+          "frame-light-edge group relative block",
+          /* Projects page: the cover panel itself rises 6px on hover, so the
+             frame hairline must ride along or it visibly detaches. */
+          !liftOnHover && "frame-light-edge-lift"
+        )}
+      >
         <div
           ref={panelRef}
           className={clsx(
@@ -471,18 +479,18 @@ export function CaseStudyCard({
                   "line-clamp-2 max-w-xl",
                   coverHeading === "title"
                     ? bodyHiddenOnXl
-                      ? /* Home: softer cover title — serif 500, white/85,
-                           no shadow, 20/22px. */
-                        "font-display text-xl font-medium leading-snug text-white/85 md:text-[22px]"
+                      ? /* Home: cover tagline in the body sans (same family
+                           as the card description) — softer, 18/20px. */
+                        "text-base font-medium leading-snug text-white/85 md:text-xl"
                       : /* Identical type to the home projects-section title
                          (font-display text-3xl font-medium leading-tight) —
                          white for contrast on the gradient panel, lifted by a
                          two-layer text shadow (tight contact + soft ambient)
                          so it stays crisp on any cover hue. */
                       "font-display text-[22px] font-medium leading-tight text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.35),0_4px_14px_rgba(0,0,0,0.22)] max-[380px]:text-[19px] sm:text-[26px] md:text-3xl"
-                    : /* Home: projects-title font/weight, but softer —
-                         white/70, no shadow — sized for two clamped lines. */
-                      "font-display text-xl font-medium leading-snug text-white/85 md:text-[22px]"
+                    : /* Home: body-sans tagline, softer — white/70,
+                         no shadow — sized for two clamped lines. */
+                      "text-base font-medium leading-snug text-white/85 md:text-xl"
                 )}
               >
                 {coverHeading === "title"
@@ -497,15 +505,33 @@ export function CaseStudyCard({
               <span
                 aria-hidden
                 className={clsx(
-                  "shrink-0 text-[22px] leading-none text-white transition-transform duration-300 group-hover:translate-x-1",
-                  /* Projects page: same two-layer shadow as the title so the
-                     arrow sits on the gradient with matching depth. */
-                  coverHeading === "title" &&
-                    "[text-shadow:0_1px_2px_rgba(0,0,0,0.35),0_4px_14px_rgba(0,0,0,0.22)]",
+                  "shrink-0 leading-none transition-transform duration-300 group-hover:translate-x-1",
+                  /* Home: thin line-arrow (long shaft + chevron) drawn as an
+                     SVG in the tagline's white/85 — matches the reference
+                     shape. Projects keeps the shadowed glyph arrow that
+                     pairs with its serif title. */
+                  bodyHiddenOnXl || coverHeading !== "title"
+                    ? "mt-1 text-white/85"
+                    : "text-[22px] text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.35),0_4px_14px_rgba(0,0,0,0.22)]",
                   active && "translate-x-1"
                 )}
               >
-                →
+                {bodyHiddenOnXl || coverHeading !== "title" ? (
+                  <svg
+                    viewBox="0 0 24 16"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2.2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-4 w-6"
+                  >
+                    <path d="M2 8h19" />
+                    <path d="m15 2 6 6-6 6" />
+                  </svg>
+                ) : (
+                  "→"
+                )}
               </span>
             </div>
 
@@ -685,7 +711,7 @@ export function CaseStudyCard({
               aria-expanded={detailsOpen}
               aria-controls={`project-details-${project.slug}`}
               onClick={toggleDetails}
-              className="group/toggle inline-flex items-center gap-2 py-1.5 -my-1.5 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:text-text-primary"
+              className="group/toggle inline-flex items-center gap-2 py-1.5 -my-1.5 font-mono text-xs uppercase tracking-widest text-text-secondary transition-colors hover:text-text-primary"
             >
               <span
                 aria-hidden
@@ -699,17 +725,17 @@ export function CaseStudyCard({
               </span>
               {detailsOpen ? "Hide details" : "Details"}
             </button>
-            <span aria-hidden className="text-text-tertiary">
+            <span aria-hidden className="text-text-secondary">
               ·
             </span>
             <Link
               href={`/projects/${project.slug}`}
-              className="group/cta inline-flex items-center gap-2 py-1.5 -my-1.5 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:text-text-primary"
+              className="group/cta inline-flex items-center gap-2 py-1.5 -my-1.5 font-mono text-xs uppercase tracking-widest text-text-secondary transition-colors hover:text-text-primary"
             >
               View case study
               <span
                 aria-hidden
-                className="transition-transform duration-300 group-hover/cta:translate-x-1"
+                className="inline-block leading-none transition-transform duration-300 group-hover/cta:translate-x-1"
               >
                 →
               </span>
@@ -741,7 +767,7 @@ export function CaseStudyCard({
                   >
                     <span
                       aria-hidden="true"
-                      className={`mr-2 shrink-0 font-mono ${hueText[i % hueText.length]}`}
+                      className={`mr-2 flex h-6 shrink-0 items-center font-mono ${hueText[i % hueText.length]}`}
                     >
                       ✦
                     </span>
@@ -760,7 +786,7 @@ export function CaseStudyCard({
                 {coverHeading === "title" && project.tech.length > 5 && (
                   /* Cap at five chips — the full stack lives on the case
                      study page. Keeps the panel tidy and even per project. */
-                  <span className="inline-flex items-center rounded-full border border-dashed border-border-primary px-3 py-1 font-mono text-[11px] text-text-tertiary">
+                  <span className="inline-flex items-center rounded-full border border-dashed border-border-primary px-3 py-1 font-mono text-xs text-text-secondary">
                     +{project.tech.length - 5}
                   </span>
                 )}
@@ -771,12 +797,12 @@ export function CaseStudyCard({
         {coverHeading !== "title" && (
           <Link
             href={`/projects/${project.slug}`}
-            className="group/cta mt-5 inline-flex items-center gap-2 py-1.5 -my-1.5 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:text-text-primary"
+            className="group/cta mt-5 inline-flex items-center gap-2 py-1.5 -my-1.5 font-mono text-xs uppercase tracking-widest text-text-secondary transition-colors hover:text-text-primary"
           >
             View case study
             <span
               aria-hidden
-              className="transition-transform duration-300 group-hover/cta:translate-x-1"
+              className="inline-block leading-none transition-transform duration-300 group-hover/cta:translate-x-1"
             >
               →
             </span>
@@ -822,7 +848,7 @@ function StickyProjectPanel({
           <li key={i} className="flex text-sm leading-6 text-text-secondary">
             <span
               aria-hidden="true"
-              className={`mr-2 shrink-0 font-mono ${hueText[index % hueText.length]}`}
+              className={`mr-2 flex h-6 shrink-0 items-center font-mono ${hueText[index % hueText.length]}`}
             >
               ✦
             </span>
@@ -842,12 +868,12 @@ function StickyProjectPanel({
       <Link
         href={`/projects/${project.slug}`}
         tabIndex={-1}
-        className="group/cta mt-6 inline-flex items-center gap-2 py-1.5 -my-1.5 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:text-text-primary"
+        className="group/cta mt-6 inline-flex items-center gap-2 py-1.5 -my-1.5 font-mono text-xs uppercase tracking-widest text-text-secondary transition-colors hover:text-text-primary"
       >
         View case study
         <span
           aria-hidden
-          className="transition-transform duration-300 group-hover/cta:translate-x-1"
+          className="inline-block leading-none transition-transform duration-300 group-hover/cta:translate-x-1"
         >
           →
         </span>
@@ -888,14 +914,14 @@ export function CaseStudies({ projects }: { projects: HomeProject[] }) {
   return (
     <section className="px-2 sm:px-4">
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
+        initial={false}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-80px" }}
         transition={{ duration: 0.6 }}
       >
         <SectionHeading kicker="Case Studies">
           Selected{" "}
-          <span className="text-gradient-animated font-display italic">
+          <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
             builds
           </span>
         </SectionHeading>
@@ -958,7 +984,7 @@ export function CaseStudies({ projects }: { projects: HomeProject[] }) {
       <div className="mt-16 flex justify-center">
         <Link
           href="/projects"
-          className="group inline-flex items-center gap-3 font-mono text-xs uppercase tracking-[0.25em] text-text-secondary transition-colors hover:text-text-primary"
+          className="group inline-flex items-center gap-3 font-mono text-xs font-normal uppercase tracking-widest text-text-secondary transition-colors hover:text-text-primary"
         >
           See more projects
           <span className="inline-flex size-8 items-center justify-center rounded-full border border-border-primary">

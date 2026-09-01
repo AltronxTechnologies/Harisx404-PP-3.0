@@ -25,15 +25,15 @@ function BentoCard({
   const cardContent = (
     <div
       className={clsx(
-        "group relative flex flex-col overflow-hidden rounded-2xl border border-border-primary bg-bg-primary p-6 transition-all duration-300 hover:bg-white dark:hover:bg-white/[0.04]",
+        "card-light-edge group relative flex flex-col overflow-hidden rounded-2xl border border-border-primary bg-bg-primary p-6 transition-all duration-300 hover:bg-white dark:hover:bg-white/[0.04]",
         height,
         className
       )}
     >
       {linkTo && (
-        <div className="absolute bottom-3.5 right-3.5 z-[999] flex h-7 w-7 rotate-6 items-center justify-center rounded-full bg-indigo-200 opacity-0 transition-all duration-300 ease-in-out group-hover:translate-y-[-6px] group-hover:rotate-0 group-hover:opacity-100 dark:bg-indigo-900/80">
+        <div className="absolute bottom-3.5 right-3.5 z-[999] flex h-7 w-7 rotate-6 items-center justify-center rounded-full bg-neutral-200 opacity-0 transition-all duration-300 ease-in-out group-hover:translate-y-[-6px] group-hover:rotate-0 group-hover:opacity-100 dark:bg-white/10">
           <svg
-            className="h-4 w-4 text-indigo-600 dark:text-indigo-300"
+            className="h-4 w-4 text-neutral-600 dark:text-neutral-300"
             fill="none"
             viewBox="0 0 24 24"
           >
@@ -54,7 +54,7 @@ function BentoCard({
           </svg>
         </div>
       )}
-      <div className="pointer-events-none absolute inset-0 z-30 select-none bg-gradient-to-tl from-indigo-400/10 via-transparent to-transparent opacity-0 transition-opacity duration-300 ease-in-out group-hover:opacity-100" />
+      <div className="pointer-events-none absolute inset-0 z-30 select-none bg-gradient-to-tl from-neutral-400/10 via-transparent to-transparent opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100 dark:from-white/[0.05]" />
       {children}
     </div>
   );
@@ -81,7 +81,7 @@ function RecessedTile({
   return (
     <div
       className={clsx(
-        "rounded-[20px] border border-border-primary p-1.5 transition-all duration-500 sm:p-2",
+        "rounded-[20px] border border-border-primary p-1.5 transition-all duration-300 sm:p-2",
         sizeClass,
         className
       )}
@@ -140,7 +140,7 @@ const accountItems = [
 
 export function AccountsBento() {
   return (
-    <BentoCard height="h-[240px] lg:h-[220px]">
+    <BentoCard height="h-auto sm:h-[240px] lg:h-[220px]">
       <div className="z-20 text-center">
         <h2 className="text-base font-medium text-text-primary">
           Learn more about me
@@ -173,7 +173,7 @@ export function AccountsBento() {
                   ? "h-16 w-16 sm:h-[84px] sm:w-[84px]"
                   : "h-14 w-14 sm:h-[72px] sm:w-[72px]"
               )}
-              className="group-hover/acct:-translate-y-2 group-hover/acct:border-indigo-400"
+              className="group-hover/acct:-translate-y-2 group-hover/acct:border-neutral-400 dark:group-hover/acct:border-white/30"
             >
               {/* Brand mark as a mask → gray at rest, true brand color on hover.
                   Decorative: the parent <a> already carries the label. */}
@@ -193,7 +193,7 @@ export function AccountsBento() {
               />
             </RecessedTile>
             {/* Handle reveals under the tile on hover */}
-            <span className="mt-1.5 block font-mono text-[10px] uppercase tracking-wider text-text-tertiary opacity-0 transition-all duration-300 group-hover/acct:opacity-100">
+            <span className="mt-1.5 block font-mono text-[10px] uppercase tracking-widest text-text-secondary opacity-0 transition-all duration-300 group-hover/acct:opacity-100">
               {item.title}
             </span>
           </a>
@@ -510,7 +510,7 @@ function GlobeBento() {
               className="absolute left-0 top-0 z-20 flex flex-col items-center will-change-transform"
               style={{ opacity: 0 }}
             >
-              <span className="whitespace-nowrap rounded-[4px] bg-[#1d2445] px-1.5 py-[2px] font-mono text-[9px] font-medium tracking-[0.12em] text-white shadow-md ring-1 ring-white/15">
+              <span className="whitespace-nowrap rounded-[4px] bg-[#1d2445] px-1.5 py-[2px] font-mono text-[9px] font-medium tracking-widest text-white shadow-md ring-1 ring-white/15">
                 {city.name}
               </span>
               <span className="h-[5px] w-px bg-white/40" />
@@ -520,7 +520,7 @@ function GlobeBento() {
       </div>
       {/* Availability pill floats over the globe's horizon */}
       <div className="pointer-events-none absolute inset-x-0 bottom-5 z-20 flex justify-center">
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-border-primary bg-bg-primary/80 px-3 py-1 font-mono text-[11px] text-text-secondary shadow-sm backdrop-blur">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-border-primary bg-bg-primary/80 px-3 py-1 font-mono text-xs text-text-secondary shadow-sm backdrop-blur">
           <span className="relative flex size-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
             <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
@@ -682,7 +682,7 @@ function buildStackRows(projectTech?: ProjectTech | null): TechItem[][] {
 function TechChip({ item }: { item: TechItem }) {
   return (
     <span
-      className="group/chip flex shrink-0 items-center gap-2 rounded-xl border border-border-primary bg-[#EDEEF0] px-3.5 py-2 transition-colors duration-300 hover:border-indigo-400/60 dark:bg-white/5"
+      className="group/chip flex shrink-0 items-center gap-2 rounded-xl border border-border-primary bg-[#EDEEF0] px-3.5 py-2 transition-colors duration-300 hover:border-neutral-400/70 dark:bg-white/5 dark:hover:border-white/25"
       style={
         {
           boxShadow: "0px 2px 1.5px 0px #A5AEB852 inset",
@@ -714,7 +714,7 @@ function TechChip({ item }: { item: TechItem }) {
           className="size-1.5 shrink-0 rounded-full bg-neutral-600 transition-colors duration-300 ease-out group-hover/chip:bg-[var(--brand)] dark:bg-neutral-300 dark:group-hover/chip:bg-[var(--brand-dark)]"
         />
       )}
-      <span className="whitespace-nowrap font-mono text-[13px] text-text-secondary transition-colors duration-300 group-hover/chip:text-text-primary">
+      <span className="whitespace-nowrap font-mono text-xs text-text-secondary transition-colors duration-300 group-hover/chip:text-text-primary">
         {item.title}
       </span>
     </span>
@@ -863,7 +863,7 @@ export function SiteStatsBento({
               key={stat.key}
               href={stat.href}
               title={`${stat.label} →`}
-              className="group/tile block rounded-[14px] border border-border-primary p-1 transition-all duration-500 hover:-translate-y-1 hover:border-indigo-400"
+              className="group/tile block rounded-[14px] border border-border-primary p-1 transition-all duration-300 hover:-translate-y-1 hover:border-neutral-400 dark:hover:border-white/30"
             >
               <div
                 className="flex h-full flex-col items-center justify-center gap-1 rounded-[10px] border-2 border-[#A5AEB81F]/10 bg-[#EDEEF0] px-2 py-2.5 dark:bg-white/5"
@@ -871,19 +871,19 @@ export function SiteStatsBento({
               >
                 <Icon
                   className={clsx(
-                    "size-4 text-neutral-600 transition-all duration-500 ease-out group-hover/tile:scale-110 dark:text-neutral-300",
+                    "size-4 text-neutral-600 transition-all duration-300 ease-out group-hover/tile:scale-110 dark:text-neutral-300",
                     stat.hoverClass
                   )}
                   aria-hidden
                 />
-                <span className="text-base font-semibold leading-none text-text-primary">
+                <span className="text-[15px] font-medium leading-none text-text-primary">
                   {value !== null ? (
                     <CountUpValue to={value} pad={2} />
                   ) : (
                     <span className="text-text-tertiary">—</span>
                   )}
                 </span>
-                <span className="text-center font-mono text-[10px] uppercase tracking-wider text-text-tertiary transition-colors duration-300 group-hover/tile:text-text-secondary">
+                <span className="text-center font-mono text-[10px] uppercase tracking-widest text-text-secondary transition-colors duration-300 group-hover/tile:text-text-primary">
                   {stat.label}
                 </span>
               </div>
@@ -923,10 +923,10 @@ export function HomeBento({
   return (
     <section className="relative space-y-14 px-2 sm:px-4">
       {/* Section header — identical system to every other homepage section */}
-      <SectionHeading kicker="Proof of work" animateWords>
-        Straight from the{" "}
-        <span className="text-gradient-animated font-display italic">
-          source
+      <SectionHeading kicker="Let's connect" animateWords>
+        Find me across the{" "}
+        <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
+          web
         </span>
       </SectionHeading>
 
@@ -935,7 +935,7 @@ export function HomeBento({
           Both stacks sum to the same height (220+300 vs 300+220) so the
           section closes on a clean baseline. */}
       <motion.div
-        initial="hidden"
+        initial="show"
         whileInView="show"
         viewport={{ once: true, margin: "-60px" }}
         variants={{ hidden: {}, show: { transition: { staggerChildren: 0.08 } } }}

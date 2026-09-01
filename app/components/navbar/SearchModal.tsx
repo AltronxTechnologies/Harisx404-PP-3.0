@@ -120,7 +120,7 @@ export function SearchModal({
   onClose,
   onOpenReachOut,
 }: SearchModalProps) {
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const pathname = usePathname();
 
   const [query, setQuery] = useState("");
@@ -155,7 +155,9 @@ export function SearchModal({
     return () => clearInterval(id);
   }, [isOpen, query, PLACEHOLDERS.length]);
 
-  const isDark = theme === "dark";
+  // resolvedTheme handles theme="system" correctly (raw `theme` would
+  // report "system" and make the first toggle click a no-op in dark mode).
+  const isDark = resolvedTheme === "dark";
 
   // Focus the input only on desktop-style devices — on phones the keyboard
   // must not pop open by itself; it opens when the user taps the search bar.
@@ -273,10 +275,12 @@ export function SearchModal({
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
-
+  // NOTE: no early `return null` here — the tree must stay mounted inside
+  // AnimatePresence so the modal can play its exit animation on close
+  // (mirrors ReachOutModal's structure).
   return (
     <AnimatePresence>
+      {isOpen && (
       <div
         className="fixed inset-0 z-[7000] flex items-end justify-center p-4 pb-[6vh] sm:pb-[8vh]"
         onClick={(e) => {
@@ -625,6 +629,7 @@ export function SearchModal({
           </div>
         </motion.div>
       </div>
+      )}
     </AnimatePresence>
   );
 }

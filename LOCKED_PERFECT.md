@@ -25,30 +25,173 @@
 
 ## Locked entries
 
-### 1. Reach Out modal ("Let's Connect") — LOCKED ✅
-- **Date locked:** 2026-08-16
-- **Locked at commit:** `5a97fe8`
+### 1. Reach Out modal ("Let's Connect") — LOCKED ✅ (v5 FINAL — production-signed-off)
+- **Date locked:** 2026-09-01 (supersedes the 2026-08-16 lock at `5a97fe8`)
+- **Status:** production-ready. Full A–Z audit passed. **Do not change anything in
+  this component, or in the `.reachout-scale` blocks in `app/globals.css`, without
+  explicit owner permission.**
+- **Reference copy:** `.design-backups/reference/ReachOutModal.LOCKED.tsx`
+  (byte-identical to the live file). All earlier explorations — v1 original,
+  v2/v3 glass drawer, v4 big-glass — were **deleted** on 2026-09-01.
+  This is the single source of truth.
+- **This entry is the design reference for the Search modal (⌘K).** Match its
+  surfaces, radii, gaps, type scale, colour tokens, control sizes and motion.
 - **Files:**
   - `app/components/navbar/ReachOutModal.tsx` (entire file)
-- **Frozen spec (do not change):**
-  - Position: lower-center — container `fixed inset-0 z-[7000] flex items-end justify-center p-4 pb-[6vh] sm:pb-[8vh]`
+  - `app/globals.css` → the `.reachout-scale` height-step and phone-miniature blocks
+
+#### Frozen spec (do not change)
+
+**Shell & position**
+  - Container: `fixed inset-0 z-[7000] flex items-end justify-center px-4 pt-4 pb-[15px]`
+    — bottom-anchored, 15px to the viewport edge
   - Backdrop: `bg-black/50 backdrop-blur-[3.85px]`, fade `duration: 0.2`
-  - Wrapper: `w-[92vw] max-w-[660px]` + `.reachout-scale` with inline `transformOrigin: "bottom center"`
-  - Card: `rounded-3xl bg-white p-3 shadow-2xl ring-1 ring-neutral-200/70 dark:bg-[#1a1a1a] dark:ring-white/[0.08]` — **layout height 559px**
-  - Action cards grid: `grid-cols-[1.3fr_1fr] gap-3` (owner-approved 2026-08-16: always side-by-side; the card is a scaled miniature on phones so the laptop layout is kept at every size)
-  - "View my resume" card (links to `/resume`): title `text-[22px]` semibold, subtitle "Experience · skills · work" `text-base`, FileText icon in `size-14` circle
-  - "Email me" card: title `text-xl`, mono email `text-[15px] break-all`, copy-to-clipboard behavior
-  - Composer: heading `text-base`, "I read every one" `text-sm`, textarea `text-lg`, kbd hints `text-xs` (always visible), Continue button `text-base ml-auto`, mailto submit
-  - Top bar: "Reach out" label `text-lg`, circle buttons `size-12 rounded-2xl` with `size-6` icons
-  - Social row: LinkedIn / X / GitHub pills, inline brand SVGs at `size-6` (24px), labels `text-sm`
-  - Entry animation: `y: 24, scale: 0.96`, spring `stiffness: 300, damping: 30`
-  - Click-away: clicking anywhere outside the cards (backdrop or the gap between
-    top bar and card) closes the modal (self-target check on `.reachout-scale` wrapper)
-    — added 2026-08-16 with owner permission
-  - Swipe-to-dismiss: dragging/swiping the card downward (>120px or fast flick)
-    closes the modal like professional bottom sheets; upward drag is blocked,
-    small drags spring back (framer-motion drag="y" on the wrapper)
-    — added 2026-08-16 with owner permission
+  - Wrapper: `mx-3 w-[92vw] max-w-[792px]` + `.reachout-scale`, inline
+    `transformOrigin: "bottom center"`
+  - Card shell: `rounded-3xl bg-white p-4 shadow-2xl ring-1 ring-neutral-200/70
+    dark:bg-[#1a1a1a] dark:ring-white/[0.08]`
+
+**Radii — two tiers only**
+  - Outer tier **24px** (`rounded-3xl`): card shell, "Reach out" pill, all three control buttons
+  - Inner tier **16px** (`rounded-2xl`): message panel, action cards, social cards
+
+**Top row**
+  - Row: `mb-4 flex items-center gap-[7px]`; the three control buttons are a
+    nested `flex shrink-0 items-center gap-[7px]` group — **all four gaps are 7px**
+  - "Reach out" pill: `h-[72px] min-w-0 flex-1` (absorbs all remaining width,
+    ~570px at 1440), `bg-white dark:bg-[#1c1c1c]`, `px-5`, label `text-xl font-medium`
+  - Control buttons (Search / Theme / Close): `size-[72px]`, icons `size-8`,
+    `shadow-lg shadow-black/5 dark:shadow-none`, `active:scale-95`
+  - Back chevron inside the pill: `size-10` visual box, `size-7` icon, plus
+    `relative before:absolute before:-inset-1.5 before:content-['']` which extends
+    the **hit area** to a 52px box with no visual or layout change. This is what
+    keeps the control above the WCAG 2.5.8 24px floor once the phone miniature
+    scales it down — **do not remove the pseudo-element.**
+
+**Message panel**
+  - `rounded-2xl bg-neutral-100/90 p-6 dark:bg-white/[0.07]` + matching border
+  - Avatar `size-11`, heading `text-lg font-semibold`, "I read every one" `text-base`
+  - Textarea `mt-5 text-xl`, auto-grow, Enter submits / Shift+Enter newline, mailto
+  - kbd hints `text-sm` with `text-[13px]` mono keycaps
+  - **Continue button** — filled, clearly visible in both themes:
+    - enabled light: `border-neutral-900 bg-neutral-900 text-white font-medium shadow-sm`,
+      hover `bg-neutral-800` (17.9:1 label, 16.2:1 vs panel)
+    - disabled light: `border-neutral-300 bg-neutral-200 text-neutral-500`, no shadow
+    - dark: `bg-white/15` → hover `/25`; disabled `bg-white/[0.06] text-white/40`
+    - geometry `rounded-xl px-5 py-2.5 text-lg`, arrow `size-5`
+
+**Action cards** — `mt-4 grid grid-cols-2 gap-4` (equal width, always side-by-side)
+  - Shared surface: `rounded-2xl bg-neutral-100/90 dark:bg-white/[0.07] p-6 text-center`
+    + `border-neutral-200/60 dark:border-white/[0.06]` + hover step
+  - **Both cards share one type scale and one icon box so they align exactly**
+    (fixed 2026-09-01 — they were 7.7px / 14.4px out of line before):
+    - icon block: `mb-4 flex h-[68px] items-center justify-center` in BOTH cards
+    - heading: `text-2xl font-semibold` in BOTH cards
+    - sub-line: `text-base` in BOTH cards
+    - **Never give one card a different heading/sub size or icon-box height.**
+  - **Both cards use the identical icon treatment** (unified 2026-09-01): a
+    `size-[68px]` `rounded-full` circle, `bg-neutral-200/80 dark:bg-white/10`,
+    `group-hover:bg-neutral-300/80 dark:group-hover:bg-white/15`, containing a
+    `size-7` icon. Both cards carry the `group` class so the hover step matches.
+    **Never give one card a bare icon and the other a circle.**
+  - Resume card → `/resume`: `FileText`, sub-line "Experience · skills · work"
+  - Email card: `Mail`, swapped for `Check` (emerald-500) for 2s after a
+    successful copy; mono email `break-all`; the heading carries
+    `aria-live="polite"` so the "Copied!" state is announced to screen readers
+  - **Both card headings use the kicker colour `text-text-secondary`** (owner request
+    2026-09-01) — hierarchy is carried by size + weight, not colour
+
+**Social row** — `mt-4 grid grid-cols-3 gap-4`, inline brand SVGs `size-7`,
+  labels `text-base font-medium`, `target=_blank rel=noopener`
+
+**Colour tokens**
+  - Primary copy: `text-neutral-900 dark:text-white`
+  - **All secondary copy uses `text-text-secondary`** (#5E5F6E / #a1a1a1).
+    `text-text-tertiary` is **banned in this component** — it measured 2.25:1 in
+    light mode (AA fail) and was removed on 2026-09-01.
+  - Only accent: emerald-500 on the "Copied!" check. No gradients.
+
+**Motion & interaction**
+  - Entry: `y: 24, scale: 0.96`, spring `stiffness: 300, damping: 30`
+  - Swipe-to-dismiss: `drag="y"`, >120px or fast flick closes; upward blocked
+  - Click-away: backdrop or the gap between top bar and card closes (self-target check)
+  - Escape closes; `body.modal-open` scroll lock while open
+
+**Accessibility**
+  - `role="dialog" aria-modal="true" aria-label="Reach out" tabIndex={-1}`
+  - **Focus trap:** Tab and Shift+Tab both wrap inside the dialog; focus is
+    restored to the trigger on close
+  - **Initial focus is pointer-gated** — the textarea is focused only when
+    `matchMedia("(hover: hover) and (pointer: fine)")` matches. On touch screens
+    focus goes to the dialog container instead, so **the soft keyboard never opens
+    by itself**. Do not remove this gate.
+
+**Phone rendering (owner-approved miniature — do not replace with a mobile layout)**
+  - ≤640px: `.reachout-scale` is pinned to `width: 660px` and scaled down so the
+    phone shows an exact miniature of the desktop card.
+  - **The 660px layout width is load-bearing.** Changing it (e.g. to 792px) shrinks
+    all text even if the rendered card width is preserved — this was tried on
+    2026-09-01 and reverted. Scale steps: 0.88 @≤640, 0.82 @≤600, 0.76 @≤560,
+    0.70 @≤520, 0.645 @≤480, 0.60 @≤440, 0.575 @≤412, 0.555 @≤390, 0.53 @≤375,
+    0.49 @≤360, 0.45 @≤330.
+  - Height steps (all widths): 0.96 @≤940 … 0.37 @≤390 — unchanged.
+
+#### Audit results at lock time (2026-09-01)
+  - **Contrast:** 0 failures, light **and** dark. All body copy ≥ 6.29:1,
+    primary headings 17.9:1. Verified programmatically against actual
+    computed colours, not estimated.
+  - **Focus trap:** wraps forward and backward. 10 focusable elements.
+  - **A11y:** role/aria-modal/aria-label/tabindex present, scroll lock active,
+    every button labelled, all external links `noopener`, all images have alt,
+    heading order H3 → H4 → H4 (no skips).
+  - **Typography:** 2 families (Outfit sans + Core Mono for keycaps — matches the
+    site), weights 400/500/600 only, sizes 14/16/18/20/24/26 — clean scale.
+  - **Geometry:** radii 24/24/24/16 as specced; gaps 7/7/16/16 as specced;
+    all padding/margin on the 4px grid apart from the intentional 7px and 15px.
+  - **Viewports verified:** 1440×900, 390×844, 375×667, 360×640 — both themes.
+    No clipping, no horizontal overflow, email address on one line everywhere.
+  - **Known accepted trade-off (not a defect, do not "fix" without asking):**
+    On a 375px phone the miniature renders the email address and social labels at
+    ~8.5px and card headings at ~13.8px. This is inherent to the owner-approved
+    miniature approach and is the size the owner signed off on. The email *tap
+    target* is 162x111px, so the copy action is unaffected — only the confirmation
+    text is small.
+  - `tsc --noEmit` clean, `eslint` clean, **`next build` succeeds**. No console
+    errors attributable to this component (only unrelated WebGL warnings from the
+    `cobe` globe under software rendering).
+
+#### Corrections & fixes after the initial lock (2026-09-01, same day)
+  - **Action-card alignment — FIXED.** The two cards were measurably out of line:
+    icon block heights 73px vs 65.3px, headings 7.7px apart, sub-lines 14.4px
+    apart, caused by different icon-wrapper structures (`pt-2` + auto height vs a
+    fixed `size-[68px]` box) and different type sizes (26/18 vs 24/16). Both cards
+    now use `h-[68px]` icon blocks, `text-2xl` headings and `text-base` sub-lines.
+    Re-measured: **all four deltas are 0.0px** at 1440 and at 375.
+  - **Email icon made identical to the resume icon — DONE.** The email card had a
+    bare `size-[54px]` outline glyph while the resume card had a `size-7` glyph in
+    a `size-[68px]` tinted circle, so the two cards read as different components.
+    Both now use the same circle + `size-7` icon. Re-measured: circles 65.3px and
+    icons 26.9px in both, identical background and radius, all six alignment
+    deltas 0.0px, icon-on-circle contrast 8.23:1.
+  - **BUG: "Copied!" timeout leaked — FIXED.** `setTimeout` was never cleared, so
+    closing the modal within 2s of copying left a pending state update against an
+    unmounted subtree. Now tracked in a ref, cleared on re-copy and on unmount.
+  - **BUG: copy confirmation was silent to screen readers — FIXED.** The label
+    swap to "Copied!" had no live region; added `aria-live="polite"`.
+  - **Back chevron hit area — FIXED.** The original audit note claiming it "passes
+    WCAG 2.5.8 AA" was **wrong**: it measured the 40px CSS box, not the rendered
+    size. Under the 0.53 phone scale it rendered at **21.2px**, below the 24px AA
+    floor. An invisible `before:-inset-1.5` pseudo-element now extends the hit area
+    to a 52px box → **28.2px rendered**, verified by hit-testing with
+    `elementFromPoint` (registers up to 3px outside the visual box). No visual or
+    layout change.
+
+> **⚠️ Entry 2 is stale.** The Search modal has not yet been brought in line with
+> the v5 Reach Out lock above. When it is reworked, **entry 1 is the reference** —
+> match its radii (24px outer / 16px inner), 7px control-row gaps, `size-[72px]`
+> controls, `text-text-secondary` for all secondary copy, filled Continue-style
+> primary button, pointer-gated autofocus, focus trap, and the 660px phone
+> miniature. Re-audit and re-lock entry 2 afterwards.
 
 ### 2. Search modal (⌘K) — LOCKED ✅
 - **Date locked:** 2026-08-16

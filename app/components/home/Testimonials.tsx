@@ -141,7 +141,7 @@ export function Testimonials({ items: itemsProp }: { items?: Testimonial[] }) {
     <section id="testimonials" className="scroll-mt-24 overflow-hidden px-2 sm:px-4">
       <SectionHeading kicker="Testimonials" animateWords>
         Word on the street{" "}
-        <span className="text-gradient-animated font-display italic">
+        <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
           about me
         </span>
       </SectionHeading>
@@ -212,7 +212,7 @@ export function Testimonials({ items: itemsProp }: { items?: Testimonial[] }) {
                   <span className="block truncate text-sm font-medium text-text-primary">
                     {t.name}
                   </span>
-                  <span className="block truncate text-xs text-text-tertiary">
+                  <span className="block truncate text-xs text-text-secondary">
                     {t.role}
                   </span>
                 </span>
@@ -239,7 +239,7 @@ export function Testimonials({ items: itemsProp }: { items?: Testimonial[] }) {
                 >
                   <span
                     className={`relative h-1 overflow-hidden rounded-full bg-border-primary transition-all duration-300 ${
-                      active ? "w-14" : "w-7 group-hover:bg-text-tertiary/50"
+                      active ? "w-14" : "w-7 group-hover:bg-neutral-400/50 dark:group-hover:bg-white/25"
                     }`}
                   >
                     {active && (
@@ -264,7 +264,7 @@ export function Testimonials({ items: itemsProp }: { items?: Testimonial[] }) {
             type="button"
             onClick={() => setUserPaused((p) => !p)}
             aria-label={userPaused ? "Play carousel" : "Pause carousel"}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border-primary text-text-secondary transition-colors hover:border-text-tertiary hover:text-text-primary sm:h-9 sm:w-9"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border-primary text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25 sm:h-9 sm:w-9"
           >
             {userPaused ? (
               <Play className="h-3.5 w-3.5" aria-hidden />
@@ -281,7 +281,7 @@ export function Testimonials({ items: itemsProp }: { items?: Testimonial[] }) {
         <button
           type="button"
           onClick={() => setSubmitOpen(true)}
-          className="inline-flex items-center gap-2 rounded-full border border-border-primary px-5 py-2.5 text-sm font-medium text-text-secondary transition-colors hover:border-text-tertiary hover:text-text-primary"
+          className="inline-flex items-center gap-2 rounded-full border border-border-primary px-5 py-2.5 text-sm font-medium text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25"
         >
           <MessageSquarePlus className="h-4 w-4" aria-hidden />
           Worked with me? Share your experience

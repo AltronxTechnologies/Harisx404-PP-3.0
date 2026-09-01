@@ -95,8 +95,8 @@ body {
 }
 
 .dark {
-  --bg-primary: #0a0a0a;
-  --border-primary: #4d4d4d;
+  --bg-primary: #0d0d0f;
+  --border-primary: rgba(255, 255, 255, 0.1);
   --dark-primary: #f7f7f8;
   --purple-primary: #7c7fff;
   --purple-secondary: #1b1c26;
@@ -209,6 +209,44 @@ body {
     rgba(255, 255, 255, 0.8) 65%,
     transparent 95%
   );
+}
+
+/* Frame variant — same specular top sheen, but drawn on a WRAPPER so it
+   sits on the outer edge of a thick-bordered child card (the child's own
+   overflow-hidden would clip a pseudo placed above its border). Slightly
+   softer (2px + blur) so it reads as light catching the frame itself. */
+.dark .frame-light-edge::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 6%;
+  right: 6%;
+  height: 2px;
+  border-radius: 9999px;
+  opacity: 0.35;
+  filter: blur(0.5px);
+  /* Ride along with the cover panel's hover rise (projects page) —
+     same duration + easing as the panel's transition-transform. */
+  transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.8) 30%,
+    #fff 50%,
+    rgba(255, 255, 255, 0.8) 70%,
+    transparent 100%
+  );
+}
+
+/* Projects page variant: the inner cover panel lifts 6px on hover
+   (group-hover:-translate-y-1.5) while the frame wrapper stays put, so the
+   hairline mirrors the exact same rise to stay glued to the frame top. */
+@media (hover: hover) {
+  .dark .frame-light-edge-lift:hover::before {
+    transform: translateY(-6px);
+  }
 }
 
 .kicker {
@@ -968,7 +1006,81 @@ blockquote p {
   color: #a3a3a3;
 }
 
-.blog-article-shell table {
+/* Tables — reference double-border card: outer rounded-2xl p-1, inner
+   rounded-xl scroll area, row dividers only, mono badge header pills. */
+.blog-article-shell .table-card {
+  margin: 1.5rem 0;
+  border: 1px solid #e5e5e5;
+  border-radius: 1rem;
+  background: rgb(229 229 229 / 0.5);
+  padding: 0.25rem;
+}
+
+.dark .blog-article-shell .table-card {
+  border-color: #262626;
+  background: rgb(23 23 23 / 0.5);
+}
+
+.blog-article-shell .table-scroll {
+  overflow-x: auto;
+  border: 1px solid rgb(229 229 229 / 0.8);
+  border-radius: 0.75rem;
+  background: #f6f6f8;
+}
+
+.dark .blog-article-shell .table-scroll {
+  border-color: #262626;
+  background: #101010;
+}
+
+.blog-article-shell .table-card table,
+.blog-article-shell .table-scroll table {
+  display: table;
+  width: 100%;
+  min-width: 500px;
+  margin: 0;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  white-space: normal;
+}
+
+.blog-article-shell th,
+.blog-article-shell td {
+  border: 0;
+  border-bottom: 1px solid rgb(229 229 229 / 0.6);
+  padding: 0.625rem 1rem;
+  text-align: left;
+  color: #364153;
+}
+
+.dark .blog-article-shell th,
+.dark .blog-article-shell td {
+  border-bottom-color: rgb(38 38 38 / 0.4);
+  color: #d1d5dc;
+}
+
+.blog-article-shell tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.blog-article-shell .th-badge {
+  display: inline-block;
+  border-radius: 0.375rem;
+  background: rgb(229 229 229 / 0.8);
+  padding: 0.125rem 0.5rem;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 11px;
+  font-weight: 400;
+  color: #737373;
+}
+
+.dark .blog-article-shell .th-badge {
+  background: rgb(38 38 38 / 0.8);
+  color: #a3a3a3;
+}
+
+/* Tables outside the card wrapper (legacy fallback) keep scrolling */
+.blog-article-shell > table {
   display: block;
   width: 100%;
   min-width: 500px;
@@ -977,14 +1089,285 @@ blockquote p {
   font-size: 0.875rem;
 }
 
-.blog-article-shell th,
-.blog-article-shell td {
-  border: 1px solid #e5e5e5;
-  padding: 0.75rem;
-  text-align: left;
+/* ---- Blog article blueprint pass (scoped, per docs/blueprints specs) ---- */
+
+/* Prose rhythm & typography */
+.blog-article-shell p {
+  margin-top: 1.25em;
+  margin-bottom: 1.25em;
+  font-size: 1rem;
+  line-height: 1.75;
+  color: #364153;
 }
 
-.dark .blog-article-shell th,
-.dark .blog-article-shell td {
+.dark .blog-article-shell p {
+  color: #d1d5dc;
+}
+
+.blog-article-shell h2 {
+  margin-top: 2em !important;
+  margin-bottom: 1em !important;
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  line-height: 1.333 !important;
+  letter-spacing: normal !important;
+  color: #101828;
+}
+
+.blog-article-shell h3 {
+  margin-top: 1.6em !important;
+  margin-bottom: 0.6em !important;
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  line-height: 1.6 !important;
+  letter-spacing: normal !important;
+  color: #101828;
+}
+
+.blog-article-shell h4 {
+  margin-top: 1.5em !important;
+  margin-bottom: 0.5em !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  line-height: 1.5 !important;
+  letter-spacing: normal !important;
+  color: #101828;
+}
+
+.dark .blog-article-shell h2,
+.dark .blog-article-shell h3,
+.dark .blog-article-shell h4 {
+  color: #ffffff;
+}
+
+.blog-article-shell h2,
+.blog-article-shell h3,
+.blog-article-shell h4 {
+  scroll-margin-top: 6rem;
+  position: relative;
+}
+
+/* Heading anchor `#` reveal on hover */
+.blog-article-shell h2 .anchor,
+.blog-article-shell h3 .anchor,
+.blog-article-shell h4 .anchor {
+  position: absolute;
+  left: -1.15em;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  color: #a3a3a3;
+  font-weight: 400;
+  text-decoration: none;
+  transition: opacity 200ms ease;
+}
+
+.blog-article-shell h2 .anchor::after,
+.blog-article-shell h3 .anchor::after,
+.blog-article-shell h4 .anchor::after {
+  content: "#";
+}
+
+.blog-article-shell h2:hover .anchor,
+.blog-article-shell h3:hover .anchor,
+.blog-article-shell h4:hover .anchor {
+  opacity: 1;
+}
+
+/* Article links — blue accent, medium, no underline */
+.blog-article-shell a:not(.anchor) {
+  color: #2563eb;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.blog-article-shell a:not(.anchor):hover {
+  color: #1d4ed8;
+}
+
+.dark .blog-article-shell a:not(.anchor) {
+  color: #60a5fa;
+}
+
+.dark .blog-article-shell a:not(.anchor):hover {
+  color: #93bbfd;
+}
+
+/* External link trailing arrow */
+.blog-article-shell a[target="_blank"]:not(.anchor)::after {
+  content: "";
+  display: inline-block;
+  width: 0.85em;
+  height: 0.85em;
+  margin-left: 0.15em;
+  vertical-align: -0.08em;
+  background-color: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='7' y1='17' x2='17' y2='7'/%3E%3Cpolyline points='7 7 17 7 17 17'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='7' y1='17' x2='17' y2='7'/%3E%3Cpolyline points='7 7 17 7 17 17'/%3E%3C/svg%3E") center / contain no-repeat;
+  transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.blog-article-shell a[target="_blank"]:not(.anchor):hover::after {
+  transform: translate(1px, -1px);
+}
+
+/* Blockquote — 4px border, italic 500 */
+.blog-article-shell blockquote {
+  margin: 1.6em 0;
+  border-left: 4px solid #e5e7eb;
+  padding-left: 1em;
+  color: #101828;
+  font-style: italic;
+  font-weight: 500;
+}
+
+.dark .blog-article-shell blockquote {
+  border-left-color: #364153;
+  color: #f3f4f6;
+}
+
+/* Horizontal rules */
+.blog-article-shell hr {
+  margin: 3em 0;
+  border: 0;
+  border-top: 1px solid #e5e7eb;
+}
+
+.dark .blog-article-shell hr {
+  border-top-color: #364153;
+}
+
+/* Images — rounded, bordered, zoomable feel */
+.blog-article-shell img {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid #e5e5e5;
+  cursor: zoom-in;
+}
+
+.dark .blog-article-shell img {
   border-color: #262626;
+}
+
+.blog-article-shell figcaption {
+  margin-top: 0.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+  line-height: 1.428;
+  color: #737373;
+}
+
+.dark .blog-article-shell figcaption {
+  color: #a3a3a3;
+}
+
+/* Lists — match paragraph tone */
+.blog-article-shell ul,
+.blog-article-shell ol {
+  margin-top: 1.25em;
+  margin-bottom: 1.25em;
+}
+
+.blog-article-shell li {
+  margin-bottom: 0.5em;
+  font-size: 1rem;
+  line-height: 1.75;
+  color: #364153;
+}
+
+.dark .blog-article-shell li {
+  color: #d1d5dc;
+}
+
+/* Code blocks — 13px/24px mono, no line numbers, filename badge, hover copy */
+.blog-article-shell pre code {
+  font-size: 13px;
+  line-height: 24px;
+  letter-spacing: normal;
+}
+
+.blog-article-shell pre code .sh__line::before {
+  content: none;
+  counter-increment: none;
+  margin-right: 0;
+}
+
+.blog-article-shell .frame-controls {
+  display: none;
+}
+
+.blog-article-shell .code-frame-filename {
+  max-width: 70%;
+  border-radius: 0.375rem;
+  background: rgb(229 229 229 / 0.8);
+  padding: 0.125rem 0.5rem;
+  font-size: 11px;
+  color: #737373;
+}
+
+.dark .blog-article-shell .code-frame-filename {
+  background: rgb(38 38 38 / 0.8);
+  color: #a3a3a3;
+}
+
+.blog-article-shell .code-frame {
+  position: relative;
+}
+
+.blog-article-shell .code-frame button {
+  border-radius: 0.5rem;
+  padding: 0.25rem;
+  opacity: 0;
+  transition: opacity 200ms ease, transform 100ms ease;
+}
+
+.blog-article-shell div:hover > .code-frame button,
+.blog-article-shell .code-frame button:focus-visible {
+  opacity: 1;
+}
+
+.blog-article-shell .code-frame button:active {
+  transform: scale(0.9);
+}
+
+.blog-article-shell .code-frame button svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+/* Sugar-high token colors — light (Catppuccin Latte-inspired) */
+.blog-article-shell pre code {
+  --sh-class: #df8e1d;
+  --sh-identifier: #4c4f69;
+  --sh-sign: #7c7f93;
+  --sh-property: #1e66f5;
+  --sh-entity: #179299;
+  --sh-jsxliterals: #8839ef;
+  --sh-string: #40a02b;
+  --sh-keyword: #d20f39;
+  --sh-comment: #9ca0b0;
+}
+
+/* Dark (Vesper-inspired) */
+.dark .blog-article-shell pre code {
+  --sh-class: #ffc799;
+  --sh-identifier: #dedede;
+  --sh-sign: #8b8b8b;
+  --sh-property: #ffc799;
+  --sh-entity: #99ffe4;
+  --sh-jsxliterals: #a0a0a0;
+  --sh-string: #99ffe4;
+  --sh-keyword: #ff8080;
+  --sh-comment: #8b8b8b;
+}
+
+/* Strong text inside article */
+.blog-article-shell strong {
+  color: #101828;
+  font-weight: 600;
+}
+
+.dark .blog-article-shell strong {
+  color: #ffffff;
 }

@@ -27,6 +27,29 @@ export default function Navbar() {
   // synthetic click (fired right after mouseenter on touch) doesn't re-toggle.
   const dropdownOpenedAt = useRef(0);
   const navRowRef = useRef<HTMLDivElement>(null);
+  const pillRef = useRef<HTMLDivElement>(null);
+
+  // Morph geometry: the dropdown panel starts clipped to the pill's EXACT
+  // rect (measured at open time) so the expansion reads as the navbar
+  // itself enlarging — never a second box appearing behind it.
+  const [pillClip, setPillClip] = useState(
+    "inset(0px 32% calc(100% - 52px) 32% round 22px)"
+  );
+  const measurePillClip = () => {
+    const pill = pillRef.current;
+    if (!pill) return;
+    const r = pill.getBoundingClientRect();
+    const panelW = Math.min(740, window.innerWidth * 0.92);
+    const hx = Math.max((panelW - r.width) / 2, 0);
+    setPillClip(
+      `inset(0px ${hx.toFixed(1)}px calc(100% - ${r.height.toFixed(1)}px) ${hx.toFixed(1)}px round 22px)`
+    );
+  };
+  const openDropdown = () => {
+    measurePillClip();
+    if (!isDropdownOpen) dropdownOpenedAt.current = Date.now();
+    setIsDropdownOpen(true);
+  };
 
   // Greeting State
   const [greeting, setGreeting] = useState("Good Evening");
@@ -81,6 +104,8 @@ export default function Navbar() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
+        // Only one overlay at a time — ⌘K over the Reach Out modal swaps to search.
+        setIsReachOutOpen(false);
         setIsCommandPaletteOpen((prev) => !prev);
       }
     };
@@ -115,13 +140,17 @@ export default function Navbar() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <header className="fixed top-2.5 z-[5000] w-full md:top-4 pointer-events-none flex justify-center">
+      {/* inset-x-0 anchors the fixed header to the viewport — without it,
+          a fixed element keeps its static x-position inside the centered
+          max-w-7xl body, drifting right by (vw-1280)/2 on wide screens. */}
+      <header className="fixed inset-x-0 top-2.5 z-[5000] w-full md:top-4 pointer-events-none flex justify-center">
         <nav className="container flex flex-col items-center py-1.5 pointer-events-none">
-          <div
-            className={`relative flex items-start gap-0 md:gap-3.5 pointer-events-auto transition-transform duration-500 ease-out ${
-              showGreeting ? "md:translate-x-[54px]" : ""
-            }`}
-          >
+          {/* Centering model: the pill wrapper is the centered element;
+              the search/theme buttons hang off its right edge via an
+              absolutely-positioned rail so they never shift the pill off
+              true center (the old flex-sibling layout pushed the pill
+              ~54px left of center on desktop and needed translate hacks). */}
+          <div className="relative flex items-start justify-center pointer-events-auto">
             
             {/* The main navbar container — top layer so the More menu covers the side buttons */}
             <div 
@@ -132,10 +161,25 @@ export default function Navbar() {
                 setHoveredTab(null);
               }}
             >
-              {/* The main morphing pill container */}
+              {/* Pre-decode the dropdown card images so the first open never
+                  paints an empty card while the file streams in. */}
+              <div aria-hidden className="pointer-events-none absolute h-px w-px overflow-hidden opacity-0">
+                <Image src="/images/nav-community-wall.jpg" alt="" width={250} height={160} priority />
+                <Image src="/images/nav-stats.jpg" alt="" width={250} height={160} priority />
+              </div>
+              {/* The main morphing pill container. While the dropdown is
+                  open, the pill's own surface (bg/shadow) fades out so the
+                  expanding panel is the ONLY visible box — the nav links
+                  simply live inside its top edge. That makes the whole
+                  thing read as the navbar itself enlarging. */}
               <motion.div
                 layout
-                className="relative z-10 flex flex-col items-center justify-start p-1.5 bg-white/90 max-md:bg-white/55 shadow-[0_10px_30px_-14px_rgba(0,0,0,0.22),0_3px_8px_-4px_rgba(0,0,0,0.08)] shadow-border dark:bg-[#1c1c1c]/90 max-md:dark:bg-[#1c1c1c]/55 dark:shadow-none overflow-hidden backdrop-blur-md max-md:backdrop-blur-xl max-md:!rounded-full max-md:p-1 max-md:ring-1 max-md:ring-neutral-300/60 max-md:dark:ring-white/15"
+                ref={pillRef}
+                className={`relative z-10 flex flex-col items-center justify-start p-1.5 transition-[background-color,box-shadow] duration-[400ms] ${
+                  isDropdownOpen
+                    ? "md:!bg-transparent md:!shadow-none"
+                    : "bg-white/90 max-md:bg-white/40 shadow-[0_10px_30px_-14px_rgba(0,0,0,0.22),0_3px_8px_-4px_rgba(0,0,0,0.08)] shadow-border dark:bg-[#1c1c1c]/90 max-md:dark:bg-[#1c1c1c]/40 dark:shadow-none"
+                } overflow-hidden backdrop-blur-md max-md:backdrop-blur-xl max-md:!rounded-full max-md:p-1 max-md:ring-1 max-md:ring-neutral-300/60 max-md:dark:ring-white/15`}
                 initial={{ borderRadius: "22px" }}
                 animate={{ borderRadius: isDropdownOpen ? "24px" : "22px" }}
                 transition={{ type: "spring", stiffness: 400, damping: 30 }}
@@ -314,8 +358,7 @@ export default function Navbar() {
                           className="relative list-none"
                           onMouseEnter={() => {
                             setHoveredTab(null);
-                            if (!isDropdownOpen) dropdownOpenedAt.current = Date.now();
-                            setIsDropdownOpen(true);
+                            openDropdown();
                           }}
                         >
                           <button
@@ -326,8 +369,11 @@ export default function Navbar() {
                               // On touch, mouseenter just opened it — don't close again.
                               // (Timestamp-based: state updates may still be batched here.)
                               if (Date.now() - dropdownOpenedAt.current < 450) return;
-                              if (!isDropdownOpen) dropdownOpenedAt.current = Date.now();
-                              setIsDropdownOpen((prev) => !prev);
+                              if (isDropdownOpen) {
+                                setIsDropdownOpen(false);
+                              } else {
+                                openDropdown();
+                              }
                             }}
                             className={`relative z-10 flex cursor-pointer select-none items-center gap-1 px-4 py-1.5 font-normal text-sm transition-colors duration-150 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 dark:focus-visible:ring-white/25 ${
                               isDropdownOpen
@@ -376,42 +422,57 @@ export default function Navbar() {
               {/* Dropdown Menu — absolute overlay panel: never affects layout, covers side buttons */}
               <AnimatePresence>
                 {isDropdownOpen && (
+                  /* Outer wrapper carries the drop-shadow: a parent's filter
+                     wraps the CLIPPED silhouette of its children, so the
+                     shadow stretches and shrinks with the morphing box
+                     (filter on the clipped element itself gets clipped away,
+                     because clip-path applies after filter). */
                   <motion.div
-                    initial={{ opacity: 0, scaleY: 0.9, scaleX: 0.97, y: -10, x: "-50%" }}
-                    animate={{ opacity: 1, scaleY: 1, scaleX: 1, y: 0, x: "-50%" }}
-                    exit={{
-                      opacity: 0,
-                      scaleY: 0.9,
-                      scaleX: 0.97,
-                      y: -10,
-                      x: "-50%",
-                      transition: { duration: 0.32, ease: [0.4, 0, 0.2, 1] },
+                    initial={{ x: "-50%" }}
+                    animate={{ x: "-50%" }}
+                    exit={{ x: "-50%" }}
+                    className="absolute top-0 left-1/2 z-0 w-[740px] max-w-[92vw] [filter:drop-shadow(0_10px_15px_rgba(0,0,0,0.13))_drop-shadow(0_3px_4px_rgba(0,0,0,0.05))] dark:[filter:none]"
+                  >
+                  <motion.div
+                    /* Pure geometry morph: the panel starts clipped to the
+                       pill's exact measured rect (no fade, same bg/radius),
+                       so the sides and bottom grow out of the navbar and
+                       fold back into it on close — one continuous surface. */
+                    initial={{
+                      clipPath: pillClip,
                     }}
-                    transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                    style={{ transformOrigin: "top center", willChange: "transform, opacity" }}
-                    className="absolute top-0 left-1/2 md:max-lg:left-[calc(50%+54px)] z-0 w-[740px] max-w-[92vw] rounded-[24px] bg-white/90 shadow-[0_10px_30px_-14px_rgba(0,0,0,0.22),0_3px_8px_-4px_rgba(0,0,0,0.08)] shadow-border dark:bg-[#1c1c1c]/90 dark:shadow-none backdrop-blur-md pt-[52px] max-h-[calc(100dvh-40px)] overflow-y-auto overflow-x-hidden"
+                    animate={{
+                      clipPath: "inset(0px 0px 0px 0px round 24px)",
+                    }}
+                    exit={{
+                      clipPath: pillClip,
+                      transition: {
+                        clipPath: { duration: 0.65, ease: [0.4, 0, 0.2, 1] },
+                      },
+                    }}
+                    transition={{
+                      clipPath: { duration: 0.9, ease: [0.19, 1, 0.22, 1] },
+                    }}
+                    style={{ transformOrigin: "top center", willChange: "clip-path" }}
+                    /* Solid surface: backdrop-blur can't apply here (the
+                       drop-shadow filter on the wrapper resets the backdrop
+                       root), so translucency would just let the page bleed
+                       through. Opaque bg keeps the panel crisp and readable. */
+                    className="w-full rounded-[24px] bg-white dark:bg-[#1c1c1c] pt-[52px] max-h-[calc(100dvh-40px)] overflow-y-auto overflow-x-hidden"
                   >
                       <motion.div 
-                        initial="hidden"
-                        animate="visible"
-                        variants={{
-                          hidden: {},
-                          visible: {
-                            transition: {
-                              staggerChildren: 0.05,
-                              delayChildren: 0.03,
-                            }
-                          }
-                        }}
+                        /* Content is completely STATIC — it never moves or
+                           staggers. The expanding clip simply reveals it, so
+                           the whole thing reads as the navbar itself
+                           enlarging (matching the reference). Only a fast
+                           fade on close so images are never sliced while the
+                           clip folds shut. */
+                        exit={{ opacity: 0, transition: { duration: 0.16, ease: "easeOut" } }}
                         className="flex flex-col md:flex-row gap-2.5 p-2 pt-4 min-h-[240px]"
                       >
                         
                         {/* Community Wall Card */}
                         <motion.div
-                          variants={{
-                            hidden: { opacity: 0, y: 10, scale: 0.97 },
-                            visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } }
-                          }}
                           className="flex-1 min-h-[160px] max-md:flex-none max-md:h-40"
                         >
                           <Link 
@@ -420,10 +481,11 @@ export default function Navbar() {
                             className="group relative flex h-full w-full flex-col justify-end overflow-hidden rounded-[18px] bg-neutral-900 p-4 ring-1 ring-black/5 dark:ring-white/10 hover:ring-black/15 dark:hover:ring-white/25 transition-all duration-300 shadow-sm hover:shadow-md"
                           >
                             <Image 
-                              src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=800&auto=format&fit=crop"
+                              src="/images/nav-community-wall.jpg"
                               alt="Community Wall"
                               fill
-                              className="object-cover transition-transform duration-700 ease-out group-hover:scale-108 opacity-60 group-hover:opacity-80"
+                              sizes="(max-width: 768px) 92vw, 250px"
+                              className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.08] opacity-60 group-hover:opacity-80"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                             <div className="relative z-10 flex flex-col items-start">
@@ -435,10 +497,6 @@ export default function Navbar() {
 
                         {/* Stats Card */}
                         <motion.div
-                          variants={{
-                            hidden: { opacity: 0, y: 10, scale: 0.97 },
-                            visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } }
-                          }}
                           className="flex-1 min-h-[160px] max-md:flex-none max-md:h-40"
                         >
                           <Link 
@@ -447,10 +505,11 @@ export default function Navbar() {
                             className="group relative flex h-full w-full flex-col justify-end overflow-hidden rounded-[18px] bg-neutral-900 p-4 ring-1 ring-black/5 dark:ring-white/10 hover:ring-black/15 dark:hover:ring-white/25 transition-all duration-300 shadow-sm hover:shadow-md"
                           >
                             <Image 
-                              src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800&auto=format&fit=crop"
+                              src="/images/nav-stats.jpg"
                               alt="Stats"
                               fill
-                              className="object-cover transition-transform duration-700 ease-out group-hover:scale-108 opacity-60 group-hover:opacity-80"
+                              sizes="(max-width: 768px) 92vw, 250px"
+                              className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.08] opacity-60 group-hover:opacity-80"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                             <div className="relative z-10 flex flex-col items-start">
@@ -462,10 +521,6 @@ export default function Navbar() {
 
                         {/* Links Column */}
                         <motion.div 
-                          variants={{
-                            hidden: { opacity: 0, y: 10, scale: 0.97 },
-                            visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } }
-                          }}
                           className="flex flex-col gap-2 w-full md:w-[220px]"
                         >
                           <Link 
@@ -519,13 +574,18 @@ export default function Navbar() {
 
                       </motion.div>
                   </motion.div>
+                  </motion.div>
                 )}
               </AnimatePresence>
             </div>
 
-            {/* Search Button — lower layer: the expanding More menu covers it */}
+            {/* Side buttons rail — absolutely positioned off the pill's right
+                edge so the pill stays perfectly centered at every width.
+                Lower layer: the expanding More menu covers it. */}
             <div
-              className={`relative z-0 ${isDropdownOpen ? "pointer-events-none" : ""}`}
+              className={`absolute left-full top-0 ml-3.5 hidden md:flex items-start gap-3.5 z-0 ${
+                isDropdownOpen ? "pointer-events-none" : ""
+              }`}
             >
               <motion.button
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -533,7 +593,7 @@ export default function Navbar() {
                 transition={{ delay: 2.2, duration: 0.4 }}
                 onClick={() => setIsCommandPaletteOpen(true)}
                 aria-label="Open search (⌘K)"
-                className="relative hidden size-10 cursor-pointer items-center justify-center rounded-full text-neutral-700 transition-all duration-150 hover:text-neutral-900 active:scale-95 md:inline-flex dark:text-white/85 dark:hover:text-white bg-white/90 shadow-[0_10px_30px_-14px_rgba(0,0,0,0.22),0_3px_8px_-4px_rgba(0,0,0,0.08)] shadow-border dark:bg-[#1c1c1c]/90 dark:shadow-none mt-0.5"
+                className="relative inline-flex size-10 cursor-pointer items-center justify-center rounded-full text-neutral-700 transition-all duration-150 hover:text-neutral-900 active:scale-95 dark:text-white/85 dark:hover:text-white bg-white/90 shadow-[0_10px_30px_-14px_rgba(0,0,0,0.22),0_3px_8px_-4px_rgba(0,0,0,0.08)] shadow-border dark:bg-[#1c1c1c]/90 dark:shadow-none mt-0.5"
                 type="button"
               >
                 <svg className="size-[18px]" fill="currentColor" viewBox="0 0 256 256">
@@ -541,17 +601,12 @@ export default function Navbar() {
                   <path d="M229.66,218.34,179.6,168.28a88.21,88.21,0,1,0-11.32,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z" />
                 </svg>
               </motion.button>
-            </div>
 
-            {/* Theme Toggle Button — lower layer: the expanding More menu covers it */}
-            <div
-              className={`relative z-0 ${isDropdownOpen ? "pointer-events-none" : ""}`}
-            >
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 2.2, duration: 0.4 }}
-                className="hidden md:inline-flex mt-0.5"
+                className="inline-flex mt-0.5"
               >
                 <ThemeToggle className="relative flex size-10 cursor-pointer items-center justify-center rounded-full text-neutral-700 transition-all duration-150 hover:text-neutral-900 active:scale-95 dark:text-white/85 dark:hover:text-white bg-white/90 shadow-[0_10px_30px_-14px_rgba(0,0,0,0.22),0_3px_8px_-4px_rgba(0,0,0,0.08)] shadow-border dark:bg-[#1c1c1c]/90 dark:shadow-none" />
               </motion.div>

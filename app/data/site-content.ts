@@ -139,13 +139,13 @@ export const siteContent = {
     kicker: "Know about me",
 
     // Heading — the italic accent word is appended by the component.
-    heading: "I solve hard problems —",
+    heading: "I solve hard problems:",
     headingAccent: "build, secure, evolve.",
 
     // Bio paragraphs (one array item per <p>).
     paragraphs: [
       "I'm Haris — a BSIT graduate from the University of Malakand working across three domains: web development, cybersecurity, and AI/ML. I build full-stack apps with MERN and Next.js, and I secure them from day one with OWASP protections, JWT + RBAC auth, and zero-trust defaults. When an API was too slow, I cut its response time by 99%. When analysts were stuck with static logs, I built a real-time intrusion detection dashboard.",
-      "The results back it up: Top 15% nationally in Pakistan's NSCT among 33,000+ graduates, 96% in Cybersecurity coursework, and hands-on SOC experience with Wazuh SIEM. Now I'm growing into AI/ML — because hard problems deserve smarter solutions.",
+      "The results back it up: Top 15% nationally in Pakistan's NSCT among 33,000+ graduates, 96% in Cybersecurity coursework, and hands-on SOC experience with Wazuh SIEM. I'm growing into AI/ML, because hard problems deserve smarter solutions.",
     ],
 
     // Phrases inside the paragraphs that get emphasized (brighter + medium).
