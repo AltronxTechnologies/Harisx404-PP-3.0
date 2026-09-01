@@ -97,7 +97,7 @@ export function ReachOutModal({
     <AnimatePresence>
       {isOpen && (
         <div
-          className="fixed inset-0 z-[7000] flex items-end justify-center p-4 pb-[6vh] sm:pb-[8vh]"
+          className="fixed inset-0 z-[7000] flex items-end justify-center px-4 pt-4 pb-2.5"
           role="dialog"
           aria-modal="true"
           aria-label="Reach out"
