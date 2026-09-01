@@ -101,7 +101,7 @@ const iconTile =
   "flex size-12 shrink-0 items-center justify-center rounded-full " +
   "bg-neutral-200/80 text-neutral-700 dark:bg-white/10 dark:text-white/80";
 
-function SectionHeading({ children }: { children: React.ReactNode }) {
+function ResultGroupHeading({ children }: { children: React.ReactNode }) {
   return (
     <h3 className="px-4 pb-2 pt-4 text-lg font-medium text-text-secondary">
       {children}
@@ -434,12 +434,12 @@ export function SearchModal({
                 {/* Projects */}
                 {projectResults.length > 0 && (
                   <section aria-label="Projects">
-                    <SectionHeading>
+                    <ResultGroupHeading>
                       Projects{" "}
                       <span className="text-text-secondary">
                         ({projectResults.length})
                       </span>
-                    </SectionHeading>
+                    </ResultGroupHeading>
                     <div className="grid grid-cols-1 gap-0.5">
                       {projectResults.map((result) => (
                         <Link
@@ -466,12 +466,12 @@ export function SearchModal({
                 {/* Blog posts */}
                 {postResults.length > 0 && (
                   <section aria-label="Blog Posts">
-                    <SectionHeading>
+                    <ResultGroupHeading>
                       Blog Posts{" "}
                       <span className="text-text-secondary">
                         ({postResults.length})
                       </span>
-                    </SectionHeading>
+                    </ResultGroupHeading>
                     <div className="grid grid-cols-1 gap-0.5">
                       {postResults.map((result) => (
                         <Link
@@ -500,7 +500,7 @@ export function SearchModal({
             {/* Pages */}
             {filteredPages.length > 0 && (
               <section aria-label="Pages">
-                <SectionHeading>Pages</SectionHeading>
+                <ResultGroupHeading>Pages</ResultGroupHeading>
                 <div className="grid grid-cols-2 gap-0.5">
                   {filteredPages.map((page) => {
                     const Icon = page.icon;
@@ -541,7 +541,7 @@ export function SearchModal({
             {/* Connect */}
             {filteredConnect.length > 0 && (
               <section aria-label="Connect">
-                <SectionHeading>Connect</SectionHeading>
+                <ResultGroupHeading>Connect</ResultGroupHeading>
                 <div className="grid grid-cols-3 gap-0.5">
                   {filteredConnect.map((item) => (
                     <a
@@ -568,7 +568,7 @@ export function SearchModal({
             {/* Legal */}
             {filteredLegal.length > 0 && (
               <section aria-label="Legal">
-                <SectionHeading>Legal</SectionHeading>
+                <ResultGroupHeading>Legal</ResultGroupHeading>
                 <div className="grid grid-cols-2 gap-0.5">
                   {filteredLegal.map((item) => {
                     const Icon = item.icon;
@@ -595,7 +595,7 @@ export function SearchModal({
             {/* Discover */}
             {filteredDiscover.length > 0 && (
               <section aria-label="Discover" className="pb-1">
-                <SectionHeading>Discover</SectionHeading>
+                <ResultGroupHeading>Discover</ResultGroupHeading>
                 <div className="grid grid-cols-2 gap-0.5">
                   {filteredDiscover.map((item) => {
                     const Icon = item.icon;

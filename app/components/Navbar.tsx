@@ -470,7 +470,7 @@ export default function Navbar() {
                        drop-shadow filter on the wrapper resets the backdrop
                        root), so translucency would just let the page bleed
                        through. Opaque bg keeps the panel crisp and readable. */
-                    className="w-full rounded-[24px] bg-white dark:bg-[#1c1c1c] pt-[52px] max-h-[calc(100dvh-40px)] overflow-y-auto overflow-x-hidden"
+                    className="w-full rounded-3xl bg-white dark:bg-[#1c1c1c] pt-[52px] max-h-[calc(100dvh-40px)] overflow-y-auto overflow-x-hidden"
                   >
                       <motion.div 
                         /* Content is completely STATIC — it never moves or
@@ -490,7 +490,7 @@ export default function Navbar() {
                           <Link 
                             href="/community-wall" 
                             onClick={() => setIsDropdownOpen(false)}
-                            className="group relative flex h-full w-full flex-col justify-end overflow-hidden rounded-[18px] bg-neutral-900 p-4 ring-1 ring-black/5 dark:ring-white/10 hover:ring-black/15 dark:hover:ring-white/25 transition-all duration-300 shadow-sm hover:shadow-md"
+                            className="group relative flex h-full w-full flex-col justify-end overflow-hidden rounded-2xl bg-neutral-900 p-4 ring-1 ring-black/5 dark:ring-white/10 hover:ring-black/15 dark:hover:ring-white/25 transition-all duration-300 shadow-sm hover:shadow-md"
                           >
                             <Image 
                               src="/images/nav-community-wall.jpg"
@@ -514,7 +514,7 @@ export default function Navbar() {
                           <Link 
                             href="/stats" 
                             onClick={() => setIsDropdownOpen(false)}
-                            className="group relative flex h-full w-full flex-col justify-end overflow-hidden rounded-[18px] bg-neutral-900 p-4 ring-1 ring-black/5 dark:ring-white/10 hover:ring-black/15 dark:hover:ring-white/25 transition-all duration-300 shadow-sm hover:shadow-md"
+                            className="group relative flex h-full w-full flex-col justify-end overflow-hidden rounded-2xl bg-neutral-900 p-4 ring-1 ring-black/5 dark:ring-white/10 hover:ring-black/15 dark:hover:ring-white/25 transition-all duration-300 shadow-sm hover:shadow-md"
                           >
                             <Image 
                               src="/images/nav-stats.jpg"
@@ -538,9 +538,9 @@ export default function Navbar() {
                           <Link 
                             href="/credentials" 
                             onClick={() => setIsDropdownOpen(false)}
-                            className="flex-1 flex items-center gap-3 rounded-[16px] bg-neutral-100/90 dark:bg-[#1a1a1a] p-3 hover:bg-neutral-200/90 dark:hover:bg-[#252525] transition-all duration-200 group border border-neutral-200/70 dark:border-white/5 shadow-xs"
+                            className="flex-1 flex items-center gap-3 rounded-2xl bg-neutral-100/90 dark:bg-[#1a1a1a] p-3 hover:bg-neutral-200/90 dark:hover:bg-[#252525] transition-all duration-200 group border border-neutral-200/70 dark:border-white/5 shadow-xs"
                           >
-                            <div className="p-2.5 rounded-[12px] bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 group-hover:scale-105 group-hover:bg-neutral-50 dark:group-hover:bg-white/10 transition-all shadow-xs">
+                            <div className="p-2.5 rounded-xl bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 group-hover:scale-105 group-hover:bg-neutral-50 dark:group-hover:bg-white/10 transition-all shadow-xs">
                               <svg className="size-4 text-neutral-800 dark:text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
                               </svg>
@@ -554,9 +554,9 @@ export default function Navbar() {
                           <Link 
                             href="/contact" 
                             onClick={() => setIsDropdownOpen(false)}
-                            className="flex-1 flex items-center gap-3 rounded-[16px] bg-neutral-100/90 dark:bg-[#1a1a1a] p-3 hover:bg-neutral-200/90 dark:hover:bg-[#252525] transition-all duration-200 group border border-neutral-200/70 dark:border-white/5 shadow-xs"
+                            className="flex-1 flex items-center gap-3 rounded-2xl bg-neutral-100/90 dark:bg-[#1a1a1a] p-3 hover:bg-neutral-200/90 dark:hover:bg-[#252525] transition-all duration-200 group border border-neutral-200/70 dark:border-white/5 shadow-xs"
                           >
-                            <div className="p-2.5 rounded-[12px] bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 group-hover:scale-105 group-hover:bg-neutral-50 dark:group-hover:bg-white/10 transition-all shadow-xs">
+                            <div className="p-2.5 rounded-xl bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 group-hover:scale-105 group-hover:bg-neutral-50 dark:group-hover:bg-white/10 transition-all shadow-xs">
                               <svg className="size-4 text-neutral-800 dark:text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
                               </svg>
@@ -570,9 +570,9 @@ export default function Navbar() {
                           <Link 
                             href="/links" 
                             onClick={() => setIsDropdownOpen(false)}
-                            className="flex-1 flex items-center gap-3 rounded-[16px] bg-neutral-100/90 dark:bg-[#1a1a1a] p-3 hover:bg-neutral-200/90 dark:hover:bg-[#252525] transition-all duration-200 group border border-neutral-200/70 dark:border-white/5 shadow-xs"
+                            className="flex-1 flex items-center gap-3 rounded-2xl bg-neutral-100/90 dark:bg-[#1a1a1a] p-3 hover:bg-neutral-200/90 dark:hover:bg-[#252525] transition-all duration-200 group border border-neutral-200/70 dark:border-white/5 shadow-xs"
                           >
-                            <div className="p-2.5 rounded-[12px] bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 group-hover:scale-105 group-hover:bg-neutral-50 dark:group-hover:bg-white/10 transition-all shadow-xs">
+                            <div className="p-2.5 rounded-xl bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 group-hover:scale-105 group-hover:bg-neutral-50 dark:group-hover:bg-white/10 transition-all shadow-xs">
                               <svg className="size-4 text-neutral-800 dark:text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                               </svg>
