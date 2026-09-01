@@ -57,14 +57,6 @@ function ReadCta({ compact = false }: { compact?: boolean }) {
   );
 }
 
-function Meta({ text }: { text: string }) {
-  return (
-    <span className="font-mono text-xs uppercase tracking-widest text-text-tertiary">
-      {text}
-    </span>
-  );
-}
-
 export function Writings({
   posts,
 }: {
@@ -127,7 +119,7 @@ export function Writings({
         >
           <Link
             href={`/blog/${featured.slug}`}
-            className={`group flex h-full flex-col rounded-3xl border border-border-primary bg-white p-3 transition-all hover:border-text-tertiary/60 hover:shadow-lg dark:bg-white/[0.02] ${
+            className={`group flex h-full flex-col rounded-3xl border border-border-primary bg-white p-3 transition-all hover:border-neutral-400/70 hover:shadow-lg dark:hover:border-white/25 dark:bg-white/[0.02] ${
               hasCompanions ? "xl:aspect-[16/10.835]" : ""
             }`}
           >
@@ -179,9 +171,14 @@ export function Writings({
                 {featured.summary}
               </p>
               <div className="mt-auto flex items-center justify-between gap-3 pt-6">
-                <Meta
-                  text={`${featured.readingTime} · ${formatShortDate(featured.publishedAt)}`}
-                />
+                {/* Mobile: reading time only — the date joins from sm up. */}
+                <span className="font-mono text-xs uppercase tracking-widest text-text-secondary">
+                  {featured.readingTime}
+                  <span className="hidden sm:inline">
+                    {" "}
+                    · {formatShortDate(featured.publishedAt)}
+                  </span>
+                </span>
                 <ReadCta />
               </div>
             </div>
@@ -205,7 +202,7 @@ export function Writings({
               >
                 <Link
                   href={`/blog/${post.slug}`}
-                  className="group flex h-full flex-col rounded-3xl border border-border-primary bg-white p-3 transition-all hover:border-text-tertiary/60 hover:shadow-lg dark:bg-white/[0.02]"
+                  className="group flex h-full flex-col rounded-3xl border border-border-primary bg-white p-3 transition-all hover:border-neutral-400/70 hover:shadow-lg dark:hover:border-white/25 dark:bg-white/[0.02]"
                 >
                   <div className="flex h-full items-stretch gap-4">
                     {/* Inset thumb — stretches the full card height so it sits
@@ -242,7 +239,7 @@ export function Writings({
                         {post.summary}
                       </p>
                       <div className="mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-                        <span className="font-mono text-xs uppercase tracking-widest text-text-tertiary">
+                        <span className="font-mono text-xs uppercase tracking-widest text-text-secondary">
                           {post.readingTime}
                           <span className="hidden md:inline lg:hidden">
                             {" "}

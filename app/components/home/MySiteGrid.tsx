@@ -88,7 +88,7 @@ export function MySiteGrid() {
       >
         {/* Changelog */}
         <motion.div {...cardMotion}>
-          <Link href="/buildlog" className={`${cardBase} hover:ring-text-tertiary/60 active:ring-text-tertiary/60`}>
+          <Link href="/buildlog" className={`${cardBase} hover:ring-neutral-400/70 active:ring-neutral-400/70 dark:hover:ring-white/25 dark:active:ring-white/25`}>
             <Ambient />
             {/* Mini release log — version chips + muted "entry" bars.
                 h-28 keeps all three card visuals the same height so the
@@ -117,7 +117,7 @@ export function MySiteGrid() {
                   </span>
                   <span className="flex-1">
                     <span
-                      className={`block h-1.5 rounded-full bg-border-primary transition-all duration-500 ease-out group-hover:bg-text-tertiary/50 group-active:bg-text-tertiary/50 ${row.d} ${row.w} ${row.hw}`}
+                      className={`block h-1.5 rounded-full bg-border-primary transition-all duration-500 ease-out group-hover:bg-neutral-400/50 group-active:bg-neutral-400/50 dark:group-hover:bg-white/25 dark:group-active:bg-white/25 ${row.d} ${row.w} ${row.hw}`}
                     />
                   </span>
                 </div>
@@ -136,7 +136,7 @@ export function MySiteGrid() {
 
         {/* Stats */}
         <motion.div {...cardMotion}>
-          <Link href="/stats" className={`${cardBase} hover:ring-text-tertiary/60 active:ring-text-tertiary/60`}>
+          <Link href="/stats" className={`${cardBase} hover:ring-neutral-400/70 active:ring-neutral-400/70 dark:hover:ring-white/25 dark:active:ring-white/25`}>
             <Ambient />
             {/* Analytics sparkline — gradient line + soft area fill; the
                 line redraws itself on hover. Decorative; numbers live
@@ -198,7 +198,7 @@ export function MySiteGrid() {
 
         {/* Community Wall */}
         <motion.div {...cardMotion}>
-          <Link href="/community-wall" className={`${cardBase} hover:ring-text-tertiary/60 active:ring-text-tertiary/60`}>
+          <Link href="/community-wall" className={`${cardBase} hover:ring-neutral-400/70 active:ring-neutral-400/70 dark:hover:ring-white/25 dark:active:ring-white/25`}>
             <Ambient />
             <div className="flex h-28 flex-wrap content-center gap-3" aria-hidden>
               {noteTints.map(({ tint, vis }, i) => (

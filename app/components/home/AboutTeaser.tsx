@@ -109,7 +109,7 @@ export function AboutTeaser() {
         className="mt-14 rounded-3xl border border-border-primary bg-white p-3 dark:bg-white/[0.02]"
       >
         <div className="flex flex-col px-2 pb-2 pt-5 sm:px-3 lg:px-5 lg:pt-7">
-          <div className="hyphens-auto break-words text-pretty text-base font-light leading-6 text-neutral-600 dark:text-neutral-300">
+          <div className="hyphens-auto break-words text-justify text-base font-light leading-6 text-neutral-600 dark:text-neutral-300">
             {/* Portrait + both paragraphs. items-stretch makes the image
                 span the full height of the text column, and both paragraphs
                 share the same left edge beside it. */}
@@ -144,7 +144,7 @@ export function AboutTeaser() {
                   <div className="font-display text-xl font-medium text-text-primary sm:text-2xl">
                     {stat.value}
                   </div>
-                  <div className="mt-1 font-mono text-[9px] uppercase tracking-widest text-text-tertiary sm:text-[11px]">
+                  <div className="mt-1 font-mono text-[9px] uppercase tracking-widest text-text-secondary sm:text-[11px]">
                     {stat.label}
                   </div>
                 </div>
@@ -155,7 +155,7 @@ export function AboutTeaser() {
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3 pb-1">
               {socials.map((social) => {
                 const pillClass =
-                  "inline-flex items-center gap-2 rounded-full border border-border-primary bg-white px-4 py-2.5 text-sm font-medium text-text-secondary transition-all hover:border-text-tertiary hover:text-text-primary hover:shadow-md dark:bg-white/[0.04] sm:px-5 sm:py-2";
+                  "inline-flex items-center gap-2 rounded-full border border-border-primary bg-white px-4 py-2.5 text-sm font-medium text-text-secondary transition-all hover:border-neutral-400/70 hover:text-text-primary hover:shadow-md dark:hover:border-white/25 dark:bg-white/[0.04] sm:px-5 sm:py-2";
                 const inner = (
                   <>
                     <PillIcon label={social.label} />
