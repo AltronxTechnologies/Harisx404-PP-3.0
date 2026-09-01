@@ -15,10 +15,10 @@ export default async function AdminFaqsPage() {
       .select("id, question, answer, display_order, is_visible")
       .order("display_order", { ascending: true })
       .order("created_at", { ascending: true }),
-    supabase.from("site_settings").select("value").eq("key", "show_faq_section").maybeSingle(),
+    supabase.from("site_settings").select("show_faq_section").limit(1).maybeSingle(),
   ]);
 
-  const sectionEnabled = (setting?.value ?? "true") !== "false";
+  const sectionEnabled = setting?.show_faq_section !== false;
   const tableMissing = Boolean(faqsError);
 
   return (

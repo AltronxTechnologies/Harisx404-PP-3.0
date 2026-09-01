@@ -76,6 +76,34 @@ export async function PUT(request: Request) {
   }
 }
 
+/**
+ * PATCH — whole-section switch. The live site_settings table is a single
+ * row with named columns, so this flips its show_faq_section boolean.
+ */
+export async function PATCH(request: Request) {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { show_faq_section } = await request.json();
+    if (typeof show_faq_section !== "boolean") {
+      return NextResponse.json({ error: "show_faq_section must be a boolean" }, { status: 400 });
+    }
+
+    const { error } = await supabase
+      .from("site_settings")
+      .update({ show_faq_section })
+      .not("id", "is", null);
+
+    if (error) throw error;
+    revalidateFaqPaths();
+    return NextResponse.json({ success: true });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
+
 export async function DELETE(request: Request) {
   try {
     const supabase = await createSupabaseServerClient();

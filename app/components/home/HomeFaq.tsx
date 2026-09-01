@@ -32,7 +32,9 @@ async function getFaqData(): Promise<{ hidden: boolean; faqs: Faq[] }> {
 
   try {
     const [settingRes, faqsRes] = await Promise.all([
-      supabase.from("site_settings").select("value").eq("key", "show_faq_section").maybeSingle(),
+      // Single-row settings table with named columns; the boolean column
+      // is added by migrations/2026_faqs.sql (missing column = visible).
+      supabase.from("site_settings").select("show_faq_section").limit(1).maybeSingle(),
       supabase
         .from("faqs")
         .select("question, answer, display_order, created_at")
@@ -41,8 +43,8 @@ async function getFaqData(): Promise<{ hidden: boolean; faqs: Faq[] }> {
         .order("created_at", { ascending: true }),
     ]);
 
-    // Section switch: any value other than the explicit 'false' shows it.
-    if (settingRes.data?.value === "false") return { hidden: true, faqs: [] };
+    // Section switch: hide only on an explicit false.
+    if (settingRes.data?.show_faq_section === false) return { hidden: true, faqs: [] };
 
     // Table missing (migration not applied yet) → keep the defaults.
     if (faqsRes.error) return { hidden: false, faqs: fallbackFaqs };

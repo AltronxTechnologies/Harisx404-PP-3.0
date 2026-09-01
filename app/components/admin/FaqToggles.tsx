@@ -59,10 +59,10 @@ export function FaqSectionToggle({ enabled }: { enabled: boolean }) {
   const toggle = async () => {
     setBusy(true);
     try {
-      const res = await fetch("/api/admin/settings", {
-        method: "PUT",
+      const res = await fetch("/api/admin/faqs", {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ show_faq_section: enabled ? "false" : "true" }),
+        body: JSON.stringify({ show_faq_section: !enabled }),
       });
       if (!res.ok) throw new Error("Failed to update section visibility");
       router.refresh();

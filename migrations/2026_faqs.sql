@@ -60,6 +60,16 @@ SELECT * FROM (VALUES
 WHERE NOT EXISTS (SELECT 1 FROM public.faqs);
 
 -- Section-level switch: hide/show the entire FAQ section on the homepage.
-INSERT INTO public.site_settings (key, value)
-VALUES ('show_faq_section', 'true')
-ON CONFLICT (key) DO NOTHING;
+-- The live site_settings table is a single row with named columns, so the
+-- switch is a boolean column (defaults to visible).
+ALTER TABLE public.site_settings
+  ADD COLUMN IF NOT EXISTS show_faq_section boolean NOT NULL DEFAULT true;
+
+-- Let the logged-in admin session flip the switch (no-op if RLS is off
+-- or an equivalent policy already exists).
+DROP POLICY IF EXISTS "Authenticated users update site settings" ON public.site_settings;
+CREATE POLICY "Authenticated users update site settings"
+  ON public.site_settings FOR UPDATE
+  TO authenticated
+  USING (true)
+  WITH CHECK (true);

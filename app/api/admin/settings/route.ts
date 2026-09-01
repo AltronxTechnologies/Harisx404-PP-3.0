@@ -11,8 +11,6 @@ const SETTINGS_KEYS = [
   'twitter_url',
   'linkedin_url',
   'email_address',
-  // Homepage section switches ('true' / 'false')
-  'show_faq_section',
 ];
 
 export async function GET() {
