@@ -14,7 +14,6 @@ import {
   FileText,
 } from "lucide-react";
 import { ThemeToggle } from "../ThemeToggle";
-import { siteMetadata } from "@/app/data/siteMetadata";
 
 const OWNER_EMAIL = "itsharis.tech@gmail.com";
 
@@ -24,15 +23,25 @@ interface ReachOutModalProps {
   onOpenSearch: () => void;
 }
 
-const cardSurface =
-  "rounded-2xl bg-neutral-100/90 dark:bg-white/[0.07] p-5 text-center " +
-  "border border-neutral-200/60 dark:border-white/[0.06] " +
-  "hover:bg-neutral-200/80 dark:hover:bg-white/[0.1] transition";
+/* Reference glass recipe: white/70 (light) · neutral-900/70 (dark),
+   backdrop-blur-2xl + saturate-150, with the layered inner highlight +
+   hairline + soft drop shadow. */
+const glass =
+  "bg-white/70 dark:bg-neutral-900/70 backdrop-blur-2xl backdrop-saturate-150 " +
+  "[box-shadow:inset_0_1px_1px_0_rgba(255,255,255,0.9),inset_0_0_0_1px_rgba(255,255,255,0.5),0_12px_32px_-12px_rgba(0,0,0,0.25)] " +
+  "dark:[box-shadow:inset_0_1px_1px_0_rgba(255,255,255,0.1),inset_0_0_0_1px_rgba(255,255,255,0.07),0_12px_32px_-12px_rgba(0,0,0,0.6)]";
 
-const circleBtn =
-  "flex size-12 shrink-0 items-center justify-center rounded-2xl bg-white dark:bg-[#1c1c1c] " +
-  "text-neutral-600 dark:text-white/80 shadow-lg shadow-black/5 dark:shadow-none " +
-  "transition-colors hover:text-neutral-900 dark:hover:text-white active:scale-95";
+/* size-11 rounded-2xl glass control buttons (search / theme / close) */
+const controlBtn =
+  `${glass} flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-2xl ` +
+  "text-neutral-700 dark:text-white/80 transition duration-200 " +
+  "hover:bg-white/80 dark:hover:bg-white/15 hover:text-neutral-900 dark:hover:text-white active:scale-95";
+
+/* Inner sub-cards sitting on the glass sheet */
+const cardSurface =
+  "rounded-2xl bg-white/60 dark:bg-white/[0.06] p-5 text-center " +
+  "border border-white/60 dark:border-white/[0.08] " +
+  "hover:bg-white/80 dark:hover:bg-white/[0.1] transition duration-200";
 
 const item = {
   hidden: { opacity: 0, y: 12 },
@@ -97,7 +106,7 @@ export function ReachOutModal({
     <AnimatePresence>
       {isOpen && (
         <div
-          className="fixed inset-0 z-[7000] flex items-end justify-center p-4 pb-[6vh] sm:pb-[8vh]"
+          className="fixed inset-0 z-[7000] flex items-end justify-center sm:p-4 sm:pb-[8vh]"
           role="dialog"
           aria-modal="true"
           aria-label="Reach out"
@@ -109,14 +118,14 @@ export function ReachOutModal({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/50 backdrop-blur-[3.85px]"
+            className="fixed inset-0 bg-black/40 backdrop-blur-[3px]"
           />
 
-          {/* Modal (top bar + card) */}
+          {/* Drawer (mobile: bottom sheet w/ 12px inset · desktop: centered modal) */}
           <motion.div
-            initial={{ opacity: 0, y: 24, scale: 0.96 }}
+            initial={{ opacity: 0, y: 24, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 24, scale: 0.96 }}
+            exit={{ opacity: 0, y: 24, scale: 0.98 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             drag="y"
             dragConstraints={{ top: 0, bottom: 0 }}
@@ -124,7 +133,7 @@ export function ReachOutModal({
             onDragEnd={(_, info) => {
               if (info.offset.y > 120 || info.velocity.y > 800) onClose();
             }}
-            className="relative z-10 mx-3 w-[92vw] max-w-[660px]"
+            className="relative z-10 w-full px-3 pb-3 sm:w-[92vw] sm:max-w-[620px] sm:px-0 sm:pb-0"
             onClick={(e) => {
               if (e.target === e.currentTarget) onClose();
             }}
@@ -136,167 +145,179 @@ export function ReachOutModal({
                 if (e.target === e.currentTarget) onClose();
               }}
             >
-            {/* Top bar — detached row above the card */}
-            <div className="mb-3 flex items-center gap-3">
-              <div className="flex h-14 flex-1 items-center gap-2 rounded-2xl bg-white px-3 shadow-lg shadow-black/5 dark:bg-[#1c1c1c] dark:shadow-none">
+              {/* Top action bar — h-13 row, gap-2.5 */}
+              <div className="mb-2.5 flex h-13 items-center gap-2.5">
                 <button
                   onClick={onClose}
-                  aria-label="Back"
-                  className="flex size-8 items-center justify-center rounded-full text-neutral-500 transition-colors hover:text-neutral-900 dark:text-white/60 dark:hover:text-white"
+                  className={`${glass} flex h-11 flex-1 cursor-pointer items-center gap-2 rounded-2xl px-4 text-left transition duration-200 hover:bg-white/80 dark:hover:bg-white/15 active:scale-[0.98]`}
                 >
-                  <ChevronLeft className="size-6" />
+                  <ChevronLeft className="size-4 text-neutral-500 dark:text-white/60" />
+                  <span className="text-sm font-medium text-neutral-900 dark:text-white">
+                    Reach out
+                  </span>
                 </button>
-                <span className="text-lg font-medium text-neutral-900 dark:text-white">
-                  Reach out
-                </span>
+
+                <button
+                  onClick={() => {
+                    onClose();
+                    onOpenSearch();
+                  }}
+                  aria-label="Search"
+                  className={controlBtn}
+                >
+                  <Search className="size-5" />
+                </button>
+
+                <ThemeToggle className={controlBtn} />
+
+                <button onClick={onClose} aria-label="Close" className={controlBtn}>
+                  <X className="size-5" />
+                </button>
               </div>
 
-              <button
-                onClick={() => {
-                  onClose();
-                  onOpenSearch();
-                }}
-                aria-label="Search"
-                className={`${circleBtn} flex`}
-              >
-                <Search className="size-6" />
-              </button>
-
-              <ThemeToggle
-                className={`${circleBtn} flex cursor-pointer`}
-              />
-
-              <button onClick={onClose} aria-label="Close" className={circleBtn}>
-                <X className="size-6" />
-              </button>
-            </div>
-
-            {/* Main card */}
-            <motion.div
-              initial="hidden"
-              animate="show"
-              variants={{ show: { transition: { staggerChildren: 0.05 } } }}
-              className="rounded-3xl bg-white p-3 shadow-2xl ring-1 ring-neutral-200/70 dark:bg-[#1a1a1a] dark:ring-white/[0.08]"
-            >
-              {/* Message panel */}
+              {/* Content sheet — glass, rounded-3xl, capped height w/ internal scroll on mobile */}
               <motion.div
-                variants={item}
-                className="rounded-2xl bg-neutral-100/90 p-5 dark:bg-white/[0.07] border border-neutral-200/60 dark:border-white/[0.06]"
+                initial="hidden"
+                animate="show"
+                variants={{ show: { transition: { staggerChildren: 0.05 } } }}
+                className={`${glass} max-h-[min(500px,65dvh)] overflow-y-auto overscroll-contain rounded-3xl p-2.5 sm:max-h-[70dvh] sm:p-3`}
               >
-                <div className="flex items-center gap-3">
-                  <Image
-                    src="/harisx404.png"
-                    alt="Muhammad Haris"
-                    width={36}
-                    height={36}
-                    className="size-9 rounded-full object-cover"
-                  />
-                  <div>
-                    <h3 className="text-base font-semibold text-neutral-900 dark:text-white">
-                      Send Haris a message
-                    </h3>
-                    <p className="text-sm text-text-tertiary">I read every one</p>
-                  </div>
-                </div>
-
-                <textarea
-                  ref={textareaRef}
-                  value={message}
-                  rows={3}
-                  onChange={(e) => {
-                    setMessage(e.target.value);
-                    autoGrow();
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      handleContinue();
-                    }
-                  }}
-                  placeholder="Hey Haris, I have a project idea..."
-                  className="mt-4 w-full resize-none bg-transparent text-lg text-neutral-900 placeholder-neutral-400 focus:outline-none dark:text-white dark:placeholder-white/30"
-                />
-
-                <div className="mt-2 flex items-center justify-between gap-3">
-                  <span className="flex items-center gap-1.5 text-xs text-text-tertiary">
-                    <kbd className="rounded-md border border-neutral-300 bg-white px-1.5 py-0.5 font-mono text-[11px] leading-none text-neutral-500 dark:border-white/15 dark:bg-white/10 dark:text-white/60">
-                      ⏎
-                    </kbd>
-                    to continue ·
-                    <kbd className="rounded-md border border-neutral-300 bg-white px-1.5 py-0.5 font-mono text-[11px] leading-none text-neutral-500 dark:border-white/15 dark:bg-white/10 dark:text-white/60">
-                      ⇧⏎
-                    </kbd>
-                    new line
-                  </span>
-                  <button
-                    onClick={handleContinue}
-                    disabled={!message.trim()}
-                    aria-label="Continue"
-                    className="ml-auto flex items-center gap-1.5 rounded-xl border border-neutral-200 bg-white px-4 py-2 text-base text-neutral-900 transition hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
-                  >
-                    Continue <ArrowRight className="size-4" />
-                  </button>
-                </div>
-              </motion.div>
-
-              {/* Action cards */}
-              <motion.div variants={item} className="mt-3 grid grid-cols-[1.3fr_1fr] gap-3">
-                {/* Resume card */}
-                <Link
-                  href="/resume"
-                  onClick={onClose}
-                  className={`${cardSurface} group flex flex-col items-center`}
+                {/* Message panel */}
+                <motion.div
+                  variants={item}
+                  className="rounded-2xl border border-white/60 bg-white/60 p-4 dark:border-white/[0.08] dark:bg-white/[0.06] sm:p-5"
                 >
-                  <div className="mb-4 flex items-center justify-center pt-2">
-                    <div className="flex size-14 items-center justify-center rounded-full bg-neutral-200/80 text-neutral-700 transition-colors group-hover:bg-neutral-300/80 dark:bg-white/10 dark:text-white/80 dark:group-hover:bg-white/15">
-                      <FileText className="size-6" />
+                  <div className="flex items-center gap-3">
+                    <Image
+                      src="/harisx404.png"
+                      alt="Muhammad Haris"
+                      width={36}
+                      height={36}
+                      className="size-9 rounded-full object-cover"
+                    />
+                    <div>
+                      <h3 className="text-base font-semibold text-neutral-900 dark:text-white">
+                        Send Haris a message
+                      </h3>
+                      <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                        I read every one
+                      </p>
                     </div>
                   </div>
-                  <h4 className="text-[22px] font-semibold text-neutral-900 dark:text-white">
-                    View my resume
-                  </h4>
-                  <p className="text-base text-text-tertiary">Experience · skills · work</p>
-                </Link>
 
-                <button
-                  onClick={handleCopyEmail}
-                  aria-label="Copy email address"
-                  className={`${cardSurface} flex flex-col items-center`}
-                >
-                  <div className="mb-4 flex size-14 items-center justify-center pt-2">
-                    {isCopied ? (
-                      <Check className="size-11 text-emerald-500" />
-                    ) : (
-                      <Mail className="size-11 text-text-tertiary" strokeWidth={1.5} />
-                    )}
-                  </div>
-                  <h4 className="text-xl font-semibold text-neutral-900 dark:text-white">
-                    {isCopied ? "Copied!" : "Email me"}
-                  </h4>
-                  <p className="max-w-full break-all font-mono text-[15px] text-text-tertiary">
-                    {OWNER_EMAIL}
-                  </p>
-                </button>
-              </motion.div>
+                  <textarea
+                    ref={textareaRef}
+                    value={message}
+                    rows={3}
+                    onChange={(e) => {
+                      setMessage(e.target.value);
+                      autoGrow();
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        handleContinue();
+                      }
+                    }}
+                    placeholder="Hey Haris, I have a project idea..."
+                    className="mt-4 w-full resize-none bg-transparent text-base text-neutral-900 placeholder-neutral-400 focus:outline-none dark:text-white dark:placeholder-white/30 sm:text-lg"
+                  />
 
-              {/* Social row */}
-              <motion.div variants={item} className="mt-3 grid grid-cols-3 gap-3">
-                {socials.map((s) => (
-                  <a
-                    key={s.label}
-                    href={s.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`${cardSurface} flex flex-col items-center gap-2`}
-                  >
-                    <SocialIcon label={s.label} />
-                    <span className="text-sm font-medium text-neutral-700 dark:text-white/80">
-                      {s.label}
+                  <div className="mt-2 flex items-center justify-between gap-3">
+                    <span className="hidden items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400 sm:flex">
+                      <kbd className="rounded-md border border-neutral-300/70 bg-white/70 px-1.5 py-0.5 font-mono text-[11px] leading-none text-neutral-500 dark:border-white/15 dark:bg-white/10 dark:text-white/60">
+                        ⏎
+                      </kbd>
+                      to continue ·
+                      <kbd className="rounded-md border border-neutral-300/70 bg-white/70 px-1.5 py-0.5 font-mono text-[11px] leading-none text-neutral-500 dark:border-white/15 dark:bg-white/10 dark:text-white/60">
+                        ⇧⏎
+                      </kbd>
+                      new line
                     </span>
-                  </a>
-                ))}
+                    <button
+                      onClick={handleContinue}
+                      disabled={!message.trim()}
+                      aria-label="Continue"
+                      className="ml-auto flex items-center gap-1.5 rounded-xl border border-white/60 bg-white/70 px-4 py-2 text-sm text-neutral-900 transition duration-200 hover:bg-white active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:bg-white/10 dark:text-white dark:hover:bg-white/15 sm:text-base"
+                    >
+                      Continue <ArrowRight className="size-4" />
+                    </button>
+                  </div>
+                </motion.div>
+
+                {/* Action cards */}
+                <motion.div
+                  variants={item}
+                  className="mt-2.5 grid grid-cols-1 gap-2.5 sm:mt-3 sm:grid-cols-[1.3fr_1fr] sm:gap-3"
+                >
+                  {/* Resume card */}
+                  <Link
+                    href="/resume"
+                    onClick={onClose}
+                    className={`${cardSurface} group flex items-center gap-4 text-left sm:flex-col sm:items-center sm:text-center`}
+                  >
+                    <div className="flex items-center justify-center sm:mb-4 sm:pt-2">
+                      <div className="flex size-11 items-center justify-center rounded-full bg-white/80 text-neutral-700 shadow-sm transition-colors group-hover:bg-white dark:bg-white/10 dark:text-white/80 dark:shadow-none dark:group-hover:bg-white/15 sm:size-14">
+                        <FileText className="size-5 sm:size-6" />
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="text-base font-semibold text-neutral-900 dark:text-white sm:text-[22px]">
+                        View my resume
+                      </h4>
+                      <p className="text-sm text-neutral-500 dark:text-neutral-400 sm:text-base">
+                        Experience · skills · work
+                      </p>
+                    </div>
+                  </Link>
+
+                  <button
+                    onClick={handleCopyEmail}
+                    aria-label="Copy email address"
+                    className={`${cardSurface} flex cursor-pointer items-center gap-4 text-left sm:flex-col sm:items-center sm:text-center`}
+                  >
+                    <div className="flex size-11 shrink-0 items-center justify-center sm:mb-4 sm:size-14 sm:pt-2">
+                      {isCopied ? (
+                        <Check className="size-7 text-emerald-500 sm:size-11" />
+                      ) : (
+                        <Mail
+                          className="size-7 text-neutral-500 dark:text-neutral-400 sm:size-11"
+                          strokeWidth={1.5}
+                        />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="text-base font-semibold text-neutral-900 dark:text-white sm:text-xl">
+                        {isCopied ? "Copied!" : "Email me"}
+                      </h4>
+                      <p className="max-w-full truncate font-mono text-[13px] text-neutral-500 dark:text-neutral-400 sm:break-all sm:whitespace-normal sm:text-[15px]">
+                        {OWNER_EMAIL}
+                      </p>
+                    </div>
+                  </button>
+                </motion.div>
+
+                {/* Social row */}
+                <motion.div
+                  variants={item}
+                  className="mt-2.5 grid grid-cols-3 gap-2.5 sm:mt-3 sm:gap-3"
+                >
+                  {socials.map((s) => (
+                    <a
+                      key={s.label}
+                      href={s.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`${cardSurface} flex flex-col items-center gap-2 !p-4 sm:!p-5`}
+                    >
+                      <SocialIcon label={s.label} />
+                      <span className="text-sm font-medium text-neutral-700 dark:text-white/80">
+                        {s.label}
+                      </span>
+                    </a>
+                  ))}
+                </motion.div>
               </motion.div>
-            </motion.div>
             </div>
           </motion.div>
         </div>
@@ -306,7 +327,7 @@ export function ReachOutModal({
 }
 
 function SocialIcon({ label }: { label: string }) {
-  const cls = "size-6 fill-current text-text-tertiary";
+  const cls = "size-6 fill-current text-neutral-500 dark:text-neutral-400";
   if (label === "LinkedIn") {
     return (
       <svg className={cls} viewBox="0 0 24 24" aria-hidden="true">
