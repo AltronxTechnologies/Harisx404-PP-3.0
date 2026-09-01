@@ -21,14 +21,44 @@ const cardVariants = {
 // 5 notes on tablets (md), 6 on phones, 7 on large screens — the extra
 // notes fill the roomier rows so no breakpoint looks sparse.
 const noteTints = [
-  { tint: "rotate-[-4deg] bg-amber-500/15", vis: "" },
-  { tint: "rotate-[3deg] bg-pink-500/15", vis: "" },
-  { tint: "rotate-[-2deg] bg-blue-500/15", vis: "" },
-  { tint: "rotate-[5deg] bg-emerald-500/15", vis: "" },
-  { tint: "rotate-[-6deg] bg-violet-500/15", vis: "" },
-  { tint: "rotate-[4deg] bg-sky-500/15", vis: "md:hidden lg:inline-block" },
-  { tint: "rotate-[-3deg] bg-rose-500/15", vis: "hidden lg:inline-block" },
+  { rot: "rotate-[-4deg]", tint: "bg-amber-500/15", vis: "" },
+  { rot: "rotate-[3deg]", tint: "bg-pink-500/15", vis: "" },
+  { rot: "rotate-[-2deg]", tint: "bg-blue-500/15", vis: "" },
+  { rot: "rotate-[5deg]", tint: "bg-emerald-500/15", vis: "" },
+  { rot: "rotate-[-6deg]", tint: "bg-violet-500/15", vis: "" },
+  { rot: "rotate-[4deg]", tint: "bg-sky-500/15", vis: "md:hidden lg:inline-block" },
+  { rot: "rotate-[-3deg]", tint: "bg-rose-500/15", vis: "hidden lg:inline-block" },
 ];
+
+/* ── Scroll pulse ────────────────────────────────────────────────────
+   When the card row crosses the middle band of the viewport, every
+   card's hover visual plays once (~1.8s: stagger in, brief hold),
+   then cools back to the resting state. It re-arms only after the row
+   leaves the band, so each scroll pass replays it exactly once. */
+function useScrollPulse<T extends HTMLElement>(ref: React.RefObject<T | null>) {
+  const [pulse, setPulse] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let t: number | undefined;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setPulse(true);
+          window.clearTimeout(t);
+          t = window.setTimeout(() => setPulse(false), 1800);
+        }
+      },
+      { rootMargin: "-30% 0px -30% 0px" }
+    );
+    io.observe(el);
+    return () => {
+      io.disconnect();
+      window.clearTimeout(t);
+    };
+  }, [ref]);
+  return pulse;
+}
 
 /* ── Stats card visual: contribution heatmap ─────────────────────────
    GitHub-style activity grid, 5 rows × 16 weeks. Deterministic pattern
@@ -52,8 +82,8 @@ const heatmapLevelClass = [
   "bg-neutral-400/80 group-hover:bg-neutral-500 group-active:bg-neutral-500 dark:bg-white/[0.28] dark:group-hover:bg-white/[0.45] dark:group-active:bg-white/[0.45]",
   "bg-emerald-500/45 group-hover:bg-emerald-500/85 group-active:bg-emerald-500/85 dark:bg-emerald-400/40 dark:group-hover:bg-emerald-400/75 dark:group-active:bg-emerald-400/75",
 ];
-/* Lit state (card centered in the viewport): same target colors the
-   hover/press wave uses, applied without needing a pointer. */
+/* Pulse state: same target colors the hover/press wave uses, applied
+   without a pointer while the one-shot scroll pulse is active. */
 const heatmapLitClass = [
   "bg-neutral-300 dark:bg-white/[0.12]",
   "bg-neutral-400/70 dark:bg-white/[0.24]",
@@ -61,25 +91,7 @@ const heatmapLitClass = [
   "bg-emerald-500/85 dark:bg-emerald-400/75",
 ];
 
-function StatsHeatmap() {
-  const gridRef = useRef<HTMLDivElement | null>(null);
-  const [lit, setLit] = useState(false);
-
-  /* Scroll-driven activation: the diagonal wave plays when the card
-     crosses the middle band of the viewport (and reverses on the way
-     out), so touch users see it without tapping. The band is the
-     central ~26% of the screen. */
-  useEffect(() => {
-    const el = gridRef.current;
-    if (!el) return;
-    const io = new IntersectionObserver(
-      ([entry]) => setLit(entry.isIntersecting),
-      { rootMargin: "-37% 0px -37% 0px" }
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
+function StatsHeatmap({ pulse }: { pulse: boolean }) {
   return (
     <div className="flex h-28 items-center" aria-hidden>
       {/* Responsive density (same idea as the accounts bento tiles): the
@@ -87,10 +99,7 @@ function StatsHeatmap() {
           there — bigger squares, no "thin strip" — and shows all 18
           columns on mobile (single, wide card) and lg+. Touch devices get
           the brightness wave on press via the group-active variants. */}
-      <div
-        ref={gridRef}
-        className="grid w-full gap-1 [grid-template-columns:repeat(18,minmax(0,1fr))] md:[grid-template-columns:repeat(10,minmax(0,1fr))] lg:[grid-template-columns:repeat(18,minmax(0,1fr))]"
-      >
+      <div className="grid w-full gap-1 [grid-template-columns:repeat(18,minmax(0,1fr))] md:[grid-template-columns:repeat(10,minmax(0,1fr))] lg:[grid-template-columns:repeat(18,minmax(0,1fr))]">
         {heatmapLevels.map((level, i) => {
           const row = Math.floor(i / HEATMAP_COLS);
           const col = i % HEATMAP_COLS;
@@ -98,7 +107,7 @@ function StatsHeatmap() {
             <span
               key={i}
               className={`aspect-square w-full rounded-[3px] transition-colors duration-500 ease-out motion-reduce:transition-none ${
-                lit ? heatmapLitClass[level] : heatmapLevelClass[level]
+                pulse ? heatmapLitClass[level] : heatmapLevelClass[level]
               } ${col >= 10 ? "md:hidden lg:block" : ""}`}
               style={{ transitionDelay: `${(row + col) * 25}ms` }}
             />
@@ -126,6 +135,10 @@ function Ambient() {
 
 export function MySiteGrid() {
   const prefersReducedMotion = useReducedMotion();
+  const rowRef = useRef<HTMLDivElement | null>(null);
+  const scrollPulse = useScrollPulse(rowRef);
+  // Respect reduced motion: no scroll-triggered animation.
+  const pulse = scrollPulse && !prefersReducedMotion;
 
   // Reduced motion: keep the variants MOUNTED but make them no-ops.
   // (Removing variants after hydration can strand cards at the already-
@@ -160,6 +173,7 @@ export function MySiteGrid() {
       </SectionHeading>
 
       <motion.div
+        ref={rowRef}
         variants={gridVariants}
         initial="show"
         whileInView="show"
@@ -175,9 +189,9 @@ export function MySiteGrid() {
                 text blocks align across the row. */}
             <div className="flex h-28 flex-col justify-center gap-2.5" aria-hidden>
               {[
-                { v: "v2.1", w: "w-[55%]", hw: "motion-safe:group-hover:w-[80%] motion-safe:group-active:w-[80%]", d: "delay-0", live: true },
-                { v: "v2.0", w: "w-[80%]", hw: "motion-safe:group-hover:w-[55%] motion-safe:group-active:w-[55%]", d: "delay-75", live: false },
-                { v: "v1.4", w: "w-[40%]", hw: "motion-safe:group-hover:w-[65%] motion-safe:group-active:w-[65%]", d: "delay-150", live: false },
+                { v: "v2.1", w: "w-[55%]", pw: "w-[80%]", hw: "motion-safe:group-hover:w-[80%] motion-safe:group-active:w-[80%]", d: "delay-0", live: true },
+                { v: "v2.0", w: "w-[80%]", pw: "w-[55%]", hw: "motion-safe:group-hover:w-[55%] motion-safe:group-active:w-[55%]", d: "delay-75", live: false },
+                { v: "v1.4", w: "w-[40%]", pw: "w-[65%]", hw: "motion-safe:group-hover:w-[65%] motion-safe:group-active:w-[65%]", d: "delay-150", live: false },
               ].map((row) => (
                 <div key={row.v} className="flex items-center gap-2.5">
                   <span
@@ -197,7 +211,11 @@ export function MySiteGrid() {
                   </span>
                   <span className="flex-1">
                     <span
-                      className={`block h-1.5 rounded-full bg-border-primary transition-all duration-500 ease-out group-hover:bg-neutral-400/50 group-active:bg-neutral-400/50 dark:group-hover:bg-white/25 dark:group-active:bg-white/25 ${row.d} ${row.w} ${row.hw}`}
+                      className={`block h-1.5 rounded-full transition-all duration-500 ease-out ${row.d} ${
+                        pulse
+                          ? `${row.pw} bg-neutral-400/50 dark:bg-white/25`
+                          : `${row.w} ${row.hw} bg-border-primary group-hover:bg-neutral-400/50 group-active:bg-neutral-400/50 dark:group-hover:bg-white/25 dark:group-active:bg-white/25`
+                      }`}
                     />
                   </span>
                 </div>
@@ -220,7 +238,7 @@ export function MySiteGrid() {
             <Ambient />
             {/* Contribution heatmap — activity grid that brightens in a
                 diagonal wave on hover. Decorative; numbers live on /stats. */}
-            <StatsHeatmap />
+            <StatsHeatmap pulse={pulse} />
             <div>
               <p className="font-mono text-xs uppercase tracking-widest text-text-secondary">
                 STATS
@@ -237,12 +255,12 @@ export function MySiteGrid() {
           <Link href="/community-wall" className={`${cardBase} hover:ring-neutral-400/70 active:ring-neutral-400/70 dark:hover:ring-white/25 dark:active:ring-white/25`}>
             <Ambient />
             <div className="flex h-28 flex-wrap content-center gap-3" aria-hidden>
-              {noteTints.map(({ tint, vis }, i) => (
+              {noteTints.map(({ rot, tint, vis }, i) => (
                 <span
                   key={tint}
                   className={`h-12 w-14 rounded-md border border-border-primary transition-transform duration-500 ease-out motion-safe:group-hover:rotate-0 motion-safe:group-hover:scale-105 motion-safe:group-active:rotate-0 motion-safe:group-active:scale-105 md:h-9 md:w-10 lg:h-12 lg:w-14 ${
                     ["delay-0", "delay-75", "delay-100", "delay-150", "delay-200", "delay-200", "delay-300"][i]
-                  } ${tint} ${vis}`}
+                  } ${pulse ? "rotate-0 scale-105" : rot} ${tint} ${vis}`}
                 />
               ))}
             </div>
