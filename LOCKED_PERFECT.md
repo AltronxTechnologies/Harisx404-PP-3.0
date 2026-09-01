@@ -900,9 +900,9 @@ must not flatten them:
 Recorded in `DESIGN_DEBT.md`; needs owner permission to action:
 - Navbar search icon is **Phosphor** while both modals use **lucide**:
   different stroke weight at the same nominal px.
-- Dead code outside the frozen file list (safe to delete, owner decision
-  pending): `ProfilePicture.tsx`, `ConnectionsBento.tsx`,
-  `components/FeaturedBlogCard.tsx` — all zero imports.
+- ~~Dead code: `ProfilePicture.tsx`, `ConnectionsBento.tsx`,
+  `components/FeaturedBlogCard.tsx`~~ — **deleted 2026-09-01** with owner
+  approval. None were imported; the live `blog/FeaturedBlogCard.tsx` was kept.
 
 ## Entry template (copy for new locks)
 

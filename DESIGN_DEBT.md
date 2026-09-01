@@ -187,15 +187,16 @@ dead code. The avatars actually rendered on the homepage come from
 `home/HomeHero.tsx` and `home/AboutTeaser.tsx`, and **both already use the same
 `/harisx404.png`**, so they are consistent and correct. No visual bug exists.
 
-What remains is a **dead-code cleanup** item, not a design issue:
-| File | Status |
-|---|---|
-| `app/components/ProfilePicture.tsx` | 0 imports. Contains a 148px ring widget + a Cloudinary URL (`haris_primary_photo.png`) that nothing serves. |
-| `app/components/ConnectionsBento.tsx` | 0 imports. Near-identical ring widget, raw `<img src="/harisx404.png">`. |
-| `app/components/FeaturedBlogCard.tsx` | 0 imports. Shares its basename with the live `blog/FeaturedBlogCard.tsx`. |
+**RESOLVED 2026-09-01** — the owner approved deletion. The three never-imported
+files below were removed (commit follows this note). The live
+`app/components/blog/FeaturedBlogCard.tsx` was **kept** — it is imported by
+`app/blog/page.tsx`; only the orphaned root-level copy was deleted.
 
-Neither is in the entry-22 frozen file list, so deleting them cannot affect the
-locked visuals. **Awaiting owner decision:** delete, or keep for planned use?
+| Deleted file | Was |
+|---|---|
+| `app/components/ProfilePicture.tsx` | 0 imports; 148px ring widget + orphaned Cloudinary URL |
+| `app/components/ConnectionsBento.tsx` | 0 imports; near-identical ring widget |
+| `app/components/FeaturedBlogCard.tsx` | 0 imports; basename clashed with the live `blog/` one |
 
 ### `Icon()` helper — same body, 4 files, 3 defaults
 `contact/page.tsx:14` (`size-4`) · `credentials/page.tsx:30` (`size-5`) ·

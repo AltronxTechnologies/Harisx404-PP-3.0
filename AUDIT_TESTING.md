@@ -4,6 +4,18 @@
 work through every phase in this file for that target, produce the report at the
 bottom, fix what’s found, then ask for lock approval.
 
+### Where the audit sits in the workflow
+```
+1. OWNER polishes the page/component to their satisfaction  ← design decisions
+2. OWNER says "Audit testing <target>"                      ← audit starts HERE
+3. Audit report -> owner vetoes anything unwanted
+4. Fix approved items, one commit each
+5. Re-verify, then LOCK
+```
+The audit is the **last** step before locking, not an ongoing activity. Do not
+start auditing a target while the owner is still designing it — findings would
+be about work in progress and waste both sides' time. Wait for the trigger.
+
 Companion files:
 - **`LOCKED_PERFECT.md`** — what is frozen. Entry 22 is the production freeze.
 - **`DESIGN_DEBT.md`** — known open issues. **Phase 11 cross-checks it.**
