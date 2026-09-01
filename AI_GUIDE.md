@@ -312,6 +312,15 @@ testimonials & experience tables + admin CRUD + project columns + seeds.
   `bg-white text-slate-900` to token-inverted `bg-text-primary text-bg-primary`
   (was invisible on the light theme). Marquee/overflow + hover rules verified
   clean elsewhere.
+> ⚠️ **Accuracy note (2026-09-01):** the "deleted 22 components" list below is
+> **stale**. `ConnectionsBento` and `SocialPill` are named in it but were still
+> present. `SocialPill` is **live** (used by `Footer.tsx`) and must not be
+> deleted. `ConnectionsBento` and `ProfilePicture` were genuinely unused and
+> were deleted on 2026-09-01, along with the orphaned root-level
+> `components/FeaturedBlogCard.tsx` (the live one is `blog/FeaturedBlogCard.tsx`).
+> Treat this historical list as a record of intent, not of current state — verify
+> with `grep` before acting on it.
+
 - Dead code: deleted 22 never-imported legacy template components from
   app/components/ (AboutMeBento, AboutSection, AboutTrackPattern,
   AnimatedProfilePicture, AnimatedText, BgSectionTag, BlogPostList,
