@@ -27,6 +27,29 @@ export default function Navbar() {
   // synthetic click (fired right after mouseenter on touch) doesn't re-toggle.
   const dropdownOpenedAt = useRef(0);
   const navRowRef = useRef<HTMLDivElement>(null);
+  const pillRef = useRef<HTMLDivElement>(null);
+
+  // Morph geometry: the dropdown panel starts clipped to the pill's EXACT
+  // rect (measured at open time) so the expansion reads as the navbar
+  // itself enlarging — never a second box appearing behind it.
+  const [pillClip, setPillClip] = useState(
+    "inset(0px 32% calc(100% - 52px) 32% round 22px)"
+  );
+  const measurePillClip = () => {
+    const pill = pillRef.current;
+    if (!pill) return;
+    const r = pill.getBoundingClientRect();
+    const panelW = Math.min(740, window.innerWidth * 0.92);
+    const hx = Math.max((panelW - r.width) / 2, 0);
+    setPillClip(
+      `inset(0px ${hx.toFixed(1)}px calc(100% - ${r.height.toFixed(1)}px) ${hx.toFixed(1)}px round 22px)`
+    );
+  };
+  const openDropdown = () => {
+    measurePillClip();
+    if (!isDropdownOpen) dropdownOpenedAt.current = Date.now();
+    setIsDropdownOpen(true);
+  };
 
   // Greeting State
   const [greeting, setGreeting] = useState("Good Evening");
@@ -141,6 +164,7 @@ export default function Navbar() {
               {/* The main morphing pill container */}
               <motion.div
                 layout
+                ref={pillRef}
                 className="relative z-10 flex flex-col items-center justify-start p-1.5 bg-white/90 max-md:bg-white/40 shadow-[0_10px_30px_-14px_rgba(0,0,0,0.22),0_3px_8px_-4px_rgba(0,0,0,0.08)] shadow-border dark:bg-[#1c1c1c]/90 max-md:dark:bg-[#1c1c1c]/40 dark:shadow-none overflow-hidden backdrop-blur-md max-md:backdrop-blur-xl max-md:!rounded-full max-md:p-1 max-md:ring-1 max-md:ring-neutral-300/60 max-md:dark:ring-white/15"
                 initial={{ borderRadius: "22px" }}
                 animate={{ borderRadius: isDropdownOpen ? "24px" : "22px" }}
@@ -320,8 +344,7 @@ export default function Navbar() {
                           className="relative list-none"
                           onMouseEnter={() => {
                             setHoveredTab(null);
-                            if (!isDropdownOpen) dropdownOpenedAt.current = Date.now();
-                            setIsDropdownOpen(true);
+                            openDropdown();
                           }}
                         >
                           <button
@@ -332,8 +355,11 @@ export default function Navbar() {
                               // On touch, mouseenter just opened it — don't close again.
                               // (Timestamp-based: state updates may still be batched here.)
                               if (Date.now() - dropdownOpenedAt.current < 450) return;
-                              if (!isDropdownOpen) dropdownOpenedAt.current = Date.now();
-                              setIsDropdownOpen((prev) => !prev);
+                              if (isDropdownOpen) {
+                                setIsDropdownOpen(false);
+                              } else {
+                                openDropdown();
+                              }
                             }}
                             className={`relative z-10 flex cursor-pointer select-none items-center gap-1 px-4 py-1.5 font-normal text-sm transition-colors duration-150 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 dark:focus-visible:ring-white/25 ${
                               isDropdownOpen
@@ -383,35 +409,29 @@ export default function Navbar() {
               <AnimatePresence>
                 {isDropdownOpen && (
                   <motion.div
-                    /* Morph reveal: the panel is clipped down to the pill's
-                       footprint and expands outward/downward from it, so it
-                       reads as the navbar itself enlarging — then contracts
-                       back into the pill on close. clip-path animates on the
-                       compositor, so it stays 60fps+. */
+                    /* Pure geometry morph: the panel starts clipped to the
+                       pill's exact measured rect (no fade, same bg/radius),
+                       so the sides and bottom grow out of the navbar and
+                       fold back into it on close — one continuous surface. */
                     initial={{
-                      clipPath: "inset(0% 32% 88% 32% round 24px)",
-                      opacity: 0.6,
+                      clipPath: pillClip,
                       x: "-50%",
                     }}
                     animate={{
-                      clipPath: "inset(0% 0% 0% 0% round 24px)",
-                      opacity: 1,
+                      clipPath: "inset(0px 0px 0px 0px round 24px)",
                       x: "-50%",
                     }}
                     exit={{
-                      clipPath: "inset(0% 32% 88% 32% round 24px)",
-                      opacity: 0,
+                      clipPath: pillClip,
                       x: "-50%",
                       transition: {
                         clipPath: { duration: 0.5, ease: [0.4, 0, 0.2, 1] },
-                        opacity: { duration: 0.45, ease: "easeIn", delay: 0.05 },
                       },
                     }}
                     transition={{
                       clipPath: { duration: 0.7, ease: [0.19, 1, 0.22, 1] },
-                      opacity: { duration: 0.25, ease: "easeOut" },
                     }}
-                    style={{ transformOrigin: "top center", willChange: "clip-path, opacity" }}
+                    style={{ transformOrigin: "top center", willChange: "clip-path" }}
                     className="absolute top-0 left-1/2 z-0 w-[740px] max-w-[92vw] rounded-[24px] bg-white/90 shadow-[0_10px_30px_-14px_rgba(0,0,0,0.22),0_3px_8px_-4px_rgba(0,0,0,0.08)] shadow-border dark:bg-[#1c1c1c]/90 dark:shadow-none backdrop-blur-md pt-[52px] max-h-[calc(100dvh-40px)] overflow-y-auto overflow-x-hidden"
                   >
                       <motion.div 
