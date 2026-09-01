@@ -89,10 +89,15 @@
     - heading: `text-2xl font-semibold` in BOTH cards
     - sub-line: `text-base` in BOTH cards
     - **Never give one card a different heading/sub size or icon-box height.**
-  - Resume card → `/resume`: FileText `size-7` inside a `size-[68px]` circle,
-    sub-line "Experience · skills · work"
-  - Email card: Mail/Check `size-[54px]` (no circle), mono email `break-all`,
-    copy-to-clipboard with a 2s "Copied!" state
+  - **Both cards use the identical icon treatment** (unified 2026-09-01): a
+    `size-[68px]` `rounded-full` circle, `bg-neutral-200/80 dark:bg-white/10`,
+    `group-hover:bg-neutral-300/80 dark:group-hover:bg-white/15`, containing a
+    `size-7` icon. Both cards carry the `group` class so the hover step matches.
+    **Never give one card a bare icon and the other a circle.**
+  - Resume card → `/resume`: `FileText`, sub-line "Experience · skills · work"
+  - Email card: `Mail`, swapped for `Check` (emerald-500) for 2s after a
+    successful copy; mono email `break-all`; the heading carries
+    `aria-live="polite"` so the "Copied!" state is announced to screen readers
   - **Both card headings use the kicker colour `text-text-secondary`** (owner request
     2026-09-01) — hierarchy is carried by size + weight, not colour
 
@@ -151,7 +156,9 @@
     miniature approach and is the size the owner signed off on. The email *tap
     target* is 162x111px, so the copy action is unaffected — only the confirmation
     text is small.
-  - `tsc --noEmit` clean. No console errors attributable to this component.
+  - `tsc --noEmit` clean, `eslint` clean, **`next build` succeeds**. No console
+    errors attributable to this component (only unrelated WebGL warnings from the
+    `cobe` globe under software rendering).
 
 #### Corrections & fixes after the initial lock (2026-09-01, same day)
   - **Action-card alignment — FIXED.** The two cards were measurably out of line:
@@ -160,6 +167,17 @@
     fixed `size-[68px]` box) and different type sizes (26/18 vs 24/16). Both cards
     now use `h-[68px]` icon blocks, `text-2xl` headings and `text-base` sub-lines.
     Re-measured: **all four deltas are 0.0px** at 1440 and at 375.
+  - **Email icon made identical to the resume icon — DONE.** The email card had a
+    bare `size-[54px]` outline glyph while the resume card had a `size-7` glyph in
+    a `size-[68px]` tinted circle, so the two cards read as different components.
+    Both now use the same circle + `size-7` icon. Re-measured: circles 65.3px and
+    icons 26.9px in both, identical background and radius, all six alignment
+    deltas 0.0px, icon-on-circle contrast 8.23:1.
+  - **BUG: "Copied!" timeout leaked — FIXED.** `setTimeout` was never cleared, so
+    closing the modal within 2s of copying left a pending state update against an
+    unmounted subtree. Now tracked in a ref, cleared on re-copy and on unmount.
+  - **BUG: copy confirmation was silent to screen readers — FIXED.** The label
+    swap to "Copied!" had no live region; added `aria-live="polite"`.
   - **Back chevron hit area — FIXED.** The original audit note claiming it "passes
     WCAG 2.5.8 AA" was **wrong**: it measured the 40px CSS box, not the rendered
     size. Under the 0.53 phone scale it rendered at **21.2px**, below the 24px AA

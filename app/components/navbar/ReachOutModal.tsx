@@ -48,6 +48,7 @@ export function ReachOutModal({
   const [isCopied, setIsCopied] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
+  const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Escape closes, Tab is trapped inside the dialog, body scroll locked while open
   useEffect(() => {
@@ -116,11 +117,20 @@ export function ReachOutModal({
     try {
       await navigator.clipboard.writeText(OWNER_EMAIL);
       setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000);
+      if (copyTimer.current) clearTimeout(copyTimer.current);
+      copyTimer.current = setTimeout(() => setIsCopied(false), 2000);
     } catch {
       // clipboard unavailable — ignore
     }
   };
+
+  // Clear any pending "Copied!" reset so it cannot fire after unmount.
+  useEffect(
+    () => () => {
+      if (copyTimer.current) clearTimeout(copyTimer.current);
+    },
+    [],
+  );
 
   const socials = [
     { label: "LinkedIn", href: "https://www.linkedin.com/in/harisx404/" },
@@ -300,16 +310,21 @@ export function ReachOutModal({
                 <button
                   onClick={handleCopyEmail}
                   aria-label="Copy email address"
-                  className={`${cardSurface} flex flex-col items-center`}
+                  className={`${cardSurface} group flex flex-col items-center`}
                 >
                   <div className="mb-4 flex h-[68px] items-center justify-center">
-                    {isCopied ? (
-                      <Check className="size-[54px] text-emerald-500" />
-                    ) : (
-                      <Mail className="size-[54px] text-text-secondary" strokeWidth={1.5} />
-                    )}
+                    <div className="flex size-[68px] items-center justify-center rounded-full bg-neutral-200/80 text-neutral-700 transition-colors group-hover:bg-neutral-300/80 dark:bg-white/10 dark:text-white/80 dark:group-hover:bg-white/15">
+                      {isCopied ? (
+                        <Check className="size-7 text-emerald-500" />
+                      ) : (
+                        <Mail className="size-7" />
+                      )}
+                    </div>
                   </div>
-                  <h4 className="text-2xl font-semibold text-text-secondary">
+                  <h4
+                    className="text-2xl font-semibold text-text-secondary"
+                    aria-live="polite"
+                  >
                     {isCopied ? "Copied!" : "Email me"}
                   </h4>
                   <p className="max-w-full break-all font-mono text-base text-text-secondary">
