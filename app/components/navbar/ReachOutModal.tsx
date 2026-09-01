@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -24,19 +24,23 @@ interface ReachOutModalProps {
   onOpenSearch: () => void;
 }
 
-const cardSurface =
-  "rounded-2xl bg-neutral-100/90 dark:bg-white/[0.07] p-5 text-center " +
-  "border border-neutral-200/60 dark:border-white/[0.06] " +
-  "hover:bg-neutral-200/80 dark:hover:bg-white/[0.1] transition duration-200";
+/* Reference glass recipe (v2): 70% surface + blur-2xl + saturate-150
+   with the layered inner highlight + hairline + soft drop shadow. */
+const glass =
+  "bg-white/70 dark:bg-neutral-900/70 backdrop-blur-2xl backdrop-saturate-150 " +
+  "[box-shadow:inset_0_1px_1px_0_rgba(255,255,255,0.9),inset_0_0_0_1px_rgba(255,255,255,0.5),0_12px_32px_-12px_rgba(0,0,0,0.25)] " +
+  "dark:[box-shadow:inset_0_1px_1px_0_rgba(255,255,255,0.1),inset_0_0_0_1px_rgba(255,255,255,0.07),0_12px_32px_-12px_rgba(0,0,0,0.6)]";
 
-/* Same surface system as SearchModal's control buttons:
-   85% white / #1c1c1c + blur + hairline ring, with press feedback. */
+const cardSurface =
+  "rounded-2xl bg-white/60 dark:bg-white/[0.07] p-5 text-center " +
+  "border border-white/60 dark:border-white/[0.08] " +
+  "hover:bg-white/85 dark:hover:bg-white/[0.11] transition duration-200";
+
+/* v1-scale control buttons (size-12) on the reference glass surface */
 const circleBtn =
-  "flex size-12 shrink-0 cursor-pointer items-center justify-center rounded-2xl " +
-  "bg-white/85 backdrop-blur-xl dark:bg-[#1c1c1c]/85 " +
-  "ring-1 ring-neutral-200/60 dark:ring-white/10 " +
-  "text-neutral-600 dark:text-white/80 shadow-lg shadow-black/5 dark:shadow-none " +
-  "transition duration-200 hover:bg-white dark:hover:bg-white/15 " +
+  `${glass} flex size-12 shrink-0 cursor-pointer items-center justify-center rounded-2xl ` +
+  "text-neutral-600 dark:text-white/80 " +
+  "transition duration-200 hover:bg-white/85 dark:hover:bg-white/15 " +
   "hover:text-neutral-900 dark:hover:text-white active:scale-95";
 
 const item = {
@@ -66,14 +70,6 @@ export function ReachOutModal({
       document.body.classList.remove("modal-open");
     };
   }, [isOpen, onClose]);
-
-  // Auto-grow textarea
-  const autoGrow = useCallback(() => {
-    const el = textareaRef.current;
-    if (!el) return;
-    el.style.height = "auto";
-    el.style.height = `${el.scrollHeight}px`;
-  }, []);
 
   const handleContinue = () => {
     if (!message.trim()) return;
@@ -141,9 +137,9 @@ export function ReachOutModal({
                 if (e.target === e.currentTarget) onClose();
               }}
             >
-            {/* Top bar — same surface as SearchModal's bar */}
+            {/* Top bar — reference glass surface */}
             <div className="mb-3 flex items-center gap-2.5 sm:gap-3">
-              <div className="flex h-14 flex-1 items-center gap-2 rounded-2xl bg-white/85 px-3 shadow-lg shadow-black/5 backdrop-blur-xl ring-1 ring-neutral-200/60 dark:bg-[#1c1c1c]/85 dark:shadow-none dark:ring-white/10">
+              <div className={`${glass} flex h-14 flex-1 items-center gap-2 rounded-2xl px-3`}>
                 <button
                   onClick={onClose}
                   aria-label="Back"
@@ -176,17 +172,17 @@ export function ReachOutModal({
               </button>
             </div>
 
-            {/* Main card */}
+            {/* Main card — fills ~65-70% of the viewport, hidden scrollbar */}
             <motion.div
               initial="hidden"
               animate="show"
               variants={{ show: { transition: { staggerChildren: 0.05 } } }}
-              className="rounded-3xl bg-white/85 p-3 shadow-2xl ring-1 ring-neutral-200/70 backdrop-blur-xl dark:bg-[#1a1a1a]/85 dark:ring-white/[0.08] max-h-[78dvh] overflow-y-auto overscroll-contain max-sm:p-2.5"
+              className={`${glass} flex h-[min(700px,68dvh)] min-h-[420px] flex-col rounded-3xl p-3 overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden max-sm:p-2.5`}
             >
-              {/* Message panel */}
+              {/* Message panel — grows to fill the card's height */}
               <motion.div
                 variants={item}
-                className="rounded-2xl bg-neutral-100/90 p-5 dark:bg-white/[0.07] border border-neutral-200/60 dark:border-white/[0.06]"
+                className="flex min-h-[220px] flex-1 flex-col rounded-2xl bg-white/60 p-5 dark:bg-white/[0.07] border border-white/60 dark:border-white/[0.08]"
               >
                 <div className="flex items-center gap-3">
                   <Image
@@ -208,10 +204,7 @@ export function ReachOutModal({
                   ref={textareaRef}
                   value={message}
                   rows={3}
-                  onChange={(e) => {
-                    setMessage(e.target.value);
-                    autoGrow();
-                  }}
+                  onChange={(e) => setMessage(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
@@ -219,16 +212,16 @@ export function ReachOutModal({
                     }
                   }}
                   placeholder="Hey Haris, I have a project idea..."
-                  className="mt-4 w-full resize-none bg-transparent text-lg text-neutral-900 placeholder-neutral-400 focus:outline-none dark:text-white dark:placeholder-white/30"
+                  className="mt-4 min-h-[88px] w-full flex-1 resize-none bg-transparent text-lg text-neutral-900 placeholder-neutral-400 focus:outline-none dark:text-white dark:placeholder-white/30 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                 />
 
-                <div className="mt-2 flex items-center justify-between gap-3">
+                <div className="mt-auto flex items-center justify-between gap-3 pt-2">
                   <span className="flex items-center gap-1.5 text-xs text-text-tertiary">
-                    <kbd className="rounded-md border border-neutral-300 bg-white px-1.5 py-0.5 font-mono text-[11px] leading-none text-neutral-500 dark:border-white/15 dark:bg-white/10 dark:text-white/60">
+                    <kbd className="rounded-md border border-white/70 bg-white/70 px-1.5 py-0.5 font-mono text-[11px] leading-none text-neutral-500 dark:border-white/15 dark:bg-white/10 dark:text-white/60">
                       ⏎
                     </kbd>
                     to continue ·
-                    <kbd className="rounded-md border border-neutral-300 bg-white px-1.5 py-0.5 font-mono text-[11px] leading-none text-neutral-500 dark:border-white/15 dark:bg-white/10 dark:text-white/60">
+                    <kbd className="rounded-md border border-white/70 bg-white/70 px-1.5 py-0.5 font-mono text-[11px] leading-none text-neutral-500 dark:border-white/15 dark:bg-white/10 dark:text-white/60">
                       ⇧⏎
                     </kbd>
                     new line
@@ -237,7 +230,7 @@ export function ReachOutModal({
                     onClick={handleContinue}
                     disabled={!message.trim()}
                     aria-label="Continue"
-                    className="ml-auto flex items-center gap-1.5 rounded-xl border border-neutral-200 bg-white px-4 py-2 text-base text-neutral-900 transition hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
+                    className="ml-auto flex items-center gap-1.5 rounded-xl border border-white/70 bg-white/70 px-4 py-2 text-base text-neutral-900 transition duration-200 hover:bg-white active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
                   >
                     Continue <ArrowRight className="size-4" />
                   </button>
@@ -245,7 +238,7 @@ export function ReachOutModal({
               </motion.div>
 
               {/* Action cards */}
-              <motion.div variants={item} className="mt-3 grid grid-cols-[1.3fr_1fr] gap-3 max-sm:grid-cols-1 max-sm:gap-2.5">
+              <motion.div variants={item} className="mt-3 grid shrink-0 grid-cols-[1.3fr_1fr] gap-3 max-sm:grid-cols-1 max-sm:gap-2.5">
                 {/* Resume card */}
                 <Link
                   href="/resume"
@@ -285,7 +278,7 @@ export function ReachOutModal({
               </motion.div>
 
               {/* Social row */}
-              <motion.div variants={item} className="mt-3 grid grid-cols-3 gap-3 max-sm:gap-2.5">
+              <motion.div variants={item} className="mt-3 grid shrink-0 grid-cols-3 gap-3 max-sm:gap-2.5">
                 {socials.map((s) => (
                   <a
                     key={s.label}
