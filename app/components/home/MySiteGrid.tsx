@@ -39,10 +39,10 @@ const noteTints = [
 const HEATMAP_COLS = 16;
 // prettier-ignore
 const heatmapLevels = [
-  1, 0, 2, 1, 3, 0, 1, 2, 0, 1, 2, 0, 3, 1, 0, 2,
-  0, 2, 1, 3, 0, 1, 2, 0, 1, 3, 0, 2, 1, 0, 2, 1,
-  2, 0, 1, 0, 2, 3, 0, 1, 2, 0, 1, 2, 0, 3, 1, 0,
-  0, 1, 3, 1, 0, 2, 1, 3, 0, 2, 0, 1, 2, 0, 2, 3,
+  1, 3, 2, 1, 3, 0, 1, 2, 0, 3, 2, 0, 3, 1, 0, 2,
+  0, 2, 1, 3, 0, 1, 2, 0, 1, 3, 0, 2, 1, 0, 3, 1,
+  2, 0, 3, 0, 2, 3, 0, 1, 2, 0, 1, 3, 0, 3, 1, 0,
+  0, 1, 3, 1, 0, 2, 1, 3, 0, 2, 0, 1, 3, 0, 2, 3,
 ];
 const heatmapLevelClass = [
   "bg-neutral-200 group-hover:bg-neutral-300 group-active:bg-neutral-300 dark:bg-white/[0.06] dark:group-hover:bg-white/[0.12] dark:group-active:bg-white/[0.12]",
@@ -54,17 +54,20 @@ const heatmapLevelClass = [
 function StatsHeatmap() {
   return (
     <div className="flex h-28 items-center" aria-hidden>
-      <div
-        className="grid w-full gap-1"
-        style={{ gridTemplateColumns: `repeat(${HEATMAP_COLS}, minmax(0, 1fr))` }}
-      >
+      {/* Responsive density (same idea as the accounts bento tiles): the
+          md 3-col row squeezes each card, so the grid drops to 10 columns
+          there — bigger squares, no "thin strip" — and restores the full
+          16 columns on mobile (single, wide card) and lg+. */}
+      <div className="grid w-full gap-1 [grid-template-columns:repeat(16,minmax(0,1fr))] md:[grid-template-columns:repeat(10,minmax(0,1fr))] lg:[grid-template-columns:repeat(16,minmax(0,1fr))]">
         {heatmapLevels.map((level, i) => {
           const row = Math.floor(i / HEATMAP_COLS);
           const col = i % HEATMAP_COLS;
           return (
             <span
               key={i}
-              className={`aspect-square w-full rounded-[3px] transition-colors duration-500 ease-out motion-reduce:transition-none ${heatmapLevelClass[level]}`}
+              className={`aspect-square w-full rounded-[3px] transition-colors duration-500 ease-out motion-reduce:transition-none ${heatmapLevelClass[level]} ${
+                col >= 10 ? "md:hidden lg:block" : ""
+              }`}
               style={{ transitionDelay: `${(row + col) * 25}ms` }}
             />
           );
