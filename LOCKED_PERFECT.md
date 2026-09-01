@@ -16,6 +16,12 @@
 > plus an explicit list of differences that are **intentional** and must NOT be
 > "fixed". Read it before starting any consistency work.
 
+> **See also: [`AUDIT_TESTING.md`](./AUDIT_TESTING.md)** — the pre-lock audit
+> protocol. Triggered by the owner saying **"Audit testing &lt;target&gt;"**. Nothing
+> new gets locked until it passes all 12 phases. It also carries the reference
+> baseline (radius tiers, colour tokens, icon sizes, shared modules) extracted
+> from the components locked in entry 22.
+
 ---
 
 ## How to use this file

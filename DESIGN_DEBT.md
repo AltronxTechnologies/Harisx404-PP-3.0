@@ -4,6 +4,11 @@ Companion to `LOCKED_PERFECT.md`. This file tracks **known, audited** design
 inconsistencies that are not yet fixed, so the analysis does not have to be
 redone from scratch.
 
+> **Workflow:** `AUDIT_TESTING.md` **Phase 11** cross-checks this file. When a
+> page or component is audited before locking, any open item belonging to it
+> must be fixed in that pass and **removed from this file in the same commit**.
+> Newly-found issues that are out of scope for the current audit get added here.
+
 - **Audited:** 2026-09-01
 - **Line numbers valid as of commit:** `eeb900b`
 - **Branch:** `haris-dev/set-up-this-codebase-for-FcY5YL` (merged to `main`)
