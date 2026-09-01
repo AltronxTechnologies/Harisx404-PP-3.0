@@ -423,7 +423,15 @@ export function CaseStudyCard({
         </div>
       )}
 
-      <Link href={`/projects/${project.slug}`} className="frame-light-edge group relative block">
+      <Link
+        href={`/projects/${project.slug}`}
+        className={clsx(
+          "frame-light-edge group relative block",
+          /* Projects page: the cover panel itself rises 6px on hover, so the
+             frame hairline must ride along or it visibly detaches. */
+          !liftOnHover && "frame-light-edge-lift"
+        )}
+      >
         <div
           ref={panelRef}
           className={clsx(

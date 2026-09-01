@@ -227,6 +227,9 @@ body {
   border-radius: 9999px;
   opacity: 0.35;
   filter: blur(0.5px);
+  /* Ride along with the cover panel's hover rise (projects page) —
+     same duration + easing as the panel's transition-transform. */
+  transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
   background: linear-gradient(
     90deg,
     transparent 0%,
@@ -235,6 +238,15 @@ body {
     rgba(255, 255, 255, 0.8) 70%,
     transparent 100%
   );
+}
+
+/* Projects page variant: the inner cover panel lifts 6px on hover
+   (group-hover:-translate-y-1.5) while the frame wrapper stays put, so the
+   hairline mirrors the exact same rise to stay glued to the frame top. */
+@media (hover: hover) {
+  .dark .frame-light-edge-lift:hover::before {
+    transform: translateY(-6px);
+  }
 }
 
 .kicker {
