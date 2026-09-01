@@ -399,7 +399,20 @@ export function SearchModal({
               722px, so 559 + (722-647) = 634. Confirmed independently: a cap of 606
               gave 694 (694 + 28 = 722). Card padding p-4 also matches Reach Out's
               shell. Do not change one without re-measuring the other. */}
-          <div className="max-h-[634px] overflow-y-auto p-4">
+          <div
+            className={
+              "max-h-[634px] overflow-y-auto p-4 " +
+              // Thin divider between category groups (Pages / Connect / Legal /
+              // Discover, and the Projects / Blog Posts result groups). The
+              // `section + section` selector means the line only ever appears
+              // BETWEEN groups: the first visible group never gets a leading
+              // rule, so filtering by a query cannot leave a stray divider.
+              // Fragments render no DOM node, so every <section> is a direct
+              // child here. border-border-primary is the project-wide divider
+              // token (#D6DADE light / white-10 dark).
+              "[&>section+section]:border-t [&>section+section]:border-border-primary"
+            }
+          >
             {/* Content search results, grouped professionally */}
             {q.length >= 2 && (
               <>
