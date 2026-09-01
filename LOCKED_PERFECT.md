@@ -890,13 +890,19 @@ must not flatten them:
 8. **SocialPill** icons keep `text-gray-400`: they sit on an always-dark
    `#3C3C3F` chip, so the page-background token would be near-invisible.
 
+9. **Homepage avatars are consistent — confirmed 2026-09-01.** The header
+   avatar (`home/HomeHero.tsx`) and the About-section avatar
+   (`home/AboutTeaser.tsx`) both use `/harisx404.png`. An earlier note wrongly
+   implied a mismatch; it had confused these with two *unused* components. No
+   action needed.
+
 #### Known non-design debt still open in this scope
 Recorded in `DESIGN_DEBT.md`; needs owner permission to action:
-- `ProfilePicture.tsx` and `ConnectionsBento.tsx` duplicate a 148px
-  profile-ring widget pointing at **two different images** (Cloudinary
-  `haris_primary_photo.png` vs `/harisx404.png`) — likely a real bug.
 - Navbar search icon is **Phosphor** while both modals use **lucide**:
   different stroke weight at the same nominal px.
+- Dead code outside the frozen file list (safe to delete, owner decision
+  pending): `ProfilePicture.tsx`, `ConnectionsBento.tsx`,
+  `components/FeaturedBlogCard.tsx` — all zero imports.
 
 ## Entry template (copy for new locks)
 

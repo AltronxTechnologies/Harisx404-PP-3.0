@@ -324,4 +324,53 @@ Date: · Commit: · Routes:
 | # | Target | Date | Result | Lock entry |
 |---|---|---|---|---|
 | — | Home, Navbar, Search modal, Reach Out modal, Footer | 2026-09-01 | Locked after pre-lock cleanup (`c04f17f`) | entry 22 |
-| | *next target* | | | |
+| 1 | **About page** — *next, on owner's signal* | | | |
+
+---
+
+## This protocol is a LIVING DOCUMENT
+
+The owner's instruction: *“I will add more pages when I polish it, so more
+perfect data will be you have to make the audit more perfect.”*
+
+Every locked area makes the baseline richer and the audit sharper. **After each
+audit, update this file** — do not let it go stale.
+
+### Post-audit maintenance (mandatory, part of Phase 12)
+1. **Extend the reference baseline** with any new value the newly-locked area
+   establishes (a new spacing rhythm, a card pattern, a state style, an
+   animation timing). Prefer extracting real values from the code over
+   describing them in prose.
+2. **Add any new check** that would have caught a bug this audit found. If a
+   defect slipped through the 12 phases, the phases were incomplete — fix them.
+3. **Add every intentional variation** discovered, with its reason, so a later
+   pass cannot flatten it.
+4. **Record the audit** in the log above.
+5. **Note anything that wasted time**, so it becomes a process rule.
+
+### Baseline growth log
+Track where each reference value came from, so its authority is traceable.
+
+| Baseline element | Source | Added |
+|---|---|---|
+| Radius tiers 24/16/12 + concentric rule + kbd exception | Reach Out & Search modals, Navbar dropdown | 2026-09-01 (entry 22) |
+| Colour tokens + “token assumes page background” rule | `globals.css` + the 310-usage colour audit | 2026-09-01 |
+| Icon size scale | Modal top rows, navbar circles, share menus | 2026-09-01 |
+| Shared-module list | `modalSurfaces.ts`, `BrandGlyph.tsx`, `ThemeToggle.tsx` | 2026-09-01 |
+| Locked modal geometry (792px / 72px / 7px / 634px) | Reach Out v5, Search v2 | 2026-09-01 |
+| *(add: About page patterns)* | | |
+
+### Still thin — strengthen as data arrives
+Honest gaps in the current baseline. Fill these from real locked pages rather
+than inventing conventions:
+- **Section spacing rhythm** for long content pages (the home page has one, but
+  it has not been extracted into measurable numbers here).
+- **Page-hero pattern** — still unresolved across 10 pages, and the top-spacing
+  question is open. See `DESIGN_DEBT.md` Issue 4.
+- **Card taxonomy** — is a content card 16px or 24px? The home page uses both.
+  Needs a ruling once About is locked.
+- **Chip / tag scale** — 9 recipes exist site-wide; the locked pages contain
+  deliberate variants, so the canonical set is not yet decided.
+- **Table / list / form patterns** — no locked example yet.
+- **Empty / loading / error state styling** — no canonical version yet.
+

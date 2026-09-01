@@ -179,10 +179,23 @@ systems (`text-text-secondary` vs `text-neutral-600 dark:text-neutral-400`).
 `links/page.tsx:205` (`size-24`) · `test/page.tsx:157,382` ·
 `ConnectionsBento.tsx:98` (raw `<img>`) · `ProfilePicture.tsx:114` (raw `motion.img`)
 
-**⚠️ Likely a real bug, not just style:** `ProfilePicture.tsx:30-113` and
-`ConnectionsBento.tsx:25-97` contain a near-identical 148×148 inline SVG ring
-widget, but point at **different images** — Cloudinary
-`haris_primary_photo.png` vs `/harisx404.png`. Decide which is correct.
+**⚠️ Correction (2026-09-01, owner-reviewed):** an earlier note here claimed
+`ProfilePicture.tsx` and `ConnectionsBento.tsx` were a duplicated widget
+"pointing at different images", implying a live visual bug. **That was
+misleading.** Verified: **neither component is imported anywhere** — both are
+dead code. The avatars actually rendered on the homepage come from
+`home/HomeHero.tsx` and `home/AboutTeaser.tsx`, and **both already use the same
+`/harisx404.png`**, so they are consistent and correct. No visual bug exists.
+
+What remains is a **dead-code cleanup** item, not a design issue:
+| File | Status |
+|---|---|
+| `app/components/ProfilePicture.tsx` | 0 imports. Contains a 148px ring widget + a Cloudinary URL (`haris_primary_photo.png`) that nothing serves. |
+| `app/components/ConnectionsBento.tsx` | 0 imports. Near-identical ring widget, raw `<img src="/harisx404.png">`. |
+| `app/components/FeaturedBlogCard.tsx` | 0 imports. Shares its basename with the live `blog/FeaturedBlogCard.tsx`. |
+
+Neither is in the entry-22 frozen file list, so deleting them cannot affect the
+locked visuals. **Awaiting owner decision:** delete, or keep for planned use?
 
 ### `Icon()` helper — same body, 4 files, 3 defaults
 `contact/page.tsx:14` (`size-4`) · `credentials/page.tsx:30` (`size-5`) ·
