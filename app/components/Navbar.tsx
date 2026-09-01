@@ -383,17 +383,35 @@ export default function Navbar() {
               <AnimatePresence>
                 {isDropdownOpen && (
                   <motion.div
-                    initial={{ opacity: 0, scale: 0.97, y: -12, x: "-50%" }}
-                    animate={{ opacity: 1, scale: 1, y: 0, x: "-50%" }}
-                    exit={{
-                      opacity: 0,
-                      scale: 0.97,
-                      y: -12,
+                    /* Morph reveal: the panel is clipped down to the pill's
+                       footprint and expands outward/downward from it, so it
+                       reads as the navbar itself enlarging — then contracts
+                       back into the pill on close. clip-path animates on the
+                       compositor, so it stays 60fps+. */
+                    initial={{
+                      clipPath: "inset(0% 32% 88% 32% round 24px)",
+                      opacity: 0.6,
                       x: "-50%",
-                      transition: { duration: 0.45, ease: [0.32, 0, 0.67, 0] },
                     }}
-                    transition={{ duration: 0.65, ease: [0.19, 1, 0.22, 1] }}
-                    style={{ transformOrigin: "top center", willChange: "transform, opacity" }}
+                    animate={{
+                      clipPath: "inset(0% 0% 0% 0% round 24px)",
+                      opacity: 1,
+                      x: "-50%",
+                    }}
+                    exit={{
+                      clipPath: "inset(0% 32% 88% 32% round 24px)",
+                      opacity: 0,
+                      x: "-50%",
+                      transition: {
+                        clipPath: { duration: 0.5, ease: [0.4, 0, 0.2, 1] },
+                        opacity: { duration: 0.45, ease: "easeIn", delay: 0.05 },
+                      },
+                    }}
+                    transition={{
+                      clipPath: { duration: 0.7, ease: [0.19, 1, 0.22, 1] },
+                      opacity: { duration: 0.25, ease: "easeOut" },
+                    }}
+                    style={{ transformOrigin: "top center", willChange: "clip-path, opacity" }}
                     className="absolute top-0 left-1/2 z-0 w-[740px] max-w-[92vw] rounded-[24px] bg-white/90 shadow-[0_10px_30px_-14px_rgba(0,0,0,0.22),0_3px_8px_-4px_rgba(0,0,0,0.08)] shadow-border dark:bg-[#1c1c1c]/90 dark:shadow-none backdrop-blur-md pt-[52px] max-h-[calc(100dvh-40px)] overflow-y-auto overflow-x-hidden"
                   >
                       <motion.div 
@@ -404,7 +422,7 @@ export default function Navbar() {
                           visible: {
                             transition: {
                               staggerChildren: 0.07,
-                              delayChildren: 0.08,
+                              delayChildren: 0.12,
                             }
                           }
                         }}
