@@ -117,13 +117,17 @@ export default function Navbar() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <header className="fixed top-2.5 z-[5000] w-full md:top-4 pointer-events-none flex justify-center">
+      {/* inset-x-0 anchors the fixed header to the viewport — without it,
+          a fixed element keeps its static x-position inside the centered
+          max-w-7xl body, drifting right by (vw-1280)/2 on wide screens. */}
+      <header className="fixed inset-x-0 top-2.5 z-[5000] w-full md:top-4 pointer-events-none flex justify-center">
         <nav className="container flex flex-col items-center py-1.5 pointer-events-none">
-          <div
-            className={`relative flex items-start gap-0 md:gap-3.5 pointer-events-auto transition-transform duration-500 ease-out ${
-              showGreeting ? "md:translate-x-[54px]" : ""
-            }`}
-          >
+          {/* Centering model: the pill wrapper is the centered element;
+              the search/theme buttons hang off its right edge via an
+              absolutely-positioned rail so they never shift the pill off
+              true center (the old flex-sibling layout pushed the pill
+              ~54px left of center on desktop and needed translate hacks). */}
+          <div className="relative flex items-start justify-center pointer-events-auto">
             
             {/* The main navbar container — top layer so the More menu covers the side buttons */}
             <div 
@@ -137,7 +141,7 @@ export default function Navbar() {
               {/* The main morphing pill container */}
               <motion.div
                 layout
-                className="relative z-10 flex flex-col items-center justify-start p-1.5 bg-white/90 max-md:bg-white/55 shadow-[0_10px_30px_-14px_rgba(0,0,0,0.22),0_3px_8px_-4px_rgba(0,0,0,0.08)] shadow-border dark:bg-[#1c1c1c]/90 max-md:dark:bg-[#1c1c1c]/55 dark:shadow-none overflow-hidden backdrop-blur-md max-md:backdrop-blur-xl max-md:!rounded-full max-md:p-1 max-md:ring-1 max-md:ring-neutral-300/60 max-md:dark:ring-white/15"
+                className="relative z-10 flex flex-col items-center justify-start p-1.5 bg-white/90 max-md:bg-white/40 shadow-[0_10px_30px_-14px_rgba(0,0,0,0.22),0_3px_8px_-4px_rgba(0,0,0,0.08)] shadow-border dark:bg-[#1c1c1c]/90 max-md:dark:bg-[#1c1c1c]/40 dark:shadow-none overflow-hidden backdrop-blur-md max-md:backdrop-blur-xl max-md:!rounded-full max-md:p-1 max-md:ring-1 max-md:ring-neutral-300/60 max-md:dark:ring-white/15"
                 initial={{ borderRadius: "22px" }}
                 animate={{ borderRadius: isDropdownOpen ? "24px" : "22px" }}
                 transition={{ type: "spring", stiffness: 400, damping: 30 }}
@@ -379,19 +383,18 @@ export default function Navbar() {
               <AnimatePresence>
                 {isDropdownOpen && (
                   <motion.div
-                    initial={{ opacity: 0, scaleY: 0.9, scaleX: 0.97, y: -10, x: "-50%" }}
-                    animate={{ opacity: 1, scaleY: 1, scaleX: 1, y: 0, x: "-50%" }}
+                    initial={{ opacity: 0, scale: 0.96, y: -8, x: "-50%" }}
+                    animate={{ opacity: 1, scale: 1, y: 0, x: "-50%" }}
                     exit={{
                       opacity: 0,
-                      scaleY: 0.9,
-                      scaleX: 0.97,
-                      y: -10,
+                      scale: 0.96,
+                      y: -8,
                       x: "-50%",
-                      transition: { duration: 0.32, ease: [0.4, 0, 0.2, 1] },
+                      transition: { duration: 0.28, ease: [0.4, 0, 0.2, 1] },
                     }}
-                    transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                    transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
                     style={{ transformOrigin: "top center", willChange: "transform, opacity" }}
-                    className="absolute top-0 left-1/2 md:max-lg:left-[calc(50%+54px)] z-0 w-[740px] max-w-[92vw] rounded-[24px] bg-white/90 shadow-[0_10px_30px_-14px_rgba(0,0,0,0.22),0_3px_8px_-4px_rgba(0,0,0,0.08)] shadow-border dark:bg-[#1c1c1c]/90 dark:shadow-none backdrop-blur-md pt-[52px] max-h-[calc(100dvh-40px)] overflow-y-auto overflow-x-hidden"
+                    className="absolute top-0 left-1/2 z-0 w-[740px] max-w-[92vw] rounded-[24px] bg-white/90 shadow-[0_10px_30px_-14px_rgba(0,0,0,0.22),0_3px_8px_-4px_rgba(0,0,0,0.08)] shadow-border dark:bg-[#1c1c1c]/90 dark:shadow-none backdrop-blur-md pt-[52px] max-h-[calc(100dvh-40px)] overflow-y-auto overflow-x-hidden"
                   >
                       <motion.div 
                         initial="hidden"
@@ -527,9 +530,13 @@ export default function Navbar() {
               </AnimatePresence>
             </div>
 
-            {/* Search Button — lower layer: the expanding More menu covers it */}
+            {/* Side buttons rail — absolutely positioned off the pill's right
+                edge so the pill stays perfectly centered at every width.
+                Lower layer: the expanding More menu covers it. */}
             <div
-              className={`relative z-0 ${isDropdownOpen ? "pointer-events-none" : ""}`}
+              className={`absolute left-full top-0 ml-3.5 hidden md:flex items-start gap-3.5 z-0 ${
+                isDropdownOpen ? "pointer-events-none" : ""
+              }`}
             >
               <motion.button
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -537,7 +544,7 @@ export default function Navbar() {
                 transition={{ delay: 2.2, duration: 0.4 }}
                 onClick={() => setIsCommandPaletteOpen(true)}
                 aria-label="Open search (⌘K)"
-                className="relative hidden size-10 cursor-pointer items-center justify-center rounded-full text-neutral-700 transition-all duration-150 hover:text-neutral-900 active:scale-95 md:inline-flex dark:text-white/85 dark:hover:text-white bg-white/90 shadow-[0_10px_30px_-14px_rgba(0,0,0,0.22),0_3px_8px_-4px_rgba(0,0,0,0.08)] shadow-border dark:bg-[#1c1c1c]/90 dark:shadow-none mt-0.5"
+                className="relative inline-flex size-10 cursor-pointer items-center justify-center rounded-full text-neutral-700 transition-all duration-150 hover:text-neutral-900 active:scale-95 dark:text-white/85 dark:hover:text-white bg-white/90 shadow-[0_10px_30px_-14px_rgba(0,0,0,0.22),0_3px_8px_-4px_rgba(0,0,0,0.08)] shadow-border dark:bg-[#1c1c1c]/90 dark:shadow-none mt-0.5"
                 type="button"
               >
                 <svg className="size-[18px]" fill="currentColor" viewBox="0 0 256 256">
@@ -545,17 +552,12 @@ export default function Navbar() {
                   <path d="M229.66,218.34,179.6,168.28a88.21,88.21,0,1,0-11.32,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z" />
                 </svg>
               </motion.button>
-            </div>
 
-            {/* Theme Toggle Button — lower layer: the expanding More menu covers it */}
-            <div
-              className={`relative z-0 ${isDropdownOpen ? "pointer-events-none" : ""}`}
-            >
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 2.2, duration: 0.4 }}
-                className="hidden md:inline-flex mt-0.5"
+                className="inline-flex mt-0.5"
               >
                 <ThemeToggle className="relative flex size-10 cursor-pointer items-center justify-center rounded-full text-neutral-700 transition-all duration-150 hover:text-neutral-900 active:scale-95 dark:text-white/85 dark:hover:text-white bg-white/90 shadow-[0_10px_30px_-14px_rgba(0,0,0,0.22),0_3px_8px_-4px_rgba(0,0,0,0.08)] shadow-border dark:bg-[#1c1c1c]/90 dark:shadow-none" />
               </motion.div>
