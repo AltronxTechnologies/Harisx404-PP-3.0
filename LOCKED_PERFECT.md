@@ -198,30 +198,64 @@
     `elementFromPoint` (registers up to 3px outside the visual box). No visual or
     layout change.
 
-> **⚠️ Entry 2 is stale.** The Search modal has not yet been brought in line with
-> the v5 Reach Out lock above. When it is reworked, **entry 1 is the reference** —
-> match its radii (24px outer / 16px inner), 7px control-row gaps, `size-[72px]`
-> controls, `text-text-secondary` for all secondary copy, filled Continue-style
-> primary button, pointer-gated autofocus, focus trap, and the 660px phone
-> miniature. Re-audit and re-lock entry 2 afterwards.
-
-### 2. Search modal (⌘K) — LOCKED ✅
-- **Date locked:** 2026-08-16
-- **Locked at commit:** `5a97fe8`
+### 2. Search modal (⌘K) — LOCKED ✅ (v2 — realigned to Reach Out v5)
+- **Date locked:** 2026-09-01 (supersedes the 2026-08-16 / `5a97fe8` lock)
+- **Locked at commit:** `758fa56` (geometry landed earlier in `1bce9b9`)
+- **Reference:** entry 1 (Reach Out v5) is the source of truth. Where a class
+  string exists in both files it must be **byte-identical**.
 - **Files:**
   - `app/components/navbar/SearchModal.tsx` (entire file)
 - **Frozen spec (do not change):**
-  - Identical shell to Reach Out modal: same container, backdrop (`backdrop-blur-[3.85px]`),
-    wrapper (`max-w-[660px]`), `.reachout-scale` bottom origin, entry animation (`y: 24`)
-  - Card: `overflow-hidden rounded-3xl` shell with ONE inner scroll area `max-h-[559px] overflow-y-auto p-3`
-    — **559px = exact pixel match with the Reach Out card height**
-  - First-appearance content (no scrolling): Pages (Home, About, Projects, Blog, Community Wall,
-    Bucket List, Speaking, Book a call, Toolbox, Attribution, Links) + Connect (GitHub, LinkedIn, X)
-  - Reached by scrolling: Legal (Privacy Policy, Terms of Use) + Discover (Blog RSS, Sitemap)
-  - Single scrollbar clipped inside the rounded shell (corners never flattened)
-  - Sizes: items `text-[17px]` `py-2.5`, item icons `size-[22px]` in `size-10` circles,
-    section headings `text-[15px]`, input `text-lg`, search icon `size-6`, top-bar button icons `size-6`
-  - Search pill: `h-14 rounded-2xl bg-white px-4 shadow-lg dark:bg-[#1c1c1c]` — NO ring (matches Reach Out pill)
+  - Shell, byte-identical to Reach Out: overlay `fixed inset-0 z-[7000] flex
+    items-end justify-center px-4 pt-4 pb-[15px] outline-none` + `tabIndex={-1}`;
+    wrapper `mx-3 w-[92vw] max-w-[792px]` + `.reachout-scale` with
+    `transformOrigin: bottom center`; backdrop `bg-black/50
+    backdrop-blur-[3.85px]` fading over 0.2s; entry `y: 24, scale: 0.96` on a
+    `stiffness: 300 / damping: 30` spring.
+  - Both modals use a **detached top row above a separate card** (the top row is
+    a sibling of the card, not a child of it): row `mb-4 flex items-center
+    gap-[7px]`, with the three controls in a nested `flex shrink-0 items-center
+    gap-[7px]`.
+  - Search pill: `flex h-[72px] min-w-0 flex-1 items-center gap-2.5 rounded-3xl
+    bg-white px-5 shadow-lg shadow-black/5 dark:bg-[#1c1c1c] dark:shadow-none`
+    — **NO `ring-1`.** A ring here is a regression; it was re-introduced once and
+    removed again in `758fa56`. Same rule for the `size-[72px]` control buttons,
+    whose `circleBtn` string is byte-identical to Reach Out's.
+  - Control buttons `size-[72px] rounded-3xl` with `size-8` glyphs; pill search
+    icon `size-7`; input `text-xl`.
+  - Card: `overflow-hidden rounded-3xl bg-white shadow-2xl ring-1
+    ring-neutral-200/70 dark:bg-[#1a1a1a] dark:ring-white/[0.08]` wrapping ONE
+    inner scroll area `max-h-[634px] overflow-y-auto p-4`. The `overflow-hidden`
+    + inner padding is a **deliberate** divergence from Reach Out's `p-4` card:
+    it clips the scroll area to the 24px radius so the corners are never
+    flattened and the scrollbar sits at the panel edge. 634px is measured to make
+    total modal height equal Reach Out's (722px at 1440×900, 15px bottom gap).
+  - Radii: two tiers only — 24px outer (overlay card, pill, controls),
+    16px inner (`rounded-2xl` row tiles). Gaps: 7px control row, 16px elsewhere.
+  - Surfaces are **opaque**. No `backdrop-blur` and no `/85` translucency
+    anywhere inside the shell; use the `bg-white` / `dark:bg-[#1c1c1c]` /
+    `dark:bg-[#1a1a1a]` tiers.
+  - Colour: `text-text-tertiary` is **banned** (2.25:1, fails AA). All secondary
+    copy — clear-X, type badges, `ArrowUpRight`, section headings — uses
+    `text-text-secondary` (6.29:1).
+  - Row tile: `flex items-center gap-4 rounded-2xl px-3 py-3 text-xl font-medium
+    … hover:bg-neutral-200/80 dark:hover:bg-white/[0.1]`.
+  - Icon tile: `flex size-12 shrink-0 items-center justify-center rounded-full
+    bg-neutral-200/80 text-neutral-700 dark:bg-white/10 dark:text-white/80`
+    — filled, **no ring**, same recipe as the Reach Out action-card circle.
+    Active row brightens the fill to `dark:bg-white/[0.12]` only; no ring colour
+    utilities (they are inert without a ring width).
+  - Glyphs: row icons `size-6`, trailing/clear icons `size-5`. Section headings
+    `px-4 pb-2 pt-4 text-lg font-medium`. Empty-state circle `size-[68px]` filled
+    with a `size-7` glyph, matching the action-card circles.
+  - **No `max-sm:` overrides** (0 in the file). Small viewports are handled
+    entirely by the `.reachout-scale` steps (0.88@≤640 … 0.45@≤330).
+  - Focus trap identical to Reach Out: `dialogRef`, `tabIndex={-1}`, Tab and
+    Shift+Tab wrap within the dialog, focus restored to the opener on close.
+  - First-appearance content (no scrolling): Pages (Home, About, Projects, Blog,
+    Community Wall, Contact, Credentials, Resume, Links) + Connect (GitHub,
+    LinkedIn, X). Reached by scrolling: Legal (Privacy Policy, Terms of Use) +
+    Discover (Blog RSS, Sitemap).
   - Click-away: identical outside-click close behavior as the Reach Out modal
     — added 2026-08-16 with owner permission
   - Swipe-to-dismiss: dragging/swiping the card downward (>120px or fast flick)
@@ -236,6 +270,32 @@
     show a polished empty state ("No results for …") with 3 pills — Browse Projects
     (/projects), Browse Posts (/blog), Get in Touch (/contact)
     — added 2026-08-16 with owner permission
+
+#### Audit results at lock time (2026-09-01)
+- **Contrast:** 0 failures in either theme (dark and light), after the
+  tertiary→secondary sweep.
+- **Geometry vs Reach Out, measured at 1440×900:** width 736px, height 722px,
+  bottom gap 15px, overlay padding, `tabIndex`, control-row gap (7px), pill
+  radius/background, control size/radius/background, card radius/background —
+  **all deltas 0.0px / identical**.
+- **Dead code:** 0 `max-sm:` overrides, 0 `backdrop-blur`, 0 ad-hoc muted colour
+  tokens, 0 inert ring-colour utilities remaining.
+- **Focus trap:** verified wrapping in both directions, focus restored on close.
+- **Toolchain:** `tsc --noEmit` and `eslint` both clean.
+
+#### Accepted, intentional divergences (documented — do NOT "fix")
+1. **Type scale is narrower than Reach Out's.** In the default list state the
+   Search modal renders weight 500 at 18px/20px; the empty state adds
+   `text-lg font-semibold` (600). Reach Out spans 400/500/600 at
+   14/16/18/20/24px. The extra 24px + 600 steps in Reach Out come from its two
+   large `text-2xl` action-card headings, which have **no Search equivalent** —
+   Search is a link list, not a pair of cards. Forcing a 24px/600 element into
+   Search purely for scale parity would invent hierarchy that the content does
+   not have. This difference is content-driven and correct.
+2. **Card padding/clipping.** Reach Out uses `p-4` directly on the card; Search
+   uses `overflow-hidden` on the card with `p-4` on the inner scroll container,
+   because it must clip a scrollable region to the rounded corners. See the
+   frozen spec above.
 
 ### 3. Modal fit-scaling system — LOCKED ✅
 - **Date locked:** 2026-08-16
