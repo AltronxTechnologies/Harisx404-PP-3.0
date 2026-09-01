@@ -275,7 +275,7 @@ export function ReachOutModal({
                     onClick={handleContinue}
                     disabled={!message.trim()}
                     aria-label="Continue"
-                    className="ml-auto flex items-center gap-1.5 rounded-xl border border-neutral-900 bg-neutral-900 px-5 py-2.5 text-lg font-medium text-white shadow-sm transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:border-neutral-300 disabled:bg-neutral-200 disabled:text-neutral-500 disabled:shadow-none dark:border-white/15 dark:bg-white/15 dark:text-white dark:hover:bg-white/25 dark:disabled:border-white/10 dark:disabled:bg-white/[0.06] dark:disabled:text-white/40"
+                    className="ml-auto flex items-center gap-1.5 rounded-2xl border border-neutral-900 bg-neutral-900 px-5 py-2.5 text-lg font-medium text-white shadow-sm transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:border-neutral-300 disabled:bg-neutral-200 disabled:text-neutral-500 disabled:shadow-none dark:border-white/15 dark:bg-white/15 dark:text-white dark:hover:bg-white/25 dark:disabled:border-white/10 dark:disabled:bg-white/[0.06] dark:disabled:text-white/40"
                   >
                     Continue <ArrowRight className="size-5" />
                   </button>

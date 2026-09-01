@@ -14,7 +14,7 @@ const HEADLINE_MAX = 70;
 const QUOTE_MAX = 280;
 
 const inputClasses =
-  "w-full rounded-xl border border-border-primary bg-white px-3.5 py-2 text-sm text-text-primary placeholder:text-text-tertiary focus:border-text-tertiary focus:outline-none focus:ring-2 focus:ring-violet-500/30 dark:bg-white/[0.03] sm:px-4 sm:py-2.5";
+  "w-full rounded-2xl border border-border-primary bg-white px-3.5 py-2 text-sm text-text-primary placeholder:text-text-tertiary focus:border-text-tertiary focus:outline-none focus:ring-2 focus:ring-violet-500/30 dark:bg-white/[0.03] sm:px-4 sm:py-2.5";
 
 const labelClasses = "mb-1 block text-xs font-medium text-text-secondary";
 
@@ -169,9 +169,9 @@ export function TestimonialSubmitModal({
               type="button"
               onClick={handleClose}
               aria-label="Close"
-              className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full border border-border-primary text-text-secondary transition-colors hover:border-text-tertiary hover:text-text-primary"
+              className="absolute right-4 top-4 flex size-9 items-center justify-center rounded-full border border-border-primary text-text-secondary transition-colors hover:border-text-tertiary hover:text-text-primary"
             >
-              <X className="h-4 w-4" aria-hidden />
+              <X className="size-4" aria-hidden />
             </button>
 
             {submitted ? (
@@ -350,7 +350,7 @@ export function TestimonialSubmitModal({
                   {formError && (
                     <p
                       role="alert"
-                      className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-sm text-red-600 dark:text-red-400"
+                      className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-sm text-red-600 dark:text-red-400"
                     >
                       {formError}
                     </p>
@@ -362,7 +362,7 @@ export function TestimonialSubmitModal({
                     className="mt-0.5 inline-flex items-center justify-center gap-2 rounded-full bg-text-primary px-6 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-60 dark:bg-white dark:text-black sm:mt-1 sm:py-3"
                   >
                     {isPending && (
-                      <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                      <Loader2 className="size-4 animate-spin" aria-hidden />
                     )}
                     {isPending ? "Submitting…" : "Submit for review"}
                   </button>
