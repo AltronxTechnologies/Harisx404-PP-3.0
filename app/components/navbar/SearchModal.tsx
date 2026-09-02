@@ -293,6 +293,40 @@ export function SearchModal({
     };
   }, [isOpen, onClose]);
 
+  useEffect(() => {
+    if (!isOpen || !dialogRef.current) return;
+    const restored: Array<{
+      element: HTMLElement;
+      inert: boolean;
+      ariaHidden: string | null;
+    }> = [];
+    let branch: HTMLElement = dialogRef.current;
+
+    while (branch.parentElement) {
+      const parent = branch.parentElement;
+      for (const sibling of Array.from(parent.children)) {
+        if (!(sibling instanceof HTMLElement) || sibling === branch) continue;
+        restored.push({
+          element: sibling,
+          inert: sibling.inert,
+          ariaHidden: sibling.getAttribute("aria-hidden"),
+        });
+        sibling.inert = true;
+        sibling.setAttribute("aria-hidden", "true");
+      }
+      branch = parent;
+      if (parent === document.body) break;
+    }
+
+    return () => {
+      for (const { element, inert, ariaHidden } of restored) {
+        element.inert = inert;
+        if (ariaHidden === null) element.removeAttribute("aria-hidden");
+        else element.setAttribute("aria-hidden", ariaHidden);
+      }
+    };
+  }, [isOpen]);
+
   // NOTE: no early `return null` here — the tree must stay mounted inside
   // AnimatePresence so the modal can play its exit animation on close
   // (mirrors ReachOutModal's structure).
