@@ -125,7 +125,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`bg-bg-primary ${GeistMono.variable} ${GeistSans.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} ${sourceSerif.variable} ${spaceGrotesk.variable}`}
+      className={`relative bg-bg-primary ${GeistMono.variable} ${GeistSans.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} ${sourceSerif.variable} ${spaceGrotesk.variable}`}
     >
       <body className="flex min-h-screen flex-col font-sans md:max-w-7xl lg:mx-auto lg:flex-row" suppressHydrationWarning>
         <script
