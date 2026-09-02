@@ -26,7 +26,6 @@ function buildTrackPath(h: number): string {
 export function AboutTrackPattern() {
   const containerRef = useRef<HTMLDivElement>(null);
   const pathRef = useRef<SVGPathElement>(null);
-  const verticalPathRef = useRef<SVGPathElement>(null);
   const ballRef = useRef<SVGCircleElement>(null);
   const glowRef = useRef<SVGCircleElement>(null);
   const prefersReducedMotion = useReducedMotion();
@@ -66,10 +65,9 @@ export function AboutTrackPattern() {
   });
 
   useEffect(() => {
-    const source = prefersReducedMotion ? scrollYProgress : smooth;
     const apply = (latest: number) => {
-      const activePath =
-        window.innerWidth >= 1024 ? pathRef.current : verticalPathRef.current;
+      if (window.innerWidth < 1024) return;
+      const activePath = pathRef.current;
       if (!activePath) return;
       const length = activePath.getTotalLength();
       if (!length) return;
@@ -84,13 +82,19 @@ export function AboutTrackPattern() {
       glowRef.current?.setAttribute("cx", x);
       glowRef.current?.setAttribute("cy", y);
     };
-    apply(source.get());
-    return source.on("change", apply);
-  }, [smooth, scrollYProgress, prefersReducedMotion]);
+    if (prefersReducedMotion) {
+      apply(0);
+      return;
+    }
+    apply(smooth.get());
+    return smooth.on("change", apply);
+  }, [smooth, prefersReducedMotion]);
 
   return (
-    <div ref={containerRef}>
+    <div ref={containerRef} className="relative">
       <svg
+        aria-hidden="true"
+        focusable="false"
         className="user-select-none pointer-events-none hidden lg:block"
         width="390"
         height={trackHeight}
@@ -171,7 +175,7 @@ export function AboutTrackPattern() {
           <circle
             ref={glowRef}
             cx="145"
-            cy="0"
+            cy="10"
             r="120"
             fill="#a78bfa"
             filter="url(#purpleGlow)"
@@ -200,7 +204,7 @@ export function AboutTrackPattern() {
             <stop offset="1" stopColor="#60a5fa" />
           </linearGradient>
         </defs>
-        <circle ref={ballRef} cx="145" cy="0" r="10" fill="url(#trackBall)" />
+        <circle ref={ballRef} cx="145" cy="10" r="10" fill="url(#trackBall)" />
       </svg>
     </div>
   );
