@@ -23,17 +23,18 @@ const MAX_COLS = 52; // a full year of weeks
 // Deterministic but organic-looking intensity 0..4 per cell. A proper
 // avalanche hash (fmix32-style) kills the visible banding a simple
 // modulo pattern produces, and the distribution is weighted like a
-// real active year: few empty days, healthy mix of every shade.
+// real active year: few empty days, a balanced neutral range, and enough
+// high-activity cells for the emerald live accent to read clearly.
 function intensityAt(i: number): number {
   let h = (i + 0x9e3779b9) | 0;
   h = Math.imul(h ^ (h >>> 16), 0x45d9f3b);
   h = Math.imul(h ^ (h >>> 13), 0x45d9f3b);
   h ^= h >>> 16;
   const v = (h >>> 0) % 100;
-  if (v < 12) return 0;
-  if (v < 34) return 1;
-  if (v < 60) return 2;
-  if (v < 83) return 3;
+  if (v < 10) return 0;
+  if (v < 28) return 1;
+  if (v < 50) return 2;
+  if (v < 70) return 3;
   return 4;
 }
 
@@ -75,23 +76,25 @@ export function StatsBento({ height = "h-[220px]" }: { height?: string }) {
   return (
     <div>
       <BentoCard height={height} className="group" linkTo="/stats">
-        {/* Header */}
-        <motion.h2
-          className="relative z-10 text-base font-medium text-text-primary"
-          initial={{ opacity: 0, y: -5 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
-          Stats
-        </motion.h2>
-        <motion.p
-          className="relative z-10 mt-1 text-sm text-text-secondary md:text-base"
-          initial={{ opacity: 0, y: -5 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.1 }}
-        >
-          A peek behind the curtain — content, engagement, code &amp; speed.
-        </motion.p>
+        {/* Header voice matches the homepage bento cards. */}
+        <div className="relative z-20 text-center">
+          <motion.h2
+            className="text-base font-medium text-text-primary"
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            Stats
+          </motion.h2>
+          <motion.p
+            className="mt-1 text-sm text-text-secondary md:text-base"
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+          >
+            A peek behind the curtain — content, engagement, code &amp; speed.
+          </motion.p>
+        </div>
 
         {/* Activity heatmap: fixed square cells, centered in the free area */}
         <div
