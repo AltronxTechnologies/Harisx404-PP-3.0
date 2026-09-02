@@ -94,7 +94,7 @@ export async function HomeFaq() {
               </span>
             </summary>
             {/* whitespace-pre-line keeps admin-entered line breaks */}
-            <p className="whitespace-pre-line px-5 pb-5 text-[14px] leading-relaxed text-text-secondary">
+            <p className="whitespace-pre-line px-5 pb-5 text-[15px] leading-relaxed text-text-secondary">
               {f.a}
             </p>
           </details>
