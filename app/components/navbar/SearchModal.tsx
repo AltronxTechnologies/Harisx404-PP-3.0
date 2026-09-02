@@ -427,7 +427,7 @@ export function SearchModal({
                 <button
                   onClick={() => setQuery("")}
                   aria-label="Clear search"
-                  className="text-text-secondary transition-colors hover:text-neutral-900 dark:hover:text-white"
+                  className="relative text-text-secondary transition-colors before:absolute before:right-0 before:top-1/2 before:size-[68px] before:-translate-y-1/2 before:content-[''] hover:text-neutral-900 dark:hover:text-white"
                 >
                   <X className="size-5" />
                 </button>
