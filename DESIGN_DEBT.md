@@ -258,3 +258,50 @@ Changing any of these is a **regression**, not a fix.
   (breaks `/admin/settings`); `community_wall_messages` and
   `testimonial_submissions` do not exist remotely.
 - Owner manual tasks: Supabase GitHub OAuth, Cal.com link, real certifications.
+
+---
+
+## 🔴 BUGS FOUND 2026-09-02 (infrastructure sweep)
+
+### B1. Blog category filtering returns nothing — USER-FACING
+`/blog?category=<any>` renders the empty state *"No published articles match
+the selected category"* for **every** category, including ones the filter bar
+itself lists (nextjs, react, performance, …). Verified in-browser with JS.
+`/blog` alone renders 63 post links; `/blog?category=nextjs` renders 0.
+
+Clicking any category pill on the blog index therefore appears broken to a
+visitor. Likely a field mismatch: the pills are built from
+`extractUniqueBlogCategories()` reading `post.categories`
+(= `blog_post_tags.tags.name`, `app/lib/utils.ts:135`), but the filter on the
+blog index compares against a different value or a different post set.
+**Not yet diagnosed. Highest-priority open bug.**
+
+### B2. `/projects/<bad-slug>` returns HTTP 200 instead of 404 — SEO
+Body correctly renders the 404 UI, but the status line is `200 OK`, so crawlers
+treat every made-up project URL as a real page. `app/projects/[slug]/page.tsx`
+calls `notFound()` at line 122 and `resolveProject()` correctly returns `null`,
+and its route config (`revalidate`, `dynamicParams`, `generateStaticParams`)
+plus its `generateMetadata` not-found branch are **identical** to
+`app/blog/[slug]/page.tsx`, which returns a correct 404. Cause not identified.
+**Needs verification against a production build** — dev-server status codes for
+`notFound()` could not be trusted here, and `next build` must not be run while
+the dev server is up (see process rules).
+
+### B3. Missing professional-standard files
+| Item | Impact |
+|---|---|
+| `app/loading.tsx` (root) | Only `/projects` has a loading state; every other route shows nothing during navigation |
+| `app/manifest.ts` | No PWA manifest at all; breaks Add-to-Home-Screen, costs Lighthouse points |
+| `app/apple-icon.png` + `app/icon.png` | Only `favicon.ico` exists, so iOS home-screen saves a screenshot instead of the logo. Source available: `public/brand/harisx404 favicon transparent.png` |
+| `themeColor` / `viewport` in `app/layout.tsx` | Mobile browser chrome will not match the dark theme |
+| `/.well-known/security.txt` | Vulnerability-disclosure contact. Strong fit for a cybersecurity portfolio |
+
+### B4. Content pages absent (need owner wording — do not invent)
+- **Cookie Policy** — relevant, the site runs view counters/analytics.
+- **Accessibility Statement** — nice-to-have.
+
+### ✅ Verified healthy in the same sweep
+404 (`not-found.tsx`), error boundary (`error.tsx`), root error
+(`global-error.tsx`), `sitemap.ts` (no dead URLs), `robots.ts`, `rss.xml`,
+OG/Twitter images (`/brand/logo-wide.png` → 200), `favicon.ico`, and all 15
+public routes returning 200. No broken internal links anywhere.

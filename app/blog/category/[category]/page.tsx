@@ -1,86 +1,25 @@
-import {
-  extractUniqueBlogCategories,
-  fetchAndSortBlogPosts,
-  formatDate,
-} from "app/lib/utils";
-import readingDuration from "reading-duration";
-import { NewsletterSignUp } from "@/app/components/NewsletterSignUp";
-import { CategorySelect } from "@/app/components/CategorySelect";
-import { BlogCard } from "@/app/components/BlogCard";
+import { redirect } from "next/navigation";
 
-export const revalidate = 3600;
-
+/**
+ * Legacy route: `/blog/category/<name>`.
+ *
+ * Nothing in the app links here any more — `BlogFilterBar` navigates to
+ * `/blog?category=<name>`, which is the view that actually works. This route
+ * was still reachable and rendered an EMPTY page with HTTP 200 for every
+ * category, valid or not: a soft 404 that let search engines index
+ * `/blog/category/<anything>` as a real page.
+ *
+ * Rather than delete it (which would 404 any existing inbound link or old
+ * search result), redirect to the canonical filtered view. `redirect()` issues
+ * a 307 in a Server Component, so crawlers follow it and consolidate ranking
+ * onto `/blog`.
+ */
 export default async function CategoryPage({
   params,
 }: {
   params: Promise<{ category: string }>;
 }) {
-  const allPublishedBlogPosts = await fetchAndSortBlogPosts();
-  const categories = Array.from(
-    extractUniqueBlogCategories(allPublishedBlogPosts),
-  );
-
-  const category = (await params).category
-    ? (await params).category.toLowerCase()
-    : "";
-
-  const categoryPosts = allPublishedBlogPosts.filter((post) => {
-    return (
-      Array.isArray(post.categories) &&
-      post.categories.some(
-        (cat) => typeof cat === "string" && cat.toLowerCase() === category,
-      )
-    );
-  });
-
-  return (
-    <div className="mt-14 w-full space-y-16 md:mt-16">
-      <title>{`${category} Articles`}</title>
-
-      {/* Header */}
-      <div className="px-2 sm:px-4">
-        <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-text-secondary">
-          From the desk
-        </p>
-        <h1 className="mt-3 font-display text-5xl text-text-primary md:text-6xl">
-          Articles about{" "}
-          <span className="text-gradient-accent font-display italic">
-            {category || "everything"}
-          </span>
-        </h1>
-      </div>
-
-      <div className="space-y-12 px-2 sm:px-4">
-        <CategorySelect categories={categories} currentCategory={category} />
-
-        {categoryPosts.length > 0 ? (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {categoryPosts.map((post, i) => (
-              <BlogCard
-                key={post.slug}
-                slug={post.slug}
-                title={post.title}
-                summary={post.summary}
-                readingTime={readingDuration(post.content || "", {
-                  wordsPerMinute: 200,
-                  emoji: false,
-                })}
-                formattedDate={formatDate(post.publishedAt)}
-                imageName={post.imageName}
-                index={i}
-              />
-            ))}
-          </div>
-        ) : (
-          <p className="text-text-secondary">Nothing to see here yet...</p>
-        )}
-      </div>
-
-      <NewsletterSignUp
-        title={`Stay updated on ${category} articles`}
-        description={`Sign up to receive notifications about new blog posts, insights, and exclusive content directly in your inbox.`}
-        buttonText="Get Notified"
-      />
-    </div>
-  );
+  const { category } = await params;
+  const slug = (category ?? "").toLowerCase();
+  redirect(slug ? `/blog?category=${encodeURIComponent(slug)}` : "/blog");
 }
