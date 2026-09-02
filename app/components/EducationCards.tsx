@@ -72,7 +72,7 @@ export function BsitCard({ rotate = "left" }: { rotate?: "left" | "right" }) {
           <br />
           Malakand
         </p>
-        <span className="font-mono text-[11px] text-white/40 dark:text-black/45">&lt;/&gt;</span>
+        <span className="font-mono text-[11px] text-white/60 dark:text-black/65">&lt;/&gt;</span>
       </div>
       <div className="relative">
         <p className="text-gradient-animated font-display text-6xl leading-none">
@@ -81,7 +81,7 @@ export function BsitCard({ rotate = "left" }: { rotate?: "left" | "right" }) {
         <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-white/70 dark:text-black/70">
           2022 — 2026
         </p>
-        <p className="mt-2 truncate font-mono text-[8px] text-white/35 dark:text-black/45">
+        <p className="mt-2 truncate font-mono text-[8px] text-white/60 dark:text-black/65">
           ~$ tourmate-malakand --deploy
         </p>
       </div>
@@ -100,7 +100,7 @@ export function BsitCard({ rotate = "left" }: { rotate?: "left" | "right" }) {
           <span className="whitespace-nowrap rounded-full border border-white/15 dark:border-black/15 px-2 py-1 font-mono text-[8px] uppercase tracking-wide text-white/70 dark:text-black/70">
             3.5 / 4.0 CGPA
           </span>
-          <span className="whitespace-nowrap font-mono text-[8px] uppercase tracking-wide text-white/40 dark:text-black/45">
+          <span className="whitespace-nowrap font-mono text-[8px] uppercase tracking-wide text-white/60 dark:text-black/65">
             FYP Lead
           </span>
         </div>
@@ -163,7 +163,7 @@ export function KpitbCard({ rotate = "right" }: { rotate?: "left" | "right" }) {
             className="h-[3px] flex-1 rounded-full bg-gradient-to-r from-[#f472b6] via-[#a78bfa] to-[#60a5fa]"
           />
         </div>
-        <p className="mt-2 truncate font-mono text-[8px] text-white/35 dark:text-black/45">
+        <p className="mt-2 truncate font-mono text-[8px] text-white/60 dark:text-black/65">
           &gt; model.fit() · loss ↓ · acc ↑
         </p>
       </div>
