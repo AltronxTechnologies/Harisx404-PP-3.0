@@ -282,6 +282,31 @@ entry’s “intentional variations” list.
 )
 ```
 
+### Section-gap measurement — MUST validate before trusting
+A naive "walk up from the heading" probe compares elements at different nesting
+depths and produces garbage gaps. It once reported a 325px first-section gap on
+/about that did not exist: the real value was 112px, set by `space-y-28`, the
+same utility the home page uses.
+
+**Rule: the probe must return `siblings: true`. If it returns false, the numbers
+are invalid - fix the selector, do not report the gap.**
+```js
+() => {
+  const pairs=[...document.querySelectorAll('h2')]
+    .filter(h=>parseFloat(getComputedStyle(h).fontSize)>=40)
+    .map(h=>({h,k:h.previousElementSibling})).filter(x=>x.k&&x.k.tagName==='P');
+  const wraps=pairs.map(p=>p.k.parentElement);
+  const chain=el=>{const a=[];let n=el;while(n){a.push(n);n=n.parentElement;}return a;};
+  const lca=chain(wraps[0]).find(c=>wraps.every(w=>c.contains(w)));
+  const blocks=wraps.map(w=>{let n=w;while(n.parentElement&&n.parentElement!==lca)n=n.parentElement;return n;});
+  const b=blocks.map(x=>x.getBoundingClientRect()), gaps=[];
+  for(let i=1;i<b.length;i++) gaps.push(Math.round(b[i].top-(b[i-1].top+b[i-1].height)));
+  return { siblings: blocks.every(x=>x.parentElement===lca), gaps };  // siblings MUST be true
+}
+```
+**Shortcut:** section rhythm is usually one `space-y-*` on a single wrapper.
+Grep for it first - `grep -n "space-y-" <page>` - which is cheaper and exact.
+
 ### Radius sweep
 ```js
 () => { const m={}; document.querySelectorAll('<scope> *').forEach(e=>{
