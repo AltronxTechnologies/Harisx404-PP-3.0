@@ -83,10 +83,11 @@ export default async function AboutPage() {
                 was on nearly every clause, which flattens the hierarchy. */}
             <p className="mx-auto mt-14 max-w-3xl text-pretty text-center text-base leading-relaxed text-text-secondary">
               I&apos;m Muhammad Haris, a BSIT graduate from the University of
-              Malakand. I build full-stack web applications, secure them from
-              day one, and use AI to make them smarter. I ranked in the top 15%
-              nationally in Pakistan&apos;s NSCT 2026 among 33,000+ candidates,
-              and I&apos;m KPITB AI/ML certified.
+              Malakand, specializing in Cybersecurity, Full-Stack Web
+              Development, and AI/ML. Ranked in Pakistan&apos;s Top 15% in NSCT
+              2026, with 96% in Cybersecurity coursework and KPITB AI/ML
+              certification, I build secure, scalable, and intelligent digital
+              solutions.
             </p>
             </div>
           </div>
