@@ -23,7 +23,7 @@ import {
 } from "./modalSurfaces";
 import { siteMetadata } from "@/app/data/siteMetadata";
 
-const OWNER_EMAIL = "itsharis.tech@gmail.com";
+const OWNER_EMAIL = siteMetadata.email.replace(/^mailto:/, "");
 const MESSAGE_MAX = 500;
 
 interface ReachOutModalProps {
@@ -134,9 +134,9 @@ export function ReachOutModal({
   );
 
   const socials = [
-    { label: "LinkedIn", href: "https://www.linkedin.com/in/harisx404/" },
-    { label: "X / Twitter", href: "https://twitter.com/harisx404" },
-    { label: "GitHub", href: "https://github.com/harisx404" },
+    { label: "LinkedIn", href: siteMetadata.linkedin },
+    { label: "X / Twitter", href: siteMetadata.twitter },
+    { label: "GitHub", href: siteMetadata.github },
   ];
 
   return (
