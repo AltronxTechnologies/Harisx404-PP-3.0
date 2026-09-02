@@ -441,7 +441,7 @@ export function CaseStudyCard({
                hover response lives on the cover panel alone — structural
                lines around it stay perfectly static. */
             !liftOnHover &&
-              "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [@media(hover:hover)]:group-hover:-translate-y-1.5"
+              "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [@media(hover:hover)]:group-hover:-translate-y-1.5 motion-reduce:transition-none motion-reduce:group-hover:translate-y-0"
           )}
           style={{ backgroundImage: panelGradients[i % panelGradients.length] }}
         >
