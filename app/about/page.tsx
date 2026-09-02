@@ -119,9 +119,9 @@ export default async function AboutPage() {
           <GridWrapper>
             <div className="px-4 xl:px-0">
               <SectionHeading kicker="Education" className="mx-auto max-w-2xl">
-                {"My academic journey and the "}
+                {"My academic "}
                 <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
-                  milestones behind it.
+                  milestones.
                 </span>
               </SectionHeading>
             </div>
