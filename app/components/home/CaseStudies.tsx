@@ -651,15 +651,15 @@ export function CaseStudyCard({
         </div>
       </Link>
 
-      {/* Compact description + project story — visible below xl; kept in the
-          accessibility tree at xl too (the sticky panel is aria-hidden).
+      {/* Compact description + project story — visible below xl; hidden at xl
+          where the cover link and sticky panel provide the same content.
           On the projects page (coverHeading="title") it stays fully visible
           at every breakpoint — there is no sticky panel there. */}
       <div
         className={clsx(
           "mt-5",
-          coverHeading === "title" ? "mt-6" : "xl:sr-only",
-          bodyHiddenOnXl && "xl:sr-only"
+          coverHeading === "title" ? "mt-6" : "xl:hidden",
+          bodyHiddenOnXl && "xl:hidden"
         )}
       >
         {coverHeading !== "title" && (
