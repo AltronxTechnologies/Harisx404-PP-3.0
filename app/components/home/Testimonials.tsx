@@ -197,7 +197,7 @@ export function Testimonials({ items: itemsProp }: { items?: Testimonial[] }) {
               </h3>
               {/* Quote — flexible middle, capped at 6 lines so an extra-long
                   testimonial can't blow the card height out of line. */}
-              <p className="mt-4 line-clamp-6 flex-1 text-sm leading-relaxed text-text-secondary">
+              <p className="mt-4 line-clamp-6 flex-1 text-[15px] leading-relaxed text-text-secondary">
                 {t.quote}
               </p>
               {/* Author footer — divider above; name/role truncate so long
