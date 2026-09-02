@@ -127,14 +127,11 @@ export function SearchModal({
 
   useEffect(() => {
     if (isOpen) return;
-    const timer = setTimeout(() => {
-      setQuery("");
-      setResults([]);
-      setIsSearching(false);
-      setSearchError(null);
-      setHasSearched(false);
-    }, 300);
-    return () => clearTimeout(timer);
+    setQuery("");
+    setResults([]);
+    setIsSearching(false);
+    setSearchError(null);
+    setHasSearched(false);
   }, [isOpen]);
 
   // Rotating placeholder — cycles while the input is empty
