@@ -60,12 +60,12 @@ export default async function AboutPage() {
         {/* Hero — kicker + heading + intro (same system as homepage sections) */}
         <GridWrapper>
           <div className="relative px-4 xl:px-0">
-            {/* Engineering dot-grid — from the very top of the screen to the
-                end of this About-me section. Lighter dots, soft bottom fade.
-                (Previous option: paper texture at /textures/paper-texture.png) */}
+            {/* Soft paper grain from the top of the viewport through the hero.
+                Multiply keeps the folds natural on light surfaces; in dark
+                mode the inverted screen blend reveals only the paper ridges. */}
             <div
               aria-hidden
-              className="pointer-events-none absolute -inset-x-2 bottom-0 top-[-128px] [background-image:radial-gradient(circle,rgba(100,106,124,0.30)_1px,transparent_1px)] [background-size:18px_18px] [mask-image:linear-gradient(to_bottom,black,transparent)] dark:[background-image:radial-gradient(circle,rgba(255,255,255,0.16)_1px,transparent_1px)] sm:-inset-x-3 sm:top-[-144px] md:top-[-176px] lg:inset-x-0"
+              className="pointer-events-none absolute -inset-x-2 bottom-0 top-[-128px] bg-[url('/textures/paper-texture.png')] bg-cover bg-[position:15%_top] bg-no-repeat opacity-75 mix-blend-multiply [mask-image:linear-gradient(to_bottom,black_55%,transparent_100%)] dark:invert dark:mix-blend-screen dark:opacity-40 sm:-inset-x-3 sm:top-[-144px] sm:bg-center sm:opacity-60 dark:sm:opacity-30 md:top-[-176px] lg:inset-x-0"
             />
             <div className="relative">
             <h1 className="sr-only">
