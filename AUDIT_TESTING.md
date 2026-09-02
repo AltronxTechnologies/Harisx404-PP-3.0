@@ -210,6 +210,9 @@ This class of bug caused the original theme-toggle defect. Always run it.
 ## PHASE 8 — Responsive
 Check at **1440×900**, **1024×768**, **768×1024**, **390×844**, **375×667**, **360×640**.
 - [ ] No horizontal overflow at any width.
+- [ ] No child is clipped by an `overflow-hidden` card. Page-level
+      `scrollWidth` can still be zero when oversized children are cut off;
+      compare the outermost child rectangles with the card bounds.
 - [ ] No text clipping / overlap.
 - [ ] Tap targets still ≥24px on the smallest.
 - [ ] Font sizes remain legible (flag anything under ~11px).
