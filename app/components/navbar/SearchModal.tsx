@@ -269,6 +269,19 @@ export function SearchModal({
     filteredDiscover.length === 0 &&
     results.length === 0 &&
     !isSearching;
+  const visibleResultCount =
+    results.length +
+    filteredPages.length +
+    filteredConnect.length +
+    filteredLegal.length +
+    filteredDiscover.length;
+  const searchStatus = isSearching
+    ? "Searching"
+    : searchError
+      ? searchError
+      : q.length > 0
+        ? `${visibleResultCount} ${visibleResultCount === 1 ? "result" : "results"} available`
+        : "";
 
   // Escape closes + body scroll lock
   useEffect(() => {
@@ -397,7 +410,9 @@ export function SearchModal({
           >
           {/* Top bar — detached search pill + action buttons (same row as ReachOutModal) */}
           <div className="mb-4 flex items-center gap-[7px]">
-            <div className={pillSurface}>
+            <div
+              className={`${pillSurface} focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-violet-600 dark:focus-within:outline-violet-400`}
+            >
               <Search className="size-7 shrink-0 text-text-secondary" />
               <input
                 ref={inputRef}
@@ -452,6 +467,7 @@ export function SearchModal({
               gave 694 (694 + 28 = 722). Card padding p-4 also matches Reach Out's
               shell. Do not change one without re-measuring the other. */}
           <div
+            aria-busy={isSearching}
             className={
               "max-h-[634px] overflow-y-auto p-4 " +
               // Thin divider between category groups (Pages / Connect / Legal /
@@ -465,6 +481,9 @@ export function SearchModal({
               "[&>section+section]:border-t [&>section+section]:border-border-primary"
             }
           >
+            <span role="status" aria-live="polite" className="sr-only">
+              {searchStatus}
+            </span>
             {/* Content search results, grouped professionally */}
             {q.length >= 2 && (
               <>
@@ -478,7 +497,7 @@ export function SearchModal({
                 )}
 
                 {searchError && (
-                  <p className="px-4 py-3 text-base text-text-secondary">
+                  <p role="alert" className="px-4 py-3 text-base text-text-secondary">
                     {searchError}
                   </p>
                 )}
