@@ -690,13 +690,13 @@ export function CaseStudyCard({
                 a short description sits naturally with no reserved gap. */}
             <Link
               href={`/projects/${project.slug}`}
-              className="line-clamp-3 block max-w-xl text-sm leading-relaxed text-text-secondary xl:min-h-[46px]"
+              className="line-clamp-3 block max-w-xl text-[15px] leading-relaxed text-text-secondary xl:min-h-[49px]"
             >
               {highlightMatches(project.description, highlight)}
             </Link>
           </>
         ) : (
-          <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-text-secondary">
+          <p className="mt-2 line-clamp-3 text-[15px] leading-relaxed text-text-secondary">
             {project.description}
           </p>
         )}
@@ -763,7 +763,7 @@ export function CaseStudyCard({
                 .map((b, bi) => (
                   <li
                     key={bi}
-                    className="flex text-sm leading-6 text-text-secondary"
+                    className="flex text-[15px] leading-6 text-text-secondary"
                   >
                     <span
                       aria-hidden="true"
@@ -840,12 +840,12 @@ function StickyProjectPanel({
       {/* Best-practice clamps keep the panel the same height ballpark as
           the image card: description ≤3 lines, bullets ≤2 lines each,
           tech chips ≤4 rows (overflow simply hidden). */}
-      <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-text-secondary">
+      <p className="mt-4 line-clamp-3 text-[15px] leading-relaxed text-text-secondary">
         {project.description}
       </p>
       <ul className="mt-[22px] space-y-[7px]">
         {bullets.map((b, i) => (
-          <li key={i} className="flex text-sm leading-6 text-text-secondary">
+          <li key={i} className="flex text-[15px] leading-6 text-text-secondary">
             <span
               aria-hidden="true"
               className={`mr-2 flex h-6 shrink-0 items-center font-mono ${hueText[index % hueText.length]}`}
