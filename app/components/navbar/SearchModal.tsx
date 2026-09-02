@@ -469,7 +469,7 @@ export function SearchModal({
           <div
             aria-busy={isSearching}
             className={
-              "max-h-[634px] overflow-y-auto p-4 " +
+              "h-[634px] overflow-y-auto p-4 " +
               // Thin divider between category groups (Pages / Connect / Legal /
               // Discover, and the Projects / Blog Posts result groups). The
               // `section + section` selector means the line only ever appears
