@@ -537,7 +537,7 @@ export default function Navbar() {
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                             <div className="relative z-10 flex flex-col items-start">
-                              <h3 className="font-sans font-bold text-lg text-white mb-0.5 tracking-tight group-hover:translate-x-0.5 transition-transform motion-reduce:transition-none motion-reduce:group-hover:translate-x-0">Community Wall</h3>
+                              <span className="font-sans font-bold text-lg text-white mb-0.5 tracking-tight group-hover:translate-x-0.5 transition-transform motion-reduce:transition-none motion-reduce:group-hover:translate-x-0">Community Wall</span>
                               <p className="text-[13px] text-white/75 font-normal">Leave your mark — say hi!</p>
                             </div>
                           </Link>
@@ -562,7 +562,7 @@ export default function Navbar() {
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                             <div className="relative z-10 flex flex-col items-start">
-                              <h3 className="font-sans font-bold text-lg text-white mb-0.5 tracking-tight group-hover:translate-x-0.5 transition-transform motion-reduce:transition-none motion-reduce:group-hover:translate-x-0">Stats</h3>
+                              <span className="font-sans font-bold text-lg text-white mb-0.5 tracking-tight group-hover:translate-x-0.5 transition-transform motion-reduce:transition-none motion-reduce:group-hover:translate-x-0">Stats</span>
                               <p className="text-[13px] text-white/75 font-normal">The numbers behind this site</p>
                             </div>
                           </Link>
@@ -584,7 +584,7 @@ export default function Navbar() {
                               </svg>
                             </div>
                             <div>
-                              <h4 className="text-[14px] font-semibold text-neutral-900 dark:text-white/90">Credentials</h4>
+                              <span className="block text-[14px] font-semibold text-neutral-900 dark:text-white/90">Credentials</span>
                               <p className="text-[12px] text-text-secondary">Certifications & badges</p>
                             </div>
                           </Link>
@@ -601,7 +601,7 @@ export default function Navbar() {
                               </svg>
                             </div>
                             <div>
-                              <h4 className="text-[14px] font-semibold text-neutral-900 dark:text-white/90">Contact</h4>
+                              <span className="block text-[14px] font-semibold text-neutral-900 dark:text-white/90">Contact</span>
                               <p className="text-[12px] text-text-secondary">Let&apos;s work together</p>
                             </div>
                           </Link>
@@ -618,7 +618,7 @@ export default function Navbar() {
                               </svg>
                             </div>
                             <div>
-                              <h4 className="text-[14px] font-semibold text-neutral-900 dark:text-white/90">Links</h4>
+                              <span className="block text-[14px] font-semibold text-neutral-900 dark:text-white/90">Links</span>
                               <p className="text-[12px] text-text-secondary">All my links are here</p>
                             </div>
                           </Link>
