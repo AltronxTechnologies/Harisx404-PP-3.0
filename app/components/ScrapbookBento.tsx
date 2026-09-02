@@ -296,8 +296,6 @@ export function ScrapbookBento({ className }: { className?: string }) {
 
   return (
     <BentoCard
-      colSpan={9}
-      rowSpan={4}
       height="h-[300px]"
       showHoverGradient={false}
       hideOverflow={false}
