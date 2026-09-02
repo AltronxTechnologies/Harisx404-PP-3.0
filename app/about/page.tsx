@@ -212,9 +212,9 @@ export default async function AboutPage() {
         <section className="relative space-y-14">
           <GridWrapper>
             <SectionHeading kicker="Beyond the resume" className="mx-auto max-w-2xl">
-              One handle, live numbers &amp; the{" "}
+              {"One handle, "}
               <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
-                story behind the work
+                live numbers.
               </span>
             </SectionHeading>
           </GridWrapper>
