@@ -14,6 +14,7 @@ import { EduReveal, EduCardHover } from "@/app/components/EducationMotion";
 import { SectionHeading } from "@/app/components/home/SectionHeading";
 import { CtaSection } from "@/app/components/home/CtaSection";
 import { AccountsBento, SiteStatsBento } from "@/app/components/home/HomeBento";
+import { HeroTexture } from "@/app/components/HeroTexture";
 import {
   fetchExperiences,
   fetchProjects,
@@ -60,12 +61,8 @@ export default async function AboutPage() {
         {/* Hero — kicker + heading + intro (same system as homepage sections) */}
         <GridWrapper>
           <div className="relative px-4 xl:px-0">
-            {/* Soft paper grain from the top of the viewport through the hero.
-                Multiply keeps the folds natural on light surfaces; in dark
-                mode the inverted screen blend reveals only the paper ridges. */}
-            <div
-              aria-hidden
-              className="pointer-events-none absolute -inset-x-2 bottom-0 top-[-128px] bg-[url('/textures/paper-texture.png')] bg-cover bg-[position:15%_top] bg-no-repeat opacity-75 mix-blend-multiply [mask-image:linear-gradient(to_bottom,black_55%,transparent_100%)] dark:invert dark:mix-blend-screen dark:opacity-40 sm:-inset-x-3 sm:top-[-144px] sm:bg-center sm:opacity-60 dark:sm:opacity-30 md:top-[-176px] lg:inset-x-0"
+            <HeroTexture
+              className="-inset-x-2 bottom-0 top-[-128px] sm:-inset-x-3 sm:top-[-144px] md:top-[-176px] lg:inset-x-0"
             />
             <div className="relative">
             <h1 className="sr-only">

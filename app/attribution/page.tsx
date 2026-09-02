@@ -85,6 +85,15 @@ export default function AttributionPage() {
                 <span className="text-text-primary">Lucide</span> — the icon
                 set used across the interface.
               </li>
+              <li>
+                <a
+                  href="https://www.transparenttextures.com/patterns/paper-fibers.png"
+                  className="text-text-primary underline underline-offset-4 hover:text-text-secondary"
+                >
+                  Paper Fibers
+                </a>{" "}
+                texture by Heliodor Jalba via Transparent Textures.
+              </li>
             </ul>
           </section>
 
