@@ -29,7 +29,12 @@ function StickerArt({
       role="img"
       aria-label={label}
       className={cn("[&>svg]:h-auto [&>svg]:w-full", className)}
-      dangerouslySetInnerHTML={{ __html: svg }}
+      dangerouslySetInnerHTML={{
+        __html: svg.replace(
+          "<svg ",
+          '<svg aria-hidden="true" focusable="false" ',
+        ),
+      }}
     />
   );
 }

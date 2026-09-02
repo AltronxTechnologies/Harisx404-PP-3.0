@@ -16,6 +16,7 @@ function CardShell({
 }) {
   return (
     <div
+      aria-hidden="true"
       className={`absolute left-0 top-0 flex h-[270px] w-[180px] flex-col justify-between overflow-hidden rounded-lg border border-white/10 bg-[#0b0b10] p-4 shadow dark:border-black/10 dark:bg-[#f4f5f7] ${
         rotate === "left" ? "rotate-[-8deg]" : "rotate-[8deg]"
       }`}
