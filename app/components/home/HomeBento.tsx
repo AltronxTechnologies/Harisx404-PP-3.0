@@ -91,7 +91,7 @@ export function AccountsBento() {
           <span className="font-mono text-text-primary">harisx404</span>
         </p>
       </div>
-      <div className="z-20 mt-4 flex flex-1 items-start justify-center gap-1 sm:mt-5 sm:gap-3">
+      <div className="z-20 mt-4 flex flex-1 items-start justify-center gap-2 sm:mt-5 sm:gap-3">
         {accountItems.map((item, index) => (
           <a
             key={item.title}
@@ -100,7 +100,7 @@ export function AccountsBento() {
             rel="noopener noreferrer"
             title={`${item.title} — @harisx404`}
             aria-label={`${item.title} profile`}
-            className="group/acct min-w-0 text-center"
+            className="group/acct inline-block text-center"
             style={
               {
                 "--brand": item.brand,
@@ -111,8 +111,8 @@ export function AccountsBento() {
             <RecessedTile
               sizeClass={clsx(
                 index === 2
-                  ? "h-[52px] w-[52px] sm:h-[84px] sm:w-[84px]"
-                  : "h-11 w-11 sm:h-[72px] sm:w-[72px]"
+                  ? "h-16 w-16 sm:h-[84px] sm:w-[84px]"
+                  : "h-14 w-14 sm:h-[72px] sm:w-[72px]"
               )}
               className="group-hover/acct:-translate-y-2 group-hover/acct:border-neutral-400 motion-reduce:group-hover/acct:translate-y-0 dark:group-hover/acct:border-white/30"
             >
@@ -134,7 +134,7 @@ export function AccountsBento() {
               />
             </RecessedTile>
             {/* Handle reveals under the tile on hover */}
-            <span className="mt-1.5 block font-mono text-[8px] uppercase tracking-widest text-text-secondary opacity-0 transition-all duration-300 group-hover/acct:opacity-100 motion-reduce:transition-none sm:text-[10px]">
+            <span className="mt-1.5 block font-mono text-[10px] uppercase tracking-widest text-text-secondary opacity-0 transition-all duration-300 group-hover/acct:opacity-100 motion-reduce:transition-none">
               {item.title}
             </span>
           </a>
