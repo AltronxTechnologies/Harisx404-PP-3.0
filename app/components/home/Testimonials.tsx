@@ -32,11 +32,14 @@ function Avatar({ src, name, tint }: { src: string | null; name: string; tint: s
   const [failed, setFailed] = useState(false);
   if (src && !failed) {
     return (
-      <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border border-border-primary">
+      <span
+        aria-hidden="true"
+        className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border border-border-primary"
+      >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={src}
-          alt={name}
+          alt=""
           className="h-full w-full object-cover"
           loading="lazy"
           onError={() => setFailed(true)}
@@ -46,6 +49,7 @@ function Avatar({ src, name, tint }: { src: string | null; name: string; tint: s
   }
   return (
     <span
+      aria-hidden="true"
       className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border-primary bg-gradient-to-br font-mono text-xs text-text-secondary ${tint}`}
     >
       {initials(name)}
