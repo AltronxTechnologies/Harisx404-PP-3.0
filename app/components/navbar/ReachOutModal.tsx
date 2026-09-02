@@ -76,7 +76,7 @@ export function ReachOutModal({
       if (e.shiftKey && (active === first || !root.contains(active))) {
         e.preventDefault();
         last.focus();
-      } else if (!e.shiftKey && active === last) {
+      } else if (!e.shiftKey && (active === last || !root.contains(active))) {
         e.preventDefault();
         first.focus();
       }
