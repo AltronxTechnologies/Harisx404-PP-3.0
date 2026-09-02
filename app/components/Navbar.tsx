@@ -662,9 +662,13 @@ export default function Navbar() {
               }`}
             >
               <motion.button
-                initial={{ opacity: 0, scale: 0.9 }}
+                initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 2.2, duration: 0.4 }}
+                transition={
+                  prefersReducedMotion
+                    ? { duration: 0 }
+                    : { delay: 2.2, duration: 0.4 }
+                }
                 onClick={() => setIsCommandPaletteOpen(true)}
                 aria-label="Open search (⌘K)"
                 className={`${navCircleSurface} mt-0.5`}
@@ -674,9 +678,13 @@ export default function Navbar() {
               </motion.button>
 
               <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
+                initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 2.2, duration: 0.4 }}
+                transition={
+                  prefersReducedMotion
+                    ? { duration: 0 }
+                    : { delay: 2.2, duration: 0.4 }
+                }
                 className="inline-flex mt-0.5"
               >
                 <ThemeToggle />
