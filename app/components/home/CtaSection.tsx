@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, Check, Copy } from "lucide-react";
@@ -11,12 +11,21 @@ const { cta } = siteContent;
 export function CtaSection() {
   const prefersReducedMotion = useReducedMotion();
   const [copied, setCopied] = useState(false);
+  const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(
+    () => () => {
+      if (copiedTimer.current) clearTimeout(copiedTimer.current);
+    },
+    [],
+  );
 
   const copyEmail = async () => {
     try {
       await navigator.clipboard.writeText(cta.email);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      if (copiedTimer.current) clearTimeout(copiedTimer.current);
+      copiedTimer.current = setTimeout(() => setCopied(false), 2000);
     } catch {
       // Clipboard unavailable (e.g. insecure context) — fall back to mailto.
       window.location.href = `mailto:${cta.email}`;
