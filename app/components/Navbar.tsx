@@ -58,6 +58,7 @@ export default function Navbar() {
   const [greeting, setGreeting] = useState("Good Evening");
   const [greetingIcon, setGreetingIcon] = useState("🌙");
   const [showGreeting, setShowGreeting] = useState(true);
+  const [sideControlsReady, setSideControlsReady] = useState(false);
 
   // Mobile pill content cycle: 0 = Harisx404, 1 = logo, 2 = Explore now
   const [mobileCycle, setMobileCycle] = useState(0);
@@ -99,7 +100,11 @@ export default function Navbar() {
     const timer = setTimeout(() => {
       setShowGreeting(false);
     }, 2200);
-    return () => clearTimeout(timer);
+    const controlsTimer = setTimeout(() => setSideControlsReady(true), 2600);
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(controlsTimer);
+    };
   }, []);
 
   // Keyboard shortcut: Cmd+K / Ctrl+K for search
@@ -603,6 +608,8 @@ export default function Navbar() {
                 edge so the pill stays perfectly centered at every width.
                 Lower layer: the expanding More menu covers it. */}
             <div
+              aria-hidden={!sideControlsReady || undefined}
+              inert={!sideControlsReady ? true : undefined}
               className={`absolute left-full top-0 ml-3.5 hidden md:flex items-start gap-3.5 z-0 ${
                 isDropdownOpen ? "pointer-events-none" : ""
               }`}
