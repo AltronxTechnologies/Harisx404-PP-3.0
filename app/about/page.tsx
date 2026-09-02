@@ -72,14 +72,7 @@ export default async function AboutPage() {
               About Muhammad Haris — Full-Stack Developer, Cybersecurity &amp;
               AI
             </h1>
-            {/* ⚠️ TEMPORARY TEST — kicker weight 600. Owner asked for this to trial the
-                heavier kicker; revert on request. Scoped with [&>p] so it hits ONLY
-                this kicker: the shared SectionHeading is locked (entry 22) and
-                editing it would change every kicker on the home page too. */}
-            <SectionHeading
-              kicker="About me"
-              className="mx-auto max-w-2xl [&>p]:font-semibold"
-            >
+            <SectionHeading kicker="About me" className="mx-auto max-w-2xl">
               {"Developing modern solutions across "}
               <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
                 web, security &amp; AI.
