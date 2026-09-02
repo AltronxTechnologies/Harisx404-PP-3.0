@@ -49,6 +49,7 @@ export function ReachOutModal({
 }: ReachOutModalProps) {
   const [message, setMessage] = useState("");
   const [isCopied, setIsCopied] = useState(false);
+  const [copyFailed, setCopyFailed] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -109,13 +110,17 @@ export function ReachOutModal({
   };
 
   const handleCopyEmail = async () => {
+    setCopyFailed(false);
     try {
       await navigator.clipboard.writeText(OWNER_EMAIL);
       setIsCopied(true);
       if (copyTimer.current) clearTimeout(copyTimer.current);
       copyTimer.current = setTimeout(() => setIsCopied(false), 2000);
     } catch {
-      // clipboard unavailable — ignore
+      setIsCopied(false);
+      setCopyFailed(true);
+      if (copyTimer.current) clearTimeout(copyTimer.current);
+      copyTimer.current = setTimeout(() => setCopyFailed(false), 2000);
     }
   };
 
@@ -320,7 +325,7 @@ export function ReachOutModal({
                     className="text-2xl font-semibold text-text-secondary"
                     aria-live="polite"
                   >
-                    {isCopied ? "Copied!" : "Email me"}
+                    {isCopied ? "Copied!" : copyFailed ? "Copy failed" : "Email me"}
                   </h4>
                   <p className="max-w-full break-all font-mono text-base text-text-secondary">
                     {OWNER_EMAIL}
