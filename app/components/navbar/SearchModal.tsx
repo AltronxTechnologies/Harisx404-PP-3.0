@@ -489,7 +489,7 @@ export function SearchModal({
               <>
                 {isSearching && (
                   <div className="flex items-center gap-2 px-3 pb-1.5 pt-3">
-                    <Loader2 className="size-5 animate-spin text-text-secondary" />
+                    <Loader2 className="size-5 animate-spin text-text-secondary motion-reduce:animate-none" />
                     <span className="text-[15px] font-medium text-text-secondary">
                       Searching&hellip;
                     </span>
