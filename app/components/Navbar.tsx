@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence, MotionConfig, useReducedMotion } from "framer-motion";
@@ -24,6 +24,10 @@ export default function Navbar() {
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isReachOutOpen, setIsReachOutOpen] = useState(false);
   const prefersReducedMotion = useReducedMotion();
+  const closeSearch = useCallback(() => setIsCommandPaletteOpen(false), []);
+  const openReachOut = useCallback(() => setIsReachOutOpen(true), []);
+  const closeReachOut = useCallback(() => setIsReachOutOpen(false), []);
+  const openSearch = useCallback(() => setIsCommandPaletteOpen(true), []);
 
   // Touch-safe "More" dropdown: remember when hover opened it so the tap's
   // synthetic click (fired right after mouseenter on touch) doesn't re-toggle.
@@ -698,15 +702,15 @@ export default function Navbar() {
       {/* Command Palette Modal */}
       <SearchModal 
         isOpen={isCommandPaletteOpen} 
-        onClose={() => setIsCommandPaletteOpen(false)}
-        onOpenReachOut={() => setIsReachOutOpen(true)} 
+        onClose={closeSearch}
+        onOpenReachOut={openReachOut}
       />
 
       {/* Reach Out Modal */}
       <ReachOutModal
         isOpen={isReachOutOpen}
-        onClose={() => setIsReachOutOpen(false)}
-        onOpenSearch={() => setIsCommandPaletteOpen(true)}
+        onClose={closeReachOut}
+        onOpenSearch={openSearch}
       />
     </MotionConfig>
   );
