@@ -2,7 +2,6 @@
    typography, spacing, or behavior without explicit owner approval. */
 import type { Metadata } from "next";
 import { HorizontalLine } from "@/app/components/HorizontalLine";
-import React from "react";
 import { ScrapbookBento } from "@/app/components/ScrapbookBento";
 import { ShadowBox } from "@/app/components/ShadowBox";
 import { Resume } from "app/components/Resume";
