@@ -38,6 +38,7 @@ export function TestimonialSubmitModal({
   const prefersReducedMotion = useReducedMotion();
   const formRef = useRef<HTMLFormElement>(null);
   const firstFieldRef = useRef<HTMLInputElement>(null);
+  const formErrorRef = useRef<HTMLParagraphElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const handleCloseRef = useRef<() => void>(() => {});
   const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -123,6 +124,16 @@ export function TestimonialSubmitModal({
       } else {
         setFormError(result.error);
         if (result.fieldErrors) setFieldErrors(result.fieldErrors);
+        requestAnimationFrame(() => {
+          const firstInvalid = (["name", "role", "email", "headline", "quote"] as const)
+            .find((field) => result.fieldErrors?.[field]);
+          if (firstInvalid) {
+            const field = formRef.current?.elements.namedItem(firstInvalid);
+            if (field instanceof HTMLElement) field.focus();
+          } else {
+            formErrorRef.current?.focus();
+          }
+        });
       }
     });
   };
@@ -389,7 +400,9 @@ export function TestimonialSubmitModal({
 
                   {formError && (
                     <p
+                      ref={formErrorRef}
                       role="alert"
+                      tabIndex={-1}
                       className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-sm text-red-600 dark:text-red-400"
                     >
                       {formError}
