@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { BentoCard } from "./BentoCard";
 
@@ -49,6 +49,7 @@ const levelClasses = [
 ];
 
 export function StatsBento({ height = "h-[220px]" }: { height?: string }) {
+  const reduced = useReducedMotion();
   const [cols, setCols] = useState(DEFAULT_COLS);
   const [rows, setRows] = useState(DEFAULT_ROWS);
   const areaRef = useRef<HTMLDivElement | null>(null);
@@ -80,7 +81,7 @@ export function StatsBento({ height = "h-[220px]" }: { height?: string }) {
         <div className="relative z-20 text-center">
           <motion.h2
             className="text-base font-medium text-text-primary"
-            initial={{ opacity: 0, y: -5 }}
+            initial={reduced ? false : { opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
@@ -88,7 +89,7 @@ export function StatsBento({ height = "h-[220px]" }: { height?: string }) {
           </motion.h2>
           <motion.p
             className="mt-1 text-sm text-text-secondary md:text-base"
-            initial={{ opacity: 0, y: -5 }}
+            initial={reduced ? false : { opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.1 }}
           >
@@ -118,7 +119,7 @@ export function StatsBento({ height = "h-[220px]" }: { height?: string }) {
                   "rounded-[3px] ring-1 ring-inset ring-black/[0.04] transition-colors duration-500 ease-out motion-reduce:transition-none dark:ring-white/[0.04] " +
                   levelClasses[level]
                 }
-                initial={{ opacity: 0, scale: 0.6 }}
+                initial={reduced ? false : { opacity: 0, scale: 0.6 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{
                   duration: 0.25,

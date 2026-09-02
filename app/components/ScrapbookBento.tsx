@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useClickAnyWhere, useMediaQuery } from "usehooks-ts";
 
 import { cn } from "../lib/utils";
@@ -53,6 +53,7 @@ function Sticker({
   caption?: string;
   className?: string;
 }) {
+  const reduced = useReducedMotion();
   // Refs + live measurement of the sticker's on-screen position
   const itemRef = useRef<HTMLDivElement | null>(null);
 
@@ -126,21 +127,23 @@ function Sticker({
      a gentle 1.1x lift with the tilt kept intact, so the sticker never
      "snaps straight" before its caption appears. Springs are tuned for a
      quick, non-wobbly settle (transform-only -> GPU composited, 60fps). */
-  const liftTransition = {
-    type: "spring" as const,
-    stiffness: 400,
-    damping: 26,
-    mass: 0.7,
-  };
+  const liftTransition = reduced
+    ? { duration: 0 }
+    : {
+        type: "spring" as const,
+        stiffness: 400,
+        damping: 26,
+        mass: 0.7,
+      };
   const stickerVariants = {
     default: { scale: 1, transition: liftTransition },
     modal: {
-      scale: 1.1,
+      scale: reduced ? 1 : 1.1,
       zIndex: 1000,
       transition: liftTransition,
     },
     dragging: {
-      scale: 1.1,
+      scale: reduced ? 1 : 1.1,
       zIndex: 1000,
       transition: liftTransition,
     },
@@ -151,9 +154,9 @@ function Sticker({
       ref={itemRef}
       variants={{
         hidden: {
-          opacity: 0,
-          scale: 0.9,
-          y: 10,
+          opacity: reduced ? 1 : 0,
+          scale: reduced ? 1 : 0.9,
+          y: reduced ? initialY : 10,
         },
         shown: {
           opacity: 1,
@@ -187,7 +190,7 @@ function Sticker({
         className={cn(
           "flex-shrink-1 relative h-fit min-w-[96px] will-change-transform drop-shadow-lg",
         )}
-        drag={!matches}
+        drag={!matches && !reduced}
         dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
         dragTransition={{
           power: 0.1,
@@ -220,24 +223,38 @@ function Sticker({
         {caption && caption.length > 0 && isCaptionVisible && (
           <motion.div
             key="caption"
-            initial={{ opacity: 0, y: -6, scale: 0.92, rotate: captionTilt }}
-            animate={{ opacity: 1, y: 0, scale: 1, rotate: captionTilt }}
+            initial={
+              reduced
+                ? { opacity: 0 }
+                : { opacity: 0, y: -6, scale: 0.92, rotate: captionTilt }
+            }
+            animate={
+              reduced
+                ? { opacity: 1 }
+                : { opacity: 1, y: 0, scale: 1, rotate: captionTilt }
+            }
             exit={{
               opacity: 0,
-              y: -6,
-              scale: 0.95,
-              rotate: captionTilt,
-              transition: { duration: 0.14, ease: "easeIn" },
+              ...(reduced
+                ? {}
+                : { y: -6, scale: 0.95, rotate: captionTilt }),
+              transition: reduced
+                ? { duration: 0 }
+                : { duration: 0.14, ease: "easeIn" },
             }}
             /* Pop-in: springy but critically damped enough to never jitter.
                Only opacity + transforms animate -> compositor-only, 60fps. */
-            transition={{
-              type: "spring",
-              stiffness: 480,
-              damping: 32,
-              mass: 0.7,
-              opacity: { duration: 0.16, ease: "easeOut" },
-            }}
+            transition={
+              reduced
+                ? { duration: 0 }
+                : {
+                    type: "spring",
+                    stiffness: 480,
+                    damping: 32,
+                    mass: 0.7,
+                    opacity: { duration: 0.16, ease: "easeOut" },
+                  }
+            }
             style={captionPos}
             /* 24px anchor gap: ~12px absorbs the sticker 1.1x lift scale,
                the rest is clean air; also acts as the hover bridge */
@@ -258,14 +275,17 @@ function Sticker({
 }
 
 export function ScrapbookBento({ className }: { className?: string }) {
+  const reduced = useReducedMotion();
   const container = {
     hidden: { opacity: 0 },
     shown: {
       opacity: 1,
-      transition: {
-        delayChildren: 0,
-        staggerChildren: 0.1,
-      },
+      transition: reduced
+        ? { duration: 0 }
+        : {
+            delayChildren: 0,
+            staggerChildren: 0.1,
+          },
     },
   };
 
@@ -294,7 +314,7 @@ export function ScrapbookBento({ className }: { className?: string }) {
       >
         <motion.div
           variants={container}
-          initial="hidden"
+          initial={reduced ? false : "hidden"}
           animate="shown"
           className="flex h-full w-full flex-wrap content-center items-center justify-center gap-x-5 gap-y-1 px-6 md:flex-nowrap md:gap-5 md:px-8 lg:gap-4 lg:px-8 xl:gap-6 xl:px-10"
         >
