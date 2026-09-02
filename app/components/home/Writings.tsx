@@ -167,7 +167,7 @@ export function Writings({
               <h3 className="line-clamp-2 break-words font-display text-2xl font-medium leading-tight text-text-primary">
                 {featured.title}
               </h3>
-              <p className="mt-2.5 line-clamp-2 break-words text-sm leading-relaxed text-text-secondary">
+              <p className="mt-2.5 line-clamp-2 break-words text-[15px] leading-relaxed text-text-secondary">
                 {featured.summary}
               </p>
               <div className="mt-auto flex items-center justify-between gap-3 pt-6">
@@ -235,7 +235,7 @@ export function Writings({
                       <h3 className="line-clamp-2 break-words font-display text-lg font-medium leading-tight text-text-primary sm:text-xl lg:text-[22px]">
                         {post.title}
                       </h3>
-                      <p className="mt-1.5 line-clamp-2 break-words text-sm leading-relaxed text-text-secondary lg:line-clamp-4">
+                      <p className="mt-1.5 line-clamp-2 break-words text-[15px] leading-relaxed text-text-secondary lg:line-clamp-4">
                         {post.summary}
                       </p>
                       <div className="mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
