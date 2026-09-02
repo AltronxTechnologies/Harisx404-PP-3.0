@@ -15,9 +15,22 @@ function LiveClock({ timeZone }: { timeZone: string }) {
   const [now, setNow] = useState<Date | null>(null);
 
   useEffect(() => {
-    setNow(new Date());
-    const timer = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(timer);
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    let timer: ReturnType<typeof setInterval> | null = null;
+    const sync = () => {
+      if (timer) clearInterval(timer);
+      timer = null;
+      if (desktop.matches) {
+        setNow(new Date());
+        timer = setInterval(() => setNow(new Date()), 1000);
+      }
+    };
+    sync();
+    desktop.addEventListener("change", sync);
+    return () => {
+      desktop.removeEventListener("change", sync);
+      if (timer) clearInterval(timer);
+    };
   }, []);
 
   let time = "--:--:--";
