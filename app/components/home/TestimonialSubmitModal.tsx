@@ -39,6 +39,14 @@ export function TestimonialSubmitModal({
   const firstFieldRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const handleCloseRef = useRef<() => void>(() => {});
+  const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(
+    () => () => {
+      if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+    },
+    [],
+  );
 
   // Close on Escape; trap Tab inside the dialog; lock body scroll;
   // restore focus to the trigger element on close (WAI-ARIA dialog).
@@ -116,13 +124,15 @@ export function TestimonialSubmitModal({
   const handleClose = () => {
     onClose();
     // Reset after the exit animation so reopening gives a fresh form.
-    setTimeout(() => {
+    if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+    resetTimerRef.current = setTimeout(() => {
       setSubmitted(false);
       setFormError("");
       setFieldErrors({});
       setHeadlineLen(0);
       setQuoteLen(0);
       formRef.current?.reset();
+      resetTimerRef.current = null;
     }, 250);
   };
   handleCloseRef.current = handleClose;
