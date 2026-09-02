@@ -73,7 +73,7 @@ export default async function AboutPage() {
               AI
             </h1>
             <SectionHeading kicker="About me" className="mx-auto max-w-2xl">
-              {"Developing modern solutions across "}
+              {"Building solutions across "}
               <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
                 web, security &amp; AI.
               </span>
