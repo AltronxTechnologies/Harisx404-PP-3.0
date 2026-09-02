@@ -324,6 +324,7 @@ export function SearchModal({
       }
     };
     const previouslyFocused = document.activeElement as HTMLElement | null;
+    const currentDialog = dialogRef.current;
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keydown", trap);
     document.body.classList.add("modal-open");
@@ -331,7 +332,12 @@ export function SearchModal({
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keydown", trap);
       document.body.classList.remove("modal-open");
-      previouslyFocused?.focus?.();
+      queueMicrotask(() => {
+        const anotherDialog = Array.from(
+          document.querySelectorAll('[role="dialog"][aria-modal="true"]'),
+        ).some((dialog) => dialog !== currentDialog);
+        if (!anotherDialog) previouslyFocused?.focus?.();
+      });
     };
   }, [isOpen, onClose]);
 
