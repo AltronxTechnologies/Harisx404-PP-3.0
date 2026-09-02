@@ -102,7 +102,7 @@ export default async function AboutPage() {
           <GridWrapper>
             <div className="px-4 xl:px-0">
               <SectionHeading kicker="Experience" className="mx-auto max-w-2xl">
-                {"A timeline of my professional experience and "}
+                {"A timeline of my "}
                 <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
                   technical journey.
                 </span>
@@ -144,7 +144,7 @@ export default async function AboutPage() {
                 <p className="mb-3 w-full lg:max-w-xl font-mono text-xs font-medium uppercase tracking-[0.2em] text-text-secondary">
                   2022 — 2026 · University of Malakand
                 </p>
-                <h2 className="mb-4 w-full lg:max-w-xl text-balance font-display text-[22px] font-semibold leading-tight tracking-tight text-text-primary">
+                <h2 className="mb-4 w-full lg:max-w-xl text-balance font-display text-2xl font-semibold leading-tight tracking-tight text-text-primary">
                   B.S. in Information Technology
                 </h2>
                 <p className="mb-6 w-full lg:max-w-xl break-words text-base leading-relaxed text-text-secondary">
@@ -184,7 +184,7 @@ export default async function AboutPage() {
                 <p className="mb-3 w-full lg:max-w-xl font-mono text-xs font-medium uppercase tracking-[0.2em] text-text-secondary">
                   KPITB · University of Malakand
                 </p>
-                <h2 className="mb-4 w-full lg:max-w-xl text-balance font-display text-[22px] font-semibold leading-tight tracking-tight text-text-primary">
+                <h2 className="mb-4 w-full lg:max-w-xl text-balance font-display text-2xl font-semibold leading-tight tracking-tight text-text-primary">
                   KPITB AI/ML Training Program
                 </h2>
                 <p className="mb-6 w-full lg:max-w-xl break-words text-base leading-relaxed text-text-secondary">
