@@ -125,6 +125,18 @@ export function SearchModal({
   const [searchError, setSearchError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
 
+  useEffect(() => {
+    if (isOpen) return;
+    const timer = setTimeout(() => {
+      setQuery("");
+      setResults([]);
+      setIsSearching(false);
+      setSearchError(null);
+      setHasSearched(false);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [isOpen]);
+
   // Rotating placeholder — cycles while the input is empty
   const PLACEHOLDERS = useMemo(
     () => [
