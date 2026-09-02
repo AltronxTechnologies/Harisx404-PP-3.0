@@ -49,7 +49,7 @@ function ReadCta({ compact = false }: { compact?: boolean }) {
       )}
       <span
         aria-hidden
-        className="inline-block transition-transform duration-300 group-hover:translate-x-1"
+        className="inline-block transition-transform duration-300 group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
       >
         →
       </span>
@@ -141,12 +141,12 @@ export function Writings({
                   sizes={
                     hasCompanions ? "(max-width: 1024px) 100vw, 60vw" : "100vw"
                   }
-                  className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                  className="object-cover transition-transform duration-500 ease-out group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                 />
               ) : (
                 <>
                   <div
-                    className={`h-full w-full bg-gradient-to-br transition-transform duration-500 ease-out group-hover:scale-105 ${covers[0]}`}
+                    className={`h-full w-full bg-gradient-to-br transition-transform duration-500 ease-out group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100 ${covers[0]}`}
                   />
                   <span
                     aria-hidden
@@ -216,7 +216,7 @@ export function Writings({
                             alt=""
                             fill
                             sizes="140px"
-                            className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                            className="object-cover transition-transform duration-500 ease-out group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                           />
                           {/* Subtle inset ring + scrim so tall crops read as a
                               deliberate cover panel rather than a raw photo. */}
@@ -227,7 +227,7 @@ export function Writings({
                         </>
                       ) : (
                         <div
-                          className={`h-full w-full bg-gradient-to-br transition-transform duration-500 ease-out group-hover:scale-105 ${covers[(i + 1) % covers.length]}`}
+                          className={`h-full w-full bg-gradient-to-br transition-transform duration-500 ease-out group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100 ${covers[(i + 1) % covers.length]}`}
                         />
                       )}
                     </div>
