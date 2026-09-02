@@ -811,45 +811,48 @@ blockquote p {
    framer-motion element so animated transforms don't override it).
    Fine-grained steps so browser zoom / OS scaling transitions stay smooth. */
 .reachout-scale {
+  --reachout-height-scale: 1;
+  --reachout-width-scale: 1;
   transform-origin: top center;
+  transform: scale(var(--reachout-height-scale));
 }
 @media (max-height: 940px) {
-  .reachout-scale { transform: scale(0.96); }
+  .reachout-scale { --reachout-height-scale: 0.96; }
 }
 @media (max-height: 880px) {
-  .reachout-scale { transform: scale(0.92); }
+  .reachout-scale { --reachout-height-scale: 0.92; }
 }
 @media (max-height: 820px) {
-  .reachout-scale { transform: scale(0.87); }
+  .reachout-scale { --reachout-height-scale: 0.87; }
 }
 @media (max-height: 770px) {
-  .reachout-scale { transform: scale(0.82); }
+  .reachout-scale { --reachout-height-scale: 0.82; }
 }
 @media (max-height: 720px) {
-  .reachout-scale { transform: scale(0.77); }
+  .reachout-scale { --reachout-height-scale: 0.77; }
 }
 @media (max-height: 680px) {
-  .reachout-scale { transform: scale(0.72); }
+  .reachout-scale { --reachout-height-scale: 0.72; }
 }
 @media (max-height: 645px) {
-  .reachout-scale { transform: scale(0.67); }
+  .reachout-scale { --reachout-height-scale: 0.67; }
 }
 @media (max-height: 610px) {
-  .reachout-scale { transform: scale(0.62); }
+  .reachout-scale { --reachout-height-scale: 0.62; }
 }
 /* Very short screens (landscape phones): keep shrinking so the card never
    clips off the top of the viewport. */
 @media (max-height: 560px) {
-  .reachout-scale { transform: scale(0.55); }
+  .reachout-scale { --reachout-height-scale: 0.55; }
 }
 @media (max-height: 500px) {
-  .reachout-scale { transform: scale(0.48); }
+  .reachout-scale { --reachout-height-scale: 0.48; }
 }
 @media (max-height: 440px) {
-  .reachout-scale { transform: scale(0.42); }
+  .reachout-scale { --reachout-height-scale: 0.42; }
 }
 @media (max-height: 390px) {
-  .reachout-scale { transform: scale(0.37); }
+  .reachout-scale { --reachout-height-scale: 0.37; }
 }
 /* Phones: render the modal card as an exact miniature of the laptop layout.
    The card keeps its full 660px desktop layout and is scaled down to fit the
@@ -860,38 +863,39 @@ blockquote p {
     width: 660px;
     position: relative;
     left: 50%;
-    transform: translateX(-50%) scale(0.88);
+    --reachout-width-scale: 0.88;
+    transform: translateX(-50%) scale(min(var(--reachout-width-scale), var(--reachout-height-scale)));
   }
 }
 @media (max-width: 600px) {
-  .reachout-scale { transform: translateX(-50%) scale(0.82); }
+  .reachout-scale { --reachout-width-scale: 0.82; }
 }
 @media (max-width: 560px) {
-  .reachout-scale { transform: translateX(-50%) scale(0.76); }
+  .reachout-scale { --reachout-width-scale: 0.76; }
 }
 @media (max-width: 520px) {
-  .reachout-scale { transform: translateX(-50%) scale(0.70); }
+  .reachout-scale { --reachout-width-scale: 0.70; }
 }
 @media (max-width: 480px) {
-  .reachout-scale { transform: translateX(-50%) scale(0.645); }
+  .reachout-scale { --reachout-width-scale: 0.645; }
 }
 @media (max-width: 440px) {
-  .reachout-scale { transform: translateX(-50%) scale(0.60); }
+  .reachout-scale { --reachout-width-scale: 0.60; }
 }
 @media (max-width: 412px) {
-  .reachout-scale { transform: translateX(-50%) scale(0.575); }
+  .reachout-scale { --reachout-width-scale: 0.575; }
 }
 @media (max-width: 390px) {
-  .reachout-scale { transform: translateX(-50%) scale(0.555); }
+  .reachout-scale { --reachout-width-scale: 0.555; }
 }
 @media (max-width: 375px) {
-  .reachout-scale { transform: translateX(-50%) scale(0.53); }
+  .reachout-scale { --reachout-width-scale: 0.53; }
 }
 @media (max-width: 360px) {
-  .reachout-scale { transform: translateX(-50%) scale(0.49); }
+  .reachout-scale { --reachout-width-scale: 0.49; }
 }
 @media (max-width: 330px) {
-  .reachout-scale { transform: translateX(-50%) scale(0.45); }
+  .reachout-scale { --reachout-width-scale: 0.45; }
 }
 
 /* Hero headline: living gradient — the color slowly drifts through the text */
