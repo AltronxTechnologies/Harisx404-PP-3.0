@@ -26,7 +26,7 @@ function FullstackVisual({ still }: SceneProps) {
   return (
     <div className="relative flex h-full w-full items-center justify-center font-mono">
       <motion.span
-        initial={{ x: -16, opacity: 0 }}
+        initial={still ? false : { x: -16, opacity: 0 }}
         animate={still ? { x: 0, opacity: 1 } : { x: 0, opacity: 1, y: [0, -7, 0] }}
         transition={{
           x: { duration: 0.45, ease: "easeOut" },
@@ -38,7 +38,7 @@ function FullstackVisual({ still }: SceneProps) {
         {"<"}
       </motion.span>
       <motion.span
-        initial={{ scale: 0.6, opacity: 0 }}
+        initial={still ? false : { scale: 0.6, opacity: 0 }}
         animate={still ? { scale: 1, opacity: 1 } : { scale: 1, opacity: 1, rotate: [8, -8, 8] }}
         transition={{
           scale: { duration: 0.45, delay: 0.15, ease: "easeOut" },
@@ -50,7 +50,7 @@ function FullstackVisual({ still }: SceneProps) {
         /
       </motion.span>
       <motion.span
-        initial={{ x: 16, opacity: 0 }}
+        initial={still ? false : { x: 16, opacity: 0 }}
         animate={still ? { x: 0, opacity: 1 } : { x: 0, opacity: 1, y: [0, -7, 0] }}
         transition={{
           x: { duration: 0.45, ease: "easeOut" },
@@ -90,7 +90,7 @@ function CyberVisual({ still, reverse }: SceneProps) {
           <motion.div
             key={size}
             style={{ width: `${size}%`, height: `${size}%`, left: "50%", top: "50%" }}
-            initial={{ opacity: 0, scale: 0.6, x: "-50%", y: "-50%" }}
+            initial={still ? false : { opacity: 0, scale: 0.6, x: "-50%", y: "-50%" }}
             animate={{ opacity: 1, scale: 1, x: "-50%", y: "-50%" }}
             transition={{ duration: 0.4, delay: i * 0.12, ease: "easeOut" }}
             className="absolute rounded-full border border-sky-500/25 dark:border-sky-400/25"
@@ -101,7 +101,7 @@ function CyberVisual({ still, reverse }: SceneProps) {
         <div className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-sky-500/15 dark:bg-sky-400/15" />
         {/* rotating sweep — fades in after the rings build */}
         <motion.div
-          initial={{ opacity: 0 }}
+          initial={still ? false : { opacity: 0 }}
           animate={still ? { opacity: 1 } : { opacity: 1, rotate: reverse ? -360 : 360 }}
           transition={{
             opacity: { duration: 0.4, delay: 0.35 },
@@ -162,7 +162,7 @@ function AiVisual({ still }: SceneProps) {
             stroke="currentColor"
             strokeWidth="0.6"
             className="text-fuchsia-500/30 dark:text-fuchsia-400/30"
-            initial={{ pathLength: 0, opacity: 0 }}
+            initial={still ? false : { pathLength: 0, opacity: 0 }}
             animate={
               still
                 ? { pathLength: 1, opacity: 0.4 }
@@ -182,7 +182,7 @@ function AiVisual({ still }: SceneProps) {
             r={3.4}
             className="fill-violet-600 dark:fill-violet-400"
             style={{ transformBox: "fill-box", transformOrigin: "center" }}
-            initial={{ opacity: 0, scale: 0.5 }}
+            initial={still ? false : { opacity: 0, scale: 0.5 }}
             animate={
               still
                 ? { opacity: 1, scale: 1 }
@@ -214,14 +214,14 @@ function DataFlowVisual({ still, reverse }: SceneProps) {
         <div className="absolute left-8 right-8 top-1/2 h-px -translate-y-1/2 bg-gradient-to-r from-teal-500/30 via-emerald-500/40 to-teal-500/30" />
         {/* traveling packet */}
         <motion.span
-          initial={{ opacity: 0 }}
+          initial={still ? false : { opacity: 0 }}
           animate={still ? { opacity: 0 } : { left: reverse ? ["82%", "14%"] : ["14%", "82%"], opacity: [0, 1, 1, 0] }}
           transition={{ duration: 2.2, times: [0, 0.15, 0.85, 1], repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
           className="absolute top-1/2 size-2 -translate-y-1/2 rounded-full bg-emerald-500 shadow-[0_0_10px_2px_rgba(16,185,129,0.55)] dark:bg-emerald-300"
         />
         {/* client — browser dot */}
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
+          initial={still ? false : { opacity: 0, y: 12 }}
           animate={still ? { opacity: 1, y: 0 } : { opacity: 1, y: 0, scale: [1, 1.08, 1] }}
           transition={{
             opacity: { duration: 0.4 },
@@ -234,7 +234,7 @@ function DataFlowVisual({ still, reverse }: SceneProps) {
         </motion.div>
         {/* server — rounded slab with LEDs */}
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
+          initial={still ? false : { opacity: 0, y: 12 }}
           animate={still ? { opacity: 1, y: 0 } : { opacity: 1, y: 0, scale: [1, 1.08, 1] }}
           transition={{
             opacity: { duration: 0.4, delay: 0.15 },
@@ -256,7 +256,7 @@ function DataFlowVisual({ still, reverse }: SceneProps) {
         </motion.div>
         {/* database — stacked discs */}
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
+          initial={still ? false : { opacity: 0, y: 12 }}
           animate={still ? { opacity: 1, y: 0 } : { opacity: 1, y: 0, scale: [1, 1.08, 1] }}
           transition={{
             opacity: { duration: 0.4, delay: 0.3 },
@@ -283,7 +283,7 @@ function DeviceTrioVisual({ still }: SceneProps) {
     <div className="relative flex h-full w-full items-end justify-center gap-4 pb-6">
       {/* desktop */}
       <motion.div
-        initial={{ opacity: 0, y: 14 }}
+        initial={still ? false : { opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: "easeOut" }}
       >
@@ -304,7 +304,7 @@ function DeviceTrioVisual({ still }: SceneProps) {
       </motion.div>
       {/* tablet */}
       <motion.div
-        initial={{ opacity: 0, y: 14 }}
+        initial={still ? false : { opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, delay: 0.15, ease: "easeOut" }}
       >
@@ -325,7 +325,7 @@ function DeviceTrioVisual({ still }: SceneProps) {
       </motion.div>
       {/* phone */}
       <motion.div
-        initial={{ opacity: 0, y: 14 }}
+        initial={still ? false : { opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, delay: 0.3, ease: "easeOut" }}
       >
@@ -360,7 +360,7 @@ function ShieldCheckVisual({ still, reverse }: SceneProps) {
       />
       <motion.svg
         viewBox="0 0 24 24"
-        initial={{ scale: 0.8, opacity: 0 }}
+        initial={still ? false : { scale: 0.8, opacity: 0 }}
         animate={still ? { scale: 1, opacity: 1 } : { scale: 1, opacity: 1, y: [0, -4, 0] }}
         transition={{
           scale: { duration: 0.45, ease: "easeOut" },
@@ -416,7 +416,7 @@ function FingerprintVisual({ still }: SceneProps) {
               strokeDasharray={a.dash}
               transform={`rotate(${a.rot} 32 32)`}
               className="stroke-sky-600/70 dark:stroke-sky-300/70"
-              initial={{ opacity: 0 }}
+              initial={still ? false : { opacity: 0 }}
               animate={still ? { opacity: 0.7 } : { opacity: [0.25, 0.9, 0.25] }}
               transition={{ duration: 2.4, delay: i * 0.12, repeat: still ? 0 : Infinity, ease: "easeInOut" }}
             />
@@ -424,7 +424,7 @@ function FingerprintVisual({ still }: SceneProps) {
         </svg>
         {/* scan beam sweeping over the print */}
         <motion.div
-          initial={{ opacity: 0 }}
+          initial={still ? false : { opacity: 0 }}
           animate={still ? { opacity: 1 } : { opacity: 1, top: ["8%", "88%", "8%"] }}
           transition={{
             opacity: { duration: 0.4, delay: 0.5 },
@@ -443,7 +443,7 @@ function OrbitCoreVisual({ still, reverse }: SceneProps) {
     <div className="relative flex h-full w-full items-center justify-center">
       <motion.svg
         viewBox="0 0 120 120"
-        initial={{ scale: 0.85, opacity: 0 }}
+        initial={still ? false : { scale: 0.85, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.45, ease: "easeOut" }}
         className="h-full max-h-[132px] w-auto lg:max-h-[148px]"
@@ -507,7 +507,7 @@ function AiChipVisual({ still, reverse }: SceneProps) {
     <div className="relative flex h-full w-full items-center justify-center">
       <motion.svg
         viewBox="0 0 120 120"
-        initial={{ scale: 0.85, opacity: 0 }}
+        initial={still ? false : { scale: 0.85, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.45, ease: "easeOut" }}
         className="h-full max-h-[132px] w-auto lg:max-h-[148px]"
