@@ -276,7 +276,7 @@ function Highlights({
           {highlights.map((highlight, i) => (
             <li
               key={i}
-              className="flex text-base leading-6 text-text-secondary"
+              className="flex text-[15px] leading-6 text-text-secondary"
             >
               <span
                 aria-hidden
@@ -359,7 +359,7 @@ export function Resume({ experiences }: { experiences?: Experience[] }) {
                     </p>
                     <div className="mt-5 flex items-center gap-3.5">
                       {logoCard}
-                      <h3 className="break-words font-display text-2xl font-semibold leading-tight tracking-tight text-text-primary">
+                      <h3 className="break-words font-display text-2xl font-bold leading-tight tracking-tight text-text-primary">
                         {experience.organization}
                       </h3>
                     </div>
@@ -388,7 +388,7 @@ export function Resume({ experiences }: { experiences?: Experience[] }) {
                       </p>
                       <div className="mt-4 flex items-center gap-3">
                         {logoCard}
-                        <h3 className="break-words font-display text-2xl font-semibold leading-tight tracking-tight text-text-primary">
+                        <h3 className="break-words font-display text-2xl font-bold leading-tight tracking-tight text-text-primary">
                           {experience.organization}
                         </h3>
                       </div>
@@ -407,11 +407,11 @@ export function Resume({ experiences }: { experiences?: Experience[] }) {
                         ) : null}
                       </div>
                     </div>
-                    <h4 className="break-words font-display text-2xl font-semibold leading-tight tracking-tight text-text-primary">
+                    <h4 className="break-words font-display text-2xl font-bold leading-tight tracking-tight text-text-primary">
                       {experience.jobTitle}
                     </h4>
                     {experience.summary ? (
-                      <p className="mt-4 break-words text-base leading-relaxed text-text-secondary">
+                      <p className="mt-4 break-words text-[15px] leading-relaxed text-text-secondary">
                         {renderRich(experience.summary)}
                       </p>
                     ) : null}
