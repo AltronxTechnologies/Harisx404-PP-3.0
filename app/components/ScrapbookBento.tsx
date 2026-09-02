@@ -276,7 +276,9 @@ export function ScrapbookBento({ className }: { className?: string }) {
       showHoverGradient={false}
       hideOverflow={false}
     >
-      <h2 className="mb-2 font-medium text-text-primary">Behind the handle</h2>
+      <h2 className="mb-2 text-base font-medium text-text-primary">
+        Behind the handle
+      </h2>
       <div className="absolute inset-0 overflow-hidden rounded-2xl bg-[radial-gradient(#e5e7eb_1px,transparent_2px)] [background-size:14px_14px] [mask-image:radial-gradient(ellipse_80%_70%_at_50%_50%,black_40%,transparent_100%)] dark:bg-[radial-gradient(#333_1px,transparent_2px)]"></div>
       <div
         className={cn(

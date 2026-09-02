@@ -37,17 +37,17 @@ function intensityAt(i: number): number {
   return 4;
 }
 
-// Light + dark classes per intensity level (emerald ramp, theme-tuned)
+// Match the homepage activity chart: neutral history with emerald reserved
+// for the strongest, "live" activity level.
 const levelClasses = [
-  "bg-black/[0.05] dark:bg-white/[0.06]",
-  "bg-emerald-200 dark:bg-emerald-900/70",
-  "bg-emerald-300 dark:bg-emerald-700/80",
-  "bg-emerald-400 dark:bg-emerald-500/90",
-  "bg-emerald-500 dark:bg-emerald-400",
+  "bg-neutral-200 group-hover:bg-neutral-300 group-active:bg-neutral-300 dark:bg-white/[0.06] dark:group-hover:bg-white/[0.12] dark:group-active:bg-white/[0.12]",
+  "bg-neutral-300 group-hover:bg-neutral-400/70 group-active:bg-neutral-400/70 dark:bg-white/[0.12] dark:group-hover:bg-white/[0.20] dark:group-active:bg-white/[0.20]",
+  "bg-neutral-400/70 group-hover:bg-neutral-500/75 group-active:bg-neutral-500/75 dark:bg-white/[0.20] dark:group-hover:bg-white/[0.30] dark:group-active:bg-white/[0.30]",
+  "bg-neutral-500/75 group-hover:bg-neutral-600/80 group-active:bg-neutral-600/80 dark:bg-white/[0.30] dark:group-hover:bg-white/[0.42] dark:group-active:bg-white/[0.42]",
+  "bg-emerald-500/55 group-hover:bg-emerald-500/90 group-active:bg-emerald-500/90 dark:bg-emerald-400/45 dark:group-hover:bg-emerald-400/80 dark:group-active:bg-emerald-400/80",
 ];
 
 export function StatsBento({ height = "h-[220px]" }: { height?: string }) {
-  const [isHovered, setIsHovered] = useState(false);
   const [cols, setCols] = useState(DEFAULT_COLS);
   const [rows, setRows] = useState(DEFAULT_ROWS);
   const areaRef = useRef<HTMLDivElement | null>(null);
@@ -73,14 +73,11 @@ export function StatsBento({ height = "h-[220px]" }: { height?: string }) {
   const cells = Array.from({ length: cols * rows }, (_, i) => intensityAt(i));
 
   return (
-    <div
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <div>
       <BentoCard height={height} className="group" linkTo="/stats">
         {/* Header */}
         <motion.h2
-          className="relative z-10 font-medium text-text-primary"
+          className="relative z-10 text-base font-medium text-text-primary"
           initial={{ opacity: 0, y: -5 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
@@ -88,7 +85,7 @@ export function StatsBento({ height = "h-[220px]" }: { height?: string }) {
           Stats
         </motion.h2>
         <motion.p
-          className="relative z-10 mt-1 text-sm text-text-secondary"
+          className="relative z-10 mt-1 text-sm text-text-secondary md:text-base"
           initial={{ opacity: 0, y: -5 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.1 }}
@@ -115,11 +112,8 @@ export function StatsBento({ height = "h-[220px]" }: { height?: string }) {
               <motion.div
                 key={`${cols}x${rows}-${i}`}
                 className={
-                  "rounded-[3px] ring-1 ring-inset ring-black/[0.04] transition-[filter] duration-300 dark:ring-white/[0.04] " +
-                  levelClasses[level] +
-                  (isHovered && level > 0
-                    ? " brightness-110 saturate-[1.15]"
-                    : "")
+                  "rounded-[3px] ring-1 ring-inset ring-black/[0.04] transition-colors duration-500 ease-out motion-reduce:transition-none dark:ring-white/[0.04] " +
+                  levelClasses[level]
                 }
                 initial={{ opacity: 0, scale: 0.6 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -134,11 +128,11 @@ export function StatsBento({ height = "h-[220px]" }: { height?: string }) {
         </div>
 
         {/* Footer: timeframe + legend */}
-        <div className="absolute inset-x-6 bottom-3 flex items-center justify-between">
-          <span className="font-mono text-[9px] uppercase tracking-wider text-text-secondary/60">
+        <div className="absolute bottom-3 left-6 right-14 flex items-center justify-between">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-text-secondary">
             Last 12 months
           </span>
-          <span className="flex items-center gap-1 font-mono text-[9px] uppercase tracking-wider text-text-secondary/60">
+          <span className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-text-secondary">
             less
             {[0, 1, 2, 3, 4].map((l) => (
               <span
