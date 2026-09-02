@@ -162,10 +162,14 @@ export default function Navbar() {
     };
   }, [isDropdownOpen]);
 
-  let activeTab = "Home";
+  let activeTab: string | null = pathname === "/" ? "Home" : null;
   if (pathname === "/about" || pathname.startsWith("/about")) activeTab = "About";
   else if (pathname === "/projects" || pathname.startsWith("/projects")) activeTab = "Projects";
   else if (pathname === "/blog" || pathname.startsWith("/blog")) activeTab = "Blog";
+  const isRouteActive = (route: string) =>
+    pathname === route || pathname.startsWith(`${route}/`);
+  const isMoreActive = ["/community-wall", "/stats", "/credentials", "/contact", "/links"]
+    .some(isRouteActive);
 
   return (
     <MotionConfig reducedMotion="user">
@@ -333,6 +337,7 @@ export default function Navbar() {
                             <Link
                               href={link.href}
                               prefetch={true}
+                              aria-current={activeTab === link.name ? "page" : undefined}
                               className={`relative z-10 block px-4 py-1.5 font-normal text-sm transition-colors duration-150 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 dark:focus-visible:ring-white/25 ${
                                 activeTab === link.name
                                   ? "text-neutral-950 dark:text-white font-medium"
@@ -406,8 +411,8 @@ export default function Navbar() {
                               }
                             }}
                             className={`relative z-10 flex cursor-pointer select-none items-center gap-1 px-4 py-1.5 font-normal text-sm transition-colors duration-150 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 dark:focus-visible:ring-white/25 ${
-                              isDropdownOpen
-                                ? "text-neutral-950 dark:text-white"
+                              isDropdownOpen || isMoreActive
+                                ? "text-neutral-950 dark:text-white font-medium"
                                 : "text-neutral-700 hover:text-neutral-950 dark:text-white/70 dark:hover:text-white"
                             }`}
                           >
@@ -518,6 +523,7 @@ export default function Navbar() {
                           <Link 
                             ref={firstDropdownLinkRef}
                             href="/community-wall" 
+                            aria-current={isRouteActive("/community-wall") ? "page" : undefined}
                             onClick={() => setIsDropdownOpen(false)}
                             className="group relative flex h-full w-full flex-col justify-end overflow-hidden rounded-2xl bg-neutral-900 p-4 ring-1 ring-black/5 dark:ring-white/10 hover:ring-black/15 dark:hover:ring-white/25 transition-all duration-300 shadow-sm hover:shadow-md"
                           >
@@ -542,6 +548,7 @@ export default function Navbar() {
                         >
                           <Link 
                             href="/stats" 
+                            aria-current={isRouteActive("/stats") ? "page" : undefined}
                             onClick={() => setIsDropdownOpen(false)}
                             className="group relative flex h-full w-full flex-col justify-end overflow-hidden rounded-2xl bg-neutral-900 p-4 ring-1 ring-black/5 dark:ring-white/10 hover:ring-black/15 dark:hover:ring-white/25 transition-all duration-300 shadow-sm hover:shadow-md"
                           >
@@ -566,6 +573,7 @@ export default function Navbar() {
                         >
                           <Link 
                             href="/credentials" 
+                            aria-current={isRouteActive("/credentials") ? "page" : undefined}
                             onClick={() => setIsDropdownOpen(false)}
                             className="flex-1 flex items-center gap-3 rounded-2xl bg-neutral-100/90 dark:bg-[#1a1a1a] p-3 hover:bg-neutral-200/90 dark:hover:bg-[#252525] transition-all duration-200 group border border-neutral-200/70 dark:border-white/5 shadow-xs"
                           >
@@ -582,6 +590,7 @@ export default function Navbar() {
 
                           <Link 
                             href="/contact" 
+                            aria-current={isRouteActive("/contact") ? "page" : undefined}
                             onClick={() => setIsDropdownOpen(false)}
                             className="flex-1 flex items-center gap-3 rounded-2xl bg-neutral-100/90 dark:bg-[#1a1a1a] p-3 hover:bg-neutral-200/90 dark:hover:bg-[#252525] transition-all duration-200 group border border-neutral-200/70 dark:border-white/5 shadow-xs"
                           >
@@ -598,6 +607,7 @@ export default function Navbar() {
 
                           <Link 
                             href="/links" 
+                            aria-current={isRouteActive("/links") ? "page" : undefined}
                             onClick={() => setIsDropdownOpen(false)}
                             className="flex-1 flex items-center gap-3 rounded-2xl bg-neutral-100/90 dark:bg-[#1a1a1a] p-3 hover:bg-neutral-200/90 dark:hover:bg-[#252525] transition-all duration-200 group border border-neutral-200/70 dark:border-white/5 shadow-xs"
                           >
