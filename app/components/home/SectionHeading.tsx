@@ -12,6 +12,7 @@ export function SectionHeading({
   children,
   align = "center",
   className = "",
+  headingId,
   // Kept for backwards compatibility with existing call sites.
   animateWords: _animateWords = false,
 }: {
@@ -19,6 +20,7 @@ export function SectionHeading({
   children: ReactNode;
   align?: "center" | "left";
   className?: string;
+  headingId?: string;
   animateWords?: boolean;
 }) {
   const centered = align === "center";
@@ -28,6 +30,7 @@ export function SectionHeading({
         {kicker}
       </p>
       <h2
+        id={headingId}
         className={`heading-glow mt-4 max-w-xl text-balance [font-family:var(--font-instrument-serif),serif] text-5xl font-medium leading-none tracking-tight text-text-primary md:text-[56px] md:tracking-[-1.5px] ${
           centered ? "mx-auto" : ""
         }`}
