@@ -50,10 +50,10 @@ export default async function Page() {
       {/* Hero — reference: super-title inside h1 + Instrument Serif headline
           with shimmering gradient accent word */}
       <h1 className="relative z-[2] mx-auto mt-24 mb-14 max-w-xl text-balance text-center font-medium text-5xl tracking-tight [text-shadow:rgba(255,255,255,0.05)_0px_4px_8px,rgba(255,255,255,0.2)_0px_8px_30px] max-sm:px-5 md:mt-28 md:text-6xl">
-        <p className="mb-4 font-mono font-normal text-black/80 text-xs uppercase tracking-widest dark:text-white/70">
+        <p className="mb-4 font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
           The wall remembers
         </p>
-        <span className="inline-block text-neutral-900 dark:text-white [font-family:var(--font-instrument-serif),serif]">
+        <span className="inline-block text-text-primary [font-family:var(--font-instrument-serif),serif]">
           Words That Echo{" "}
           <span
             className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]"
