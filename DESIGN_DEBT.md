@@ -211,12 +211,12 @@ Also `links/page.tsx:59,68` re-declare the mail/globe paths already in
 - `app/components/blog/FeaturedBlogCard.tsx` — the live one.
 - Two files share the basename `FeaturedBlogCard.tsx`.
 
-### Search triggers — 5 implementations
+### Search triggers
 `Navbar.tsx` (Lucide `size-[18px]`) · `Navbar.tsx` (mobile pill) ·
-`ReachOutModal.tsx:194` (lucide `size-8`) · `blog/BlogFilterBar.tsx:69` (Phosphor `size-4`) ·
+`ReachOutModal.tsx:194` (Lucide `size-8`) · `blog/BlogFilterBar.tsx:69` (Lucide `size-4`) ·
 `projects/ProjectsIndex.tsx:264` (bespoke `size-4`) · `SearchModal.tsx:356` (lucide `size-7`).
-The Navbar and modal launchers now share Lucide. BlogFilterBar and ProjectsIndex
-still use separate glyph implementations.
+The Navbar, modal, and BlogFilterBar launchers now share Lucide. ProjectsIndex
+still uses a separate glyph implementation.
 
 ### `DoubleArrow` fork
 Shared: `app/components/home/DoubleArrow.tsx:6`. Fork with different animation
