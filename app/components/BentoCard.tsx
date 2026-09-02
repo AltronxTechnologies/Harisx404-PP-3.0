@@ -57,7 +57,10 @@ export function BentoCard({
 
   if (linkTo) {
     return linkTo.startsWith("/") ? (
-      <Link href={linkTo} className="block h-full">
+      <Link
+        href={linkTo}
+        className="block h-full rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary"
+      >
         {cardContent}
       </Link>
     ) : (
@@ -65,7 +68,7 @@ export function BentoCard({
         href={linkTo}
         target="_blank"
         rel="noopener noreferrer"
-        className="block h-full"
+        className="block h-full rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary"
       >
         {cardContent}
       </a>
