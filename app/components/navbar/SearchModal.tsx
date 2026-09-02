@@ -158,10 +158,11 @@ export function SearchModal({
     const isDesktop =
       window.matchMedia("(min-width: 640px)").matches &&
       window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-    if (isDesktop) {
-      const id = setTimeout(() => inputRef.current?.focus(), 50);
-      return () => clearTimeout(id);
-    }
+    const id = setTimeout(() => {
+      if (isDesktop) inputRef.current?.focus();
+      else dialogRef.current?.focus();
+    }, 50);
+    return () => clearTimeout(id);
   }, [isOpen]);
 
   // Debounced content search via /api/ai/search
@@ -275,7 +276,7 @@ export function SearchModal({
       if (e.shiftKey && (active === first || !root.contains(active))) {
         e.preventDefault();
         last.focus();
-      } else if (!e.shiftKey && active === last) {
+      } else if (!e.shiftKey && (active === last || !root.contains(active))) {
         e.preventDefault();
         first.focus();
       }
