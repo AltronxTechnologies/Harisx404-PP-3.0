@@ -78,7 +78,7 @@ export default async function AboutPage() {
                 web, security &amp; AI.
               </span>
             </SectionHeading>
-            <div className="mx-auto mt-14 max-w-3xl space-y-5 hyphens-auto break-words text-justify text-pretty text-sm leading-relaxed text-text-secondary lg:max-w-5xl xl:max-w-6xl">
+            <div className="mx-auto mt-14 max-w-3xl space-y-5 hyphens-auto break-words text-justify text-pretty text-base leading-relaxed text-text-secondary lg:max-w-5xl xl:max-w-6xl">
               <p>
                 I&apos;m{" "}
                 <strong className="font-medium text-text-primary">
@@ -171,7 +171,7 @@ export default async function AboutPage() {
                 <h2 className="mb-4 w-full lg:max-w-xl text-balance font-display text-[22px] font-semibold leading-tight tracking-tight text-text-primary">
                   B.S. in Information Technology
                 </h2>
-                <p className="mb-6 w-full lg:max-w-xl break-words text-sm leading-relaxed text-text-secondary">
+                <p className="mb-6 w-full lg:max-w-xl break-words text-base leading-relaxed text-text-secondary">
                   I completed my Bachelor of Science in Information
                   Technology at the University of Malakand (2022 — 2026),
                   graduated with a 3.5/4.0 CGPA and a strong foundation in
@@ -211,7 +211,7 @@ export default async function AboutPage() {
                 <h2 className="mb-4 w-full lg:max-w-xl text-balance font-display text-[22px] font-semibold leading-tight tracking-tight text-text-primary">
                   KPITB AI/ML Training Program
                 </h2>
-                <p className="mb-6 w-full lg:max-w-xl break-words text-sm leading-relaxed text-text-secondary">
+                <p className="mb-6 w-full lg:max-w-xl break-words text-base leading-relaxed text-text-secondary">
                   I completed a hands-on AI/ML training program offered by
                   KPITB at the University of Malakand, focused on practical
                   Artificial Intelligence and Machine Learning development.
