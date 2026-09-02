@@ -74,7 +74,7 @@ export default async function AboutPage() {
             </h1>
             <SectionHeading kicker="About me" className="mx-auto max-w-2xl">
               {"Developing modern solutions across "}
-              <span className="text-gradient-animated font-display italic">
+              <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
                 web, security &amp; AI.
               </span>
             </SectionHeading>
@@ -103,7 +103,7 @@ export default async function AboutPage() {
             <div className="px-4 xl:px-0">
               <SectionHeading kicker="Experience" className="mx-auto max-w-2xl">
                 {"A timeline of my professional experience and "}
-                <span className="text-gradient-animated font-display italic">
+                <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
                   technical journey.
                 </span>
               </SectionHeading>
@@ -120,7 +120,7 @@ export default async function AboutPage() {
             <div className="px-4 xl:px-0">
               <SectionHeading kicker="Education" className="mx-auto max-w-2xl">
                 {"My academic journey and the "}
-                <span className="text-gradient-animated font-display italic">
+                <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
                   milestones behind it.
                 </span>
               </SectionHeading>
@@ -213,7 +213,7 @@ export default async function AboutPage() {
           <GridWrapper>
             <SectionHeading kicker="Beyond the resume" className="mx-auto max-w-2xl">
               One handle, live numbers &amp; the{" "}
-              <span className="text-gradient-animated font-display italic">
+              <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
                 story behind the work
               </span>
             </SectionHeading>
