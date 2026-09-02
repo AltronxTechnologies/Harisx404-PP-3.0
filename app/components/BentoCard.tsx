@@ -8,6 +8,7 @@ interface BentoCardProps {
   showHoverGradient?: boolean;
   hideOverflow?: boolean;
   linkTo?: string;
+  appearance?: "default" | "home";
 }
 
 export function BentoCard({
@@ -17,17 +18,29 @@ export function BentoCard({
   showHoverGradient = true,
   hideOverflow = true,
   linkTo,
+  appearance = "default",
 }: BentoCardProps) {
+  const isHome = appearance === "home";
   const cardContent = (
     <div
-      className={`card-light-edge group relative flex flex-col rounded-2xl border border-border-primary bg-bg-primary p-6 transition-all duration-300 hover:bg-white motion-reduce:transition-none dark:hover:bg-white/[0.04] ${
+      className={`${isHome ? "card-light-edge " : ""}group relative flex flex-col rounded-2xl border border-border-primary bg-bg-primary p-6 transition-all duration-300 hover:bg-white motion-reduce:transition-none dark:hover:bg-white/[0.04] ${
         hideOverflow ? "overflow-hidden" : ""
       } ${height} ${className}`}
     >
       {linkTo && (
-        <div className="absolute bottom-3.5 right-3.5 z-[999] flex h-7 w-7 rotate-6 items-center justify-center rounded-full bg-neutral-200 opacity-0 transition-all duration-300 ease-in-out group-hover:translate-y-[-6px] group-hover:rotate-0 group-hover:opacity-100 motion-reduce:transition-none dark:bg-white/10">
+        <div
+          className={`absolute bottom-3.5 right-3.5 z-[999] flex h-7 w-7 rotate-6 items-center justify-center rounded-full opacity-0 transition-all duration-300 ease-in-out group-hover:translate-y-[-6px] group-hover:rotate-0 group-hover:opacity-100 motion-reduce:transition-none ${
+            isHome
+              ? "bg-neutral-200 dark:bg-white/10"
+              : "bg-indigo-200 dark:bg-indigo-900/80"
+          }`}
+        >
           <svg
-            className="h-4 w-4 text-neutral-600 dark:text-neutral-300"
+            className={`h-4 w-4 ${
+              isHome
+                ? "text-neutral-600 dark:text-neutral-300"
+                : "text-indigo-600 dark:text-indigo-300"
+            }`}
             fill="none"
             viewBox="0 0 24 24"
           >
@@ -49,7 +62,13 @@ export function BentoCard({
         </div>
       )}
       {showHoverGradient && (
-        <div className="pointer-events-none absolute inset-0 z-30 select-none bg-gradient-to-tl from-neutral-400/10 via-transparent to-transparent opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100 motion-reduce:transition-none dark:from-white/[0.05]" />
+        <div
+          className={`pointer-events-none absolute inset-0 z-30 select-none bg-gradient-to-tl via-transparent to-transparent opacity-0 transition-opacity ease-out group-hover:opacity-100 motion-reduce:transition-none ${
+            isHome
+              ? "from-neutral-400/10 duration-200 dark:from-white/[0.05]"
+              : "from-indigo-400/10 duration-300"
+          }`}
+        />
       )}
       {children}
     </div>

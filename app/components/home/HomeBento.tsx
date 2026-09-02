@@ -81,7 +81,7 @@ const accountItems = [
 
 export function AccountsBento() {
   return (
-    <BentoCard height="h-auto sm:h-[240px] lg:h-[220px]">
+    <BentoCard height="h-auto sm:h-[240px] lg:h-[220px]" appearance="home">
       <div className="z-20 text-center">
         <h3 className="text-base font-medium text-text-primary">
           Learn more about me
@@ -381,7 +381,7 @@ function GlobeBento() {
   }, [isDark]);
 
   return (
-    <BentoCard linkTo="/contact" height="h-[300px]">
+    <BentoCard linkTo="/contact" height="h-[300px]" appearance="home">
       <div className="z-20 text-center">
         <h3 className="text-base font-medium text-text-primary">
           Open to work — worldwide
@@ -706,7 +706,7 @@ function TechStackBento({
      when the (server-provided) project tech actually changes. */
   const rows = React.useMemo(() => buildStackRows(projectTech), [projectTech]);
   return (
-    <BentoCard height="h-[300px]" linkTo={linkTo}>
+    <BentoCard height="h-[300px]" linkTo={linkTo} appearance="home">
       {/* Header voice matches the sibling bento cards */}
       <div className="z-20 text-center">
         <h3 className="text-base font-medium text-text-primary">Tech stack</h3>
@@ -774,7 +774,7 @@ export function SiteStatsBento({
   height?: string;
 }) {
   return (
-    <BentoCard height={height}>
+    <BentoCard height={height} appearance="home">
       {/* Header — same centered voice as the other bento cards */}
       <div className="z-20 text-center">
         <div className="flex items-center justify-center gap-2">
