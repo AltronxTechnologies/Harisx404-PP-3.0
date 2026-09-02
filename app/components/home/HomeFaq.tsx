@@ -79,7 +79,7 @@ export async function HomeFaq() {
           >
             <summary className="flex cursor-pointer items-center justify-between gap-4 px-5 py-4 text-[15px] font-medium leading-snug text-text-secondary transition-colors duration-300 hover:text-text-primary group-open:text-text-primary [&::-webkit-details-marker]:hidden">
               {f.q}
-              <span className="flex size-7 shrink-0 items-center justify-center rounded-full border border-neutral-200/80 bg-white text-neutral-500 transition-all duration-300 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] group-open:rotate-180 dark:border-white/10 dark:bg-white/[0.06] dark:text-white/60">
+              <span className="flex size-7 shrink-0 items-center justify-center rounded-full border border-neutral-200/80 bg-white text-neutral-500 transition-all duration-300 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] group-open:rotate-180 motion-reduce:transition-none motion-reduce:group-open:rotate-0 dark:border-white/10 dark:bg-white/[0.06] dark:text-white/60">
               <svg
                   viewBox="0 0 24 24"
                   fill="none"
