@@ -918,6 +918,16 @@ Recorded in `DESIGN_DEBT.md`; needs owner permission to action:
 
 ## Unlock log
 
+- **2026-09-02 — MAIN EXPERIENCE UNLOCKED BY OWNER FOR PRODUCTION AUDIT:**
+  entries 1, 2, 3–18, 21 and 22 are temporarily unlocked for a controlled
+  production-grade pass covering the Home page, Navbar, Reach Out modal,
+  Search modal and Footer. The owner explicitly requested pixel-level visual
+  consistency, responsive verification across all supported breakpoints, and
+  complete light/dark-mode testing before these areas are frozen again.
+  Existing approved values remain the starting baseline, not permission for a
+  redesign. Work proceeds one target at a time under `AUDIT_TESTING.md`, with
+  findings reported and independently verified before the final re-lock.
+
 - **2026-09-02 — rejected HomeBento phone-size experiment, fully reverted:**
   an audit attempted to shrink the Accounts card's base tiles to 44px/52px.
   The owner confirmed the approved 56px tiles, 64px GitHub tile, 8px gaps and
