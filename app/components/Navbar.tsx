@@ -398,8 +398,8 @@ export default function Navbar() {
                           <button
                             ref={moreTriggerRef}
                             type="button"
-                            aria-haspopup="menu"
                             aria-expanded={isDropdownOpen}
+                            aria-controls="navbar-more-panel"
                             onClick={(event) => {
                               // On touch, mouseenter just opened it — don't close again.
                               // (Timestamp-based: state updates may still be batched here.)
@@ -462,8 +462,9 @@ export default function Navbar() {
                      shadow stretches and shrinks with the morphing box
                      (filter on the clipped element itself gets clipped away,
                      because clip-path applies after filter). */
-                  <motion.div
-                    initial={{ x: "-50%" }}
+                   <motion.div
+                     id="navbar-more-panel"
+                     initial={{ x: "-50%" }}
                     animate={{ x: "-50%" }}
                     exit={{ x: "-50%" }}
                     className="absolute top-0 left-1/2 z-0 w-[740px] max-w-[92vw] [filter:drop-shadow(0_10px_15px_rgba(0,0,0,0.13))_drop-shadow(0_3px_4px_rgba(0,0,0,0.05))] dark:[filter:none]"
