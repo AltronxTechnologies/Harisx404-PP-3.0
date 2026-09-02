@@ -1,3 +1,5 @@
+import { useId, type ReactNode } from "react";
+
 /**
  * Hand-built visual cards for the two Education panels — replaces photos with
  * on-brand typographic artwork (same 180x270 footprint the ShadowBox frames
@@ -10,7 +12,7 @@ function CardShell({
   children,
 }: {
   rotate: "left" | "right";
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <div
@@ -29,6 +31,7 @@ function CardShell({
 }
 
 export function BsitCard({ rotate = "left" }: { rotate?: "left" | "right" }) {
+  const gradientId = `bsit-circuit-${useId().replace(/:/g, "")}`;
   return (
     <CardShell rotate={rotate}>
       {/* circuit-board motif, bottom-left */}
@@ -40,11 +43,11 @@ export function BsitCard({ rotate = "left" }: { rotate?: "left" | "right" }) {
       >
         <path
           d="M10 90H40V60H70V30H90M10 70H30V40H55V15M40 90V75H60V55H85"
-          stroke="url(#cc)"
+          stroke={`url(#${gradientId})`}
           strokeWidth="1"
         />
         <defs>
-          <linearGradient id="cc" x1="0" y1="100" x2="100" y2="0">
+          <linearGradient id={gradientId} x1="0" y1="100" x2="100" y2="0">
             <stop stopColor="#60a5fa" />
             <stop offset="1" stopColor="#a78bfa" />
           </linearGradient>
@@ -110,6 +113,7 @@ export function BsitCard({ rotate = "left" }: { rotate?: "left" | "right" }) {
 }
 
 export function KpitbCard({ rotate = "right" }: { rotate?: "left" | "right" }) {
+  const gradientId = `kpitb-network-${useId().replace(/:/g, "")}`;
   return (
     <CardShell rotate={rotate}>
       {/* neural-net motif: 3-4-2 layers */}
@@ -121,11 +125,11 @@ export function KpitbCard({ rotate = "right" }: { rotate?: "left" | "right" }) {
       >
         <path
           d="M18 25L52 15M18 25L52 40M18 25L52 65M18 25L52 90M18 55L52 15M18 55L52 40M18 55L52 65M18 55L52 90M18 85L52 15M18 85L52 40M18 85L52 65M18 85L52 90M52 15L90 40M52 40L90 40M52 65L90 40M52 90L90 40M52 15L90 70M52 40L90 70M52 65L90 70M52 90L90 70"
-          stroke="url(#nn)"
+          stroke={`url(#${gradientId})`}
           strokeWidth="0.8"
         />
         <defs>
-          <linearGradient id="nn" x1="0" y1="0" x2="110" y2="110">
+          <linearGradient id={gradientId} x1="0" y1="0" x2="110" y2="110">
             <stop stopColor="#f472b6" />
             <stop offset="0.5" stopColor="#a78bfa" />
             <stop offset="1" stopColor="#60a5fa" />
