@@ -63,10 +63,10 @@ export function BentoCard({
       )}
       {showHoverGradient && (
         <div
-          className={`pointer-events-none absolute inset-0 z-30 select-none bg-gradient-to-tl via-transparent to-transparent opacity-0 transition-opacity ease-out group-hover:opacity-100 motion-reduce:transition-none ${
+          className={`pointer-events-none absolute inset-0 z-30 select-none bg-gradient-to-tl via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100 motion-reduce:transition-none ${
             isHome
-              ? "from-neutral-400/10 duration-200 dark:from-white/[0.05]"
-              : "from-indigo-400/10 duration-300"
+              ? "from-neutral-400/10 duration-200 ease-out dark:from-white/[0.05]"
+              : "from-indigo-400/10 duration-300 ease-in-out"
           }`}
         />
       )}
