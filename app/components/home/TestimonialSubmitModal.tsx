@@ -175,12 +175,19 @@ export function TestimonialSubmitModal({
             </button>
 
             {submitted ? (
-              <div className="flex flex-col items-center py-10 text-center">
+              <div
+                role="status"
+                aria-live="polite"
+                className="flex flex-col items-center py-10 text-center"
+              >
                 <CheckCircle2
                   className="h-12 w-12 text-emerald-500"
                   aria-hidden
                 />
-                <h3 className="mt-4 font-display text-2xl italic text-text-primary">
+                <h3
+                  id="testimonial-modal-title"
+                  className="mt-4 font-display text-2xl italic text-text-primary"
+                >
                   Thank you!
                 </h3>
                 <p className="mt-2 max-w-sm text-sm leading-relaxed text-text-secondary">
