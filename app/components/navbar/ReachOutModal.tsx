@@ -247,6 +247,7 @@ export function ReachOutModal({
 
                 <textarea
                   ref={textareaRef}
+                  aria-label="Message"
                   value={message}
                   rows={3}
                   onChange={(e) => setMessage(e.target.value)}
