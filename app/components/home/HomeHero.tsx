@@ -209,6 +209,9 @@ function HeadlineRotator({
       if (prefersReducedMotion) {
         setLine1(t1);
         setLine2(t2);
+        await wait(HOLD_MS);
+        await waitVisible();
+        if (!cancelled) setIndex((prev) => (prev + 1) % headlines.length);
         return;
       }
 

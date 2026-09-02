@@ -915,6 +915,13 @@ blockquote p {
   animation: hero-caret-blink 1.1s steps(1) infinite;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .hero-gradient-animate,
+  .hero-caret {
+    animation: none;
+  }
+}
+
 /* Hero portrait: sonar-style ripple rings expanding outward like water waves */
 @keyframes hero-ripple {
   0% {
