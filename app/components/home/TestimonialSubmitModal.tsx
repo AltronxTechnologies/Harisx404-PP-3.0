@@ -258,11 +258,13 @@ export function TestimonialSubmitModal({
                         type="text"
                         maxLength={80}
                         required
+                        aria-invalid={Boolean(fieldErrors.name)}
+                        aria-describedby={fieldErrors.name ? "ts-name-error" : undefined}
                         placeholder="Jane Smith"
                         className={inputClasses}
                       />
                       {fieldErrors.name && (
-                        <p className="mt-1 text-xs text-red-500">
+                        <p id="ts-name-error" className="mt-1 text-xs text-red-500">
                           {fieldErrors.name}
                         </p>
                       )}
@@ -277,11 +279,13 @@ export function TestimonialSubmitModal({
                         type="text"
                         maxLength={80}
                         required
+                        aria-invalid={Boolean(fieldErrors.role)}
+                        aria-describedby={fieldErrors.role ? "ts-role-error" : undefined}
                         placeholder="CTO, Acme Inc."
                         className={inputClasses}
                       />
                       {fieldErrors.role && (
-                        <p className="mt-1 text-xs text-red-500">
+                        <p id="ts-role-error" className="mt-1 text-xs text-red-500">
                           {fieldErrors.role}
                         </p>
                       )}
@@ -302,11 +306,13 @@ export function TestimonialSubmitModal({
                       type="email"
                       maxLength={120}
                       required
+                      aria-invalid={Boolean(fieldErrors.email)}
+                      aria-describedby={fieldErrors.email ? "ts-email-error" : undefined}
                       placeholder="jane@company.com"
                       className={inputClasses}
                     />
                     {fieldErrors.email && (
-                      <p className="mt-1 text-xs text-red-500">
+                      <p id="ts-email-error" className="mt-1 text-xs text-red-500">
                         {fieldErrors.email}
                       </p>
                     )}
@@ -327,12 +333,14 @@ export function TestimonialSubmitModal({
                       type="text"
                       maxLength={HEADLINE_MAX}
                       required
+                      aria-invalid={Boolean(fieldErrors.headline)}
+                      aria-describedby={fieldErrors.headline ? "ts-headline-error" : undefined}
                       placeholder="A one-line summary, e.g. “Delivered beyond expectations.”"
                       className={inputClasses}
                       onChange={(e) => setHeadlineLen(e.target.value.length)}
                     />
                     {fieldErrors.headline && (
-                      <p className="mt-1 text-xs text-red-500">
+                      <p id="ts-headline-error" className="mt-1 text-xs text-red-500">
                         {fieldErrors.headline}
                       </p>
                     )}
@@ -353,12 +361,14 @@ export function TestimonialSubmitModal({
                       rows={4}
                       maxLength={QUOTE_MAX}
                       required
+                      aria-invalid={Boolean(fieldErrors.quote)}
+                      aria-describedby={fieldErrors.quote ? "ts-quote-error" : undefined}
                       placeholder="What did we work on together? What was the result?"
                       className={`${inputClasses} resize-none`}
                       onChange={(e) => setQuoteLen(e.target.value.length)}
                     />
                     {fieldErrors.quote && (
-                      <p className="mt-1 text-xs text-red-500">
+                      <p id="ts-quote-error" className="mt-1 text-xs text-red-500">
                         {fieldErrors.quote}
                       </p>
                     )}
