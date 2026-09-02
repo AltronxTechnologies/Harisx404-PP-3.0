@@ -918,13 +918,13 @@ Recorded in `DESIGN_DEBT.md`; needs owner permission to action:
 
 ## Unlock log
 
-- **2026-09-02 — owner-authorized final About confirmation (HomeBento phone
-  fit, no desktop change):** the Accounts card's base tiles now use 44px
-  frames (52px GitHub), 4px gaps and 8px labels below `sm`; its existing
-  72px/84px frames, 12px gaps and 10px labels remain unchanged from `sm` up.
-  This removes 7–14.5px clipping of the outer account tiles at 375/360px.
-  Re-measured at 360px: every account link is at least 25px inside the card,
-  page overflow 0px.
+- **2026-09-02 — rejected HomeBento phone-size experiment, fully reverted:**
+  an audit attempted to shrink the Accounts card's base tiles to 44px/52px.
+  The owner confirmed the approved 56px tiles, 64px GitHub tile, 8px gaps and
+  10px labels were visually correct and required their exact restoration.
+  No `sm`/tablet/desktop values were changed. The slight crop of the outer
+  decorative frames at 375/360px is an accepted part of the centered, oversized
+  account-row composition; links remain fully operable and page overflow is 0px.
 
 - **2026-09-02 — owner-authorized About production audit (entries 19, 20–22
   touched, no visual redesign):** corrected heading semantics, consolidated the
