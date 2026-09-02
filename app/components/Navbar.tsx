@@ -162,6 +162,31 @@ export default function Navbar() {
     };
   }, [isDropdownOpen]);
 
+  useEffect(() => {
+    if (!isDropdownOpen) return;
+    const syncGeometry = () => {
+      if (window.innerWidth < 768) {
+        setIsDropdownOpen(false);
+        return;
+      }
+      const pill = pillRef.current;
+      if (!pill) return;
+      const r = pill.getBoundingClientRect();
+      const panelW = Math.min(740, window.innerWidth * 0.92);
+      const hx = Math.max((panelW - r.width) / 2, 0);
+      setPillClip(
+        `inset(0px ${hx.toFixed(1)}px calc(100% - ${r.height.toFixed(1)}px) ${hx.toFixed(1)}px round 22px)`
+      );
+    };
+    const observer = new ResizeObserver(syncGeometry);
+    if (pillRef.current) observer.observe(pillRef.current);
+    window.addEventListener("resize", syncGeometry);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", syncGeometry);
+    };
+  }, [isDropdownOpen]);
+
   let activeTab: string | null = pathname === "/" ? "Home" : null;
   if (pathname === "/about" || pathname.startsWith("/about")) activeTab = "About";
   else if (pathname === "/projects" || pathname.startsWith("/projects")) activeTab = "Projects";
