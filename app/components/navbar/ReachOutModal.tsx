@@ -257,7 +257,7 @@ export function ReachOutModal({
                     }
                   }}
                   placeholder="Hey Haris, I have a project idea..."
-                  className="composer-scroll mt-5 w-full resize-none overflow-y-auto bg-transparent text-xl text-neutral-900 placeholder-neutral-400 focus:outline-none dark:text-white dark:placeholder-white/30"
+                  className="composer-scroll mt-5 w-full resize-none overflow-y-auto bg-transparent text-xl text-neutral-900 placeholder-neutral-400 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500/60 dark:text-white dark:placeholder-white/30"
                 />
 
                 <div className="mt-2 flex items-center justify-between gap-3">
