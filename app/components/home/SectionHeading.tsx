@@ -2,8 +2,8 @@ import type { ReactNode } from "react";
 
 /**
  * Section header matching the reference site exactly:
- * kicker (mono 12px w400 uppercase tracking-widest) + Instrument Serif
- * heading (48→60px, w500, -1.5px, leading-none, max-w-xl, text-balance,
+ * kicker (mono 12px w500 uppercase tracking-widest) + Instrument Serif
+ * heading (48→56px, w500, -1.5px, leading-none, max-w-xl, text-balance,
  * white glow text-shadow). The reference renders headers statically —
  * no entry animation; only the gradient accent word animates (gradient-x).
  */

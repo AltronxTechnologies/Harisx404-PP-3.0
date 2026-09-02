@@ -290,7 +290,7 @@ the dev server is up (see process rules).
 ### B3. Missing professional-standard files
 | Item | Impact |
 |---|---|
-| `app/loading.tsx` (root) | Only `/projects` has a loading state; every other route shows nothing during navigation |
+| `app/loading.tsx` (root) | Root fallback is still missing; `/projects` and `/about` now have route-level loading states, while other routes show nothing during navigation |
 | `app/manifest.ts` | No PWA manifest at all; breaks Add-to-Home-Screen, costs Lighthouse points |
 | `app/apple-icon.png` + `app/icon.png` | Only `favicon.ico` exists, so iOS home-screen saves a screenshot instead of the logo. Source available: `public/brand/harisx404 favicon transparent.png` |
 | `themeColor` / `viewport` in `app/layout.tsx` | Mobile browser chrome will not match the dark theme |

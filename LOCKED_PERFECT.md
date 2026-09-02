@@ -918,6 +918,15 @@ Recorded in `DESIGN_DEBT.md`; needs owner permission to action:
 
 ## Unlock log
 
+- **2026-09-02 — owner-authorized About production audit (entries 19, 20–22
+  touched, no visual redesign):** corrected heading semantics, consolidated the
+  duplicated BentoCard shell, added reduced-motion behavior to the Experience
+  timeline and Home bento interactions, cleared the CTA copy timer on unmount,
+  and positioned the root scroll container to satisfy Framer's offset contract.
+  Normal-mode geometry, typography, spacing, colours and animation endpoints
+  remain unchanged. About-specific accessibility and loading fixes are recorded
+  in `AUDIT_TESTING.md` audit row 1.
+
 - **2026-08-23 — owner-directed site-wide heading rhythm (not an unlock):**
   every section heading now sits exactly 56px above its content on the
   homepage and /about. Homepage: HomeBento space-y-8/10 -> space-y-14,
@@ -1164,8 +1173,8 @@ Final spec (verified by measurement):
   r10 border + 1px/3px shadow (8%/30%), object-cover; org 22px/600 Source
   Serif 4 (font-org); meta lines 12px/500 with 14px MapPin/Briefcase icons;
   rhythm 20/20/8 desktop, 16/16/8 mobile; all rows share one left edge.
-- Right column: title 22px/600 font-org (top aligned 0.0px with period);
-  summary + bullets 14px/400 LEFT-ALIGNED all screens (owner final,
+- Right column: title 22px/600 Source Serif 4 (top aligned 0.0px with period);
+  summary + bullets 15px/400 LEFT-ALIGNED all screens (owner final,
   re-confirmed 2026-08-23 after trying justify); ✦ mono markers, 600
   leads, 16px bullet spacing; links underlined
   with focus-visible outline.
@@ -1192,13 +1201,13 @@ Unlock note: Timeline/Resume geometry constants (33.333%+24px md, 352px xl,
 |---|---|
 | Kicker / eyebrow | 12px / weight 500, Geist Mono, uppercase |
 | Kicker → heading gap | **16px** (`mt-4`) |
-| Section heading | **56px / weight 500**, Instrument Serif (`text-4xl md:text-[56px] font-medium`, mobile 36px) |
+| Section heading | **48px mobile / 56px from md, weight 500**, Instrument Serif (`text-5xl md:text-[56px] font-medium`) |
 | Heading → content gap | **56px** (`mt-14` / `space-y-14`) |
 | Section → section gap | **112px** (`space-y-28`) at ALL breakpoints |
 
 **CTA-style closing sections (page-final call-to-action) are the one allowed variant:**
-- Kicker → heading gap: 20px (`mt-5`)
-- Heading: 60px / 500 (`md:text-6xl font-medium`)
+- Kicker → heading gap: 16px (`mt-4`)
+- Heading: 40px mobile → 48px sm → 56px md → 60px lg, weight 500
 - Heading → content: 56px (`mt-14`) — same as standard
 
 Notes:

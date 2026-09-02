@@ -197,8 +197,13 @@ This class of bug caused the original theme-toggle defect. Always run it.
       focus restored to the opener, `tabIndex={-1}` on the container.
 - [ ] **Touch targets ≥ 24×24px** (WCAG 2.5.8); use a `before:-inset-*`
       extension rather than resizing the visual box.
+- [ ] **Draggable controls have one keyboard stop.** Framer can add
+      `tabindex="0"` to a draggable child automatically; inspect rendered DOM,
+      not only JSX, and ensure a labelled wrapper does not gain an unnamed
+      second stop.
 - [ ] **Semantics**: correct heading order, `aria-label` on icon-only buttons,
-      `aria-live` on async status, `alt` on meaningful images.
+      `aria-live` on async status, `alt` on meaningful images, no duplicate SVG
+      fragment IDs when responsive copies are both present in the DOM.
 - [ ] **No hydration flash** — theme-dependent UI must be `mounted`-guarded.
 - [ ] Respects `prefers-reduced-motion` if it animates.
 
@@ -361,7 +366,7 @@ Date: · Commit: · Routes:
 | # | Target | Date | Result | Lock entry |
 |---|---|---|---|---|
 | — | Home, Navbar, Search modal, Reach Out modal, Footer | 2026-09-01 | Locked after pre-lock cleanup (`c04f17f`) | entry 22 |
-| 1 | **About page** — *next, on owner's signal* | | | |
+| 1 | **About page** | 2026-09-02 | Passed after 12-phase audit; awaiting owner lock approval | pending |
 
 ---
 
@@ -395,7 +400,10 @@ Track where each reference value came from, so its authority is traceable.
 | Icon size scale | Modal top rows, navbar circles, share menus | 2026-09-01 |
 | Shared-module list | `modalSurfaces.ts`, `BrandGlyph.tsx`, `ThemeToggle.tsx` | 2026-09-01 |
 | Locked modal geometry (792px / 72px / 7px / 634px) | Reach Out v5, Search v2 | 2026-09-01 |
-| *(add: About page patterns)* | | |
+| Long-page section rhythm: 16px kicker gap / 56px content gap / 112px sections | About page + Home reference | 2026-09-02 |
+| About content prose: 15px/400; card subtitles remain 14px mobile → 16px md | About hero, Experience, Education, bento baseline | 2026-09-02 |
+| Theme-aware paper hero: local image, multiply light / inverted screen dark | `PaperHeroTexture.tsx` | 2026-09-02 |
+| Rendered-DOM checks for draggable tabindex and duplicate SVG IDs | About scrapbook + Education posters | 2026-09-02 |
 
 ### Still thin — strengthen as data arrives
 Honest gaps in the current baseline. Fill these from real locked pages rather
@@ -410,4 +418,3 @@ than inventing conventions:
   deliberate variants, so the canonical set is not yet decided.
 - **Table / list / form patterns** — no locked example yet.
 - **Empty / loading / error state styling** — no canonical version yet.
-
