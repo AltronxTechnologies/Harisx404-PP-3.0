@@ -79,14 +79,14 @@ export function StatsBento({ height = "h-[220px]" }: { height?: string }) {
       <BentoCard height={height} className="group" linkTo="/stats">
         {/* Header voice matches the homepage bento cards. */}
         <div className="relative z-20 text-center">
-          <motion.h2
+          <motion.h3
             className="text-base font-medium text-text-primary"
             initial={reduced ? false : { opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
             Stats
-          </motion.h2>
+          </motion.h3>
           <motion.p
             className="mt-1 text-sm text-text-secondary md:text-base"
             initial={reduced ? false : { opacity: 0, y: -5 }}

@@ -142,9 +142,9 @@ export function AccountsBento() {
   return (
     <BentoCard height="h-auto sm:h-[240px] lg:h-[220px]">
       <div className="z-20 text-center">
-        <h2 className="text-base font-medium text-text-primary">
+        <h3 className="text-base font-medium text-text-primary">
           Learn more about me
-        </h2>
+        </h3>
         <p className="mt-1 text-sm text-text-secondary md:text-base">
           One handle everywhere —{" "}
           <span className="font-mono text-text-primary">harisx404</span>
@@ -442,9 +442,9 @@ function GlobeBento() {
   return (
     <BentoCard linkTo="/contact" height="h-[300px]">
       <div className="z-20 text-center">
-        <h2 className="text-base font-medium text-text-primary">
+        <h3 className="text-base font-medium text-text-primary">
           Open to work — worldwide
-        </h2>
+        </h3>
         <p className="mt-1 text-sm text-text-secondary md:text-base">
           Remote from Pakistan, shipping across every timezone.
         </p>
@@ -768,7 +768,7 @@ function TechStackBento({
     <BentoCard height="h-[300px]" linkTo={linkTo}>
       {/* Header voice matches the sibling bento cards */}
       <div className="z-20 text-center">
-        <h2 className="text-base font-medium text-text-primary">Tech stack</h2>
+        <h3 className="text-base font-medium text-text-primary">Tech stack</h3>
         <p className="mt-1 text-sm text-text-secondary md:text-base">
           The stack behind everything I ship — web, security &amp; AI/ML.
         </p>
@@ -837,9 +837,9 @@ export function SiteStatsBento({
       {/* Header — same centered voice as the other bento cards */}
       <div className="z-20 text-center">
         <div className="flex items-center justify-center gap-2">
-          <h2 className="text-base font-medium text-text-primary">
+          <h3 className="text-base font-medium text-text-primary">
             Shipped, counted, public
-          </h2>
+          </h3>
           <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
             <span className="relative flex size-1.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />

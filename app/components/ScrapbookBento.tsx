@@ -298,9 +298,9 @@ export function ScrapbookBento({ className }: { className?: string }) {
       hideOverflow={false}
     >
       <div className="relative z-20 text-center">
-        <h2 className="text-base font-medium text-text-primary">
+        <h3 className="text-base font-medium text-text-primary">
           Behind the handle
-        </h2>
+        </h3>
         <p className="mt-1 text-sm text-text-secondary md:text-base">
           Symbols and stories behind harisx404.
         </p>
