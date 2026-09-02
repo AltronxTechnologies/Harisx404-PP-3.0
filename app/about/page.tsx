@@ -78,41 +78,16 @@ export default async function AboutPage() {
                 web, security &amp; AI.
               </span>
             </SectionHeading>
-            <div className="mx-auto mt-14 max-w-3xl space-y-5 hyphens-auto break-words text-justify text-pretty text-base leading-relaxed text-text-secondary lg:max-w-5xl xl:max-w-6xl">
-              <p>
-                I&apos;m{" "}
-                <strong className="font-medium text-text-primary">
-                  Muhammad Haris
-                </strong>
-                , a BSIT graduate (2022&ndash;2026) from the University of
-                Malakand with a strong foundation in{" "}
-                <strong className="font-medium text-text-primary">
-                  Cybersecurity, Network Security, and Full-Stack Web
-                  Development
-                </strong>
-                . I ranked in the{" "}
-                <strong className="font-medium text-text-primary">
-                  Top 15%
-                </strong>{" "}
-                nationally in Pakistan&apos;s NSCT 2026 among{" "}
-                <strong className="font-medium text-text-primary">
-                  33,000+
-                </strong>{" "}
-                candidates, achieved{" "}
-                <strong className="font-medium text-text-primary">96%</strong>{" "}
-                in Cybersecurity coursework, and am{" "}
-                <strong className="font-medium text-text-primary">
-                  KPITB AI/ML certified
-                </strong>
-                .
-              </p>
-              <p>
-                From developing full-stack applications to exploring security
-                operations and applied AI, I enjoy working across disciplines
-                to solve complex problems and turn ideas into reliable,
-                secure, and intelligent solutions.
-              </p>
-            </div>
+            {/* Intro — one short, plain-language paragraph. Centred to match
+                the centred kicker + heading above it. No bold: the emphasis
+                was on nearly every clause, which flattens the hierarchy. */}
+            <p className="mx-auto mt-14 max-w-3xl text-pretty text-center text-base leading-relaxed text-text-secondary">
+              I&apos;m Muhammad Haris, a BSIT graduate from the University of
+              Malakand. I build full-stack web applications, secure them from
+              day one, and use AI to make them smarter. I ranked in the top 15%
+              nationally in Pakistan&apos;s NSCT 2026 among 33,000+ candidates,
+              and I&apos;m KPITB AI/ML certified.
+            </p>
             </div>
           </div>
         </GridWrapper>
