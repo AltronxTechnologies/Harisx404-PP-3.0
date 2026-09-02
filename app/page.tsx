@@ -14,7 +14,6 @@ import {
   type HomeProject,
 } from "./data/fallback-home";
 import { getServerStats } from "./lib/stats/server-stats";
-import { getBuildTimeStats } from "./lib/stats/build-time-stats";
 import { HomeHero } from "./components/home/HomeHero";
 import { StatusRow } from "./components/home/StatusRow";
 import { HomeBento } from "./components/home/HomeBento";
@@ -70,20 +69,19 @@ function estimateReadingTime(content: string | undefined): string {
 }
 
 export default async function Home() {
-  const [dbProjects, dbPosts, dbTestimonials, serverStats, buildStats] =
+  const [dbProjects, dbPosts, dbTestimonials, serverStats] =
     await Promise.all([
       fetchProjects(),
       fetchAndSortBlogPosts(),
       fetchTestimonials(),
       getServerStats().catch(() => null),
-      getBuildTimeStats().catch(() => null),
     ]);
 
   /* Live site-wide numbers for the bento — every value is counted from
      the database (projects, blog_posts, messages, testimonials, views). */
   const siteStats = {
     projects: dbProjects.length > 0 ? dbProjects.length : fallbackProjects.length,
-    posts: buildStats?.totalArticles ?? (dbPosts.length > 0 ? dbPosts.length : null),
+    posts: dbPosts.length > 0 ? dbPosts.length : fallbackPosts.length,
     notes: serverStats?.communityWallMessages ?? null,
     testimonials: dbTestimonials.length > 0 ? dbTestimonials.length : null,
     views: serverStats?.totalViews ?? null,

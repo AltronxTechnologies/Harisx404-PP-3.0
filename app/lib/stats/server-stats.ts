@@ -2,7 +2,6 @@
 
 import { unstable_cache } from "next/cache";
 import { createSupabaseAdminClient } from "../supabase/server";
-import { fetchAndSortBlogPosts } from "@/app/lib/utils";
 import type { ServerStats, ReactionType, ArticleMetric } from "./types";
 
 const VALID_REACTIONS: ReactionType[] = [
@@ -47,7 +46,11 @@ export const getServerStats = unstable_cache(
       0
     );
 
-    const posts = await fetchAndSortBlogPosts();
+    // Stats only need display metadata; avoid loading every article body.
+    const { data: posts } = await supabase
+      .from("blog_posts")
+      .select("slug, title, cover_image_url")
+      .eq("status", "published");
 
     // Top 5 most viewed articles
     const topViewedRaw =
@@ -55,12 +58,12 @@ export const getServerStats = unstable_cache(
         ?.sort((a, b) => b.view_count - a.view_count)
         .slice(0, 5)
         .map((item) => {
-          const post = posts.find((p) => p.slug === item.slug);
+          const post = posts?.find((p) => p.slug === item.slug);
           return {
             slug: item.slug,
             title: post?.title || item.slug,
             count: item.view_count,
-            imageName: post?.imageName,
+            imageName: post?.cover_image_url,
           };
         }) || [];
 
@@ -75,12 +78,12 @@ export const getServerStats = unstable_cache(
       .sort(([, a], [, b]) => b - a)
       .slice(0, 5)
       .map(([slug, count]) => {
-        const post = posts.find((p) => p.slug === slug);
+        const post = posts?.find((p) => p.slug === slug);
         return {
           slug,
           title: post?.title || slug,
           count,
-          imageName: post?.imageName,
+          imageName: post?.cover_image_url,
         };
       });
 
