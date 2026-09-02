@@ -212,11 +212,11 @@ Also `links/page.tsx:59,68` re-declare the mail/globe paths already in
 - Two files share the basename `FeaturedBlogCard.tsx`.
 
 ### Search triggers — 5 implementations
-`Navbar.tsx:594` (Phosphor `size-[18px]`) · `Navbar.tsx:216` (mobile pill) ·
+`Navbar.tsx` (Lucide `size-[18px]`) · `Navbar.tsx` (mobile pill) ·
 `ReachOutModal.tsx:194` (lucide `size-8`) · `blog/BlogFilterBar.tsx:69` (Phosphor `size-4`) ·
 `projects/ProjectsIndex.tsx:264` (bespoke `size-4`) · `SearchModal.tsx:356` (lucide `size-7`).
-Note the navbar uses **Phosphor** icons while the modals use **lucide** — different
-stroke weight and optical size at nominally equal px.
+The Navbar and modal launchers now share Lucide. BlogFilterBar and ProjectsIndex
+still use separate glyph implementations.
 
 ### `DoubleArrow` fork
 Shared: `app/components/home/DoubleArrow.tsx:6`. Fork with different animation
