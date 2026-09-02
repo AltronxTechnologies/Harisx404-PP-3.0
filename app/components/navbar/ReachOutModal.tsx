@@ -260,7 +260,7 @@ export function ReachOutModal({
                   maxLength={MESSAGE_MAX}
                   onChange={(e) => setMessage(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
+                    if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
                       e.preventDefault();
                       handleContinue();
                     }
