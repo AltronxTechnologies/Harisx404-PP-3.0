@@ -22,6 +22,9 @@
 > the reference baseline (radius tiers, colour tokens, icon sizes, shared
 > modules) extracted from the locked components.
 >
+> 📋 **`DUE_WORK.md`** is the prioritised pending queue — start here to see
+> what is outstanding. P1 items are real bugs visitors can hit.
+>
 > 🐛 **`DESIGN_DEBT.md`** lists known unfixed issues **and** an explicit list of
 > differences that are *intentional* and must NOT be "fixed". Read it before
 > any consistency work.
