@@ -24,6 +24,7 @@ import {
 import { siteMetadata } from "@/app/data/siteMetadata";
 
 const OWNER_EMAIL = "itsharis.tech@gmail.com";
+const MESSAGE_MAX = 500;
 
 interface ReachOutModalProps {
   isOpen: boolean;
@@ -253,8 +254,10 @@ export function ReachOutModal({
                 <textarea
                   ref={textareaRef}
                   aria-label="Message"
+                  aria-describedby="reach-out-message-limit"
                   value={message}
                   rows={3}
+                  maxLength={MESSAGE_MAX}
                   onChange={(e) => setMessage(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
@@ -265,6 +268,9 @@ export function ReachOutModal({
                   placeholder="Hey Haris, I have a project idea..."
                   className="composer-scroll mt-5 w-full resize-none overflow-y-auto bg-transparent text-xl text-neutral-900 placeholder-neutral-400 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500/60 dark:text-white dark:placeholder-white/30"
                 />
+                <span id="reach-out-message-limit" className="sr-only">
+                  Maximum {MESSAGE_MAX} characters.
+                </span>
 
                 <div className="mt-2 flex items-center justify-between gap-3">
                   <span className="flex items-center gap-1.5 text-sm text-text-secondary">
