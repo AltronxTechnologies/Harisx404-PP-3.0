@@ -183,6 +183,7 @@ function Sticker({
     >
       <motion.div
         variants={stickerVariants}
+        tabIndex={-1}
         className={cn(
           "flex-shrink-1 relative h-fit min-w-[96px] will-change-transform drop-shadow-lg",
         )}
