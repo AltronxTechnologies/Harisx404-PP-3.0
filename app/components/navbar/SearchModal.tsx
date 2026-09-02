@@ -117,6 +117,7 @@ export function SearchModal({
   const pathname = usePathname();
 
   const dialogRef = useRef<HTMLDivElement>(null);
+  const requestIdRef = useRef(0);
 
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<ContentResult[]>([]);
@@ -167,8 +168,14 @@ export function SearchModal({
 
   // Debounced content search via /api/ai/search
   useEffect(() => {
+    if (!isOpen) {
+      requestIdRef.current += 1;
+      setIsSearching(false);
+      return;
+    }
     const trimmed = query.trim();
     if (trimmed.length < 2) {
+      requestIdRef.current += 1;
       setResults([]);
       setIsSearching(false);
       setSearchError(null);
@@ -176,8 +183,11 @@ export function SearchModal({
       return;
     }
 
+    const requestId = ++requestIdRef.current;
     setIsSearching(true);
     setSearchError(null);
+    setHasSearched(false);
+    setResults([]);
     const controller = new AbortController();
     const timer = setTimeout(async () => {
       try {
@@ -191,23 +201,28 @@ export function SearchModal({
         if (!res.ok) {
           throw new Error(data?.error || "Search failed");
         }
-        setResults(Array.isArray(data.results) ? data.results : []);
-        setHasSearched(true);
+        if (requestId === requestIdRef.current && !controller.signal.aborted) {
+          setResults(Array.isArray(data.results) ? data.results : []);
+          setHasSearched(true);
+        }
       } catch (err: any) {
         if (err?.name === "AbortError") return;
-        setSearchError("Search is unavailable right now. Try again in a moment.");
-        setResults([]);
-        setHasSearched(true);
+        if (requestId === requestIdRef.current) {
+          setSearchError("Search is unavailable right now. Try again in a moment.");
+          setResults([]);
+          setHasSearched(true);
+        }
       } finally {
-        setIsSearching(false);
+        if (requestId === requestIdRef.current) setIsSearching(false);
       }
     }, 350);
 
     return () => {
       controller.abort();
       clearTimeout(timer);
+      if (requestId === requestIdRef.current) requestIdRef.current += 1;
     };
-  }, [query]);
+  }, [isOpen, query]);
 
   const q = query.trim().toLowerCase();
 
@@ -245,7 +260,9 @@ export function SearchModal({
   );
 
   const nothingFound =
-    q.length > 0 &&
+    hasSearched &&
+    !searchError &&
+    q.length >= 2 &&
     filteredPages.length === 0 &&
     filteredConnect.length === 0 &&
     filteredLegal.length === 0 &&
