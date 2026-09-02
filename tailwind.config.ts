@@ -14,7 +14,6 @@ export default {
         sans: ["Reference Outfit", "system-ui", "sans-serif"],
         mono: ["Reference Core Mono", "ui-monospace", "monospace"],
         display: ["Reference Bluu Next", "Georgia", "serif"],
-        org: ["Reference Bluu Next", "Georgia", "serif"],
         grotesk: ["Reference Outfit", "system-ui", "sans-serif"],
       },
       colors: {
