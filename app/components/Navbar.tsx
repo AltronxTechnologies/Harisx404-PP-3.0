@@ -219,12 +219,6 @@ export default function Navbar() {
                 setHoveredTab(null);
               }}
             >
-              {/* Pre-decode the dropdown card images so the first open never
-                  paints an empty card while the file streams in. */}
-              <div aria-hidden className="pointer-events-none absolute h-px w-px overflow-hidden opacity-0">
-                <Image src="/images/nav-community-wall.jpg" alt="" width={250} height={160} priority />
-                <Image src="/images/nav-stats.jpg" alt="" width={250} height={160} priority />
-              </div>
               {/* The main morphing pill container. While the dropdown is
                   open, the pill's own surface (bg/shadow) fades out so the
                   expanding panel is the ONLY visible box — the nav links
