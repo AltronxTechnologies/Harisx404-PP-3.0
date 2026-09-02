@@ -138,7 +138,10 @@ export default function Navbar() {
       }
     };
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setIsDropdownOpen(false);
+      if (e.key === "Escape") {
+        setIsDropdownOpen(false);
+        requestAnimationFrame(() => moreTriggerRef.current?.focus());
+      }
     };
     document.addEventListener("pointerdown", handlePointerDown);
     window.addEventListener("keydown", handleKeyDown);
