@@ -169,10 +169,10 @@ export default function LinksPage() {
 
       {/* Hero — hidden on mobile per reference (profile card is the mobile hero) */}
       <h1 className="relative z-[2] mx-auto mt-20 mb-14 hidden max-w-xl text-balance text-center font-medium text-5xl tracking-tight [text-shadow:rgba(255,255,255,0.05)_0px_4px_8px,rgba(255,255,255,0.2)_0px_8px_30px] max-sm:px-5 md:mt-28 md:block md:text-6xl">
-        <p className="mb-4 font-mono font-normal text-black/80 text-xs uppercase tracking-widest dark:text-white/70">
+        <p className="mb-4 font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
           Connect
         </p>
-        <span className="inline-block text-neutral-900 dark:text-white [font-family:var(--font-instrument-serif),serif]">
+        <span className="inline-block text-text-primary [font-family:var(--font-instrument-serif),serif]">
           One Handle,{" "}
           <span
             className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]"
