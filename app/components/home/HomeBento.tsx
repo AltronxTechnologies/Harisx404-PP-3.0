@@ -25,13 +25,13 @@ function BentoCard({
   const cardContent = (
     <div
       className={clsx(
-        "card-light-edge group relative flex flex-col overflow-hidden rounded-2xl border border-border-primary bg-bg-primary p-6 transition-all duration-300 hover:bg-white dark:hover:bg-white/[0.04]",
+        "card-light-edge group relative flex flex-col overflow-hidden rounded-2xl border border-border-primary bg-bg-primary p-6 transition-all duration-300 hover:bg-white motion-reduce:transition-none dark:hover:bg-white/[0.04]",
         height,
         className
       )}
     >
       {linkTo && (
-        <div className="absolute bottom-3.5 right-3.5 z-[999] flex h-7 w-7 rotate-6 items-center justify-center rounded-full bg-neutral-200 opacity-0 transition-all duration-300 ease-in-out group-hover:translate-y-[-6px] group-hover:rotate-0 group-hover:opacity-100 dark:bg-white/10">
+        <div className="absolute bottom-3.5 right-3.5 z-[999] flex h-7 w-7 rotate-6 items-center justify-center rounded-full bg-neutral-200 opacity-0 transition-all duration-300 ease-in-out group-hover:translate-y-[-6px] group-hover:rotate-0 group-hover:opacity-100 motion-reduce:transition-none dark:bg-white/10">
           <svg
             className="h-4 w-4 text-neutral-600 dark:text-neutral-300"
             fill="none"
@@ -54,7 +54,7 @@ function BentoCard({
           </svg>
         </div>
       )}
-      <div className="pointer-events-none absolute inset-0 z-30 select-none bg-gradient-to-tl from-neutral-400/10 via-transparent to-transparent opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100 dark:from-white/[0.05]" />
+      <div className="pointer-events-none absolute inset-0 z-30 select-none bg-gradient-to-tl from-neutral-400/10 via-transparent to-transparent opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100 motion-reduce:transition-none dark:from-white/[0.05]" />
       {children}
     </div>
   );
@@ -81,7 +81,7 @@ function RecessedTile({
   return (
     <div
       className={clsx(
-        "rounded-[20px] border border-border-primary p-1.5 transition-all duration-300 sm:p-2",
+        "rounded-[20px] border border-border-primary p-1.5 transition-all duration-300 motion-reduce:transition-none sm:p-2",
         sizeClass,
         className
       )}
@@ -173,13 +173,13 @@ export function AccountsBento() {
                   ? "h-16 w-16 sm:h-[84px] sm:w-[84px]"
                   : "h-14 w-14 sm:h-[72px] sm:w-[72px]"
               )}
-              className="group-hover/acct:-translate-y-2 group-hover/acct:border-neutral-400 dark:group-hover/acct:border-white/30"
+              className="group-hover/acct:-translate-y-2 group-hover/acct:border-neutral-400 motion-reduce:group-hover/acct:translate-y-0 dark:group-hover/acct:border-white/30"
             >
               {/* Brand mark as a mask → gray at rest, true brand color on hover.
                   Decorative: the parent <a> already carries the label. */}
               <span
                 aria-hidden
-                className="h-6 w-6 bg-neutral-600 transition-colors duration-300 ease-out group-hover/acct:bg-[var(--brand)] dark:bg-neutral-300 dark:group-hover/acct:bg-[var(--brand-dark)] sm:h-7 sm:w-7"
+                className="h-6 w-6 bg-neutral-600 transition-colors duration-300 ease-out group-hover/acct:bg-[var(--brand)] motion-reduce:transition-none dark:bg-neutral-300 dark:group-hover/acct:bg-[var(--brand-dark)] sm:h-7 sm:w-7"
                 style={{
                   WebkitMaskImage: `url(${item.src})`,
                   maskImage: `url(${item.src})`,
@@ -193,7 +193,7 @@ export function AccountsBento() {
               />
             </RecessedTile>
             {/* Handle reveals under the tile on hover */}
-            <span className="mt-1.5 block font-mono text-[10px] uppercase tracking-widest text-text-secondary opacity-0 transition-all duration-300 group-hover/acct:opacity-100">
+            <span className="mt-1.5 block font-mono text-[10px] uppercase tracking-widest text-text-secondary opacity-0 transition-all duration-300 group-hover/acct:opacity-100 motion-reduce:transition-none">
               {item.title}
             </span>
           </a>
@@ -522,7 +522,7 @@ function GlobeBento() {
       <div className="pointer-events-none absolute inset-x-0 bottom-5 z-20 flex justify-center">
         <span className="inline-flex items-center gap-1.5 rounded-full border border-border-primary bg-bg-primary/80 px-3 py-1 font-mono text-xs text-text-secondary shadow-sm backdrop-blur">
           <span className="relative flex size-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75 motion-reduce:animate-none" />
             <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
           </span>
           available for new projects
@@ -842,7 +842,7 @@ export function SiteStatsBento({
           </h3>
           <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
             <span className="relative flex size-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75 motion-reduce:animate-none" />
               <span className="relative inline-flex size-1.5 rounded-full bg-emerald-500" />
             </span>
             LIVE
@@ -863,7 +863,7 @@ export function SiteStatsBento({
               key={stat.key}
               href={stat.href}
               title={`${stat.label} →`}
-              className="group/tile block rounded-[14px] border border-border-primary p-1 transition-all duration-300 hover:-translate-y-1 hover:border-neutral-400 dark:hover:border-white/30"
+              className="group/tile block rounded-[14px] border border-border-primary p-1 transition-all duration-300 hover:-translate-y-1 hover:border-neutral-400 motion-reduce:hover:translate-y-0 motion-reduce:transition-none dark:hover:border-white/30"
             >
               <div
                 className="flex h-full flex-col items-center justify-center gap-1 rounded-[10px] border-2 border-[#A5AEB81F]/10 bg-[#EDEEF0] px-2 py-2.5 dark:bg-white/5"
@@ -871,7 +871,7 @@ export function SiteStatsBento({
               >
                 <Icon
                   className={clsx(
-                    "size-4 text-neutral-600 transition-all duration-300 ease-out group-hover/tile:scale-110 dark:text-neutral-300",
+                    "size-4 text-neutral-600 transition-all duration-300 ease-out group-hover/tile:scale-110 motion-reduce:group-hover/tile:scale-100 motion-reduce:transition-none dark:text-neutral-300",
                     stat.hoverClass
                   )}
                   aria-hidden
@@ -883,7 +883,7 @@ export function SiteStatsBento({
                     <span className="text-text-secondary">—</span>
                   )}
                 </span>
-                <span className="text-center font-mono text-[10px] uppercase tracking-widest text-text-secondary transition-colors duration-300 group-hover/tile:text-text-primary">
+                <span className="text-center font-mono text-[10px] uppercase tracking-widest text-text-secondary transition-colors duration-300 group-hover/tile:text-text-primary motion-reduce:transition-none">
                   {stat.label}
                 </span>
               </div>
@@ -895,7 +895,7 @@ export function SiteStatsBento({
       {/* Footer — live view total + link to the full breakdown */}
       <Link
         href="/stats"
-        className="z-20 mt-2 block py-1.5 -my-1.5 text-center font-mono text-[11px] text-text-secondary transition-colors duration-300 hover:text-text-primary"
+        className="z-20 mt-2 block py-1.5 -my-1.5 text-center font-mono text-[11px] text-text-secondary transition-colors duration-300 hover:text-text-primary motion-reduce:transition-none"
       >
         {site?.views != null && (
           <>{site.views.toLocaleString("en-US")} article views · </>

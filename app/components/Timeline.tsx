@@ -1,7 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion";
+import {
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+  useTransform,
+} from "framer-motion";
 import { useRef } from "react";
 
 interface TimelineProps {
@@ -25,7 +32,8 @@ export function Timeline({ avatarUrl }: TimelineProps) {
     mass: 0.4,
     restDelta: 0.001,
   });
-  const progress = prefersReducedMotion ? scrollYProgress : smooth;
+  const staticProgress = useMotionValue(1);
+  const progress = prefersReducedMotion ? staticProgress : smooth;
 
   // Avatar rides from the top of the line to its very end (36px = avatar
   // height) so it never slips past the bottom divider.
