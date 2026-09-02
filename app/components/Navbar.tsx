@@ -188,12 +188,12 @@ export default function Navbar() {
     };
   }, [isDropdownOpen]);
 
-  let activeTab: string | null = pathname === "/" ? "Home" : null;
-  if (pathname === "/about" || pathname.startsWith("/about")) activeTab = "About";
-  else if (pathname === "/projects" || pathname.startsWith("/projects")) activeTab = "Projects";
-  else if (pathname === "/blog" || pathname.startsWith("/blog")) activeTab = "Blog";
   const isRouteActive = (route: string) =>
     pathname === route || pathname.startsWith(`${route}/`);
+  let activeTab: string | null = pathname === "/" ? "Home" : null;
+  if (isRouteActive("/about")) activeTab = "About";
+  else if (isRouteActive("/projects")) activeTab = "Projects";
+  else if (isRouteActive("/blog")) activeTab = "Blog";
   const isMoreActive = ["/community-wall", "/stats", "/credentials", "/contact", "/links"]
     .some(isRouteActive);
 
