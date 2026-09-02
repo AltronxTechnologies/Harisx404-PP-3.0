@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { CheckCircle2, Loader2, X } from "lucide-react";
 import {
   submitTestimonial,
@@ -35,6 +35,7 @@ export function TestimonialSubmitModal({
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [headlineLen, setHeadlineLen] = useState(0);
   const [quoteLen, setQuoteLen] = useState(0);
+  const prefersReducedMotion = useReducedMotion();
   const formRef = useRef<HTMLFormElement>(null);
   const firstFieldRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -152,9 +153,10 @@ export function TestimonialSubmitModal({
           // z-[6000] beats the navbar (z-[5000]) so nothing ever renders
           // above the dialog while it's open.
           className="fixed inset-0 z-[6000] overflow-y-auto"
-          initial={{ opacity: 0 }}
+          initial={prefersReducedMotion ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          exit={prefersReducedMotion ? undefined : { opacity: 0 }}
+          transition={prefersReducedMotion ? { duration: 0 } : undefined}
           role="dialog"
           aria-modal="true"
           aria-labelledby="testimonial-modal-title"
@@ -174,10 +176,16 @@ export function TestimonialSubmitModal({
             <motion.div
               ref={dialogRef}
               tabIndex={-1}
-              initial={{ opacity: 0, y: 16, scale: 0.98 }}
+              initial={prefersReducedMotion ? false : { opacity: 0, y: 16, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 16, scale: 0.98 }}
-              transition={{ type: "spring", stiffness: 300, damping: 28 }}
+              exit={
+                prefersReducedMotion ? undefined : { opacity: 0, y: 16, scale: 0.98 }
+              }
+              transition={
+                prefersReducedMotion
+                  ? { duration: 0 }
+                  : { type: "spring", stiffness: 300, damping: 28 }
+              }
               className="relative w-full max-w-lg rounded-3xl border border-border-primary bg-white p-4 shadow-2xl dark:bg-[#111] sm:p-8"
             >
             <button
@@ -394,7 +402,10 @@ export function TestimonialSubmitModal({
                     className="mt-0.5 inline-flex items-center justify-center gap-2 rounded-full bg-text-primary px-6 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-60 dark:bg-white dark:text-black sm:mt-1 sm:py-3"
                   >
                     {isPending && (
-                      <Loader2 className="size-4 animate-spin" aria-hidden />
+                      <Loader2
+                        className={`size-4 ${prefersReducedMotion ? "" : "animate-spin"}`}
+                        aria-hidden
+                      />
                     )}
                     {isPending ? "Submitting…" : "Submit for review"}
                   </button>
