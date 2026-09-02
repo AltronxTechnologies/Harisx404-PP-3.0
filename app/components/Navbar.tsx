@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion, AnimatePresence, MotionConfig } from "framer-motion";
+import { motion, AnimatePresence, MotionConfig, useReducedMotion } from "framer-motion";
 import Image from "next/image";
 import { ReachOutModal } from "./navbar/ReachOutModal";
 import { SearchModal } from "./navbar/SearchModal";
@@ -22,6 +22,7 @@ export default function Navbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isReachOutOpen, setIsReachOutOpen] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
 
   // Touch-safe "More" dropdown: remember when hover opened it so the tap's
   // synthetic click (fired right after mouseenter on touch) doesn't re-toggle.
@@ -64,7 +65,7 @@ export default function Navbar() {
   const [mobileCycle, setMobileCycle] = useState(0);
 
   useEffect(() => {
-    if (showGreeting) return;
+    if (showGreeting || prefersReducedMotion) return;
     // The cycling pill only exists below md — don't tick on larger screens.
     const mq = window.matchMedia("(max-width: 767px)");
     let interval: ReturnType<typeof setInterval> | undefined;
@@ -82,9 +83,14 @@ export default function Navbar() {
       clearInterval(interval);
       mq.removeEventListener("change", sync);
     };
-  }, [showGreeting]);
+  }, [prefersReducedMotion, showGreeting]);
 
   useEffect(() => {
+    if (prefersReducedMotion) {
+      setShowGreeting(false);
+      setSideControlsReady(true);
+      return;
+    }
     const hour = new Date().getHours();
     if (hour >= 5 && hour < 12) {
       setGreeting("Good Morning");
@@ -105,7 +111,7 @@ export default function Navbar() {
       clearTimeout(timer);
       clearTimeout(controlsTimer);
     };
-  }, []);
+  }, [prefersReducedMotion]);
 
   // Keyboard shortcut: Cmd+K / Ctrl+K for search
   useEffect(() => {
@@ -290,7 +296,7 @@ export default function Navbar() {
                                 transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                                 className="inline-flex items-center gap-1.5 text-[15px] font-medium text-neutral-800 dark:text-white/90 tracking-wide whitespace-nowrap"
                               >
-                                <span className="inline-block size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                <span className="inline-block size-1.5 rounded-full bg-emerald-500 animate-pulse motion-reduce:animate-none" />
                                 Explore now
                               </motion.span>
                             )}
@@ -463,19 +469,29 @@ export default function Navbar() {
                        so the sides and bottom grow out of the navbar and
                        fold back into it on close — one continuous surface. */
                     initial={{
-                      clipPath: pillClip,
+                      clipPath: prefersReducedMotion
+                        ? "inset(0px 0px 0px 0px round 24px)"
+                        : pillClip,
                     }}
                     animate={{
                       clipPath: "inset(0px 0px 0px 0px round 24px)",
                     }}
                     exit={{
-                      clipPath: pillClip,
+                      clipPath: prefersReducedMotion
+                        ? "inset(0px 0px 0px 0px round 24px)"
+                        : pillClip,
                       transition: {
-                        clipPath: { duration: 0.65, ease: [0.4, 0, 0.2, 1] },
+                        clipPath: {
+                          duration: prefersReducedMotion ? 0 : 0.65,
+                          ease: [0.4, 0, 0.2, 1],
+                        },
                       },
                     }}
                     transition={{
-                      clipPath: { duration: 0.9, ease: [0.19, 1, 0.22, 1] },
+                      clipPath: {
+                        duration: prefersReducedMotion ? 0 : 0.9,
+                        ease: [0.19, 1, 0.22, 1],
+                      },
                     }}
                     style={{ transformOrigin: "top center", willChange: "clip-path" }}
                     /* Solid surface: backdrop-blur can't apply here (the
@@ -510,11 +526,11 @@ export default function Navbar() {
                               alt="Community Wall"
                               fill
                               sizes="(max-width: 768px) 92vw, 250px"
-                              className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.08] opacity-60 group-hover:opacity-80"
+                              className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.08] opacity-60 group-hover:opacity-80 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                             <div className="relative z-10 flex flex-col items-start">
-                              <h3 className="font-sans font-bold text-lg text-white mb-0.5 tracking-tight group-hover:translate-x-0.5 transition-transform">Community Wall</h3>
+                              <h3 className="font-sans font-bold text-lg text-white mb-0.5 tracking-tight group-hover:translate-x-0.5 transition-transform motion-reduce:transition-none motion-reduce:group-hover:translate-x-0">Community Wall</h3>
                               <p className="text-[13px] text-white/75 font-normal">Leave your mark — say hi!</p>
                             </div>
                           </Link>
@@ -534,11 +550,11 @@ export default function Navbar() {
                               alt="Stats"
                               fill
                               sizes="(max-width: 768px) 92vw, 250px"
-                              className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.08] opacity-60 group-hover:opacity-80"
+                              className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.08] opacity-60 group-hover:opacity-80 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                             <div className="relative z-10 flex flex-col items-start">
-                              <h3 className="font-sans font-bold text-lg text-white mb-0.5 tracking-tight group-hover:translate-x-0.5 transition-transform">Stats</h3>
+                              <h3 className="font-sans font-bold text-lg text-white mb-0.5 tracking-tight group-hover:translate-x-0.5 transition-transform motion-reduce:transition-none motion-reduce:group-hover:translate-x-0">Stats</h3>
                               <p className="text-[13px] text-white/75 font-normal">The numbers behind this site</p>
                             </div>
                           </Link>
@@ -553,7 +569,7 @@ export default function Navbar() {
                             onClick={() => setIsDropdownOpen(false)}
                             className="flex-1 flex items-center gap-3 rounded-2xl bg-neutral-100/90 dark:bg-[#1a1a1a] p-3 hover:bg-neutral-200/90 dark:hover:bg-[#252525] transition-all duration-200 group border border-neutral-200/70 dark:border-white/5 shadow-xs"
                           >
-                            <div className="p-2.5 rounded-xl bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 group-hover:scale-105 group-hover:bg-neutral-50 dark:group-hover:bg-white/10 transition-all shadow-xs">
+                            <div className="p-2.5 rounded-xl bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 group-hover:scale-105 group-hover:bg-neutral-50 dark:group-hover:bg-white/10 transition-all shadow-xs motion-reduce:transition-none motion-reduce:group-hover:scale-100">
                               <svg className="size-4 text-neutral-800 dark:text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
                               </svg>
@@ -569,7 +585,7 @@ export default function Navbar() {
                             onClick={() => setIsDropdownOpen(false)}
                             className="flex-1 flex items-center gap-3 rounded-2xl bg-neutral-100/90 dark:bg-[#1a1a1a] p-3 hover:bg-neutral-200/90 dark:hover:bg-[#252525] transition-all duration-200 group border border-neutral-200/70 dark:border-white/5 shadow-xs"
                           >
-                            <div className="p-2.5 rounded-xl bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 group-hover:scale-105 group-hover:bg-neutral-50 dark:group-hover:bg-white/10 transition-all shadow-xs">
+                            <div className="p-2.5 rounded-xl bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 group-hover:scale-105 group-hover:bg-neutral-50 dark:group-hover:bg-white/10 transition-all shadow-xs motion-reduce:transition-none motion-reduce:group-hover:scale-100">
                               <svg className="size-4 text-neutral-800 dark:text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
                               </svg>
@@ -585,7 +601,7 @@ export default function Navbar() {
                             onClick={() => setIsDropdownOpen(false)}
                             className="flex-1 flex items-center gap-3 rounded-2xl bg-neutral-100/90 dark:bg-[#1a1a1a] p-3 hover:bg-neutral-200/90 dark:hover:bg-[#252525] transition-all duration-200 group border border-neutral-200/70 dark:border-white/5 shadow-xs"
                           >
-                            <div className="p-2.5 rounded-xl bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 group-hover:scale-105 group-hover:bg-neutral-50 dark:group-hover:bg-white/10 transition-all shadow-xs">
+                            <div className="p-2.5 rounded-xl bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 group-hover:scale-105 group-hover:bg-neutral-50 dark:group-hover:bg-white/10 transition-all shadow-xs motion-reduce:transition-none motion-reduce:group-hover:scale-100">
                               <svg className="size-4 text-neutral-800 dark:text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                               </svg>
