@@ -616,11 +616,11 @@ export function DomainShowcase({ domain }: { domain: string }) {
       <AnimatePresence mode="wait">
         <motion.div
           key={`${domain}-${idx}`}
-          initial={{ opacity: 0, scale: 0.92 }}
+          initial={still ? false : { opacity: 0, scale: 0.92 }}
           animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.94 }}
-          transition={{ duration: 0.4, ease: "easeInOut" }}
-          className="absolute inset-0 transition-[filter] duration-300 group-hover:brightness-110 group-hover:saturate-110"
+          exit={still ? { opacity: 1 } : { opacity: 0, scale: 0.94 }}
+          transition={still ? { duration: 0 } : { duration: 0.4, ease: "easeInOut" }}
+          className="absolute inset-0 transition-[filter] duration-300 group-hover:brightness-110 group-hover:saturate-110 motion-reduce:transition-none"
         >
           <Visual still={still} reverse={reverse} />
         </motion.div>

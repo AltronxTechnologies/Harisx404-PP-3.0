@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, useReducedMotion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import { siteContent } from "@/app/data/site-content";
 
@@ -73,9 +73,14 @@ function CountUp({ to, pad = 2 }: { to: number; pad?: number }) {
   const ref = useRef<HTMLSpanElement | null>(null);
   const inView = useInView(ref, { once: true, margin: "-40px" });
   const [value, setValue] = useState(0);
+  const reduced = useReducedMotion();
 
   useEffect(() => {
     if (!inView) return;
+    if (reduced) {
+      setValue(to);
+      return;
+    }
     let raf: number;
     const start = performance.now();
     const duration = 900;
@@ -87,7 +92,7 @@ function CountUp({ to, pad = 2 }: { to: number; pad?: number }) {
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [inView, to]);
+  }, [inView, reduced, to]);
 
   return (
     <span ref={ref} className="tabular-nums">
@@ -132,6 +137,7 @@ function DomainBar({
 }: {
   domains: { web: number; cyber: number; ai: number };
 }) {
+  const reduced = useReducedMotion();
   const ref = useRef<HTMLDivElement | null>(null);
   const inView = useInView(ref, { once: true, margin: "-40px" });
   const total = Math.max(1, domains.web + domains.cyber + domains.ai);
@@ -150,9 +156,13 @@ function DomainBar({
       {segments.map((s, i) => (
         <motion.span
           key={i}
-          initial={{ flexGrow: 0.0001 }}
+          initial={reduced ? false : { flexGrow: 0.0001 }}
           animate={inView ? { flexGrow: s.count / total } : {}}
-          transition={{ duration: 0.9, delay: 0.15 + s.delay, ease: [0.22, 1, 0.36, 1] }}
+          transition={
+            reduced
+              ? { duration: 0 }
+              : { duration: 0.9, delay: 0.15 + s.delay, ease: [0.22, 1, 0.36, 1] }
+          }
           className={`${s.color} min-w-0`}
         />
       ))}
@@ -194,7 +204,7 @@ function Segment({
         <span className="relative flex h-1.5 w-1.5 shrink-0" aria-hidden>
           {ping && (
             <span
-              className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-60 ${ping}`}
+              className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-60 motion-reduce:animate-none ${ping}`}
             />
           )}
           <span className={`relative inline-flex h-1.5 w-1.5 rounded-full ${dot}`} />
@@ -219,15 +229,16 @@ function Segment({
    uses an internal grid so the domain bar aligns exactly with the chips
    row beneath it. */
 export function StatusRow({ data }: { data?: StatusRowData }) {
+  const reduced = useReducedMotion();
   const total = data?.projectCount ?? 3;
   const domains = data?.domainCounts ?? { web: 1, cyber: 1, ai: 1 };
 
   return (
     <motion.section
       initial={false}
-      whileInView={{ opacity: 1, y: 0 }}
+      whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.55, ease: "easeOut" }}
+      transition={reduced ? { duration: 0 } : { duration: 0.55, ease: "easeOut" }}
       aria-label="Current status"
       className="grid grid-cols-1 border-y border-border-primary md:grid-cols-[auto_1fr] lg:grid-cols-[1fr_auto_1fr]"
     >
@@ -260,7 +271,7 @@ export function StatusRow({ data }: { data?: StatusRowData }) {
           {/* row 1 · col 1 — label */}
           <span className="flex items-center gap-2">
             <span className="relative flex h-1.5 w-1.5 shrink-0" aria-hidden>
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-60" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-60 motion-reduce:animate-none" />
               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-orange-500" />
             </span>
             <span className="whitespace-nowrap font-mono text-[10px] uppercase tracking-widest text-text-secondary">

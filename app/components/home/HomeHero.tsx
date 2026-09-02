@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { DomainShowcase } from "./DomainShowcase";
 import { ArrowUpRight, ChevronRight } from "lucide-react";
 import { siteContent } from "@/app/data/site-content";
@@ -25,14 +25,16 @@ const statusLines = hero.statusLines;
    under the hero. */
 function TaglineRotator() {
   const [index, setIndex] = useState(0);
+  const reduced = useReducedMotion();
 
   useEffect(() => {
+    if (reduced) return;
     const timer = setInterval(
       () => setIndex((prev) => (prev + 1) % statusLines.length),
       3000
     );
     return () => clearInterval(timer);
-  }, []);
+  }, [reduced]);
 
   return (
     <div
@@ -41,17 +43,17 @@ function TaglineRotator() {
     >
       {/* Dot lives outside the clipped rotator so its ping ring never cuts */}
       <span aria-hidden className="relative flex size-1.5 shrink-0">
-        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75 motion-reduce:animate-none" />
         <span className="relative inline-flex size-1.5 rounded-full bg-emerald-500" />
       </span>
       <div className="relative h-5 w-[250px] overflow-hidden lg:h-6 lg:w-[314px]">
         <AnimatePresence mode="wait">
           <motion.span
             key={statusLines[index]}
-            initial={{ opacity: 0, y: 14 }}
+            initial={reduced ? false : { opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -14 }}
-            transition={{ duration: 0.35, ease: "easeOut" }}
+            exit={reduced ? { opacity: 1 } : { opacity: 0, y: -14 }}
+            transition={reduced ? { duration: 0 } : { duration: 0.35, ease: "easeOut" }}
             className="absolute inset-x-0 top-1 block whitespace-nowrap text-center md:text-left"
           >
             {statusLines[index]}
@@ -120,6 +122,7 @@ function HeadlineRotator({
 }: {
   onDomainChange?: (accent: string) => void;
 }) {
+  const prefersReducedMotion = useReducedMotion();
   const [index, setIndex] = useState(0);
   const [line1, setLine1] = useState<string>(headlines[0].line1);
   const [line2, setLine2] = useState<string>(headlines[0].line2);
@@ -172,10 +175,6 @@ function HeadlineRotator({
       firstRun.current ? 0 : 300
     );
 
-    const reduced = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
-
     /* Off-screen pause: resolve only once the headline is visible. */
     const waitVisible = async () => {
       while (!cancelled && !visibleRef.current) await wait(500);
@@ -207,11 +206,9 @@ function HeadlineRotator({
       });
 
     (async () => {
-      if (reduced) {
+      if (prefersReducedMotion) {
         setLine1(t1);
         setLine2(t2);
-        await wait(4200);
-        if (!cancelled) setIndex((prev) => (prev + 1) % headlines.length);
         return;
       }
 
@@ -237,7 +234,7 @@ function HeadlineRotator({
       cancelled = true;
       clearTimeout(domainTimer);
     };
-  }, [index, replay]);
+  }, [index, onDomainChange, prefersReducedMotion, replay]);
 
   const current = headlines[index];
   const domain = domainStyles[current.accent] ?? domainStyles.ai;
@@ -285,6 +282,7 @@ export function HomeHero({
 }: {
   latestLaunch?: HeroLaunch | null;
 }) {
+  const reduced = useReducedMotion();
   const launch: HeroLaunch = latestLaunch ?? hero.newLaunch;
   // Current headline domain, reported by the typewriter, drives the showcase.
   const [domain, setDomain] = useState<string>(headlines[0].accent);
@@ -311,7 +309,7 @@ export function HomeHero({
         <div className="flex flex-col items-center gap-5 text-center md:items-start md:self-start md:text-left">
           <motion.p
             variants={fadeUp}
-            initial="hidden"
+            initial={reduced ? false : "hidden"}
             animate="show"
             custom={0}
             className="font-display text-5xl font-medium leading-[0.95] max-[374px]:text-[2.5rem] sm:text-6xl md:text-5xl lg:text-7xl"
@@ -328,7 +326,7 @@ export function HomeHero({
 
           <motion.div
             variants={fadeUp}
-            initial="hidden"
+            initial={reduced ? false : "hidden"}
             animate="show"
             custom={1}
             className="flex w-fit flex-col gap-4"
@@ -342,7 +340,7 @@ export function HomeHero({
         {/* Circular portrait with concentric rings + sonar ripples */}
         <motion.div
           variants={fadeUp}
-          initial="hidden"
+          initial={reduced ? false : "hidden"}
           animate="show"
           custom={1}
           className="order-first flex justify-center md:order-none"
@@ -375,7 +373,7 @@ export function HomeHero({
         <div className="flex flex-col items-center text-center md:items-end md:self-start md:text-right">
           <motion.div
             variants={fadeUp}
-            initial="hidden"
+            initial={reduced ? false : "hidden"}
             animate="show"
             custom={1}
             className="w-fit max-w-full px-2 md:max-w-xs md:px-0 md:-mr-2 lg:mr-0"
@@ -387,7 +385,7 @@ export function HomeHero({
             >
               <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-blue-500/10 px-2.5 py-1">
                 <span className="relative flex size-1.5 shrink-0" aria-hidden>
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75 motion-reduce:animate-none" />
                   <span className="relative inline-flex size-1.5 rounded-full bg-blue-500" />
                 </span>
                 <span className="whitespace-nowrap font-mono text-[9px] uppercase tracking-widest text-blue-600 dark:text-blue-300">
@@ -410,7 +408,7 @@ export function HomeHero({
             >
               <span className="flex w-full items-center gap-3">
                 <span className="relative flex size-1.5 shrink-0" aria-hidden>
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75 motion-reduce:animate-none" />
                   <span className="relative inline-flex size-1.5 rounded-full bg-blue-500" />
                 </span>
                 <span className="whitespace-nowrap font-mono text-xs uppercase tracking-widest text-text-secondary">
@@ -428,7 +426,7 @@ export function HomeHero({
                 {/* Blue stroke that sweeps in on hover (per reference) */}
                 <span
                   aria-hidden
-                  className="mt-1 block h-[2px] w-full origin-left scale-x-0 rounded-full bg-gradient-to-r from-blue-500 via-blue-400/70 to-transparent opacity-0 transition-all duration-300 ease-out group-hover:scale-x-100 group-hover:opacity-100"
+                  className="mt-1 block h-[2px] w-full origin-left scale-x-0 rounded-full bg-gradient-to-r from-blue-500 via-blue-400/70 to-transparent opacity-0 transition-all duration-300 ease-out group-hover:scale-x-100 group-hover:opacity-100 motion-reduce:transition-none"
                 />
               </span>
               <span className="mt-1.5 flex w-full items-center justify-between gap-3 lg:mt-2">
@@ -447,7 +445,7 @@ export function HomeHero({
       {/* ── Full-width divider between the hero's upper and lower rows ── */}
       <motion.div
         variants={fadeUp}
-        initial="hidden"
+        initial={reduced ? false : "hidden"}
         animate="show"
         custom={2}
         aria-hidden
@@ -458,7 +456,7 @@ export function HomeHero({
       <div className="grid grid-cols-1 items-center gap-12 md:grid-cols-2 md:gap-6">
         <motion.div
           variants={fadeUp}
-          initial="hidden"
+          initial={reduced ? false : "hidden"}
           animate="show"
           custom={3}
           className="flex justify-center text-center md:justify-start md:text-left"
@@ -468,7 +466,7 @@ export function HomeHero({
 
         <motion.div
           variants={fadeUp}
-          initial="hidden"
+          initial={reduced ? false : "hidden"}
           animate="show"
           custom={4}
           className="flex w-full justify-center md:justify-end"
