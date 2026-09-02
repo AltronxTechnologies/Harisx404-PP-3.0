@@ -392,7 +392,7 @@ function GlobeBento() {
       </div>
       {/* Globe sits half-cropped at the card's bottom edge — the classic
           bento treatment. Pointer-drag spins it; it self-rotates at 60fps. */}
-      <div className="absolute inset-x-0 -bottom-[150px] z-10 mx-auto aspect-square w-[320px] sm:-bottom-[190px] sm:w-[400px]">
+      <div className="absolute -bottom-[150px] left-1/2 z-10 aspect-square w-[320px] -translate-x-1/2 sm:-bottom-[190px] sm:w-[400px]">
         <canvas
           ref={canvasRef}
           className="size-full opacity-0 transition-opacity duration-700 [contain:layout_paint_size]"
