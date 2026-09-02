@@ -28,6 +28,8 @@ export default function Navbar() {
   const dropdownOpenedAt = useRef(0);
   const navRowRef = useRef<HTMLDivElement>(null);
   const pillRef = useRef<HTMLDivElement>(null);
+  const moreTriggerRef = useRef<HTMLButtonElement>(null);
+  const firstDropdownLinkRef = useRef<HTMLAnchorElement>(null);
 
   // Morph geometry: the dropdown panel starts clipped to the pill's EXACT
   // rect (measured at open time) so the expansion reads as the navbar
@@ -45,10 +47,11 @@ export default function Navbar() {
       `inset(0px ${hx.toFixed(1)}px calc(100% - ${r.height.toFixed(1)}px) ${hx.toFixed(1)}px round 22px)`
     );
   };
-  const openDropdown = () => {
+  const openDropdown = (focusFirst = false) => {
     measurePillClip();
     if (!isDropdownOpen) dropdownOpenedAt.current = Date.now();
     setIsDropdownOpen(true);
+    if (focusFirst) requestAnimationFrame(() => firstDropdownLinkRef.current?.focus());
   };
 
   // Greeting State
@@ -374,17 +377,18 @@ export default function Navbar() {
                           }}
                         >
                           <button
+                            ref={moreTriggerRef}
                             type="button"
                             aria-haspopup="menu"
                             aria-expanded={isDropdownOpen}
-                            onClick={() => {
+                            onClick={(event) => {
                               // On touch, mouseenter just opened it — don't close again.
                               // (Timestamp-based: state updates may still be batched here.)
                               if (Date.now() - dropdownOpenedAt.current < 450) return;
                               if (isDropdownOpen) {
                                 setIsDropdownOpen(false);
                               } else {
-                                openDropdown();
+                                openDropdown(event.detail === 0);
                               }
                             }}
                             className={`relative z-10 flex cursor-pointer select-none items-center gap-1 px-4 py-1.5 font-normal text-sm transition-colors duration-150 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 dark:focus-visible:ring-white/25 ${
@@ -488,6 +492,7 @@ export default function Navbar() {
                           className="flex-1 min-h-[160px] max-md:flex-none max-md:h-40"
                         >
                           <Link 
+                            ref={firstDropdownLinkRef}
                             href="/community-wall" 
                             onClick={() => setIsDropdownOpen(false)}
                             className="group relative flex h-full w-full flex-col justify-end overflow-hidden rounded-2xl bg-neutral-900 p-4 ring-1 ring-black/5 dark:ring-white/10 hover:ring-black/15 dark:hover:ring-white/25 transition-all duration-300 shadow-sm hover:shadow-md"
