@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence, MotionConfig, useReducedMotion } from "framer-motion";
 import Image from "next/image";
+import { Search } from "lucide-react";
 import { ReachOutModal } from "./navbar/ReachOutModal";
 import { SearchModal } from "./navbar/SearchModal";
 import { ThemeToggle, navCircleSurface } from "./ThemeToggle";
@@ -669,10 +670,7 @@ export default function Navbar() {
                 className={`${navCircleSurface} mt-0.5`}
                 type="button"
               >
-                <svg className="size-[18px]" fill="currentColor" viewBox="0 0 256 256">
-                  <path d="M192,112a80,80,0,1,1-80-80A80,80,0,0,1,192,112Z" opacity="0.2" />
-                  <path d="M229.66,218.34,179.6,168.28a88.21,88.21,0,1,0-11.32,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z" />
-                </svg>
+                <Search className="size-[18px]" aria-hidden />
               </motion.button>
 
               <motion.div
