@@ -130,6 +130,7 @@ export default async function Home() {
       ? dbPosts.slice(0, 3).map((post) => ({
           title: post.title,
           slug: post.slug,
+          href: `/blog/${post.slug}`,
           summary: post.summary,
           publishedAt: post.publishedAt,
           readingTime: estimateReadingTime(post.content),
@@ -199,7 +200,7 @@ export default async function Home() {
     latestPostMeta: latestPost
       ? `${latestPost.readingTime} · ${formatDate(latestPost.publishedAt)}`
       : undefined,
-    latestPostHref: latestPost ? `/blog/${latestPost.slug}` : undefined,
+    latestPostHref: latestPost?.href ?? (latestPost ? `/blog/${latestPost.slug}` : undefined),
   };
 
   return (

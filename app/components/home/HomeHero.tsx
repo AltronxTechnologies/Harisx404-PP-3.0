@@ -283,7 +283,7 @@ export function HomeHero({
   latestLaunch?: HeroLaunch | null;
 }) {
   const reduced = useReducedMotion();
-  const launch: HeroLaunch = latestLaunch ?? hero.newLaunch;
+  const launch: HeroLaunch = latestLaunch ?? { ...hero.newLaunch, href: "/projects" };
   // Current headline domain, reported by the typewriter, drives the showcase.
   const [domain, setDomain] = useState<string>(headlines[0].accent);
   // Pause ambient CSS animations (ripple rings, ping dots) while the hero

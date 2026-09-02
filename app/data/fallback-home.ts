@@ -17,6 +17,7 @@ export type HomeProject = {
 export type HomePost = {
   title: string;
   slug: string;
+  href?: string;
   summary: string;
   publishedAt: string;
   readingTime: string;
@@ -92,6 +93,7 @@ export const fallbackPosts: HomePost[] = [
   {
     title: "Shipping Faster with a Boring Tech Stack",
     slug: "shipping-faster-boring-stack",
+    href: "/blog",
     summary:
       "Why I reach for proven tools over shiny ones, and how a boring stack helped me cut delivery time in half on client projects.",
     publishedAt: "2025-06-12T00:00:00.000Z",
@@ -100,6 +102,7 @@ export const fallbackPosts: HomePost[] = [
   {
     title: "Threat Modeling for Frontend Developers",
     slug: "threat-modeling-for-frontend-devs",
+    href: "/blog",
     summary:
       "A practical, jargon-free walkthrough of thinking like an attacker before you write your first component.",
     publishedAt: "2025-04-03T00:00:00.000Z",
@@ -108,6 +111,7 @@ export const fallbackPosts: HomePost[] = [
   {
     title: "Postgres Patterns I Wish I Knew Earlier",
     slug: "postgres-patterns-i-wish-i-knew",
+    href: "/blog",
     summary:
       "Indexes, row-level security, and jsonb tricks that took my Supabase projects from prototype to production-grade.",
     publishedAt: "2025-02-18T00:00:00.000Z",
@@ -116,6 +120,7 @@ export const fallbackPosts: HomePost[] = [
   {
     title: "Designing APIs Humans Can Actually Read",
     slug: "designing-readable-apis",
+    href: "/blog",
     summary:
       "Naming, versioning, and error-shape conventions that make integrating with your backend feel effortless.",
     publishedAt: "2024-12-05T00:00:00.000Z",

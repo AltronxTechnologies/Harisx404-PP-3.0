@@ -118,7 +118,7 @@ export function Writings({
           className={hasCompanions ? "lg:col-span-6" : "lg:col-span-10"}
         >
           <Link
-            href={`/blog/${featured.slug}`}
+            href={featured.href ?? `/blog/${featured.slug}`}
             className={`group flex h-full flex-col rounded-3xl border border-border-primary bg-white p-3 transition-all hover:border-neutral-400/70 hover:shadow-lg dark:hover:border-white/25 dark:bg-white/[0.02] ${
               hasCompanions ? "xl:aspect-[16/10.835]" : ""
             }`}
@@ -201,7 +201,7 @@ export function Writings({
                 className="h-full"
               >
                 <Link
-                  href={`/blog/${post.slug}`}
+                  href={post.href ?? `/blog/${post.slug}`}
                   className="group flex h-full flex-col rounded-3xl border border-border-primary bg-white p-3 transition-all hover:border-neutral-400/70 hover:shadow-lg dark:hover:border-white/25 dark:bg-white/[0.02]"
                 >
                   <div className="flex h-full items-stretch gap-4">
