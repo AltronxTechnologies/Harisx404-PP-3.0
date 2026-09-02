@@ -144,7 +144,7 @@ export default async function AboutPage() {
                 <p className="mb-3 w-full lg:max-w-xl font-mono text-xs font-medium uppercase tracking-[0.2em] text-text-secondary">
                   2022 — 2026 · University of Malakand
                 </p>
-                <h2 className="mb-4 w-full lg:max-w-xl text-balance [font-family:var(--font-source-serif),Georgia,serif] text-2xl font-semibold leading-tight tracking-tight text-text-primary">
+                <h2 className="mb-4 w-full lg:max-w-xl text-balance [font-family:var(--font-source-serif),Georgia,serif] text-[22px] font-semibold leading-tight tracking-tight text-text-primary">
                   B.S. in Information Technology
                 </h2>
                 <p className="mb-6 w-full lg:max-w-xl break-words text-[15px] leading-relaxed text-text-secondary">
@@ -184,7 +184,7 @@ export default async function AboutPage() {
                 <p className="mb-3 w-full lg:max-w-xl font-mono text-xs font-medium uppercase tracking-[0.2em] text-text-secondary">
                   KPITB · University of Malakand
                 </p>
-                <h2 className="mb-4 w-full lg:max-w-xl text-balance [font-family:var(--font-source-serif),Georgia,serif] text-2xl font-semibold leading-tight tracking-tight text-text-primary">
+                <h2 className="mb-4 w-full lg:max-w-xl text-balance [font-family:var(--font-source-serif),Georgia,serif] text-[22px] font-semibold leading-tight tracking-tight text-text-primary">
                   KPITB AI/ML Training Program
                 </h2>
                 <p className="mb-6 w-full lg:max-w-xl break-words text-[15px] leading-relaxed text-text-secondary">

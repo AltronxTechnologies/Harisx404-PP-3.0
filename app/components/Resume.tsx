@@ -359,7 +359,7 @@ export function Resume({ experiences }: { experiences?: Experience[] }) {
                     </p>
                     <div className="mt-5 flex items-center gap-3.5">
                       {logoCard}
-                      <h3 className="break-words [font-family:var(--font-source-serif),Georgia,serif] text-2xl font-semibold leading-tight tracking-tight text-text-primary">
+                      <h3 className="break-words [font-family:var(--font-source-serif),Georgia,serif] text-[22px] font-semibold leading-tight tracking-tight text-text-primary">
                         {experience.organization}
                       </h3>
                     </div>
@@ -388,7 +388,7 @@ export function Resume({ experiences }: { experiences?: Experience[] }) {
                       </p>
                       <div className="mt-4 flex items-center gap-3">
                         {logoCard}
-                        <h3 className="break-words [font-family:var(--font-source-serif),Georgia,serif] text-2xl font-semibold leading-tight tracking-tight text-text-primary">
+                        <h3 className="break-words [font-family:var(--font-source-serif),Georgia,serif] text-[22px] font-semibold leading-tight tracking-tight text-text-primary">
                           {experience.organization}
                         </h3>
                       </div>
@@ -407,7 +407,7 @@ export function Resume({ experiences }: { experiences?: Experience[] }) {
                         ) : null}
                       </div>
                     </div>
-                    <h4 className="break-words [font-family:var(--font-source-serif),Georgia,serif] text-2xl font-semibold leading-tight tracking-tight text-text-primary">
+                    <h4 className="break-words [font-family:var(--font-source-serif),Georgia,serif] text-[22px] font-semibold leading-tight tracking-tight text-text-primary">
                       {experience.jobTitle}
                     </h4>
                     {experience.summary ? (
