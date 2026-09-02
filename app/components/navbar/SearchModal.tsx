@@ -593,6 +593,7 @@ export function SearchModal({
                         key={page.name}
                         href={page.link}
                         onClick={onClose}
+                        aria-current={isActive ? "page" : undefined}
                         className={`${itemTile} ${
                           isActive
                             ? "bg-neutral-200/70 text-neutral-800 dark:bg-white/[0.09] dark:text-white"
