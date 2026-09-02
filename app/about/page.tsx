@@ -14,7 +14,7 @@ import { EduReveal, EduCardHover } from "@/app/components/EducationMotion";
 import { SectionHeading } from "@/app/components/home/SectionHeading";
 import { CtaSection } from "@/app/components/home/CtaSection";
 import { AccountsBento, SiteStatsBento } from "@/app/components/home/HomeBento";
-import { HeroTexture } from "@/app/components/HeroTexture";
+import { PaperHeroTexture } from "@/app/components/PaperHeroTexture";
 import {
   fetchExperiences,
   fetchProjects,
@@ -61,7 +61,7 @@ export default async function AboutPage() {
         {/* Hero — kicker + heading + intro (same system as homepage sections) */}
         <GridWrapper>
           <div className="relative px-4 xl:px-0">
-            <HeroTexture
+            <PaperHeroTexture
               className="-inset-x-2 bottom-0 top-[-128px] sm:-inset-x-3 sm:top-[-144px] md:top-[-176px] lg:inset-x-0"
             />
             <div className="relative">
