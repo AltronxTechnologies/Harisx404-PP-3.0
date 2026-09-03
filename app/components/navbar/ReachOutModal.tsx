@@ -266,7 +266,7 @@ export function ReachOutModal({
                     }
                   }}
                   placeholder="Hey Haris, I have a project idea..."
-                  className="composer-scroll mt-5 w-full resize-none overflow-y-auto bg-transparent text-xl text-neutral-900 placeholder-neutral-400 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 dark:text-white dark:placeholder-white/30 dark:focus-visible:outline-violet-400"
+                  className="composer-scroll mt-5 w-full resize-none overflow-y-auto bg-transparent text-xl text-neutral-900 placeholder-neutral-400 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-400 dark:text-white dark:placeholder-white/30 dark:focus-visible:outline-white/30"
                 />
                 <span id="reach-out-message-limit" className="sr-only">
                   Maximum {MESSAGE_MAX} characters.

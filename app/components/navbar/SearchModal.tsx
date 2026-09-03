@@ -426,7 +426,7 @@ export function SearchModal({
           {/* Top bar — detached search pill + action buttons (same row as ReachOutModal) */}
           <div className="mb-4 flex items-center gap-[7px]">
             <div
-              className={`${pillSurface} focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-violet-600 dark:focus-within:outline-violet-400`}
+              className={`${pillSurface} focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-neutral-400 dark:focus-within:outline-white/30`}
             >
               <Search className="size-7 shrink-0 text-text-secondary" />
               <input

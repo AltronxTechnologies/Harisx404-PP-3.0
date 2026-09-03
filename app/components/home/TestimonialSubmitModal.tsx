@@ -14,7 +14,7 @@ const HEADLINE_MAX = 70;
 const QUOTE_MAX = 280;
 
 const inputClasses =
-  "w-full rounded-2xl border border-border-primary bg-white px-3.5 py-2 text-sm text-text-primary placeholder:text-text-tertiary focus:border-text-tertiary focus:outline-none focus:ring-2 focus:ring-violet-500/30 dark:bg-white/[0.03] sm:px-4 sm:py-2.5";
+  "w-full rounded-2xl border border-border-primary bg-white px-3.5 py-2 text-sm text-text-primary placeholder:text-text-tertiary focus:border-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400/20 dark:bg-white/[0.03] dark:focus:border-white/30 dark:focus:ring-white/15 sm:px-4 sm:py-2.5";
 
 const labelClasses = "mb-1 block text-xs font-medium text-text-secondary";
 
