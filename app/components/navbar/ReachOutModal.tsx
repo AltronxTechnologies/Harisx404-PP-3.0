@@ -185,7 +185,7 @@ export function ReachOutModal({
               }}
             >
             {/* Top bar — detached row above the card */}
-            <div className="mb-4 flex items-center gap-[7px]">
+            <div className="mb-4 flex items-center gap-2">
               <div className={pillSurface}>
                 <button
                   onClick={onClose}
@@ -199,7 +199,7 @@ export function ReachOutModal({
                 </span>
               </div>
 
-              <div className="flex shrink-0 items-center gap-[7px]">
+              <div className="flex shrink-0 items-center gap-2">
                 <button
                   onClick={() => {
                     onClose();
@@ -266,7 +266,7 @@ export function ReachOutModal({
                     }
                   }}
                   placeholder="Hey Haris, I have a project idea..."
-                  className="composer-scroll mt-5 w-full resize-none overflow-y-auto bg-transparent text-xl text-neutral-900 placeholder-neutral-400 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-400 dark:text-white dark:placeholder-white/30 dark:focus-visible:outline-white/30"
+                  className="composer-scroll mt-5 w-full resize-none overflow-y-auto bg-transparent text-xl text-neutral-900 placeholder-neutral-400 focus:outline-none dark:text-white dark:placeholder-white/30"
                 />
                 <span id="reach-out-message-limit" className="sr-only">
                   Maximum {MESSAGE_MAX} characters.
