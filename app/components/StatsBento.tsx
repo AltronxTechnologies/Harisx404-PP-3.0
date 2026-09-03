@@ -132,7 +132,7 @@ export function StatsBento({ height = "h-[220px]" }: { height?: string }) {
         </div>
 
         {/* Footer: timeframe + legend */}
-        <div className="absolute bottom-3 left-6 right-14 flex items-center justify-between">
+        <div className="absolute bottom-3 left-6 right-6 flex items-center justify-between sm:right-14">
           <span className="font-mono text-[10px] uppercase tracking-widest text-text-secondary">
             Last 12 months
           </span>

@@ -763,7 +763,7 @@ export function CaseStudyCard({
                 .map((b, bi) => (
                   <li
                     key={bi}
-                    className="flex text-[15px] leading-6 text-text-secondary"
+                    className="flex text-sm leading-6 text-text-secondary sm:text-[15px]"
                   >
                     <span
                       aria-hidden="true"
@@ -844,7 +844,7 @@ function StickyProjectPanel({
       </p>
       <ul className="mt-[22px] space-y-[7px]">
         {bullets.map((b, i) => (
-          <li key={i} className="flex text-[15px] leading-6 text-text-secondary">
+          <li key={i} className="flex text-sm leading-6 text-text-secondary sm:text-[15px]">
             <span
               aria-hidden="true"
               className={`mr-2 flex h-6 shrink-0 items-center font-mono ${hueText[index % hueText.length]}`}

@@ -279,7 +279,7 @@ function Highlights({
           {highlights.map((highlight, i) => (
             <li
               key={i}
-              className="flex text-[15px] leading-6 text-text-secondary"
+              className="flex text-sm leading-6 text-text-secondary sm:text-[15px]"
             >
               <span
                 aria-hidden

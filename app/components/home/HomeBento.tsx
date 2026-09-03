@@ -100,7 +100,10 @@ export function AccountsBento() {
             rel="noopener noreferrer"
             title={`${item.title} — @harisx404`}
             aria-label={`${item.title} profile`}
-            className="group/acct inline-block text-center"
+            className={clsx(
+              "group/acct relative inline-block text-center sm:w-auto",
+              index === 2 ? "w-16" : "w-14",
+            )}
             style={
               {
                 "--brand": item.brand,
@@ -134,7 +137,7 @@ export function AccountsBento() {
               />
             </RecessedTile>
             {/* Handle reveals under the tile on hover */}
-            <span className="mt-1.5 block font-mono text-[10px] uppercase tracking-widest text-text-secondary opacity-0 transition-all duration-300 group-hover/acct:opacity-100 motion-reduce:transition-none">
+            <span className="absolute left-1/2 top-full mt-1.5 block -translate-x-1/2 whitespace-nowrap font-mono text-[10px] uppercase tracking-widest text-text-secondary opacity-0 transition-all duration-300 group-hover/acct:opacity-100 motion-reduce:transition-none sm:static sm:translate-x-0 sm:whitespace-normal">
               {item.title}
             </span>
           </a>
@@ -838,10 +841,8 @@ export function SiteStatsBento({
         href="/stats"
         className="z-20 mt-2 block py-1.5 -my-1.5 text-center font-mono text-[11px] text-text-secondary transition-colors duration-300 hover:text-text-primary motion-reduce:transition-none"
       >
-        {site?.views != null && (
-          <>{site.views.toLocaleString("en-US")} article views · </>
-        )}
-        full breakdown · /stats →
+        {site?.views != null && <>{site.views.toLocaleString("en-US")} views · </>}
+        Explore stats →
       </Link>
     </BentoCard>
   );
