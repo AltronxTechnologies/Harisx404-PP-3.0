@@ -822,7 +822,7 @@ blockquote p {
 .search-result-tile {
   font-size: max(
     1.25rem,
-    calc(15px / min(var(--reachout-width-scale), var(--reachout-height-scale)))
+    calc(12px / min(var(--reachout-width-scale), var(--reachout-height-scale)))
   );
 }
 @media (max-height: 940px) {
