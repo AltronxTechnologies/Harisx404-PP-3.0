@@ -424,9 +424,9 @@ export function SearchModal({
             }}
           >
           {/* Top bar — detached search pill + action buttons (same row as ReachOutModal) */}
-          <div className="mb-4 flex items-center gap-2">
+          <div className="mb-4 flex items-center gap-[8.5px]">
             <div
-              className={`${pillSurface} focus-within:outline focus-within:outline-1 focus-within:outline-offset-1 focus-within:outline-neutral-400 dark:focus-within:outline-white/30`}
+              className={`${pillSurface} focus-within:outline focus-within:outline-1 focus-within:outline-offset-1 focus-within:outline-border-primary`}
             >
               <Search className="size-7 shrink-0 text-text-secondary" />
               <input
@@ -449,7 +449,7 @@ export function SearchModal({
               )}
             </div>
 
-            <div className="flex shrink-0 items-center gap-2">
+            <div className="flex shrink-0 items-center gap-[8.5px]">
               <button
                 onClick={() => {
                   onClose();

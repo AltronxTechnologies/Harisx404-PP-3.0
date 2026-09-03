@@ -185,7 +185,7 @@ export function ReachOutModal({
               }}
             >
             {/* Top bar — detached row above the card */}
-            <div className="mb-4 flex items-center gap-2">
+            <div className="mb-4 flex items-center gap-[8.5px]">
               <div className={pillSurface}>
                 <button
                   onClick={onClose}
@@ -199,7 +199,7 @@ export function ReachOutModal({
                 </span>
               </div>
 
-              <div className="flex shrink-0 items-center gap-2">
+              <div className="flex shrink-0 items-center gap-[8.5px]">
                 <button
                   onClick={() => {
                     onClose();
