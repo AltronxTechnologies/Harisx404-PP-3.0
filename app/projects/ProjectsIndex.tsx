@@ -1,11 +1,11 @@
 "use client";
 
-/* LOCKED — projects page is audited & production-approved. See note in
-   app/projects/page.tsx before changing anything here. */
+/* Audited under audit/06-projects-page.md; awaiting owner lock approval. */
 
 import { Fragment, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
+import { Search } from "lucide-react";
 import type { HomeProject } from "@/app/data/fallback-home";
 import { CaseStudyCard, projectTags } from "@/app/components/home/CaseStudies";
 
@@ -16,7 +16,7 @@ import { CaseStudyCard, projectTags } from "@/app/components/home/CaseStudies";
  * - Tag filters built from the SAME labels the cards display. Scales to
  *   20+ projects: the row shows the most-used tags (with live counts)
  *   and folds the long tail behind a "+N more" toggle.
- * - Pagination: 6 projects per page, numbering continues across pages.
+ * - Pagination: 8 projects per page, numbering continues across pages.
  * - URL-synced state (?tag=&q=&page=) — refresh-safe, shareable,
  *   back/forward friendly.
  * - Subtle staggered reveal when results change (reduced-motion safe).
@@ -35,7 +35,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
 
   /* Accordion: only one card's Details panel open at a time. */
   const [detailsOpenSlug, setDetailsOpenSlug] = useState<string | null>(null);
-  const topRef = useRef<HTMLDivElement | null>(null);
+  const topRef = useRef<HTMLElement | null>(null);
 
   // ── State lives in the URL ────────────────────────────────────────
   const activeTag = searchParams.get("tag") ?? "All";
@@ -45,6 +45,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
   const [query, setQuery] = useState(q);
   const [showAllTags, setShowAllTags] = useState(false);
   const moreRef = useRef<HTMLDivElement | null>(null);
+  const moreButtonRef = useRef<HTMLButtonElement | null>(null);
   const searchRef = useRef<HTMLInputElement | null>(null);
 
   // "/" focuses the search field (ignored while typing elsewhere).
@@ -70,7 +71,10 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
       }
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setShowAllTags(false);
+      if (e.key === "Escape") {
+        setShowAllTags(false);
+        requestAnimationFrame(() => moreButtonRef.current?.focus());
+      }
       /* Menu keyboard nav: arrows cycle through the tag rows, Home/End
          jump, Enter activates the focused row (native button behavior). */
       if (["ArrowDown", "ArrowUp", "Home", "End"].includes(e.key)) {
@@ -227,7 +231,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
      active tags via a shared layout element — same motion language as the
      pagination's page pill. */
   const inlineChipClass = (active: boolean) =>
-    `relative inline-flex h-[2rem] items-center rounded-full border px-2 font-mono text-[10px] uppercase tracking-normal transition-colors sm:px-4 sm:text-[11px] sm:tracking-widest ${
+    `relative inline-flex h-[2rem] items-center rounded-full border px-1.5 font-mono text-[11px] uppercase tracking-normal transition-colors sm:px-4 sm:tracking-widest ${
       active
         ? "border-text-primary text-bg-primary"
         : "border-border-primary text-text-secondary hover:border-text-tertiary hover:text-text-primary"
@@ -248,7 +252,10 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
     ) : null;
 
   return (
-    <div ref={topRef} className="scroll-mt-20">
+    <section ref={topRef} aria-labelledby="project-collection-heading" className="scroll-mt-20">
+      <h2 id="project-collection-heading" className="sr-only">
+        Project collection
+      </h2>
       {/* Controls — search + domain chips + "More" dropdown, one row. */}
       <div className="mx-auto mt-6 flex flex-wrap items-center justify-center gap-2 max-lg:gap-y-[9px]">
         <label htmlFor="project-search" className="sr-only">
@@ -260,15 +267,11 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
             aligned control block. From lg up they share a line and the
             search returns to its original 224px. */}
         <div className="relative w-full max-w-[297px] sm:w-[439px] sm:max-w-[439px] lg:w-56 lg:max-w-[260px]">
-          <svg
+          <Search
             aria-hidden
-            viewBox="0 0 20 20"
-            fill="none"
+            strokeWidth={1.5}
             className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-text-secondary"
-          >
-            <circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="1.5" />
-            <path d="m13.5 13.5 3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
+          />
           <input
             id="project-search"
             ref={searchRef}
@@ -284,7 +287,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
                 else (e.target as HTMLInputElement).blur();
               }
             }}
-            className="h-[2rem] w-full rounded-full border border-border-primary bg-white pl-10 pr-9 font-mono text-xs text-text-primary outline-none transition-colors placeholder:text-text-secondary hover:border-text-tertiary/60 focus:border-text-tertiary dark:bg-white/[0.03] [&::-webkit-search-cancel-button]:hidden"
+            className="h-[2rem] w-full rounded-full border border-border-primary bg-white pl-10 pr-9 font-mono text-xs text-text-primary outline-none transition-colors placeholder:text-text-secondary hover:border-text-tertiary/60 focus:border-text-tertiary focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-text-secondary dark:bg-white/[0.03] [&::-webkit-search-cancel-button]:hidden"
           />
           {!query && (
             /* Keyboard hint — press "/" anywhere to jump to search. */
@@ -343,11 +346,12 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
             <div ref={moreRef} className="relative">
               <button
                 type="button"
+                ref={moreButtonRef}
                 aria-expanded={showAllTags}
-                aria-haspopup="true"
+                aria-haspopup="menu"
                 aria-controls="projects-more-tags"
                 onClick={() => setShowAllTags((v) => !v)}
-                className={`relative flex h-[2rem] items-center gap-1 rounded-full border px-2 font-mono text-[10px] uppercase tracking-normal transition-colors sm:px-4 sm:text-[11px] sm:tracking-widest ${
+                className={`relative flex h-[2rem] items-center gap-1 rounded-full border px-1.5 font-mono text-[11px] uppercase tracking-normal transition-colors sm:px-4 sm:tracking-widest ${
                   overflowActive
                     ? "border-text-primary text-bg-primary"
                     : "border-border-primary text-text-secondary hover:border-text-tertiary hover:text-text-primary"
@@ -371,7 +375,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   transition={{ duration: 0.16, ease: "easeOut" }}
                   className="absolute right-0 top-full z-20 mt-2 w-60 max-w-[calc(100vw-2.5rem)] overflow-hidden rounded-xl border border-border-primary bg-bg-primary shadow-xl"
-                  role="group"
+                  role="menu"
                   aria-label="More tags"
                 >
                   {/* Blueprint header — kicker + live count, closed by the
@@ -394,16 +398,17 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
                   />
                   {/* Command-menu rows: tag left, project count right. The
                       active tag reads as an inked row, mirroring the chips. */}
-                  <ul className="max-h-64 overflow-y-auto p-1.5 [scrollbar-width:thin] [scrollbar-color:var(--border-primary)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border-primary [&::-webkit-scrollbar-track]:bg-transparent">
+                  <ul role="none" className="max-h-64 overflow-y-auto p-1.5 [scrollbar-width:thin] [scrollbar-color:var(--border-primary)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border-primary [&::-webkit-scrollbar-track]:bg-transparent">
                     {overflowTags.map((tag) => {
                       const active = activeTag === tag;
                       const count =
                         tagCounts.find(([t]) => t === tag)?.[1] ?? 0;
                       return (
-                        <li key={tag}>
+                        <li key={tag} role="none">
                           <button
                             type="button"
-                            aria-pressed={active}
+                            role="menuitemradio"
+                            aria-checked={active}
                             onClick={() => {
                               setParams({
                                 tag: active ? "All" : tag,
@@ -447,7 +452,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
         </div>
       </div>
 
-      {/* Grid — 6 per page. Below xl: single column. From xl: staggered
+      {/* Grid — 8 per page. Below xl: single column. From xl: staggered
           two-column layout — the right column starts lower so the cards
           alternate down the page (editorial case-study rhythm). The whole
           scaffold (columns, spine, closing rule) unmounts when there are no
@@ -709,7 +714,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
           </p>
         </nav>
       )}
-    </div>
+    </section>
   );
 }
 

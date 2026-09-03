@@ -2,7 +2,7 @@
 
 - Route: `/projects`
 - Audit date: 2026-09-03
-- Status: Findings recorded; fixes require owner review
+- Status: Fixes applied and verified; awaiting owner visual approval and lock
 - Primary files: `app/projects/page.tsx`, `app/projects/ProjectsIndex.tsx`,
   `app/projects/loading.tsx`
 - Shared reference component: `app/components/home/CaseStudies.tsx`
@@ -31,6 +31,8 @@ requested this audit in the current conversation.
 - `/projects?q=security`: HTTP 200.
 - All ten project-detail links rendered by the index returned HTTP 200.
 - Browser console: no runtime errors, hydration errors, or missing assets.
+- Browser console: one non-blocking development performance warning reports
+  the first project cover as LCP without Next Image `priority`.
 - All rendered project images completed with non-zero natural dimensions.
 
 ### Responsive matrix
@@ -52,7 +54,7 @@ not increase document `scrollWidth`. No real content overflows.
 
 ## Findings
 
-### P1. Project headings skip from h1 to h3
+### P1. Project headings skip from h1 to h3 - resolved
 
 - Severity: Medium
 - Evidence: The accessibility tree renders `Things I've built` as `h1`, then
@@ -63,8 +65,11 @@ not increase document `scrollWidth`. No real content overflows.
 - Safe scoped fix: Add a visually hidden `h2` such as `Project collection`
   immediately before the results grid and associate the results region with it.
   This avoids editing the locked shared card component.
+- Resolution: `ProjectsIndex` is now a labelled `section` with a visually
+  hidden `Project collection` h2. The accessibility tree reads h1, h2, then
+  project h3 headings without a visible layout change.
 
-### P2. More-tags popup has incomplete focus and popup semantics
+### P2. More-tags popup has incomplete focus and popup semantics - resolved
 
 - Severity: Medium
 - Evidence: ArrowDown correctly moves focus from More to the first tag. Escape
@@ -78,8 +83,11 @@ not increase document `scrollWidth`. No real content overflows.
 - Safe scoped fix: Store a trigger ref, restore focus on Escape, use
   `aria-haspopup="menu"`, and give the popup/rows internally consistent menu
   semantics. Keep click and outside-dismiss behavior unchanged.
+- Resolution: Escape now closes the popup and restores focus to More. The
+  accessibility tree exposes a menu with menuitemradio rows and checked state;
+  ArrowUp/ArrowDown/Home/End behavior remains intact.
 
-### P3. Search focus indicator is insufficient in light mode
+### P3. Search focus indicator is insufficient in light mode - resolved
 
 - Severity: Medium
 - Evidence: The search input removes its outline. On keyboard focus in light
@@ -89,8 +97,10 @@ not increase document `scrollWidth`. No real content overflows.
 - Impact: Keyboard focus can be difficult to locate in the light theme.
 - Safe scoped fix: Add a neutral 1px or 2px `focus-visible` outline with offset,
   matching the approved Search modal's quiet neutral focus language.
+- Resolution: Search now has a 1px `text-secondary` outline with 2px offset.
+  Computed colors are `#5E5F6E` in light mode and `#A1A1A1` in dark mode.
 
-### P4. Loading skeleton does not match live control geometry
+### P4. Loading skeleton does not match live control geometry - resolved
 
 - Severity: Medium
 - Evidence: The live search is 297px at 360-390px, 439px at 640-1023px, and
@@ -100,8 +110,10 @@ not increase document `scrollWidth`. No real content overflows.
   loading content is replaced by the page.
 - Safe scoped fix: Mirror the live `297px -> 439px -> 224px` responsive widths
   and the live control-row spacing in `loading.tsx`.
+- Resolution: The skeleton now uses the same search breakpoints, 32px control
+  height, row gap, and grouped five-pill structure as the live controls.
 
-### P5. Mobile page-title size differs from the approved page baseline
+### P5. Mobile page-title size differs from the approved page baseline - retained
 
 - Severity: Owner decision
 - Evidence: `Things I've built` measures 36px below `md`; approved standalone
@@ -111,8 +123,11 @@ not increase document `scrollWidth`. No real content overflows.
   materially change the composition.
 - Recommendation: Do not change automatically. Owner should choose between
   strict 46px cross-page consistency and the current one-line blueprint title.
+- Resolution: Retained at 36px to avoid a large visual reflow. This is now an
+  intentional Projects-specific variation: it keeps the title on one line at
+  360px inside the crop-mark frame.
 
-### P6. Interactive filter labels are below the audit legibility threshold
+### P6. Interactive filter labels are below the audit legibility threshold - resolved
 
 - Severity: Low
 - Evidence: All, AI/ML, Cybersecurity, Web, and More render at 10px below
@@ -122,8 +137,11 @@ not increase document `scrollWidth`. No real content overflows.
   filter row, not every micro-label.
 - Safe scoped fix: Use 11px for filter controls at all widths and confirm the
   complete row still fits at 360px without reducing spacing or target size.
+- Resolution: Filters now use 11px at every width. Mobile horizontal padding
+  was reduced by 2px per side only, retaining 32px-high targets and a single
+  298px-wide row at 360px with no overflow.
 
-### P7. Search icon duplicates the established icon implementation
+### P7. Search icon duplicates the established icon implementation - resolved
 
 - Severity: Low maintenance debt
 - Evidence: `ProjectsIndex.tsx` contains a bespoke search SVG while the Navbar,
@@ -132,13 +150,15 @@ not increase document `scrollWidth`. No real content overflows.
 - Impact: No current visual defect, but stroke/geometry can drift independently.
 - Safe scoped fix: Replace only this local SVG with the existing Lucide icon at
   the same 16px size and 1.5 stroke treatment.
+- Resolution: Projects now uses Lucide Search at the same 16px/1.5 geometry.
 
-### P8. Pagination comments contradict runtime behavior
+### P8. Pagination comments contradict runtime behavior - resolved
 
 - Severity: Low maintenance debt
 - Evidence: `PER_PAGE` is 8, and runtime correctly shows `01-08 of 10`, but
   comments in `ProjectsIndex.tsx` still say six projects per page.
 - Safe scoped fix: Correct comments only; do not alter pagination behavior.
+- Resolution: Both comments now correctly state eight projects per page.
 
 ### Deferred font-source note
 
@@ -187,16 +207,37 @@ font migration, so this audit does not propose changing font sources.
 - Card cover colors and white overlay text are content surfaces, so page-level
   text tokens must not replace their tuned contrast colors.
 
-## Proposed fix set awaiting owner approval
+## Applied fix set
 
 1. Add the missing results-region `h2` without changing visible layout.
 2. Restore focus and normalize semantics for the More-tags popup.
 3. Add a compliant neutral focus-visible outline to project search.
 4. Match the loading skeleton to live responsive control widths.
-5. Owner decision: keep the intentional 36px one-line title or adopt 46px.
+5. Retain the intentional 36px one-line mobile title to avoid major reflow.
 6. Raise primary filter labels from 10px to 11px on mobile.
 7. Replace the bespoke search SVG with Lucide at identical geometry.
 8. Correct stale six-per-page comments to eight.
 
-No production fix should be applied until the owner reviews this list, as
-required by `AUDIT_TESTING.md`.
+## Post-fix verification
+
+- TypeScript: 0 errors.
+- Targeted ESLint: 0 errors.
+- `git diff --check`: passed.
+- The required six-viewports matrix remains free of document overflow, real
+  content clipping, and targets below 24px.
+- At 360px the filter row measures 298x32px with all five labels at 11px.
+- Search focus outline is visible and theme-aware in light and dark modes.
+- More-menu Escape dismissal restores focus to the collapsed trigger.
+- Accessibility hierarchy is h1 -> hidden region h2 -> card h3.
+- Search, filtering, rescue suggestions, details accordion, and pagination
+  remain functional after the changes.
+- No locked page or shared locked component was modified.
+
+### Residual locked-component item
+
+The first project cover can become the Largest Contentful Paint image, and
+Next.js recommends `priority`. That image is rendered inside the locked,
+homepage-shared `CaseStudyCard`. Adding a Projects-only optional priority prop
+would be a clean non-visual optimization, but it was deliberately not attempted
+without explicit permission to touch the shared locked file. The item is tracked
+in `DESIGN_DEBT.md`.

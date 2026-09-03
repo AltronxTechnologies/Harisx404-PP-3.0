@@ -1,9 +1,5 @@
-/* ────────────────────────────────────────────────────────────────────
-   LOCKED PAGE — audited & production-approved (like Home and About).
-   Do not change layout, typography, spacing, card geometry, or theme
-   behavior here or in ProjectsIndex/CaseStudyCard (projects variant)
-   without explicit owner approval.
-   ──────────────────────────────────────────────────────────────────── */
+/* Projects index audited under audit/06-projects-page.md. It remains open
+   for owner review and is not part of the final production lock yet. */
 import type { Metadata } from "next";
 import { fetchProjects } from "@/app/lib/utils";
 import {

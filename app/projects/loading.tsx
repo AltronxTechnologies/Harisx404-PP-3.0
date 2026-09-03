@@ -43,13 +43,15 @@ export default function ProjectsLoading() {
         </div>
 
         {/* Controls row: search + tag pills (2rem, matching the live page) */}
-        <div className="mx-auto mt-10 flex animate-pulse flex-wrap items-center justify-center gap-2">
-          <div className="h-[2rem] w-full max-w-[260px] rounded-full bg-border-primary/40 sm:w-56" />
-          <div className="h-[2rem] w-14 rounded-full bg-border-primary/40" />
-          <div className="h-[2rem] w-20 rounded-full bg-border-primary/40" />
-          <div className="h-[2rem] w-32 rounded-full bg-border-primary/40" />
-          <div className="h-[2rem] w-16 rounded-full bg-border-primary/40" />
-          <div className="h-[2rem] w-20 rounded-full bg-border-primary/40" />
+        <div className="mx-auto mt-6 flex animate-pulse flex-wrap items-center justify-center gap-2 max-lg:gap-y-[9px]">
+          <div className="h-[2rem] w-full max-w-[297px] rounded-full bg-border-primary/40 sm:w-[439px] sm:max-w-[439px] lg:w-56 lg:max-w-[260px]" />
+          <div className="flex items-center justify-center gap-1 sm:gap-2">
+            <div className="h-[2rem] w-9 rounded-full bg-border-primary/40 sm:w-14" />
+            <div className="h-[2rem] w-12 rounded-full bg-border-primary/40 sm:w-[70px]" />
+            <div className="h-[2rem] w-[92px] rounded-full bg-border-primary/40 sm:w-[116px]" />
+            <div className="h-[2rem] w-10 rounded-full bg-border-primary/40 sm:w-[61px]" />
+            <div className="h-[2rem] w-[61px] rounded-full bg-border-primary/40 sm:w-20" />
+          </div>
         </div>
 
         {/* Grid — single column below xl, staggered two columns from xl */}

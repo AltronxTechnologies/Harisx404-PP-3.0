@@ -215,8 +215,7 @@ Also `links/page.tsx:59,68` re-declare the mail/globe paths already in
 `Navbar.tsx` (Lucide `size-[18px]`) · `Navbar.tsx` (mobile pill) ·
 `ReachOutModal.tsx:194` (Lucide `size-8`) · `blog/BlogFilterBar.tsx:69` (Lucide `size-4`) ·
 `projects/ProjectsIndex.tsx:264` (bespoke `size-4`) · `SearchModal.tsx:356` (lucide `size-7`).
-The Navbar, modal, and BlogFilterBar launchers now share Lucide. ProjectsIndex
-still uses a separate glyph implementation.
+The Navbar, modal, BlogFilterBar, and ProjectsIndex launchers now share Lucide.
 
 ### `DoubleArrow` fork
 Shared: `app/components/home/DoubleArrow.tsx:6`. Fork with different animation
@@ -254,6 +253,10 @@ Changing any of these is a **regression**, not a fix.
 - `/stats` PageSpeed API returns 400.
 - GitHub contribution graph shows 0.
 - Admin changelog revalidate is stale.
+- `/projects` first cover image is detected as LCP without `priority` in
+  development. The image lives in the homepage-shared, locked `CaseStudyCard`;
+  a clean fix needs an optional Projects-only priority prop and explicit owner
+  permission to touch that shared file.
 - Live Supabase mismatches: prod `site_settings` is one row with named columns
   (breaks `/admin/settings`); `community_wall_messages` and
   `testimonial_submissions` do not exist remotely.
