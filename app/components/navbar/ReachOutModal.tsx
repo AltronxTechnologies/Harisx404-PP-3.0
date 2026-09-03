@@ -33,9 +33,9 @@ interface ReachOutModalProps {
 }
 
 const cardSurface =
-  "rounded-2xl bg-neutral-100/90 dark:bg-white/[0.07] p-6 text-center " +
-  "border border-neutral-200/60 dark:border-white/[0.06] " +
-  "hover:bg-neutral-200/80 dark:hover:bg-white/[0.1] transition";
+  "rounded-2xl bg-neutral-100/90 dark:bg-white/[0.04] p-6 text-center " +
+  "border border-neutral-200/60 dark:border-white/[0.04] " +
+  "hover:bg-neutral-200/80 dark:hover:bg-white/[0.07] transition";
 
 
 const item = {
@@ -233,7 +233,7 @@ export function ReachOutModal({
               {/* Message panel */}
               <motion.div
                 variants={item}
-                className="rounded-2xl bg-neutral-100/90 p-6 dark:bg-white/[0.07] border border-neutral-200/60 dark:border-white/[0.06]"
+                className="rounded-2xl border border-neutral-200/60 bg-neutral-100/90 p-6 dark:border-white/[0.04] dark:bg-white/[0.04]"
               >
                 <div className="flex items-center gap-3">
                   <Image
@@ -307,7 +307,7 @@ export function ReachOutModal({
                       <FileText className="size-7" />
                     </div>
                   </div>
-                  <h4 className="text-2xl font-semibold text-text-secondary">
+                  <h4 className="text-2xl font-semibold text-text-secondary transition-colors group-hover:text-neutral-900 dark:group-hover:text-white">
                     View my resume
                   </h4>
                   <p className="text-base text-text-secondary">Experience · skills · work</p>
@@ -328,7 +328,7 @@ export function ReachOutModal({
                     </div>
                   </div>
                   <h4
-                    className="text-2xl font-semibold text-text-secondary"
+                    className="text-2xl font-semibold text-text-secondary transition-colors group-hover:text-neutral-900 dark:group-hover:text-white"
                     aria-live="polite"
                   >
                     {isCopied ? "Copied!" : copyFailed ? "Copy failed" : "Email me"}
@@ -347,10 +347,10 @@ export function ReachOutModal({
                     href={s.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`${cardSurface} flex flex-col items-center gap-2`}
+                    className={`${cardSurface} group flex flex-col items-center gap-2`}
                   >
                     <SocialIcon label={s.label} />
-                    <span className="text-base font-medium text-neutral-700 dark:text-white/80">
+                    <span className="text-base font-medium text-neutral-700 transition-colors group-hover:text-neutral-900 dark:text-white/80 dark:group-hover:text-white">
                       {s.label}
                     </span>
                   </a>

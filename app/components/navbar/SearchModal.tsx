@@ -103,8 +103,9 @@ const iconTile =
 
 function ResultGroupHeading({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="px-4 pb-2 pt-4 text-lg font-medium text-text-secondary">
-      {children}
+    <h3 className="flex items-center gap-3 px-4 pb-2 pt-4 text-lg font-medium text-text-secondary">
+      <span className="shrink-0">{children}</span>
+      <span aria-hidden="true" className="h-px flex-1 bg-border-primary" />
     </h3>
   );
 }
@@ -484,16 +485,7 @@ export function SearchModal({
           <div
             aria-busy={isSearching}
             className={
-              "h-[634px] overflow-y-auto p-4 " +
-              // Thin divider between category groups (Pages / Connect / Legal /
-              // Discover, and the Projects / Blog Posts result groups). The
-              // `section + section` selector means the line only ever appears
-              // BETWEEN groups: the first visible group never gets a leading
-              // rule, so filtering by a query cannot leave a stray divider.
-              // Fragments render no DOM node, so every <section> is a direct
-              // child here. border-border-primary is the project-wide divider
-              // token (#D6DADE light / white-10 dark).
-              "[&>section+section]:border-t [&>section+section]:border-border-primary"
+              "h-[634px] overflow-y-auto p-4"
             }
           >
             <span role="status" aria-live="polite" className="sr-only">
@@ -526,7 +518,7 @@ export function SearchModal({
                         ({projectResults.length})
                       </span>
                     </ResultGroupHeading>
-                    <div className="grid grid-cols-1 gap-0.5">
+                    <div className="grid grid-cols-1 gap-px">
                       {projectResults.map((result) => (
                         <Link
                           key={`project-${result.link}`}
@@ -558,7 +550,7 @@ export function SearchModal({
                         ({postResults.length})
                       </span>
                     </ResultGroupHeading>
-                    <div className="grid grid-cols-1 gap-0.5">
+                    <div className="grid grid-cols-1 gap-px">
                       {postResults.map((result) => (
                         <Link
                           key={`post-${result.link}`}
@@ -587,7 +579,7 @@ export function SearchModal({
             {filteredPages.length > 0 && (
               <section aria-label="Pages">
                 <ResultGroupHeading>Pages</ResultGroupHeading>
-                <div className="grid grid-cols-2 gap-0.5">
+                <div className="grid grid-cols-2 gap-px">
                   {filteredPages.map((page) => {
                     const Icon = page.icon;
                     const isActive = pathname === page.link;
@@ -629,7 +621,7 @@ export function SearchModal({
             {filteredConnect.length > 0 && (
               <section aria-label="Connect">
                 <ResultGroupHeading>Connect</ResultGroupHeading>
-                <div className="grid grid-cols-3 gap-0.5">
+                <div className="grid grid-cols-3 gap-px">
                   {filteredConnect.map((item) => (
                     <a
                       key={item.name}
@@ -656,7 +648,7 @@ export function SearchModal({
             {filteredLegal.length > 0 && (
               <section aria-label="Legal">
                 <ResultGroupHeading>Legal</ResultGroupHeading>
-                <div className="grid grid-cols-2 gap-0.5">
+                <div className="grid grid-cols-2 gap-px">
                   {filteredLegal.map((item) => {
                     const Icon = item.icon;
                     return (
@@ -683,7 +675,7 @@ export function SearchModal({
             {filteredDiscover.length > 0 && (
               <section aria-label="Discover" className="pb-1">
                 <ResultGroupHeading>Discover</ResultGroupHeading>
-                <div className="grid grid-cols-2 gap-0.5">
+                <div className="grid grid-cols-2 gap-px">
                   {filteredDiscover.map((item) => {
                     const Icon = item.icon;
                     return (
