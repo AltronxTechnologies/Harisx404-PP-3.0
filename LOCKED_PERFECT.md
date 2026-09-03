@@ -1297,3 +1297,36 @@ Layout/behavior baseline (audited 2026-08-24):
 - **Content exceptions (data, not design — still editable via /admin):**
   testimonials, projects, blog posts, live stats. Known content TODOs
   remain: truncated/self testimonials, placeholder projects/posts.
+
+## 23. FINAL PRODUCTION LOCK — Home, About, Navbar, Search, Reach Out, Footer ✅✅
+
+- **Date locked:** 2026-09-03
+- **Owner approval:** The owner declared all six areas fully polished and
+  instructed that they must not be touched until the owner explicitly unlocks
+  them and grants permission for a specific change.
+- **Status:** Final production-approved visual, responsive, interaction, and
+  accessibility baseline.
+
+### Frozen scope
+
+| Area | Files and dependencies |
+|---|---|
+| Home page | `app/page.tsx`, `app/components/home/**` |
+| About page | `app/about/page.tsx`, `app/components/Resume.tsx`, `app/components/EducationCards.tsx`, `app/components/EducationMotion.tsx`, `app/components/AboutTrackPattern.tsx`, `app/components/ScrapbookBento.tsx`, `app/components/StatsBento.tsx` |
+| Navbar | `app/components/Navbar.tsx`, `app/components/ThemeToggle.tsx` |
+| Search modal | `app/components/navbar/SearchModal.tsx` |
+| Reach Out modal | `app/components/navbar/ReachOutModal.tsx` |
+| Footer | `app/components/Footer.tsx`, `app/components/SocialPill.tsx` |
+| Shared presentation | `app/components/navbar/modalSurfaces.ts`, `app/components/BrandGlyph.tsx`, and the applicable rules in `app/globals.css` |
+
+### Lock rule
+
+Do not modify, refactor, restyle, rename, reorder, or indirectly alter any
+frozen area through shared components, tokens, global CSS, parent layout, or
+responsive rules. A future change is allowed only after the owner explicitly
+states that the relevant area is unlocked and grants permission for that
+specific work in the current conversation.
+
+Admin-managed content remains editable without unlocking the presentation
+layer. The owner-deferred X/Twitter destination also remains unchanged until a
+verified replacement URL is supplied.
