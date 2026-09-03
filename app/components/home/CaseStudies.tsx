@@ -771,7 +771,7 @@ export function CaseStudyCard({
                     >
                       ✦
                     </span>
-                    <span className="line-clamp-2">{b}</span>
+                    <span>{b}</span>
                   </li>
                 ))}
             </ul>
@@ -837,9 +837,8 @@ function StickyProjectPanel({
           {project.title}
         </h3>
       </div>
-      {/* Best-practice clamps keep the panel the same height ballpark as
-          the image card: description ≤3 lines, bullets ≤2 lines each,
-          tech chips ≤4 rows (overflow simply hidden). */}
+      {/* The description and tech rows stay compact, while feature bullets
+          wrap fully so important project details are never truncated. */}
       <p className="mt-4 line-clamp-3 text-[15px] leading-relaxed text-text-secondary">
         {project.description}
       </p>
@@ -852,7 +851,7 @@ function StickyProjectPanel({
             >
               ✦
             </span>
-            <span className="line-clamp-2">{b}</span>
+            <span>{b}</span>
           </li>
         ))}
       </ul>
