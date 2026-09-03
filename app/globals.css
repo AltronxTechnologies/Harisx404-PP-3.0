@@ -816,6 +816,15 @@ blockquote p {
   transform-origin: top center;
   transform: scale(var(--reachout-height-scale));
 }
+
+/* Search result labels stay readable while the fixed-size modal canvas scales
+   down on phones. At larger sizes the original 20px type remains unchanged. */
+.search-result-tile {
+  font-size: max(
+    1.25rem,
+    calc(15px / min(var(--reachout-width-scale), var(--reachout-height-scale)))
+  );
+}
 @media (max-height: 940px) {
   .reachout-scale { --reachout-height-scale: 0.96; }
 }

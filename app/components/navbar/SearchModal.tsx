@@ -92,7 +92,7 @@ interface ContentResult {
 /* Row tile — inner 16px radius tier and the same hover step as the Reach Out
    action cards. Sizes are the Reach Out scale (x1.2 of the old 660px shell). */
 const itemTile =
-  "flex items-center gap-4 rounded-2xl px-3 py-3 text-xl font-medium transition-colors " +
+  "search-result-tile m-px flex items-center gap-4 rounded-2xl px-3 py-3 text-xl font-medium transition-colors " +
   "text-neutral-700 hover:bg-neutral-200/80 dark:text-white/80 dark:hover:bg-white/[0.1] dark:hover:text-white";
 
 /* Icon tile — identical recipe to the Reach Out action-card circle (filled, no
@@ -518,7 +518,7 @@ export function SearchModal({
                         ({projectResults.length})
                       </span>
                     </ResultGroupHeading>
-                    <div className="grid grid-cols-1 gap-px">
+                    <div className="grid grid-cols-1 gap-0">
                       {projectResults.map((result) => (
                         <Link
                           key={`project-${result.link}`}
@@ -550,7 +550,7 @@ export function SearchModal({
                         ({postResults.length})
                       </span>
                     </ResultGroupHeading>
-                    <div className="grid grid-cols-1 gap-px">
+                    <div className="grid grid-cols-1 gap-0">
                       {postResults.map((result) => (
                         <Link
                           key={`post-${result.link}`}
@@ -579,7 +579,7 @@ export function SearchModal({
             {filteredPages.length > 0 && (
               <section aria-label="Pages">
                 <ResultGroupHeading>Pages</ResultGroupHeading>
-                <div className="grid grid-cols-2 gap-px">
+                <div className="grid grid-cols-2 gap-0">
                   {filteredPages.map((page) => {
                     const Icon = page.icon;
                     const isActive = pathname === page.link;
@@ -621,7 +621,7 @@ export function SearchModal({
             {filteredConnect.length > 0 && (
               <section aria-label="Connect">
                 <ResultGroupHeading>Connect</ResultGroupHeading>
-                <div className="grid grid-cols-3 gap-px">
+                <div className="grid grid-cols-3 gap-0">
                   {filteredConnect.map((item) => (
                     <a
                       key={item.name}
@@ -648,7 +648,7 @@ export function SearchModal({
             {filteredLegal.length > 0 && (
               <section aria-label="Legal">
                 <ResultGroupHeading>Legal</ResultGroupHeading>
-                <div className="grid grid-cols-2 gap-px">
+                <div className="grid grid-cols-2 gap-0">
                   {filteredLegal.map((item) => {
                     const Icon = item.icon;
                     return (
@@ -675,7 +675,7 @@ export function SearchModal({
             {filteredDiscover.length > 0 && (
               <section aria-label="Discover" className="pb-1">
                 <ResultGroupHeading>Discover</ResultGroupHeading>
-                <div className="grid grid-cols-2 gap-px">
+                <div className="grid grid-cols-2 gap-0">
                   {filteredDiscover.map((item) => {
                     const Icon = item.icon;
                     return (
