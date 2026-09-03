@@ -456,7 +456,7 @@ export function HomeHero({
       />
 
       {/* ── Lower row: typewriter (left) + showcase window (right) ── */}
-      <div className="grid grid-cols-1 items-center gap-12 md:grid-cols-2 md:gap-6">
+      <div className="grid grid-cols-1 items-center gap-[46px] md:grid-cols-2 md:gap-6">
         <motion.div
           variants={fadeUp}
           initial={reduced ? false : "hidden"}
