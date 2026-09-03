@@ -37,7 +37,7 @@ function SectionHeader({ kicker, children }: { kicker: string; children: ReactNo
     <div className="mb-12 text-center">
       <Kicker>{kicker}</Kicker>
       <h2
-        className={`mt-2 text-5xl font-medium leading-none tracking-tight text-black dark:text-white md:text-6xl md:tracking-[-1.5px] ${IS} [text-shadow:rgba(255,255,255,0.05)_0px_4px_8px,rgba(255,255,255,0.2)_0px_8px_30px]`}
+        className={`mt-2 text-[46px] font-medium leading-none tracking-tight text-black dark:text-white md:text-6xl md:tracking-[-1.5px] ${IS} [text-shadow:rgba(255,255,255,0.05)_0px_4px_8px,rgba(255,255,255,0.2)_0px_8px_30px]`}
       >
         {children}
       </h2>

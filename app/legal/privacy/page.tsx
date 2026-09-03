@@ -107,7 +107,7 @@ export default function PrivacyPolicyPage() {
       <HeroTexture />
 
       {/* Hero */}
-      <h1 className="relative z-[2] mx-auto mt-24 mb-14 max-w-xl text-balance text-center font-medium text-5xl tracking-tight [text-shadow:rgba(255,255,255,0.05)_0px_4px_8px,rgba(255,255,255,0.2)_0px_8px_30px] max-sm:px-5 md:mt-28 md:text-6xl">
+      <h1 className="relative z-[2] mx-auto mt-24 mb-14 max-w-xl text-balance text-center font-medium text-[46px] tracking-tight [text-shadow:rgba(255,255,255,0.05)_0px_4px_8px,rgba(255,255,255,0.2)_0px_8px_30px] max-sm:px-5 md:mt-28 md:text-6xl">
         <p className="mb-4 font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
           Legal &amp; Privacy
         </p>

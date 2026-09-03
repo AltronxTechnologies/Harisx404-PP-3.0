@@ -102,7 +102,7 @@ export default async function BlogPage({
       {/* Main Page Layout — matches reference: pt-38 (152px) pb-24 */}
       <main className="relative z-10 pt-[152px] pb-24">
         {/* Page Header (The Pensieve) — matches reference h1 exactly */}
-        <h1 className="relative z-[2] mx-auto mb-16 max-w-xl text-balance font-medium text-5xl tracking-tight max-sm:px-5 sm:text-5xl md:text-6xl text-center dark:[text-shadow:rgba(255,255,255,0.05)_0px_4px_8px,rgba(255,255,255,0.2)_0px_8px_30px]">
+        <h1 className="relative z-[2] mx-auto mb-16 max-w-xl text-balance font-medium text-[46px] tracking-tight max-sm:px-5 md:text-6xl text-center dark:[text-shadow:rgba(255,255,255,0.05)_0px_4px_8px,rgba(255,255,255,0.2)_0px_8px_30px]">
           <p className="mb-4 font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
             The Pensieve
           </p>
