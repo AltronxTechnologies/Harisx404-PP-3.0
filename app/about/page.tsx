@@ -129,7 +129,7 @@ export default async function AboutPage() {
 
             {/* Section 1 — BSIT */}
             <EduReveal>
-            <div className="grid grid-cols-1 gap-8 pb-12 pt-16 lg:grid-cols-2 lg:items-center lg:justify-between lg:pb-[84px] lg:pt-32 lg:pr-12">
+            <div className="grid grid-cols-1 gap-8 pb-8 pt-14 lg:grid-cols-2 lg:items-center lg:justify-between lg:pb-[84px] lg:pt-32 lg:pr-12">
               <div className="flex flex-col items-center text-left lg:order-2 lg:items-start">
                 <div className="mb-8 text-center lg:hidden">
                   <EduCardHover>
@@ -172,7 +172,7 @@ export default async function AboutPage() {
 
             {/* Section 2 — KPITB AI/ML, present */}
             <EduReveal>
-            <div className="grid grid-cols-1 gap-8 pb-16 pt-12 lg:grid-cols-2 lg:items-center lg:justify-between lg:pb-32 lg:pt-[84px] lg:pl-12">
+            <div className="grid grid-cols-1 gap-8 pb-8 pt-14 lg:grid-cols-2 lg:items-center lg:justify-between lg:pb-32 lg:pt-[84px] lg:pl-12">
               <div className="flex flex-col items-center text-left lg:items-start">
                 <div className="mb-8 text-center lg:hidden">
                   <EduCardHover>
@@ -208,7 +208,7 @@ export default async function AboutPage() {
         </div>
 
         {/* More */}
-        <section className="relative space-y-14">
+        <section className="relative space-y-14 max-lg:!mt-14">
           <GridWrapper>
             <SectionHeading kicker="Beyond the resume" className="mx-auto max-w-2xl">
               {"One handle, "}
