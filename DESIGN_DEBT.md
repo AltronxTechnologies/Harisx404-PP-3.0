@@ -253,10 +253,6 @@ Changing any of these is a **regression**, not a fix.
 - `/stats` PageSpeed API returns 400.
 - GitHub contribution graph shows 0.
 - Admin changelog revalidate is stale.
-- `/projects` first cover image is detected as LCP without `priority` in
-  development. The image lives in the homepage-shared, locked `CaseStudyCard`;
-  a clean fix needs an optional Projects-only priority prop and explicit owner
-  permission to touch that shared file.
 - Live Supabase mismatches: prod `site_settings` is one row with named columns
   (breaks `/admin/settings`); `community_wall_messages` and
   `testimonial_submissions` do not exist remotely.

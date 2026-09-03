@@ -1330,3 +1330,14 @@ specific work in the current conversation.
 Admin-managed content remains editable without unlocking the presentation
 layer. The owner-deferred X/Twitter destination also remains unchanged until a
 verified replacement URL is supplied.
+
+### 2026-09-03 owner-authorized temporary amendment
+
+The owner temporarily unlocked only `app/components/home/CaseStudies.tsx` to
+improve the shared Home/Projects card behavior and add Projects-only optional
+props. Authorized scope: brief Behind-the-Site-style touch scroll preview,
+reduced-motion correction, Projects line-arrow selection, decorative Projects
+cover alt behavior, Projects image priority, and Projects responsive image
+sizing. Homepage content, typography, geometry, desktop hover, sticky panel,
+and all other entry 23 surfaces remain locked. Final re-lock of this amended
+card behavior awaits owner visual approval.

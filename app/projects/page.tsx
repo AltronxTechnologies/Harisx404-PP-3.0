@@ -122,7 +122,7 @@ export default async function ProjectsPage() {
             className="pointer-events-none absolute bottom-0 right-0 size-4 border-b border-r border-[rgba(100,106,124,0.55)] dark:border-text-tertiary/40"
           />
 
-          <p className="font-mono text-xs font-medium uppercase tracking-[0.35em] text-text-secondary">
+          <p className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
             Selected Projects
           </p>
           <h1 className="heading-glow mt-4 font-display text-4xl font-medium leading-[1.05] text-text-primary md:text-[56px]">

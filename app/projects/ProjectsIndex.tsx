@@ -102,7 +102,10 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
     };
   }, [showAllTags]);
 
-  function setParams(next: { tag?: string; q?: string; page?: number }) {
+  function setParams(
+    next: { tag?: string; q?: string; page?: number },
+    history: "push" | "replace" = "push"
+  ) {
     const params = new URLSearchParams(searchParams.toString());
     const apply = (key: string, value: string | undefined, def: string) => {
       if (value === undefined) return;
@@ -112,15 +115,24 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
     apply("tag", next.tag, "All");
     apply("q", next.q, "");
     apply("page", next.page !== undefined ? String(next.page) : undefined, "1");
-    router.replace(`${pathname}${params.size ? `?${params}` : ""}`, {
-      scroll: false,
-    });
+    const href = `${pathname}${params.size ? `?${params}` : ""}`;
+    if (history === "replace") router.replace(href, { scroll: false });
+    else router.push(href, { scroll: false });
   }
 
-  // Debounced search → URL (any new search resets to page 1)
+  // Browser back/forward can change the URL independently of the input.
+  useEffect(() => {
+    setQuery(q);
+  }, [q]);
+
+  // Debounced search → URL (any new search resets to page 1). Replacing keeps
+  // normal typing from adding one browser-history entry per query update.
   useEffect(() => {
     if (query === q) return;
-    const t = setTimeout(() => setParams({ q: query, page: 1 }), 300);
+    const t = setTimeout(
+      () => setParams({ q: query, page: 1 }, "replace"),
+      300
+    );
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
@@ -256,6 +268,11 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
       <h2 id="project-collection-heading" className="sr-only">
         Project collection
       </h2>
+      <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {filtered.length === 0
+          ? "No projects found"
+          : `${filtered.length} ${filtered.length === 1 ? "project" : "projects"} found`}
+      </p>
       {/* Controls — search + domain chips + "More" dropdown, one row. */}
       <div className="mx-auto mt-6 flex flex-wrap items-center justify-center gap-2 max-lg:gap-y-[9px]">
         <label htmlFor="project-search" className="sr-only">
@@ -343,7 +360,15 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
 
           {/* "More" dropdown for the long tail of tags */}
           {foldedCount > 0 && (
-            <div ref={moreRef} className="relative">
+            <div
+              ref={moreRef}
+              className="relative"
+              onBlur={(event) => {
+                if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+                  setShowAllTags(false);
+                }
+              }}
+            >
               <button
                 type="button"
                 ref={moreButtonRef}
@@ -483,6 +508,10 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
               metaDividerClass="mx-0"
               liftOnHover={false}
               coverHeading="title"
+              coverArrow="line"
+              decorativeCoverImage
+              imagePriority={i === 0}
+              imageSizes="(max-width: 1279px) 100vw, 50vw"
               highlight={q}
               detailsOpen={detailsOpenSlug === project.slug}
               onToggleDetails={() =>
@@ -542,6 +571,10 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
                     metaDividerJoint={col === 0 ? "right" : "left"}
                     liftOnHover={false}
                     coverHeading="title"
+                    coverArrow="line"
+                    decorativeCoverImage
+                    imagePriority={i === 0}
+                    imageSizes="(max-width: 1279px) 100vw, 50vw"
                     highlight={q}
                     detailsOpen={detailsOpenSlug === project.slug}
                     onToggleDetails={() =>

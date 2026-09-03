@@ -7,7 +7,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import clsx from "clsx";
 import { optimizeImageUrl } from "@/app/lib/image-utils";
 import type { HomeProject } from "@/app/data/fallback-home";
@@ -230,6 +230,10 @@ export function CaseStudyCard({
   liftOnHover = true,
   coverHeading = "tagline",
   bodyHiddenOnXl = false,
+  coverArrow = "auto",
+  decorativeCoverImage = false,
+  imagePriority = false,
+  imageSizes = "(max-width: 768px) 100vw, 50vw",
   detailsOpen: detailsOpenProp,
   onToggleDetails,
   highlight,
@@ -259,6 +263,15 @@ export function CaseStudyCard({
   /** What the big heading inside the cover shows. Home keeps the default
       tagline; the projects page passes "title" to show the project name. */
   coverHeading?: "tagline" | "title";
+  /** Projects can request the homepage's stroked line arrow while retaining
+      their title-led cover. Auto preserves the established context behavior. */
+  coverArrow?: "auto" | "line" | "glyph";
+  /** The Projects cover already names the project in its h3, so its screenshot
+      can be decorative instead of repeating the link name to screen readers. */
+  decorativeCoverImage?: boolean;
+  /** Context-specific Next Image loading and responsive source hints. */
+  imagePriority?: boolean;
+  imageSizes?: string;
   /** Controlled disclosure (projects page): when provided, the open state
       lives in the parent so only one card's details are open at a time. */
   detailsOpen?: boolean;
@@ -268,15 +281,18 @@ export function CaseStudyCard({
   highlight?: string;
 }) {
   const i = index;
+  const lineArrow =
+    coverArrow === "line" ||
+    (coverArrow === "auto" && (bodyHiddenOnXl || coverHeading !== "title"));
 
-  /* Touch devices have no hover, so replay the hover choreography when the
-     card crosses the middle band of the viewport. Detection: coarse pointer /
-     no-hover media queries, plus a first-touch listener as a fallback so any
-     device switches over the moment it is actually touched. Mouse/trackpad
-     behaviour stays untouched. */
+  /* Touch devices preview the hover choreography once when the card enters the
+     viewport's middle band, then return to rest. This mirrors Behind the Site's
+     scroll pulse instead of leaving a card persistently transformed while it
+     remains centered. Mouse/trackpad hover stays untouched. */
   const panelRef = useRef<HTMLDivElement>(null);
-  const inCenter = useInView(panelRef, { margin: "-18% 0px -18% 0px" });
+  const reducedMotion = useReducedMotion();
   const [isTouch, setIsTouch] = useState(false);
+  const [scrollPreview, setScrollPreview] = useState(false);
   useEffect(() => {
     if (window.matchMedia("(hover: none), (pointer: coarse)").matches) {
       setIsTouch(true);
@@ -289,7 +305,29 @@ export function CaseStudyCard({
     });
     return () => window.removeEventListener("touchstart", onFirstTouch);
   }, []);
-  const active = isTouch && inCenter;
+  useEffect(() => {
+    const el = panelRef.current;
+    if (!el || !isTouch || reducedMotion) {
+      setScrollPreview(false);
+      return;
+    }
+    let timeout: number | undefined;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        window.clearTimeout(timeout);
+        setScrollPreview(true);
+        timeout = window.setTimeout(() => setScrollPreview(false), 1200);
+      },
+      { rootMargin: "-30% 0px -30% 0px" }
+    );
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(timeout);
+    };
+  }, [isTouch, reducedMotion]);
+  const active = isTouch && scrollPreview && !reducedMotion;
 
   /* Projects-page disclosure for highlights + tech stack (collapsed by
      default so the grid stays compact). Controlled by the parent when
@@ -441,7 +479,8 @@ export function CaseStudyCard({
                hover response lives on the cover panel alone — structural
                lines around it stay perfectly static. */
             !liftOnHover &&
-              "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [@media(hover:hover)]:group-hover:-translate-y-1.5 motion-reduce:transition-none motion-reduce:group-hover:translate-y-0"
+              "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [@media(hover:hover)]:group-hover:-translate-y-1.5 motion-reduce:transition-none motion-reduce:group-hover:translate-y-0",
+            active && !liftOnHover && "-translate-y-1.5"
           )}
           style={{ backgroundImage: panelGradients[i % panelGradients.length] }}
         >
@@ -510,13 +549,13 @@ export function CaseStudyCard({
                      SVG in the tagline's white/85 — matches the reference
                      shape. Projects keeps the shadowed glyph arrow that
                      pairs with its serif title. */
-                  bodyHiddenOnXl || coverHeading !== "title"
+                  lineArrow
                     ? "mt-1 text-white/85"
                     : "text-[22px] text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.35),0_4px_14px_rgba(0,0,0,0.22)]",
                   active && "translate-x-1"
                 )}
               >
-                {bodyHiddenOnXl || coverHeading !== "title" ? (
+                {lineArrow ? (
                   <svg
                     viewBox="0 0 24 16"
                     fill="none"
@@ -583,33 +622,33 @@ export function CaseStudyCard({
                          home defaults. Home keeps its original scales. */
                       active
                         ? clsx(
-                            liftOnHover ? "scale-[1.03]" : "scale-[1.045]",
+                             liftOnHover ? "scale-[1.03]" : "scale-[1.045]",
                             "-translate-y-[5px] md:-translate-y-[5.5px] xl:-translate-y-[6px]"
                           )
                         : clsx(
                             liftOnHover
-                              ? "scale-[0.98] group-hover:scale-[1.03]"
-                              : /* Projects: gentler hover below xl (4% grow,
-                                   4/5px rise); laptop keeps 4.5% / 6px. */
-                                "scale-100 group-hover:scale-[1.04] xl:group-hover:scale-[1.045]",
-                            liftOnHover
-                              ? "group-hover:-translate-y-[5px] md:group-hover:-translate-y-[5.5px] xl:group-hover:-translate-y-[6px]"
-                              : "group-hover:-translate-y-[4px] md:group-hover:-translate-y-[5px] xl:group-hover:-translate-y-[6px]"
+                               ? "scale-[0.98] motion-safe:group-hover:scale-[1.03]"
+                               : /* Projects: gentler hover below xl (4% grow,
+                                    4/5px rise); laptop keeps 4.5% / 6px. */
+                                 "scale-100 motion-safe:group-hover:scale-[1.04] xl:motion-safe:group-hover:scale-[1.045]",
+                             liftOnHover
+                               ? "motion-safe:group-hover:-translate-y-[5px] md:motion-safe:group-hover:-translate-y-[5.5px] xl:motion-safe:group-hover:-translate-y-[6px]"
+                               : "motion-safe:group-hover:-translate-y-[4px] md:motion-safe:group-hover:-translate-y-[5px] xl:motion-safe:group-hover:-translate-y-[6px]"
                           ),
                       i % 2 === 0
                         ? clsx(
                             liftOnHover
-                              ? "origin-bottom-left group-hover:rotate-2 group-hover:translate-x-[7px] md:group-hover:translate-x-[7.5px] xl:group-hover:translate-x-[8px]"
-                              : /* Projects: softer tilt/shift below xl
-                                   (±1.5°, 6/7px); laptop keeps ±2° / 8px. */
-                                "origin-bottom-left group-hover:rotate-[1.5deg] xl:group-hover:rotate-2 group-hover:translate-x-[6px] md:group-hover:translate-x-[7px] xl:group-hover:translate-x-[8px]",
+                               ? "origin-bottom-left motion-safe:group-hover:rotate-2 motion-safe:group-hover:translate-x-[7px] md:motion-safe:group-hover:translate-x-[7.5px] xl:motion-safe:group-hover:translate-x-[8px]"
+                               : /* Projects: softer tilt/shift below xl
+                                    (±1.5°, 6/7px); laptop keeps ±2° / 8px. */
+                                 "origin-bottom-left motion-safe:group-hover:rotate-[1.5deg] xl:motion-safe:group-hover:rotate-2 motion-safe:group-hover:translate-x-[6px] md:motion-safe:group-hover:translate-x-[7px] xl:motion-safe:group-hover:translate-x-[8px]",
                             active &&
                               "rotate-2 translate-x-[7px] md:translate-x-[7.5px] xl:translate-x-[8px]"
                           )
                         : clsx(
                             liftOnHover
-                              ? "origin-bottom-right group-hover:-rotate-2 group-hover:-translate-x-[7px] md:group-hover:-translate-x-[7.5px] xl:group-hover:-translate-x-[8px]"
-                              : "origin-bottom-right group-hover:-rotate-[1.5deg] xl:group-hover:-rotate-2 group-hover:-translate-x-[6px] md:group-hover:-translate-x-[7px] xl:group-hover:-translate-x-[8px]",
+                               ? "origin-bottom-right motion-safe:group-hover:-rotate-2 motion-safe:group-hover:-translate-x-[7px] md:motion-safe:group-hover:-translate-x-[7.5px] xl:motion-safe:group-hover:-translate-x-[8px]"
+                               : "origin-bottom-right motion-safe:group-hover:-rotate-[1.5deg] xl:motion-safe:group-hover:-rotate-2 motion-safe:group-hover:-translate-x-[6px] md:motion-safe:group-hover:-translate-x-[7px] xl:motion-safe:group-hover:-translate-x-[8px]",
                             active &&
                               "-rotate-2 -translate-x-[7px] md:-translate-x-[7.5px] xl:-translate-x-[8px]"
                           )
@@ -628,9 +667,10 @@ export function CaseStudyCard({
                       {primary ? (
                         <Image
                           src={optimizeImageUrl(primary, 1200)}
-                          alt={project.title}
+                          alt={decorativeCoverImage ? "" : project.title}
                           fill
-                          sizes="(max-width: 768px) 100vw, 50vw"
+                          priority={imagePriority}
+                          sizes={imageSizes}
                           className="object-cover object-top"
                         />
                       ) : (

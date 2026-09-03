@@ -361,3 +361,85 @@ Projects-only changes safe to implement after owner approval:
 
 Shared `CaseStudyCard` changes require an explicit temporary unlock limited to
 Projects-only optional props. No shared edit was made during this addendum.
+
+## Microscopic parity resolution - 2026-09-03
+
+The owner approved every item above and temporarily unlocked the shared Home
+project-card component, with the requirement that Home and Projects retain
+their intentional differences.
+
+### Completed hero and control work
+
+- `Selected Projects` now uses the same 12px/500 Core Mono,
+  `tracking-widest`, and secondary-color kicker recipe as Home/About.
+- The 36px one-line mobile Projects heading, blueprint decoration, distinct
+  copy, gradient recipe, and 14px introductory paragraph remain intentionally
+  Projects-specific.
+- URL query changes now synchronize back into the visible search input.
+- Search typing uses history replacement; tag and pagination actions use
+  history pushes. Browser Back restored `?tag=Web&q=Next.js` together with the
+  visible `Next.js` input and three matching cards in live verification.
+- A persistent polite status now announces zero, one, and many result counts.
+- The More menu closes when Tab moves focus beyond its last item; Escape still
+  restores focus to the trigger.
+
+### Completed card work
+
+- Projects retains its title-led cover; Home retains its existing content and
+  sticky-detail composition.
+- Projects now requests the same 24x16 stroked line arrow used by Home instead
+  of the text glyph.
+- Projects screenshots are decorative when the visible h3 already names the
+  project. The cover link now announces `IntruShield NIDS` once rather than
+  twice. Homepage image alt text remains unchanged.
+- Projects supplies context-correct image sizing through 1279px.
+- The first visible Projects image receives priority; the Next.js LCP warning
+  no longer appears.
+- All new behavior is exposed through optional `CaseStudyCard` props, leaving
+  homepage defaults unchanged.
+
+### Touch and motion behavior
+
+- The old touch behavior kept a card transformed for as long as it remained in
+  the viewport center band.
+- Both Home and Projects cards now follow the Behind the Site interaction
+  language: entering the middle 40% viewport band triggers a 1.2-second preview
+  of the hover choreography, then the card returns to its exact resting state.
+- The preview re-arms only after the card leaves and re-enters the band.
+- Desktop pointer hover remains continuous and unchanged.
+- Reduced-motion users receive neither the scroll preview nor image
+  scale/translate/rotation hover motion.
+- Measured touch simulation on both routes:
+  - Preview panel transform: `translateY(-6px)`.
+  - Preview image transform: approximately `scale(1.045) rotate(2deg)` with the
+    existing directional offset.
+  - Returning state interpolates smoothly.
+  - Final panel transform: `none`.
+  - Final image transform: identity matrix.
+
+### Loading parity
+
+- The loading route now reproduces the blueprint grid, atmosphere, compass,
+  crop marks, and live header spacing.
+- Controls use the exact responsive search widths and five-pill grouping.
+- Skeleton cards now include the 26.5px metadata row, dotted divider, 22px
+  outer panel, 8px light/dark frame, title/arrow row, screenshot frame,
+  description, and action placeholders.
+- Desktop loading uses the live full width, staggered 213px second column, 24px
+  column gap, and central spine instead of the old `max-w-6xl` generic grid.
+
+### Final measured verification
+
+- Responsive matrix: 1440x900, 1024x768, 768x1024, 390x844, 375x667, and
+  360x640.
+- Both themes: zero document overflow and zero real-content overflow.
+- All viewports: zero interactive targets below 24px.
+- Mobile filter row: 298x32px at 360, 375, and 390px.
+- Accessibility tree: h1 -> collection h2 -> project h3; persistent status;
+  single-name cover links; menu/menuitemradio semantics.
+- Home and Projects routes: HTTP 200.
+- TypeScript: 0 errors.
+- Targeted ESLint: 0 errors.
+- `git diff --check`: passed.
+- Browser console: no application errors, hydration errors, missing assets, or
+  LCP warning. Homepage sandbox-only WebGL warnings remain unrelated.
