@@ -138,7 +138,10 @@ export default async function AboutPage() {
                   </EduCardHover>
                 </div>
                 <p className="mb-3 w-full lg:max-w-xl font-mono text-xs font-medium uppercase tracking-[0.2em] text-text-secondary">
-                  2022 — 2026 · University of Malakand
+                  <span className="sm:hidden">2022–26 · University of Malakand</span>
+                  <span className="hidden sm:inline">
+                    2022 — 2026 · University of Malakand
+                  </span>
                 </p>
                 <h3 className="mb-4 w-full lg:max-w-xl text-balance [font-family:var(--font-source-serif),Georgia,serif] text-[22px] font-semibold leading-tight tracking-tight text-text-primary">
                   B.S. in Information Technology
