@@ -97,8 +97,9 @@ not increase document `scrollWidth`. No real content overflows.
 - Impact: Keyboard focus can be difficult to locate in the light theme.
 - Safe scoped fix: Add a neutral 1px or 2px `focus-visible` outline with offset,
   matching the approved Search modal's quiet neutral focus language.
-- Resolution: Search now has a 1px `text-secondary` outline with 2px offset.
-  Computed colors are `#5E5F6E` in light mode and `#A1A1A1` in dark mode.
+- Resolution initially used an offset outline. The owner later requested exact
+  filter-hover parity, so the final state is a single 1px
+  `border-text-tertiary` hairline with no visible outline or layout change.
 
 ### P4. Loading skeleton does not match live control geometry - resolved
 
@@ -211,7 +212,7 @@ font migration, so this audit does not propose changing font sources.
 
 1. Add the missing results-region `h2` without changing visible layout.
 2. Restore focus and normalize semantics for the More-tags popup.
-3. Add a compliant neutral focus-visible outline to project search.
+3. Add a neutral keyboard focus treatment to project search.
 4. Match the loading skeleton to live responsive control widths.
 5. Retain the intentional 36px one-line mobile title to avoid major reflow.
 6. Raise primary filter labels from 10px to 11px on mobile.
@@ -226,7 +227,7 @@ font migration, so this audit does not propose changing font sources.
 - The required six-viewports matrix remains free of document overflow, real
   content clipping, and targets below 24px.
 - At 360px the filter row measures 298x32px with all five labels at 11px.
-- Search focus outline is visible and theme-aware in light and dark modes.
+- Search focus uses the same theme-aware thin hairline as filter hover.
 - More-menu Escape dismissal restores focus to the collapsed trigger.
 - Accessibility hierarchy is h1 -> hidden region h2 -> card h3.
 - Search, filtering, rescue suggestions, details accordion, and pagination
@@ -443,3 +444,10 @@ their intentional differences.
 - `git diff --check`: passed.
 - Browser console: no application errors, hydration errors, missing assets, or
   LCP warning. Homepage sandbox-only WebGL warnings remain unrelated.
+
+### Owner-directed search-focus amendment
+
+After final review, the offset search outline was removed. Search hover and
+keyboard focus now use the same thin `text-tertiary` border as filter-tag hover.
+Computed verification showed a transparent outline and only the 1px border
+change; the 32px control geometry remains unchanged.

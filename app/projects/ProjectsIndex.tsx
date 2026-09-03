@@ -304,7 +304,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
                 else (e.target as HTMLInputElement).blur();
               }
             }}
-            className="h-[2rem] w-full rounded-full border border-border-primary bg-white pl-10 pr-9 font-mono text-xs text-text-primary outline-none transition-colors placeholder:text-text-secondary hover:border-text-tertiary/60 focus:border-text-tertiary focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-text-secondary dark:bg-white/[0.03] [&::-webkit-search-cancel-button]:hidden"
+            className="h-[2rem] w-full rounded-full border border-border-primary bg-white pl-10 pr-9 font-mono text-xs text-text-primary outline-none transition-colors placeholder:text-text-secondary hover:border-text-tertiary focus:border-text-tertiary dark:bg-white/[0.03] [&::-webkit-search-cancel-button]:hidden"
           />
           {!query && (
             /* Keyboard hint — press "/" anywhere to jump to search. */
