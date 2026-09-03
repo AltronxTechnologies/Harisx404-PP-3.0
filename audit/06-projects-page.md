@@ -114,7 +114,7 @@ not increase document `scrollWidth`. No real content overflows.
 - Resolution: The skeleton now uses the same search breakpoints, 32px control
   height, row gap, and grouped five-pill structure as the live controls.
 
-### P5. Mobile page-title size differs from the approved page baseline - retained
+### P5. Mobile page-title size differs from the approved page baseline - resolved
 
 - Severity: Owner decision
 - Evidence: `Things I've built` measures 36px below `md`; approved standalone
@@ -124,9 +124,10 @@ not increase document `scrollWidth`. No real content overflows.
   materially change the composition.
 - Recommendation: Do not change automatically. Owner should choose between
   strict 46px cross-page consistency and the current one-line blueprint title.
-- Resolution: Retained at 36px to avoid a large visual reflow. This is now an
-  intentional Projects-specific variation: it keeps the title on one line at
-  360px inside the crop-mark frame.
+- Resolution: The owner later requested exact cross-page parity. The title now
+  uses explicit Instrument Serif at 46px mobile/56px desktop, line-height 1,
+  tight tracking, and the shared padded gradient accent. At 360px it wraps into
+  two balanced lines, matching other page-heading behavior.
 
 ### P6. Interactive filter labels are below the audit legibility threshold - resolved
 
@@ -214,7 +215,7 @@ font migration, so this audit does not propose changing font sources.
 2. Restore focus and normalize semantics for the More-tags popup.
 3. Add a neutral keyboard focus treatment to project search.
 4. Match the loading skeleton to live responsive control widths.
-5. Retain the intentional 36px one-line mobile title to avoid major reflow.
+5. Align the title to the shared 46px mobile/56px desktop heading system.
 6. Raise primary filter labels from 10px to 11px on mobile.
 7. Replace the bespoke search SVG with Lucide at identical geometry.
 8. Correct stale six-per-page comments to eight.
@@ -254,19 +255,17 @@ checking general conformance.
 | Element | Homepage source | Projects page | Assessment |
 |---|---|---|---|
 | Kicker | 12px/500 Core Mono, uppercase, `tracking-widest`, secondary token | Same family/size/weight/color, but `tracking-[0.35em]` | Real tracking difference; Projects-only fix possible |
-| Heading family | Explicit Instrument Serif variable | `font-display`; CSS alias points to the same Instrument Serif outlines today | Visually similar now, but selector/source differs |
-| Heading size | 46px mobile, 56px from `md` | 36px mobile, 56px from `md` | Intentional one-line mobile variation retained in first pass |
-| Heading line height | 1.0 | 1.05 | Small but measurable difference |
-| Heading tracking | Tight; -1.5px from `md` | Default tracking | Small but measurable difference |
-| Accent | `text-colorfull`, padded, no text shadow | `text-gradient-animated`, no padding/shadow reset | Different approved gradient recipes |
-| Intro copy | No Case Studies subtitle | 14px/400 Outfit, relaxed, secondary, max-width 576px | Appropriate standalone-page context, not duplication |
+| Heading family | Explicit Instrument Serif variable | Explicit Instrument Serif variable | Parity passes |
+| Heading size | 46px mobile, 56px from `md` | 46px mobile, 56px from `md` | Parity passes |
+| Heading line height | 1.0 | 1.0 | Parity passes |
+| Heading tracking | Tight; -1.5px from `md` | Tight; -1.5px from `md` | Parity passes |
+| Accent | `text-colorfull`, padded, no text shadow | Same | Parity passes |
+| Intro copy | No Case Studies subtitle | 15px/400 Outfit, 24px line height, secondary, max-width 576px | Approved principal prose; appropriate standalone context |
 | Decoration | Plain shared heading | Grid, compass, crop marks, atmosphere | Intentional Projects identity |
 
-The kicker is not exactly the same as homepage kickers. The heading also is not
-the same recipe even though the mislabeled display file currently contains
-Instrument Serif. Strict parity would alter the current one-line drawing-sheet
-composition and therefore remains an owner decision rather than an automatic
-cleanup.
+The kicker and heading now use the same typography and internal spacing as the
+approved shared system. The Projects-specific copy, supporting paragraph, and
+drawing-sheet decoration preserve the page's distinct identity.
 
 ### Search and filtering verification
 
@@ -373,9 +372,10 @@ their intentional differences.
 
 - `Selected Projects` now uses the same 12px/500 Core Mono,
   `tracking-widest`, and secondary-color kicker recipe as Home/About.
-- The 36px one-line mobile Projects heading, blueprint decoration, distinct
-  copy, gradient recipe, and 14px introductory paragraph remain intentionally
-  Projects-specific.
+- The Projects heading now follows the exact 46px mobile/56px desktop shared
+  Instrument Serif recipe. Its copy and blueprint decoration remain
+  Projects-specific; the supporting paragraph uses approved 15px principal
+  prose with a 16px heading gap.
 - URL query changes now synchronize back into the visible search input.
 - Search typing uses history replacement; tag and pagination actions use
   history pushes. Browser Back restored `?tag=Web&q=Next.js` together with the
@@ -436,6 +436,8 @@ their intentional differences.
 - Both themes: zero document overflow and zero real-content overflow.
 - All viewports: zero interactive targets below 24px.
 - Mobile filter row: 298x32px at 360, 375, and 390px.
+- Hero typography: 12px/500 kicker, 16px gap, 46px/56px Instrument Serif
+  heading, 16px gap, and 15px/24px supporting copy.
 - Accessibility tree: h1 -> collection h2 -> project h3; persistent status;
   single-name cover links; menu/menuitemradio semantics.
 - Home and Projects routes: HTTP 200.

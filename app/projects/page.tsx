@@ -125,13 +125,13 @@ export default async function ProjectsPage() {
           <p className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
             Selected Projects
           </p>
-          <h1 className="heading-glow mt-4 font-display text-4xl font-medium leading-[1.05] text-text-primary md:text-[56px]">
+          <h1 className="heading-glow mx-auto mt-4 max-w-xl text-balance [font-family:var(--font-instrument-serif),serif] text-[46px] font-medium leading-none tracking-tight text-text-primary md:text-[56px] md:tracking-[-1.5px]">
             Things I&apos;ve{" "}
-            <span className="text-gradient-animated font-display italic">
+            <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
               built
             </span>
           </h1>
-          <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-text-secondary">
+          <p className="mx-auto mt-4 max-w-xl text-[15px] font-normal leading-6 text-text-secondary">
             A collection of work across full-stack web, cybersecurity, and
             AI/ML — every project here was designed, built, and shipped to
             solve a real problem.

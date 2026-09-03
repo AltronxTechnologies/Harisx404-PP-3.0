@@ -63,7 +63,7 @@ function HeaderSkeleton() {
 
         <div className="flex animate-pulse flex-col items-center">
           <div className="h-3 w-36 rounded bg-border-primary/50" />
-          <div className="mt-4 h-[38px] w-64 rounded bg-border-primary/40 md:h-[59px] md:w-96" />
+          <div className="mt-4 h-[92px] w-[278px] max-w-full rounded bg-border-primary/40 md:h-[59px] md:w-96" />
           <div className="mt-4 h-3.5 w-full max-w-xl rounded bg-border-primary/30" />
           <div className="mt-2 h-3.5 w-4/5 max-w-md rounded bg-border-primary/30" />
         </div>
