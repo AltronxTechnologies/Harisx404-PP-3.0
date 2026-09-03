@@ -91,7 +91,7 @@ export function AccountsBento() {
           <span className="font-mono text-text-primary">harisx404</span>
         </p>
       </div>
-      <div className="z-20 mt-4 flex flex-1 items-start justify-center gap-2 sm:mt-5 sm:gap-3">
+      <div className="z-20 mt-4 flex flex-1 items-start justify-center gap-[7px] sm:mt-5 sm:gap-3">
         {accountItems.map((item, index) => (
           <a
             key={item.title}

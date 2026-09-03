@@ -334,6 +334,7 @@ export function ScrapbookBento({ className }: { className?: string }) {
           <Sticker
             caption="Home is a dark screen and a blinking cursor — most of my best ideas start at this prompt."
             index={1}
+            className="top-3 md:top-0"
           >
             <StickerArt
               svg={terminalSvg}
@@ -354,6 +355,7 @@ export function ScrapbookBento({ className }: { className?: string }) {
           <Sticker
             caption="Build, break, learn — then ship it. The only loop I never want to terminate."
             index={3}
+            className="top-3 md:top-0"
           >
             <StickerArt
               svg={shipitSvg}

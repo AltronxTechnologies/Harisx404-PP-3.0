@@ -229,18 +229,21 @@ function renderRich(text: ReactNode): ReactNode {
  *  and is keyboard- and screen-reader-accessible. */
 function Highlights({
   highlights,
+  open,
+  onToggle,
 }: {
   highlights: Experience["highlights"];
+  open: boolean;
+  onToggle: () => void;
 }) {
   const prefersReducedMotion = useReducedMotion();
-  const [open, setOpen] = useState(false);
   const panelId = useId();
   const count = highlights.length;
   return (
     <div className="mt-4">
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={onToggle}
         aria-expanded={open}
         aria-controls={panelId}
         className="flex items-center gap-2 rounded-full border border-border-primary px-3.5 py-1.5 font-mono text-xs font-medium uppercase tracking-[0.2em] text-text-secondary transition-colors hover:border-text-tertiary hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:border-white/20 dark:hover:border-white/40"
@@ -304,6 +307,7 @@ function Highlights({
 
 export function Resume({ experiences }: { experiences?: Experience[] }) {
   const prefersReducedMotion = useReducedMotion();
+  const [openHighlightsId, setOpenHighlightsId] = useState<string | null>(null);
   const entries =
     experiences && experiences.length > 0
       ? experiences
@@ -312,6 +316,9 @@ export function Resume({ experiences }: { experiences?: Experience[] }) {
     <div className="relative -mx-2 sm:-mx-3 lg:mx-0">
       <div className="divide-y divide-gray-200 border-y border-gray-300 dark:divide-white/10 dark:border-white/20">
         {entries.map((experience) => {
+              const experienceKey = String(
+                experience.id ?? `${experience.organization}-${experience.jobTitle}`,
+              );
               const period = formatPeriod(experience);
               // "Full-time · Remote" line, deduped when the two match.
               const typeMeta = Array.from(
@@ -337,7 +344,7 @@ export function Resume({ experiences }: { experiences?: Experience[] }) {
               ) : null;
               return (
             <motion.div
-              key={experience.id ?? `${experience.organization}-${experience.jobTitle}`}
+              key={experienceKey}
               className="py-12"
               initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -416,7 +423,15 @@ export function Resume({ experiences }: { experiences?: Experience[] }) {
                       </p>
                     ) : null}
                     {experience.highlights.length > 0 ? (
-                      <Highlights highlights={experience.highlights} />
+                      <Highlights
+                        highlights={experience.highlights}
+                        open={openHighlightsId === experienceKey}
+                        onToggle={() =>
+                          setOpenHighlightsId((current) =>
+                            current === experienceKey ? null : experienceKey,
+                          )
+                        }
+                      />
                     ) : null}
                   </div>
                 </div>
