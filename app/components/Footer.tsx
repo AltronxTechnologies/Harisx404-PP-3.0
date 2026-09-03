@@ -61,12 +61,24 @@ export function Footer(): JSX.Element {
     );
     if (link.isExternal) {
       return (
-        <a href={link.href} target="_blank" rel="noopener noreferrer">
+        <a
+          href={link.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-block py-1 text-sm text-text-secondary transition-colors hover:text-text-primary focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-text-primary"
+        >
           {label}
         </a>
       );
     }
-    return <Link href={link.href}>{label}</Link>;
+    return (
+      <Link
+        href={link.href}
+        className="inline-block py-1 text-sm text-text-secondary transition-colors hover:text-text-primary focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-text-primary"
+      >
+        {label}
+      </Link>
+    );
   };
 
   return (
@@ -76,7 +88,11 @@ export function Footer(): JSX.Element {
           <div className="max-w-6xl divide-y divide-gray-200 px-4 dark:divide-white/10 lg:mx-auto lg:flex lg:divide-x lg:divide-y-0 lg:px-4 xl:px-0">
             {/* Left brand & bio area */}
             <div className="flex w-full flex-col py-8 pb-10 text-sm md:py-6 md:pb-10 lg:pr-16">
-              <Link className="inline-block w-fit" href="/" aria-label="Home">
+              <Link
+                className="inline-block w-fit focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-text-primary"
+                href="/"
+                aria-label="Home"
+              >
                 <Image
                   src="/brand/harisx404 black transparent.png"
                   alt="Muhammad Haris Logo"
@@ -110,15 +126,19 @@ export function Footer(): JSX.Element {
               <div className="flex w-full flex-wrap justify-between gap-x-4 gap-y-8 sm:gap-x-8">
                 {footerSections.map((section) => (
                   <div key={section.title} className="min-w-0">
-                    <span className="mb-3 inline-block text-sm font-medium text-text-primary sm:mb-4 sm:text-base">
+                    <span
+                      id={`footer-${section.title.toLowerCase()}-heading`}
+                      className="mb-3 inline-block text-sm font-medium text-text-primary sm:mb-4 sm:text-base"
+                    >
                       {section.title}
                     </span>
-                    <ul className="space-y-2 sm:space-y-2.5">
+                    <ul
+                      aria-labelledby={`footer-${section.title.toLowerCase()}-heading`}
+                      className="space-y-2 sm:space-y-2.5"
+                    >
                       {section.links.map((link) => (
                         <li key={link.href}>
-                          <span className="inline-block py-1 text-sm text-text-secondary transition-colors hover:text-text-primary">
-                            {renderFooterLink(link)}
-                          </span>
+                          {renderFooterLink(link)}
                         </li>
                       ))}
                     </ul>
@@ -141,14 +161,14 @@ export function Footer(): JSX.Element {
                       {isFile ? (
                         <a
                           href={link.href}
-                          className="inline-block py-1 transition-colors hover:text-text-primary"
+                          className="inline-block min-w-6 py-1 transition-colors hover:text-text-primary focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-text-primary"
                         >
                           {link.label}
                         </a>
                       ) : (
                         <Link
                           href={link.href}
-                          className="inline-block py-1 transition-colors hover:text-text-primary"
+                          className="inline-block min-w-6 py-1 transition-colors hover:text-text-primary focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-text-primary"
                         >
                           {link.label}
                         </Link>
