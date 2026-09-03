@@ -19,16 +19,17 @@ The effective primary type system is:
 |---|---|---|
 | Primary sans/body/UI | Reference Outfit | Inherited from `body.font-sans` |
 | Primary mono/UI labels | Reference Core Mono | Explicit `font-mono` utility |
-| Display/card/editorial serif | Reference Bluu Next | Explicit `font-display` utility |
+| Display/card/editorial serif | Instrument Serif binary mislabeled as Reference Bluu Next | Explicit `font-display` utility |
 | Large section/page serif | Instrument Serif | Explicit CSS variable family |
 | Experience/education serif | Source Serif 4 | Explicit CSS variable family |
 | Hero decode headline | JetBrains Mono | Explicit CSS variable family |
 | Article code/table mono | Geist Mono | Direct scoped CSS rules |
 
-The three fonts that define most of the site's appearance - Reference Outfit,
-Reference Core Mono, and Reference Bluu Next - are fetched directly by the
-browser from `aayushbharti.in`. They are not stored in this repository. This is
-the main reliability and ownership issue to resolve.
+Three font URLs that define most of the site's appearance are fetched directly
+by the browser from `aayushbharti.in`. They are not stored in this repository.
+The URL exposed in CSS as Reference Bluu Next was inspected after the initial
+source audit and is actually an Instrument Serif Regular binary. This is both a
+reliability issue and a misleading family alias that must be resolved.
 
 Two loaded families are currently unused:
 
@@ -78,7 +79,8 @@ Important consequences:
 
 - `font-sans` does not mean Geist Sans. It means Reference Outfit.
 - `font-mono` does not mean Geist Mono. It means Reference Core Mono.
-- `font-display` does not mean Instrument Serif. It means Reference Bluu Next.
+- `font-display` points to the CSS name Reference Bluu Next, but that name wraps
+  a remote file whose internal family is Instrument Serif Regular.
 - `font-grotesk` is an alternate name for Reference Outfit and currently has
   no application-code consumers.
 
@@ -246,7 +248,7 @@ Reference Core Mono -> ui-monospace -> generic monospace
 
 Fallback metrics differ substantially across macOS, Windows, and Linux.
 
-## 3. Reference Bluu Next
+## 3. Reference Bluu Next alias (actually Instrument Serif)
 
 ### Source and declaration
 
@@ -267,6 +269,19 @@ https://aayushbharti.in/_next/static/immutable/media/e41d5df559864f9e-s.p.2rlzm4
 
 The URL returned HTTP 200 on 2026-09-03 with `font/woff2`, wildcard CORS,
 one-year immutable caching, and a 15,040-byte response.
+
+Binary metadata inspection with `fc-scan` returned:
+
+```text
+Internal family: Instrument Serif
+Internal style: Regular
+Variable font: false
+```
+
+Therefore, this file is not Bluu Next. `Reference Bluu Next` is only the custom
+CSS alias assigned to an Instrument Serif Regular font file. This explains why
+Reference Bluu Next and the separately loaded official Instrument Serif look
+the same on the site.
 
 ### Where it is used
 
@@ -305,8 +320,11 @@ Representative locations:
 ### Requested weights and styles
 
 - Normal 400, 500, and 700 are requested.
-- The declared 400-700 variable range should support those normal weights if
-  the remote binary contains the advertised variable weight axis.
+- The CSS declaration advertises a 400-700 variable range, but the inspected
+  binary is a non-variable Instrument Serif Regular face. It does not contain
+  genuine Bluu Next 500 or 700 outlines.
+- Browsers can reuse or synthesize the regular face for the requested heavier
+  appearances; these are not verified native Bluu weights.
 - Italic `font-display` is used extensively, but no italic face is declared.
   Those appearances are synthetic obliques.
 
@@ -331,11 +349,13 @@ Synthetic italic examples include:
 ### Fallback behavior
 
 ```text
-Reference Bluu Next -> Georgia -> generic serif
+CSS alias "Reference Bluu Next" (Instrument Serif Regular binary) -> Georgia -> generic serif
 ```
 
 Georgia is not metrically equivalent and will materially alter wrapping and
-the visual tone if the remote font fails.
+the visual tone if the remote font fails. Supplying a real Bluu Next file would
+also change the approved appearance because the current design has actually
+been rendering Instrument Serif in these locations.
 
 ## 4. Instrument Serif
 
@@ -577,7 +597,7 @@ systems.
 | Reference Outfit | Italic | Any inherited sans italic text |
 | Reference Core Mono | 500 and 700 | Kickers, section numbers, bold mono labels |
 | Reference Core Mono | Italic | Any future mono italic use |
-| Reference Bluu Next | Italic/oblique | Project accents, blog overlays, testimonials |
+| `Reference Bluu Next` alias | Real 500/700 weights and italic/oblique; binary is Instrument Serif Regular | Project names, blog titles, accents, testimonials |
 | Instrument Serif | 500 normal | Shared section and page headings |
 | Instrument Serif | 500 italic | Italic accent words inside 500 headings |
 
@@ -590,7 +610,8 @@ The browser directly depends on these three files owned by another website:
 
 1. Reference Outfit WOFF2.
 2. Reference Core Mono Regular WOFF2.
-3. Reference Bluu Next WOFF2.
+3. A file labeled Reference Bluu Next in CSS but internally identified as
+   Instrument Serif Regular.
 
 Current technical status:
 
@@ -624,9 +645,13 @@ Do not overwrite the current setup until the files have been compared visually.
    - Bold 700 WOFF2.
    - If only Regular legally exists, decide whether to keep synthesis or stop
      requesting unavailable weights.
-3. Bluu Next or the exact legally licensed equivalent:
-   - Normal variable WOFF2 covering at least 400-700, or static 400/500/700.
-   - Real italic/oblique files covering the used 400/500 range.
+3. Decide the intended display identity before obtaining another file:
+   - To preserve the current approved appearance, use official Instrument
+     Serif for the `font-display` role too and remove the misleading Bluu alias.
+   - To introduce actual Bluu Next, obtain licensed normal and italic/oblique
+     files, but treat that as a visual redesign requiring owner approval.
+   - Do not assume real Bluu Next will match the current screenshots; the site
+     has not actually been rendering Bluu Next.
 
 ### Optional cleanup inputs
 
@@ -665,8 +690,8 @@ Outfit-Variable-Italic.woff2
 CoreMono-Regular.woff2
 CoreMono-Medium.woff2
 CoreMono-Bold.woff2
-BluuNext-Variable-Normal.woff2
-BluuNext-Variable-Italic.woff2
+InstrumentSerif-Regular.woff2
+InstrumentSerif-Italic.woff2
 ```
 
 These names are recommendations, not claims about which official files exist.
@@ -685,8 +710,9 @@ Migration order:
 3. Configure them with `next/font/local` and `display: "swap"`.
 4. Preserve current family roles and fallback stacks.
 5. Remove only the three external `@font-face` URLs after local files load.
-6. Resolve synthetic Core Mono weights and Bluu/Outfit italics using real faces
-   where available.
+6. Resolve synthetic Core Mono weights and Outfit italics using real faces
+   where available; decide whether the misleading Bluu alias should become
+   official Instrument Serif or a genuinely different Bluu family.
 7. Remove unused Geist Sans and Space Grotesk loading only after confirming no
    runtime-generated content depends on them.
 8. Decide whether the dormant `.kicker` rule should use Geist Mono or the site's
@@ -725,8 +751,9 @@ not those historical statements, determines actual rendering.
   Outfit.
 - Some documents say `font-mono` means Geist Mono. It currently means Reference
   Core Mono.
-- Some documents say `font-display` means Instrument Serif. It currently means
-  Reference Bluu Next.
+- Some documents say `font-display` means Instrument Serif. The Tailwind alias
+  is named Reference Bluu Next, but its remote binary is actually Instrument
+  Serif Regular, so the visual result is Instrument Serif.
 - An older lock note says the hero headline uses Space Grotesk. It currently
   uses JetBrains Mono.
 - Guide material mentions Bricolage Grotesque. It is not loaded or used.
