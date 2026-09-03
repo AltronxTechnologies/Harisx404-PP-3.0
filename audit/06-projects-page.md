@@ -241,3 +241,123 @@ homepage-shared `CaseStudyCard`. Adding a Projects-only optional priority prop
 would be a clean non-visual optimization, but it was deliberately not attempted
 without explicit permission to touch the shared locked file. The item is tracked
 in `DESIGN_DEBT.md`.
+
+## Microscopic parity addendum - 2026-09-03
+
+This second pass was requested after owner review. It compares individual
+Projects elements directly against the locked homepage source rather than only
+checking general conformance.
+
+### Hero comparison
+
+| Element | Homepage source | Projects page | Assessment |
+|---|---|---|---|
+| Kicker | 12px/500 Core Mono, uppercase, `tracking-widest`, secondary token | Same family/size/weight/color, but `tracking-[0.35em]` | Real tracking difference; Projects-only fix possible |
+| Heading family | Explicit Instrument Serif variable | `font-display`; CSS alias points to the same Instrument Serif outlines today | Visually similar now, but selector/source differs |
+| Heading size | 46px mobile, 56px from `md` | 36px mobile, 56px from `md` | Intentional one-line mobile variation retained in first pass |
+| Heading line height | 1.0 | 1.05 | Small but measurable difference |
+| Heading tracking | Tight; -1.5px from `md` | Default tracking | Small but measurable difference |
+| Accent | `text-colorfull`, padded, no text shadow | `text-gradient-animated`, no padding/shadow reset | Different approved gradient recipes |
+| Intro copy | No Case Studies subtitle | 14px/400 Outfit, relaxed, secondary, max-width 576px | Appropriate standalone-page context, not duplication |
+| Decoration | Plain shared heading | Grid, compass, crop marks, atmosphere | Intentional Projects identity |
+
+The kicker is not exactly the same as homepage kickers. The heading also is not
+the same recipe even though the mislabeled display file currently contains
+Instrument Serif. Strict parity would alter the current one-line drawing-sheet
+composition and therefore remains an owner decision rather than an automatic
+cleanup.
+
+### Search and filtering verification
+
+Passed states:
+
+- Case-insensitive search across title, tagline, description, tech, and tags.
+- 300ms debounce, URL persistence, refresh-safe state, and page reset to 1.
+- Found-results state and dotted description highlighting.
+- No-results state with the exact query shown.
+- Cross-tag rescue suggestions and one-click recovery.
+- Clear icon, Clear filters, Enter blur, and two-stage Escape behavior.
+- All, AI/ML, Cybersecurity, Web, and More filters with pressed/checked state.
+- More menu counts, sorted long-tail tags, outside click, Escape, Arrow keys,
+  Home/End, and restored trigger focus.
+- Eight-item pagination, continuous numbering, and correct 09-10 second page.
+- 11px mobile filter labels remain one 298x32px row at 360px.
+
+New Projects-only findings:
+
+1. The local input state is initialized from `q` but is not synchronized when
+   URL query state changes externally. Filtering reads `q` while the field
+   displays `query`, so browser/history-driven query changes can display stale
+   text. A guarded URL-to-input synchronization is needed.
+2. Result changes are announced only when multi-page pagination exists. Zero,
+   one-page, and no-results transitions need a persistent visually hidden
+   `aria-live="polite"` status.
+3. The source comment promises back/forward-friendly state, but all controls use
+   `router.replace`; this is refresh/share friendly but does not create history
+   entries for filter/page changes. Either behavior or documentation must be
+   made accurate.
+4. The More popup remains open if keyboard focus leaves it with Tab. This is not
+   a trapping defect, but closing on focus departure would make the dropdown
+   behavior more complete.
+
+### Project card microscopic comparison
+
+| Card part | Homepage | Projects | Assessment |
+|---|---|---|---|
+| Index, tags, quarter | Shared output | Shared output, pagination continues numbering | Exact component parity |
+| Meta divider | None | Dotted rule and central junction/spine | Intentional blueprint structure |
+| Cover content | Tagline in 16-20px Outfit | Project title in 19-30px display serif | Intentional hierarchy; owner says title is correct |
+| Cover arrow | 24x16 stroked SVG | 22px text glyph `->` | Visible mismatch flagged by owner |
+| Outer frame | 22px panel, 8px light/dark frame, tuned shadows | Same | Parity passes |
+| Screenshot frame | 3px white/70, 11px top radius, shared aspect ratio | Same | Parity passes |
+| Description | 15px, relaxed, secondary, three-line clamp | Same; visible at `xl` and search-highlightable | Typography parity passes |
+| Details/View actions | Shared 12px mono recipe | Same, visible at every Projects breakpoint | Parity passes |
+| Expanded bullets | 14px mobile, 15px from `sm`, 24px line height | Same | Parity passes |
+| Tech chips | 10px mono, rounded-md, brand treatment | Same first five plus `+N` | Parity passes |
+| Card spacing | 80px stack rhythm | 80px stack rhythm | Parity passes |
+| Desktop composition | Main cards plus sticky detail panel | Equal staggered columns and spine | Intentional page-level difference |
+
+Shared-component findings requiring explicit unlock permission:
+
+1. Match the Projects cover arrow to the homepage's stroked SVG while retaining
+   the approved Projects title. The clean implementation is a Projects-only
+   arrow variant prop on `CaseStudyCard`.
+2. Projects cover links currently announce duplicated names such as
+   `IntruShield NIDS IntruShield NIDS` because both the visible h3 and image alt
+   contain the title. A Projects-only decorative-image/alt prop would fix it.
+3. Reduced-motion disables transition duration but does not neutralize image
+   scale, translation, and rotation. Fixing it affects the shared card motion.
+4. A Projects-only first-image priority prop would resolve the existing LCP
+   warning without changing homepage behavior.
+5. A context-specific image `sizes` prop should use near-full-width sizing from
+   769-1279px, where Projects remains one column; the current shared hint says
+   50vw above 768px.
+
+### Loading-state parity
+
+The controls now match, but the rest of the loading skeleton remains structurally
+different:
+
+- Skeleton content is capped at `max-w-6xl`; live content is not.
+- Skeleton header omits the drawing grid, compass, crop marks, and live top
+  spacing geometry.
+- Skeleton cards omit the 8px frame, in-cover title/arrow, dotted meta divider,
+  desktop junctions, and central spine.
+- Skeleton cover uses 16px radius while the live outer panel uses 22px.
+
+These can be corrected entirely in `app/projects/loading.tsx` without touching
+locked code.
+
+### Second-pass decision gate
+
+Projects-only changes safe to implement after owner approval:
+
+1. Guardedly synchronize URL `q` back into the visible search field.
+2. Add a persistent polite result-count status.
+3. Make URL-history behavior or its documentation truthful.
+4. Close More when keyboard focus leaves the popup.
+5. Rebuild the loading skeleton to mirror live header/card geometry.
+6. Optionally align kicker tracking with homepage `tracking-widest`.
+
+Shared `CaseStudyCard` changes require an explicit temporary unlock limited to
+Projects-only optional props. No shared edit was made during this addendum.
