@@ -2,96 +2,105 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { startTransition } from "react";
 import { Rss, Search } from "lucide-react";
 
 interface BlogFilterBarProps {
   categories: string[];
+  invalidCategory?: boolean;
 }
 
-export function BlogFilterBar({ categories }: BlogFilterBarProps) {
+export function BlogFilterBar({
+  categories,
+  invalidCategory = false,
+}: BlogFilterBarProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const activeCategory = searchParams.get("category")?.toLowerCase() || "";
+  const activeCategory = invalidCategory
+    ? ""
+    : searchParams.get("category")?.trim().toLowerCase().slice(0, 80) || "";
 
-  const handleCategoryClick = (cat: string) => {
-    if (cat === "") {
-      router.push("/blog");
-    } else {
-      router.push(`/blog?category=${encodeURIComponent(cat.toLowerCase())}`);
-    }
+  const handleCategoryClick = (category: string) => {
+    startTransition(() => {
+      router.push(
+        category
+          ? `/blog?category=${encodeURIComponent(category.toLowerCase())}`
+          : "/blog",
+      );
+    });
   };
 
   const handleOpenSearch = () => {
     window.dispatchEvent(new CustomEvent("open-search-modal"));
   };
 
+  const filterClass = (selected: boolean) =>
+    `inline-flex h-8 shrink-0 items-center rounded-full border px-3 font-mono text-[11px] uppercase tracking-widest transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary ${
+      selected
+        ? "border-text-primary bg-text-primary text-bg-primary"
+        : "border-border-primary text-text-secondary hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 dark:hover:border-white/25 dark:active:border-white/25"
+    }`;
+
   return (
-    <div className="flex items-center gap-2 px-4 py-4 sm:px-6">
-      {/* Category Pills Slider — reference: scrollbar-none mask-[...] flex min-w-0 flex-1 gap-1 overflow-x-auto pr-8 */}
+    <div className="flex items-center gap-2 border-y border-border-primary px-2 py-4 sm:px-4">
       <div className="min-w-0 flex-1">
-        <div className="[mask-image:linear-gradient(to_right,black,black_calc(100%-2rem),transparent)] flex min-w-0 items-center gap-1 overflow-x-auto pr-8 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-          {/* All Posts — reference: active state */}
+        <div
+          className="flex min-w-0 items-center gap-2 overflow-x-auto pr-8 [mask-image:linear-gradient(to_right,black,black_calc(100%-2rem),transparent)] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          role="group"
+          aria-label="Filter articles by category"
+        >
           <button
             type="button"
             onClick={() => handleCategoryClick("")}
-            className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-sm transition-colors duration-200 ${
-              !activeCategory
-                ? "border border-neutral-300 bg-white text-neutral-900 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
-                : "text-neutral-400 hover:text-neutral-700 dark:text-neutral-500 dark:hover:text-neutral-300"
-            }`}
+            aria-pressed={!activeCategory && !invalidCategory}
+            className={filterClass(!activeCategory && !invalidCategory)}
           >
-            All Posts
+            All articles
           </button>
-
-          {/* Dynamic Category Pills — reference: capitalize */}
-          {categories.map((cat) => {
-            const isSelected = activeCategory === cat.toLowerCase();
+          {categories.map((category) => {
+            const selected = activeCategory === category.toLowerCase();
             return (
               <button
-                key={cat}
+                key={category}
                 type="button"
-                onClick={() => handleCategoryClick(cat)}
-                className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-sm capitalize transition-colors duration-200 ${
-                  isSelected
-                    ? "border border-neutral-300 bg-white text-neutral-900 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
-                    : "text-neutral-400 hover:text-neutral-700 dark:text-neutral-500 dark:hover:text-neutral-300"
-                }`}
+                onClick={() => handleCategoryClick(category)}
+                aria-pressed={selected}
+                className={filterClass(selected)}
               >
-                {cat}
+                {category}
               </button>
             );
           })}
         </div>
       </div>
 
-      {/* Action Buttons: ⌘K Search & RSS Feed — reference: flex shrink-0 items-center gap-1 */}
-      <div className="flex shrink-0 items-center gap-1">
-        {/* Search Posts — reference: inline-flex size-9 cursor-pointer ... lg:h-9 lg:w-52 lg:justify-start lg:gap-2 lg:px-3 */}
+      <div className="flex shrink-0 items-center gap-2">
         <button
           type="button"
           onClick={handleOpenSearch}
           aria-label="Search site"
-          className="inline-flex size-9 cursor-pointer items-center justify-center rounded-lg border border-border-primary text-neutral-400 transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 hover:text-neutral-600 dark:border-neutral-800 dark:hover:border-white/25 dark:active:border-white/25 dark:hover:text-neutral-300 lg:h-9 lg:w-52 lg:justify-start lg:gap-2 lg:px-3"
+          className="inline-flex size-8 cursor-pointer items-center justify-center rounded-lg border border-border-primary text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25 lg:w-52 lg:justify-start lg:gap-2 lg:px-3"
         >
           <Search className="size-4 shrink-0" aria-hidden />
-          <span className="hidden text-neutral-400 text-sm lg:inline">Search site</span>
-          <span className="ms-auto hidden gap-0.5 text-[11px] lg:inline-flex">
-            <kbd className="rounded border border-neutral-200 bg-neutral-100 px-1.5 py-0.5 font-mono text-neutral-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400">
+          <span className="hidden font-mono text-[11px] uppercase tracking-widest lg:inline">
+            Search site
+          </span>
+          <span className="ms-auto hidden gap-0.5 text-[10px] lg:inline-flex">
+            <kbd className="rounded-md border border-border-primary bg-white px-1.5 py-0.5 font-mono text-text-secondary dark:bg-white/5">
               ⌘
             </kbd>
-            <kbd className="rounded border border-neutral-200 bg-neutral-100 px-1.5 py-0.5 font-mono text-neutral-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400">
+            <kbd className="rounded-md border border-border-primary bg-white px-1.5 py-0.5 font-mono text-text-secondary dark:bg-white/5">
               K
             </kbd>
           </span>
         </button>
 
-        {/* RSS Feed — reference: inline-flex size-9 ... */}
         <Link
           href="/rss.xml"
           target="_blank"
           rel="noopener noreferrer"
-          aria-label="RSS Feed"
-          className="inline-flex size-9 items-center justify-center rounded-lg border border-border-primary bg-transparent text-neutral-400 transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 hover:text-neutral-600 dark:border-neutral-800 dark:hover:border-white/25 dark:active:border-white/25 dark:hover:text-neutral-300"
+          aria-label="RSS Feed (opens in a new tab)"
+          className="inline-flex size-8 items-center justify-center rounded-lg border border-border-primary text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25"
         >
           <Rss className="size-4" aria-hidden />
         </Link>

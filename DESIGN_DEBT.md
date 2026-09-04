@@ -262,18 +262,20 @@ Changing any of these is a **regression**, not a fix.
 
 ## 🔴 BUGS FOUND 2026-09-02 (infrastructure sweep)
 
-### B1. Blog category filtering returns nothing — USER-FACING
-`/blog?category=<any>` renders the empty state *"No published articles match
-the selected category"* for **every** category, including ones the filter bar
-itself lists (nextjs, react, performance, …). Verified in-browser with JS.
-`/blog` alone renders 63 post links; `/blog?category=nextjs` renders 0.
+### B1. Blog category filtering returns nothing — RESOLVED 2026-09-04
+The public tag join was empty. The Blog index now reconciles published database
+rows with checked-in frontmatter metadata, while keeping database tags
+authoritative when present. Fourteen real categories are available and every
+filter was verified against matching posts. Source drafts are excluded.
 
-Clicking any category pill on the blog index therefore appears broken to a
-visitor. Likely a field mismatch: the pills are built from
-`extractUniqueBlogCategories()` reading `post.categories`
-(= `blog_post_tags.tags.name`, `app/lib/utils.ts:135`), but the filter on the
-blog index compares against a different value or a different post set.
-**Not yet diagnosed. Highest-priority open bug.**
+### B1a. Imported Blog content ownership — OWNER DECISION REQUIRED
+The checked-in archive contains third-party first-person articles associated
+with Braydon Coyer, while Blog detail metadata and the attribution page identify
+Muhammad Haris as the author/owner. Several imported summaries are also copied
+to unrelated titles. Before the Blog corpus can receive final production lock,
+the owner must choose whether to unpublish these posts or provide original
+authors, licenses, canonical sources, and corrected summaries. This is an
+editorial/legal decision and must not be guessed or silently rewritten.
 
 ### B2. `/projects/<bad-slug>` returns HTTP 200 instead of 404 — SEO
 Body correctly renders the 404 UI, but the status line is `200 OK`, so crawlers

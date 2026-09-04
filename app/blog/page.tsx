@@ -1,208 +1,358 @@
 import type { Metadata } from "next";
-import readingDuration from "reading-duration";
-import { HeroTexture } from "@/app/components/HeroTexture";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 import { BlogFilterBar } from "@/app/components/blog/BlogFilterBar";
-import { FeaturedBlogCard } from "@/app/components/blog/FeaturedBlogCard";
 import { BlogGridCard } from "@/app/components/blog/BlogGridCard";
+import { FeaturedBlogCard } from "@/app/components/blog/FeaturedBlogCard";
+import { GridWrapper } from "@/app/components/GridWrapper";
+import { PaperHeroTexture } from "@/app/components/PaperHeroTexture";
 import { CtaSection } from "@/app/components/home/CtaSection";
-import {
-  extractUniqueBlogCategories,
-  fetchAndSortBlogPosts,
-  formatDate,
-} from "app/lib/utils";
+import { fetchBlogIndexPosts } from "@/app/blog/data";
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = {
-  title: "Blog | Handpicked Insights - Muhammad Haris",
-  description:
-    "Explore deep dives, tutorials, and insights on full-stack development, modern web architecture, Next.js, and security by Muhammad Haris.",
-  openGraph: {
-    title: "Blog | Handpicked Insights",
-    description:
-      "Explore deep dives, tutorials, and insights on full-stack development, modern web architecture, Next.js, and security by Muhammad Haris.",
-    type: "website",
-  },
+const POSTS_PER_PAGE = 12;
+
+const description =
+  "Explore practical deep dives on software engineering, modern web architecture, performance, and security.";
+
+type BlogSearchParams = {
+  category?: string | string[];
+  page?: string | string[];
 };
 
-type FormattedPost = {
-  slug: string;
-  title: string;
-  summary: string;
-  publishedAt: string;
-  formattedDate: string;
-  readingTime: string;
-  imageName?: string;
-  categories: string[];
-};
+function firstParam(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function normalizeCategory(value: string | undefined) {
+  return value?.trim().toLowerCase().slice(0, 80) || "";
+}
+
+function formatPublishedDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Date unavailable";
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(date);
+}
+
+function pageHref(page: number, category: string) {
+  const params = new URLSearchParams();
+  if (category) params.set("category", category);
+  if (page > 1) params.set("page", String(page));
+  const query = params.toString();
+  return query ? `/blog?${query}` : "/blog";
+}
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<BlogSearchParams>;
+}): Promise<Metadata> {
+  const params = await searchParams;
+  const ambiguousCategory = Array.isArray(params.category);
+  const category = Array.isArray(params.category)
+    ? ""
+    : normalizeCategory(params.category);
+  const rawPage = firstParam(params.page);
+  const page = rawPage && /^\d+$/.test(rawPage)
+    ? Math.max(1, Number.parseInt(rawPage, 10))
+    : 1;
+  const qualifier = [
+    category ? category.replace(/-/g, " ") : "",
+    page > 1 ? `Page ${page}` : "",
+  ].filter(Boolean).join(" · ");
+  const title = qualifier
+    ? `Blog · ${qualifier} | Muhammad Haris`
+    : "Blog | Handpicked Insights - Muhammad Haris";
+  const categoryPosts = category ? await fetchBlogIndexPosts() : [];
+  const validCategory = categoryPosts.some((post) =>
+    post.categories.some(
+      (candidate) => candidate.toLowerCase() === category,
+    ),
+  );
+  const invalidCategory = ambiguousCategory || Boolean(category && !validCategory);
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: invalidCategory ? "/blog" : pageHref(page, category),
+    },
+    robots: invalidCategory ? { index: false, follow: true } : undefined,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+    },
+  };
+}
+
+function paginationItems(currentPage: number, totalPages: number) {
+  if (totalPages <= 5) return Array.from({ length: totalPages }, (_, index) => index + 1);
+  const pages = new Set([1, totalPages, currentPage - 1, currentPage, currentPage + 1]);
+  const sorted = Array.from(pages)
+    .filter((page) => page >= 1 && page <= totalPages)
+    .sort((a, b) => a - b);
+  const items: Array<number | "gap"> = [];
+  sorted.forEach((page, index) => {
+    if (index > 0 && page - sorted[index - 1] > 1) items.push("gap");
+    items.push(page);
+  });
+  return items;
+}
 
 export default async function BlogPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string }>;
+  searchParams: Promise<BlogSearchParams>;
 }) {
-  const allPosts = await fetchAndSortBlogPosts();
-  const categoryParam = (await searchParams).category?.toLowerCase() || "";
+  const allPosts = await fetchBlogIndexPosts();
+  const params = await searchParams;
+  const ambiguousCategory = Array.isArray(params.category);
+  const categoryParam = ambiguousCategory
+    ? ""
+    : normalizeCategory(firstParam(params.category));
+  const rawPage = firstParam(params.page);
+  const requestedPage = rawPage && /^\d+$/.test(rawPage)
+    ? Number.parseInt(rawPage, 10)
+    : 1;
 
-  // Extract all categories dynamically from database
-  const dynamicCategories = Array.from(
-    extractUniqueBlogCategories(allPosts),
-  );
+  const categories = allPosts
+    .flatMap((post) => post.categories)
+    .filter(
+      (category, index, values) =>
+        values.findIndex(
+          (candidate) => candidate.toLowerCase() === category.toLowerCase(),
+        ) === index,
+    );
 
-  // Curated category list (matching reference)
-  const defaultCategories = [
-    "nextjs",
-    "react",
-    "performance",
-    "web-vitals",
-    "javascript",
-    "css",
-    "typescript",
-    "architecture",
-    "security",
-    "developer-mindset",
-  ];
-
-  const combinedCategories = Array.from(
-    new Set([...dynamicCategories, ...defaultCategories]),
-  );
-
-  const posts: FormattedPost[] = allPosts.map((post) => ({
+  const posts = allPosts.map((post) => ({
     slug: post.slug,
     title: post.title,
     summary: post.summary,
     publishedAt: post.publishedAt,
-    formattedDate: formatDate(post.publishedAt),
-    readingTime: readingDuration(post.content || "", {
-      wordsPerMinute: 200,
-      emoji: false,
-    }),
+    formattedDate: formatPublishedDate(post.publishedAt),
+    readingTime: post.readingTime,
     imageName: post.imageName || "",
     categories: post.categories || [],
+    featured: post.featured,
   }));
 
-  // Filter posts based on active category
-  const filteredPosts = categoryParam
+  const validCategory = categories.some(
+    (category) => category.toLowerCase() === categoryParam,
+  );
+  const filteredPosts = ambiguousCategory
+    ? []
+    : categoryParam
     ? posts.filter((post) =>
         post.categories.some(
-          (cat) => cat.toLowerCase() === categoryParam,
+          (category) => category.toLowerCase() === categoryParam,
         ),
       )
     : posts;
-
-  // The first post is featured
-  const featuredPost = filteredPosts.length > 0 ? filteredPosts[0] : undefined;
-  const latestPosts = featuredPost ? filteredPosts.slice(1) : [];
+  const editorialFeatured = categoryParam
+    ? undefined
+    : filteredPosts.find((post) => post.featured);
+  const orderedPosts = editorialFeatured
+    ? [editorialFeatured, ...filteredPosts.filter((post) => post !== editorialFeatured)]
+    : filteredPosts;
+  const totalPages = Math.max(1, Math.ceil(orderedPosts.length / POSTS_PER_PAGE));
+  const currentPage = Number.isFinite(requestedPage)
+    ? Math.min(Math.max(requestedPage, 1), totalPages)
+    : 1;
+  const canonicalPage = currentPage > 1 ? String(currentPage) : undefined;
+  const rawCategory = firstParam(params.category);
+  if (
+    !ambiguousCategory &&
+    params.page !== undefined &&
+    (Array.isArray(params.page) || rawPage !== canonicalPage)
+  ) {
+    redirect(pageHref(currentPage, categoryParam));
+  }
+  if (!ambiguousCategory && rawCategory !== undefined && rawCategory !== categoryParam) {
+    redirect(pageHref(currentPage, categoryParam));
+  }
+  const pagePosts = orderedPosts.slice(
+    (currentPage - 1) * POSTS_PER_PAGE,
+    currentPage * POSTS_PER_PAGE,
+  );
+  const featuredPost = currentPage === 1 ? pagePosts[0] : undefined;
+  const latestPosts = featuredPost ? pagePosts.slice(1) : pagePosts;
+  const hasInvalidCategory = ambiguousCategory || Boolean(categoryParam && !validCategory);
 
   return (
-    <div className="relative">
-      {/* Background paper texture shader */}
-      <HeroTexture />
+    <div className="relative mt-14 pb-24">
+      <GridWrapper>
+        <div className="relative px-4 xl:px-0">
+          <PaperHeroTexture className="-inset-x-2 bottom-0 top-[-128px] sm:-inset-x-3 sm:top-[-144px] md:top-[-176px] lg:inset-x-0" />
+          <header className="relative mx-auto max-w-3xl text-center">
+            <p className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
+              The Pensieve
+            </p>
+            <h1 className="heading-glow mx-auto mt-4 max-w-xl text-balance [font-family:var(--font-instrument-serif),serif] text-[46px] font-medium leading-none tracking-tight text-text-primary md:text-[56px] md:tracking-[-1.5px]">
+              Handpicked{" "}
+              <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
+                Insights
+              </span>
+            </h1>
+            <p className="mx-auto mt-4 max-w-2xl text-pretty text-[15px] leading-6 text-text-secondary">
+              Practical notes on building thoughtful software, from resilient
+              interfaces and web performance to architecture and security.
+            </p>
+          </header>
+        </div>
+      </GridWrapper>
 
-      {/* Main Page Layout — matches reference: pt-38 (152px) pb-24 */}
-      <main className="relative z-10 pt-[152px] pb-24">
-        {/* Page Header (The Pensieve) — matches reference h1 exactly */}
-        <h1 className="relative z-[2] mx-auto mb-16 max-w-xl text-balance font-medium text-[46px] tracking-tight max-sm:px-5 md:text-6xl text-center dark:[text-shadow:rgba(255,255,255,0.05)_0px_4px_8px,rgba(255,255,255,0.2)_0px_8px_30px]">
-          <p className="mb-4 font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
-            The Pensieve
-          </p>
-          <span className="inline-block text-neutral-900 dark:text-white [font-family:var(--font-instrument-serif),Georgia,serif]">
-            Handpicked{" "}
-            <span
-              className="px-1 pb-1 italic animate-gradient-x text-colorfull"
-              style={{
-                textShadow: "none",
-                maskImage: "linear-gradient(to right, black 70%, transparent 100%)",
-                maskSize: "200% 100%",
-                maskPosition: "left center",
-                maskRepeat: "no-repeat",
-              }}
-            >
-              Insights
-            </span>
-          </span>
-        </h1>
+      <section aria-label="Browse articles" className="mt-14">
+        <BlogFilterBar categories={categories} invalidCategory={ambiguousCategory} />
 
-        {/* Hairline Divider */}
-        <div aria-hidden="true" className="w-full border-t border-border-primary" />
-
-        {/* Filter Controls Section */}
-        <section className="flex flex-col">
-          {/* Category + Search + RSS Bar */}
-          <BlogFilterBar categories={combinedCategories} />
-
-          {/* Hairline Divider */}
-          <div aria-hidden="true" className="w-full border-t border-border-primary" />
-
-          {/* Featured articles kicker + card */}
+        <div className="mt-14 space-y-14 px-2 sm:px-4">
           {featuredPost && (
-            <>
-              <h4 className="py-5 text-center font-mono text-text-secondary text-xs uppercase tracking-widest">
-                Featured articles
-              </h4>
-              <div aria-hidden="true" className="w-full border-t border-border-primary" />
-
-              <div className="px-2 py-4 sm:px-4">
-                <FeaturedBlogCard
-                  slug={featuredPost.slug}
-                  title={featuredPost.title}
-                  summary={featuredPost.summary}
-                  readingTime={featuredPost.readingTime}
-                  formattedDate={featuredPost.formattedDate}
-                  imageName={featuredPost.imageName}
-                  categories={featuredPost.categories}
-                />
+            <section aria-labelledby="featured-article-heading">
+              <div className="mb-6 flex items-center justify-between gap-4">
+                <h2
+                  id="featured-article-heading"
+                  className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary"
+                >
+                  {categoryParam
+                    ? `Newest in ${categoryParam}`
+                    : editorialFeatured
+                      ? "Featured article"
+                      : "Newest article"}
+                </h2>
+                <span className="font-mono text-[11px] uppercase tracking-widest text-text-secondary">
+                  {String(orderedPosts.length).padStart(2, "0")} {orderedPosts.length === 1 ? "article" : "articles"}
+                </span>
               </div>
-            </>
+              <FeaturedBlogCard
+                slug={featuredPost.slug}
+                title={featuredPost.title}
+                summary={featuredPost.summary}
+                readingTime={featuredPost.readingTime}
+                publishedAt={featuredPost.publishedAt}
+                formattedDate={featuredPost.formattedDate}
+                imageName={featuredPost.imageName}
+                categories={featuredPost.categories}
+              />
+            </section>
           )}
 
-          {/* Latest articles section */}
           {latestPosts.length > 0 && (
-            <>
-              <div aria-hidden="true" className="w-full border-t border-border-primary" />
-              <h4 className="py-5 text-center font-mono text-text-secondary text-xs uppercase tracking-widest">
-                Latest articles
-              </h4>
-              <div aria-hidden="true" className="w-full border-t border-border-primary" />
-
-              <div className="px-2 py-4 sm:px-4">
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-                  {latestPosts.map((post, idx) => (
-                    <BlogGridCard
-                      key={post.slug}
-                      slug={post.slug}
-                      title={post.title}
-                      summary={post.summary}
-                      readingTime={post.readingTime}
-                      formattedDate={post.formattedDate}
-                      imageName={post.imageName}
-                      index={idx}
-                    />
-                  ))}
-                </div>
+            <section aria-labelledby="latest-articles-heading">
+              <div className="mb-6 flex items-center justify-between gap-4 border-b border-border-primary pb-4" role="status" aria-live="polite">
+                <h2
+                  id="latest-articles-heading"
+                  className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary"
+                >
+                  {currentPage === 1 ? "Latest articles" : `Articles, page ${currentPage}`}
+                </h2>
+                <span className="font-mono text-[11px] uppercase tracking-widest text-text-secondary">
+                  Page {String(currentPage).padStart(2, "0")} / {String(totalPages).padStart(2, "0")}
+                </span>
               </div>
-            </>
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+                {latestPosts.map((post, index) => (
+                  <BlogGridCard
+                    key={post.slug}
+                    slug={post.slug}
+                    title={post.title}
+                    summary={post.summary}
+                    readingTime={post.readingTime}
+                    publishedAt={post.publishedAt}
+                    formattedDate={post.formattedDate}
+                    imageName={post.imageName}
+                    index={index}
+                  />
+                ))}
+              </div>
+            </section>
           )}
 
-          {/* Empty State */}
-          {filteredPosts.length === 0 && (
-            <div className="py-20 text-center">
-              <p className="font-mono text-xs uppercase tracking-widest text-text-secondary">
-                No articles found
+          {pagePosts.length === 0 && (
+            <div className="rounded-3xl border border-border-primary bg-white px-6 py-16 text-center dark:bg-white/[0.02]">
+              <p className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
+                {hasInvalidCategory ? "Unknown category" : "No articles yet"}
               </p>
-              <p className="mt-2 text-sm text-text-secondary">
-                No published articles match the selected category &quot;{categoryParam}&quot;.
-              </p>
+              <h2 className="mt-4 font-display text-3xl font-medium text-text-primary">
+                {hasInvalidCategory
+                  ? "That filter does not match the published collection."
+                  : "The next article is still being prepared."}
+              </h2>
+              <Link
+                href="/blog"
+                className="mt-6 inline-flex min-h-8 items-center rounded-full border border-border-primary px-4 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25"
+              >
+                View all articles
+              </Link>
             </div>
           )}
-        </section>
 
-        {/* Hairline Divider before CTA */}
-        <div aria-hidden="true" className="mt-14 w-full border-t border-border-primary" />
+          {orderedPosts.length > POSTS_PER_PAGE && (
+            <nav aria-label="Blog pages" className="flex flex-col items-center gap-4 pt-2">
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                {currentPage === 1 ? (
+                  <span className="inline-flex min-h-8 items-center rounded-full border border-border-primary px-4 font-mono text-[11px] uppercase tracking-widest text-text-secondary opacity-40">
+                    Previous
+                  </span>
+                ) : (
+                  <Link
+                    prefetch={false}
+                    href={pageHref(currentPage - 1, categoryParam)}
+                    className="inline-flex min-h-8 items-center rounded-full border border-border-primary px-4 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25"
+                  >
+                    Previous
+                  </Link>
+                )}
+                {paginationItems(currentPage, totalPages).map((item, index) =>
+                  item === "gap" ? (
+                    <span key={`gap-${index}`} aria-hidden className="px-0.5 font-mono text-xs text-text-secondary">…</span>
+                  ) : (
+                    <Link
+                      prefetch={false}
+                      key={item}
+                      href={pageHref(item, categoryParam)}
+                      aria-current={item === currentPage ? "page" : undefined}
+                      aria-label={`Page ${item}${item === currentPage ? ", current page" : ""}`}
+                      className={`inline-flex size-8 items-center justify-center rounded-full border font-mono text-xs transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary ${
+                        item === currentPage
+                          ? "border-text-primary bg-text-primary text-bg-primary"
+                          : "border-border-primary text-text-secondary hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 dark:hover:border-white/25 dark:active:border-white/25"
+                      }`}
+                    >
+                      {String(item).padStart(2, "0")}
+                    </Link>
+                  ),
+                )}
+                {currentPage === totalPages ? (
+                  <span className="inline-flex min-h-8 items-center rounded-full border border-border-primary px-4 font-mono text-[11px] uppercase tracking-widest text-text-secondary opacity-40">
+                    Next
+                  </span>
+                ) : (
+                  <Link
+                    prefetch={false}
+                    href={pageHref(currentPage + 1, categoryParam)}
+                    className="inline-flex min-h-8 items-center rounded-full border border-border-primary px-4 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25"
+                  >
+                    Next
+                  </Link>
+                )}
+              </div>
+              <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-text-secondary">
+                Showing {String((currentPage - 1) * POSTS_PER_PAGE + 1).padStart(2, "0")}–{String(Math.min(currentPage * POSTS_PER_PAGE, orderedPosts.length)).padStart(2, "0")} of {String(orderedPosts.length).padStart(2, "0")}
+              </p>
+            </nav>
+          )}
+        </div>
+      </section>
 
-        {/* Bottom CTA Callout */}
+      <div className="mt-28">
         <CtaSection />
-      </main>
+      </div>
     </div>
   );
 }
