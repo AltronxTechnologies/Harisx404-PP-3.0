@@ -98,8 +98,9 @@ not increase document `scrollWidth`. No real content overflows.
 - Safe scoped fix: Add a neutral 1px or 2px `focus-visible` outline with offset,
   matching the approved Search modal's quiet neutral focus language.
 - Resolution initially used an offset outline. The owner later requested exact
-  filter-hover parity, so the final state is a single 1px
-  `border-text-tertiary` hairline with no visible outline or layout change.
+  filter-hover parity. The final production audit retained the single 1px
+  hairline but moved both states to `border-text-secondary`, meeting the 3:1 UI
+  contrast requirement without an outline or layout change.
 
 ### P4. Loading skeleton does not match live control geometry - resolved
 
@@ -450,6 +451,40 @@ their intentional differences.
 ### Owner-directed search-focus amendment
 
 After final review, the offset search outline was removed. Search hover and
-keyboard focus now use the same thin `text-tertiary` border as filter-tag hover.
+keyboard focus use the same thin `text-secondary` border as filter-tag hover.
 Computed verification showed a transparent outline and only the 1px border
-change; the 32px control geometry remains unchanged.
+change; the 32px control geometry remains unchanged. The light border is
+`#5E5F6E`, correcting the lower-contrast `#A5AEB8` trial.
+
+## Final production audit - 2026-09-04
+
+The complete Projects index was re-audited after all owner-directed polish.
+
+- TypeScript, targeted ESLint, and `git diff --check`: passed with zero errors.
+- `/`, `/projects`, pagination, combined filter/search, and all ten rendered
+  project-detail routes: HTTP 200.
+- Required matrix rechecked in light and dark: 1440x900, 1024x768, 768x1024,
+  390x844, 375x667, and 360x640.
+- Every viewport: document `scrollWidth` equals viewport width, zero real-content
+  overflow, zero clipped controls, and zero interactive targets below 24px.
+- Hero measurements: 12px/500 kicker, 16px gap, 46px mobile/56px desktop
+  Instrument Serif heading at line-height 1, 16px gap, 15px/24px supporting
+  copy. Mobile two-line wrap is balanced and unclipped.
+- Search/filter hairline: one pixel, no ring/glow/outline/layout shift; both use
+  `text-secondary` for compliant light/dark contrast.
+- Found, zero-result, rescue, clear, URL refresh, Back/Forward, active filter,
+  More menu, keyboard navigation, focus restoration/departure, Details
+  accordion, and pagination states: passed.
+- Card title, line arrow, metadata, date, description, disclosure actions,
+  bullets, technology chips, image frame, responsive image hints, and first
+  image priority: passed.
+- Touch scroll preview on Home and Projects reaches the intended hover transform
+  and returns to exact rest after 1.2 seconds. Desktop hover and reduced-motion
+  safeguards remain correct.
+- Loading state mirrors the live blueprint header, controls, card frame, and
+  staggered desktop layout.
+- Browser console: no application errors, hydration errors, missing assets, or
+  LCP warning.
+
+No known Projects-index issue remains. The page is ready for owner visual
+approval and an explicit production lock.
