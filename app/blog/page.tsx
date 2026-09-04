@@ -7,7 +7,10 @@ import { FeaturedBlogCard } from "@/app/components/blog/FeaturedBlogCard";
 import { GridWrapper } from "@/app/components/GridWrapper";
 import { PaperHeroTexture } from "@/app/components/PaperHeroTexture";
 import { CtaSection } from "@/app/components/home/CtaSection";
-import { fetchBlogIndexPosts } from "@/app/blog/data";
+import {
+  fetchBlogIndexPosts,
+  fetchBlogReactionSummaries,
+} from "@/app/blog/data";
 
 export const revalidate = 3600;
 
@@ -188,6 +191,9 @@ export default async function BlogPage({
   }
   const { start: pageStart, end: pageEnd } = pageBounds(currentPage);
   const pagePosts = orderedPosts.slice(pageStart, pageEnd);
+  const reactionSummaries = await fetchBlogReactionSummaries(
+    pagePosts.map((post) => post.slug),
+  );
   const featuredPost = currentPage === 1 ? pagePosts[0] : undefined;
   const latestPosts = featuredPost ? pagePosts.slice(1) : pagePosts;
   const hasInvalidCategory = ambiguousCategory || Boolean(categoryParam && !validCategory);
@@ -245,6 +251,7 @@ export default async function BlogPage({
                 formattedDate={featuredPost.formattedDate}
                 imageName={featuredPost.imageName}
                 categories={featuredPost.categories}
+                reactionSummary={reactionSummaries[featuredPost.slug]}
               />
             </section>
           )}
@@ -274,6 +281,7 @@ export default async function BlogPage({
                     formattedDate={post.formattedDate}
                     imageName={post.imageName}
                     index={index}
+                    reactionSummary={reactionSummaries[post.slug]}
                   />
                 ))}
               </div>

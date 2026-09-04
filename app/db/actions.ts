@@ -105,14 +105,36 @@ export async function getArticleReactions(slug: string) {
 export async function getUserReactions(slug: string) {
   const cookieStore = await cookies();
   const reactionsJson = cookieStore.get(`article_reactions_${slug}`)?.value;
-  
-  if (!reactionsJson) return [];
-  
-  try {
-    return JSON.parse(reactionsJson) as string[];
-  } catch {
-    return [];
+  let legacyReactions: string[] = [];
+  if (reactionsJson) {
+    try {
+      legacyReactions = (JSON.parse(reactionsJson) as string[]).filter(
+        (reaction) => VALID_REACTIONS.includes(reaction as ReactionType),
+      );
+    } catch {
+      legacyReactions = [];
+    }
   }
+
+  const visitorId = cookieStore.get("visitor_id")?.value;
+  if (visitorId) {
+    try {
+      const supabase = await createSupabaseAdminClient();
+      const { data, error } = await supabase
+        .from("article_reaction_visitors")
+        .select("reaction_type")
+        .eq("article_slug", slug)
+        .eq("visitor_id", visitorId);
+      if (!error) {
+        const storedReactions = data?.map((row) => row.reaction_type) || [];
+        return storedReactions;
+      }
+    } catch {
+      // Fall through to the legacy cookie until the migration is applied.
+    }
+  }
+
+  return legacyReactions;
 }
 
 // Toggle reaction (add or remove)
@@ -144,88 +166,60 @@ export async function toggleReaction(slug: string, reactionType: ReactionType) {
         userReactions = [];
       }
     }
+
+    const { data: existingVisitorReaction, error: visitorReactionError } =
+      await supabase
+        .from("article_reaction_visitors")
+        .select("reaction_type")
+        .eq("article_slug", slug)
+        .eq("reaction_type", reactionType)
+        .eq("visitor_id", visitorId)
+        .maybeSingle();
+    if (visitorReactionError) throw visitorReactionError;
+    const hasReacted = Boolean(existingVisitorReaction);
     
-    // Check if user has already reacted with this type
-    const hasReacted = userReactions.includes(reactionType);
-    
-    if (hasReacted) {
-      // Remove reaction
-      userReactions = userReactions.filter(r => r !== reactionType);
-      
-      // Decrement count in database
-      const { data: reaction } = await supabase
-        .from('article_reactions')
-        .select('count')
-        .eq('article_slug', slug)
-        .eq('reaction_type', reactionType)
-        .single();
-      
-      if (reaction && reaction.count > 1) {
-        await supabase
-          .from('article_reactions')
-          .update({ 
-            count: reaction.count - 1,
-            updated_at: new Date().toISOString()
-          })
-          .eq('article_slug', slug)
-          .eq('reaction_type', reactionType);
-      } else {
-        // If count would be 0, remove the record
-        await supabase
-          .from('article_reactions')
-          .delete()
-          .eq('article_slug', slug)
-          .eq('reaction_type', reactionType);
-      }
-    } else {
-      // Add reaction
-      userReactions.push(reactionType);
-      
-      // Check if article reaction exists
-      const { data: existingReaction } = await supabase
-        .from('article_reactions')
-        .select('count')
-        .eq('article_slug', slug)
-        .eq('reaction_type', reactionType)
-        .single();
-      
-      if (existingReaction) {
-        // Increment existing count
-        await supabase
-          .from('article_reactions')
-          .update({ 
-            count: existingReaction.count + 1,
-            updated_at: new Date().toISOString()
-          })
-          .eq('article_slug', slug)
-          .eq('reaction_type', reactionType);
-      } else {
-        // Create new reaction record
-        await supabase
-          .from('article_reactions')
-          .insert({
-            article_slug: slug,
-            reaction_type: reactionType,
-            count: 1
-          });
-      }
-    }
+    const { data: adjustedCount, error: reactionError } = await supabase.rpc(
+      "adjust_article_reaction",
+      {
+        target_slug: slug,
+        target_type: reactionType,
+        target_visitor: visitorId,
+        should_add: !hasReacted,
+      },
+    );
+    if (reactionError) throw reactionError;
+
+    const { data: storedReactions, error: storedReactionsError } = await supabase
+      .from("article_reaction_visitors")
+      .select("reaction_type")
+      .eq("article_slug", slug)
+      .eq("visitor_id", visitorId);
+    userReactions = storedReactionsError
+      ? hasReacted
+        ? userReactions.filter((reaction) => reaction !== reactionType)
+        : Array.from(new Set([...userReactions, reactionType]))
+      : storedReactions?.map((row) => row.reaction_type) || [];
     
     // Update cookie with new reactions
-    cookieStore.set(cookieKey, JSON.stringify(userReactions), { 
-      expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-      path: '/',
-      httpOnly: true,
-      sameSite: 'lax'
-    });
-    
-    revalidatePath(`/blog/${slug}`);
+    try {
+      cookieStore.set(cookieKey, JSON.stringify(userReactions), {
+        expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        path: "/",
+        httpOnly: true,
+        sameSite: "lax",
+      });
+      revalidatePath(`/blog/${slug}`);
+      revalidatePath("/blog");
+    } catch (postCommitError) {
+      console.warn("Reaction saved, but local state could not be refreshed.", postCommitError);
+    }
     
     return { 
       success: true, 
       added: !hasReacted, 
       removed: hasReacted,
-      userReactions
+      userReactions,
+      count: Number(adjustedCount) || 0,
     };
   } catch (error) {
     console.error('Error toggling reaction:', error);

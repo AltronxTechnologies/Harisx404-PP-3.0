@@ -2,6 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { DoubleArrow } from "@/app/components/home/DoubleArrow";
 import { getBlogImageSrc } from "@/app/components/blog/blogImage";
+import { ReactionSummaryPill } from "@/app/components/blog/ReactionSummaryPill";
+import type { ReactionSummary } from "@/app/blog/data";
 
 export interface BlogGridCardProps {
   slug: string;
@@ -12,6 +14,7 @@ export interface BlogGridCardProps {
   formattedDate: string;
   imageName?: string;
   index?: number;
+  reactionSummary?: ReactionSummary;
 }
 
 export function BlogGridCard({
@@ -22,6 +25,7 @@ export function BlogGridCard({
   publishedAt,
   formattedDate,
   imageName,
+  reactionSummary,
 }: BlogGridCardProps) {
   const imageSrc = getBlogImageSrc(imageName);
   return (
@@ -63,9 +67,12 @@ export function BlogGridCard({
             <span className="mx-1.5" aria-hidden>·</span>
             <time dateTime={publishedAt}>{formattedDate}</time>
           </div>
-          <div className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors group-hover:text-text-primary">
-            Read article
-            <DoubleArrow />
+          <div className="flex flex-wrap items-center justify-end gap-3">
+            <ReactionSummaryPill summary={reactionSummary} />
+            <span className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors group-hover:text-text-primary">
+              Read article
+              <DoubleArrow />
+            </span>
           </div>
         </div>
       </div>

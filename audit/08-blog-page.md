@@ -246,6 +246,43 @@ document overflow, correct windowed pagination/ellipsis states, and correct
 disabled Previous/Next boundaries. TypeScript, targeted ESLint,
 `git diff --check`, routes, and browser console checks passed.
 
+## Card reaction summaries - 2026-09-04
+
+Blog cards now support a compact, display-only social-proof pill backed by the
+existing article reaction system:
+
+- Up to three non-zero reaction glyphs overlap inside a 28px neutral pill,
+  followed by the aggregate total.
+- The pill is omitted when an article has no reactions or reaction data is
+  unavailable, so empty counts do not add noise.
+- The entire card remains one valid link. Reactions are submitted only inside
+  the article, avoiding nested controls and accidental card-level reactions.
+- Assistive technology receives the total, per-type breakdown, and instruction
+  to open the article to react through `role="img"` and an accessible label.
+- Counts for the visible 10 or 9 articles are loaded in one batched query, not
+  one request per card. Query failure is optional and never blocks the Blog.
+- Tied reaction counts use a fixed type order, preventing glyphs from changing
+  order between requests.
+
+The reaction backend was hardened alongside the card summary. The migration at
+`migrations/2026_article_reactions.sql` creates or upgrades the aggregate table,
+deduplicates existing rows under a migration lock, adds validation and unique
+constraints, adds per-visitor reaction markers, and installs a security-definer
+atomic adjustment function restricted to the service role. The server action
+validates published article slugs through that function, uses per-visitor
+idempotency, returns the committed count to correct stale clients, and only
+updates cookies after a successful mutation.
+
+The remote database currently returns `PGRST205` because the reaction migration
+has not yet been applied. The feature therefore correctly remains hidden in the
+live preview without errors. Applying the checked-in migration is recorded in
+`MANUAL_TASKS.md`; no fabricated preview counts were introduced.
+
+Static checks and the final independent feature review passed with no findings.
+With the migration absent, responsive fail-open verification passed at 1440,
+768, 390, 375, and 360px in both themes with zero card, footer, or document
+overflow and no browser-console errors.
+
 ## Remaining owner decision
 
 The index UI, behavior, states, and responsive implementation are

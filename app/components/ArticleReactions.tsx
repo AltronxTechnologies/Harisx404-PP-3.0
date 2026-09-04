@@ -2,7 +2,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { toggleReaction } from "../db/actions";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -355,7 +354,6 @@ export default function ArticleReactions({
   initialReactions,
   initialUserReactions,
 }: ArticleReactionsProps) {
-  const router = useRouter();
   const [reactions, setReactions] =
     useState<Record<string, number>>(initialReactions);
   const [userReactions, setUserReactions] =
@@ -389,9 +387,11 @@ export default function ArticleReactions({
 
       // If server action successful, update with server data
       if (result.success && result.userReactions) {
-        // Update with actual server values
+        setReactions((prev) => ({
+          ...prev,
+          [type]: result.count,
+        }));
         setUserReactions(result.userReactions);
-        router.refresh(); // Refresh to get updated counts from server
       } else {
         // If there was an error, revert optimistic update
         console.error("Error toggling reaction");
@@ -410,6 +410,18 @@ export default function ArticleReactions({
       }
     } catch (error) {
       console.error("Error handling reaction:", error);
+      const hadReaction = userReactions.includes(type);
+      setUserReactions((prev) =>
+        hadReaction
+          ? Array.from(new Set([...prev, type]))
+          : prev.filter((reaction) => reaction !== type),
+      );
+      setReactions((prev) => ({
+        ...prev,
+        [type]: hadReaction
+          ? (prev[type] || 0) + 1
+          : Math.max(0, (prev[type] || 0) - 1),
+      }));
     } finally {
       setIsSubmitting(null);
     }

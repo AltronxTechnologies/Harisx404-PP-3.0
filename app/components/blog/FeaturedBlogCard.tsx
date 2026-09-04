@@ -2,6 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { DoubleArrow } from "@/app/components/home/DoubleArrow";
 import { getBlogImageSrc } from "@/app/components/blog/blogImage";
+import { ReactionSummaryPill } from "@/app/components/blog/ReactionSummaryPill";
+import type { ReactionSummary } from "@/app/blog/data";
 
 export interface FeaturedBlogCardProps {
   slug: string;
@@ -12,6 +14,7 @@ export interface FeaturedBlogCardProps {
   formattedDate: string;
   imageName?: string;
   categories?: string[];
+  reactionSummary?: ReactionSummary;
 }
 
 export function FeaturedBlogCard({
@@ -23,6 +26,7 @@ export function FeaturedBlogCard({
   formattedDate,
   imageName,
   categories = [],
+  reactionSummary,
 }: FeaturedBlogCardProps) {
   const imageSrc = getBlogImageSrc(imageName);
   return (
@@ -51,10 +55,13 @@ export function FeaturedBlogCard({
       </div>
 
       <div className="flex flex-1 flex-col justify-center px-4 py-6 sm:px-6 md:px-8 md:py-8">
-        <div className="font-mono text-xs uppercase tracking-widest text-text-secondary">
-          <span>{readingTime}</span>
-          <span className="mx-2" aria-hidden>·</span>
-          <time dateTime={publishedAt}>{formattedDate}</time>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="font-mono text-xs uppercase tracking-widest text-text-secondary">
+            <span>{readingTime}</span>
+            <span className="mx-2" aria-hidden>·</span>
+            <time dateTime={publishedAt}>{formattedDate}</time>
+          </div>
+          <ReactionSummaryPill summary={reactionSummary} />
         </div>
 
         <h3 className="mt-4 text-balance font-display text-2xl font-medium leading-tight text-text-primary">
