@@ -44,9 +44,9 @@ Measured in light and dark themes:
 | 1440x900 | 0 | 0 | 0 | 224x32 | Pass |
 | 1024x768 | 0 | 0 | 0 | 224x32 | Pass |
 | 768x1024 | 0 | 0 | 0 | 439x32 | Pass |
-| 390x844 | 0 | 0 | 0 | 297x32 | Pass |
-| 375x667 | 0 | 0 | 0 | 297x32 | Pass |
-| 360x640 | 0 | 0 | 0 | 297x32 | Pass |
+| 390x844 | 0 | 0 | 0 | 298x32 | Pass |
+| 375x667 | 0 | 0 | 0 | 298x32 | Pass |
+| 360x640 | 0 | 0 | 0 | 298x32 | Pass |
 
 At 768px the blueprint background and compass circle deliberately extend past
 the viewport, but they are `aria-hidden`, clipped by the global frame, and do
@@ -105,7 +105,7 @@ not increase document `scrollWidth`. No real content overflows.
 ### P4. Loading skeleton does not match live control geometry - resolved
 
 - Severity: Medium
-- Evidence: The live search is 297px at 360-390px, 439px at 640-1023px, and
+- Evidence at the initial audit: the live search was 297px at 360-390px, 439px at 640-1023px, and
   224px from 1024px. `app/projects/loading.tsx` instead renders a maximum 260px
   search by default and 224px from `sm` upward.
 - Impact: A route transition can visibly resize and reflow the controls when
@@ -507,3 +507,17 @@ after hover; its computed border changed from `rgba(255,255,255,0.1)` to
 `rgba(255,255,255,0.25)` without layout shift. The complete six-viewport,
 light/dark route matrix remained free of document overflow or new clipping.
 TypeScript, targeted ESLint, and `git diff --check` passed after the amendment.
+
+## Mobile control-edge alignment - 2026-09-04
+
+The mobile search width was increased by one pixel, from 297px to 298px, to
+match the exact rendered width of the five-filter row. The loading skeleton was
+updated to the same value. Measured results:
+
+- 360px viewport: both rows `left: 31px`, `right: 329px`, `width: 298px`.
+- 375px viewport: both rows `left: 38.5px`, `right: 336.5px`, `width: 298px`.
+- 390px viewport: both rows `left: 46px`, `right: 344px`, `width: 298px`.
+- Tablet behavior remains on the unchanged 439px search breakpoint.
+
+There is no document overflow or control wrapping. TypeScript, targeted ESLint,
+`git diff --check`, and the browser console check passed.

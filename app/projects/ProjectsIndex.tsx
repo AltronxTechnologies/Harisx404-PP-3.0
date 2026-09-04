@@ -280,10 +280,10 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
         </label>
         {/* On stacked layouts (below lg the search sits on its own line
             above the pills) the search bar matches the pills-row width
-            (297px compact / 439px at sm+) so both lines read as one
+            (298px compact / 439px at sm+) so both lines read as one
             aligned control block. From lg up they share a line and the
             search returns to its original 224px. */}
-        <div className="relative w-full max-w-[297px] sm:w-[439px] sm:max-w-[439px] lg:w-56 lg:max-w-[260px]">
+        <div className="relative w-full max-w-[298px] sm:w-[439px] sm:max-w-[439px] lg:w-56 lg:max-w-[260px]">
           <Search
             aria-hidden
             strokeWidth={1.5}
