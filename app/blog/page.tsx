@@ -11,7 +11,8 @@ import { fetchBlogIndexPosts } from "@/app/blog/data";
 
 export const revalidate = 3600;
 
-const POSTS_PER_PAGE = 9;
+const FIRST_PAGE_POSTS = 10;
+const LATER_PAGE_POSTS = 9;
 
 const description =
   "Explore practical deep dives on software engineering, modern web architecture, performance, and security.";
@@ -106,6 +107,12 @@ function paginationItems(currentPage: number, totalPages: number) {
   return items;
 }
 
+function pageBounds(page: number) {
+  if (page === 1) return { start: 0, end: FIRST_PAGE_POSTS };
+  const start = FIRST_PAGE_POSTS + (page - 2) * LATER_PAGE_POSTS;
+  return { start, end: start + LATER_PAGE_POSTS };
+}
+
 export default async function BlogPage({
   searchParams,
 }: {
@@ -161,7 +168,9 @@ export default async function BlogPage({
   const orderedPosts = editorialFeatured
     ? [editorialFeatured, ...filteredPosts.filter((post) => post !== editorialFeatured)]
     : filteredPosts;
-  const totalPages = Math.max(1, Math.ceil(orderedPosts.length / POSTS_PER_PAGE));
+  const totalPages = orderedPosts.length <= FIRST_PAGE_POSTS
+    ? 1
+    : 1 + Math.ceil((orderedPosts.length - FIRST_PAGE_POSTS) / LATER_PAGE_POSTS);
   const currentPage = Number.isFinite(requestedPage)
     ? Math.min(Math.max(requestedPage, 1), totalPages)
     : 1;
@@ -177,10 +186,8 @@ export default async function BlogPage({
   if (!ambiguousCategory && rawCategory !== undefined && rawCategory !== categoryParam) {
     redirect(pageHref(currentPage, categoryParam));
   }
-  const pagePosts = orderedPosts.slice(
-    (currentPage - 1) * POSTS_PER_PAGE,
-    currentPage * POSTS_PER_PAGE,
-  );
+  const { start: pageStart, end: pageEnd } = pageBounds(currentPage);
+  const pagePosts = orderedPosts.slice(pageStart, pageEnd);
   const featuredPost = currentPage === 1 ? pagePosts[0] : undefined;
   const latestPosts = featuredPost ? pagePosts.slice(1) : pagePosts;
   const hasInvalidCategory = ambiguousCategory || Boolean(categoryParam && !validCategory);
@@ -292,7 +299,7 @@ export default async function BlogPage({
             </div>
           )}
 
-          {orderedPosts.length > POSTS_PER_PAGE && (
+          {orderedPosts.length > FIRST_PAGE_POSTS && (
             <nav aria-label="Blog pages" className="flex flex-col items-center gap-4 pt-2">
               <div className="flex flex-wrap items-center justify-center gap-2">
                 {currentPage === 1 ? (
@@ -343,7 +350,7 @@ export default async function BlogPage({
                 )}
               </div>
               <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-text-secondary">
-                Showing {String((currentPage - 1) * POSTS_PER_PAGE + 1).padStart(2, "0")}–{String(Math.min(currentPage * POSTS_PER_PAGE, orderedPosts.length)).padStart(2, "0")} of {String(orderedPosts.length).padStart(2, "0")}
+                Showing {String(pageStart + 1).padStart(2, "0")}–{String(Math.min(pageEnd, orderedPosts.length)).padStart(2, "0")} of {String(orderedPosts.length).padStart(2, "0")}
               </p>
             </nav>
           )}

@@ -154,7 +154,8 @@ resolved safely within the Blog-index scope.
 - Added machine-readable UTC dates and mobile-safe wrapping.
 - Added validated responsive Next images, bounded `sizes`, featured priority,
   and a no-image fallback for invalid/unapproved sources.
-- Added six-page, 9-item pagination with bounded page links, real disabled
+- Added six-page pagination with ten items on the first page and nine on later
+  pages, plus bounded page links, real disabled
   states, `aria-current`, live summaries, and prefetch suppression.
 - Removed full article bodies and heading extraction from normal database index
   requests. Full content is fetched only for a new admin post that lacks both a
@@ -193,9 +194,9 @@ The index was measured at 1440x900, 1024x768, 768x1024, 390x844,
 
 ## Route and state verification
 
-- Base collection: 53 published articles, page 01/06, showing 01-09. Page 1
-  contains one featured article plus eight latest cards.
-- Pages 2-5 contain nine cards each. Page 6 contains eight cards, shows 46-53,
+- Base collection: 53 published articles, page 01/06, showing 01-10. Page 1
+  contains one featured article plus nine latest cards, completing a 3x3 grid.
+- Pages 2-5 contain nine cards each. Page 6 contains seven cards, shows 47-53,
   and renders Next as non-interactive.
 - All 14 category filters returned matching content. Counts range from one to
   twelve on the first page; singular categories correctly say `01 article`.
@@ -227,18 +228,18 @@ The index was measured at 1440x900, 1024x768, 768x1024, 390x844,
 - Search remains site-wide and opens the locked Search modal; Blog does not
   duplicate that search implementation.
 
-## Nine-per-page amendment - 2026-09-04
+## Completed-first-grid pagination amendment - 2026-09-04
 
-The owner set the Blog archive to exactly nine articles per page. All six pages
-were verified at 1440x900, 768x1024, 390x844, 375x667, and 360x640 in both
-themes, covering 60 route/viewport/theme states:
+The owner set the first Blog page to ten articles so its one featured card is
+followed by a complete nine-card grid. Later pages use nine articles. The six
+pages require the following distribution:
 
-- Page 1: 01-09, one featured card plus eight grid cards.
-- Page 2: 10-18, nine grid cards.
-- Page 3: 19-27, nine grid cards.
-- Page 4: 28-36, nine grid cards.
-- Page 5: 37-45, nine grid cards.
-- Page 6: 46-53, eight grid cards.
+- Page 1: 01-10, one featured card plus nine grid cards.
+- Page 2: 11-19, nine grid cards.
+- Page 3: 20-28, nine grid cards.
+- Page 4: 29-37, nine grid cards.
+- Page 5: 38-46, nine grid cards.
+- Page 6: 47-53, seven grid cards.
 
 Across the archive there are 53 unique article URLs, zero duplicates, zero
 document overflow, correct windowed pagination/ellipsis states, and correct
