@@ -1,7 +1,7 @@
 # Secondary-Control Border Consistency Audit
 
 - Audit date: 2026-09-04
-- Status: Implemented and verified; awaiting owner visual approval and re-lock
+- Status: Implemented, verified, and owner-approved in the 2026-09-04 final re-lock
 - Scope: Public neutral bordered secondary controls and fields already using a
   visible border
 

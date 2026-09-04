@@ -1,6 +1,6 @@
 "use client";
 
-/* Audited under audit/06-projects-page.md; awaiting owner lock approval. */
+/* Owner-approved and locked; see audit/06-projects-page.md and LOCKED_PERFECT.md entry 24. */
 
 import { Fragment, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";

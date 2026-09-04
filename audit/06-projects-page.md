@@ -2,7 +2,7 @@
 
 - Route: `/projects`
 - Audit date: 2026-09-03
-- Status: Fixes applied and verified; awaiting owner visual approval and lock
+- Status: Owner-approved and production-locked on 2026-09-04
 - Primary files: `app/projects/page.tsx`, `app/projects/ProjectsIndex.tsx`,
   `app/projects/loading.tsx`
 - Shared reference component: `app/components/home/CaseStudies.tsx`
@@ -486,8 +486,8 @@ The complete Projects index was re-audited after all owner-directed polish.
 - Browser console: no application errors, hydration errors, missing assets, or
   LCP warning.
 
-No known Projects-index issue remains. The page is ready for owner visual
-approval and an explicit production lock.
+No known Projects-index issue remains. The owner approved and production-locked
+the page on 2026-09-04; see `LOCKED_PERFECT.md` entry 24.
 
 ## Secondary-control border addendum - 2026-09-04
 

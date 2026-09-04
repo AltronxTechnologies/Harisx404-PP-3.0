@@ -1339,8 +1339,8 @@ props. Authorized scope: brief Behind-the-Site-style touch scroll preview,
 reduced-motion correction, Projects line-arrow selection, decorative Projects
 cover alt behavior, Projects image priority, and Projects responsive image
 sizing. Homepage content, typography, geometry, desktop hover, sticky panel,
-and all other entry 23 surfaces remain locked. Final re-lock of this amended
-card behavior awaits owner visual approval.
+and all other entry 23 surfaces remain locked. The owner approved this amended
+card behavior in the final re-lock recorded in entry 24.
 
 ### 2026-09-04 owner-authorized secondary-control amendment
 
@@ -1358,8 +1358,8 @@ required viewports, with no new document overflow, clipping, wrapping, or
 geometry changes. TypeScript, targeted ESLint, `git diff --check`, route checks,
 representative computed hover/focus measurements, and the browser console
 check passed. Full evidence and the exact file scope are recorded in
-`audit/07-secondary-control-borders.md`. This amendment records the authorized
-change only; final owner visual approval and re-lock are still pending.
+`audit/07-secondary-control-borders.md`. The owner approved these changes in the
+final re-lock recorded in entry 24.
 
 ### 2026-09-04 owner-directed Reach Out color amendment
 
@@ -1370,3 +1370,60 @@ Supporting text, surfaces, icons, geometry, typography, spacing, hover behavior,
 and all other locked modal details remain unchanged. Computed colors were
 verified as `rgb(23,23,23)` in light mode and white in dark mode for all three
 headings; TypeScript, targeted ESLint, and `git diff --check` passed.
+
+## 24. FINAL OWNER RE-LOCK — Core Reference Surfaces ✅✅
+
+- **Date locked:** 2026-09-04
+- **Locked through commit:** `d1b496d`
+- **Supporting commits:** `e261ae9` (final Projects audit), `0354415` and
+  `2df3a27` (secondary-control consistency), `bf6d606` (Reach Out heading
+  colors), and `d1b496d` (exact mobile Projects control alignment).
+- **Owner approval:** The owner declared Home, About, Projects, Navbar, Search
+  modal, Reach Out modal, and Footer perfect, professional, aligned, and
+  responsive, and directed that they be locked before work moves to Blog.
+- **Status:** Final production-approved design, responsive, interaction, and
+  accessibility reference baseline. This entry closes the temporary amendments
+  under entry 23 and supersedes every remaining approval-pending note for these
+  surfaces.
+
+### Frozen scope
+
+| Area | Frozen files and dependencies |
+|---|---|
+| Home page | `app/page.tsx`, `app/components/home/**`, and Home-affecting layout/global presentation |
+| About page | `app/about/page.tsx`, `app/components/Resume.tsx`, `app/components/EducationCards.tsx`, `app/components/EducationMotion.tsx`, `app/components/AboutTrackPattern.tsx`, `app/components/ScrapbookBento.tsx`, `app/components/StatsBento.tsx` |
+| Projects index | `app/projects/page.tsx`, `app/projects/ProjectsIndex.tsx`, `app/projects/loading.tsx`, and Projects use of `app/components/home/CaseStudies.tsx` |
+| Navbar | `app/components/Navbar.tsx`, `app/components/ThemeToggle.tsx` |
+| Search modal | `app/components/navbar/SearchModal.tsx` |
+| Reach Out modal | `app/components/navbar/ReachOutModal.tsx` |
+| Footer | `app/components/Footer.tsx`, `app/components/SocialPill.tsx` |
+| Shared presentation | `app/components/navbar/modalSurfaces.ts`, `app/components/BrandGlyph.tsx`, and applicable rules in `app/globals.css` and `app/layout.tsx` |
+
+### Frozen final amendments
+
+- Shared Home/Projects cards include the approved touch scroll-preview,
+  reduced-motion safeguards, Projects arrow treatment, image priority, image
+  sizing, and decorative-alt behavior.
+- Neutral bordered secondary controls use matching subtle hover and active
+  borders: `border-neutral-400/70` in light mode and `border-white/25` in dark
+  mode, while focus, selected, primary, inverted, and disabled states remain
+  distinct.
+- Reach Out's `View my resume` and `Email me` headings use the same primary
+  colors as `Send Haris a message`: `text-neutral-900 dark:text-white`.
+- Projects phone controls are exactly aligned: search and filter rows are
+  298x32px with identical left/right edges at 360px, 375px, and 390px. The
+  tablet search remains 439px, and the loading skeleton mirrors live geometry.
+
+### Reference rule for future work
+
+These seven areas are the source of truth for polishing all remaining pages,
+starting with Blog. Reuse their established typography, section rhythm,
+responsive behavior, border language, control geometry, accessibility, and
+light/dark hierarchy. Intentional page-specific compositions may remain
+distinct, but new arbitrary spacing, type scales, colors, radii, interactions,
+or responsive rules must not be invented when an approved pattern exists here.
+
+Do not modify, refactor, restyle, rename, reorder, or indirectly alter any file
+or dependency in this frozen scope without explicit owner permission for that
+specific change in the current conversation. Admin-managed content remains
+editable; presentation does not.
