@@ -1360,3 +1360,13 @@ representative computed hover/focus measurements, and the browser console
 check passed. Full evidence and the exact file scope are recorded in
 `audit/07-secondary-control-borders.md`. This amendment records the authorized
 change only; final owner visual approval and re-lock are still pending.
+
+### 2026-09-04 owner-directed Reach Out color amendment
+
+The owner explicitly authorized the `View my resume` and `Email me` action-card
+headings in `app/components/navbar/ReachOutModal.tsx` to use the same primary
+text colors as `Send Haris a message`: `text-neutral-900 dark:text-white`.
+Supporting text, surfaces, icons, geometry, typography, spacing, hover behavior,
+and all other locked modal details remain unchanged. Computed colors were
+verified as `rgb(23,23,23)` in light mode and white in dark mode for all three
+headings; TypeScript, targeted ESLint, and `git diff --check` passed.

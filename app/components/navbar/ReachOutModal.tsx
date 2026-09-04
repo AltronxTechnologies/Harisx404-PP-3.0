@@ -307,7 +307,7 @@ export function ReachOutModal({
                       <FileText className="size-7" />
                     </div>
                   </div>
-                  <h4 className="text-2xl font-semibold text-text-secondary transition-colors group-hover:text-neutral-900 dark:group-hover:text-white">
+                  <h4 className="text-2xl font-semibold text-neutral-900 dark:text-white">
                     View my resume
                   </h4>
                   <p className="text-base text-text-secondary">Experience · skills · work</p>
@@ -328,7 +328,7 @@ export function ReachOutModal({
                     </div>
                   </div>
                   <h4
-                    className="text-2xl font-semibold text-text-secondary transition-colors group-hover:text-neutral-900 dark:group-hover:text-white"
+                    className="text-2xl font-semibold text-neutral-900 dark:text-white"
                     aria-live="polite"
                   >
                     {isCopied ? "Copied!" : copyFailed ? "Copy failed" : "Email me"}
