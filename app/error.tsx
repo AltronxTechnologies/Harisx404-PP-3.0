@@ -43,7 +43,7 @@ export default function Error({
           </button>
           <Link
             href="/"
-            className="rounded-full border border-border-primary bg-bg-primary px-6 py-3 text-sm font-medium text-text-primary transition-all hover:border-text-tertiary hover:shadow-lg"
+            className="rounded-full border border-border-primary bg-bg-primary px-6 py-3 text-sm font-medium text-text-primary transition-all hover:border-neutral-400/70 active:border-neutral-400/70 hover:shadow-lg dark:hover:border-white/25 dark:active:border-white/25"
           >
             Go back home
           </Link>

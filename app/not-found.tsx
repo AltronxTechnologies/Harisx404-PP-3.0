@@ -29,7 +29,7 @@ export default function NotFound() {
         </Link>
         <Link
           href="/blog"
-          className="rounded-full border border-border-primary bg-white px-6 py-2.5 text-sm font-medium text-text-primary transition-colors hover:border-border-primary/60 dark:bg-white/[0.02]"
+          className="rounded-full border border-border-primary bg-white px-6 py-2.5 text-sm font-medium text-text-primary transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 dark:bg-white/[0.02] dark:hover:border-white/25 dark:active:border-white/25"
         >
           Blog
         </Link>

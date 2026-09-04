@@ -135,7 +135,7 @@ export default function ResumePage() {
                 href={RESUME_PDF}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-full border border-border-primary px-6 py-3 text-sm font-medium text-text-secondary transition hover:text-text-primary"
+                className="rounded-full border border-border-primary px-6 py-3 text-sm font-medium text-text-secondary transition hover:border-neutral-400/70 active:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25 dark:active:border-white/25"
               >
                 Open in new tab
               </a>
@@ -382,7 +382,7 @@ export default function ResumePage() {
               className="group inline-flex items-center gap-3 font-mono text-xs uppercase tracking-[0.25em] text-text-secondary transition-colors hover:text-text-primary"
             >
               Download the PDF
-              <span className="inline-flex size-8 items-center justify-center rounded-full border border-border-primary transition-transform duration-300 group-hover:translate-y-0.5">
+              <span className="inline-flex size-8 items-center justify-center rounded-full border border-border-primary transition duration-300 group-hover:translate-y-0.5 group-hover:border-neutral-400/70 group-active:border-neutral-400/70 dark:group-hover:border-white/25 dark:group-active:border-white/25">
                 ↓
               </span>
             </a>

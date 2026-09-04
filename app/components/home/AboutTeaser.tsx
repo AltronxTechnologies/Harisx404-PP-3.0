@@ -131,7 +131,7 @@ export function AboutTeaser() {
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3 pb-1">
               {socials.map((social) => {
                 const pillClass =
-                  "inline-flex items-center gap-2 rounded-full border border-border-primary bg-white px-4 py-2.5 text-sm font-medium text-text-secondary transition-all hover:border-neutral-400/70 hover:text-text-primary hover:shadow-md dark:hover:border-white/25 dark:bg-white/[0.04] sm:px-5 sm:py-2";
+                  "inline-flex items-center gap-2 rounded-full border border-border-primary bg-white px-4 py-2.5 text-sm font-medium text-text-secondary transition-all hover:border-neutral-400/70 active:border-neutral-400/70 hover:text-text-primary hover:shadow-md dark:hover:border-white/25 dark:active:border-white/25 dark:bg-white/[0.04] sm:px-5 sm:py-2";
                 const inner = (
                   <>
                     <PillIcon label={social.label} />
@@ -181,7 +181,7 @@ export function AboutTeaser() {
           className="group inline-flex items-center gap-3 font-mono text-xs font-normal uppercase tracking-widest text-text-secondary transition-colors hover:text-text-primary"
         >
           More about me
-          <span className="inline-flex size-8 items-center justify-center rounded-full border border-border-primary">
+          <span className="inline-flex size-8 items-center justify-center rounded-full border border-border-primary transition-colors group-hover:border-neutral-400/70 group-active:border-neutral-400/70 dark:group-hover:border-white/25 dark:group-active:border-white/25">
             <DoubleArrow />
           </span>
         </Link>

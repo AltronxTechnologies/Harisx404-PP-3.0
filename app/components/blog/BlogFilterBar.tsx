@@ -71,7 +71,7 @@ export function BlogFilterBar({ categories }: BlogFilterBarProps) {
           type="button"
           onClick={handleOpenSearch}
           aria-label="Search site"
-          className="inline-flex size-9 cursor-pointer items-center justify-center rounded-lg border border-border-primary text-neutral-400 transition-colors hover:border-neutral-400 hover:text-neutral-600 dark:border-neutral-800 dark:hover:border-neutral-600 dark:hover:text-neutral-300 lg:h-9 lg:w-52 lg:justify-start lg:gap-2 lg:px-3"
+          className="inline-flex size-9 cursor-pointer items-center justify-center rounded-lg border border-border-primary text-neutral-400 transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 hover:text-neutral-600 dark:border-neutral-800 dark:hover:border-white/25 dark:active:border-white/25 dark:hover:text-neutral-300 lg:h-9 lg:w-52 lg:justify-start lg:gap-2 lg:px-3"
         >
           <Search className="size-4 shrink-0" aria-hidden />
           <span className="hidden text-neutral-400 text-sm lg:inline">Search site</span>
@@ -91,7 +91,7 @@ export function BlogFilterBar({ categories }: BlogFilterBarProps) {
           target="_blank"
           rel="noopener noreferrer"
           aria-label="RSS Feed"
-          className="inline-flex size-9 items-center justify-center rounded-lg border border-border-primary bg-transparent text-neutral-400 transition-colors hover:border-neutral-400 hover:text-neutral-600 dark:border-neutral-800 dark:hover:border-neutral-600 dark:hover:text-neutral-300"
+          className="inline-flex size-9 items-center justify-center rounded-lg border border-border-primary bg-transparent text-neutral-400 transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 hover:text-neutral-600 dark:border-neutral-800 dark:hover:border-white/25 dark:active:border-white/25 dark:hover:text-neutral-300"
         >
           <Rss className="size-4" aria-hidden />
         </Link>

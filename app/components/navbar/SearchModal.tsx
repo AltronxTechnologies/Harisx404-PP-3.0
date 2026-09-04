@@ -718,21 +718,21 @@ export function SearchModal({
                   <Link
                     href="/projects"
                     onClick={onClose}
-                    className="flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-100/90 px-4 py-2 text-[15px] font-medium text-neutral-700 transition hover:bg-neutral-200/80 dark:border-white/[0.08] dark:bg-white/[0.07] dark:text-white/80 dark:hover:bg-white/[0.12] dark:hover:text-white"
+                    className="flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-100/90 px-4 py-2 text-[15px] font-medium text-neutral-700 transition hover:border-neutral-400/70 active:border-neutral-400/70 hover:bg-neutral-200/80 dark:border-white/[0.08] dark:bg-white/[0.07] dark:text-white/80 dark:hover:border-white/25 dark:active:border-white/25 dark:hover:bg-white/[0.12] dark:hover:text-white"
                   >
                     <Folder className="size-5" /> Browse Projects
                   </Link>
                   <Link
                     href="/blog"
                     onClick={onClose}
-                    className="flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-100/90 px-4 py-2 text-[15px] font-medium text-neutral-700 transition hover:bg-neutral-200/80 dark:border-white/[0.08] dark:bg-white/[0.07] dark:text-white/80 dark:hover:bg-white/[0.12] dark:hover:text-white"
+                    className="flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-100/90 px-4 py-2 text-[15px] font-medium text-neutral-700 transition hover:border-neutral-400/70 active:border-neutral-400/70 hover:bg-neutral-200/80 dark:border-white/[0.08] dark:bg-white/[0.07] dark:text-white/80 dark:hover:border-white/25 dark:active:border-white/25 dark:hover:bg-white/[0.12] dark:hover:text-white"
                   >
                     <FileText className="size-5" /> Browse Posts
                   </Link>
                   <Link
                     href="/contact"
                     onClick={onClose}
-                    className="flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-100/90 px-4 py-2 text-[15px] font-medium text-neutral-700 transition hover:bg-neutral-200/80 dark:border-white/[0.08] dark:bg-white/[0.07] dark:text-white/80 dark:hover:bg-white/[0.12] dark:hover:text-white"
+                    className="flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-100/90 px-4 py-2 text-[15px] font-medium text-neutral-700 transition hover:border-neutral-400/70 active:border-neutral-400/70 hover:bg-neutral-200/80 dark:border-white/[0.08] dark:bg-white/[0.07] dark:text-white/80 dark:hover:border-white/25 dark:active:border-white/25 dark:hover:bg-white/[0.12] dark:hover:text-white"
                   >
                     <Mail className="size-5" /> Get in Touch
                   </Link>

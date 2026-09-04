@@ -246,7 +246,7 @@ function Highlights({
         onClick={onToggle}
         aria-expanded={open}
         aria-controls={panelId}
-        className="flex items-center gap-2 rounded-full border border-border-primary px-3.5 py-1.5 font-mono text-xs font-medium uppercase tracking-[0.2em] text-text-secondary transition-colors hover:border-text-tertiary hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:border-white/20 dark:hover:border-white/40"
+        className="flex items-center gap-2 rounded-full border border-border-primary px-3.5 py-1.5 font-mono text-xs font-medium uppercase tracking-[0.2em] text-text-secondary transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:border-white/20 dark:hover:border-white/25 dark:active:border-white/25"
       >
         <span aria-hidden className="text-text-secondary">
           ✦

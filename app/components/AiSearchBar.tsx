@@ -65,7 +65,7 @@ export function AiSearchBar() {
             }
           }}
           placeholder="Semantic search: 'How to build an AI app' or 'NextJS authentication'..."
-          className="w-full bg-surface-raised border border-border-hairline rounded-full pl-12 pr-24 py-4 text-base focus:outline-none focus:ring-2 focus:ring-accent-signal/50 shadow-sm transition-all"
+          className="w-full bg-surface-raised border border-border-hairline rounded-full pl-12 pr-24 py-4 text-base hover:border-neutral-400/70 active:border-neutral-400/70 focus:outline-none focus:ring-2 focus:ring-accent-signal/50 shadow-sm transition-all dark:hover:border-white/25 dark:active:border-white/25"
         />
         <button
           type="submit"

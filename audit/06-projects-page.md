@@ -488,3 +488,22 @@ The complete Projects index was re-audited after all owner-directed polish.
 
 No known Projects-index issue remains. The page is ready for owner visual
 approval and an explicit production lock.
+
+## Secondary-control border addendum - 2026-09-04
+
+The owner-authorized site-wide secondary-control pass aligned Projects search,
+unselected filters, rescue tags, Clear filters, and unselected pagination
+controls to identical hover and pointer-active border colors:
+
+- Light: `border-neutral-400/70`.
+- Dark: `border-white/25`.
+- Selected filters and the current pagination page retain their stronger
+  inverted treatment.
+- Search retains its stronger existing keyboard-focus border.
+- Disabled pagination remains non-interactive and visually subdued.
+
+At 360px in dark mode, an unselected filter measured 49x32px both before and
+after hover; its computed border changed from `rgba(255,255,255,0.1)` to
+`rgba(255,255,255,0.25)` without layout shift. The complete six-viewport,
+light/dark route matrix remained free of document overflow or new clipping.
+TypeScript, targeted ESLint, and `git diff --check` passed after the amendment.

@@ -14,7 +14,7 @@ const HEADLINE_MAX = 70;
 const QUOTE_MAX = 280;
 
 const inputClasses =
-  "w-full rounded-2xl border border-border-primary bg-white px-3.5 py-2 text-sm text-text-primary placeholder:text-text-tertiary focus:border-neutral-400 focus:outline-none focus:ring-1 focus:ring-neutral-400/20 dark:bg-white/[0.03] dark:focus:border-white/30 dark:focus:ring-white/15 sm:px-4 sm:py-2.5";
+  "w-full rounded-2xl border border-border-primary bg-white px-3.5 py-2 text-sm text-text-primary placeholder:text-text-tertiary transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 focus:border-neutral-400 focus:outline-none focus:ring-1 focus:ring-neutral-400/20 dark:bg-white/[0.03] dark:hover:border-white/25 dark:active:border-white/25 dark:focus:border-white/30 dark:focus:ring-white/15 sm:px-4 sm:py-2.5";
 
 const labelClasses = "mb-1 block text-xs font-medium text-text-secondary";
 
@@ -203,7 +203,7 @@ export function TestimonialSubmitModal({
               type="button"
               onClick={handleClose}
               aria-label="Close"
-              className="absolute right-4 top-4 flex size-9 items-center justify-center rounded-full border border-border-primary text-text-secondary transition-colors hover:border-text-tertiary hover:text-text-primary"
+              className="absolute right-4 top-4 flex size-9 items-center justify-center rounded-full border border-border-primary text-text-secondary transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25 dark:active:border-white/25"
             >
               <X className="size-4" aria-hidden />
             </button>
@@ -231,7 +231,7 @@ export function TestimonialSubmitModal({
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="mt-6 rounded-full border border-border-primary px-6 py-2 text-sm font-medium text-text-primary transition-colors hover:border-text-tertiary"
+                  className="mt-6 rounded-full border border-border-primary px-6 py-2 text-sm font-medium text-text-primary transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 dark:hover:border-white/25 dark:active:border-white/25"
                 >
                   Done
                 </button>

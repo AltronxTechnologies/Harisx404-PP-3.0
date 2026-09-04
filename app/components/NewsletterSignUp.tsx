@@ -123,7 +123,7 @@ export function NewsletterSignUp({
                   onChange={(e) =>
                     setFormState((prev) => ({ ...prev, email: e.target.value }))
                   }
-                  className="w-full rounded-full border border-gray-400 bg-transparent px-5 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-slate-100 focus:ring-offset-2 focus:ring-offset-dark-primary md:w-[425px]"
+                  className="w-full rounded-full border border-gray-400 bg-transparent px-5 py-3 text-white placeholder-gray-400 transition-colors hover:border-white/25 active:border-white/25 focus:border-white/25 focus:outline-none focus:ring-2 focus:ring-slate-100 focus:ring-offset-2 focus:ring-offset-dark-primary md:w-[425px]"
                   disabled={formState.isLoading}
                 />
                 {/* Honeypot field - hidden from real users, bots will fill this */}

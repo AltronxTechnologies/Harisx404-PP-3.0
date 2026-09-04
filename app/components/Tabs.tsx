@@ -54,7 +54,7 @@ export function TabList({
         <select
           id="tabs"
           name="tabs"
-          className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-400 focus:outline-none focus:ring-indigo-400 sm:text-sm"
+          className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:hover:border-white/25 dark:active:border-white/25 sm:text-sm"
           onChange={(e) => {
             const selectedTab = childrenArray.find(
               (child: any) => child.props.label === e.target.value,

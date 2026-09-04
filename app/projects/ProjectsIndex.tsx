@@ -246,7 +246,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
     `relative inline-flex h-[2rem] items-center rounded-full border px-1.5 font-mono text-[11px] uppercase tracking-normal transition-colors sm:px-4 sm:tracking-widest ${
       active
         ? "border-text-primary text-bg-primary"
-        : "border-border-primary text-text-secondary hover:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25"
+        : "border-border-primary text-text-secondary hover:border-neutral-400/70 active:border-neutral-400/70 focus-visible:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25 dark:active:border-white/25 dark:focus-visible:border-white/25"
     }`;
 
   const chipPill = (active: boolean) =>
@@ -304,7 +304,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
                 else (e.target as HTMLInputElement).blur();
               }
             }}
-            className="h-[2rem] w-full rounded-full border border-border-primary bg-white pl-10 pr-9 font-mono text-xs text-text-primary outline-none transition-colors placeholder:text-text-secondary hover:border-neutral-400/70 focus:border-text-secondary dark:bg-white/[0.03] dark:hover:border-white/25 [&::-webkit-search-cancel-button]:hidden"
+            className="h-[2rem] w-full rounded-full border border-border-primary bg-white pl-10 pr-9 font-mono text-xs text-text-primary outline-none transition-colors placeholder:text-text-secondary hover:border-neutral-400/70 active:border-neutral-400/70 focus:border-text-secondary dark:bg-white/[0.03] dark:hover:border-white/25 dark:active:border-white/25 [&::-webkit-search-cancel-button]:hidden"
           />
           {!query && (
             /* Keyboard hint — press "/" anywhere to jump to search. */
@@ -379,7 +379,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
                 className={`relative flex h-[2rem] items-center gap-1 rounded-full border px-1.5 font-mono text-[11px] uppercase tracking-normal transition-colors sm:px-4 sm:tracking-widest ${
                   overflowActive
                     ? "border-text-primary text-bg-primary"
-                    : "border-border-primary text-text-secondary hover:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25"
+                    : "border-border-primary text-text-secondary hover:border-neutral-400/70 active:border-neutral-400/70 focus-visible:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25 dark:active:border-white/25 dark:focus-visible:border-white/25"
                 }`}
               >
                 {chipPill(overflowActive)}
@@ -631,7 +631,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
                   key={tag}
                   type="button"
                   onClick={() => setParams({ tag, page: 1 })}
-                  className="rounded-full border border-border-primary px-3 py-1 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25"
+                  className="rounded-full border border-border-primary px-3 py-1 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 focus-visible:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25 dark:active:border-white/25 dark:focus-visible:border-white/25"
                 >
                   {tag}
                 </button>
@@ -644,7 +644,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
               setQuery("");
               setParams({ tag: "All", q: "", page: 1 });
             }}
-            className="mt-5 rounded-full border border-border-primary px-4 py-1.5 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25"
+            className="mt-5 rounded-full border border-border-primary px-4 py-1.5 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 focus-visible:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25 dark:active:border-white/25 dark:focus-visible:border-white/25"
           >
             Clear filters
           </button>
@@ -665,7 +665,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
               aria-label="Previous page"
               onClick={() => goToPage(safePage - 1)}
               disabled={safePage === 1}
-              className="inline-flex min-h-[2rem] items-center gap-2 rounded-full border border-border-primary px-4 py-1.5 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-text-tertiary hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-tertiary disabled:pointer-events-none disabled:opacity-40"
+              className="inline-flex min-h-[2rem] items-center gap-2 rounded-full border border-border-primary px-4 py-1.5 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25 dark:active:border-white/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-tertiary disabled:pointer-events-none disabled:opacity-40"
             >
               <span aria-hidden>←</span>
               <span className="hidden sm:inline">Prev</span>
@@ -693,7 +693,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
                   className={`relative flex h-[2rem] min-w-[2rem] items-center justify-center rounded-full border px-1 font-mono text-xs transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-tertiary ${
                     item === safePage
                       ? "border-text-primary text-bg-primary"
-                      : "border-border-primary text-text-secondary hover:border-text-tertiary hover:text-text-primary"
+                      : "border-border-primary text-text-secondary hover:border-neutral-400/70 active:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25 dark:active:border-white/25"
                   }`}
                 >
                   {item === safePage && (
@@ -721,7 +721,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
               aria-label="Next page"
               onClick={() => goToPage(safePage + 1)}
               disabled={safePage === totalPages}
-              className="inline-flex min-h-[2rem] items-center gap-2 rounded-full border border-border-primary px-4 py-1.5 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-text-tertiary hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-tertiary disabled:pointer-events-none disabled:opacity-40"
+              className="inline-flex min-h-[2rem] items-center gap-2 rounded-full border border-border-primary px-4 py-1.5 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25 dark:active:border-white/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-tertiary disabled:pointer-events-none disabled:opacity-40"
             >
               <span className="hidden sm:inline">Next</span>
               <span aria-hidden>→</span>

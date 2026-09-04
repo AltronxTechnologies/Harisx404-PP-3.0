@@ -98,7 +98,7 @@ export function CtaSection() {
             type="button"
             onClick={copyEmail}
             aria-live="polite"
-            className="inline-flex items-center gap-2.5 rounded-full border border-border-primary bg-white px-6 py-[21px] font-mono text-sm text-text-secondary outline-none transition-colors hover:border-text-tertiary/60 hover:text-text-primary focus-visible:ring-2 focus-visible:ring-blue-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary dark:bg-white/[0.03] hover:dark:bg-white/[0.06]"
+            className="inline-flex items-center gap-2.5 rounded-full border border-border-primary bg-white px-6 py-[21px] font-mono text-sm text-text-secondary outline-none transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 hover:text-text-primary focus-visible:ring-2 focus-visible:ring-blue-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary dark:bg-white/[0.03] dark:hover:border-white/25 dark:active:border-white/25 hover:dark:bg-white/[0.06]"
           >
             {copied ? (
               <>

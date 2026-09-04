@@ -384,7 +384,7 @@ export function HomeHero({
             {/* Mobile: compact single-row notification pill */}
             <Link
               href={launch.href}
-              className="group flex items-center gap-2.5 rounded-full border border-border-primary bg-bg-secondary/60 py-1.5 pl-2 pr-3 md:hidden"
+              className="group flex items-center gap-2.5 rounded-full border border-border-primary bg-bg-secondary/60 py-1.5 pl-2 pr-3 transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 dark:hover:border-white/25 dark:active:border-white/25 md:hidden"
             >
               <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-blue-500/10 px-2.5 py-1">
                 <span className="relative flex size-1.5 shrink-0" aria-hidden>
@@ -436,7 +436,7 @@ export function HomeHero({
                 <span className="font-mono text-xs uppercase tracking-widest text-text-secondary">
                   {hero.newLaunch.subline}
                 </span>
-                <span className="flex size-5 shrink-0 items-center justify-center rounded-full border border-border-primary text-text-secondary transition-colors group-hover:bg-text-primary group-hover:text-bg-primary">
+                <span className="flex size-5 shrink-0 items-center justify-center rounded-full border border-border-primary text-text-secondary transition-colors group-hover:border-neutral-400/70 group-active:border-neutral-400/70 group-hover:bg-text-primary group-hover:text-bg-primary dark:group-hover:border-white/25 dark:group-active:border-white/25">
                   <ArrowUpRight className="size-2.5" aria-hidden />
                 </span>
               </span>

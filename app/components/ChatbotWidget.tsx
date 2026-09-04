@@ -115,7 +115,7 @@ export function ChatbotWidget() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask me anything..."
-                className="w-full bg-surface-base border border-border-hairline rounded-full pl-4 pr-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal/50"
+                className="w-full bg-surface-base border border-border-hairline rounded-full pl-4 pr-10 py-2 text-sm transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 focus:border-neutral-400/70 focus:outline-none focus:ring-2 focus:ring-accent-signal/50 dark:hover:border-white/25 dark:active:border-white/25 dark:focus:border-white/25"
                 disabled={isLoading}
               />
               <button 

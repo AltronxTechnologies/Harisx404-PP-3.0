@@ -361,7 +361,7 @@ export function ProjectDetail({
           {upNext.tagline && <p className="mt-4 max-w-xl text-sm leading-relaxed text-text-secondary">{upNext.tagline}</p>}
           <div className="mt-7 flex items-center gap-3">
             <span className="font-mono text-[10px] uppercase tracking-widest text-text-secondary">{upNext.category}</span>
-            <span className="flex size-9 items-center justify-center rounded-full border border-dashed border-border-primary transition-colors group-hover:border-text-tertiary">↗</span>
+            <span className="flex size-9 items-center justify-center rounded-full border border-dashed border-border-primary transition-colors group-hover:border-neutral-400/70 group-active:border-neutral-400/70 dark:group-hover:border-white/25 dark:group-active:border-white/25">↗</span>
           </div>
         </Link>
       )}

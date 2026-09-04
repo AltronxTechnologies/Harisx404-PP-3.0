@@ -1341,3 +1341,22 @@ cover alt behavior, Projects image priority, and Projects responsive image
 sizing. Homepage content, typography, geometry, desktop hover, sticky panel,
 and all other entry 23 surfaces remain locked. Final re-lock of this amended
 card behavior awaits owner visual approval.
+
+### 2026-09-04 owner-authorized secondary-control amendment
+
+The owner authorized a site-wide state-only consistency pass for neutral
+bordered secondary controls, including controls inside otherwise frozen Home
+and Search surfaces. Hover and pointer-active borders now share the same quiet
+recipe: `border-neutral-400/70` in light mode and `border-white/25` in dark
+mode. Existing selected, primary, inverted, disabled, and stronger keyboard
+focus states remain distinct. Intentionally borderless fields, card frames,
+modal chrome, layout, typography, spacing, radii, dimensions, shadows, and
+motion remain unchanged.
+
+Verification covered 96 route/viewport/theme combinations across the six
+required viewports, with no new document overflow, clipping, wrapping, or
+geometry changes. TypeScript, targeted ESLint, `git diff --check`, route checks,
+representative computed hover/focus measurements, and the browser console
+check passed. Full evidence and the exact file scope are recorded in
+`audit/07-secondary-control-borders.md`. This amendment records the authorized
+change only; final owner visual approval and re-lock are still pending.

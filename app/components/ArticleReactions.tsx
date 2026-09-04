@@ -427,10 +427,10 @@ export default function ArticleReactions({
             onClick={() => handleReaction(type as ReactionType)}
             disabled={isSubmitting !== null}
             whileTap={{ scale: 0.9 }}
-            className={`flex items-center gap-1 rounded-full border px-3 py-1 text-sm ${
+            className={`flex items-center gap-1 rounded-full border px-3 py-1 text-sm transition-colors ${
               isActive
                 ? "bg-white dark:bg-[#1A1F2B] text-text-primary"
-                : "bg-bg-primary text-text-secondary hover:bg-slate-100 dark:hover:bg-[#1A1F2B] dark:bg-[#1A1F2B]"
+                : "bg-bg-primary text-text-secondary hover:border-neutral-400/70 active:border-neutral-400/70 hover:bg-slate-100 dark:hover:border-white/25 dark:active:border-white/25 dark:hover:bg-[#1A1F2B] dark:bg-[#1A1F2B]"
             } `}
             aria-label={`${isActive ? "Remove" : "Add"} ${type} reaction`}
           >

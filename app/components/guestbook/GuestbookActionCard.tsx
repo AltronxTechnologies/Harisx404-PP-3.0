@@ -45,7 +45,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-white/20 bg-white/10 px-5 font-medium text-sm text-white backdrop-blur-sm transition-colors hover:bg-white/20 active:scale-[0.98] disabled:opacity-60"
+      className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-white/20 bg-white/10 px-5 font-medium text-sm text-white backdrop-blur-sm transition-colors hover:border-white/25 active:border-white/25 hover:bg-white/20 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70 disabled:opacity-60"
     >
       <PencilIcon />
       {pending ? "Posting..." : "Post it"}
@@ -98,7 +98,7 @@ export function GuestbookActionCard({ user, action }: GuestbookActionCardProps) 
                 type="button"
                 onClick={signIn}
                 disabled={signingIn}
-                className="relative z-10 inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-white/20 bg-white/10 px-5 font-medium text-sm text-white backdrop-blur-sm transition-colors hover:bg-white/20 active:scale-[0.98] disabled:opacity-60"
+                className="relative z-10 inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-white/20 bg-white/10 px-5 font-medium text-sm text-white backdrop-blur-sm transition-colors hover:border-white/25 active:border-white/25 hover:bg-white/20 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70 disabled:opacity-60"
               >
                 <PencilIcon />
                 {signingIn ? "Redirecting..." : "Write a message..."}
@@ -115,7 +115,7 @@ export function GuestbookActionCard({ user, action }: GuestbookActionCardProps) 
                 maxLength={200}
                 rows={3}
                 placeholder="Write a message..."
-                className="w-full resize-none rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white placeholder:text-white/40 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/30"
+                className="w-full resize-none rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white placeholder:text-white/40 backdrop-blur-sm transition-colors hover:border-white/25 active:border-white/25 focus:border-white/25 focus:outline-none focus:ring-2 focus:ring-white/30"
               />
               <SubmitButton />
             </form>

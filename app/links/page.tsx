@@ -244,13 +244,13 @@ export default function LinksPage() {
               <div className="mt-6 grid grid-cols-2 gap-3 lg:mt-3">
                 <a
                   href={siteMetadata.email}
-                  className="rounded-lg border border-neutral-200 bg-neutral-50 py-2.5 text-center text-xs font-medium text-neutral-900 transition-colors hover:bg-white dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700"
+                  className="rounded-lg border border-neutral-200 bg-neutral-50 py-2.5 text-center text-xs font-medium text-neutral-900 transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 hover:bg-white dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:hover:border-white/25 dark:active:border-white/25 dark:hover:bg-neutral-700"
                 >
                   Email
                 </a>
                 <Link
                   href="/"
-                  className="rounded-lg border border-neutral-200 bg-neutral-50 py-2.5 text-center text-xs font-medium text-neutral-900 transition-colors hover:bg-white dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700"
+                  className="rounded-lg border border-neutral-200 bg-neutral-50 py-2.5 text-center text-xs font-medium text-neutral-900 transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 hover:bg-white dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:hover:border-white/25 dark:active:border-white/25 dark:hover:bg-neutral-700"
                 >
                   Full Website
                 </Link>

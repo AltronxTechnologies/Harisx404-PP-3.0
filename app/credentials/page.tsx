@@ -107,7 +107,7 @@ export default async function CredentialsPage() {
               href="https://www.credly.com/users/harisx404"
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-border-primary bg-black/5 px-3 py-1 font-mono text-[10px] text-neutral-600 transition-colors hover:bg-black/10 dark:bg-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800"
+              className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-border-primary bg-black/5 px-3 py-1 font-mono text-[10px] text-neutral-600 transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 hover:bg-black/10 dark:bg-neutral-900 dark:text-neutral-400 dark:hover:border-white/25 dark:active:border-white/25 dark:hover:bg-neutral-800"
             >
               credly.com/users/harisx404
               {arrowUpRight}

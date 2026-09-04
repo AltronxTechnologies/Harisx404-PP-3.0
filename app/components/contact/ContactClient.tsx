@@ -172,7 +172,7 @@ export function ContactClient() {
                     </a>
                     <button
                       onClick={handleCopyEmail}
-                      className="flex items-center gap-2 rounded-xl border border-border-primary px-5 py-2.5 text-sm font-medium text-text-secondary transition hover:text-text-primary"
+                      className="flex items-center gap-2 rounded-xl border border-border-primary px-5 py-2.5 text-sm font-medium text-text-secondary transition hover:border-neutral-400/70 active:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25 dark:active:border-white/25"
                     >
                       {isCopied ? (
                         <>

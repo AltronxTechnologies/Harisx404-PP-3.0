@@ -1026,7 +1026,7 @@ export function CaseStudies({ projects }: { projects: HomeProject[] }) {
           className="group inline-flex items-center gap-3 font-mono text-xs font-normal uppercase tracking-widest text-text-secondary transition-colors hover:text-text-primary"
         >
           See more projects
-          <span className="inline-flex size-8 items-center justify-center rounded-full border border-border-primary">
+          <span className="inline-flex size-8 items-center justify-center rounded-full border border-border-primary transition-colors group-hover:border-neutral-400/70 group-active:border-neutral-400/70 dark:group-hover:border-white/25 dark:group-active:border-white/25">
             <DoubleArrow />
           </span>
         </Link>

@@ -268,7 +268,7 @@ export function Testimonials({ items: itemsProp }: { items?: Testimonial[] }) {
             type="button"
             onClick={() => setUserPaused((p) => !p)}
             aria-label={userPaused ? "Play carousel" : "Pause carousel"}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border-primary text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25 sm:h-9 sm:w-9"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border-primary text-text-secondary transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25 dark:active:border-white/25 sm:h-9 sm:w-9"
           >
             {userPaused ? (
               <Play className="h-3.5 w-3.5" aria-hidden />
@@ -285,7 +285,7 @@ export function Testimonials({ items: itemsProp }: { items?: Testimonial[] }) {
         <button
           type="button"
           onClick={() => setSubmitOpen(true)}
-          className="inline-flex items-center gap-2 rounded-full border border-border-primary px-5 py-2.5 text-sm font-medium text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25"
+          className="inline-flex items-center gap-2 rounded-full border border-border-primary px-5 py-2.5 text-sm font-medium text-text-secondary transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25 dark:active:border-white/25"
         >
           <MessageSquarePlus className="h-4 w-4" aria-hidden />
           Worked with me? Share your experience
