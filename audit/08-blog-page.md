@@ -281,9 +281,34 @@ the article to react.`, then removed it. Both `article_reactions` and
 fabricated production counts remain.
 
 Static checks and the final independent feature review passed with no findings.
-With the migration absent, responsive fail-open verification passed at 1440,
+Before the migration was applied, responsive fail-open verification passed at 1440,
 768, 390, 375, and 360px in both themes with zero card, footer, or document
 overflow and no browser-console errors.
+
+## Device-specific pagination amendment - 2026-09-04
+
+The owner approved separate archive densities at the existing `lg` breakpoint:
+
+- Laptop/desktop at 1024px and above: page 1 has one featured plus nine grid
+  cards; later pages contain nine cards. Ranges are 01-10, 11-19, 20-28,
+  29-37, 38-46, and 47-53.
+- Tablet/mobile below 1024px: page 1 has one featured plus six grid cards;
+  later pages contain eight cards. Ranges are 01-07, 08-15, 16-23, 24-31,
+  32-39, 40-47, and 48-53.
+
+The compact mode is URL-backed so filters and pagination remain stable. A
+`matchMedia` listener updates it exactly once when crossing 1024px and maps the
+current first article into the corresponding destination page. Wrong-mode
+server content is hidden during the one-time synchronization, and a short
+status reserves the layout instead of flashing the other device's cards.
+Compact variants are `noindex, follow` and canonicalize to `/blog`.
+
+Both distributions contain all 53 article URLs exactly once. Initial mobile
+loads, repeated breakpoint crossings, page boundaries, category filters,
+windowed pagination, cached transitions, light/dark themes, and 1440, 1024,
+768, 390, 375, and 360px layouts passed with zero document overflow or console
+errors. The Blog index and reaction summaries use tagged caches invalidated by
+admin mutations and successful reactions.
 
 ## Remaining owner decision
 

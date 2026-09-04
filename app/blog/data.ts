@@ -4,7 +4,7 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 import readingDuration from "reading-duration";
-import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { getPublicSupabase } from "@/app/lib/supabase/safe";
 import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 
@@ -13,6 +13,12 @@ export type ReactionType = "like" | "heart" | "celebrate" | "insightful";
 export type ReactionSummary = {
   total: number;
   top: Array<{ type: ReactionType; count: number }>;
+};
+
+type ReactionRow = {
+  article_slug: string;
+  reaction_type: string;
+  count: number;
 };
 
 export type BlogIndexPost = {
@@ -77,7 +83,7 @@ function localImagePath(imageName: string) {
   return `/blog/${imageName}`;
 }
 
-export const fetchBlogIndexPosts = cache(async (): Promise<BlogIndexPost[]> => {
+const loadBlogIndexPosts = async (): Promise<BlogIndexPost[]> => {
   const supabase = getPublicSupabase();
   if (!supabase) throw new Error("Blog data is unavailable: Supabase is not configured.");
 
@@ -156,22 +162,39 @@ export const fetchBlogIndexPosts = cache(async (): Promise<BlogIndexPost[]> => {
         featured: post.featured === true,
       };
     });
-});
+};
+
+export const fetchBlogIndexPosts = unstable_cache(
+  loadBlogIndexPosts,
+  ["blog-index-posts"],
+  { revalidate: 3600, tags: ["blog-index"] },
+);
+
+const fetchReactionRows = unstable_cache(
+  async (): Promise<ReactionRow[]> => {
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return [];
+    try {
+      const supabase = await createSupabaseAdminClient();
+      const { data, error } = await supabase
+        .from("article_reactions")
+        .select("article_slug, reaction_type, count");
+      return error ? [] : data || [];
+    } catch {
+      return [];
+    }
+  },
+  ["blog-reaction-summaries"],
+  { revalidate: 30, tags: ["blog-reactions"] },
+);
 
 export async function fetchBlogReactionSummaries(slugs: string[]) {
   const summaries: Record<string, ReactionSummary> = {};
-  if (slugs.length === 0 || !process.env.SUPABASE_SERVICE_ROLE_KEY) return summaries;
-
-  try {
-    const supabase = await createSupabaseAdminClient();
-    const { data, error } = await supabase
-      .from("article_reactions")
-      .select("article_slug, reaction_type, count")
-      .in("article_slug", slugs);
-    if (error) return summaries;
-
-    const validTypes: ReactionType[] = ["like", "heart", "celebrate", "insightful"];
-    data?.forEach((row) => {
+  if (slugs.length === 0) return summaries;
+  const visibleSlugs = new Set(slugs);
+  const data = await fetchReactionRows();
+  const validTypes: ReactionType[] = ["like", "heart", "celebrate", "insightful"];
+  data.forEach((row) => {
+      if (!visibleSlugs.has(row.article_slug)) return;
       if (!validTypes.includes(row.reaction_type as ReactionType)) return;
       const count = Math.max(0, Number(row.count) || 0);
       if (count === 0) return;
@@ -179,18 +202,15 @@ export async function fetchBlogReactionSummaries(slugs: string[]) {
       summary.total += count;
       summary.top.push({ type: row.reaction_type as ReactionType, count });
       summaries[row.article_slug] = summary;
-    });
+  });
 
-    Object.values(summaries).forEach((summary) => {
+  Object.values(summaries).forEach((summary) => {
       summary.top.sort(
         (a, b) =>
           b.count - a.count || validTypes.indexOf(a.type) - validTypes.indexOf(b.type),
       );
       summary.top = summary.top.slice(0, 3);
-    });
-  } catch {
-    return {};
-  }
+  });
 
   return summaries;
 }

@@ -1,7 +1,7 @@
 "use server";
 
 import { createSupabaseAdminClient } from "../lib/supabase/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { v4 as uuidv4 } from "uuid";
 import { type CurrentlyPlaying, getCurrentlyPlaying as getSpotifyCurrentlyPlaying } from "./spotify";
@@ -201,6 +201,11 @@ export async function toggleReaction(slug: string, reactionType: ReactionType) {
       : storedReactions?.map((row) => row.reaction_type) || [];
     
     // Update cookie with new reactions
+    try {
+      revalidateTag("blog-reactions");
+    } catch (cacheError) {
+      console.warn("Reaction saved, but card summaries may refresh later.", cacheError);
+    }
     try {
       cookieStore.set(cookieKey, JSON.stringify(userReactions), {
         expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),

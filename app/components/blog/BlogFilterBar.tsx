@@ -8,11 +8,13 @@ import { Rss, Search } from "lucide-react";
 interface BlogFilterBarProps {
   categories: string[];
   invalidCategory?: boolean;
+  compact?: boolean;
 }
 
 export function BlogFilterBar({
   categories,
   invalidCategory = false,
+  compact = false,
 }: BlogFilterBarProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -22,11 +24,11 @@ export function BlogFilterBar({
 
   const handleCategoryClick = (category: string) => {
     startTransition(() => {
-      router.push(
-        category
-          ? `/blog?category=${encodeURIComponent(category.toLowerCase())}`
-          : "/blog",
-      );
+      const params = new URLSearchParams();
+      if (category) params.set("category", category.toLowerCase());
+      if (compact) params.set("view", "compact");
+      const query = params.toString();
+      router.push(query ? `/blog?${query}` : "/blog");
     });
   };
 

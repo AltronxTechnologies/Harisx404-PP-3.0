@@ -78,7 +78,32 @@ CREATE TABLE IF NOT EXISTS public.article_reaction_visitors (
   PRIMARY KEY (article_slug, reaction_type, visitor_id)
 );
 
+CREATE INDEX IF NOT EXISTS article_reaction_visitors_article_visitor_idx
+  ON public.article_reaction_visitors (article_slug, visitor_id);
+
 ALTER TABLE public.article_reaction_visitors ENABLE ROW LEVEL SECURITY;
+
+DELETE FROM public.article_reactions AS reaction
+WHERE NOT EXISTS (
+  SELECT 1 FROM public.blog_posts WHERE slug = reaction.article_slug
+);
+
+DELETE FROM public.article_reaction_visitors AS reaction
+WHERE NOT EXISTS (
+  SELECT 1 FROM public.blog_posts WHERE slug = reaction.article_slug
+);
+
+ALTER TABLE public.article_reactions
+  DROP CONSTRAINT IF EXISTS article_reactions_article_slug_fkey,
+  ADD CONSTRAINT article_reactions_article_slug_fkey
+  FOREIGN KEY (article_slug) REFERENCES public.blog_posts(slug)
+  ON UPDATE CASCADE ON DELETE CASCADE;
+
+ALTER TABLE public.article_reaction_visitors
+  DROP CONSTRAINT IF EXISTS article_reaction_visitors_article_slug_fkey,
+  ADD CONSTRAINT article_reaction_visitors_article_slug_fkey
+  FOREIGN KEY (article_slug) REFERENCES public.blog_posts(slug)
+  ON UPDATE CASCADE ON DELETE CASCADE;
 
 DROP FUNCTION IF EXISTS public.adjust_article_reaction(TEXT, TEXT, INTEGER);
 

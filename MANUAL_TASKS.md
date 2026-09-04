@@ -29,12 +29,15 @@ these steps for reference if the DB is ever recreated:
    `experience`, and `projects` should have new columns (tagline, tech_stack,
    category, year, features, live_url, github_url).
 
-### STEP 1B — Enable Blog reactions (DONE 2026-09-04)
+### STEP 1B — Enable Blog reactions (RERUN LATEST MIGRATION)
 
 The owner ran `migrations/2026_article_reactions.sql`. Both reaction tables and
 the atomic adjustment function are active. A reversible end-to-end test added
 an Insightful reaction, verified the `💡 1` card summary, removed the reaction,
-and confirmed both tables returned to zero rows.
+and confirmed both tables returned to zero rows. The migration was subsequently
+hardened with an optimized visitor lookup and atomic slug-rename/delete
+cascades. Run the latest file once more in the Supabase SQL Editor; it is
+idempotent and preserves existing reaction counts.
 
 ## STEP 2 — Re-run the seed (1 min)
 

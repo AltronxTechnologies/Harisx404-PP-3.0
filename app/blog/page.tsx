@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { BlogFilterBar } from "@/app/components/blog/BlogFilterBar";
 import { BlogGridCard } from "@/app/components/blog/BlogGridCard";
 import { FeaturedBlogCard } from "@/app/components/blog/FeaturedBlogCard";
+import { BlogViewportMode } from "@/app/components/blog/BlogViewportMode";
 import { GridWrapper } from "@/app/components/GridWrapper";
 import { PaperHeroTexture } from "@/app/components/PaperHeroTexture";
 import { CtaSection } from "@/app/components/home/CtaSection";
@@ -14,8 +15,10 @@ import {
 
 export const revalidate = 3600;
 
-const FIRST_PAGE_POSTS = 10;
-const LATER_PAGE_POSTS = 9;
+const DESKTOP_FIRST_PAGE_POSTS = 10;
+const DESKTOP_LATER_PAGE_POSTS = 9;
+const COMPACT_FIRST_PAGE_POSTS = 7;
+const COMPACT_LATER_PAGE_POSTS = 8;
 
 const description =
   "Explore practical deep dives on software engineering, modern web architecture, performance, and security.";
@@ -23,6 +26,7 @@ const description =
 type BlogSearchParams = {
   category?: string | string[];
   page?: string | string[];
+  view?: string | string[];
 };
 
 function firstParam(value: string | string[] | undefined) {
@@ -44,10 +48,11 @@ function formatPublishedDate(value: string) {
   }).format(date);
 }
 
-function pageHref(page: number, category: string) {
+function pageHref(page: number, category: string, compact = false) {
   const params = new URLSearchParams();
   if (category) params.set("category", category);
   if (page > 1) params.set("page", String(page));
+  if (compact) params.set("view", "compact");
   const query = params.toString();
   return query ? `/blog?${query}` : "/blog";
 }
@@ -66,6 +71,7 @@ export async function generateMetadata({
   const page = rawPage && /^\d+$/.test(rawPage)
     ? Math.max(1, Number.parseInt(rawPage, 10))
     : 1;
+  const compact = firstParam(params.view) === "compact";
   const qualifier = [
     category ? category.replace(/-/g, " ") : "",
     page > 1 ? `Page ${page}` : "",
@@ -85,9 +91,9 @@ export async function generateMetadata({
     title,
     description,
     alternates: {
-      canonical: invalidCategory ? "/blog" : pageHref(page, category),
+      canonical: invalidCategory || compact ? "/blog" : pageHref(page, category),
     },
-    robots: invalidCategory ? { index: false, follow: true } : undefined,
+    robots: invalidCategory || compact ? { index: false, follow: true } : undefined,
     openGraph: {
       title,
       description,
@@ -110,10 +116,17 @@ function paginationItems(currentPage: number, totalPages: number) {
   return items;
 }
 
-function pageBounds(page: number) {
-  if (page === 1) return { start: 0, end: FIRST_PAGE_POSTS };
-  const start = FIRST_PAGE_POSTS + (page - 2) * LATER_PAGE_POSTS;
-  return { start, end: start + LATER_PAGE_POSTS };
+function paginationConfig(compact: boolean) {
+  return compact
+    ? { firstPage: COMPACT_FIRST_PAGE_POSTS, laterPages: COMPACT_LATER_PAGE_POSTS }
+    : { firstPage: DESKTOP_FIRST_PAGE_POSTS, laterPages: DESKTOP_LATER_PAGE_POSTS };
+}
+
+function pageBounds(page: number, compact: boolean) {
+  const { firstPage, laterPages } = paginationConfig(compact);
+  if (page === 1) return { start: 0, end: firstPage };
+  const start = firstPage + (page - 2) * laterPages;
+  return { start, end: start + laterPages };
 }
 
 export default async function BlogPage({
@@ -128,6 +141,9 @@ export default async function BlogPage({
     ? ""
     : normalizeCategory(firstParam(params.category));
   const rawPage = firstParam(params.page);
+  const rawView = firstParam(params.view);
+  const compact = rawView === "compact";
+  const invalidView = Array.isArray(params.view) || Boolean(rawView && rawView !== "compact");
   const requestedPage = rawPage && /^\d+$/.test(rawPage)
     ? Number.parseInt(rawPage, 10)
     : 1;
@@ -171,9 +187,10 @@ export default async function BlogPage({
   const orderedPosts = editorialFeatured
     ? [editorialFeatured, ...filteredPosts.filter((post) => post !== editorialFeatured)]
     : filteredPosts;
-  const totalPages = orderedPosts.length <= FIRST_PAGE_POSTS
+  const { firstPage, laterPages } = paginationConfig(compact);
+  const totalPages = orderedPosts.length <= firstPage
     ? 1
-    : 1 + Math.ceil((orderedPosts.length - FIRST_PAGE_POSTS) / LATER_PAGE_POSTS);
+    : 1 + Math.ceil((orderedPosts.length - firstPage) / laterPages);
   const currentPage = Number.isFinite(requestedPage)
     ? Math.min(Math.max(requestedPage, 1), totalPages)
     : 1;
@@ -184,12 +201,15 @@ export default async function BlogPage({
     params.page !== undefined &&
     (Array.isArray(params.page) || rawPage !== canonicalPage)
   ) {
-    redirect(pageHref(currentPage, categoryParam));
+    redirect(pageHref(currentPage, categoryParam, compact));
   }
   if (!ambiguousCategory && rawCategory !== undefined && rawCategory !== categoryParam) {
+    redirect(pageHref(currentPage, categoryParam, compact));
+  }
+  if (invalidView) {
     redirect(pageHref(currentPage, categoryParam));
   }
-  const { start: pageStart, end: pageEnd } = pageBounds(currentPage);
+  const { start: pageStart, end: pageEnd } = pageBounds(currentPage, compact);
   const pagePosts = orderedPosts.slice(pageStart, pageEnd);
   const reactionSummaries = await fetchBlogReactionSummaries(
     pagePosts.map((post) => post.slug),
@@ -200,6 +220,7 @@ export default async function BlogPage({
 
   return (
     <div className="relative mt-14 pb-24">
+      <BlogViewportMode />
       <GridWrapper>
         <div className="relative px-4 xl:px-0">
           <PaperHeroTexture className="-inset-x-2 bottom-0 top-[-128px] sm:-inset-x-3 sm:top-[-144px] md:top-[-176px] lg:inset-x-0" />
@@ -222,8 +243,13 @@ export default async function BlogPage({
       </GridWrapper>
 
       <section aria-label="Browse articles" className="mt-14">
-        <BlogFilterBar categories={categories} invalidCategory={ambiguousCategory} />
+        <BlogFilterBar
+          categories={categories}
+          invalidCategory={ambiguousCategory}
+          compact={compact}
+        />
 
+        <div className={compact ? "lg:hidden" : "hidden lg:block"}>
         <div className="mt-14 space-y-14 px-2 sm:px-4">
           {featuredPost && (
             <section aria-labelledby="featured-article-heading">
@@ -307,7 +333,7 @@ export default async function BlogPage({
             </div>
           )}
 
-          {orderedPosts.length > FIRST_PAGE_POSTS && (
+          {orderedPosts.length > firstPage && (
             <nav aria-label="Blog pages" className="flex flex-col items-center gap-4 pt-2">
               <div className="flex flex-wrap items-center justify-center gap-2">
                 {currentPage === 1 ? (
@@ -317,7 +343,7 @@ export default async function BlogPage({
                 ) : (
                   <Link
                     prefetch={false}
-                    href={pageHref(currentPage - 1, categoryParam)}
+                    href={pageHref(currentPage - 1, categoryParam, compact)}
                     className="inline-flex min-h-8 items-center rounded-full border border-border-primary px-4 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25"
                   >
                     Previous
@@ -330,7 +356,7 @@ export default async function BlogPage({
                     <Link
                       prefetch={false}
                       key={item}
-                      href={pageHref(item, categoryParam)}
+                      href={pageHref(item, categoryParam, compact)}
                       aria-current={item === currentPage ? "page" : undefined}
                       aria-label={`Page ${item}${item === currentPage ? ", current page" : ""}`}
                       className={`inline-flex size-8 items-center justify-center rounded-full border font-mono text-xs transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary ${
@@ -350,7 +376,7 @@ export default async function BlogPage({
                 ) : (
                   <Link
                     prefetch={false}
-                    href={pageHref(currentPage + 1, categoryParam)}
+                    href={pageHref(currentPage + 1, categoryParam, compact)}
                     className="inline-flex min-h-8 items-center rounded-full border border-border-primary px-4 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25"
                   >
                     Next
@@ -363,11 +389,20 @@ export default async function BlogPage({
             </nav>
           )}
         </div>
-      </section>
+        <div className="mt-28">
+          <CtaSection />
+        </div>
+        </div>
 
-      <div className="mt-28">
-        <CtaSection />
-      </div>
+        <div
+          role="status"
+          className={`min-h-screen items-start justify-center pt-20 font-mono text-xs uppercase tracking-widest text-text-secondary ${
+            compact ? "hidden lg:flex" : "flex lg:hidden"
+          }`}
+        >
+          Aligning articles to this screen
+        </div>
+      </section>
     </div>
   );
 }
