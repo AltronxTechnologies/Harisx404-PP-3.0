@@ -7,6 +7,7 @@ import { MDXContent } from "@/app/components/mdx";
 import { RelatedPostCard } from "@/app/components/blog/RelatedPostCard";
 import { ImageLightbox } from "@/app/components/blog/ImageLightbox";
 import { NewsletterSignUp } from "@/app/components/NewsletterSignUp";
+import ArticleReactionWrapper from "@/app/components/ArticleReactionsWrapper";
 import { CtaSection } from "@/app/components/home/CtaSection";
 import { CopyUrlButton } from "@/app/components/blog/CopyUrlButton";
 import { TableOfContents } from "@/app/components/TableOfContents";
@@ -177,6 +178,19 @@ export default async function BlogPage({ params }: BlogPageProps) {
           <MDXContent code={post.code} />
         </article>
       </div>
+
+      <section
+        aria-labelledby="article-reactions-heading"
+        className="relative mx-auto mb-16 w-full max-w-3xl border-t border-border-primary px-4 pt-6 md:px-6"
+      >
+        <h2
+          id="article-reactions-heading"
+          className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary"
+        >
+          React to this article
+        </h2>
+        <ArticleReactionWrapper slug={post.slug} />
+      </section>
 
       <TableOfContents headings={post.headings} />
       <ImageLightbox />

@@ -273,10 +273,12 @@ validates published article slugs through that function, uses per-visitor
 idempotency, returns the committed count to correct stale clients, and only
 updates cookies after a successful mutation.
 
-The remote database currently returns `PGRST205` because the reaction migration
-has not yet been applied. The feature therefore correctly remains hidden in the
-live preview without errors. Applying the checked-in migration is recorded in
-`MANUAL_TASKS.md`; no fabricated preview counts were introduced.
+The owner applied the reaction migration on 2026-09-04. A reversible live test
+added one Insightful reaction through the article control, verified the featured
+card rendered `💡 1` with the accessible label `1 reaction: 1 insightful. Open
+the article to react.`, then removed it. Both `article_reactions` and
+`article_reaction_visitors` were confirmed back at zero rows after cleanup; no
+fabricated production counts remain.
 
 Static checks and the final independent feature review passed with no findings.
 With the migration absent, responsive fail-open verification passed at 1440,

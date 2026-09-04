@@ -230,6 +230,7 @@ const HeartSVG = ({ isActive }: { isActive: boolean }) => (
     {/* Main heart - synchronized stroke and fill transitions */}
     <motion.path
       d="M9.497 10.877c-.95-1.233-2.534-1.565-3.724-.436-1.19 1.13-1.357 3.019-.423 4.355l4.147 4.454 4.146-4.454c.934-1.336.787-3.237-.423-4.355-1.21-1.117-2.774-.797-3.723.436Z"
+      initial={false}
       animate={{
         fill: isActive ? "#fda4af" : "rgba(253, 164, 175, 0)",
         stroke: isActive ? "#e11d48" : "#64748b",
@@ -251,7 +252,12 @@ const HeartSVG = ({ isActive }: { isActive: boolean }) => (
         pathLength: isActive ? 1 : 0,
         opacity: isActive ? 1 : 0,
       }}
-      initial={{ pathLength: 0, opacity: 0 }}
+      initial={{
+        fill: "rgba(253, 164, 175, 0)",
+        stroke: "#64748b",
+        pathLength: 0,
+        opacity: 0,
+      }}
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"

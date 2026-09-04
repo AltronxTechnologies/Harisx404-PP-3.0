@@ -29,14 +29,12 @@ these steps for reference if the DB is ever recreated:
    `experience`, and `projects` should have new columns (tagline, tech_stack,
    category, year, features, live_url, github_url).
 
-### STEP 1B — Enable Blog reactions
+### STEP 1B — Enable Blog reactions (DONE 2026-09-04)
 
-The live project currently reports that `article_reactions` is missing. In the
-Supabase SQL Editor, run the complete checked-in migration at
-`migrations/2026_article_reactions.sql`. It safely creates or upgrades the
-aggregate table, adds per-visitor uniqueness, and installs the atomic reaction
-function used by article pages and Blog-card summaries. Until this is run, the
-optional reaction pills stay hidden and the Blog remains fully usable.
+The owner ran `migrations/2026_article_reactions.sql`. Both reaction tables and
+the atomic adjustment function are active. A reversible end-to-end test added
+an Insightful reaction, verified the `💡 1` card summary, removed the reaction,
+and confirmed both tables returned to zero rows.
 
 ## STEP 2 — Re-run the seed (1 min)
 
