@@ -56,7 +56,7 @@ export default function BlogLoading() {
             <div className="h-3 w-32 animate-pulse rounded bg-border-primary/40 motion-reduce:animate-none" />
           </div>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 11 }, (_, index) => (
+            {Array.from({ length: 8 }, (_, index) => (
               <CardSkeleton key={index} />
             ))}
           </div>

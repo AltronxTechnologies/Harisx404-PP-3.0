@@ -154,7 +154,7 @@ resolved safely within the Blog-index scope.
 - Added machine-readable UTC dates and mobile-safe wrapping.
 - Added validated responsive Next images, bounded `sizes`, featured priority,
   and a no-image fallback for invalid/unapproved sources.
-- Added five-page, 12-item pagination with bounded page links, real disabled
+- Added six-page, 9-item pagination with bounded page links, real disabled
   states, `aria-current`, live summaries, and prefetch suppression.
 - Removed full article bodies and heading extraction from normal database index
   requests. Full content is fetched only for a new admin post that lacks both a
@@ -193,8 +193,10 @@ The index was measured at 1440x900, 1024x768, 768x1024, 390x844,
 
 ## Route and state verification
 
-- Base collection: 53 published articles, page 01/05, showing 01-12.
-- Page 5: five articles, showing 49-53; Next is non-interactive.
+- Base collection: 53 published articles, page 01/06, showing 01-09. Page 1
+  contains one featured article plus eight latest cards.
+- Pages 2-5 contain nine cards each. Page 6 contains eight cards, shows 46-53,
+  and renders Next as non-interactive.
 - All 14 category filters returned matching content. Counts range from one to
   twelve on the first page; singular categories correctly say `01 article`.
 - Invalid repeated category parameters show the designed unknown-category state
@@ -224,6 +226,24 @@ The index was measured at 1440x900, 1024x768, 768x1024, 390x844,
   controls or 11px labels.
 - Search remains site-wide and opens the locked Search modal; Blog does not
   duplicate that search implementation.
+
+## Nine-per-page amendment - 2026-09-04
+
+The owner set the Blog archive to exactly nine articles per page. All six pages
+were verified at 1440x900, 768x1024, 390x844, 375x667, and 360x640 in both
+themes, covering 60 route/viewport/theme states:
+
+- Page 1: 01-09, one featured card plus eight grid cards.
+- Page 2: 10-18, nine grid cards.
+- Page 3: 19-27, nine grid cards.
+- Page 4: 28-36, nine grid cards.
+- Page 5: 37-45, nine grid cards.
+- Page 6: 46-53, eight grid cards.
+
+Across the archive there are 53 unique article URLs, zero duplicates, zero
+document overflow, correct windowed pagination/ellipsis states, and correct
+disabled Previous/Next boundaries. TypeScript, targeted ESLint,
+`git diff --check`, routes, and browser console checks passed.
 
 ## Remaining owner decision
 

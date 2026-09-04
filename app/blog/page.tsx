@@ -11,7 +11,7 @@ import { fetchBlogIndexPosts } from "@/app/blog/data";
 
 export const revalidate = 3600;
 
-const POSTS_PER_PAGE = 12;
+const POSTS_PER_PAGE = 9;
 
 const description =
   "Explore practical deep dives on software engineering, modern web architecture, performance, and security.";
