@@ -220,7 +220,8 @@ export default async function BlogPage({
   const allReactionSummaries = await fetchBlogReactionSummaries(
     filteredPosts.map((post) => post.slug),
   );
-  const mostReactedPost = !categoryParam && !queryParam
+  const rankByReactions = !categoryParam || Boolean(queryParam);
+  const mostReactedPost = rankByReactions
     ? filteredPosts.reduce<(typeof filteredPosts)[number] | undefined>(
         (best, post) =>
           !best ||
@@ -273,24 +274,52 @@ export default async function BlogPage({
   const emptyState = emptyPublication
     ? {
         kicker: "No articles yet",
-        title: "The first article is still being prepared.",
+        title: (
+          <>
+            The first article is still{" "}
+            <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
+              being prepared.
+            </span>
+          </>
+        ),
         copy: "Please return soon when the published collection is available.",
       }
     : hasInvalidCategory
       ? {
           kicker: "Unknown category",
-          title: "That filter does not match the published collection.",
+          title: (
+            <>
+              Choose another{" "}
+              <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
+                category.
+              </span>
+            </>
+          ),
           copy: "Choose another category or return to the complete article collection.",
         }
       : queryParam || ambiguousQuery
         ? {
             kicker: "No matching articles",
-            title: "Try a different title, topic, or category.",
+            title: (
+              <>
+                Try something{" "}
+                <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
+                  different.
+                </span>
+              </>
+            ),
             copy: "Check the spelling, try a broader topic, or clear the search to browse every published article.",
           }
         : {
             kicker: "No articles found",
-            title: "This page has no published articles.",
+            title: (
+              <>
+                No articles are{" "}
+                <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
+                  available here.
+                </span>
+              </>
+            ),
             copy: "Return to the complete collection to continue browsing.",
           };
   const emptyAction = emptyPublication
@@ -343,7 +372,9 @@ export default async function BlogPage({
                   className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary"
                 >
                   {queryParam
-                    ? "Search results"
+                    ? (reactionSummaries[featuredPost.slug]?.total || 0) > 0
+                      ? "Most reacted result"
+                      : "Search results"
                     : categoryParam
                     ? `Newest in ${categoryParam}`
                     : (reactionSummaries[featuredPost.slug]?.total || 0) > 0

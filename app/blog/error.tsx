@@ -19,7 +19,14 @@ export default function BlogError({
     <div className="relative mt-14 px-2 pb-24 sm:px-4">
       <BlogStatePanel
         kicker="Blog unavailable"
-        title="The articles could not be loaded."
+        title={
+          <>
+            The articles could not{" "}
+            <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
+              be loaded.
+            </span>
+          </>
+        }
         description="This is a temporary data issue. Try again, or return when the collection is available."
         headingLevel="h1"
       >

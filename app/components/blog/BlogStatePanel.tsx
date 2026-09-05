@@ -8,7 +8,7 @@ export function BlogStatePanel({
   children,
 }: {
   kicker: string;
-  title: string;
+  title: ReactNode;
   description: string;
   headingLevel?: "h1" | "h2";
   children?: ReactNode;

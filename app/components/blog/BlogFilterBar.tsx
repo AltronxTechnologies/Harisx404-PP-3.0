@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { startTransition, useEffect, useRef, useState } from "react";
+import {
+  startTransition,
+  useEffect,
+  useRef,
+  useState,
+  type FocusEvent,
+} from "react";
 import { Rss, Search, X } from "lucide-react";
 
 interface BlogFilterBarProps {
@@ -27,6 +33,44 @@ export function BlogFilterBar({
   const previousInitialQuery = useRef(initialQuery);
   const pendingQuery = useRef<string | null>(null);
   const syncingFromUrl = useRef(false);
+  const filtersRef = useRef<HTMLDivElement>(null);
+  const [filterEdges, setFilterEdges] = useState({ left: false, right: false });
+
+  useEffect(() => {
+    const filters = filtersRef.current;
+    if (!filters) return;
+    let active = true;
+
+    const updateEdges = () => {
+      if (!active) return;
+      const maxScroll = Math.max(0, filters.scrollWidth - filters.clientWidth);
+      const next = {
+        left: filters.scrollLeft > 1,
+        right: filters.scrollLeft < maxScroll - 1,
+      };
+      setFilterEdges((current) =>
+        current.left === next.left && current.right === next.right ? current : next,
+      );
+    };
+
+    updateEdges();
+    const observer = new ResizeObserver(updateEdges);
+    observer.observe(filters);
+    document.fonts?.ready.then(updateEdges);
+    return () => {
+      active = false;
+      observer.disconnect();
+    };
+  }, [categories]);
+
+  const handleFilterFocus = (event: FocusEvent<HTMLButtonElement>) => {
+    const target = event.currentTarget;
+    window.requestAnimationFrame(() => {
+      if (target.matches(":focus-visible")) {
+        target.scrollIntoView({ block: "nearest", inline: "center" });
+      }
+    });
+  };
 
   useEffect(() => {
     const handleHistoryNavigation = () => {
@@ -93,23 +137,34 @@ export function BlogFilterBar({
   };
 
   const filterClass = (selected: boolean) =>
-    `inline-flex h-8 shrink-0 items-center rounded-full border px-3 font-mono text-[11px] uppercase tracking-widest transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary ${
+    `inline-flex h-8 shrink-0 scroll-mx-8 items-center rounded-full border px-3 font-mono text-[11px] uppercase tracking-widest outline-none transition-colors ${
       selected
-        ? "border-text-primary bg-text-primary text-bg-primary"
-        : "border-border-primary text-text-secondary hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 dark:hover:border-white/25 dark:active:border-white/25"
+        ? "border-text-primary bg-text-primary text-bg-primary focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-bg-primary"
+        : "border-border-primary text-text-secondary hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:border-neutral-400/70 dark:hover:border-white/25 dark:active:border-white/25 dark:focus-visible:border-white/25"
     }`;
 
   return (
     <div className="flex flex-col gap-3 border-y border-border-primary px-2 py-4 sm:px-4 lg:flex-row lg:items-center lg:gap-2">
-      <div className="order-2 min-w-0 flex-1 lg:order-1">
+      <div className="relative order-2 min-w-0 flex-1 lg:order-1">
         <div
-          className="flex min-w-0 items-center gap-2 overflow-x-auto pr-8 [mask-image:linear-gradient(to_right,black,black_calc(100%-2rem),transparent)] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          ref={filtersRef}
+          onScroll={() => {
+            const filters = filtersRef.current;
+            if (!filters) return;
+            const maxScroll = Math.max(0, filters.scrollWidth - filters.clientWidth);
+            setFilterEdges({
+              left: filters.scrollLeft > 1,
+              right: filters.scrollLeft < maxScroll - 1,
+            });
+          }}
+          className="flex min-w-0 items-center gap-2 overflow-x-auto pr-8 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           role="group"
           aria-label="Filter articles by category"
         >
           <button
             type="button"
             onClick={() => handleCategoryClick("")}
+            onFocus={handleFilterFocus}
             aria-pressed={!activeCategory && !invalidCategory}
             className={filterClass(!activeCategory && !invalidCategory)}
           >
@@ -122,6 +177,7 @@ export function BlogFilterBar({
                 key={category}
                 type="button"
                 onClick={() => handleCategoryClick(category)}
+                onFocus={handleFilterFocus}
                 aria-pressed={selected}
                 className={filterClass(selected)}
               >
@@ -130,6 +186,18 @@ export function BlogFilterBar({
             );
           })}
         </div>
+        {filterEdges.left && (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-bg-primary to-transparent"
+          />
+        )}
+        {filterEdges.right && (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-bg-primary to-transparent"
+          />
+        )}
       </div>
 
       <div className="order-1 flex w-full shrink-0 items-center gap-2 lg:order-2 lg:w-auto">

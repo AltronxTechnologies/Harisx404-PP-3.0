@@ -475,6 +475,34 @@ viewports in both themes: panel max width 768px, heading max width 576px, zero
 horizontal center offset, zero clipping, and zero document overflow. Computed
 type, tracking, line height, and gaps are identical to locked `SectionHeading`.
 
+## Gradient states, filter fog, and search ranking - 2026-09-04
+
+- Every shared Blog state heading now follows the locked sentence-plus-accent
+  composition. The concise phrases `different.`, `category.`, `being prepared.`,
+  `available here.`, and `be loaded.` use the same italic animated gradient,
+  padding, and text-shadow removal as the main Blog and locked page headings.
+- No-results and invalid-category measurements remain exact: 12px/500 kicker,
+  16px kicker-heading gap, 46/56px heading at weight 500, 16px heading-copy gap,
+  and 15px/24px supporting copy in both themes at all required viewports.
+- The category rail now uses separate 32px page-colored fog overlays rather than
+  masking interactive content. At the start only the right fog appears; in the
+  middle both appear; at the end only the left appears; when all filters fit,
+  neither appears.
+- Fade edges recalculate on scroll, resize, category changes, and web-font
+  readiness. Overlays are pointer-transparent. Pointer-down causes zero rail
+  movement, partially covered filters remain clickable, and keyboard-focused
+  filters scroll fully clear of the fog.
+- Unselected keyboard focus uses the Projects-style border. Selected focus uses
+  a visible 2px inset page-background ring, avoiding clipped external outlines.
+- Search-result featuring now ranks the complete matching set by aggregate
+  reactions. The current `writing` search correctly promotes the four-reaction
+  article over four zero-reaction matches. An all-zero `mocking` search correctly
+  falls back to its newest result. Remaining matches stay in standard cards.
+
+Light/dark testing at all required viewports passed with correct start/middle/end
+fog states, zero blocked clicks, fully visible keyboard focus, zero document
+overflow, and no console errors.
+
 ## Description-height reduction - 2026-09-04
 
 The owner reduced every card description by one line. One-line titles now show
