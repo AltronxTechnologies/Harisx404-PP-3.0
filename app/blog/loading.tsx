@@ -64,10 +64,10 @@ export default function BlogLoading() {
         </div>
       </div>
 
-      <div className="mt-6 space-y-14 px-2 sm:px-4">
+      <div className="mt-[30px] space-y-14 px-2 sm:px-4">
         {firstPage && (
           <section>
-            <div className="mb-6 h-[16.5px] w-36 animate-pulse rounded bg-border-primary/40 motion-reduce:animate-none" />
+            <div className="mb-[30px] h-[16.5px] w-36 animate-pulse rounded bg-border-primary/40 motion-reduce:animate-none" />
             <div className="rounded-3xl border border-border-primary bg-white p-3 dark:bg-white/[0.02] md:flex">
               <div className="aspect-[16/11] animate-pulse rounded-2xl bg-border-primary/40 motion-reduce:animate-none md:aspect-auto md:min-h-[260px] md:w-1/2 lg:min-h-[300px]" />
               <div className="flex flex-1 flex-col px-2 pb-3 pt-4 md:justify-center md:px-6 md:py-6 lg:px-8 lg:py-8">
