@@ -504,9 +504,9 @@ fog states, zero blocked clicks, fully visible keyboard focus, zero document
 overflow, and no console errors.
 
 The two fog nodes remain mounted and animate only opacity, eliminating abrupt
-appearance/removal. Both use a restrained final opacity of 0.7 and a 200ms
-standard ease: measured ramps were approximately 0.06 at 50ms, 0.45 at 100ms,
-0.64 at 150ms, and 0.70 at 200ms in both themes.
+appearance/removal. Both now use the owner-approved final opacity of 0.8 and a
+200ms standard ease. Start/middle/end states, click-through behavior, keyboard
+focus clearance, and light/dark theme matching were reverified after the change.
 
 ## Final Blog-to-CTA rhythm confirmation - 2026-09-04
 

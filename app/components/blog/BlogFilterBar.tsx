@@ -189,13 +189,13 @@ export function BlogFilterBar({
         <span
           aria-hidden
           className={`pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-bg-primary to-transparent transition-opacity duration-200 ${
-            filterEdges.left ? "opacity-70" : "opacity-0"
+            filterEdges.left ? "opacity-80" : "opacity-0"
           }`}
         />
         <span
           aria-hidden
           className={`pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-bg-primary to-transparent transition-opacity duration-200 ${
-            filterEdges.right ? "opacity-70" : "opacity-0"
+            filterEdges.right ? "opacity-80" : "opacity-0"
           }`}
         />
       </div>
