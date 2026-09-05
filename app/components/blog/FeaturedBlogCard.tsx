@@ -33,7 +33,7 @@ export function FeaturedBlogCard({
       href={`/blog/${slug}`}
       className="group relative flex flex-col rounded-3xl border border-border-primary bg-white p-3 transition-all hover:border-neutral-400/70 hover:shadow-lg dark:bg-white/[0.02] dark:hover:border-white/25 md:flex-row"
     >
-      <div className="relative aspect-[16/11] w-full shrink-0 overflow-hidden rounded-2xl bg-slate-900 md:aspect-auto md:min-h-[280px] md:w-1/2 lg:min-h-[320px]">
+      <div className="relative aspect-[16/11] w-full shrink-0 overflow-hidden rounded-2xl bg-slate-900 md:aspect-auto md:min-h-[260px] md:w-1/2 lg:min-h-[300px]">
         {imageSrc ? (
           <Image
             src={imageSrc}
@@ -51,6 +51,9 @@ export function FeaturedBlogCard({
             </span>
           </div>
         )}
+        <span className="absolute left-3 top-3 rounded-full border border-white/30 bg-black/70 px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-white backdrop-blur-sm">
+          Featured
+        </span>
       </div>
 
       <div className="flex flex-1 flex-col px-2 pb-3 pt-4 md:justify-center md:px-6 md:py-6 lg:px-8 lg:py-8">

@@ -16,18 +16,18 @@ export default function BlogError({
 
   return (
     <div className="relative mt-14 px-2 pb-24 sm:px-4">
-      <div className="mx-auto max-w-2xl rounded-3xl border border-border-primary bg-white px-6 py-16 text-center dark:bg-white/[0.02]">
+      <div className="mx-auto max-w-3xl rounded-3xl border border-border-primary bg-white px-6 py-12 text-center shadow-sm dark:bg-white/[0.02] sm:px-10 sm:py-14">
         <p className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
           Blog unavailable
         </p>
-        <h1 className="mt-4 font-display text-[46px] font-medium leading-none text-text-primary md:text-[56px]">
+        <h1 className="mx-auto mt-4 max-w-2xl text-balance font-display text-[40px] font-medium leading-tight text-text-primary md:text-[46px]">
           The articles could not be loaded.
         </h1>
         <p className="mx-auto mt-4 max-w-lg text-[15px] leading-6 text-text-secondary">
           This is a temporary data issue. Try again, or return when the
           collection is available.
         </p>
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+        <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
           <button
             type="button"
             onClick={reset}

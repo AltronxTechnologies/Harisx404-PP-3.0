@@ -268,6 +268,33 @@ export default async function BlogPage({
   const featuredPost = currentPage === 1 ? pagePosts[0] : undefined;
   const latestPosts = featuredPost ? pagePosts.slice(1) : pagePosts;
   const hasInvalidCategory = ambiguousCategory || Boolean(categoryParam && !validCategory);
+  const emptyPublication = allPosts.length === 0;
+  const emptyState = emptyPublication
+    ? {
+        kicker: "No articles yet",
+        title: "The first article is still being prepared.",
+        copy: "Please return soon when the published collection is available.",
+      }
+    : hasInvalidCategory
+      ? {
+          kicker: "Unknown category",
+          title: "That filter does not match the published collection.",
+          copy: "Choose another category or return to the complete article collection.",
+        }
+      : queryParam || ambiguousQuery
+        ? {
+            kicker: "No matching articles",
+            title: "Try a different title, topic, or category.",
+            copy: "Check the spelling, try a broader topic, or clear the search to browse every published article.",
+          }
+        : {
+            kicker: "No articles found",
+            title: "This page has no published articles.",
+            copy: "Return to the complete collection to continue browsing.",
+          };
+  const emptyAction = emptyPublication
+    ? { href: "/", label: "Go home" }
+    : { href: "/blog", label: "View all articles" };
 
   return (
     <div className="relative mt-14 pb-24">
@@ -372,26 +399,21 @@ export default async function BlogPage({
           )}
 
           {pagePosts.length === 0 && (
-            <div className="rounded-3xl border border-border-primary bg-white px-6 py-16 text-center dark:bg-white/[0.02]">
+            <div className="mx-auto max-w-3xl rounded-3xl border border-border-primary bg-white px-6 py-12 text-center shadow-sm dark:bg-white/[0.02] sm:px-10 sm:py-14">
               <p className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
-                {hasInvalidCategory
-                  ? "Unknown category"
-                  : queryParam || ambiguousQuery
-                    ? "No matching articles"
-                    : "No articles yet"}
+                {emptyState.kicker}
               </p>
-              <h2 className="mt-4 font-display text-3xl font-medium text-text-primary">
-                {hasInvalidCategory
-                  ? "That filter does not match the published collection."
-                  : queryParam || ambiguousQuery
-                    ? "Try a different title, topic, or category."
-                  : "The next article is still being prepared."}
+              <h2 className="mx-auto mt-4 max-w-2xl text-balance font-display text-[36px] font-medium leading-tight text-text-primary md:text-[42px]">
+                {emptyState.title}
               </h2>
+              <p className="mx-auto mt-4 max-w-xl text-[15px] leading-6 text-text-secondary">
+                {emptyState.copy}
+              </p>
               <Link
-                href="/blog"
-                className="mt-6 inline-flex min-h-8 items-center rounded-full border border-border-primary px-4 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25"
+                href={emptyAction.href}
+                className="mt-7 inline-flex min-h-9 items-center rounded-full border border-border-primary px-5 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25"
               >
-                View all articles
+                {emptyAction.label}
               </Link>
             </div>
           )}

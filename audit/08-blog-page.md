@@ -385,8 +385,8 @@ measured 24px, featured titles 26px, and every arrow measured 25x25px.
 
 ## Final responsive card and search refinement - 2026-09-04
 
-- Laptop/desktop featured cards remain 346px high. Tablet featured cards use a
-  280px media minimum and content-driven panel, measuring 306px at 768px.
+- Laptop/desktop featured cards are 326px high. Tablet featured cards use a
+  260px media minimum and content-driven panel, measuring 286px at 768px.
 - On phones, the featured card now uses the exact standard-card geometry:
   16:11 media, 12px shell inset, 24px/500 title with 28px line height, 142px
   adaptive copy block, 11px metadata/action type, and matching panel padding.
@@ -412,8 +412,8 @@ measured 24px, featured titles 26px, and every arrow measured 25x25px.
 
 Final measurements passed in both themes at all six required viewports:
 
-- Featured height: 346px at 1440/1024, 306px at 768, then 486.13px, 475.82px,
-  and 465.5px at 390, 375, and 360 respectively.
+- Featured height: 326px at 1440/1024, 286px at 768, then 464.13px, 453.81px,
+  and 443.5px at 390, 375, and 360 respectively.
 - Search: 256x32px at 1440/1024; 630px, 288px, 273px, and 258px wide at 768,
   390, 375, and 360 respectively.
 - Grid row-height spread: 0px.
@@ -426,6 +426,31 @@ Final measurements passed in both themes at all six required viewports:
 - Local search, focus retention, URL state, and live result announcement passed.
 - TypeScript, targeted ESLint, `git diff --check`, and final independent code
   review passed with no findings.
+
+## Featured badge and resilient-state amendment - 2026-09-04
+
+- Added the locked Home Blog image-overlay badge treatment to the featured
+  image, labelled `Featured`: 12px top/left inset, 10px mono uppercase label,
+  rounded pill, backdrop blur, white/30 border, and black/70 surface. The darker
+  surface guarantees 8.45:1 worst-case contrast over a white image.
+- Root featured selection was verified against live aggregate data: the current
+  four-reaction article outranks the one-reaction article and renders under
+  `Most reacted article`. Zero/tied totals retain newest-first order.
+- Search success and failure paths were verified in both themes at all six
+  required viewports. Found results retain focus and announce their count;
+  no-match and invalid-category panels use distinct, non-contradictory copy and
+  a working `View all articles` recovery action.
+- A genuinely empty publication takes precedence over query/category state and
+  uses a non-circular `Go home` recovery action. The Blog data error boundary
+  uses the same centered card language, 40/46px title scale, 15px supporting
+  copy, and primary/secondary action hierarchy.
+- No-result panels measure 768px max width on desktop, 670px at 768, and 328,
+  313, and 298px on phones, with zero center delta or overflow.
+- Blog loading now mirrors the final responsive header, stacked/inline toolbar,
+  featured section label, image, adaptive copy reserve, reaction/action footer,
+  and 326/286/mobile featured geometry. Loading-to-resolved rectangle deltas for
+  header, toolbar, featured shell, and media are exactly 0px at 360, 390, 640,
+  768, 1024, and 1440px.
 
 ## Description-height reduction - 2026-09-04
 
