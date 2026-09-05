@@ -452,6 +452,29 @@ Final measurements passed in both themes at all six required viewports:
   header, toolbar, featured shell, and media are exactly 0px at 360, 390, 640,
   768, 1024, and 1440px.
 
+## Unified Blog state panels - 2026-09-04
+
+No-results, invalid-category, empty-publication, and Blog-unavailable surfaces
+now share `app/components/blog/BlogStatePanel.tsx`, preventing typography and
+spacing drift. The component uses the locked heading system exactly:
+
+- Kicker: Reference Core Mono, 12px/16px, weight 500, uppercase, 1.2px tracking.
+- Kicker-to-heading gap: 16px.
+- Heading: Instrument Serif, 46px/46px on phones and 56px/56px from `md`, weight
+  500, tight mobile tracking and -1.5px desktop tracking, max width 576px.
+- Heading-to-copy gap: 16px.
+- Supporting copy: Reference Outfit, 15px/24px, weight 400.
+- Copy-to-actions gap: 28px; wrapped action gap: 12px.
+
+The Blog page supplies an h2 state heading beneath its h1; the route error
+boundary supplies an h1. Empty-publication, invalid-category, search-no-result,
+and generic-empty copy and recovery actions have explicit precedence.
+
+Measured across no-result and invalid-category states at all six required
+viewports in both themes: panel max width 768px, heading max width 576px, zero
+horizontal center offset, zero clipping, and zero document overflow. Computed
+type, tracking, line height, and gaps are identical to locked `SectionHeading`.
+
 ## Description-height reduction - 2026-09-04
 
 The owner reduced every card description by one line. One-line titles now show

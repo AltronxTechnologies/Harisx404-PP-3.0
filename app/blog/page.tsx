@@ -5,6 +5,7 @@ import { BlogFilterBar } from "@/app/components/blog/BlogFilterBar";
 import { BlogGridCard } from "@/app/components/blog/BlogGridCard";
 import { FeaturedBlogCard } from "@/app/components/blog/FeaturedBlogCard";
 import { BlogViewportMode } from "@/app/components/blog/BlogViewportMode";
+import { BlogStatePanel } from "@/app/components/blog/BlogStatePanel";
 import { GridWrapper } from "@/app/components/GridWrapper";
 import { PaperHeroTexture } from "@/app/components/PaperHeroTexture";
 import { CtaSection } from "@/app/components/home/CtaSection";
@@ -399,23 +400,18 @@ export default async function BlogPage({
           )}
 
           {pagePosts.length === 0 && (
-            <div className="mx-auto max-w-3xl rounded-3xl border border-border-primary bg-white px-6 py-12 text-center shadow-sm dark:bg-white/[0.02] sm:px-10 sm:py-14">
-              <p className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
-                {emptyState.kicker}
-              </p>
-              <h2 className="heading-glow mx-auto mt-4 max-w-2xl text-balance [font-family:var(--font-instrument-serif),serif] text-[46px] font-medium leading-none tracking-tight text-text-primary md:text-[56px] md:tracking-[-1.5px]">
-                {emptyState.title}
-              </h2>
-              <p className="mx-auto mt-4 max-w-xl text-[15px] leading-6 text-text-secondary">
-                {emptyState.copy}
-              </p>
+            <BlogStatePanel
+              kicker={emptyState.kicker}
+              title={emptyState.title}
+              description={emptyState.copy}
+            >
               <Link
                 href={emptyAction.href}
-                className="mt-7 inline-flex min-h-9 items-center rounded-full border border-border-primary px-5 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25"
+                className="inline-flex min-h-9 items-center rounded-full border border-border-primary px-5 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25"
               >
                 {emptyAction.label}
               </Link>
-            </div>
+            </BlogStatePanel>
           )}
 
           {orderedPosts.length > firstPage && (
