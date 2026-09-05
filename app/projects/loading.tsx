@@ -74,14 +74,14 @@ function HeaderSkeleton() {
 
 function ControlsSkeleton() {
   return (
-    <div className="mx-auto mt-6 flex animate-pulse flex-wrap items-center justify-center gap-2 max-lg:gap-y-[9px]">
-      <div className="h-[2rem] w-full max-w-[298px] rounded-full bg-border-primary/40 sm:w-[439px] sm:max-w-[439px] lg:w-56 lg:max-w-[260px]" />
-      <div className="flex items-center justify-center gap-1 sm:gap-2">
-        <div className="h-[2rem] w-[35px] rounded-full bg-border-primary/40 sm:w-14" />
-        <div className="h-[2rem] w-[49px] rounded-full bg-border-primary/40 sm:w-[70px]" />
-        <div className="h-[2rem] w-[105px] rounded-full bg-border-primary/40 sm:w-[116px]" />
-        <div className="h-[2rem] w-[35px] rounded-full bg-border-primary/40 sm:w-[61px]" />
-        <div className="h-[2rem] w-[58px] rounded-full bg-border-primary/40 sm:w-20" />
+    <div className="mt-14 flex animate-pulse flex-col gap-3 border-y border-border-primary px-2 py-4 motion-reduce:animate-none sm:px-4 lg:flex-row lg:items-center lg:gap-2">
+      <div className="order-1 h-8 w-full rounded-lg bg-border-primary/40 lg:order-2 lg:w-64 lg:flex-none" />
+      <div className="order-2 flex min-w-0 items-center justify-center gap-1 max-[359px]:gap-0.5 sm:gap-2 lg:order-1 lg:flex-1 lg:justify-start">
+        <div className="h-[2rem] w-[35px] rounded-full bg-border-primary/40 sm:w-[50px]" />
+        <div className="h-[2rem] w-[49px] rounded-full bg-border-primary/40 sm:w-[67px]" />
+        <div className="h-[2rem] w-[105px] rounded-full bg-border-primary/40 sm:w-[131px]" />
+        <div className="h-[2rem] w-[35px] rounded-full bg-border-primary/40 sm:w-[50px]" />
+        <div className="h-[2rem] w-[58px] rounded-full bg-border-primary/40 sm:w-[74px]" />
       </div>
     </div>
   );

@@ -5,7 +5,7 @@
 import { Fragment, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 import type { HomeProject } from "@/app/data/fallback-home";
 import { CaseStudyCard, projectTags } from "@/app/components/home/CaseStudies";
 
@@ -47,6 +47,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
   const moreRef = useRef<HTMLDivElement | null>(null);
   const moreButtonRef = useRef<HTMLButtonElement | null>(null);
   const searchRef = useRef<HTMLInputElement | null>(null);
+  const skipNextSearchSyncRef = useRef(false);
 
   // "/" focuses the search field (ignored while typing elsewhere).
   useEffect(() => {
@@ -128,6 +129,10 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
   // Debounced search → URL (any new search resets to page 1). Replacing keeps
   // normal typing from adding one browser-history entry per query update.
   useEffect(() => {
+    if (skipNextSearchSyncRef.current) {
+      skipNextSearchSyncRef.current = false;
+      return;
+    }
     if (query === q) return;
     const t = setTimeout(
       () => setParams({ q: query, page: 1 }, "replace"),
@@ -214,7 +219,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
   // Windowed page list: always show first/last, current ±1, and collapse
   // longer runs into an ellipsis so the control stays compact at any count.
   const pageList: (number | "…")[] = (() => {
-    if (totalPages <= 7)
+    if (totalPages <= 5)
       return Array.from({ length: totalPages }, (_, i) => i + 1);
     const wanted = new Set([
       1,
@@ -243,25 +248,11 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
      active tags via a shared layout element — same motion language as the
      pagination's page pill. */
   const inlineChipClass = (active: boolean) =>
-    `relative inline-flex h-[2rem] items-center rounded-full border px-1.5 font-mono text-[11px] uppercase tracking-normal transition-colors sm:px-4 sm:tracking-widest ${
+    `relative inline-flex h-[2rem] items-center rounded-full border px-1.5 font-mono text-[11px] uppercase tracking-normal outline-none transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary sm:px-3 sm:tracking-widest ${
       active
-        ? "border-text-primary text-bg-primary"
-        : "border-border-primary text-text-secondary hover:border-neutral-400/70 active:border-neutral-400/70 focus-visible:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25 dark:active:border-white/25 dark:focus-visible:border-white/25"
+        ? "border-text-primary bg-text-primary text-bg-primary"
+        : "border-border-primary text-text-secondary hover:border-neutral-400/70 active:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25 dark:active:border-white/25"
     }`;
-
-  const chipPill = (active: boolean) =>
-    active ? (
-      <motion.span
-        layoutId="projects-tag-pill"
-        aria-hidden
-        className="absolute inset-0 rounded-full bg-text-primary"
-        transition={
-          reducedMotion
-            ? { duration: 0 }
-            : { type: "spring", stiffness: 500, damping: 38 }
-        }
-      />
-    ) : null;
 
   return (
     <section ref={topRef} aria-labelledby="project-collection-heading" className="scroll-mt-20">
@@ -274,20 +265,15 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
           : `${filtered.length} ${filtered.length === 1 ? "project" : "projects"} found`}
       </p>
       {/* Controls — search + domain chips + "More" dropdown, one row. */}
-      <div className="mx-auto mt-6 flex flex-wrap items-center justify-center gap-2 max-lg:gap-y-[9px]">
+      <div className="mt-14 flex flex-col gap-3 border-y border-border-primary px-2 py-4 sm:px-4 lg:flex-row lg:items-center lg:gap-2">
         <label htmlFor="project-search" className="sr-only">
           Search projects
         </label>
-        {/* On stacked layouts (below lg the search sits on its own line
-            above the pills) the search bar matches the pills-row width
-            (298px compact / 439px at sm+) so both lines read as one
-            aligned control block. From lg up they share a line and the
-            search returns to its original 224px. */}
-        <div className="relative w-full max-w-[298px] sm:w-[439px] sm:max-w-[439px] lg:w-56 lg:max-w-[260px]">
+        {/* Same responsive search geometry and states as the locked Blog. */}
+        <div className="relative order-1 w-full min-w-0 lg:order-2 lg:w-64 lg:flex-none">
           <Search
             aria-hidden
-            strokeWidth={1.5}
-            className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-text-secondary"
+            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary"
           />
           <input
             id="project-search"
@@ -304,33 +290,26 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
                 else (e.target as HTMLInputElement).blur();
               }
             }}
-            className="h-[2rem] w-full rounded-full border border-border-primary bg-white pl-10 pr-9 font-mono text-xs text-text-primary outline-none transition-colors placeholder:text-text-secondary hover:border-neutral-400/70 active:border-neutral-400/70 focus:border-text-secondary dark:bg-white/[0.03] dark:hover:border-white/25 dark:active:border-white/25 [&::-webkit-search-cancel-button]:hidden"
+            maxLength={100}
+            className="h-8 w-full rounded-lg border border-black/[0.16] bg-transparent pl-9 pr-9 font-mono text-[11px] text-text-primary outline-none transition-colors placeholder:text-neutral-400 hover:border-neutral-400/[0.72] active:border-neutral-400/[0.72] focus:border-text-secondary focus-visible:ring-2 focus-visible:ring-neutral-300/60 dark:border-white/[0.12] dark:placeholder:text-white/30 dark:hover:border-white/[0.27] dark:active:border-white/[0.27] dark:focus-visible:ring-white/20 [&::-webkit-search-cancel-button]:hidden"
           />
-          {!query && (
-            /* Keyboard hint — press "/" anywhere to jump to search. */
-            <kbd
-              aria-hidden
-              className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded border border-border-primary px-1.5 py-px font-mono text-[10px] leading-4 text-text-secondary"
-            >
-              /
-            </kbd>
-          )}
           {query && (
             <button
               type="button"
-              aria-label="Clear search"
-              onClick={() => setQuery("")}
-              className="absolute right-2.5 top-1/2 flex size-5 -translate-y-1/2 items-center justify-center rounded-full text-text-secondary transition-colors hover:bg-black/5 hover:text-text-primary dark:hover:bg-white/10"
+              aria-label="Clear project search"
+              onClick={() => {
+                setQuery("");
+                searchRef.current?.focus();
+              }}
+              className="absolute right-1 top-1/2 flex size-6 -translate-y-1/2 items-center justify-center rounded-full text-text-secondary outline-none transition-colors hover:bg-black/5 hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-text-primary dark:hover:bg-white/10"
             >
-              <svg aria-hidden viewBox="0 0 12 12" fill="none" className="size-3">
-                <path d="m3 3 6 6M9 3l-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-              </svg>
+              <X className="size-3" aria-hidden />
             </button>
           )}
         </div>
 
         <div
-          className="flex flex-wrap items-center justify-center gap-1 sm:gap-2"
+          className="order-2 flex min-w-0 items-center justify-center gap-1 max-[359px]:gap-0.5 sm:gap-2 lg:order-1 lg:flex-1 lg:justify-start"
           role="group"
           aria-label="Filter projects by tag"
         >
@@ -340,7 +319,6 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
             onClick={() => setParams({ tag: "All", page: 1 })}
             className={inlineChipClass(activeTag === "All")}
           >
-            {chipPill(activeTag === "All")}
             <span className="relative">All</span>
           </button>
           {headTags.map((tag) => (
@@ -353,7 +331,6 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
               }
               className={inlineChipClass(activeTag === tag)}
             >
-              {chipPill(activeTag === tag)}
               <span className="relative">{tag}</span>
             </button>
           ))}
@@ -375,15 +352,38 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
                 aria-expanded={showAllTags}
                 aria-haspopup="menu"
                 aria-controls="projects-more-tags"
-                onClick={() => setShowAllTags((v) => !v)}
-                className={`relative flex h-[2rem] items-center gap-1 rounded-full border px-1.5 font-mono text-[11px] uppercase tracking-normal transition-colors sm:px-4 sm:tracking-widest ${
+                onClick={(event) => {
+                  const opening = !showAllTags;
+                  setShowAllTags(opening);
+                  if (opening && event.detail === 0) {
+                    requestAnimationFrame(() =>
+                      moreRef.current
+                        ?.querySelector<HTMLButtonElement>("#projects-more-tags button")
+                        ?.focus(),
+                    );
+                  }
+                }}
+                onKeyDown={(event) => {
+                  if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
+                  event.preventDefault();
+                  setShowAllTags(true);
+                  requestAnimationFrame(() => {
+                    const rows = moreRef.current?.querySelectorAll<HTMLButtonElement>(
+                      "#projects-more-tags button",
+                    );
+                    if (!rows?.length) return;
+                    rows[event.key === "ArrowUp" ? rows.length - 1 : 0].focus();
+                  });
+                }}
+                className={`relative flex h-[2rem] max-w-20 items-center gap-1 rounded-full border px-1.5 font-mono text-[11px] uppercase tracking-normal outline-none transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary sm:max-w-32 sm:px-3 sm:tracking-widest ${
                   overflowActive
-                    ? "border-text-primary text-bg-primary"
-                    : "border-border-primary text-text-secondary hover:border-neutral-400/70 active:border-neutral-400/70 focus-visible:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25 dark:active:border-white/25 dark:focus-visible:border-white/25"
+                    ? "border-text-primary bg-text-primary text-bg-primary"
+                    : "border-border-primary text-text-secondary hover:border-neutral-400/70 active:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25 dark:active:border-white/25"
                 }`}
               >
-                {chipPill(overflowActive)}
-                <span className="relative">{overflowActive ? activeTag : "More"}</span>
+                <span className="relative truncate" title={overflowActive ? activeTag : undefined}>
+                  {overflowActive ? activeTag : "More"}
+                </span>
                 <svg
                   aria-hidden
                   viewBox="0 0 12 12"
@@ -434,12 +434,21 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
                             type="button"
                             role="menuitemradio"
                             aria-checked={active}
+                            tabIndex={active || (!overflowActive && tag === overflowTags[0]) ? 0 : -1}
+                            onFocus={(event) => {
+                              moreRef.current
+                                ?.querySelectorAll<HTMLButtonElement>("#projects-more-tags button")
+                                .forEach((row) => {
+                                  row.tabIndex = row === event.currentTarget ? 0 : -1;
+                                });
+                            }}
                             onClick={() => {
                               setParams({
                                 tag: active ? "All" : tag,
                                 page: 1,
                               });
                               setShowAllTags(false);
+                              requestAnimationFrame(() => moreButtonRef.current?.focus());
                             }}
                             className={`group/row flex w-full items-center justify-between gap-3 rounded-lg px-2.5 py-2 font-mono text-[11px] uppercase tracking-widest transition-colors ${
                               active
@@ -447,7 +456,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
                                 : "text-text-secondary hover:bg-black/[0.04] hover:text-text-primary dark:hover:bg-white/[0.06]"
                             }`}
                           >
-                            <span className="flex items-center gap-2">
+                            <span className="flex min-w-0 items-center gap-2">
                               <span
                                 aria-hidden
                                 className={`h-1 w-1 rounded-full transition-colors ${
@@ -456,7 +465,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
                                     : "bg-text-tertiary/60 group-hover/row:bg-text-tertiary"
                                 }`}
                               />
-                              {tag}
+                              <span className="truncate" title={tag}>{tag}</span>
                             </span>
                             <span
                               className={
@@ -641,6 +650,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
           <button
             type="button"
             onClick={() => {
+              skipNextSearchSyncRef.current = query !== "";
               setQuery("");
               setParams({ tag: "All", q: "", page: 1 });
             }}
@@ -657,93 +667,57 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
       {totalPages > 1 && (
         <nav
           aria-label="Projects pages"
-          className="mt-20 flex flex-col items-center gap-4"
+          className="mt-14 flex flex-col items-center gap-4"
         >
-          <div className="flex flex-wrap items-center justify-center gap-2">
+          <div className="grid grid-cols-2 items-center justify-center gap-2 sm:flex sm:flex-wrap">
             <button
               type="button"
               aria-label="Previous page"
               onClick={() => goToPage(safePage - 1)}
               disabled={safePage === 1}
-              className="inline-flex min-h-[2rem] items-center gap-2 rounded-full border border-border-primary px-4 py-1.5 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25 dark:active:border-white/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-tertiary disabled:pointer-events-none disabled:opacity-40"
+              className="order-2 inline-flex min-h-8 w-[88px] items-center justify-center justify-self-end rounded-full border border-border-primary px-4 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary disabled:cursor-not-allowed disabled:opacity-40 dark:hover:border-white/25 dark:active:border-white/25 sm:order-1"
             >
-              <span aria-hidden>←</span>
-              <span className="hidden sm:inline">Prev</span>
+              Previous
             </button>
-            {pageList.map((item, idx) =>
-              item === "…" ? (
-                <span
-                  key={`gap-${idx}`}
-                  aria-hidden
-                  className="flex size-[2rem] items-center justify-center font-mono text-xs text-text-secondary"
-                >
-                  …
-                </span>
-              ) : (
-                <button
-                  key={item}
-                  type="button"
-                  aria-label={
-                    item === safePage
-                      ? `Page ${item}, current page`
-                      : `Go to page ${item}`
-                  }
-                  aria-current={item === safePage ? "page" : undefined}
-                  onClick={() => goToPage(item)}
-                  className={`relative flex h-[2rem] min-w-[2rem] items-center justify-center rounded-full border px-1 font-mono text-xs transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-tertiary ${
-                    item === safePage
-                      ? "border-text-primary text-bg-primary"
-                      : "border-border-primary text-text-secondary hover:border-neutral-400/70 active:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25 dark:active:border-white/25"
-                  }`}
-                >
-                  {item === safePage && (
-                    /* Shared-layout ink pill glides between page numbers on
-                       change (snaps instantly under reduced motion). */
-                    <motion.span
-                      layoutId="projects-page-pill"
-                      aria-hidden
-                      className="absolute inset-0 rounded-full bg-text-primary"
-                      transition={
-                        reducedMotion
-                          ? { duration: 0 }
-                          : { type: "spring", stiffness: 500, damping: 38 }
-                      }
-                    />
-                  )}
-                  <span className="relative">
+            <div className="order-1 col-span-2 flex items-center justify-center gap-2 sm:order-2">
+              {pageList.map((item, idx) =>
+                item === "…" ? (
+                  <span key={`gap-${idx}`} aria-hidden className="px-0.5 font-mono text-xs text-text-secondary">…</span>
+                ) : (
+                  <button
+                    key={item}
+                    type="button"
+                    aria-label={item === safePage ? `Page ${item}, current page` : `Go to page ${item}`}
+                    aria-current={item === safePage ? "page" : undefined}
+                    onClick={() => goToPage(item)}
+                    className={`inline-flex size-8 items-center justify-center rounded-full border font-mono text-xs transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary ${
+                      item === safePage
+                        ? "border-text-primary bg-text-primary text-bg-primary"
+                        : "border-border-primary text-text-secondary hover:border-neutral-400/70 active:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25 dark:active:border-white/25"
+                    }`}
+                  >
                     {String(item).padStart(2, "0")}
-                  </span>
-                </button>
-              )
-            )}
+                  </button>
+                )
+              )}
+            </div>
             <button
               type="button"
               aria-label="Next page"
               onClick={() => goToPage(safePage + 1)}
               disabled={safePage === totalPages}
-              className="inline-flex min-h-[2rem] items-center gap-2 rounded-full border border-border-primary px-4 py-1.5 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25 dark:active:border-white/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-tertiary disabled:pointer-events-none disabled:opacity-40"
+              className="order-3 inline-flex min-h-8 w-[88px] items-center justify-center justify-self-start rounded-full border border-border-primary px-4 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary disabled:cursor-not-allowed disabled:opacity-40 dark:hover:border-white/25 dark:active:border-white/25"
             >
-              <span className="hidden sm:inline">Next</span>
-              <span aria-hidden>→</span>
+              Next
             </button>
           </div>
           <p
             aria-live="polite"
-            className="flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.25em] text-text-secondary"
+            className="font-mono text-[11px] uppercase tracking-[0.2em] text-text-secondary"
           >
-            <span
-              aria-hidden
-              className="w-8 border-t border-dotted"
-              style={{ borderTopColor: "color-mix(in srgb, var(--rule-color) 85%, transparent)" }}
-            />
             Showing {String(start + 1).padStart(2, "0")}–
             {String(Math.min(start + PER_PAGE, filtered.length)).padStart(2, "0")} of{" "}
             {String(filtered.length).padStart(2, "0")}
-            <span
-              aria-hidden
-              className="w-8 border-t border-dotted"
-              style={{ borderTopColor: "color-mix(in srgb, var(--rule-color) 85%, transparent)" }}
-            />
           </p>
         </nav>
       )}

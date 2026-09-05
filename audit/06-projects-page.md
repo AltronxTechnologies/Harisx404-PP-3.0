@@ -508,6 +508,41 @@ after hover; its computed border changed from `rgba(255,255,255,0.1)` to
 light/dark route matrix remained free of document overflow or new clipping.
 TypeScript, targeted ESLint, and `git diff --check` passed after the amendment.
 
+## Blog control-system parity amendment - 2026-09-05
+
+The owner temporarily unlocked Projects search/filter controls, pagination, and
+loading geometry to align them with the locked Blog page.
+
+- Toolbar now uses the same full-width border-y frame, 16px vertical padding,
+  12px compact row gap, and responsive order: search first on compact screens,
+  filters first on desktop.
+- Search now matches Blog at 32px high, 8px radius, 256px desktop width, fluid
+  compact width, 11px mono text, placeholder colors, 24px clear control, and
+  identical resting/hover/active/focus border states.
+- Project filters retain compact phone padding so All, three primary domains,
+  and More remain visible without clipping the popup. From `sm`, their padding
+  and tracking match Blog. Selected states use the same static inverted pill.
+- Long selected More labels truncate inside an 80px phone / 128px `sm+` bound;
+  full text remains available through `title` and popup rows.
+- More uses complete menu-button behavior: click, outside dismissal, Escape,
+  ArrowDown/ArrowUp/Home/End, selection focus restoration, and one roving
+  `tabIndex=0` item.
+- Pagination now uses Blog's 32px numbered controls, 88px Previous/Next controls,
+  selected inversion, disabled buttons, five-page window threshold, mobile
+  number/action rows, 16px summary gap, and plain live range summary.
+- Pagination begins 56px after project results instead of the former 80px.
+- Loading search/filter geometry mirrors the amended toolbar and measured pill
+  widths.
+
+Verified at 1440, 768, 390, 360, and 320px in light/dark: zero document
+overflow, long-tag containment, exact 32px search/control height, correct
+responsive order, functional search/filter URL state, Clear filters race-free,
+More keyboard semantics, pagination 01-08 / 09-10 ranges, and no normal-mode
+console errors. TypeScript, targeted ESLint, and `git diff --check` passed.
+
+Project header, cards, content, details, CTA, and all other locked presentation
+were not changed. Final Projects re-lock awaits owner visual approval.
+
 ## Mobile control-edge alignment - 2026-09-04
 
 The mobile search width was increased by one pixel, from 297px to 298px, to

@@ -1436,3 +1436,29 @@ The owner temporarily unlocked only the About page heading-to-intro spacing.
 at 1440, 1024, 768, 390, 375, 360px in light and dark with zero overflow,
 clipping, or content overlap. All other About presentation remains locked; final
 re-lock of this spacing amendment awaits owner approval.
+
+## 25. FINAL OWNER LOCK — Blog and About ✅✅
+
+- **Date locked:** 2026-09-05
+- **Locked through commit:** `eff914e`
+- **Owner approval:** The owner declared the completed Blog page and amended
+  About page perfect and instructed that both be locked before a minor Projects
+  control-consistency adjustment.
+- **About final amendment:** heading-to-intro spacing is 16px (`mt-4`) in both
+  `app/about/page.tsx` and `app/about/loading.tsx`, matching Blog and Projects.
+- **Blog scope:** `app/blog/page.tsx`, `app/blog/loading.tsx`,
+  `app/blog/error.tsx`, `app/blog/data.ts`, and `app/components/blog/**`, plus
+  Blog-specific presentation in article routes and shared rendering utilities.
+- **Blog reference role:** its search/filter toolbar and pagination are the
+  approved source for the Projects amendment below.
+
+Do not modify either locked page or its presentation dependencies without a
+new explicit owner unlock. Temporary About language in the preceding amendment
+is closed by this final lock.
+
+### 2026-09-05 owner-authorized temporary Projects controls amendment
+
+The owner temporarily unlocked only Projects search/filter controls,
+pagination, and their loading geometry to align them with the locked Blog page.
+Project header, cards, content, CTA, and every other Projects behavior remain
+locked. Final re-lock awaits owner review of this limited amendment.
