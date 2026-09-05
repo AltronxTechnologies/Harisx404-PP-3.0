@@ -77,7 +77,7 @@ export default async function AboutPage() {
             {/* Intro — one short, plain-language paragraph. Centred to match
                 the centred kicker + heading above it. No bold: the emphasis
                 was on nearly every clause, which flattens the hierarchy. */}
-            <p className="mx-auto mt-14 max-w-3xl text-pretty text-center text-[15px] leading-relaxed text-text-secondary">
+            <p className="mx-auto mt-4 max-w-3xl text-pretty text-center text-[15px] leading-relaxed text-text-secondary">
               I&apos;m Muhammad Haris, a BSIT graduate from the University of
               Malakand, specializing in Cybersecurity, Full-Stack Web
               Development, and AI/ML. Ranked in Pakistan&apos;s Top 15% in NSCT

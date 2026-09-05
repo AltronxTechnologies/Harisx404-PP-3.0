@@ -1427,3 +1427,12 @@ Do not modify, refactor, restyle, rename, reorder, or indirectly alter any file
 or dependency in this frozen scope without explicit owner permission for that
 specific change in the current conversation. Admin-managed content remains
 editable; presentation does not.
+
+### 2026-09-05 owner-authorized temporary About header amendment
+
+The owner temporarily unlocked only the About page heading-to-intro spacing.
+`app/about/page.tsx` and `app/about/loading.tsx` now use the shared 16px gap
+(`mt-4`) instead of 56px (`mt-14`), matching Blog and Projects exactly. Verified
+at 1440, 1024, 768, 390, 375, 360px in light and dark with zero overflow,
+clipping, or content overlap. All other About presentation remains locked; final
+re-lock of this spacing amendment awaits owner approval.

@@ -19,7 +19,7 @@ export default function AboutLoading() {
         <GridWrapper>
           <div className="px-4 xl:px-0">
             <SectionHeaderSkeleton />
-            <div className={`mx-auto mt-14 max-w-3xl space-y-2 ${pulse}`}>
+            <div className={`mx-auto mt-4 max-w-3xl space-y-2 ${pulse}`}>
               <div className="h-3.5 w-full rounded bg-border-primary/35" />
               <div className="mx-auto h-3.5 w-5/6 rounded bg-border-primary/35" />
               <div className="mx-auto h-3.5 w-2/3 rounded bg-border-primary/35" />
