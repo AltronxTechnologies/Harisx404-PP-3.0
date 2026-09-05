@@ -363,7 +363,7 @@ export default async function BlogPage({
         <div className="mt-[30px] space-y-14 px-2 sm:px-4">
           {featuredPost && (
             <section aria-labelledby="featured-article-heading">
-              <div className="mb-[30px] flex items-center justify-between gap-4">
+              <div className="mb-6 flex items-center justify-between gap-4">
                 <h2
                   id="featured-article-heading"
                   className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary"
