@@ -32,7 +32,9 @@ export function BlogFilterBar({
   const [query, setQuery] = useState(initialQuery);
   const searchTimerRef = useRef<number | null>(null);
   const desiredUrlRef = useRef<string | null>(null);
+  const dispatchedUrlRef = useRef<string | null>(null);
   const navigationInFlightRef = useRef(false);
+  const navigationTimeoutRef = useRef<number | null>(null);
   const desiredHistoryRef = useRef<"push" | "replace">("replace");
   const searchRef = useRef<HTMLInputElement>(null);
   const filtersRef = useRef<HTMLDivElement>(null);
@@ -78,11 +80,24 @@ export function BlogFilterBar({
     const desiredUrl = desiredUrlRef.current;
     if (!desiredUrl || navigationInFlightRef.current) return;
     const currentUrl = `${window.location.pathname}${window.location.search}`;
-    if (desiredUrl === currentUrl) return;
+    if (desiredUrl === currentUrl) {
+      desiredHistoryRef.current = "replace";
+      return;
+    }
 
     navigationInFlightRef.current = true;
+    dispatchedUrlRef.current = desiredUrl;
     const historyMode = desiredHistoryRef.current;
     desiredHistoryRef.current = "replace";
+    if (navigationTimeoutRef.current !== null) {
+      window.clearTimeout(navigationTimeoutRef.current);
+    }
+    navigationTimeoutRef.current = window.setTimeout(() => {
+      navigationTimeoutRef.current = null;
+      navigationInFlightRef.current = false;
+      dispatchedUrlRef.current = null;
+      flushNavigation();
+    }, 10_000);
     startTransition(() => {
       router[historyMode](desiredUrl, { scroll: false });
     });
@@ -109,10 +124,21 @@ export function BlogFilterBar({
   useEffect(() => {
     const currentUrl = `${window.location.pathname}${window.location.search}`;
     const completedQueuedNavigation = navigationInFlightRef.current;
+    const dispatchedUrl = dispatchedUrlRef.current;
     navigationInFlightRef.current = false;
+    dispatchedUrlRef.current = null;
+    if (navigationTimeoutRef.current !== null) {
+      window.clearTimeout(navigationTimeoutRef.current);
+      navigationTimeoutRef.current = null;
+    }
 
-    if (!desiredUrlRef.current || (!completedQueuedNavigation && desiredUrlRef.current !== currentUrl)) {
+    if (
+      !desiredUrlRef.current ||
+      (!completedQueuedNavigation && desiredUrlRef.current !== currentUrl) ||
+      (completedQueuedNavigation && dispatchedUrl !== currentUrl)
+    ) {
       desiredUrlRef.current = currentUrl;
+      desiredHistoryRef.current = "replace";
       setQuery(initialQuery);
       return;
     }
@@ -126,6 +152,11 @@ export function BlogFilterBar({
         searchTimerRef.current = null;
       }
       navigationInFlightRef.current = false;
+      dispatchedUrlRef.current = null;
+      if (navigationTimeoutRef.current !== null) {
+        window.clearTimeout(navigationTimeoutRef.current);
+        navigationTimeoutRef.current = null;
+      }
       desiredHistoryRef.current = "replace";
       desiredUrlRef.current = `${window.location.pathname}${window.location.search}`;
       const historyQuery = new URLSearchParams(window.location.search)
@@ -137,7 +168,12 @@ export function BlogFilterBar({
     };
 
     window.addEventListener("popstate", handleHistoryNavigation);
-    return () => window.removeEventListener("popstate", handleHistoryNavigation);
+    return () => {
+      window.removeEventListener("popstate", handleHistoryNavigation);
+      if (navigationTimeoutRef.current !== null) {
+        window.clearTimeout(navigationTimeoutRef.current);
+      }
+    };
   }, []);
 
   useEffect(() => {
