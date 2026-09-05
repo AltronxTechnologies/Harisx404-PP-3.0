@@ -262,7 +262,7 @@ export function BlogFilterBar({
             maxLength={100}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search articles…"
-            className="h-8 w-full rounded-lg border border-neutral-500 bg-white pl-9 pr-9 font-mono text-[11px] text-text-primary outline-none transition-colors placeholder:text-neutral-400 hover:border-neutral-600 active:border-neutral-600 focus:border-text-secondary focus-visible:ring-2 focus-visible:ring-neutral-300/60 dark:border-white/35 dark:bg-white/[0.03] dark:placeholder:text-white/30 dark:hover:border-white/50 dark:active:border-white/50 dark:focus-visible:ring-white/20 [&::-webkit-search-cancel-button]:hidden"
+            className="h-8 w-full rounded-lg border border-border-primary bg-transparent pl-9 pr-9 font-mono text-[11px] text-text-primary outline-none transition-colors placeholder:text-neutral-400 hover:border-neutral-400/70 active:border-neutral-400/70 focus:border-text-secondary focus-visible:ring-2 focus-visible:ring-neutral-300/60 dark:placeholder:text-white/30 dark:hover:border-white/25 dark:active:border-white/25 dark:focus-visible:ring-white/20 [&::-webkit-search-cancel-button]:hidden"
           />
           {query && (
             <button

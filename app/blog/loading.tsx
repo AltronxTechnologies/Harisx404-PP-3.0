@@ -36,7 +36,7 @@ export default function BlogLoading() {
           <div className="relative mx-auto flex max-w-3xl animate-pulse flex-col items-center text-center motion-reduce:animate-none">
             <div className="h-4 w-28 rounded bg-border-primary/50" />
             <div className="mt-4 h-[92px] w-full max-w-md rounded bg-border-primary/40 sm:h-[46px] md:h-14" />
-            <div className="mt-4 h-[72px] w-full max-w-2xl rounded bg-border-primary/30 max-[374px]:h-24 sm:h-12" />
+            <div className="mt-4 h-[72px] w-full max-w-2xl rounded bg-border-primary/30 sm:h-12" />
           </div>
         </div>
       </GridWrapper>
@@ -52,7 +52,7 @@ export default function BlogLoading() {
         </div>
       </div>
 
-      <div className="mt-10 space-y-14 px-2 sm:px-4">
+      <div className="mt-6 space-y-14 px-2 sm:px-4">
         {firstPage && (
           <section>
             <div className="mb-6 h-[16.5px] w-36 animate-pulse rounded bg-border-primary/40 motion-reduce:animate-none" />

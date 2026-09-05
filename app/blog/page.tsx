@@ -360,7 +360,7 @@ export default async function BlogPage({
         </p>
 
         <div className={compact ? "lg:hidden" : "hidden lg:block"}>
-        <div className="mt-10 space-y-14 px-2 sm:px-4">
+        <div className="mt-6 space-y-14 px-2 sm:px-4">
           {featuredPost && (
             <section aria-labelledby="featured-article-heading">
               <div className="mb-6 flex items-center justify-between gap-4">
