@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+import { permanentRedirect } from "next/navigation";
 
 /**
  * Legacy route: `/blog/category/<name>`.
@@ -10,9 +10,8 @@ import { redirect } from "next/navigation";
  * `/blog/category/<anything>` as a real page.
  *
  * Rather than delete it (which would 404 any existing inbound link or old
- * search result), redirect to the canonical filtered view. `redirect()` issues
- * a 307 in a Server Component, so crawlers follow it and consolidate ranking
- * onto `/blog`.
+ * search result), permanently redirect to the canonical filtered view so
+ * crawlers consolidate ranking onto `/blog`.
  */
 export default async function CategoryPage({
   params,
@@ -21,5 +20,5 @@ export default async function CategoryPage({
 }) {
   const { category } = await params;
   const slug = (category ?? "").toLowerCase();
-  redirect(slug ? `/blog?category=${encodeURIComponent(slug)}` : "/blog");
+  permanentRedirect(slug ? `/blog?category=${encodeURIComponent(slug)}` : "/blog");
 }

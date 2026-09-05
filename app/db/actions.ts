@@ -3,6 +3,8 @@
 import { createSupabaseAdminClient } from "../lib/supabase/server";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
+import { headers } from "next/headers";
+import { createHash } from "crypto";
 import { v4 as uuidv4 } from "uuid";
 import { type CurrentlyPlaying, getCurrentlyPlaying as getSpotifyCurrentlyPlaying } from "./spotify";
 
@@ -73,31 +75,26 @@ export async function incrementViewCount(slug: string) {
 
 // Get all reaction counts for an article
 export async function getArticleReactions(slug: string) {
-  const supabase = await createSupabaseAdminClient();
-  
+  const reactionCounts: Record<string, number> = Object.fromEntries(
+    VALID_REACTIONS.map((type) => [type, 0]),
+  );
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return null;
+
   try {
-    const { data } = await supabase
-      .from('article_reactions')
-      .select('reaction_type, count')
-      .eq('article_slug', slug);
-    
-    // Transform into a more usable format
-    const reactionCounts: Record<string, number> = {};
-    
-    // Initialize with all reaction types at 0
-    VALID_REACTIONS.forEach(type => {
-      reactionCounts[type] = 0;
-    });
-    
-    // Update with actual counts
-    data?.forEach(row => {
+    const supabase = await createSupabaseAdminClient();
+    const { data, error } = await supabase
+      .from("article_reactions")
+      .select("reaction_type, count")
+      .eq("article_slug", slug);
+    if (error) throw error;
+
+    data?.forEach((row) => {
       reactionCounts[row.reaction_type] = row.count;
     });
-    
     return reactionCounts;
   } catch (error) {
-    console.error('Error fetching article reactions:', error);
-    return {};
+    console.error("Error fetching optional article reactions:", error);
+    return null;
   }
 }
 
@@ -117,7 +114,7 @@ export async function getUserReactions(slug: string) {
   }
 
   const visitorId = cookieStore.get("visitor_id")?.value;
-  if (visitorId) {
+  if (visitorId && process.env.SUPABASE_SERVICE_ROLE_KEY) {
     try {
       const supabase = await createSupabaseAdminClient();
       const { data, error } = await supabase
@@ -129,7 +126,9 @@ export async function getUserReactions(slug: string) {
         const storedReactions = data?.map((row) => row.reaction_type) || [];
         return storedReactions;
       }
-    } catch {
+      console.error("Error fetching optional visitor reactions:", error);
+    } catch (error) {
+      console.error("Error fetching optional visitor reactions:", error);
       // Fall through to the legacy cookie until the migration is applied.
     }
   }
@@ -139,10 +138,19 @@ export async function getUserReactions(slug: string) {
 
 // Toggle reaction (add or remove)
 export async function toggleReaction(slug: string, reactionType: ReactionType) {
-  const supabase = await createSupabaseAdminClient();
   const cookieStore = await cookies();
   
   try {
+    if (!VALID_REACTIONS.includes(reactionType) || !slug || slug.length > 200) {
+      return { success: false, message: "Invalid reaction request." };
+    }
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      return {
+        success: false,
+        message: "Reactions are temporarily unavailable. Please try again later.",
+      };
+    }
+    const supabase = await createSupabaseAdminClient();
     let visitorId = cookieStore.get('visitor_id')?.value;
     if (!visitorId) {
       visitorId = uuidv4();
@@ -177,6 +185,20 @@ export async function toggleReaction(slug: string, reactionType: ReactionType) {
         .maybeSingle();
     if (visitorReactionError) throw visitorReactionError;
     const hasReacted = Boolean(existingVisitorReaction);
+
+    const headerStore = await headers();
+    const requestSignal =
+      headerStore.get("cf-connecting-ip") ||
+      headerStore.get("x-vercel-forwarded-for")?.split(",")[0]?.trim() ||
+      headerStore.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      headerStore.get("x-real-ip") ||
+      "unavailable";
+    const scopedSignal = requestSignal === "unavailable"
+      ? `visitor:${visitorId}`
+      : requestSignal;
+    const signalHash = createHash("sha256")
+      .update(`${process.env.SUPABASE_SERVICE_ROLE_KEY}:${scopedSignal}`)
+      .digest("hex");
     
     const { data: adjustedCount, error: reactionError } = await supabase.rpc(
       "adjust_article_reaction",
@@ -184,6 +206,7 @@ export async function toggleReaction(slug: string, reactionType: ReactionType) {
         target_slug: slug,
         target_type: reactionType,
         target_visitor: visitorId,
+        target_signal_hash: signalHash,
         should_add: !hasReacted,
       },
     );
@@ -228,9 +251,16 @@ export async function toggleReaction(slug: string, reactionType: ReactionType) {
     };
   } catch (error) {
     console.error('Error toggling reaction:', error);
+    const errorMessage =
+      error && typeof error === "object" && "message" in error
+        ? String(error.message)
+        : "";
+    const isRateLimited = errorMessage.includes("Reaction rate limit exceeded");
     return { 
       success: false, 
-      message: 'Error processing reaction' 
+      message: isRateLimited
+        ? "You're reacting too quickly. Please wait a few minutes and try again."
+        : "We couldn't save your reaction. Please try again.",
     };
   }
 }

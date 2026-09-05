@@ -15,7 +15,13 @@ const blogSchema = z.object({
   summary: z.string().optional(),
   content: z.string().min(1, "Content is required"),
   status: z.enum(["draft", "published"]),
-  cover_image_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  cover_image_url: z
+    .string()
+    .refine(
+      (value) => !value || value.startsWith("/blog/") || /^https:\/\//.test(value),
+      "Must be a local Blog image or HTTPS URL",
+    )
+    .optional(),
   cover_image_id: z.string().optional(),
   canonical_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   published_at: z.string().optional(),
@@ -25,7 +31,15 @@ const blogSchema = z.object({
 type BlogFormValues = z.infer<typeof blogSchema>;
 
 interface BlogFormProps {
-  initialData?: BlogFormValues & { id?: string };
+  initialData?: BlogFormValues & { id?: string; updated_at?: string };
+}
+
+function toLocalDateTime(value?: string) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  const offset = date.getTimezoneOffset() * 60_000;
+  return new Date(date.getTime() - offset).toISOString().slice(0, 16);
 }
 
 export function BlogForm({ initialData }: BlogFormProps) {
@@ -44,7 +58,10 @@ export function BlogForm({ initialData }: BlogFormProps) {
     formState: { errors },
   } = useForm<BlogFormValues>({
     resolver: zodResolver(blogSchema),
-    defaultValues: initialData || {
+    defaultValues: initialData ? {
+      ...initialData,
+      published_at: toLocalDateTime(initialData.published_at),
+    } : {
       title: "",
       slug: "",
       summary: "",
@@ -78,7 +95,23 @@ export function BlogForm({ initialData }: BlogFormProps) {
       const res = await fetch("/api/admin/blogs", {
         method: initialData?.id ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(initialData?.id ? { id: initialData.id, ...data } : data),
+        body: JSON.stringify(
+          initialData?.id
+            ? {
+                id: initialData.id,
+                updated_at: initialData.updated_at,
+                ...data,
+                published_at: data.published_at
+                  ? new Date(data.published_at).toISOString()
+                  : "",
+              }
+            : {
+                ...data,
+                published_at: data.published_at
+                  ? new Date(data.published_at).toISOString()
+                  : "",
+              },
+        ),
       });
 
       if (!res.ok) {

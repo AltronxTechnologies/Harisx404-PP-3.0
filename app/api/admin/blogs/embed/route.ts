@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { generateEmbedding } from '@/app/lib/gemini';
-import createSupabaseServerClient from '@/app/lib/supabase/server';
+import createSupabaseServerClient, { createSupabaseAdminClient } from '@/app/lib/supabase/server';
 
 export async function POST(request: Request) {
   try {
@@ -11,9 +11,14 @@ export async function POST(request: Request) {
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+    if (!adminEmail || user.email?.toLowerCase() !== adminEmail) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+    const admin = await createSupabaseAdminClient();
 
     // Get all blog posts that don't have an embedding
-    const { data: posts, error: fetchError } = await supabase
+    const { data: posts, error: fetchError } = await admin
       .from('blog_posts')
       .select('id, title, summary, content')
       .is('content_embedding', null);
@@ -45,7 +50,7 @@ export async function POST(request: Request) {
         const embedding = await generateEmbedding(truncatedText);
         const vectorString = `[${embedding.join(',')}]`;
 
-        const { error: updateError } = await supabase
+        const { error: updateError } = await admin
           .from('blog_posts')
           .update({ content_embedding: vectorString })
           .eq('id', post.id);

@@ -90,9 +90,20 @@ const runtime =
     ? { ...jsxRuntime, development: false }
     : { ...jsxDevRuntime, development: true };
 
+function replaceUnavailableCodePenEmbeds(code: string) {
+  return code.replace(
+    /<iframe\b(?=[^>]*\bsrc=["']https:\/\/codepen\.io\/([^/"']+)\/embed\/(?:preview\/)?([^?"']+)[^"']*["'])[^>]*>[\s\S]*?<\/iframe>/gi,
+    (_match, author: string, penId: string) =>
+      `[Open this interactive example on CodePen](https://codepen.io/${author}/pen/${penId})`,
+  );
+}
+
 export const MDXContent = async ({ code, components }: MDXProps) => {
   try {
-    const { default: Content } = await evaluate(code, runtime as any);
+    const { default: Content } = await evaluate(
+      replaceUnavailableCodePenEmbeds(code),
+      runtime as any,
+    );
     return (
       <Content
         components={{ ...serverComponentsMap, ...components } as any}

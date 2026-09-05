@@ -52,7 +52,7 @@ export default function BlogLoading() {
         </div>
       </div>
 
-      <div className="mt-14 space-y-14 px-2 sm:px-4">
+      <div className="mt-10 space-y-14 px-2 sm:px-4">
         {firstPage && (
           <section>
             <div className="mb-6 h-[16.5px] w-36 animate-pulse rounded bg-border-primary/40 motion-reduce:animate-none" />
@@ -78,7 +78,7 @@ export default function BlogLoading() {
           <div className="mb-6 border-b border-border-primary pb-4">
             <div className="h-3 w-32 animate-pulse rounded bg-border-primary/40 motion-reduce:animate-none" />
           </div>
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 9 }, (_, index) => (
               <div
                 key={index}

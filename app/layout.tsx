@@ -53,7 +53,7 @@ const websiteJsonLd = {
     "@type": "SearchAction",
     target: {
       "@type": "EntryPoint",
-      urlTemplate: `${siteMetadata.siteUrl}/blog?category={search_term_string}`,
+      urlTemplate: `${siteMetadata.siteUrl}/blog?q={search_term_string}`,
     },
     "query-input": "required name=search_term_string",
   },
@@ -133,11 +133,11 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-          <main
-          className={cx(
-            "relative flex flex-1 flex-col overflow-x-clip border-x border-border-primary/50",
-          )}
-        >
+          <div
+            className={cx(
+              "relative flex flex-1 flex-col overflow-x-clip border-x border-border-primary/50",
+            )}
+          >
           <a
             href="#main-content"
             className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:border focus:border-border-primary focus:bg-bg-primary focus:px-4 focus:py-2 focus:font-mono focus:text-xs focus:text-text-primary"
@@ -145,15 +145,18 @@ export default function RootLayout({
             Skip to content
           </a>
           <Navbar />
-          <div className="grid flex-1 grid-cols-[14px_minmax(0,1fr)_14px] sm:grid-cols-[20px_minmax(0,1fr)_20px] lg:grid-cols-[32px_minmax(0,1fr)_32px]">
+          <div className="grid flex-1 grid-cols-[14px_minmax(0,1fr)_14px] max-[359px]:grid-cols-[10px_minmax(0,1fr)_10px] sm:grid-cols-[20px_minmax(0,1fr)_20px] lg:grid-cols-[32px_minmax(0,1fr)_32px]">
             <div className="block w-full border-r border-border-primary opacity-75 [background-image:linear-gradient(45deg,theme(colors.border-primary)_12.50%,transparent_12.50%,transparent_50%,theme(colors.border-primary)_50%,theme(colors.border-primary)_62.50%,transparent_62.50%,transparent_100%)] [background-size:5px_5px]"></div>
-            <div id="main-content" className="relative col-span-1 min-w-0 px-2 pt-16 sm:px-3 sm:pt-20 lg:px-0">
+            <main
+              id="main-content"
+              className="relative col-span-1 min-w-0 px-2 pt-16 sm:px-3 sm:pt-20 lg:px-0"
+            >
               {children}
-            </div>
+            </main>
             <div className="block w-full border-l border-border-primary opacity-75 [background-image:linear-gradient(45deg,theme(colors.border-primary)_12.50%,transparent_12.50%,transparent_50%,theme(colors.border-primary)_50%,theme(colors.border-primary)_62.50%,transparent_62.50%,transparent_100%)] [background-size:5px_5px]"></div>
           </div>
           <Footer />
-        </main>
+        </div>
         <ChatbotWidget />
         </ThemeProvider>
       </body>

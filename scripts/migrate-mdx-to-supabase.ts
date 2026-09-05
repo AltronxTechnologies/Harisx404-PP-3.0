@@ -43,10 +43,15 @@ async function migrate() {
     const title = frontmatter.title || slug;
     const summary = frontmatter.summary || '';
     const publishedAt = frontmatter.publishedAt ? new Date(frontmatter.publishedAt).toISOString() : null;
-    const coverImageUrl = frontmatter.image || null;
+    const imageName = frontmatter.imageName || frontmatter.image;
+    const coverImageUrl = imageName
+      ? imageName.startsWith("http") || imageName.startsWith("/")
+        ? imageName
+        : `/blog/${imageName}`
+      : null;
     
     // The previous site hardcoded author/status in Velite, let's make it published
-    const status = 'published';
+    const status = frontmatter.draft === true ? 'draft' : 'published';
 
     console.log(`Migrating: ${slug}...`);
 
@@ -58,8 +63,9 @@ async function migrate() {
         summary,
         content,
         published_at: publishedAt,
-        cover_image_url: coverImageUrl,
-        status,
+      cover_image_url: coverImageUrl,
+      status,
+      reading_time_minutes: Math.max(1, Math.ceil(content.trim().split(/\s+/).length / 200)),
         updated_at: new Date().toISOString()
       }, { onConflict: 'slug' });
 

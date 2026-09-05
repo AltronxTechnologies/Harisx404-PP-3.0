@@ -1,9 +1,12 @@
 import type { MetadataRoute } from "next";
-import { fetchAndSortBlogPosts, fetchProjects } from "@/app/lib/utils";
+import { fetchProjects } from "@/app/lib/utils";
+import { fetchBlogIndexPosts } from "@/app/blog/data";
 import { siteMetadata } from "@/app/data/siteMetadata";
 
+export const revalidate = 60;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const posts = await fetchAndSortBlogPosts();
+  const posts = await fetchBlogIndexPosts();
   const projects = await fetchProjects();
   
   const blogUrls = posts.map((post) => ({

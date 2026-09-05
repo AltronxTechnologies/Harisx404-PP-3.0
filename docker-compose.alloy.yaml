@@ -14,6 +14,7 @@ services:
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}
       SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
       GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY:-}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-itsharis.tech@gmail.com}
     command: bash -lc "bash .alloy/populate-env.sh && set -a && . ./.env.local && set +a && npm ci --no-audit --no-fund && npm run dev -- --hostname 0.0.0.0 --port 3000"
     restart: unless-stopped
 

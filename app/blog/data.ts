@@ -3,10 +3,10 @@ import "server-only";
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
-import readingDuration from "reading-duration";
 import { unstable_cache } from "next/cache";
 import { getPublicSupabase } from "@/app/lib/supabase/safe";
 import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
+import { formatReadingTime } from "@/app/lib/reading-time";
 
 export type ReactionType = "like" | "heart" | "celebrate" | "insightful";
 
@@ -19,6 +19,11 @@ type ReactionRow = {
   article_slug: string;
   reaction_type: string;
   count: number;
+};
+
+type ReactionRowsResult = {
+  available: boolean;
+  rows: ReactionRow[];
 };
 
 export type BlogIndexPost = {
@@ -76,6 +81,10 @@ function getLocalMetadata() {
   return localMetadataCache;
 }
 
+export function isLocalBlogDraft(slug: string) {
+  return getLocalMetadata().get(slug)?.draft === true;
+}
+
 function localImagePath(imageName: string) {
   if (!imageName) return "";
   if (imageName.startsWith("//")) return "";
@@ -128,22 +137,21 @@ const loadBlogIndexPosts = async (): Promise<BlogIndexPost[]> => {
   }
 
   const localMetadata = getLocalMetadata();
-  const missingContentSlugs = (data || [])
+  const contentSlugs = (data || [])
     .filter((post) => {
       const minutes = Number(post.reading_time_minutes);
       return (
-        !localMetadata.has(post.slug) &&
-        (!(Number.isFinite(minutes) && minutes > 0) ||
-          (post.summary || "").trim().length < 220)
+        (post.summary || "").trim().length < 220 ||
+        !(Number.isFinite(minutes) && minutes > 0)
       );
     })
     .map((post) => post.slug);
   const contentBySlug = new Map<string, string>();
-  if (missingContentSlugs.length > 0) {
+  if (contentSlugs.length > 0) {
     const { data: contentRows, error: contentError } = await supabase
       .from("blog_posts")
       .select("slug, content")
-      .in("slug", missingContentSlugs);
+      .in("slug", contentSlugs);
     if (contentError) {
       console.error("Unable to calculate reading time for new Blog posts.", contentError.message);
     } else {
@@ -163,7 +171,7 @@ const loadBlogIndexPosts = async (): Promise<BlogIndexPost[]> => {
         ? joinedCategories
         : local?.categories || [];
       const minutes = Number(post.reading_time_minutes);
-      const sourceContent = local?.content || contentBySlug.get(post.slug) || "";
+      const sourceContent = contentBySlug.get(post.slug) || local?.content || "";
 
       return {
         slug: post.slug,
@@ -174,10 +182,7 @@ const loadBlogIndexPosts = async (): Promise<BlogIndexPost[]> => {
           Number.isFinite(minutes) && minutes > 0
             ? `${minutes} min read`
             : local || contentBySlug.has(post.slug)
-              ? readingDuration(sourceContent, {
-                wordsPerMinute: 200,
-                emoji: false,
-                })
+              ? formatReadingTime(sourceContent)
               : "Article",
         imageName: localImagePath(post.cover_image_url || local?.imageName || ""),
         categories: categories
@@ -197,20 +202,28 @@ const loadBlogIndexPosts = async (): Promise<BlogIndexPost[]> => {
 export const fetchBlogIndexPosts = unstable_cache(
   loadBlogIndexPosts,
   ["blog-index-posts"],
-  { revalidate: 3600, tags: ["blog-index"] },
+  { revalidate: 60, tags: ["blog-index"] },
 );
 
 const fetchReactionRows = unstable_cache(
-  async (): Promise<ReactionRow[]> => {
-    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return [];
+  async (slugs: string[]): Promise<ReactionRowsResult> => {
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      return { available: false, rows: [] };
+    }
     try {
       const supabase = await createSupabaseAdminClient();
       const { data, error } = await supabase
         .from("article_reactions")
-        .select("article_slug, reaction_type, count");
-      return error ? [] : data || [];
-    } catch {
-      return [];
+        .select("article_slug, reaction_type, count")
+        .in("article_slug", slugs);
+      if (error) {
+        console.error("Unable to load optional Blog reaction summaries.", error);
+        return { available: false, rows: [] };
+      }
+      return { available: true, rows: data || [] };
+    } catch (error) {
+      console.error("Unable to load optional Blog reaction summaries.", error);
+      return { available: false, rows: [] };
     }
   },
   ["blog-reaction-summaries"],
@@ -220,21 +233,28 @@ const fetchReactionRows = unstable_cache(
 export async function fetchBlogReactionSummaries(slugs: string[]) {
   const summaries: Record<string, ReactionSummary> = {};
   if (slugs.length === 0) return summaries;
-  const visibleSlugs = new Set(slugs);
-  const data = await fetchReactionRows();
-  const validTypes: ReactionType[] = ["like", "heart", "celebrate", "insightful"];
-  data.forEach((row) => {
-      if (!visibleSlugs.has(row.article_slug)) return;
-      if (!validTypes.includes(row.reaction_type as ReactionType)) return;
-      const count = Math.max(0, Number(row.count) || 0);
-      if (count === 0) return;
-      const summary = summaries[row.article_slug] || {
+  const visibleSlugs = Array.from(new Set(slugs));
+  const result = await fetchReactionRows(visibleSlugs);
+  if (result.available) {
+    visibleSlugs.forEach((slug) => {
+      summaries[slug] = {
         total: 0,
         counts: { like: 0, heart: 0, celebrate: 0, insightful: 0 },
       };
-      summary.total += count;
-      summary.counts[row.reaction_type as ReactionType] = count;
-      summaries[row.article_slug] = summary;
+    });
+  }
+  const validTypes: ReactionType[] = ["like", "heart", "celebrate", "insightful"];
+  result.rows.forEach((row) => {
+    if (!validTypes.includes(row.reaction_type as ReactionType)) return;
+    const count = Math.max(0, Number(row.count) || 0);
+    if (count === 0) return;
+    const summary = summaries[row.article_slug] || {
+      total: 0,
+      counts: { like: 0, heart: 0, celebrate: 0, insightful: 0 },
+    };
+    summary.total += count;
+    summary.counts[row.reaction_type as ReactionType] = count;
+    summaries[row.article_slug] = summary;
   });
 
   return summaries;

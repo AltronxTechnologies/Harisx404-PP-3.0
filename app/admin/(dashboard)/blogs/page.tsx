@@ -1,9 +1,9 @@
-import createSupabaseServerClient from "@/app/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 import Link from "next/link";
 import { Plus, Edit, Trash2 } from "lucide-react";
 
 export default async function AdminBlogsPage() {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseAdminClient();
   const { data: blogs } = await supabase
     .from("blog_posts")
     .select("id, title, slug, status, published_at")

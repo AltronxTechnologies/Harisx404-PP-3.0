@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import readingDuration from "reading-duration";
 import { Metadata, ResolvingMetadata } from "next";
 import { MDXContent } from "@/app/components/mdx";
 import { RelatedPostCard } from "@/app/components/blog/RelatedPostCard";
@@ -14,21 +13,23 @@ import { TableOfContents } from "@/app/components/TableOfContents";
 import {
   getRelatedBlogPosts,
   getBlogPostBySlug,
-  fetchAndSortBlogPosts,
   formatDate,
 } from "@/app/lib/utils";
 import { optimizeImageUrl } from "@/app/lib/image-utils";
+import { fetchBlogIndexPosts, isLocalBlogDraft } from "@/app/blog/data";
+import { getBlogImageSrc } from "@/app/components/blog/blogImage";
+import { formatReadingTime } from "@/app/lib/reading-time";
 
 interface BlogPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export const revalidate = 3600;
+export const revalidate = 60;
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
   try {
-    const posts = await fetchAndSortBlogPosts();
+    const posts = await fetchBlogIndexPosts();
     return (posts ?? []).map((post) => ({ slug: post.slug }));
   } catch {
     return [];
@@ -45,6 +46,7 @@ function longDate(date: string) {
 
 async function getPostFromParams(params: BlogPageProps["params"]) {
   const { slug } = await params;
+  if (isLocalBlogDraft(slug)) notFound();
   const post = await getBlogPostBySlug(slug);
   if (!post) notFound();
   return post;
@@ -52,20 +54,19 @@ async function getPostFromParams(params: BlogPageProps["params"]) {
 
 export default async function BlogPage({ params }: BlogPageProps) {
   const post = await getPostFromParams(params);
-  const similarPosts = await getRelatedBlogPosts(post);
+  const similarPosts = (await getRelatedBlogPosts(post)).filter(
+    (related) => !isLocalBlogDraft(related.slug),
+  );
 
-  const readingTime = readingDuration(post.code, {
-    wordsPerMinute: 200,
-    emoji: false,
-  });
+  const readingTime = post.readingTimeMinutes
+    ? `${post.readingTimeMinutes} min read`
+    : formatReadingTime(post.code);
 
+  const normalizedCover = post.imageName.startsWith("http") || post.imageName.startsWith("/")
+    ? post.imageName
+    : `/blog/${post.imageName}`;
   const coverSrc = post.imageName
-    ? optimizeImageUrl(
-        post.imageName.startsWith("http") || post.imageName.startsWith("/")
-          ? post.imageName
-          : `/blog/${post.imageName}`,
-        1600,
-      )
+    ? getBlogImageSrc(optimizeImageUrl(normalizedCover, 1600)) || ""
     : "";
 
   return (
@@ -251,6 +252,9 @@ export async function generateMetadata(
   return {
     title: post.title,
     description: post.summary,
+    alternates: {
+      canonical: post.canonicalUrl || `/blog/${post.slug}`,
+    },
     openGraph: {
       title: post.title,
       description: post.summary,

@@ -1,6 +1,7 @@
-import { fetchAndSortBlogPosts } from "@/app/lib/utils";
+import { fetchBlogIndexPosts } from "@/app/blog/data";
+import { siteMetadata } from "@/app/data/siteMetadata";
 
-export const revalidate = 3600;
+export const revalidate = 60;
 
 function escapeXml(value: string): string {
   return value
@@ -12,9 +13,8 @@ function escapeXml(value: string): string {
 }
 
 export async function GET() {
-  const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL || "https://harisx404.dev";
-  const posts = await fetchAndSortBlogPosts();
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || siteMetadata.siteUrl;
+  const posts = await fetchBlogIndexPosts();
 
   const items = posts
     .map((post) => {

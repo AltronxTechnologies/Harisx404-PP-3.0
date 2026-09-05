@@ -1,16 +1,20 @@
-import type { ReactNode } from "react";
+import type { ReactNode, Ref } from "react";
 
 export function BlogStatePanel({
   kicker,
   title,
   description,
   headingLevel = "h2",
+  headingRef,
+  headingTabIndex,
   children,
 }: {
   kicker: string;
   title: ReactNode;
   description: string;
   headingLevel?: "h1" | "h2";
+  headingRef?: Ref<HTMLHeadingElement>;
+  headingTabIndex?: number;
   children?: ReactNode;
 }) {
   const Heading = headingLevel;
@@ -20,7 +24,11 @@ export function BlogStatePanel({
       <p className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
         {kicker}
       </p>
-      <Heading className="heading-glow mx-auto mt-4 max-w-xl text-balance [font-family:var(--font-instrument-serif),serif] text-[46px] font-medium leading-none tracking-tight text-text-primary md:text-[56px] md:tracking-[-1.5px]">
+      <Heading
+        ref={headingRef}
+        tabIndex={headingTabIndex}
+        className="heading-glow mx-auto mt-4 max-w-xl text-balance [font-family:var(--font-instrument-serif),serif] text-[46px] font-medium leading-none tracking-tight text-text-primary focus:outline-none md:text-[56px] md:tracking-[-1.5px]"
+      >
         {title}
       </Heading>
       <p className="mx-auto mt-4 max-w-xl text-pretty text-[15px] leading-6 text-text-secondary">

@@ -90,10 +90,11 @@ async function processTags(categories, blogId) {
     }
 
     // Link tag to blog
-    await supabase.from('blog_tags').insert({
+    const { error: linkError } = await supabase.from('blog_post_tags').upsert({
       blog_post_id: blogId,
       tag_id: tagId
-    }).select().maybeSingle(); // ignore uniqueness errors gracefully
+    }, { onConflict: 'blog_post_id,tag_id', ignoreDuplicates: true });
+    if (linkError) throw linkError;
   }
 }
 
@@ -115,7 +116,7 @@ async function migrateBlogs() {
     let coverImageId = null;
     let coverImageUrl = null;
     if (frontmatter.imageName) {
-      const imagePath = path.join(process.cwd(), 'public', 'images', 'blog', frontmatter.imageName);
+      const imagePath = path.join(process.cwd(), 'public', 'blog', frontmatter.imageName);
       if (fs.existsSync(imagePath)) {
         console.log(`  Uploading cover image: ${frontmatter.imageName}`);
         const result = await uploadToCloudinary(imagePath, 'portfolio/blog');
@@ -134,7 +135,8 @@ async function migrateBlogs() {
       summary: frontmatter.summary || '',
       content: content,
       published_at: frontmatter.publishedAt ? new Date(frontmatter.publishedAt).toISOString() : null,
-      status: 'published', // existing content is published
+      status: frontmatter.draft === true ? 'draft' : 'published',
+      reading_time_minutes: Math.max(1, Math.ceil(content.trim().split(/\s+/).length / 200)),
       cover_image_id: coverImageId,
       cover_image_url: coverImageUrl,
     };

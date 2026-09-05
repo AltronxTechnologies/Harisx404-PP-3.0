@@ -22,6 +22,26 @@ const config = {
         protocol: "https",
         hostname: "cdn.hashnode.com",
       },
+      {
+        protocol: "https",
+        hostname: "media.giphy.com",
+      },
+      {
+        protocol: "https",
+        hostname: "dev-to-uploads.s3.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "badges.pufler.dev",
+      },
+      {
+        protocol: "https",
+        hostname: "img.shields.io",
+      },
+      {
+        protocol: "https",
+        hostname: "framerusercontent.com",
+      },
     ],
   },
   async redirects() {

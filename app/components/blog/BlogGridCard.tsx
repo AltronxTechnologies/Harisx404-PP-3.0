@@ -32,6 +32,11 @@ export function BlogGridCard({
   return (
     <Link
       href={`/blog/${slug}`}
+      aria-label={
+        reactionSummary
+          ? `Read ${title}. ${reactionSummary.total} reactions.`
+          : `Read ${title}.`
+      }
       className="group flex h-full flex-col rounded-3xl border border-border-primary bg-white p-3 transition-all hover:border-neutral-400/70 hover:shadow-lg dark:bg-white/[0.02] dark:hover:border-white/25"
     >
       <div className="relative aspect-[16/11] overflow-hidden rounded-2xl bg-slate-900">
@@ -41,7 +46,7 @@ export function BlogGridCard({
             alt=""
             aria-hidden
             fill
-            sizes="(max-width: 767px) calc(100vw - 88px), (max-width: 1023px) calc(50vw - 80px), 380px"
+            sizes="(max-width: 639px) calc(100vw - 88px), (max-width: 1023px) calc(50vw - 56px), 380px"
             className="object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
           />
         ) : (
@@ -68,7 +73,7 @@ export function BlogGridCard({
             <ReactionSummaryPill summary={reactionSummary} />
           </div>
           <span className="inline-flex shrink-0 items-center gap-2 font-mono text-[11px] uppercase leading-none tracking-widest text-text-secondary transition-colors group-hover:text-text-primary">
-            Read article
+            <span>Read article</span>
             <ArticleCardArrow />
           </span>
         </div>

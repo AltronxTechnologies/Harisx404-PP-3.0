@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { BlogFilterBar } from "@/app/components/blog/BlogFilterBar";
 import { BlogGridCard } from "@/app/components/blog/BlogGridCard";
 import { FeaturedBlogCard } from "@/app/components/blog/FeaturedBlogCard";
-import { BlogViewportMode } from "@/app/components/blog/BlogViewportMode";
 import { BlogStatePanel } from "@/app/components/blog/BlogStatePanel";
 import { GridWrapper } from "@/app/components/GridWrapper";
 import { PaperHeroTexture } from "@/app/components/PaperHeroTexture";
@@ -14,7 +13,7 @@ import {
   fetchBlogReactionSummaries,
 } from "@/app/blog/data";
 
-export const revalidate = 3600;
+export const revalidate = 60;
 
 const DESKTOP_FIRST_PAGE_POSTS = 10;
 const DESKTOP_LATER_PAGE_POSTS = 9;
@@ -22,7 +21,7 @@ const COMPACT_FIRST_PAGE_POSTS = 7;
 const COMPACT_LATER_PAGE_POSTS = 8;
 
 const description =
-  "Explore practical deep dives on software engineering, modern web architecture, performance, and security.";
+  "Practical articles on software engineering, web performance, architecture, security, and reliable digital products.";
 
 type BlogSearchParams = {
   category?: string | string[];
@@ -93,7 +92,7 @@ export async function generateMetadata({
   ].filter(Boolean).join(" · ");
   const title = qualifier
     ? `Blog · ${qualifier} | Muhammad Haris`
-    : "Blog | Handpicked Insights - Muhammad Haris";
+    : "Blog | Ideas, clearly explained - Muhammad Haris";
   const categoryPosts = category ? await fetchBlogIndexPosts() : [];
   const validCategory = categoryPosts.some((post) =>
     post.categories.some(
@@ -328,23 +327,22 @@ export default async function BlogPage({
 
   return (
     <div className="relative mt-14">
-      <BlogViewportMode />
       <GridWrapper>
         <div className="relative px-4 xl:px-0">
           <PaperHeroTexture className="-inset-x-2 bottom-0 top-[-128px] sm:-inset-x-3 sm:top-[-144px] md:top-[-176px] lg:inset-x-0" />
           <header className="relative mx-auto max-w-3xl text-center">
             <p className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
-              The Pensieve
+              The Blog
             </p>
             <h1 className="heading-glow mx-auto mt-4 max-w-xl text-balance [font-family:var(--font-instrument-serif),serif] text-[46px] font-medium leading-none tracking-tight text-text-primary md:text-[56px] md:tracking-[-1.5px]">
-              Handpicked{" "}
+              Ideas, clearly{" "}
               <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
-                Insights
+                explained.
               </span>
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-pretty text-[15px] leading-6 text-text-secondary">
-              Practical notes on building thoughtful software, from resilient
-              interfaces and web performance to architecture and security.
+              Practical articles on software engineering, web performance,
+              architecture, security, and reliable digital products.
             </p>
           </header>
         </div>
@@ -353,8 +351,7 @@ export default async function BlogPage({
       <section aria-label="Browse articles" className="mt-14">
         <BlogFilterBar
           categories={categories}
-          invalidCategory={ambiguousCategory}
-          compact={compact}
+          invalidCategory={hasInvalidCategory}
           initialQuery={queryParam}
         />
         <p className="sr-only" role="status" aria-live="polite">
@@ -363,7 +360,7 @@ export default async function BlogPage({
         </p>
 
         <div className={compact ? "lg:hidden" : "hidden lg:block"}>
-        <div className="mt-14 space-y-14 px-2 sm:px-4">
+        <div className="mt-10 space-y-14 px-2 sm:px-4">
           {featuredPost && (
             <section aria-labelledby="featured-article-heading">
               <div className="mb-6 flex items-center justify-between gap-4">
@@ -411,7 +408,7 @@ export default async function BlogPage({
                   Page {String(currentPage).padStart(2, "0")} / {String(totalPages).padStart(2, "0")}
                 </span>
               </div>
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {latestPosts.map((post, index) => (
                   <BlogGridCard
                     key={post.slug}
@@ -447,49 +444,59 @@ export default async function BlogPage({
 
           {orderedPosts.length > firstPage && (
             <nav aria-label="Blog pages" className="flex flex-col items-center gap-4 pt-2">
-              <div className="flex flex-wrap items-center justify-center gap-2">
+              <div className="grid grid-cols-2 items-center justify-center gap-2 sm:flex sm:flex-wrap">
                 {currentPage === 1 ? (
-                  <span className="inline-flex min-h-8 items-center rounded-full border border-border-primary px-4 font-mono text-[11px] uppercase tracking-widest text-text-secondary opacity-40">
+                  <button
+                    type="button"
+                    disabled
+                    className="order-2 inline-flex min-h-8 w-[88px] items-center justify-center justify-self-end rounded-full border border-border-primary px-4 font-mono text-[11px] uppercase tracking-widest text-text-secondary opacity-40 disabled:cursor-not-allowed sm:order-1"
+                  >
                     Previous
-                  </span>
+                  </button>
                 ) : (
                   <Link
                     prefetch={false}
                     href={pageHref(currentPage - 1, categoryParam, compact, queryParam)}
-                    className="inline-flex min-h-8 items-center rounded-full border border-border-primary px-4 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25"
+                    className="order-2 inline-flex min-h-8 w-[88px] items-center justify-center justify-self-end rounded-full border border-border-primary px-4 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25 sm:order-1"
                   >
                     Previous
                   </Link>
                 )}
-                {paginationItems(currentPage, totalPages).map((item, index) =>
-                  item === "gap" ? (
-                    <span key={`gap-${index}`} aria-hidden className="px-0.5 font-mono text-xs text-text-secondary">…</span>
-                  ) : (
-                    <Link
-                      prefetch={false}
-                      key={item}
-                      href={pageHref(item, categoryParam, compact, queryParam)}
-                      aria-current={item === currentPage ? "page" : undefined}
-                      aria-label={`Page ${item}${item === currentPage ? ", current page" : ""}`}
-                      className={`inline-flex size-8 items-center justify-center rounded-full border font-mono text-xs transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary ${
-                        item === currentPage
-                          ? "border-text-primary bg-text-primary text-bg-primary"
-                          : "border-border-primary text-text-secondary hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 dark:hover:border-white/25 dark:active:border-white/25"
-                      }`}
-                    >
-                      {String(item).padStart(2, "0")}
-                    </Link>
-                  ),
-                )}
+                <div className="order-1 col-span-2 flex items-center justify-center gap-2 sm:order-2">
+                  {paginationItems(currentPage, totalPages).map((item, index) =>
+                    item === "gap" ? (
+                      <span key={`gap-${index}`} aria-hidden className="px-0.5 font-mono text-xs text-text-secondary">…</span>
+                    ) : (
+                      <Link
+                        prefetch={false}
+                        key={item}
+                        href={pageHref(item, categoryParam, compact, queryParam)}
+                        aria-current={item === currentPage ? "page" : undefined}
+                        aria-label={`Page ${item}${item === currentPage ? ", current page" : ""}`}
+                        className={`inline-flex size-8 items-center justify-center rounded-full border font-mono text-xs transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary ${
+                          item === currentPage
+                            ? "border-text-primary bg-text-primary text-bg-primary"
+                            : "border-border-primary text-text-secondary hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 dark:hover:border-white/25 dark:active:border-white/25"
+                        }`}
+                      >
+                        {String(item).padStart(2, "0")}
+                      </Link>
+                    ),
+                  )}
+                </div>
                 {currentPage === totalPages ? (
-                  <span className="inline-flex min-h-8 items-center rounded-full border border-border-primary px-4 font-mono text-[11px] uppercase tracking-widest text-text-secondary opacity-40">
+                  <button
+                    type="button"
+                    disabled
+                    className="order-3 inline-flex min-h-8 w-[88px] items-center justify-center justify-self-start rounded-full border border-border-primary px-4 font-mono text-[11px] uppercase tracking-widest text-text-secondary opacity-40 disabled:cursor-not-allowed"
+                  >
                     Next
-                  </span>
+                  </button>
                 ) : (
                   <Link
                     prefetch={false}
                     href={pageHref(currentPage + 1, categoryParam, compact, queryParam)}
-                    className="inline-flex min-h-8 items-center rounded-full border border-border-primary px-4 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25"
+                    className="order-3 inline-flex min-h-8 w-[88px] items-center justify-center justify-self-start rounded-full border border-border-primary px-4 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25"
                   >
                     Next
                   </Link>

@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   startTransition,
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -14,25 +15,26 @@ import { Rss, Search, X } from "lucide-react";
 interface BlogFilterBarProps {
   categories: string[];
   invalidCategory?: boolean;
-  compact?: boolean;
   initialQuery?: string;
 }
 
 export function BlogFilterBar({
   categories,
   invalidCategory = false,
-  compact = false,
   initialQuery = "",
 }: BlogFilterBarProps) {
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const router = useRouter();
   const activeCategory = invalidCategory
     ? ""
     : searchParams.get("category")?.trim().toLowerCase().slice(0, 80) || "";
   const [query, setQuery] = useState(initialQuery);
-  const previousInitialQuery = useRef(initialQuery);
-  const pendingQuery = useRef<string | null>(null);
-  const syncingFromUrl = useRef(false);
+  const searchTimerRef = useRef<number | null>(null);
+  const desiredUrlRef = useRef<string | null>(null);
+  const navigationInFlightRef = useRef(false);
+  const desiredHistoryRef = useRef<"push" | "replace">("replace");
+  const searchRef = useRef<HTMLInputElement>(null);
   const filtersRef = useRef<HTMLDivElement>(null);
   const [filterEdges, setFilterEdges] = useState({ left: false, right: false });
 
@@ -72,16 +74,65 @@ export function BlogFilterBar({
     });
   };
 
+  const flushNavigation = useCallback(() => {
+    const desiredUrl = desiredUrlRef.current;
+    if (!desiredUrl || navigationInFlightRef.current) return;
+    const currentUrl = `${window.location.pathname}${window.location.search}`;
+    if (desiredUrl === currentUrl) return;
+
+    navigationInFlightRef.current = true;
+    const historyMode = desiredHistoryRef.current;
+    desiredHistoryRef.current = "replace";
+    startTransition(() => {
+      router[historyMode](desiredUrl, { scroll: false });
+    });
+  }, [router]);
+
+  const queueNavigation = useCallback(
+    (
+      update: (params: URLSearchParams) => void,
+      historyMode: "push" | "replace" = "replace",
+    ) => {
+      const source = desiredUrlRef.current
+        ? new URL(desiredUrlRef.current, window.location.origin).search
+        : window.location.search;
+      const params = new URLSearchParams(source);
+      update(params);
+      const urlQuery = params.toString();
+      desiredUrlRef.current = urlQuery ? `${pathname}?${urlQuery}` : pathname;
+      if (historyMode === "push") desiredHistoryRef.current = "push";
+      flushNavigation();
+    },
+    [flushNavigation, pathname],
+  );
+
+  useEffect(() => {
+    const currentUrl = `${window.location.pathname}${window.location.search}`;
+    const completedQueuedNavigation = navigationInFlightRef.current;
+    navigationInFlightRef.current = false;
+
+    if (!desiredUrlRef.current || (!completedQueuedNavigation && desiredUrlRef.current !== currentUrl)) {
+      desiredUrlRef.current = currentUrl;
+      setQuery(initialQuery);
+      return;
+    }
+    if (desiredUrlRef.current !== currentUrl) flushNavigation();
+  }, [flushNavigation, initialQuery, searchParams]);
+
   useEffect(() => {
     const handleHistoryNavigation = () => {
+      if (searchTimerRef.current !== null) {
+        window.clearTimeout(searchTimerRef.current);
+        searchTimerRef.current = null;
+      }
+      navigationInFlightRef.current = false;
+      desiredHistoryRef.current = "replace";
+      desiredUrlRef.current = `${window.location.pathname}${window.location.search}`;
       const historyQuery = new URLSearchParams(window.location.search)
         .get("q")
         ?.trim()
         .replace(/\s+/g, " ")
         .slice(0, 100) || "";
-      pendingQuery.current = null;
-      previousInitialQuery.current = historyQuery;
-      syncingFromUrl.current = true;
       setQuery(historyQuery);
     };
 
@@ -90,61 +141,119 @@ export function BlogFilterBar({
   }, []);
 
   useEffect(() => {
-    if (previousInitialQuery.current === initialQuery) return;
-    previousInitialQuery.current = initialQuery;
-    if (pendingQuery.current === initialQuery) {
-      pendingQuery.current = null;
-      return;
-    }
-    syncingFromUrl.current = true;
-    setQuery(initialQuery);
-  }, [initialQuery]);
+    const media = window.matchMedia("(max-width: 1023px)");
+    const syncViewport = () => {
+      queueNavigation((params) => {
+        const currentlyCompact = params.get("view") === "compact";
+        if (media.matches === currentlyCompact) return;
+        const currentPage = Number.parseInt(params.get("page") || "1", 10);
+        const currentStart = currentlyCompact
+          ? currentPage <= 1 ? 0 : 7 + (currentPage - 2) * 8
+          : currentPage <= 1 ? 0 : 10 + (currentPage - 2) * 9;
+        const targetPage = media.matches
+          ? currentStart < 7 ? 1 : 2 + Math.floor((currentStart - 7) / 8)
+          : currentStart < 10 ? 1 : 2 + Math.floor((currentStart - 10) / 9);
+        if (media.matches) params.set("view", "compact");
+        else params.delete("view");
+        if (targetPage > 1) params.set("page", String(targetPage));
+        else params.delete("page");
+      });
+    };
+
+    syncViewport();
+    media.addEventListener("change", syncViewport);
+    return () => media.removeEventListener("change", syncViewport);
+  }, [queueNavigation]);
 
   useEffect(() => {
-    if (syncingFromUrl.current) {
-      syncingFromUrl.current = false;
-      return;
-    }
     const normalized = query.trim().replace(/\s+/g, " ").slice(0, 100);
     const current = searchParams.get("q") || "";
     if (normalized === current) return;
 
-    const timer = window.setTimeout(() => {
-      const params = new URLSearchParams(searchParams.toString());
-      if (normalized) params.set("q", normalized);
-      else params.delete("q");
-      params.delete("page");
-      pendingQuery.current = normalized;
-      startTransition(() => {
-        const next = params.toString();
-        router.replace(next ? `/blog?${next}` : "/blog", { scroll: false });
+    searchTimerRef.current = window.setTimeout(() => {
+      searchTimerRef.current = null;
+      queueNavigation((params) => {
+        if (normalized) params.set("q", normalized);
+        else params.delete("q");
+        params.delete("page");
       });
     }, 300);
 
-    return () => window.clearTimeout(timer);
-  }, [query, router, searchParams]);
+    return () => {
+      if (searchTimerRef.current !== null) {
+        window.clearTimeout(searchTimerRef.current);
+        searchTimerRef.current = null;
+      }
+    };
+  }, [query, queueNavigation, searchParams]);
 
   const handleCategoryClick = (category: string) => {
-    startTransition(() => {
-      const params = new URLSearchParams(searchParams.toString());
+    if (searchTimerRef.current !== null) {
+      window.clearTimeout(searchTimerRef.current);
+      searchTimerRef.current = null;
+    }
+    queueNavigation((params) => {
+      const normalizedQuery = query.trim().replace(/\s+/g, " ").slice(0, 100);
+      if (normalizedQuery) params.set("q", normalizedQuery);
+      else params.delete("q");
       if (category) params.set("category", category.toLowerCase());
       else params.delete("category");
       params.delete("page");
-      if (compact) params.set("view", "compact");
-      const query = params.toString();
-      router.push(query ? `/blog?${query}` : "/blog");
-    });
+    }, "push");
   };
 
   const filterClass = (selected: boolean) =>
-    `inline-flex h-8 shrink-0 scroll-mx-8 items-center rounded-full border px-3 font-mono text-[11px] uppercase tracking-widest outline-none transition-colors ${
+    `inline-flex h-8 shrink-0 scroll-mx-8 items-center rounded-full border px-3 font-mono text-[11px] uppercase tracking-widest outline-none transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary ${
       selected
-        ? "border-text-primary bg-text-primary text-bg-primary focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-bg-primary"
-        : "border-border-primary text-text-secondary hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:border-neutral-400/70 dark:hover:border-white/25 dark:active:border-white/25 dark:focus-visible:border-white/25"
+        ? "border-text-primary bg-text-primary text-bg-primary"
+        : "border-border-primary text-text-secondary hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 dark:hover:border-white/25 dark:active:border-white/25"
     }`;
 
   return (
     <div className="flex flex-col gap-3 border-y border-border-primary px-2 py-4 sm:px-4 lg:flex-row lg:items-center lg:gap-2">
+      <div className="order-1 flex w-full shrink-0 items-center gap-2 max-[359px]:!w-[calc(100%-24px)] lg:order-2 lg:w-auto">
+        <label htmlFor="blog-search" className="sr-only">Search articles</label>
+        <div className="relative min-w-0 flex-1 lg:w-64 lg:flex-none">
+          <Search
+            aria-hidden
+            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary"
+          />
+          <input
+            ref={searchRef}
+            id="blog-search"
+            type="search"
+            value={query}
+            maxLength={100}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search articles…"
+            className="h-8 w-full rounded-lg border border-neutral-500 bg-white pl-9 pr-9 font-mono text-[11px] text-text-primary outline-none transition-colors placeholder:text-neutral-400 hover:border-neutral-600 active:border-neutral-600 focus:border-text-secondary focus-visible:ring-2 focus-visible:ring-neutral-300/60 dark:border-white/35 dark:bg-white/[0.03] dark:placeholder:text-white/30 dark:hover:border-white/50 dark:active:border-white/50 dark:focus-visible:ring-white/20 [&::-webkit-search-cancel-button]:hidden"
+          />
+          {query && (
+            <button
+              type="button"
+              onClick={() => {
+                setQuery("");
+                searchRef.current?.focus();
+              }}
+              aria-label="Clear article search"
+              className="absolute right-1 top-1/2 flex size-6 -translate-y-1/2 items-center justify-center rounded-full text-text-secondary outline-none transition-colors hover:bg-black/5 hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-text-primary dark:hover:bg-white/10"
+            >
+              <X className="size-3" aria-hidden />
+            </button>
+          )}
+        </div>
+
+        <Link
+          href="/rss.xml"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="RSS Feed (opens in a new tab)"
+          className="inline-flex size-8 items-center justify-center rounded-lg border border-border-primary text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25"
+        >
+          <Rss className="size-4" aria-hidden />
+        </Link>
+      </div>
+
       <div className="relative order-2 min-w-0 flex-1 lg:order-1">
         <div
           ref={filtersRef}
@@ -200,44 +309,6 @@ export function BlogFilterBar({
         />
       </div>
 
-      <div className="order-1 flex w-full shrink-0 items-center gap-2 lg:order-2 lg:w-auto">
-        <label htmlFor="blog-search" className="sr-only">Search articles</label>
-        <div className="relative min-w-0 flex-1 lg:w-64 lg:flex-none">
-          <Search
-            aria-hidden
-            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary"
-          />
-          <input
-            id="blog-search"
-            type="search"
-            value={query}
-            maxLength={100}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search articles…"
-            className="h-8 w-full rounded-lg border border-border-primary bg-white pl-9 pr-8 font-mono text-[11px] text-text-primary outline-none transition-colors placeholder:text-neutral-400 hover:border-neutral-400/70 active:border-neutral-400/70 focus:border-text-secondary focus-visible:ring-2 focus-visible:ring-neutral-300/60 dark:bg-white/[0.03] dark:placeholder:text-white/30 dark:hover:border-white/25 dark:active:border-white/25 dark:focus-visible:ring-white/20 [&::-webkit-search-cancel-button]:hidden"
-          />
-          {query && (
-            <button
-              type="button"
-              onClick={() => setQuery("")}
-              aria-label="Clear article search"
-              className="absolute right-1.5 top-1/2 flex size-5 -translate-y-1/2 items-center justify-center rounded-full text-text-secondary transition-colors hover:bg-black/5 hover:text-text-primary dark:hover:bg-white/10"
-            >
-              <X className="size-3" aria-hidden />
-            </button>
-          )}
-        </div>
-
-        <Link
-          href="/rss.xml"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="RSS Feed (opens in a new tab)"
-          className="inline-flex size-8 items-center justify-center rounded-lg border border-border-primary text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25"
-        >
-          <Rss className="size-4" aria-hidden />
-        </Link>
-      </div>
     </div>
   );
 }

@@ -3,7 +3,8 @@
 
 import { useState, useEffect } from "react";
 import { toggleReaction } from "../db/actions";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { ReactionIcon } from "./ReactionIcon";
 
 type ReactionType = "like" | "heart" | "celebrate" | "insightful";
 
@@ -322,17 +323,13 @@ const REACTION_EMOJIS: Record<
   insightful: (isActive) => <InsightfulSVG isActive={isActive} />,
 };
 
-export function ArticleReactionIcon({
-  type,
-  active = false,
+const AnimatedNumber = ({
+  number,
+  reduceMotion,
 }: {
-  type: ReactionType;
-  active?: boolean;
-}) {
-  return REACTION_EMOJIS[type](active);
-}
-
-const AnimatedNumber = ({ number }: { number: number }) => {
+  number: number;
+  reduceMotion: boolean;
+}) => {
   const [prevNumber, setPrevNumber] = useState(number);
 
   useEffect(() => {
@@ -343,6 +340,10 @@ const AnimatedNumber = ({ number }: { number: number }) => {
   }, [number]);
 
   const isIncrementing = number > prevNumber;
+
+  if (reduceMotion) {
+    return <span className="min-w-[2.5ch] text-center font-mono">{number}</span>;
+  }
 
   return (
     <div className="relative inline-flex h-[1.2em] min-w-[2.5ch] items-center overflow-hidden">
@@ -375,12 +376,15 @@ export default function ArticleReactions({
   const [userReactions, setUserReactions] =
     useState<string[]>(initialUserReactions);
   const [isSubmitting, setIsSubmitting] = useState<ReactionType | null>(null);
+  const [errorMessage, setErrorMessage] = useState("");
+  const reduceMotion = useReducedMotion() ?? false;
 
   const handleReaction = async (type: ReactionType) => {
     // Prevent multiple clicks
     if (isSubmitting) return;
 
     setIsSubmitting(type);
+    setErrorMessage("");
 
     try {
       // Optimistic UI update
@@ -410,7 +414,14 @@ export default function ArticleReactions({
         setUserReactions(result.userReactions);
       } else {
         // If there was an error, revert optimistic update
-        console.error("Error toggling reaction");
+        const message =
+          "message" in result
+            ? result.message
+            : "We couldn't save your reaction. Please try again.";
+        console.error("Error toggling reaction", message);
+        setErrorMessage(
+          message || "We couldn't save your reaction. Please try again.",
+        );
 
         // Revert optimistic update
         if (hasReacted) {
@@ -426,6 +437,7 @@ export default function ArticleReactions({
       }
     } catch (error) {
       console.error("Error handling reaction:", error);
+      setErrorMessage("We couldn't save your reaction. Please try again.");
       const hadReaction = userReactions.includes(type);
       setUserReactions((prev) =>
         hadReaction
@@ -444,29 +456,47 @@ export default function ArticleReactions({
   };
 
   return (
-    <div className="my-6 flex flex-wrap items-center gap-3">
-      {Object.entries(REACTION_EMOJIS).map(([type, emoji]) => {
-        const count = reactions[type] || 0;
-        const isActive = userReactions.includes(type);
+    <div className="my-6">
+      <div className="flex flex-wrap items-center gap-3">
+        {Object.entries(REACTION_EMOJIS).map(([type, emoji]) => {
+          const count = reactions[type] || 0;
+          const isActive = userReactions.includes(type);
 
-        return (
-          <motion.button
-            key={type}
-            onClick={() => handleReaction(type as ReactionType)}
-            disabled={isSubmitting !== null}
-            whileTap={{ scale: 0.9 }}
-            className={`flex items-center gap-1 rounded-full border px-3 py-1 text-sm transition-colors ${
-              isActive
-                ? "bg-white dark:bg-[#1A1F2B] text-text-primary"
-                : "bg-bg-primary text-text-secondary hover:border-neutral-400/70 active:border-neutral-400/70 hover:bg-slate-100 dark:hover:border-white/25 dark:active:border-white/25 dark:hover:bg-[#1A1F2B] dark:bg-[#1A1F2B]"
-            } `}
-            aria-label={`${isActive ? "Remove" : "Add"} ${type} reaction`}
-          >
-            <span>{emoji(isActive)}</span>
-            {count > 0 && <AnimatedNumber number={count} />}
-          </motion.button>
-        );
-      })}
+          return (
+            <motion.button
+              key={type}
+              onClick={() => handleReaction(type as ReactionType)}
+              disabled={isSubmitting !== null}
+              whileTap={reduceMotion ? undefined : { scale: 0.9 }}
+              className={`flex items-center gap-1 rounded-full border px-3 py-1 text-sm transition-colors ${
+                isActive
+                  ? "bg-white dark:bg-[#1A1F2B] text-text-primary"
+                  : "bg-bg-primary text-text-secondary hover:border-neutral-400/70 active:border-neutral-400/70 hover:bg-slate-100 dark:hover:border-white/25 dark:active:border-white/25 dark:hover:bg-[#1A1F2B] dark:bg-[#1A1F2B]"
+              } `}
+              aria-label={`${isActive ? "Remove" : "Add"} ${type} reaction, ${count} ${count === 1 ? "reaction" : "reactions"}`}
+              aria-pressed={isActive}
+            >
+              <span aria-hidden>
+                {reduceMotion ? (
+                  <ReactionIcon type={type as ReactionType} active={isActive} />
+                ) : (
+                  emoji(isActive)
+                )}
+              </span>
+              {count > 0 && (
+                <AnimatedNumber number={count} reduceMotion={reduceMotion} />
+              )}
+            </motion.button>
+          );
+        })}
+      </div>
+      <p
+        className={`mt-2 text-sm text-red-600 dark:text-red-400 ${errorMessage ? "" : "sr-only"}`}
+        role="alert"
+        aria-live="assertive"
+      >
+        {errorMessage}
+      </p>
     </div>
   );
 }

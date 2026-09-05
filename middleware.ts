@@ -90,9 +90,9 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/admin/login", request.url));
     }
     
-    // Check if ADMIN_EMAIL is set and matches
-    const adminEmail = process.env.ADMIN_EMAIL;
-    if (adminEmail && user.email !== adminEmail) {
+    // Fail closed unless the verified user matches the configured administrator.
+    const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+    if (!adminEmail || user.email?.toLowerCase() !== adminEmail) {
       return NextResponse.redirect(new URL("/", request.url));
     }
   }

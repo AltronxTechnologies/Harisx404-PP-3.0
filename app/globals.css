@@ -258,10 +258,6 @@ body {
   color: var(--text-tertiary);
 }
 
-html {
-  min-width: 360px;
-}
-
 @keyframes marquee {
   from {
     transform: translateX(0);

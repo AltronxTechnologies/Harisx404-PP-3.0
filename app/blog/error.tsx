@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { BlogStatePanel } from "@/app/components/blog/BlogStatePanel";
 
@@ -11,12 +11,19 @@ export default function BlogError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const headingRef = useRef<HTMLHeadingElement>(null);
+
   useEffect(() => {
     console.error("Blog route error", error);
+    headingRef.current?.focus();
   }, [error]);
 
   return (
-    <div className="relative mt-14 px-2 pb-24 sm:px-4">
+    <div
+      role="alert"
+      aria-live="assertive"
+      className="relative mt-14 px-2 pb-24 sm:px-4"
+    >
       <BlogStatePanel
         kicker="Blog unavailable"
         title={
@@ -29,6 +36,8 @@ export default function BlogError({
         }
         description="This is a temporary data issue. Try again, or return when the collection is available."
         headingLevel="h1"
+        headingRef={headingRef}
+        headingTabIndex={-1}
       >
           <button
             type="button"

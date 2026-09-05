@@ -8,6 +8,7 @@ import {
   fetchTestimonials,
   formatDate,
 } from "./lib/utils";
+import { formatReadingTime } from "./lib/reading-time";
 import {
   fallbackProjects,
   fallbackPosts,
@@ -25,7 +26,7 @@ import { MySiteGrid } from "./components/home/MySiteGrid";
 import { CtaSection } from "./components/home/CtaSection";
 import { HomeFaq } from "./components/home/HomeFaq";
 
-export const revalidate = 3600;
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: `${siteMetadata.title} — Full-Stack Developer`,
@@ -62,11 +63,6 @@ const personJsonLd = {
     "AI",
   ],
 };
-
-function estimateReadingTime(content: string | undefined): string {
-  const words = (content || "").trim().split(/\s+/).filter(Boolean).length;
-  return `${Math.max(1, Math.round(words / 200))} min read`;
-}
 
 export default async function Home() {
   const [dbProjects, dbPosts, dbTestimonials, serverStats] =
@@ -131,7 +127,9 @@ export default async function Home() {
           href: `/blog/${post.slug}`,
           summary: post.summary,
           publishedAt: post.publishedAt,
-          readingTime: estimateReadingTime(post.content),
+          readingTime: post.readingTimeMinutes
+            ? `${post.readingTimeMinutes} min read`
+            : formatReadingTime(post.content),
           imageName: post.imageName || "",
         }))
       : fallbackPosts.slice(0, 3);

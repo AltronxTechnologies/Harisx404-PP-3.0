@@ -31,6 +31,11 @@ export function FeaturedBlogCard({
   return (
     <Link
       href={`/blog/${slug}`}
+      aria-label={
+        reactionSummary
+          ? `Read ${title}. ${reactionSummary.total} reactions.`
+          : `Read ${title}.`
+      }
       className="group relative flex flex-col rounded-3xl border border-border-primary bg-white p-3 transition-all hover:border-neutral-400/70 hover:shadow-lg dark:bg-white/[0.02] dark:hover:border-white/25 md:flex-row"
     >
       <div className="relative aspect-[16/11] w-full shrink-0 overflow-hidden rounded-2xl bg-slate-900 md:aspect-auto md:min-h-[260px] md:w-1/2 lg:min-h-[300px]">

@@ -173,6 +173,23 @@ function CustomLink({ href, children, ...rest }: { href: string; children: React
 }
 
 function RoundedImage(props: { src: string; alt?: string }) {
+  try {
+    const url = new URL(props.src);
+    if (["res.craft.do", "img.devrant.com"].includes(url.hostname)) {
+      return (
+        <a
+          href={props.src}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="my-6 flex min-h-24 w-full items-center justify-center rounded-xl border border-border-primary bg-neutral-50 px-6 text-center text-sm font-medium text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary dark:bg-white/[0.03] dark:hover:border-white/25"
+        >
+          {props.alt || "External article image"} · View source ↗
+        </a>
+      );
+    }
+  } catch {
+    // Relative image paths are handled by Next Image below.
+  }
   return (
     <NextImage src={props.src} alt={props.alt || ""} width={800} height={450} className="drama-shadow rounded-xl w-full h-auto" />
   );

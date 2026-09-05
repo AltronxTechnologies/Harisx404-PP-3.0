@@ -1,3 +1,5 @@
+BEGIN;
+
 CREATE TABLE IF NOT EXISTS public.article_reactions (
   id BIGSERIAL PRIMARY KEY,
   article_slug TEXT,
@@ -6,7 +8,41 @@ CREATE TABLE IF NOT EXISTS public.article_reactions (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-LOCK TABLE public.article_reactions IN SHARE ROW EXCLUSIVE MODE;
+CREATE TABLE IF NOT EXISTS public.article_reaction_visitors (
+  article_slug TEXT NOT NULL,
+  reaction_type TEXT NOT NULL CHECK (
+    reaction_type IN ('like', 'heart', 'celebrate', 'insightful')
+  ),
+  visitor_id UUID NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (article_slug, reaction_type, visitor_id)
+);
+
+CREATE TABLE IF NOT EXISTS public.article_reaction_rate_limits (
+  signal_hash TEXT NOT NULL,
+  visitor_id UUID NOT NULL,
+  window_started_at TIMESTAMPTZ NOT NULL,
+  request_count INTEGER NOT NULL DEFAULT 0 CHECK (request_count >= 0),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (signal_hash, visitor_id, window_started_at)
+);
+
+CREATE TABLE IF NOT EXISTS public.article_reaction_signal_rate_limits (
+  signal_hash TEXT NOT NULL,
+  window_started_at TIMESTAMPTZ NOT NULL,
+  request_count INTEGER NOT NULL DEFAULT 0 CHECK (request_count >= 0),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (signal_hash, window_started_at)
+);
+
+-- Match the mutation function's table access order and hold all migration locks
+-- until COMMIT so deduplication and constraint changes cannot race with writes.
+LOCK TABLE
+  public.article_reaction_signal_rate_limits,
+  public.article_reaction_rate_limits,
+  public.article_reaction_visitors,
+  public.article_reactions
+IN SHARE ROW EXCLUSIVE MODE;
 
 DELETE FROM public.article_reactions
 WHERE article_slug IS NULL
@@ -68,20 +104,19 @@ END $$;
 
 ALTER TABLE public.article_reactions ENABLE ROW LEVEL SECURITY;
 
-CREATE TABLE IF NOT EXISTS public.article_reaction_visitors (
-  article_slug TEXT NOT NULL,
-  reaction_type TEXT NOT NULL CHECK (
-    reaction_type IN ('like', 'heart', 'celebrate', 'insightful')
-  ),
-  visitor_id UUID NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  PRIMARY KEY (article_slug, reaction_type, visitor_id)
-);
-
 CREATE INDEX IF NOT EXISTS article_reaction_visitors_article_visitor_idx
   ON public.article_reaction_visitors (article_slug, visitor_id);
 
 ALTER TABLE public.article_reaction_visitors ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE public.article_reaction_rate_limits ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.article_reaction_signal_rate_limits ENABLE ROW LEVEL SECURITY;
+
+CREATE INDEX IF NOT EXISTS article_reaction_rate_limits_window_idx
+  ON public.article_reaction_rate_limits (window_started_at);
+
+CREATE INDEX IF NOT EXISTS article_reaction_signal_rate_limits_window_idx
+  ON public.article_reaction_signal_rate_limits (window_started_at);
 
 DELETE FROM public.article_reactions AS reaction
 WHERE NOT EXISTS (
@@ -106,11 +141,14 @@ ALTER TABLE public.article_reaction_visitors
   ON UPDATE CASCADE ON DELETE CASCADE;
 
 DROP FUNCTION IF EXISTS public.adjust_article_reaction(TEXT, TEXT, INTEGER);
+DROP FUNCTION IF EXISTS public.adjust_article_reaction(TEXT, TEXT, UUID, BOOLEAN);
+DROP FUNCTION IF EXISTS public.adjust_article_reaction(TEXT, TEXT, UUID, TEXT, BOOLEAN);
 
-CREATE OR REPLACE FUNCTION public.adjust_article_reaction(
+CREATE FUNCTION public.adjust_article_reaction(
   target_slug TEXT,
   target_type TEXT,
   target_visitor UUID,
+  target_signal_hash TEXT,
   should_add BOOLEAN
 )
 RETURNS INTEGER
@@ -121,6 +159,9 @@ AS $$
 DECLARE
   updated_count INTEGER;
   changed_rows INTEGER;
+  rate_limit_count INTEGER;
+  signal_rate_limit_count INTEGER;
+  rate_limit_window TIMESTAMPTZ;
 BEGIN
   IF target_slug IS NULL OR BTRIM(target_slug) = '' THEN
     RAISE EXCEPTION 'Article slug is required';
@@ -131,6 +172,9 @@ BEGIN
   IF target_visitor IS NULL THEN
     RAISE EXCEPTION 'Visitor ID is required';
   END IF;
+  IF target_signal_hash IS NULL OR BTRIM(target_signal_hash) = '' THEN
+    RAISE EXCEPTION 'Request signal is required';
+  END IF;
   IF NOT EXISTS (
     SELECT 1
     FROM public.blog_posts
@@ -139,6 +183,52 @@ BEGIN
       AND published_at <= NOW()
   ) THEN
     RAISE EXCEPTION 'Published article not found';
+  END IF;
+
+  rate_limit_window := date_trunc('hour', NOW())
+    + FLOOR(EXTRACT(MINUTE FROM NOW()) / 10) * INTERVAL '10 minutes';
+
+  DELETE FROM public.article_reaction_rate_limits
+  WHERE window_started_at < NOW() - INTERVAL '2 days';
+
+  DELETE FROM public.article_reaction_signal_rate_limits
+  WHERE window_started_at < NOW() - INTERVAL '2 days';
+
+  INSERT INTO public.article_reaction_signal_rate_limits (
+    signal_hash,
+    window_started_at,
+    request_count,
+    updated_at
+  )
+  VALUES (target_signal_hash, rate_limit_window, 1, NOW())
+  ON CONFLICT (signal_hash, window_started_at)
+  DO UPDATE SET
+    request_count = public.article_reaction_signal_rate_limits.request_count + 1,
+    updated_at = NOW()
+  WHERE public.article_reaction_signal_rate_limits.request_count < 300
+  RETURNING request_count INTO signal_rate_limit_count;
+
+  IF signal_rate_limit_count IS NULL THEN
+    RAISE EXCEPTION 'Reaction rate limit exceeded';
+  END IF;
+
+  INSERT INTO public.article_reaction_rate_limits (
+    signal_hash,
+    visitor_id,
+    window_started_at,
+    request_count,
+    updated_at
+  )
+  VALUES (target_signal_hash, target_visitor, rate_limit_window, 1, NOW())
+  ON CONFLICT (signal_hash, visitor_id, window_started_at)
+  DO UPDATE SET
+    request_count = public.article_reaction_rate_limits.request_count + 1,
+    updated_at = NOW()
+  WHERE public.article_reaction_rate_limits.request_count < 30
+  RETURNING request_count INTO rate_limit_count;
+
+  IF rate_limit_count IS NULL THEN
+    RAISE EXCEPTION 'Reaction rate limit exceeded';
   END IF;
 
   IF should_add THEN
@@ -205,10 +295,18 @@ BEGIN
 END;
 $$;
 
-REVOKE ALL ON FUNCTION public.adjust_article_reaction(TEXT, TEXT, UUID, BOOLEAN)
+REVOKE ALL ON FUNCTION public.adjust_article_reaction(TEXT, TEXT, UUID, TEXT, BOOLEAN)
   FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.adjust_article_reaction(TEXT, TEXT, UUID, BOOLEAN)
+GRANT EXECUTE ON FUNCTION public.adjust_article_reaction(TEXT, TEXT, UUID, TEXT, BOOLEAN)
   TO service_role;
 
 COMMENT ON TABLE public.article_reactions IS
   'Aggregate reaction counts for public Blog articles. Writes use server actions.';
+
+COMMENT ON TABLE public.article_reaction_rate_limits IS
+  'Persistent ten-minute anonymous reaction mutation counters keyed by request signal and visitor.';
+
+COMMENT ON TABLE public.article_reaction_signal_rate_limits IS
+  'Persistent ten-minute reaction abuse ceiling keyed by a salted request signal.';
+
+COMMIT;

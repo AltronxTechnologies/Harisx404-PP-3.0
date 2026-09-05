@@ -12,6 +12,8 @@ export interface Blog {
   draft: boolean;
   headings: any[];
   audioFile?: string;
+  canonicalUrl?: string;
+  readingTimeMinutes?: number;
 }
 
 export interface Changelog {
@@ -38,32 +40,30 @@ import { extractHeadingsFromMdx } from "@/app/lib/toc-utils";
 const supabase = getPublicSupabase();
 
 export const formatDate = (date: string) => {
-  let currentDate = new Date();
   if (!date.includes("T")) {
     date = `${date}T00:00:00`;
   }
-  let targetDate = new Date(date);
+  const targetDate = new Date(date);
+  if (Number.isNaN(targetDate.getTime())) return "Date unavailable";
 
-  let yearsAgo = currentDate.getFullYear() - targetDate.getFullYear();
-  let monthsAgo = currentDate.getMonth() - targetDate.getMonth();
-  let daysAgo = currentDate.getDate() - targetDate.getDate();
+  const elapsedDays = Math.max(
+    0,
+    Math.floor((Date.now() - targetDate.getTime()) / 86_400_000),
+  );
+  const formattedDate =
+    elapsedDays >= 365
+      ? `${Math.floor(elapsedDays / 365)}y ago`
+      : elapsedDays >= 30
+        ? `${Math.floor(elapsedDays / 30)}mo ago`
+        : elapsedDays > 0
+          ? `${elapsedDays}d ago`
+          : "Today";
 
-  let formattedDate = "";
-
-  if (yearsAgo > 0) {
-    formattedDate = `${yearsAgo}y ago`;
-  } else if (monthsAgo > 0) {
-    formattedDate = `${monthsAgo}mo ago`;
-  } else if (daysAgo > 0) {
-    formattedDate = `${daysAgo}d ago`;
-  } else {
-    formattedDate = "Today";
-  }
-
-  let fullDate = targetDate.toLocaleString("en-us", {
+  const fullDate = targetDate.toLocaleString("en-US", {
     month: "long",
     day: "numeric",
     year: "numeric",
+    timeZone: "UTC",
   });
 
   return `${fullDate} (${formattedDate})`;
@@ -118,12 +118,13 @@ export async function fetchAndSortBlogPosts(): Promise<Blog[]> {
     const { data, error } = await supabase
       .from('blog_posts')
       .select(`
-        id, title, slug, summary, content, published_at, cover_image_url, status, featured,
+        id, title, slug, summary, content, published_at, cover_image_url, status, featured, canonical_url, reading_time_minutes,
         blog_post_tags (
           tags ( name, slug )
         )
       `)
       .eq('status', 'published')
+      .lte('published_at', new Date().toISOString())
       .order('published_at', { ascending: false });
 
     if (error || !data) {
@@ -144,6 +145,8 @@ export async function fetchAndSortBlogPosts(): Promise<Blog[]> {
         imageName: post.cover_image_url || '',
         categories: categories as string[],
         featured: post.featured === true,
+        canonicalUrl: post.canonical_url || undefined,
+        readingTimeMinutes: post.reading_time_minutes || undefined,
         draft: false,
         headings: extractHeadingsFromMdx(post.content)
       } as any;
@@ -158,12 +161,14 @@ export async function getBlogPostBySlug(slug: string): Promise<Blog | null> {
   const { data, error } = await supabase
     .from('blog_posts')
     .select(`
-      id, title, slug, summary, content, published_at, cover_image_url, status,
+      id, title, slug, summary, content, published_at, cover_image_url, status, canonical_url, reading_time_minutes,
       blog_post_tags (
         tags ( name, slug )
       )
     `)
     .eq('slug', slug)
+    .eq('status', 'published')
+    .lte('published_at', new Date().toISOString())
     .single();
 
   if (error || !data) {
@@ -181,6 +186,8 @@ export async function getBlogPostBySlug(slug: string): Promise<Blog | null> {
     publishedAt: data.published_at || new Date().toISOString(),
     imageName: data.cover_image_url || '',
     categories: categories as string[],
+    canonicalUrl: data.canonical_url || undefined,
+    readingTimeMinutes: data.reading_time_minutes || undefined,
     draft: false,
     headings: extractHeadingsFromMdx(data.content)
   } as any;
@@ -197,6 +204,8 @@ export async function getRelatedBlogPosts(
       .from('blog_posts')
       .select('content_embedding')
       .eq('slug', currentPost.slug)
+      .eq('status', 'published')
+      .lte('published_at', new Date().toISOString())
       .single();
 
     if (postData && postData.content_embedding) {
@@ -215,13 +224,14 @@ export async function getRelatedBlogPosts(
         const { data: fullPosts } = await supabase
           .from('blog_posts')
           .select(`
-            id, title, slug, summary, content, published_at, cover_image_url, status,
+            id, title, slug, summary, content, published_at, cover_image_url, status, canonical_url, reading_time_minutes,
             blog_post_tags (
               tags ( name, slug )
             )
           `)
           .in('slug', slugs)
-          .eq('status', 'published');
+          .eq('status', 'published')
+          .lte('published_at', new Date().toISOString());
 
         if (fullPosts) {
           // Map to Blog interface and preserve semantic order
@@ -239,6 +249,8 @@ export async function getRelatedBlogPosts(
               publishedAt: fp.published_at || new Date().toISOString(),
               imageName: fp.cover_image_url || '',
               categories: categories as string[],
+              canonicalUrl: fp.canonical_url || undefined,
+              readingTimeMinutes: fp.reading_time_minutes || undefined,
               draft: false,
               headings: extractHeadingsFromMdx(fp.content)
             } as any;
