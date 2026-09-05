@@ -4,6 +4,7 @@ import { DoubleArrow } from "@/app/components/home/DoubleArrow";
 import { getBlogImageSrc } from "@/app/components/blog/blogImage";
 import { ReactionSummaryPill } from "@/app/components/blog/ReactionSummaryPill";
 import type { ReactionSummary } from "@/app/blog/data";
+import { AdaptiveCardCopy } from "@/app/components/blog/AdaptiveCardCopy";
 
 export interface FeaturedBlogCardProps {
   slug: string;
@@ -32,7 +33,7 @@ export function FeaturedBlogCard({
       href={`/blog/${slug}`}
       className="group relative flex flex-col rounded-3xl border border-border-primary bg-white p-3 transition-all hover:border-neutral-400/70 hover:shadow-lg dark:bg-white/[0.02] dark:hover:border-white/25 md:flex-row"
     >
-      <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-2xl bg-slate-900 md:aspect-auto md:min-h-[360px] md:w-1/2">
+      <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-2xl bg-slate-900 md:aspect-auto md:min-h-[320px] md:w-1/2">
         {imageSrc ? (
           <Image
             src={imageSrc}
@@ -60,15 +61,9 @@ export function FeaturedBlogCard({
           </time>
         </div>
 
-        <h3 className="mt-4 line-clamp-2 min-h-[60px] text-balance font-display text-2xl font-medium leading-tight text-text-primary">
-          {title}
-        </h3>
+        <AdaptiveCardCopy title={title} summary={summary} featured />
 
-        <p className="mt-4 line-clamp-3 min-h-[72px] text-[15px] leading-6 text-text-secondary">
-          {summary}
-        </p>
-
-        <div className="mt-auto flex min-h-7 items-center justify-between gap-4 pt-8">
+        <div className="mt-auto flex min-h-7 items-center justify-between gap-2.5 pt-4">
           <div className="flex min-h-7 min-w-0 items-center">
             <ReactionSummaryPill summary={reactionSummary} />
           </div>

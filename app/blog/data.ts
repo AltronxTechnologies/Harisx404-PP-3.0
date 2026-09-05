@@ -12,7 +12,7 @@ export type ReactionType = "like" | "heart" | "celebrate" | "insightful";
 
 export type ReactionSummary = {
   total: number;
-  top: Array<{ type: ReactionType; count: number }>;
+  counts: Record<ReactionType, number>;
 };
 
 type ReactionRow = {
@@ -198,18 +198,13 @@ export async function fetchBlogReactionSummaries(slugs: string[]) {
       if (!validTypes.includes(row.reaction_type as ReactionType)) return;
       const count = Math.max(0, Number(row.count) || 0);
       if (count === 0) return;
-      const summary = summaries[row.article_slug] || { total: 0, top: [] };
+      const summary = summaries[row.article_slug] || {
+        total: 0,
+        counts: { like: 0, heart: 0, celebrate: 0, insightful: 0 },
+      };
       summary.total += count;
-      summary.top.push({ type: row.reaction_type as ReactionType, count });
+      summary.counts[row.reaction_type as ReactionType] = count;
       summaries[row.article_slug] = summary;
-  });
-
-  Object.values(summaries).forEach((summary) => {
-      summary.top.sort(
-        (a, b) =>
-          b.count - a.count || validTypes.indexOf(a.type) - validTypes.indexOf(b.type),
-      );
-      summary.top = summary.top.slice(0, 3);
   });
 
   return summaries;

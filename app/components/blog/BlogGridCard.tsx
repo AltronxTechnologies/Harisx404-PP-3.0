@@ -4,6 +4,7 @@ import { DoubleArrow } from "@/app/components/home/DoubleArrow";
 import { getBlogImageSrc } from "@/app/components/blog/blogImage";
 import { ReactionSummaryPill } from "@/app/components/blog/ReactionSummaryPill";
 import type { ReactionSummary } from "@/app/blog/data";
+import { AdaptiveCardCopy } from "@/app/components/blog/AdaptiveCardCopy";
 
 export interface BlogGridCardProps {
   slug: string;
@@ -60,15 +61,9 @@ export function BlogGridCard({
           </time>
         </div>
 
-        <h3 className="mt-4 line-clamp-2 min-h-[55px] text-balance font-display text-[22px] font-medium leading-tight text-text-primary">
-          {title}
-        </h3>
+        <AdaptiveCardCopy title={title} summary={summary} />
 
-        <p className="mt-3 line-clamp-3 min-h-[72px] text-[15px] leading-6 text-text-secondary">
-          {summary}
-        </p>
-
-        <div className="mt-auto flex min-h-7 items-center justify-between gap-3 pt-6">
+        <div className="mt-auto flex min-h-7 items-center justify-between gap-2.5 pt-4">
           <div className="flex min-h-7 min-w-0 items-center">
             <ReactionSummaryPill summary={reactionSummary} />
           </div>

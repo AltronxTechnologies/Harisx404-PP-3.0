@@ -14,25 +14,30 @@ const reactionNames: Record<ReactionType, string> = {
   insightful: "insightful",
 };
 
+const reactionOrder: ReactionType[] = ["like", "heart", "celebrate", "insightful"];
+
 export function ReactionSummaryPill({ summary }: { summary?: ReactionSummary }) {
   if (!summary || summary.total <= 0) return null;
 
-  const details = summary.top
-    .map(({ type, count }) => `${count} ${reactionNames[type]}`)
+  const details = reactionOrder
+    .filter((type) => summary.counts[type] > 0)
+    .map((type) => `${summary.counts[type]} ${reactionNames[type]}`)
     .join(", ");
 
   return (
     <span
-      className="inline-flex h-7 shrink-0 items-center gap-2 rounded-full border border-border-primary bg-bg-primary px-2.5 text-text-secondary"
+      className="inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-border-primary bg-bg-primary px-2 text-text-secondary"
       role="img"
       aria-label={`${summary.total} ${summary.total === 1 ? "reaction" : "reactions"}: ${details}. Open the article to react.`}
       title="Open the article to react"
     >
       <span className="flex -space-x-1" aria-hidden>
-        {summary.top.map(({ type }) => (
+        {reactionOrder.map((type) => (
           <span
             key={type}
-            className="flex size-5 items-center justify-center rounded-full border border-border-primary bg-white text-[11px] leading-none shadow-sm dark:bg-[#1A1F2B]"
+            className={`flex size-4 items-center justify-center rounded-full border border-border-primary bg-white text-[10px] leading-none shadow-sm dark:bg-[#1A1F2B] ${
+              summary.counts[type] > 0 ? "opacity-100" : "opacity-40 grayscale"
+            }`}
           >
             {reactionGlyphs[type]}
           </span>

@@ -320,22 +320,29 @@ The owner standardized every Blog card text panel to the same content order:
 4. Reserved reaction summary at the bottom-left and `Read article` at the
    bottom-right.
 
-Grid titles reserve exactly 55px with a two-line clamp; featured titles reserve
-60px with a two-line clamp. Descriptions reserve exactly 72px with a three-line
-clamp. Excess text uses ellipsis rather than changing card geometry. Every
-footer reserves 28px for reaction state even when no reactions exist. Visible
-reaction totals cap at `999+`, while assistive technology receives the complete
-count and per-type breakdown.
+Card copy is now adaptive inside one fixed combined block. A one-line title
+allows five description lines; a two-line title allows four. Titles never
+exceed two lines and excess title/description copy uses ellipsis. Grid copy
+reserves 160px; featured copy reserves 168px, exactly covering the worst-case
+line geometry including the 12px title offset. Every footer reserves 28px for
+reaction state even when no reactions exist. Visible reaction totals cap at
+`999+`, while assistive technology receives the complete count and per-type
+breakdown.
 
 Measured verification across all six required viewports in both themes passed:
 
 - Grid-row height spread: 0px at every multi-column viewport.
-- Featured title/description: 60px / 72px.
-- Grid title/description: 55px / 72px.
+- Standard card title: 22px/500 with a 26px line height.
+- Featured card title: 24px/500 with a 30px line height.
+- Description: 15px/400 with a 22px line height; five lines after a one-line
+  title and four lines after a two-line title.
+- Featured media minimum reduced from 360px to 320px.
 - Footer/action right-edge delta: 0px.
 - Card, panel, and document overflow: 0px.
-- A synthetic three-glyph `999+` pill measured 110px wide and retained at least
-  24.8px clearance from `Read article` in the narrowest 360px footer.
+- The reaction pill always presents all four reaction types; zero-count glyphs
+  are subdued while non-zero glyphs remain full strength.
+- A synthetic four-glyph `999+` pill measured 104px wide and retained 30.8px
+  clearance from `Read article` in the narrowest 360px footer.
 - The stress pill changed neither card height nor action position.
 
 TypeScript, targeted ESLint, `git diff --check`, long-title/description clamps,
