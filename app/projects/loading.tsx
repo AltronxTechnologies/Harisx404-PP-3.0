@@ -76,12 +76,12 @@ function ControlsSkeleton() {
   return (
     <div className="mt-14 flex animate-pulse flex-col gap-3 border-y border-border-primary px-2 py-4 motion-reduce:animate-none sm:px-4 lg:flex-row lg:items-center lg:gap-2">
       <div className="order-1 h-8 w-full rounded-lg bg-border-primary/40 lg:order-2 lg:w-64 lg:flex-none" />
-      <div className="order-2 flex min-w-0 items-center justify-center gap-1 max-[359px]:gap-0.5 sm:gap-2 lg:order-1 lg:flex-1 lg:justify-start">
-        <div className="h-[2rem] w-[35px] rounded-full bg-border-primary/40 sm:w-[50px]" />
-        <div className="h-[2rem] w-[49px] rounded-full bg-border-primary/40 sm:w-[67px]" />
-        <div className="h-[2rem] w-[105px] rounded-full bg-border-primary/40 sm:w-[131px]" />
-        <div className="h-[2rem] w-[35px] rounded-full bg-border-primary/40 sm:w-[50px]" />
-        <div className="h-[2rem] w-[58px] rounded-full bg-border-primary/40 sm:w-[74px]" />
+      <div className="order-2 flex min-w-0 items-center gap-2 overflow-hidden lg:order-1 lg:flex-1">
+        <div className="h-8 w-[106px] shrink-0 rounded-full bg-border-primary/40" />
+        <div className="h-8 w-[67px] shrink-0 rounded-full bg-border-primary/40" />
+        <div className="h-8 w-[131px] shrink-0 rounded-full bg-border-primary/40" />
+        <div className="h-8 w-[50px] shrink-0 rounded-full bg-border-primary/40" />
+        <div className="h-8 w-[74px] shrink-0 rounded-full bg-border-primary/40" />
       </div>
     </div>
   );

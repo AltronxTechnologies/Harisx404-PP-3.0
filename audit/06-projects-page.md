@@ -2,9 +2,9 @@
 
 - Route: `/projects`
 - Audit date: 2026-09-03
-- Status: Owner-approved and production-locked on 2026-09-04
+- Status: Owner-approved baseline; controls and result states temporarily unlocked
 - Primary files: `app/projects/page.tsx`, `app/projects/ProjectsIndex.tsx`,
-  `app/projects/loading.tsx`
+  `app/projects/loading.tsx`, `app/projects/error.tsx`
 - Shared reference component: `app/components/home/CaseStudies.tsx`
 
 ## Scope and constraints
@@ -556,3 +556,28 @@ updated to the same value. Measured results:
 
 There is no document overflow or control wrapping. TypeScript, targeted ESLint,
 `git diff --check`, and the browser console check passed.
+
+## Scrollable filters and unified state panels - 2026-09-05
+
+The owner clarified that Projects filters must follow the Blog interaction
+exactly rather than retaining the earlier Projects-specific More menu. This
+amendment supersedes every More-menu note above.
+
+- Removed the More button, popup, primary/overflow tag split, menu state,
+  dismissal handlers, and menu keyboard behavior.
+- All available project tags now render in one 32px-high horizontally scrollable
+  pill rail, matching Blog's spacing, hidden scrollbar, selected treatment,
+  keyboard focus auto-scroll, and 32px left/right edge fog.
+- Loading controls now show the same clipped horizontal pill-rail geometry.
+- Search no-results, unknown-tag, empty-collection, and generic no-project states
+  now use the shared Blog state panel with matching kicker, 46/56px serif
+  heading, gradient emphasis, supporting copy, card shell, and recovery action.
+- Added `app/projects/error.tsx` with the same accessible unavailable-state
+  structure, focus management, retry action, and home action as Blog.
+
+Focused verification passed at 1440px and 360px in the running preview. The
+compact view shows search first, the scrollable filter rail second, no More
+control, and the complete matching no-results hierarchy. TypeScript, targeted
+ESLint, and `git diff --check` pass. Playwright Chromium was unavailable because
+of a sandbox launcher failure, so visual verification used the running Firefox
+preview instead.

@@ -1458,7 +1458,10 @@ is closed by this final lock.
 
 ### 2026-09-05 owner-authorized temporary Projects controls amendment
 
-The owner temporarily unlocked only Projects search/filter controls,
-pagination, and their loading geometry to align them with the locked Blog page.
+The owner temporarily unlocked Projects search/filter controls, pagination,
+their loading geometry, and Projects result/error states to align them with the
+locked Blog page. The earlier Projects-specific More dropdown is superseded by
+Blog's horizontally scrollable filter rail, and Projects states reuse Blog's
+shared state panel.
 Project header, cards, content, CTA, and every other Projects behavior remain
 locked. Final re-lock awaits owner review of this limited amendment.

@@ -1,21 +1,29 @@
 "use client";
 
-/* Owner-approved and locked; see audit/06-projects-page.md and LOCKED_PERFECT.md entry 24. */
+/* Temporarily unlocked for the owner-directed Blog controls/state parity amendment. */
 
-import { Fragment, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Fragment,
+  Suspense,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FocusEvent,
+} from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import { Search, X } from "lucide-react";
 import type { HomeProject } from "@/app/data/fallback-home";
 import { CaseStudyCard, projectTags } from "@/app/components/home/CaseStudies";
+import { BlogStatePanel } from "@/app/components/blog/BlogStatePanel";
 
 /*
  * Projects index — production controls for a growing catalog:
  *
  * - Search (title / tagline / description / tech / tags), debounced.
- * - Tag filters built from the SAME labels the cards display. Scales to
- *   20+ projects: the row shows the most-used tags (with live counts)
- *   and folds the long tail behind a "+N more" toggle.
+ * - Tag filters built from the SAME labels the cards display in a horizontally
+ *   scrollable rail that matches the Blog category filters.
  * - Pagination: 8 projects per page, numbering continues across pages.
  * - URL-synced state (?tag=&q=&page=) — refresh-safe, shareable,
  *   back/forward friendly.
@@ -23,9 +31,6 @@ import { CaseStudyCard, projectTags } from "@/app/components/home/CaseStudies";
  */
 
 const PER_PAGE = 8;
-/* The three primary domains always shown inline — everything else lives
-   behind the "More" dropdown. */
-const PRIMARY_TAGS = ["AI/ML", "Cybersecurity", "Web"];
 
 function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
   const router = useRouter();
@@ -43,10 +48,9 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
   const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
 
   const [query, setQuery] = useState(q);
-  const [showAllTags, setShowAllTags] = useState(false);
-  const moreRef = useRef<HTMLDivElement | null>(null);
-  const moreButtonRef = useRef<HTMLButtonElement | null>(null);
   const searchRef = useRef<HTMLInputElement | null>(null);
+  const filtersRef = useRef<HTMLDivElement | null>(null);
+  const [filterEdges, setFilterEdges] = useState({ left: false, right: false });
   const skipNextSearchSyncRef = useRef(false);
 
   // "/" focuses the search field (ignored while typing elsewhere).
@@ -63,45 +67,41 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
-  // Close the "More" dropdown on outside click / Escape.
   useEffect(() => {
-    if (!showAllTags) return;
-    const onDown = (e: MouseEvent | TouchEvent) => {
-      if (moreRef.current && !moreRef.current.contains(e.target as Node)) {
-        setShowAllTags(false);
-      }
+    const filters = filtersRef.current;
+    if (!filters) return;
+    let active = true;
+
+    const updateEdges = () => {
+      if (!active) return;
+      const maxScroll = Math.max(0, filters.scrollWidth - filters.clientWidth);
+      const next = {
+        left: filters.scrollLeft > 1,
+        right: filters.scrollLeft < maxScroll - 1,
+      };
+      setFilterEdges((current) =>
+        current.left === next.left && current.right === next.right ? current : next,
+      );
     };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setShowAllTags(false);
-        requestAnimationFrame(() => moreButtonRef.current?.focus());
-      }
-      /* Menu keyboard nav: arrows cycle through the tag rows, Home/End
-         jump, Enter activates the focused row (native button behavior). */
-      if (["ArrowDown", "ArrowUp", "Home", "End"].includes(e.key)) {
-        const rows = moreRef.current?.querySelectorAll<HTMLButtonElement>(
-          "#projects-more-tags button",
-        );
-        if (!rows || rows.length === 0) return;
-        e.preventDefault();
-        const list = [...rows];
-        const idx = list.indexOf(document.activeElement as HTMLButtonElement);
-        let next = 0;
-        if (e.key === "ArrowDown") next = idx < list.length - 1 ? idx + 1 : 0;
-        else if (e.key === "ArrowUp") next = idx > 0 ? idx - 1 : list.length - 1;
-        else if (e.key === "End") next = list.length - 1;
-        list[next].focus();
-      }
-    };
-    document.addEventListener("mousedown", onDown);
-    document.addEventListener("touchstart", onDown);
-    document.addEventListener("keydown", onKey);
+
+    updateEdges();
+    const observer = new ResizeObserver(updateEdges);
+    observer.observe(filters);
+    document.fonts?.ready.then(updateEdges);
     return () => {
-      document.removeEventListener("mousedown", onDown);
-      document.removeEventListener("touchstart", onDown);
-      document.removeEventListener("keydown", onKey);
+      active = false;
+      observer.disconnect();
     };
-  }, [showAllTags]);
+  }, [projects]);
+
+  const handleFilterFocus = (event: FocusEvent<HTMLButtonElement>) => {
+    const target = event.currentTarget;
+    window.requestAnimationFrame(() => {
+      if (target.matches(":focus-visible")) {
+        target.scrollIntoView({ block: "nearest", inline: "center" });
+      }
+    });
+  };
 
   function setParams(
     next: { tag?: string; q?: string; page?: number },
@@ -153,14 +153,8 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
     );
   }, [projects]);
 
-  const { headTags, overflowTags } = useMemo(() => {
-    const all = tagCounts.map(([t]) => t);
-    const head = PRIMARY_TAGS.filter((t) => all.includes(t));
-    const overflow = all.filter((t) => !head.includes(t));
-    return { headTags: head, overflowTags: overflow };
-  }, [tagCounts]);
-  const foldedCount = overflowTags.length;
-  const overflowActive = overflowTags.includes(activeTag);
+  const tags = tagCounts.map(([tag]) => tag);
+  const invalidTag = activeTag !== "All" && !tags.includes(activeTag);
 
   // ── Filter: tag AND search ─────────────────────────────────────────
   const filtered = useMemo(() => {
@@ -181,34 +175,6 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
       return hay.includes(needle);
     });
   }, [projects, activeTag, q]);
-
-  // ── No-results rescue: when the search matches projects that the
-  //    active tag filters out, suggest the tags where matches live. ────
-  const rescueTags = useMemo(() => {
-    if (filtered.length > 0) return [];
-    const needle = q.trim().toLowerCase();
-    if (!needle) return [];
-    const counts = new Map<string, number>();
-    projects.forEach((p) => {
-      const hay = [
-        p.title,
-        p.tagline,
-        p.description,
-        ...(p.tech ?? []),
-        ...projectTags(p),
-      ]
-        .join(" ")
-        .toLowerCase();
-      if (!hay.includes(needle)) return;
-      projectTags(p).forEach((t) => {
-        if (t !== activeTag) counts.set(t, (counts.get(t) ?? 0) + 1);
-      });
-    });
-    return [...counts.entries()]
-      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-      .slice(0, 3)
-      .map(([t]) => t);
-  }, [filtered.length, q, projects, activeTag]);
 
   // ── Pagination ─────────────────────────────────────────────────────
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
@@ -244,11 +210,8 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
     });
   }
 
-  /* Inline chips (All + primary tags): inverted ink pill glides between the
-     active tags via a shared layout element — same motion language as the
-     pagination's page pill. */
   const inlineChipClass = (active: boolean) =>
-    `relative inline-flex h-[2rem] items-center rounded-full border px-1.5 font-mono text-[11px] uppercase tracking-normal outline-none transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary sm:px-3 sm:tracking-widest ${
+    `inline-flex h-8 shrink-0 scroll-mx-8 items-center rounded-full border px-3 font-mono text-[11px] uppercase tracking-widest outline-none transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary ${
       active
         ? "border-text-primary bg-text-primary text-bg-primary"
         : "border-border-primary text-text-secondary hover:border-neutral-400/70 active:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25 dark:active:border-white/25"
@@ -264,7 +227,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
           ? "No projects found"
           : `${filtered.length} ${filtered.length === 1 ? "project" : "projects"} found`}
       </p>
-      {/* Controls — search + domain chips + "More" dropdown, one row. */}
+      {/* Controls match the locked Blog toolbar and horizontally scrolling filters. */}
       <div className="mt-14 flex flex-col gap-3 border-y border-border-primary px-2 py-4 sm:px-4 lg:flex-row lg:items-center lg:gap-2">
         <label htmlFor="project-search" className="sr-only">
           Search projects
@@ -308,181 +271,56 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
           )}
         </div>
 
-        <div
-          className="order-2 flex min-w-0 items-center justify-center gap-1 max-[359px]:gap-0.5 sm:gap-2 lg:order-1 lg:flex-1 lg:justify-start"
-          role="group"
-          aria-label="Filter projects by tag"
-        >
-          <button
-            type="button"
-            aria-pressed={activeTag === "All"}
-            onClick={() => setParams({ tag: "All", page: 1 })}
-            className={inlineChipClass(activeTag === "All")}
+        <div className="relative order-2 min-w-0 flex-1 lg:order-1">
+          <div
+            ref={filtersRef}
+            onScroll={() => {
+              const filters = filtersRef.current;
+              if (!filters) return;
+              const maxScroll = Math.max(0, filters.scrollWidth - filters.clientWidth);
+              setFilterEdges({
+                left: filters.scrollLeft > 1,
+                right: filters.scrollLeft < maxScroll - 1,
+              });
+            }}
+            className="flex min-w-0 items-center gap-2 overflow-x-auto pr-8 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            role="group"
+            aria-label="Filter projects by tag"
           >
-            <span className="relative">All</span>
-          </button>
-          {headTags.map((tag) => (
             <button
-              key={tag}
               type="button"
-              aria-pressed={activeTag === tag}
-              onClick={() =>
-                setParams({ tag: activeTag === tag ? "All" : tag, page: 1 })
-              }
-              className={inlineChipClass(activeTag === tag)}
+              aria-pressed={activeTag === "All"}
+              onFocus={handleFilterFocus}
+              onClick={() => setParams({ tag: "All", page: 1 })}
+              className={inlineChipClass(activeTag === "All")}
             >
-              <span className="relative">{tag}</span>
+              All projects
             </button>
-          ))}
-
-          {/* "More" dropdown for the long tail of tags */}
-          {foldedCount > 0 && (
-            <div
-              ref={moreRef}
-              className="relative"
-              onBlur={(event) => {
-                if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-                  setShowAllTags(false);
-                }
-              }}
-            >
+            {tags.map((tag) => (
               <button
+                key={tag}
                 type="button"
-                ref={moreButtonRef}
-                aria-expanded={showAllTags}
-                aria-haspopup="menu"
-                aria-controls="projects-more-tags"
-                onClick={(event) => {
-                  const opening = !showAllTags;
-                  setShowAllTags(opening);
-                  if (opening && event.detail === 0) {
-                    requestAnimationFrame(() =>
-                      moreRef.current
-                        ?.querySelector<HTMLButtonElement>("#projects-more-tags button")
-                        ?.focus(),
-                    );
-                  }
-                }}
-                onKeyDown={(event) => {
-                  if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
-                  event.preventDefault();
-                  setShowAllTags(true);
-                  requestAnimationFrame(() => {
-                    const rows = moreRef.current?.querySelectorAll<HTMLButtonElement>(
-                      "#projects-more-tags button",
-                    );
-                    if (!rows?.length) return;
-                    rows[event.key === "ArrowUp" ? rows.length - 1 : 0].focus();
-                  });
-                }}
-                className={`relative flex h-[2rem] max-w-20 items-center gap-1 rounded-full border px-1.5 font-mono text-[11px] uppercase tracking-normal outline-none transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary sm:max-w-32 sm:px-3 sm:tracking-widest ${
-                  overflowActive
-                    ? "border-text-primary bg-text-primary text-bg-primary"
-                    : "border-border-primary text-text-secondary hover:border-neutral-400/70 active:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25 dark:active:border-white/25"
-                }`}
+                aria-pressed={activeTag === tag}
+                onFocus={handleFilterFocus}
+                onClick={() => setParams({ tag, page: 1 })}
+                className={inlineChipClass(activeTag === tag)}
               >
-                <span className="relative truncate" title={overflowActive ? activeTag : undefined}>
-                  {overflowActive ? activeTag : "More"}
-                </span>
-                <svg
-                  aria-hidden
-                  viewBox="0 0 12 12"
-                  fill="none"
-                  className={`relative size-3 transition-transform ${showAllTags ? "rotate-180" : ""}`}
-                >
-                  <path d="m3 4.5 3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+                {tag}
               </button>
-              {showAllTags && (
-                <motion.div
-                  id="projects-more-tags"
-                  initial={reducedMotion ? false : { opacity: 0, y: 6, scale: 0.98 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ duration: 0.16, ease: "easeOut" }}
-                  className="absolute right-0 top-full z-20 mt-2 w-60 max-w-[calc(100vw-2.5rem)] overflow-hidden rounded-xl border border-border-primary bg-bg-primary shadow-xl"
-                  role="menu"
-                  aria-label="More tags"
-                >
-                  {/* Blueprint header — kicker + live count, closed by the
-                      same open-dot rule the grid uses. */}
-                  <div className="flex items-baseline justify-between px-3.5 pb-2 pt-3">
-                    <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-text-secondary">
-                      More tags
-                    </span>
-                    <span className="font-mono text-[10px] text-text-secondary">
-                      {String(overflowTags.length).padStart(2, "0")}
-                    </span>
-                  </div>
-                  <div
-                    aria-hidden
-                    className="mx-3.5 h-px"
-                    style={{
-                      backgroundImage:
-                        "repeating-linear-gradient(90deg, var(--rule-color) 0 1px, transparent 1px 4px)",
-                    }}
-                  />
-                  {/* Command-menu rows: tag left, project count right. The
-                      active tag reads as an inked row, mirroring the chips. */}
-                  <ul role="none" className="max-h-64 overflow-y-auto p-1.5 [scrollbar-width:thin] [scrollbar-color:var(--border-primary)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border-primary [&::-webkit-scrollbar-track]:bg-transparent">
-                    {overflowTags.map((tag) => {
-                      const active = activeTag === tag;
-                      const count =
-                        tagCounts.find(([t]) => t === tag)?.[1] ?? 0;
-                      return (
-                        <li key={tag} role="none">
-                          <button
-                            type="button"
-                            role="menuitemradio"
-                            aria-checked={active}
-                            tabIndex={active || (!overflowActive && tag === overflowTags[0]) ? 0 : -1}
-                            onFocus={(event) => {
-                              moreRef.current
-                                ?.querySelectorAll<HTMLButtonElement>("#projects-more-tags button")
-                                .forEach((row) => {
-                                  row.tabIndex = row === event.currentTarget ? 0 : -1;
-                                });
-                            }}
-                            onClick={() => {
-                              setParams({
-                                tag: active ? "All" : tag,
-                                page: 1,
-                              });
-                              setShowAllTags(false);
-                              requestAnimationFrame(() => moreButtonRef.current?.focus());
-                            }}
-                            className={`group/row flex w-full items-center justify-between gap-3 rounded-lg px-2.5 py-2 font-mono text-[11px] uppercase tracking-widest transition-colors ${
-                              active
-                                ? "bg-text-primary text-bg-primary"
-                                : "text-text-secondary hover:bg-black/[0.04] hover:text-text-primary dark:hover:bg-white/[0.06]"
-                            }`}
-                          >
-                            <span className="flex min-w-0 items-center gap-2">
-                              <span
-                                aria-hidden
-                                className={`h-1 w-1 rounded-full transition-colors ${
-                                  active
-                                    ? "bg-bg-primary"
-                                    : "bg-text-tertiary/60 group-hover/row:bg-text-tertiary"
-                                }`}
-                              />
-                              <span className="truncate" title={tag}>{tag}</span>
-                            </span>
-                            <span
-                              className={
-                                active ? "text-bg-primary/70" : "text-text-secondary"
-                              }
-                            >
-                              {String(count).padStart(2, "0")}
-                            </span>
-                          </button>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </motion.div>
-              )}
-            </div>
-          )}
+            ))}
+          </div>
+          <span
+            aria-hidden
+            className={`pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-bg-primary to-transparent transition-opacity duration-200 ${
+              filterEdges.left ? "opacity-80" : "opacity-0"
+            }`}
+          />
+          <span
+            aria-hidden
+            className={`pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-bg-primary to-transparent transition-opacity duration-200 ${
+              filterEdges.right ? "opacity-80" : "opacity-0"
+            }`}
+          />
         </div>
       </div>
 
@@ -620,33 +458,47 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
       )}
 
       {filtered.length === 0 && (
-        <div className="mt-10 rounded-2xl border border-dashed border-border-primary px-6 py-16 text-center">
-          <p className="font-mono text-xs uppercase tracking-[0.25em] text-text-secondary">
-            Nothing here yet
-          </p>
-          <p className="mt-3 text-sm text-text-secondary">
-            No projects match{q ? ` “${q}”` : " this filter"} — try a different
-            search or tag.
-          </p>
-          {rescueTags.length > 0 && (
-            /* The search DOES match projects — they're just hidden behind
-               another tag. Offer one-click jumps that keep the query. */
-            <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
-              <span className="font-mono text-[11px] uppercase tracking-widest text-text-secondary">
-                Matches found under:
-              </span>
-              {rescueTags.map((tag) => (
-                <button
-                  key={tag}
-                  type="button"
-                  onClick={() => setParams({ tag, page: 1 })}
-                  className="rounded-full border border-border-primary px-3 py-1 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 focus-visible:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25 dark:active:border-white/25 dark:focus-visible:border-white/25"
-                >
-                  {tag}
-                </button>
-              ))}
-            </div>
-          )}
+        <div className="mt-10 px-2 sm:px-4">
+          <BlogStatePanel
+            kicker={
+              projects.length === 0
+                ? "No projects yet"
+                : invalidTag
+                  ? "Unknown project tag"
+                  : q
+                    ? "No matching projects"
+                    : "No projects found"
+            }
+            title={
+              <>
+                {projects.length === 0
+                  ? "The first project is still "
+                  : invalidTag
+                    ? "Choose another "
+                    : q
+                      ? "Try something "
+                      : "No projects are "}
+                <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
+                  {projects.length === 0
+                    ? "being prepared."
+                    : invalidTag
+                      ? "project tag."
+                      : q
+                        ? "different."
+                        : "available here."}
+                </span>
+              </>
+            }
+            description={
+              projects.length === 0
+                ? "Please return soon when the project collection is available."
+                : invalidTag
+                  ? "Choose another tag or return to the complete project collection."
+                  : q
+                    ? "Check the spelling, try a broader term, or clear the search to browse every project."
+                    : "Return to the complete collection to continue browsing."
+            }
+          >
           <button
             type="button"
             onClick={() => {
@@ -654,10 +506,11 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
               setQuery("");
               setParams({ tag: "All", q: "", page: 1 });
             }}
-            className="mt-5 rounded-full border border-border-primary px-4 py-1.5 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 focus-visible:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25 dark:active:border-white/25 dark:focus-visible:border-white/25"
+            className="inline-flex min-h-9 items-center rounded-full border border-border-primary px-5 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25"
           >
-            Clear filters
+            View all projects
           </button>
+          </BlogStatePanel>
         </div>
       )}
 
