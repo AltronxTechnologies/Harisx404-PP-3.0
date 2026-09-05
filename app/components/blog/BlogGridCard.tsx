@@ -53,27 +53,29 @@ export function BlogGridCard({
       </div>
 
       <div className="flex flex-1 flex-col px-2 pb-3 pt-4">
-        <h3 className="text-balance font-display text-[22px] font-medium leading-tight text-text-primary">
+        <div className="flex items-center justify-between gap-3 font-mono text-[11px] uppercase tracking-widest text-text-secondary">
+          <span className="shrink-0">{readingTime}</span>
+          <time className="truncate text-right" dateTime={publishedAt} title={formattedDate}>
+            {formattedDate}
+          </time>
+        </div>
+
+        <h3 className="mt-4 line-clamp-2 min-h-[55px] text-balance font-display text-[22px] font-medium leading-tight text-text-primary">
           {title}
         </h3>
 
-        <p className="mt-3 line-clamp-3 text-[15px] leading-6 text-text-secondary">
+        <p className="mt-3 line-clamp-3 min-h-[72px] text-[15px] leading-6 text-text-secondary">
           {summary}
         </p>
 
-        <div className="mt-auto flex flex-wrap items-end justify-between gap-4 pt-6">
-          <div className="font-mono text-[11px] uppercase tracking-widest text-text-secondary">
-            <span>{readingTime}</span>
-            <span className="mx-1.5" aria-hidden>·</span>
-            <time dateTime={publishedAt}>{formattedDate}</time>
-          </div>
-          <div className="flex flex-wrap items-center justify-end gap-3">
+        <div className="mt-auto flex min-h-7 items-center justify-between gap-3 pt-6">
+          <div className="flex min-h-7 min-w-0 items-center">
             <ReactionSummaryPill summary={reactionSummary} />
-            <span className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors group-hover:text-text-primary">
-              Read article
-              <DoubleArrow />
-            </span>
           </div>
+          <span className="inline-flex shrink-0 items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors group-hover:text-text-primary">
+            Read article
+            <DoubleArrow />
+          </span>
         </div>
       </div>
     </Link>

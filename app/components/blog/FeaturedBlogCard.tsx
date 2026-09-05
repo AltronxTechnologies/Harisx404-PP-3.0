@@ -13,7 +13,6 @@ export interface FeaturedBlogCardProps {
   publishedAt: string;
   formattedDate: string;
   imageName?: string;
-  categories?: string[];
   reactionSummary?: ReactionSummary;
 }
 
@@ -25,7 +24,6 @@ export function FeaturedBlogCard({
   publishedAt,
   formattedDate,
   imageName,
-  categories = [],
   reactionSummary,
 }: FeaturedBlogCardProps) {
   const imageSrc = getBlogImageSrc(imageName);
@@ -55,39 +53,29 @@ export function FeaturedBlogCard({
       </div>
 
       <div className="flex flex-1 flex-col justify-center px-4 py-6 sm:px-6 md:px-8 md:py-8">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="font-mono text-xs uppercase tracking-widest text-text-secondary">
-            <span>{readingTime}</span>
-            <span className="mx-2" aria-hidden>·</span>
-            <time dateTime={publishedAt}>{formattedDate}</time>
-          </div>
-          <ReactionSummaryPill summary={reactionSummary} />
+        <div className="flex items-center justify-between gap-4 font-mono text-xs uppercase tracking-widest text-text-secondary">
+          <span className="shrink-0">{readingTime}</span>
+          <time className="truncate text-right" dateTime={publishedAt} title={formattedDate}>
+            {formattedDate}
+          </time>
         </div>
 
-        <h3 className="mt-4 text-balance font-display text-2xl font-medium leading-tight text-text-primary">
+        <h3 className="mt-4 line-clamp-2 min-h-[60px] text-balance font-display text-2xl font-medium leading-tight text-text-primary">
           {title}
         </h3>
 
-        <p className="mt-4 line-clamp-3 text-[15px] leading-6 text-text-secondary">
+        <p className="mt-4 line-clamp-3 min-h-[72px] text-[15px] leading-6 text-text-secondary">
           {summary}
         </p>
 
-        {categories.length > 0 && (
-          <div className="mt-6 flex flex-wrap gap-2" aria-label="Article categories">
-            {categories.map((category) => (
-              <span
-                key={category}
-                className="rounded-md border border-border-primary px-2 py-1 font-mono text-[11px] uppercase tracking-widest text-text-secondary"
-              >
-                {category}
-              </span>
-            ))}
+        <div className="mt-auto flex min-h-7 items-center justify-between gap-4 pt-8">
+          <div className="flex min-h-7 min-w-0 items-center">
+            <ReactionSummaryPill summary={reactionSummary} />
           </div>
-        )}
-
-        <div className="mt-8 inline-flex items-center gap-2 self-start font-mono text-xs uppercase tracking-widest text-text-secondary transition-colors group-hover:text-text-primary">
-          Read article
-          <DoubleArrow />
+          <span className="inline-flex shrink-0 items-center gap-2 font-mono text-xs uppercase tracking-widest text-text-secondary transition-colors group-hover:text-text-primary">
+            Read article
+            <DoubleArrow />
+          </span>
         </div>
       </div>
     </Link>

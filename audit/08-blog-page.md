@@ -310,6 +310,37 @@ windowed pagination, cached transitions, light/dark themes, and 1440, 1024,
 errors. The Blog index and reaction summaries use tagged caches invalidated by
 admin mutations and successful reactions.
 
+## Card text-panel geometry amendment - 2026-09-04
+
+The owner standardized every Blog card text panel to the same content order:
+
+1. Reading time at the top-left and publication date at the top-right.
+2. Article title.
+3. Article description.
+4. Reserved reaction summary at the bottom-left and `Read article` at the
+   bottom-right.
+
+Grid titles reserve exactly 55px with a two-line clamp; featured titles reserve
+60px with a two-line clamp. Descriptions reserve exactly 72px with a three-line
+clamp. Excess text uses ellipsis rather than changing card geometry. Every
+footer reserves 28px for reaction state even when no reactions exist. Visible
+reaction totals cap at `999+`, while assistive technology receives the complete
+count and per-type breakdown.
+
+Measured verification across all six required viewports in both themes passed:
+
+- Grid-row height spread: 0px at every multi-column viewport.
+- Featured title/description: 60px / 72px.
+- Grid title/description: 55px / 72px.
+- Footer/action right-edge delta: 0px.
+- Card, panel, and document overflow: 0px.
+- A synthetic three-glyph `999+` pill measured 110px wide and retained at least
+  24.8px clearance from `Read article` in the narrowest 360px footer.
+- The stress pill changed neither card height nor action position.
+
+TypeScript, targeted ESLint, `git diff --check`, long-title/description clamps,
+zero-reaction cards, light/dark geometry, and responsive alignment passed.
+
 ## Remaining owner decision
 
 The index UI, behavior, states, and responsive implementation are

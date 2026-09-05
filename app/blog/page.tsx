@@ -276,7 +276,6 @@ export default async function BlogPage({
                 publishedAt={featuredPost.publishedAt}
                 formattedDate={featuredPost.formattedDate}
                 imageName={featuredPost.imageName}
-                categories={featuredPost.categories}
                 reactionSummary={reactionSummaries[featuredPost.slug]}
               />
             </section>

@@ -39,7 +39,7 @@ export function ReactionSummaryPill({ summary }: { summary?: ReactionSummary }) 
         ))}
       </span>
       <span className="font-mono text-[11px] tabular-nums">
-        {summary.total}
+        {summary.total > 999 ? "999+" : summary.total}
       </span>
     </span>
   );
