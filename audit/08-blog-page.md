@@ -321,9 +321,10 @@ The owner standardized every Blog card text panel to the same content order:
    bottom-right.
 
 Card copy is now adaptive inside one fixed combined block. A one-line title
-allows five description lines; a two-line title allows four. Titles never
-exceed two lines and excess title/description copy uses ellipsis. Grid copy
-reserves 164px; featured copy reserves 172px, exactly covering the worst-case
+allows four description lines; a two-line title allows three. Titles never
+exceed two lines and excess title/description copy uses ellipsis. Grid and
+mobile-featured copy reserve 142px; tablet/desktop featured copy reserves 150px,
+exactly covering the worst-case
 line geometry including the 12px title offset. Every footer reserves 28px for
 reaction state even when no reactions exist. Visible reaction totals cap at
 `999+`, while assistive technology receives the complete count and per-type
@@ -334,8 +335,8 @@ Measured verification across all six required viewports in both themes passed:
 - Grid-row height spread: 0px at every multi-column viewport.
 - Standard card title: 24px/500 with a 28px line height.
 - Featured card title: 26px/500 with a 32px line height.
-- Description: 15px/400 with a 22px line height; five lines after a one-line
-  title and four lines after a two-line title.
+- Description: 15px/400 with a 22px line height; four lines after a one-line
+  title and three lines after a two-line title.
 - Featured media minimum reduced from 360px to 320px.
 - Footer/action right-edge delta: 0px.
 - Card, panel, and document overflow: 0px.
@@ -353,9 +354,10 @@ zero-reaction cards, light/dark geometry, and responsive alignment passed.
 
 - Increased every standard card title from 22px to 24px and the featured title
   from 24px to 26px, retaining weight 500 and exact two-line clamps.
-- Recalculated fixed adaptive copy blocks to 164px for standard cards and 172px
-  for featured cards. A one-line title exposes five 15px/22px description lines;
-  a two-line title exposes four, with no hydration-driven card movement.
+- Recalculated fixed adaptive copy blocks to 142px for standard/mobile-featured
+  cards and 150px for tablet/desktop featured cards. A one-line title exposes
+  four 15px/22px description lines; a two-line title exposes three, with no
+  hydration-driven card movement.
 - Restored the prior 25x25px rounded, dashed-border, animated dual-arrow box
   beside `Read article`.
 - Refined the 28px reaction pill with a quiet neutral surface, inset highlight,
@@ -386,7 +388,7 @@ measured 24px, featured titles 26px, and every arrow measured 25x25px.
 - Laptop/desktop featured cards remain 346px high. Tablet featured cards use a
   280px media minimum and content-driven panel, measuring 306px at 768px.
 - On phones, the featured card now uses the exact standard-card geometry:
-  16:11 media, 12px shell inset, 24px/500 title with 28px line height, 164px
+  16:11 media, 12px shell inset, 24px/500 title with 28px line height, 142px
   adaptive copy block, 11px metadata/action type, and matching panel padding.
 - Laptop search increased from 224px to 256px. Tablet/mobile widths remain fluid
   and unchanged. The search keeps its rounded rectangular shape.
@@ -424,6 +426,14 @@ Final measurements passed in both themes at all six required viewports:
 - Local search, focus retention, URL state, and live result announcement passed.
 - TypeScript, targeted ESLint, `git diff --check`, and final independent code
   review passed with no findings.
+
+## Description-height reduction - 2026-09-04
+
+The owner reduced every card description by one line. One-line titles now show
+up to four description lines; two-line titles show up to three. The exact fixed
+copy reserves are 142px for standard/mobile-featured cards and 150px for
+tablet/desktop featured cards, reducing card height by 22px while preserving
+two-line title ellipses, footer alignment, equal grid rows, and stable hydration.
 
 ## Remaining owner decision
 

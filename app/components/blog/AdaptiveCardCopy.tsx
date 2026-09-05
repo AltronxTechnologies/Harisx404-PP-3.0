@@ -37,7 +37,7 @@ export function AdaptiveCardCopy({
   }, [title]);
 
   return (
-    <div className={`overflow-hidden ${featured ? "h-[164px] md:h-[172px]" : "h-[164px]"}`}>
+    <div className={`overflow-hidden ${featured ? "h-[142px] md:h-[150px]" : "h-[142px]"}`}>
       <h3
         ref={titleRef}
         className={`mt-3 line-clamp-2 text-balance font-display font-medium text-text-primary ${
@@ -50,7 +50,7 @@ export function AdaptiveCardCopy({
       </h3>
       <p
         className={`mt-2 text-[15px] leading-[22px] text-text-secondary ${
-          titleLines === 1 ? "line-clamp-5" : "line-clamp-4"
+          titleLines === 1 ? "line-clamp-4" : "line-clamp-3"
         }`}
       >
         {summary}
