@@ -403,7 +403,7 @@ export default async function BlogPage({
               <p className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
                 {emptyState.kicker}
               </p>
-              <h2 className="mx-auto mt-4 max-w-2xl text-balance font-display text-[36px] font-medium leading-tight text-text-primary md:text-[42px]">
+              <h2 className="heading-glow mx-auto mt-4 max-w-2xl text-balance [font-family:var(--font-instrument-serif),serif] text-[46px] font-medium leading-none tracking-tight text-text-primary md:text-[56px] md:tracking-[-1.5px]">
                 {emptyState.title}
               </h2>
               <p className="mx-auto mt-4 max-w-xl text-[15px] leading-6 text-text-secondary">

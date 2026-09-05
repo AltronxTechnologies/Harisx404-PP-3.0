@@ -442,7 +442,7 @@ Final measurements passed in both themes at all six required viewports:
   a working `View all articles` recovery action.
 - A genuinely empty publication takes precedence over query/category state and
   uses a non-circular `Go home` recovery action. The Blog data error boundary
-  uses the same centered card language, 40/46px title scale, 15px supporting
+  uses the same centered card language, 46/56px title scale, 15px supporting
   copy, and primary/secondary action hierarchy.
 - No-result panels measure 768px max width on desktop, 670px at 768, and 328,
   313, and 298px on phones, with zero center delta or overflow.
