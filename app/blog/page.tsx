@@ -21,7 +21,7 @@ const COMPACT_FIRST_PAGE_POSTS = 7;
 const COMPACT_LATER_PAGE_POSTS = 8;
 
 const description =
-  "Practical articles on software engineering, web performance, architecture, security, and reliable digital products.";
+  "Straightforward explanations of engineering decisions, useful patterns, trade-offs, and lessons from practice.";
 
 type BlogSearchParams = {
   category?: string | string[];
@@ -92,7 +92,7 @@ export async function generateMetadata({
   ].filter(Boolean).join(" · ");
   const title = qualifier
     ? `Blog · ${qualifier} | Muhammad Haris`
-    : "Blog | Ideas, clearly explained - Muhammad Haris";
+    : "Blog | Learn the reasoning behind the code - Muhammad Haris";
   const categoryPosts = category ? await fetchBlogIndexPosts() : [];
   const validCategory = categoryPosts.some((post) =>
     post.categories.some(
@@ -335,14 +335,14 @@ export default async function BlogPage({
               The Blog
             </p>
             <h1 className="heading-glow mx-auto mt-4 max-w-xl text-balance [font-family:var(--font-instrument-serif),serif] text-[46px] font-medium leading-none tracking-tight text-text-primary md:text-[56px] md:tracking-[-1.5px]">
-              Ideas, clearly{" "}
+              Learn the reasoning behind{" "}
               <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
-                explained.
+                the code.
               </span>
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-pretty text-[15px] leading-6 text-text-secondary">
-              Practical articles on software engineering, web performance,
-              architecture, security, and reliable digital products.
+              Straightforward explanations of engineering decisions, useful
+              patterns, trade-offs, and lessons from practice.
             </p>
           </header>
         </div>

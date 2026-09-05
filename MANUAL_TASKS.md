@@ -39,6 +39,19 @@ hardened with an optimized visitor lookup and atomic slug-rename/delete
 cascades. Run the latest file once more in the Supabase SQL Editor; it is
 idempotent and preserves existing reaction counts.
 
+### STEP 1C — Apply final Blog production hardening
+
+Run these files in the Supabase SQL Editor in this order:
+
+1. `migrations/2026_blog_publication_policy.sql`
+2. `migrations/2026_blog_admin_atomic_save.sql`
+3. `migrations/2026_article_reactions.sql`
+
+The first keeps scheduled posts private until publication time. The second
+installs the authorized atomic Blog-and-tags save RPC with stale-edit
+protection. The third upgrades reaction ownership and persistent abuse limits.
+All three are idempotent and safe to run against the current development data.
+
 ## STEP 2 — Re-run the seed (1 min)
 
 From the repo root (or inside the dev container):

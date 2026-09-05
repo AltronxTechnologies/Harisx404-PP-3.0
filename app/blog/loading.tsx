@@ -35,8 +35,20 @@ export default function BlogLoading() {
           <PaperHeroTexture className="-inset-x-2 bottom-0 top-[-128px] sm:-inset-x-3 sm:top-[-144px] md:top-[-176px] lg:inset-x-0" />
           <div className="relative mx-auto flex max-w-3xl animate-pulse flex-col items-center text-center motion-reduce:animate-none">
             <div className="h-4 w-28 rounded bg-border-primary/50" />
-            <div className="mt-4 h-[92px] w-full max-w-md rounded bg-border-primary/40 sm:h-[46px] md:h-14" />
-            <div className="mt-4 h-[72px] w-full max-w-2xl rounded bg-border-primary/30 sm:h-12" />
+            <div className="relative mx-auto mt-4 max-w-xl text-balance [font-family:var(--font-instrument-serif),serif] text-[46px] font-medium leading-none tracking-tight md:text-[56px] md:tracking-[-1.5px]">
+              <span className="invisible">
+                Learn the reasoning behind{" "}
+                <span className="px-1 pb-1 italic">the code.</span>
+              </span>
+              <span className="absolute inset-0 rounded bg-border-primary/40" />
+            </div>
+            <div className="relative mx-auto mt-4 max-w-2xl text-pretty text-[15px] leading-6">
+              <span className="invisible">
+                Straightforward explanations of engineering decisions, useful
+                patterns, trade-offs, and lessons from practice.
+              </span>
+              <span className="absolute inset-0 rounded bg-border-primary/30" />
+            </div>
           </div>
         </div>
       </GridWrapper>

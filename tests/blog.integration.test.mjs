@@ -28,7 +28,7 @@ test("Blog index and search states render", async () => {
     responseText("/blog?q=definitely-no-result"),
   ]);
 
-  assert.match(index, /Ideas, clearly/);
+  assert.match(index, /Learn the reasoning behind/);
   assert.match(found, /the-hard-part-isnt-writing-tests-anymore/i);
   assert.match(missing, /No matching articles/i);
   assert.match(missing, /Try something/);

@@ -512,7 +512,7 @@ focus clearance, and light/dark theme matching were reverified after the change.
 
 - Page top offset: 56px.
 - Kicker-to-heading and heading-to-copy gaps: 16px / 16px.
-- Header-to-filter and filter-to-content gaps: 56px / 56px.
+- Header-to-filter and filter-to-content gaps: 56px / 24px.
 - Featured-to-latest section spacing: 56px.
 - Final article/pagination block to CTA: 112px.
 - CTA internal bottom space: 80px mobile / 112px desktop.
@@ -531,11 +531,22 @@ copy reserves are 142px for standard/mobile-featured cards and 150px for
 tablet/desktop featured cards, reducing card height by 22px while preserving
 two-line title ellipses, footer alignment, equal grid rows, and stable hydration.
 
-## Remaining owner decision
+## Final header copy - 2026-09-05
 
-The index UI, behavior, states, and responsive implementation are
-production-ready. The complete Blog publication cannot honestly be called
-accurate or legally production-ready until ownership of imported third-party
-articles is resolved. The options are to unpublish them, or add verified author,
-license, canonical-source, and attribution data and correct the affected
-summaries. No destructive content change was made without owner direction.
+- Kicker: `The Blog`.
+- Heading: `Learn the reasoning behind the code.` with `the code.` using the
+  locked italic animated gradient treatment.
+- Supporting text: `Straightforward explanations of engineering decisions,
+  useful patterns, trade-offs, and lessons from practice.`
+
+The selected copy retains the locked 12px/500 kicker, 46/56px heading, 15/24px
+supporting text, and 16px internal gaps. The loading header uses invisible exact
+typography copies rather than breakpoint guesses; loading and resolved heights
+match at 1440, 768, 640, 390, 360, and 320px in both themes.
+
+## Dummy-content note
+
+The owner confirmed the imported articles are temporary dummy content used to
+exercise full production behavior and will be removed before launch. Their
+editorial ownership is therefore not a blocker for the Blog implementation
+audit; no destructive content changes were made during engineering validation.
