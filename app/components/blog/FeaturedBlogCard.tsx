@@ -33,7 +33,7 @@ export function FeaturedBlogCard({
       href={`/blog/${slug}`}
       className="group relative flex flex-col rounded-3xl border border-border-primary bg-white p-3 transition-all hover:border-neutral-400/70 hover:shadow-lg dark:bg-white/[0.02] dark:hover:border-white/25 md:flex-row"
     >
-      <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-2xl bg-slate-900 md:aspect-auto md:min-h-[320px] md:w-1/2">
+      <div className="relative aspect-[16/11] w-full shrink-0 overflow-hidden rounded-2xl bg-slate-900 md:aspect-auto md:min-h-[280px] md:w-1/2 lg:min-h-[320px]">
         {imageSrc ? (
           <Image
             src={imageSrc}
@@ -45,16 +45,16 @@ export function FeaturedBlogCard({
             className="object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
           />
         ) : (
-          <div aria-hidden className="flex size-full items-center justify-center bg-slate-900 p-8">
-            <span className="max-w-md text-balance text-center font-display text-3xl font-medium italic leading-tight text-white">
+          <div aria-hidden className="flex size-full items-center justify-center bg-slate-900 p-6 md:p-8">
+            <span className="text-balance text-center font-display text-2xl font-medium italic leading-tight text-white md:max-w-md md:text-3xl">
               {title}
             </span>
           </div>
         )}
       </div>
 
-      <div className="flex flex-1 flex-col justify-center px-4 py-6 sm:px-6 md:px-8 md:py-8">
-        <div className="flex items-center justify-between gap-4 font-mono text-xs uppercase tracking-widest text-text-secondary">
+      <div className="flex flex-1 flex-col px-2 pb-3 pt-4 md:justify-center md:px-6 md:py-6 lg:px-8 lg:py-8">
+        <div className="flex items-center justify-between gap-4 font-mono text-[11px] uppercase tracking-widest text-text-secondary md:text-xs">
           <span className="shrink-0">{readingTime}</span>
           <time className="truncate text-right" dateTime={publishedAt} title={formattedDate}>
             {formattedDate}
@@ -67,7 +67,7 @@ export function FeaturedBlogCard({
           <div className="flex min-h-7 min-w-0 items-center">
             <ReactionSummaryPill summary={reactionSummary} />
           </div>
-          <span className="inline-flex shrink-0 items-center gap-2 font-mono text-xs uppercase tracking-widest text-text-secondary transition-colors group-hover:text-text-primary">
+          <span className="inline-flex shrink-0 items-center gap-2 font-mono text-[11px] uppercase leading-none tracking-widest text-text-secondary transition-colors group-hover:text-text-primary md:text-xs">
             Read article
             <ArticleCardArrow />
           </span>

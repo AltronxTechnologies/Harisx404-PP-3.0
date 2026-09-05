@@ -381,6 +381,50 @@ behavior. Across all six required viewports in both themes, row-height spread,
 card/pill/arrow clipping, and document overflow were zero. Standard titles
 measured 24px, featured titles 26px, and every arrow measured 25x25px.
 
+## Final responsive card and search refinement - 2026-09-04
+
+- Laptop/desktop featured cards remain 346px high. Tablet featured cards use a
+  280px media minimum and content-driven panel, measuring 306px at 768px.
+- On phones, the featured card now uses the exact standard-card geometry:
+  16:11 media, 12px shell inset, 24px/500 title with 28px line height, 164px
+  adaptive copy block, 11px metadata/action type, and matching panel padding.
+- Laptop search increased from 224px to 256px. Tablet/mobile widths remain fluid
+  and unchanged. The search keeps its rounded rectangular shape.
+- Search hover and pointer-active borders match Projects exactly:
+  `neutral-400/70` in light mode and `white/25` in dark mode. Keyboard focus
+  retains a dedicated 2px ring.
+- Search placeholder colors match the locked Search modal: neutral-400 in light
+  mode and white/30 in dark mode.
+- Card descriptions shorter than the display target are enriched from the real
+  checked-in article prose. Up to the first two eligible prose paragraphs are
+  cleaned of MDX formatting and used only when they provide a fuller, more
+  representative card excerpt. No filler or fabricated copy is seeded.
+- Root Blog featured selection is reaction-driven. The highest aggregate total
+  is placed first; equal or zero totals retain newest-first ordering. Category
+  and search result pages continue using their newest matching article.
+- Reaction pills reuse the exact four SVG components from article reactions at
+  16x16px. All four are colored and visible on every card; zero totals render
+  `0`, while real totals remain accurate and accessible.
+- `Read article` and its restored 25x25px dashed arrow use a shared centered flex
+  line with `leading-none`; measured optical/geometric center delta is 0px.
+
+Final measurements passed in both themes at all six required viewports:
+
+- Featured height: 346px at 1440/1024, 306px at 768, then 486.13px, 475.82px,
+  and 465.5px at 390, 375, and 360 respectively.
+- Search: 256x32px at 1440/1024; 630px, 288px, 273px, and 258px wide at 768,
+  390, 375, and 360 respectively.
+- Grid row-height spread: 0px.
+- Arrow center delta: 0px.
+- Document/card overflow and unintended clipping: 0px.
+- Placeholder colors: `rgb(163,163,163)` light and `white/30` dark.
+- All card pills contained four SVGs with the same paths and active colors as
+  the article controls. Existing nonzero totals were preserved; zero-reaction
+  cards correctly displayed `0`.
+- Local search, focus retention, URL state, and live result announcement passed.
+- TypeScript, targeted ESLint, `git diff --check`, and final independent code
+  review passed with no findings.
+
 ## Remaining owner decision
 
 The index UI, behavior, states, and responsive implementation are

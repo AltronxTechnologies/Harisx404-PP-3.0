@@ -1,11 +1,7 @@
-import type { ReactionSummary, ReactionType } from "@/app/blog/data";
+"use client";
 
-const reactionGlyphs: Record<ReactionType, string> = {
-  like: "👍",
-  heart: "♥",
-  celebrate: "✦",
-  insightful: "💡",
-};
+import type { ReactionSummary, ReactionType } from "@/app/blog/data";
+import { ArticleReactionIcon } from "@/app/components/ArticleReactions";
 
 const reactionNames: Record<ReactionType, string> = {
   like: "like",
@@ -45,11 +41,11 @@ export function ReactionSummaryPill({ summary }: { summary?: ReactionSummary }) 
         {reactionOrder.map((type) => (
           <span
             key={type}
-            className={`flex size-4 items-center justify-center rounded-full border border-border-primary bg-white text-[10px] leading-none shadow-sm dark:bg-[#1A1F2B] ${
-              counts[type] > 0 ? "opacity-100" : "opacity-35 grayscale"
+            className={`flex size-5 items-center justify-center rounded-full border border-border-primary bg-white leading-none shadow-sm dark:bg-[#1A1F2B] [&>svg]:size-4 ${
+              counts[type] > 0 ? "opacity-100" : "opacity-70"
             }`}
           >
-            {reactionGlyphs[type]}
+            <ArticleReactionIcon type={type} active />
           </span>
         ))}
       </span>

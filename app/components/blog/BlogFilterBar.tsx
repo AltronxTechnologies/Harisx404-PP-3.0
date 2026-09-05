@@ -134,7 +134,7 @@ export function BlogFilterBar({
 
       <div className="order-1 flex w-full shrink-0 items-center gap-2 lg:order-2 lg:w-auto">
         <label htmlFor="blog-search" className="sr-only">Search articles</label>
-        <div className="relative min-w-0 flex-1 lg:w-56 lg:flex-none">
+        <div className="relative min-w-0 flex-1 lg:w-64 lg:flex-none">
           <Search
             aria-hidden
             className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary"
@@ -146,7 +146,7 @@ export function BlogFilterBar({
             maxLength={100}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search articles…"
-            className="h-8 w-full rounded-lg border border-border-primary bg-white pl-9 pr-8 font-mono text-[11px] text-text-primary outline-none transition-colors placeholder:text-text-secondary hover:border-neutral-400/70 active:border-neutral-400/70 focus:border-text-secondary focus:ring-2 focus:ring-neutral-300/50 dark:bg-white/[0.03] dark:hover:border-white/25 dark:active:border-white/25 dark:focus:ring-white/20 [&::-webkit-search-cancel-button]:hidden"
+            className="h-8 w-full rounded-lg border border-border-primary bg-white pl-9 pr-8 font-mono text-[11px] text-text-primary outline-none transition-colors placeholder:text-neutral-400 hover:border-neutral-400/70 active:border-neutral-400/70 focus:border-text-secondary focus-visible:ring-2 focus-visible:ring-neutral-300/60 dark:bg-white/[0.03] dark:placeholder:text-white/30 dark:hover:border-white/25 dark:active:border-white/25 dark:focus-visible:ring-white/20 [&::-webkit-search-cancel-button]:hidden"
           />
           {query && (
             <button

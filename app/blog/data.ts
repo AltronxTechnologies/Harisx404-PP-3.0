@@ -83,6 +83,31 @@ function localImagePath(imageName: string) {
   return `/blog/${imageName}`;
 }
 
+function buildCardDescription(summary: string, content = "") {
+  if (summary.trim().length >= 220 || !content) return summary.trim();
+
+  const prose = content
+    .split(/\n\s*\n/)
+    .map((paragraph) => paragraph.trim())
+    .filter(
+      (paragraph) =>
+        paragraph.length > 35 &&
+        !/^(import|export|#|<|\!\[|```|---|\*\*[^*]+\*\*$)/.test(paragraph),
+    )
+    .map((paragraph) =>
+      paragraph
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+        .replace(/[*_`>#]/g, "")
+        .replace(/\s+/g, " ")
+        .trim(),
+    )
+    .filter(Boolean)
+    .slice(0, 2)
+    .join(" ");
+
+  return prose.length > summary.trim().length ? prose.slice(0, 360) : summary.trim();
+}
+
 const loadBlogIndexPosts = async (): Promise<BlogIndexPost[]> => {
   const supabase = getPublicSupabase();
   if (!supabase) throw new Error("Blog data is unavailable: Supabase is not configured.");
@@ -106,7 +131,11 @@ const loadBlogIndexPosts = async (): Promise<BlogIndexPost[]> => {
   const missingContentSlugs = (data || [])
     .filter((post) => {
       const minutes = Number(post.reading_time_minutes);
-      return !(Number.isFinite(minutes) && minutes > 0) && !localMetadata.has(post.slug);
+      return (
+        !localMetadata.has(post.slug) &&
+        (!(Number.isFinite(minutes) && minutes > 0) ||
+          (post.summary || "").trim().length < 220)
+      );
     })
     .map((post) => post.slug);
   const contentBySlug = new Map<string, string>();
@@ -134,17 +163,18 @@ const loadBlogIndexPosts = async (): Promise<BlogIndexPost[]> => {
         ? joinedCategories
         : local?.categories || [];
       const minutes = Number(post.reading_time_minutes);
+      const sourceContent = local?.content || contentBySlug.get(post.slug) || "";
 
       return {
         slug: post.slug,
         title: post.title,
-        summary: post.summary || "",
+        summary: buildCardDescription(post.summary || "", sourceContent),
         publishedAt: post.published_at,
         readingTime:
           Number.isFinite(minutes) && minutes > 0
             ? `${minutes} min read`
             : local || contentBySlug.has(post.slug)
-              ? readingDuration(local?.content || contentBySlug.get(post.slug) || "", {
+              ? readingDuration(sourceContent, {
                 wordsPerMinute: 200,
                 emoji: false,
                 })

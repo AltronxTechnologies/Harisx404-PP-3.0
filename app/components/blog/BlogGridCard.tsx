@@ -67,7 +67,7 @@ export function BlogGridCard({
           <div className="flex min-h-7 min-w-0 items-center">
             <ReactionSummaryPill summary={reactionSummary} />
           </div>
-          <span className="inline-flex shrink-0 items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors group-hover:text-text-primary">
+          <span className="inline-flex shrink-0 items-center gap-2 font-mono text-[11px] uppercase leading-none tracking-widest text-text-secondary transition-colors group-hover:text-text-primary">
             Read article
             <ArticleCardArrow />
           </span>

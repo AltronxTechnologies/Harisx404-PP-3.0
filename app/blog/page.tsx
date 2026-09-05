@@ -216,11 +216,23 @@ export default async function BlogPage({
           return searchable.includes(queryParam.toLowerCase());
         })
       : categoryPosts;
-  const editorialFeatured = categoryParam
-    ? undefined
-    : filteredPosts.find((post) => post.featured);
-  const orderedPosts = editorialFeatured
-    ? [editorialFeatured, ...filteredPosts.filter((post) => post !== editorialFeatured)]
+  const allReactionSummaries = await fetchBlogReactionSummaries(
+    filteredPosts.map((post) => post.slug),
+  );
+  const mostReactedPost = !categoryParam && !queryParam
+    ? filteredPosts.reduce<(typeof filteredPosts)[number] | undefined>(
+        (best, post) =>
+          !best ||
+          (allReactionSummaries[post.slug]?.total || 0) >
+            (allReactionSummaries[best.slug]?.total || 0)
+            ? post
+            : best,
+        undefined,
+      )
+    : undefined;
+  const featuredSource = mostReactedPost || filteredPosts[0];
+  const orderedPosts = featuredSource
+    ? [featuredSource, ...filteredPosts.filter((post) => post !== featuredSource)]
     : filteredPosts;
   const { firstPage, laterPages } = paginationConfig(compact);
   const totalPages = orderedPosts.length <= firstPage
@@ -252,9 +264,7 @@ export default async function BlogPage({
   }
   const { start: pageStart, end: pageEnd } = pageBounds(currentPage, compact);
   const pagePosts = orderedPosts.slice(pageStart, pageEnd);
-  const reactionSummaries = await fetchBlogReactionSummaries(
-    pagePosts.map((post) => post.slug),
-  );
+  const reactionSummaries = allReactionSummaries;
   const featuredPost = currentPage === 1 ? pagePosts[0] : undefined;
   const latestPosts = featuredPost ? pagePosts.slice(1) : pagePosts;
   const hasInvalidCategory = ambiguousCategory || Boolean(categoryParam && !validCategory);
@@ -308,8 +318,8 @@ export default async function BlogPage({
                     ? "Search results"
                     : categoryParam
                     ? `Newest in ${categoryParam}`
-                    : editorialFeatured
-                      ? "Featured article"
+                    : (reactionSummaries[featuredPost.slug]?.total || 0) > 0
+                      ? "Most reacted article"
                       : "Newest article"}
                 </h2>
                 <span className="font-mono text-[11px] uppercase tracking-widest text-text-secondary">

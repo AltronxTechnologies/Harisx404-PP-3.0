@@ -322,6 +322,16 @@ const REACTION_EMOJIS: Record<
   insightful: (isActive) => <InsightfulSVG isActive={isActive} />,
 };
 
+export function ArticleReactionIcon({
+  type,
+  active = false,
+}: {
+  type: ReactionType;
+  active?: boolean;
+}) {
+  return REACTION_EMOJIS[type](active);
+}
+
 const AnimatedNumber = ({ number }: { number: number }) => {
   const [prevNumber, setPrevNumber] = useState(number);
 
