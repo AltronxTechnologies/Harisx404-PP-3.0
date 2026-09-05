@@ -262,7 +262,7 @@ export function BlogFilterBar({
             maxLength={100}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search articles…"
-            className="h-8 w-full rounded-lg border border-border-primary bg-transparent pl-9 pr-9 font-mono text-[11px] text-text-primary outline-none transition-colors placeholder:text-neutral-400 hover:border-neutral-400/70 active:border-neutral-400/70 focus:border-text-secondary focus-visible:ring-2 focus-visible:ring-neutral-300/60 dark:placeholder:text-white/30 dark:hover:border-white/25 dark:active:border-white/25 dark:focus-visible:ring-white/20 [&::-webkit-search-cancel-button]:hidden"
+            className="h-8 w-full rounded-lg border border-black/[0.16] bg-transparent pl-9 pr-9 font-mono text-[11px] text-text-primary outline-none transition-colors placeholder:text-neutral-400 hover:border-neutral-400/[0.72] active:border-neutral-400/[0.72] focus:border-text-secondary focus-visible:ring-2 focus-visible:ring-neutral-300/60 dark:border-white/[0.12] dark:placeholder:text-white/30 dark:hover:border-white/[0.27] dark:active:border-white/[0.27] dark:focus-visible:ring-white/20 [&::-webkit-search-cancel-button]:hidden"
           />
           {query && (
             <button
@@ -284,7 +284,7 @@ export function BlogFilterBar({
           target="_blank"
           rel="noopener noreferrer"
           aria-label="RSS Feed (opens in a new tab)"
-          className="inline-flex size-8 items-center justify-center rounded-lg border border-border-primary text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25"
+          className="inline-flex size-8 items-center justify-center rounded-lg border border-black/[0.16] text-text-secondary transition-colors hover:border-neutral-400/[0.72] hover:text-text-primary active:border-neutral-400/[0.72] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:border-white/[0.12] dark:hover:border-white/[0.27] dark:active:border-white/[0.27]"
         >
           <Rss className="size-4" aria-hidden />
         </Link>
