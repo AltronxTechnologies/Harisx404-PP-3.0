@@ -503,6 +503,26 @@ Light/dark testing at all required viewports passed with correct start/middle/en
 fog states, zero blocked clicks, fully visible keyboard focus, zero document
 overflow, and no console errors.
 
+The two fog nodes remain mounted and animate only opacity, eliminating abrupt
+appearance/removal. Both use a restrained final opacity of 0.7 and a 200ms
+standard ease: measured ramps were approximately 0.06 at 50ms, 0.45 at 100ms,
+0.64 at 150ms, and 0.70 at 200ms in both themes.
+
+## Final Blog-to-CTA rhythm confirmation - 2026-09-04
+
+- Page top offset: 56px.
+- Kicker-to-heading and heading-to-copy gaps: 16px / 16px.
+- Header-to-filter and filter-to-content gaps: 56px / 56px.
+- Featured-to-latest section spacing: 56px.
+- Final article/pagination block to CTA: 112px.
+- CTA internal bottom space: 80px mobile / 112px desktop.
+- CTA bottom to Footer: 0px, identical to Home, About, and Projects.
+
+Blog renders the same locked `CtaSection` DOM and complete class string as the
+reference pages. The redundant Blog-only 96px page-bottom padding was removed.
+Measured CTA and Footer spacing now matches all locked references exactly in
+light/dark mobile and desktop layouts, with zero overflow.
+
 ## Description-height reduction - 2026-09-04
 
 The owner reduced every card description by one line. One-line titles now show

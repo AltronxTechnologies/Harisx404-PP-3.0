@@ -186,18 +186,18 @@ export function BlogFilterBar({
             );
           })}
         </div>
-        {filterEdges.left && (
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-bg-primary to-transparent"
-          />
-        )}
-        {filterEdges.right && (
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-bg-primary to-transparent"
-          />
-        )}
+        <span
+          aria-hidden
+          className={`pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-bg-primary to-transparent transition-opacity duration-200 ${
+            filterEdges.left ? "opacity-70" : "opacity-0"
+          }`}
+        />
+        <span
+          aria-hidden
+          className={`pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-bg-primary to-transparent transition-opacity duration-200 ${
+            filterEdges.right ? "opacity-70" : "opacity-0"
+          }`}
+        />
       </div>
 
       <div className="order-1 flex w-full shrink-0 items-center gap-2 lg:order-2 lg:w-auto">

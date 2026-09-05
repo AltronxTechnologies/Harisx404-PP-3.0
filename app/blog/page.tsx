@@ -327,7 +327,7 @@ export default async function BlogPage({
     : { href: "/blog", label: "View all articles" };
 
   return (
-    <div className="relative mt-14 pb-24">
+    <div className="relative mt-14">
       <BlogViewportMode />
       <GridWrapper>
         <div className="relative px-4 xl:px-0">
