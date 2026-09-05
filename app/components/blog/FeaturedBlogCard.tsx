@@ -1,10 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
-import { DoubleArrow } from "@/app/components/home/DoubleArrow";
 import { getBlogImageSrc } from "@/app/components/blog/blogImage";
 import { ReactionSummaryPill } from "@/app/components/blog/ReactionSummaryPill";
 import type { ReactionSummary } from "@/app/blog/data";
 import { AdaptiveCardCopy } from "@/app/components/blog/AdaptiveCardCopy";
+import { ArticleCardArrow } from "@/app/components/blog/ArticleCardArrow";
 
 export interface FeaturedBlogCardProps {
   slug: string;
@@ -69,7 +69,7 @@ export function FeaturedBlogCard({
           </div>
           <span className="inline-flex shrink-0 items-center gap-2 font-mono text-xs uppercase tracking-widest text-text-secondary transition-colors group-hover:text-text-primary">
             Read article
-            <DoubleArrow />
+            <ArticleCardArrow />
           </span>
         </div>
       </div>

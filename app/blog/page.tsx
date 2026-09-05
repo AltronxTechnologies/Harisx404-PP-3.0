@@ -27,6 +27,7 @@ type BlogSearchParams = {
   category?: string | string[];
   page?: string | string[];
   view?: string | string[];
+  q?: string | string[];
 };
 
 function firstParam(value: string | string[] | undefined) {
@@ -35,6 +36,10 @@ function firstParam(value: string | string[] | undefined) {
 
 function normalizeCategory(value: string | undefined) {
   return value?.trim().toLowerCase().slice(0, 80) || "";
+}
+
+function normalizeQuery(value: string | undefined) {
+  return value?.trim().replace(/\s+/g, " ").slice(0, 100) || "";
 }
 
 function formatPublishedDate(value: string) {
@@ -48,13 +53,19 @@ function formatPublishedDate(value: string) {
   }).format(date);
 }
 
-function pageHref(page: number, category: string, compact = false) {
+function pageHref(
+  page: number,
+  category: string,
+  compact = false,
+  searchQuery = "",
+) {
   const params = new URLSearchParams();
   if (category) params.set("category", category);
+  if (searchQuery) params.set("q", searchQuery);
   if (page > 1) params.set("page", String(page));
   if (compact) params.set("view", "compact");
-  const query = params.toString();
-  return query ? `/blog?${query}` : "/blog";
+  const urlQuery = params.toString();
+  return urlQuery ? `/blog?${urlQuery}` : "/blog";
 }
 
 export async function generateMetadata({
@@ -72,8 +83,11 @@ export async function generateMetadata({
     ? Math.max(1, Number.parseInt(rawPage, 10))
     : 1;
   const compact = firstParam(params.view) === "compact";
+  const ambiguousQuery = Array.isArray(params.q);
+  const query = Array.isArray(params.q) ? "" : normalizeQuery(params.q);
   const qualifier = [
     category ? category.replace(/-/g, " ") : "",
+    query ? `Search: ${query}` : "",
     page > 1 ? `Page ${page}` : "",
   ].filter(Boolean).join(" · ");
   const title = qualifier
@@ -91,9 +105,15 @@ export async function generateMetadata({
     title,
     description,
     alternates: {
-      canonical: invalidCategory || compact ? "/blog" : pageHref(page, category),
+      canonical:
+        invalidCategory || ambiguousQuery || compact || query
+          ? "/blog"
+          : pageHref(page, category),
     },
-    robots: invalidCategory || compact ? { index: false, follow: true } : undefined,
+    robots:
+      invalidCategory || ambiguousQuery || compact || query
+        ? { index: false, follow: true }
+        : undefined,
     openGraph: {
       title,
       description,
@@ -144,6 +164,9 @@ export default async function BlogPage({
   const rawView = firstParam(params.view);
   const compact = rawView === "compact";
   const invalidView = Array.isArray(params.view) || Boolean(rawView && rawView !== "compact");
+  const ambiguousQuery = Array.isArray(params.q);
+  const rawQuery = firstParam(params.q);
+  const queryParam = ambiguousQuery ? "" : normalizeQuery(rawQuery);
   const requestedPage = rawPage && /^\d+$/.test(rawPage)
     ? Number.parseInt(rawPage, 10)
     : 1;
@@ -172,7 +195,7 @@ export default async function BlogPage({
   const validCategory = categories.some(
     (category) => category.toLowerCase() === categoryParam,
   );
-  const filteredPosts = ambiguousCategory
+  const categoryPosts = ambiguousCategory
     ? []
     : categoryParam
     ? posts.filter((post) =>
@@ -181,6 +204,18 @@ export default async function BlogPage({
         ),
       )
     : posts;
+  const filteredPosts = ambiguousQuery
+    ? []
+    : queryParam
+      ? categoryPosts.filter((post) => {
+          const searchable = [
+            post.title,
+            post.summary,
+            ...post.categories,
+          ].join(" ").toLowerCase();
+          return searchable.includes(queryParam.toLowerCase());
+        })
+      : categoryPosts;
   const editorialFeatured = categoryParam
     ? undefined
     : filteredPosts.find((post) => post.featured);
@@ -201,13 +236,19 @@ export default async function BlogPage({
     params.page !== undefined &&
     (Array.isArray(params.page) || rawPage !== canonicalPage)
   ) {
-    redirect(pageHref(currentPage, categoryParam, compact));
+    redirect(pageHref(currentPage, categoryParam, compact, queryParam));
   }
   if (!ambiguousCategory && rawCategory !== undefined && rawCategory !== categoryParam) {
-    redirect(pageHref(currentPage, categoryParam, compact));
+    redirect(pageHref(currentPage, categoryParam, compact, queryParam));
   }
   if (invalidView) {
-    redirect(pageHref(currentPage, categoryParam));
+    redirect(pageHref(currentPage, categoryParam, false, queryParam));
+  }
+  if (ambiguousQuery) {
+    redirect(pageHref(currentPage, categoryParam, compact));
+  }
+  if (!ambiguousQuery && rawQuery !== undefined && rawQuery !== queryParam) {
+    redirect(pageHref(currentPage, categoryParam, compact, queryParam));
   }
   const { start: pageStart, end: pageEnd } = pageBounds(currentPage, compact);
   const pagePosts = orderedPosts.slice(pageStart, pageEnd);
@@ -247,7 +288,12 @@ export default async function BlogPage({
           categories={categories}
           invalidCategory={ambiguousCategory}
           compact={compact}
+          initialQuery={queryParam}
         />
+        <p className="sr-only" role="status" aria-live="polite">
+          {filteredPosts.length} {filteredPosts.length === 1 ? "article" : "articles"}
+          {queryParam ? ` found for ${queryParam}` : " in this collection"}
+        </p>
 
         <div className={compact ? "lg:hidden" : "hidden lg:block"}>
         <div className="mt-14 space-y-14 px-2 sm:px-4">
@@ -258,7 +304,9 @@ export default async function BlogPage({
                   id="featured-article-heading"
                   className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary"
                 >
-                  {categoryParam
+                  {queryParam
+                    ? "Search results"
+                    : categoryParam
                     ? `Newest in ${categoryParam}`
                     : editorialFeatured
                       ? "Featured article"
@@ -283,7 +331,7 @@ export default async function BlogPage({
 
           {latestPosts.length > 0 && (
             <section aria-labelledby="latest-articles-heading">
-              <div className="mb-6 flex items-center justify-between gap-4 border-b border-border-primary pb-4" role="status" aria-live="polite">
+              <div className="mb-6 flex items-center justify-between gap-4 border-b border-border-primary pb-4">
                 <h2
                   id="latest-articles-heading"
                   className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary"
@@ -316,11 +364,17 @@ export default async function BlogPage({
           {pagePosts.length === 0 && (
             <div className="rounded-3xl border border-border-primary bg-white px-6 py-16 text-center dark:bg-white/[0.02]">
               <p className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
-                {hasInvalidCategory ? "Unknown category" : "No articles yet"}
+                {hasInvalidCategory
+                  ? "Unknown category"
+                  : queryParam || ambiguousQuery
+                    ? "No matching articles"
+                    : "No articles yet"}
               </p>
               <h2 className="mt-4 font-display text-3xl font-medium text-text-primary">
                 {hasInvalidCategory
                   ? "That filter does not match the published collection."
+                  : queryParam || ambiguousQuery
+                    ? "Try a different title, topic, or category."
                   : "The next article is still being prepared."}
               </h2>
               <Link
@@ -342,7 +396,7 @@ export default async function BlogPage({
                 ) : (
                   <Link
                     prefetch={false}
-                    href={pageHref(currentPage - 1, categoryParam, compact)}
+                    href={pageHref(currentPage - 1, categoryParam, compact, queryParam)}
                     className="inline-flex min-h-8 items-center rounded-full border border-border-primary px-4 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25"
                   >
                     Previous
@@ -355,7 +409,7 @@ export default async function BlogPage({
                     <Link
                       prefetch={false}
                       key={item}
-                      href={pageHref(item, categoryParam, compact)}
+                      href={pageHref(item, categoryParam, compact, queryParam)}
                       aria-current={item === currentPage ? "page" : undefined}
                       aria-label={`Page ${item}${item === currentPage ? ", current page" : ""}`}
                       className={`inline-flex size-8 items-center justify-center rounded-full border font-mono text-xs transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary ${
@@ -375,7 +429,7 @@ export default async function BlogPage({
                 ) : (
                   <Link
                     prefetch={false}
-                    href={pageHref(currentPage + 1, categoryParam, compact)}
+                    href={pageHref(currentPage + 1, categoryParam, compact, queryParam)}
                     className="inline-flex min-h-8 items-center rounded-full border border-border-primary px-4 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25"
                   >
                     Next

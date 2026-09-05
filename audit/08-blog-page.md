@@ -323,7 +323,7 @@ The owner standardized every Blog card text panel to the same content order:
 Card copy is now adaptive inside one fixed combined block. A one-line title
 allows five description lines; a two-line title allows four. Titles never
 exceed two lines and excess title/description copy uses ellipsis. Grid copy
-reserves 160px; featured copy reserves 168px, exactly covering the worst-case
+reserves 164px; featured copy reserves 172px, exactly covering the worst-case
 line geometry including the 12px title offset. Every footer reserves 28px for
 reaction state even when no reactions exist. Visible reaction totals cap at
 `999+`, while assistive technology receives the complete count and per-type
@@ -332,21 +332,54 @@ breakdown.
 Measured verification across all six required viewports in both themes passed:
 
 - Grid-row height spread: 0px at every multi-column viewport.
-- Standard card title: 22px/500 with a 26px line height.
-- Featured card title: 24px/500 with a 30px line height.
+- Standard card title: 24px/500 with a 28px line height.
+- Featured card title: 26px/500 with a 32px line height.
 - Description: 15px/400 with a 22px line height; five lines after a one-line
   title and four lines after a two-line title.
 - Featured media minimum reduced from 360px to 320px.
 - Footer/action right-edge delta: 0px.
 - Card, panel, and document overflow: 0px.
-- The reaction pill always presents all four reaction types; zero-count glyphs
-  are subdued while non-zero glyphs remain full strength.
+- The reaction pill always presents all four reaction types on every card,
+  including total `0`; zero-count glyphs are subdued while non-zero glyphs
+  remain full strength.
 - A synthetic four-glyph `999+` pill measured 104px wide and retained 30.8px
   clearance from `Read article` in the narrowest 360px footer.
 - The stress pill changed neither card height nor action position.
 
 TypeScript, targeted ESLint, `git diff --check`, long-title/description clamps,
 zero-reaction cards, light/dark geometry, and responsive alignment passed.
+
+## Card polish and local search amendment - 2026-09-04
+
+- Increased every standard card title from 22px to 24px and the featured title
+  from 24px to 26px, retaining weight 500 and exact two-line clamps.
+- Recalculated fixed adaptive copy blocks to 164px for standard cards and 172px
+  for featured cards. A one-line title exposes five 15px/22px description lines;
+  a two-line title exposes four, with no hydration-driven card movement.
+- Restored the prior 25x25px rounded, dashed-border, animated dual-arrow box
+  beside `Read article`.
+- Refined the 28px reaction pill with a quiet neutral surface, inset highlight,
+  all four overlapping reaction glyphs, subdued zero states, and full accessible
+  totals. The pill appears on every card, including articles with zero reactions.
+- Replaced the Blog toolbar's global Search-modal launcher with a real 32px-high
+  Blog search field. It filters published articles by title, summary, and
+  category without opening a modal.
+- Search is URL-backed through `q`, debounced by 300ms, capped and canonicalized
+  at 100 characters, resets pagination, combines with categories, and preserves
+  compact mode. Query pages are `noindex, follow` and canonicalize to `/blog`.
+- Clear search preserves the active category. Pagination preserves query,
+  category, page, and responsive mode. Zero, one, and many results share one
+  persistent polite live-status announcement.
+- Guarded pending-query and `popstate` synchronization preserve focus and prevent
+  stale RSC responses or unresolved replace transitions from overwriting newer
+  typing or Back/Forward destinations.
+
+Playwright verified title, summary, category, and combined searches; clear,
+pagination, compact mode, no-results, one-result, many-result, Back/Forward,
+100-character input, delayed RSC races, focus retention, and single live-region
+behavior. Across all six required viewports in both themes, row-height spread,
+card/pill/arrow clipping, and document overflow were zero. Standard titles
+measured 24px, featured titles 26px, and every arrow measured 25x25px.
 
 ## Remaining owner decision
 

@@ -2,38 +2,94 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { startTransition } from "react";
-import { Rss, Search } from "lucide-react";
+import { startTransition, useEffect, useRef, useState } from "react";
+import { Rss, Search, X } from "lucide-react";
 
 interface BlogFilterBarProps {
   categories: string[];
   invalidCategory?: boolean;
   compact?: boolean;
+  initialQuery?: string;
 }
 
 export function BlogFilterBar({
   categories,
   invalidCategory = false,
   compact = false,
+  initialQuery = "",
 }: BlogFilterBarProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const activeCategory = invalidCategory
     ? ""
     : searchParams.get("category")?.trim().toLowerCase().slice(0, 80) || "";
+  const [query, setQuery] = useState(initialQuery);
+  const previousInitialQuery = useRef(initialQuery);
+  const pendingQuery = useRef<string | null>(null);
+  const syncingFromUrl = useRef(false);
+
+  useEffect(() => {
+    const handleHistoryNavigation = () => {
+      const historyQuery = new URLSearchParams(window.location.search)
+        .get("q")
+        ?.trim()
+        .replace(/\s+/g, " ")
+        .slice(0, 100) || "";
+      pendingQuery.current = null;
+      previousInitialQuery.current = historyQuery;
+      syncingFromUrl.current = true;
+      setQuery(historyQuery);
+    };
+
+    window.addEventListener("popstate", handleHistoryNavigation);
+    return () => window.removeEventListener("popstate", handleHistoryNavigation);
+  }, []);
+
+  useEffect(() => {
+    if (previousInitialQuery.current === initialQuery) return;
+    previousInitialQuery.current = initialQuery;
+    if (pendingQuery.current === initialQuery) {
+      pendingQuery.current = null;
+      return;
+    }
+    syncingFromUrl.current = true;
+    setQuery(initialQuery);
+  }, [initialQuery]);
+
+  useEffect(() => {
+    if (syncingFromUrl.current) {
+      syncingFromUrl.current = false;
+      return;
+    }
+    const normalized = query.trim().replace(/\s+/g, " ").slice(0, 100);
+    const current = searchParams.get("q") || "";
+    if (normalized === current) return;
+
+    const timer = window.setTimeout(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (normalized) params.set("q", normalized);
+      else params.delete("q");
+      params.delete("page");
+      pendingQuery.current = normalized;
+      startTransition(() => {
+        const next = params.toString();
+        router.replace(next ? `/blog?${next}` : "/blog", { scroll: false });
+      });
+    }, 300);
+
+    return () => window.clearTimeout(timer);
+  }, [query, router, searchParams]);
 
   const handleCategoryClick = (category: string) => {
     startTransition(() => {
-      const params = new URLSearchParams();
+      const params = new URLSearchParams(searchParams.toString());
       if (category) params.set("category", category.toLowerCase());
+      else params.delete("category");
+      params.delete("page");
       if (compact) params.set("view", "compact");
       const query = params.toString();
       router.push(query ? `/blog?${query}` : "/blog");
     });
-  };
-
-  const handleOpenSearch = () => {
-    window.dispatchEvent(new CustomEvent("open-search-modal"));
   };
 
   const filterClass = (selected: boolean) =>
@@ -44,8 +100,8 @@ export function BlogFilterBar({
     }`;
 
   return (
-    <div className="flex items-center gap-2 border-y border-border-primary px-2 py-4 sm:px-4">
-      <div className="min-w-0 flex-1">
+    <div className="flex flex-col gap-3 border-y border-border-primary px-2 py-4 sm:px-4 lg:flex-row lg:items-center lg:gap-2">
+      <div className="order-2 min-w-0 flex-1 lg:order-1">
         <div
           className="flex min-w-0 items-center gap-2 overflow-x-auto pr-8 [mask-image:linear-gradient(to_right,black,black_calc(100%-2rem),transparent)] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           role="group"
@@ -76,26 +132,33 @@ export function BlogFilterBar({
         </div>
       </div>
 
-      <div className="flex shrink-0 items-center gap-2">
-        <button
-          type="button"
-          onClick={handleOpenSearch}
-          aria-label="Search site"
-          className="inline-flex size-8 cursor-pointer items-center justify-center rounded-lg border border-border-primary text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25 lg:w-52 lg:justify-start lg:gap-2 lg:px-3"
-        >
-          <Search className="size-4 shrink-0" aria-hidden />
-          <span className="hidden font-mono text-[11px] uppercase tracking-widest lg:inline">
-            Search site
-          </span>
-          <span className="ms-auto hidden gap-0.5 text-[10px] lg:inline-flex">
-            <kbd className="rounded-md border border-border-primary bg-white px-1.5 py-0.5 font-mono text-text-secondary dark:bg-white/5">
-              ⌘
-            </kbd>
-            <kbd className="rounded-md border border-border-primary bg-white px-1.5 py-0.5 font-mono text-text-secondary dark:bg-white/5">
-              K
-            </kbd>
-          </span>
-        </button>
+      <div className="order-1 flex w-full shrink-0 items-center gap-2 lg:order-2 lg:w-auto">
+        <label htmlFor="blog-search" className="sr-only">Search articles</label>
+        <div className="relative min-w-0 flex-1 lg:w-56 lg:flex-none">
+          <Search
+            aria-hidden
+            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary"
+          />
+          <input
+            id="blog-search"
+            type="search"
+            value={query}
+            maxLength={100}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search articles…"
+            className="h-8 w-full rounded-lg border border-border-primary bg-white pl-9 pr-8 font-mono text-[11px] text-text-primary outline-none transition-colors placeholder:text-text-secondary hover:border-neutral-400/70 active:border-neutral-400/70 focus:border-text-secondary focus:ring-2 focus:ring-neutral-300/50 dark:bg-white/[0.03] dark:hover:border-white/25 dark:active:border-white/25 dark:focus:ring-white/20 [&::-webkit-search-cancel-button]:hidden"
+          />
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              aria-label="Clear article search"
+              className="absolute right-1.5 top-1/2 flex size-5 -translate-y-1/2 items-center justify-center rounded-full text-text-secondary transition-colors hover:bg-black/5 hover:text-text-primary dark:hover:bg-white/10"
+            >
+              <X className="size-3" aria-hidden />
+            </button>
+          )}
+        </div>
 
         <Link
           href="/rss.xml"
