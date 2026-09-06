@@ -53,7 +53,7 @@ export default function BlogLoading() {
         </div>
       </GridWrapper>
 
-      <div className="mt-14 flex flex-col gap-3 border-y border-border-primary px-2 py-4 sm:px-4 lg:flex-row lg:items-center lg:gap-2">
+      <div className="mt-14 flex flex-col gap-3 border-y border-border-primary px-2 py-4 sm:px-4 lg:flex-row lg:items-center lg:gap-3">
         <div className="order-2 flex items-center gap-2 lg:order-1 lg:min-w-0 lg:flex-1">
           <div className="h-8 w-28 animate-pulse rounded-full bg-border-primary/40 motion-reduce:animate-none" />
           <div className="h-8 w-24 animate-pulse rounded-full bg-border-primary/30 motion-reduce:animate-none" />

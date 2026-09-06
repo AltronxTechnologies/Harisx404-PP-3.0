@@ -74,7 +74,7 @@ function HeaderSkeleton() {
 
 function ControlsSkeleton() {
   return (
-    <div className="mt-14 flex animate-pulse flex-col gap-3 border-y border-border-primary px-2 py-4 motion-reduce:animate-none sm:px-4 lg:flex-row lg:items-center lg:gap-2">
+    <div className="mt-14 flex animate-pulse flex-col gap-3 border-y border-border-primary px-2 py-4 motion-reduce:animate-none sm:px-4 lg:flex-row lg:items-center lg:gap-3">
       <div className="order-1 h-8 w-full rounded-lg bg-border-primary/40 lg:order-2 lg:w-64 lg:flex-none" />
       <div className="order-2 flex min-w-0 items-center gap-2 overflow-hidden lg:order-1 lg:flex-1">
         <div className="h-8 w-[106px] shrink-0 rounded-full bg-border-primary/40" />

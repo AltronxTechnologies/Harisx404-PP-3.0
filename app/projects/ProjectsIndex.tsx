@@ -228,7 +228,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
           : `${filtered.length} ${filtered.length === 1 ? "project" : "projects"} found`}
       </p>
       {/* Controls match the locked Blog toolbar and horizontally scrolling filters. */}
-      <div className="mt-14 flex flex-col gap-3 border-y border-border-primary px-2 py-4 sm:px-4 lg:flex-row lg:items-center lg:gap-2">
+      <div className="mt-14 flex flex-col gap-3 border-y border-border-primary px-2 py-4 sm:px-4 lg:flex-row lg:items-center lg:gap-3">
         <label htmlFor="project-search" className="sr-only">
           Search projects
         </label>

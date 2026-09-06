@@ -246,7 +246,7 @@ export function BlogFilterBar({
     }`;
 
   return (
-    <div className="flex flex-col gap-3 border-y border-border-primary px-2 py-4 sm:px-4 lg:flex-row lg:items-center lg:gap-2">
+    <div className="flex flex-col gap-3 border-y border-border-primary px-2 py-4 sm:px-4 lg:flex-row lg:items-center lg:gap-3">
       <div className="order-1 flex w-full shrink-0 items-center gap-2 max-[359px]:!w-[calc(100%-24px)] lg:order-2 lg:w-auto">
         <label htmlFor="blog-search" className="sr-only">Search articles</label>
         <div className="relative min-w-0 flex-1 lg:w-64 lg:flex-none">
