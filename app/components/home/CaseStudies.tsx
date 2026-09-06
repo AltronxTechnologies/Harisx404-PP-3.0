@@ -743,9 +743,8 @@ export function CaseStudyCard({
         )}
 
         {coverHeading === "title" && (
-          /* Projects page: one action row — secondary disclosure toggle on
-             the left, primary case-study CTA beside it (stronger color =
-             clear hierarchy). Divider dot separates them quietly. */
+          /* Projects page and Home below xl: one action row with a disclosure
+             toggle, visible vertical divider, and Blog-style case-study CTA. */
           <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
             <button
               type="button"
@@ -904,15 +903,10 @@ function StickyProjectPanel({
       <Link
         href={`/projects/${project.slug}`}
         tabIndex={-1}
-        className="group/cta mt-6 inline-flex items-center gap-2 py-1.5 -my-1.5 font-mono text-xs uppercase tracking-widest text-text-secondary transition-colors hover:text-text-primary"
+        className="group -my-1.5 mt-6 inline-flex items-center gap-2 py-1.5 font-mono text-[11px] uppercase leading-none tracking-widest text-text-secondary transition-colors hover:text-text-primary"
       >
         View case study
-        <span
-          aria-hidden
-          className="inline-block leading-none transition-transform duration-300 group-hover/cta:translate-x-1"
-        >
-          →
-        </span>
+        <ArticleCardArrow />
       </Link>
     </div>
   );

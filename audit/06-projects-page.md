@@ -581,3 +581,18 @@ control, and the complete matching no-results hierarchy. TypeScript, targeted
 ESLint, and `git diff --check` pass. Playwright Chromium was unavailable because
 of a sandbox launcher failure, so visual verification used the running Firefox
 preview instead.
+
+## Final control and action amendments - 2026-09-06
+
+- Blog and Projects toolbar search/filter separation is 12px at `lg+`; both
+  route loading states use the same geometry.
+- The Projects heading closes as `Things I've built.`.
+- Every Projects card action row uses a clearly visible 16px vertical divider:
+  `neutral-400/70` in light mode and `white/25` in dark mode.
+- `View case study` uses the exact Blog `Read article` treatment: 11px mono
+  uppercase text, 8px internal gap, 25px rounded dashed arrow badge, dual-arrow
+  slide animation, and matching light/dark hover and active states.
+
+TypeScript, targeted ESLint, route checks, desktop/tablet/mobile rendering, and
+light/dark visual checks passed. The owner instructed that Projects and every
+completed page except Home be locked after these amendments.

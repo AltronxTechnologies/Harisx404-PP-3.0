@@ -5,10 +5,17 @@ import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { optimizeImageUrl } from "@/app/lib/image-utils";
 import type { HomePost } from "@/app/data/fallback-home";
+import type { ReactionSummary } from "@/app/blog/data";
+import { ArticleCardArrow } from "@/app/components/blog/ArticleCardArrow";
+import { ReactionSummaryPill } from "@/app/components/blog/ReactionSummaryPill";
 import { SectionHeading } from "./SectionHeading";
 import { DoubleArrow } from "./DoubleArrow";
 
-export type WritingPost = HomePost & { imageName?: string };
+export type WritingPost = HomePost & {
+  imageName?: string;
+  badge?: "Featured" | "Latest";
+  reactionSummary?: ReactionSummary;
+};
 
 /* Gradient placeholder covers for posts without an image — same palette
    family as the BlogCard component so /blog and the homepage stay in sync. */
@@ -33,26 +40,12 @@ function formatShortDate(iso: string): string {
   return Number.isNaN(d.getTime()) ? "" : shortDate.format(d);
 }
 
-/* Shared CTA — mono uppercase with a sliding arrow, matching the
-   "View case study" CTA in the Case Studies section. `compact` shortens
-   the label to "Read" on phones where horizontal space is tight. */
-function ReadCta({ compact = false }: { compact?: boolean }) {
+/* Same action treatment as the locked Blog cards. */
+function ReadCta() {
   return (
-    <span className="inline-flex shrink-0 items-center gap-2 font-mono text-xs uppercase tracking-widest text-text-secondary transition-colors group-hover:text-text-primary">
-      {compact ? (
-        <>
-          <span className="sm:hidden">Read</span>
-          <span className="hidden sm:inline">Read article</span>
-        </>
-      ) : (
-        "Read article"
-      )}
-      <span
-        aria-hidden
-        className="inline-block transition-transform duration-300 group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
-      >
-        →
-      </span>
+    <span className="inline-flex shrink-0 items-center gap-2 font-mono text-[11px] uppercase leading-none tracking-widest text-text-secondary transition-colors group-hover:text-text-primary">
+      Read article
+      <ArticleCardArrow />
     </span>
   );
 }
@@ -158,27 +151,32 @@ export function Writings({
                   </span>
                 </>
               )}
-              <span className="absolute left-3 top-3 rounded-full border border-white/25 bg-black/45 px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-white/90 backdrop-blur-sm">
-                Latest
-              </span>
-            </div>
+               <span className="absolute left-3 top-3 rounded-full border border-white/30 bg-black/70 px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-white backdrop-blur-sm">
+                 {featured.badge || "Featured"}
+               </span>
+             </div>
 
             <div className="flex flex-1 flex-col px-2 pb-2 pt-5 sm:px-3 lg:flex-none">
-              <h3 className="line-clamp-2 break-words font-display text-2xl font-medium leading-tight text-text-primary">
+              <div className="flex items-center justify-between gap-3 font-mono text-[11px] uppercase tracking-widest text-text-secondary md:text-xs">
+                <span className="shrink-0">{featured.readingTime}</span>
+                <time
+                  className="truncate text-right"
+                  dateTime={featured.publishedAt}
+                  title={formatShortDate(featured.publishedAt)}
+                >
+                  {formatShortDate(featured.publishedAt)}
+                </time>
+              </div>
+              <h3 className="mt-3 line-clamp-2 break-words font-display text-2xl font-medium leading-tight text-text-primary">
                 {featured.title}
               </h3>
-              <p className="mt-2.5 line-clamp-2 break-words text-[15px] leading-relaxed text-text-secondary">
+              <p className="mt-2 line-clamp-2 break-words text-[15px] leading-relaxed text-text-secondary">
                 {featured.summary}
               </p>
-              <div className="mt-auto flex items-center justify-between gap-3 pt-6">
-                {/* Mobile: reading time only — the date joins from sm up. */}
-                <span className="font-mono text-xs uppercase tracking-widest text-text-secondary">
-                  {featured.readingTime}
-                  <span className="hidden sm:inline">
-                    {" "}
-                    · {formatShortDate(featured.publishedAt)}
-                  </span>
-                </span>
+              <div className="mt-auto flex min-h-7 items-center justify-between gap-2.5 pt-4">
+                <div className="flex min-h-7 min-w-0 items-center">
+                  <ReactionSummaryPill summary={featured.reactionSummary} />
+                </div>
                 <ReadCta />
               </div>
             </div>
@@ -204,11 +202,11 @@ export function Writings({
                   href={post.href ?? `/blog/${post.slug}`}
                   className="group flex h-full flex-col rounded-3xl border border-border-primary bg-white p-3 transition-all hover:border-neutral-400/70 hover:shadow-lg dark:hover:border-white/25 dark:bg-white/[0.02]"
                 >
-                  <div className="flex h-full items-stretch gap-4">
+                  <div className="flex h-full flex-col items-stretch gap-4 xl:flex-row">
                     {/* Inset thumb — stretches the full card height so it sits
                         flush with the card padding on top, bottom, and left,
                         mirroring the featured card's inset cover. */}
-                    <div className="relative w-[112px] shrink-0 self-stretch overflow-hidden rounded-2xl sm:w-[128px] md:w-[140px] lg:w-[152px]">
+                    <div className="relative aspect-[16/7] w-full shrink-0 self-stretch overflow-hidden rounded-2xl xl:aspect-auto xl:w-[152px]">
                       {post.imageName ? (
                         <>
                           <Image
@@ -230,23 +228,32 @@ export function Writings({
                           className={`h-full w-full bg-gradient-to-br transition-transform duration-500 ease-out group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100 ${covers[(i + 1) % covers.length]}`}
                         />
                       )}
+                      <span className="absolute left-2.5 top-2.5 rounded-full border border-white/30 bg-black/70 px-2.5 py-1 font-mono text-[9px] uppercase tracking-widest text-white backdrop-blur-sm sm:left-3 sm:top-3 sm:px-3 sm:text-[10px]">
+                        {post.badge || "Latest"}
+                      </span>
                     </div>
-                    <div className="flex min-w-0 flex-1 flex-col justify-center py-1 pr-1 sm:pr-2">
-                      <h3 className="line-clamp-2 break-words font-display text-lg font-medium leading-tight text-text-primary sm:text-xl lg:text-[22px]">
+                    <div className="flex min-w-0 flex-1 flex-col px-2 pb-2 sm:px-3 xl:justify-center xl:px-0 xl:py-1 xl:pr-2">
+                      <div className="flex items-center justify-between gap-3 font-mono text-[11px] uppercase tracking-widest text-text-secondary">
+                        <span className="shrink-0">{post.readingTime}</span>
+                        <time
+                          className="truncate text-right"
+                          dateTime={post.publishedAt}
+                          title={formatShortDate(post.publishedAt)}
+                        >
+                          {formatShortDate(post.publishedAt)}
+                        </time>
+                      </div>
+                      <h3 className="mt-3 line-clamp-2 break-words font-display text-lg font-medium leading-tight text-text-primary sm:text-xl lg:text-[22px]">
                         {post.title}
                       </h3>
-                      <p className="mt-1.5 line-clamp-2 break-words text-[15px] leading-relaxed text-text-secondary lg:line-clamp-4">
+                      <p className="mt-2 line-clamp-2 break-words text-[15px] leading-relaxed text-text-secondary">
                         {post.summary}
                       </p>
-                      <div className="mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-                        <span className="font-mono text-xs uppercase tracking-widest text-text-secondary">
-                          {post.readingTime}
-                          <span className="hidden md:inline lg:hidden">
-                            {" "}
-                            · {formatShortDate(post.publishedAt)}
-                          </span>
-                        </span>
-                        <ReadCta compact />
+                      <div className="mt-auto flex min-h-7 flex-wrap items-center justify-between gap-2.5 pt-4">
+                        <div className="flex min-h-7 min-w-0 items-center">
+                          <ReactionSummaryPill summary={post.reactionSummary} />
+                        </div>
+                        <ReadCta />
                       </div>
                     </div>
                   </div>

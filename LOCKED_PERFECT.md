@@ -1465,3 +1465,25 @@ Blog's horizontally scrollable filter rail, and Projects states reuse Blog's
 shared state panel.
 Project header, cards, content, CTA, and every other Projects behavior remain
 locked. Final re-lock awaits owner review of this limited amendment.
+
+## 26. FINAL OWNER LOCK - All Completed Pages Except Home
+
+- **Date locked:** 2026-09-06
+- **Owner instruction:** Lock every completed page and global surface while
+  leaving only the Home page open for continued iteration.
+- **Fully locked:** About, Blog index and article presentation, Projects index
+  and project-detail presentation, Navbar, Search modal, Reach Out modal,
+  Footer, shared CTA, and all other previously locked public surfaces.
+- **Projects final amendments:** Blog-style horizontally scrollable tag rail
+  with no More dropdown; unified Blog-style result/error panels; 12px laptop
+  filter-to-search gap; `Things I've built.` punctuation; matching loading
+  geometry; Blog-style `View case study` text and animated arrow badge; and the
+  visible light/dark vertical divider beside Details.
+- **Blog final amendment:** toolbar filter-to-search gap is 12px at `lg+`, with
+  matching loading geometry. All other locked Blog behavior remains unchanged.
+- **Only unlocked surface:** Home page presentation and Home-specific branches
+  in shared components. Home changes must not alter the locked rendering or
+  behavior of `/projects`, `/blog`, or any other locked route.
+
+The temporary Projects unlock in entry 25 is closed by this final lock. Do not
+modify any locked surface without a new explicit owner instruction.

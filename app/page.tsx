@@ -4,11 +4,14 @@ import type { Metadata } from "next";
 import { siteMetadata } from "./data/siteMetadata";
 import {
   fetchProjects,
-  fetchAndSortBlogPosts,
   fetchTestimonials,
   formatDate,
 } from "./lib/utils";
-import { formatReadingTime } from "./lib/reading-time";
+import {
+  fetchBlogIndexPosts,
+  fetchBlogReactionSummaries,
+  type BlogIndexPost,
+} from "./blog/data";
 import {
   fallbackProjects,
   fallbackPosts,
@@ -68,7 +71,7 @@ export default async function Home() {
   const [dbProjects, dbPosts, dbTestimonials, serverStats] =
     await Promise.all([
       fetchProjects(),
-      fetchAndSortBlogPosts(),
+      fetchBlogIndexPosts().catch((): BlogIndexPost[] => []),
       fetchTestimonials(),
       getServerStats().catch(() => null),
     ]);
@@ -119,20 +122,38 @@ export default async function Home() {
       : fallbackProjects.slice(0, 3)
   );
 
+  const reactionSummaries = await fetchBlogReactionSummaries(
+    dbPosts.map((post) => post.slug),
+  );
+  const featuredPost = dbPosts.reduce<BlogIndexPost | undefined>(
+    (best, post) =>
+      !best ||
+      (reactionSummaries[post.slug]?.total || 0) >
+        (reactionSummaries[best.slug]?.total || 0)
+        ? post
+        : best,
+    undefined,
+  );
+  const selectedPosts = featuredPost
+    ? [featuredPost, ...dbPosts.filter((post) => post.slug !== featuredPost.slug)].slice(0, 3)
+    : [];
   const posts: WritingPost[] =
-    dbPosts.length > 0
-      ? dbPosts.slice(0, 3).map((post) => ({
+    selectedPosts.length > 0
+      ? selectedPosts.map((post, index) => ({
           title: post.title,
           slug: post.slug,
           href: `/blog/${post.slug}`,
           summary: post.summary,
           publishedAt: post.publishedAt,
-          readingTime: post.readingTimeMinutes
-            ? `${post.readingTimeMinutes} min read`
-            : formatReadingTime(post.content),
+          readingTime: post.readingTime,
           imageName: post.imageName || "",
+          badge: index === 0 ? "Featured" : "Latest",
+          reactionSummary: reactionSummaries[post.slug],
         }))
-      : fallbackPosts.slice(0, 3);
+      : fallbackPosts.slice(0, 3).map((post, index) => ({
+          ...post,
+          badge: index === 0 ? "Featured" : "Latest",
+        }));
 
   const formattedDates = posts.map((post) => formatDate(post.publishedAt));
 
