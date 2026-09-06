@@ -1532,3 +1532,28 @@ unlock from a request to make another page similar to a locked reference.
 - Home work must not modify or indirectly change any still-locked route or
   shared presentation branch. Home will remain temporarily open until the owner
   explicitly instructs that it be re-locked.
+
+## 29. FINAL OWNER RE-LOCK - Home
+
+- **Date locked:** 2026-09-06
+- **Owner instruction:** Re-lock the Home page in its current approved state.
+- **Final hero state:** domain text and illustrations transition together with
+  an overlapping crossfade. Light mode uses professional 500/600 domain colors;
+  dark mode uses balanced 400/500 colors. Layout, timing, scramble behavior,
+  domain order, and illustration variants are frozen.
+- **Final Home Blog state:** mobile uses three matching vertical cards; tablets
+  use one vertical Featured card followed by horizontal Latest cards with 220px
+  images; laptop/desktop keeps the approved one-large/two-stacked composition.
+  Badges, metadata, titles, descriptions, reactions, and Read Article actions
+  are frozen in their current responsive positions.
+- **Final Home Projects state:** Blog-style View Case Study arrows at every
+  breakpoint; Details and the visible vertical divider remain only where the
+  below-`xl` card body exists; the `xl+` sticky presentation remains unchanged.
+- **Heading punctuation:** approved sentence-style Home section headings close
+  with periods; names, roles, article/project titles, questions, and noun labels
+  retain their grammatically appropriate punctuation.
+
+The temporary Home unlock in entry 28 is closed. Home, About, Projects, Blog,
+Navbar, Search modal, Reach Out modal, Footer, and all other entry-27 surfaces
+are locked. Any future change requires an explicit owner unlock naming the
+specific page or component first.
