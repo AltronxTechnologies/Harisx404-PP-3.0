@@ -33,7 +33,7 @@ function FullstackVisual({ still }: SceneProps) {
           opacity: { duration: 0.45 },
           y: { duration: 3.4, repeat: Infinity, ease: "easeInOut", delay: 0.45 },
         }}
-        className="text-[3.4rem] font-bold text-teal-500 dark:text-teal-400 lg:text-[3.9rem]"
+        className="text-[3.4rem] font-bold text-teal-600 dark:text-teal-400 lg:text-[3.9rem]"
       >
         {"<"}
       </motion.span>
@@ -45,7 +45,7 @@ function FullstackVisual({ still }: SceneProps) {
           opacity: { duration: 0.45, delay: 0.15 },
           rotate: { duration: 4.2, repeat: Infinity, ease: "easeInOut" },
         }}
-        className="mx-1 text-[2.8rem] font-bold text-emerald-500/80 dark:text-emerald-400/80 lg:text-[3.2rem]"
+        className="mx-1 text-[2.8rem] font-bold text-emerald-600/80 dark:text-emerald-400/80 lg:text-[3.2rem]"
       >
         /
       </motion.span>
@@ -57,7 +57,7 @@ function FullstackVisual({ still }: SceneProps) {
           opacity: { duration: 0.45 },
           y: { duration: 3.4, repeat: Infinity, ease: "easeInOut", delay: 0.95 },
         }}
-        className="text-[3.4rem] font-bold text-teal-500 dark:text-teal-400 lg:text-[3.9rem]"
+        className="text-[3.4rem] font-bold text-teal-600 dark:text-teal-400 lg:text-[3.9rem]"
       >
         {">"}
       </motion.span>
@@ -73,7 +73,7 @@ function FullstackVisual({ still }: SceneProps) {
           animate={still ? undefined : { opacity: [0.2, 1, 0.2], scale: [0.8, 1.15, 0.8] }}
           transition={{ duration: 2.6, delay: p.delay, repeat: Infinity, ease: "easeInOut" }}
           style={{ top: p.top, left: p.left }}
-          className="absolute size-1.5 rounded-full bg-teal-500/70 dark:bg-teal-400/70"
+          className="absolute size-1.5 rounded-full bg-teal-500/70 dark:bg-teal-500/70"
         />
       ))}
     </div>
@@ -124,11 +124,11 @@ function CyberVisual({ still, reverse }: SceneProps) {
             animate={still ? undefined : { opacity: [0, 1, 0], scale: [0.6, 1.3, 0.6] }}
             transition={{ duration: 2, delay: b.delay, repeat: Infinity, repeatDelay: 2 }}
             style={{ top: b.top, left: b.left }}
-            className="absolute size-2 rounded-full bg-sky-500 shadow-[0_0_10px_2px_rgba(56,189,248,0.6)] dark:bg-sky-400"
+            className="absolute size-2 rounded-full bg-sky-500 shadow-[0_0_10px_2px_rgba(56,189,248,0.6)] dark:bg-sky-500"
           />
         ))}
         {/* center dot */}
-        <span className="absolute left-1/2 top-1/2 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-500 dark:bg-sky-400" />
+        <span className="absolute left-1/2 top-1/2 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-600 dark:bg-sky-400" />
       </div>
     </div>
   );
@@ -180,7 +180,7 @@ function AiVisual({ still }: SceneProps) {
             cx={n.x}
             cy={n.y}
             r={3.4}
-            className="fill-violet-500 dark:fill-violet-400"
+            className="fill-violet-600 dark:fill-violet-400"
             style={{ transformBox: "fill-box", transformOrigin: "center" }}
             initial={still ? false : { opacity: 0, scale: 0.5 }}
             animate={
@@ -217,7 +217,7 @@ function DataFlowVisual({ still, reverse }: SceneProps) {
           initial={still ? false : { opacity: 0 }}
           animate={still ? { opacity: 0 } : { left: reverse ? ["82%", "14%"] : ["14%", "82%"], opacity: [0, 1, 1, 0] }}
           transition={{ duration: 2.2, times: [0, 0.15, 0.85, 1], repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-          className="absolute top-1/2 size-2 -translate-y-1/2 rounded-full bg-emerald-500 shadow-[0_0_10px_2px_rgba(16,185,129,0.55)] dark:bg-emerald-400"
+          className="absolute top-1/2 size-2 -translate-y-1/2 rounded-full bg-emerald-500 shadow-[0_0_10px_2px_rgba(16,185,129,0.55)] dark:bg-emerald-500"
         />
         {/* client — browser dot */}
         <motion.div
@@ -230,7 +230,7 @@ function DataFlowVisual({ still, reverse }: SceneProps) {
           }}
           className="relative flex size-12 items-center justify-center rounded-full border border-teal-500/40 bg-teal-500/10 dark:border-teal-400/40"
         >
-          <span className="size-4 rounded-full border-2 border-teal-500 dark:border-teal-400" />
+          <span className="size-4 rounded-full border-2 border-teal-600 dark:border-teal-400" />
         </motion.div>
         {/* server — rounded slab with LEDs */}
         <motion.div
@@ -248,9 +248,9 @@ function DataFlowVisual({ still, reverse }: SceneProps) {
               <motion.span
                 animate={still ? undefined : { opacity: [0.3, 1, 0.3] }}
                 transition={{ duration: 1.4, delay: i * 0.4, repeat: Infinity }}
-                className="size-1 rounded-full bg-emerald-500 dark:bg-emerald-400"
+                className="size-1 rounded-full bg-emerald-500 dark:bg-emerald-500"
               />
-              <span className="h-0.5 w-4 rounded-full bg-emerald-500/50 dark:bg-emerald-400/50" />
+              <span className="h-0.5 w-4 rounded-full bg-emerald-600/50 dark:bg-emerald-500/50" />
             </span>
           ))}
         </motion.div>
@@ -268,7 +268,7 @@ function DataFlowVisual({ still, reverse }: SceneProps) {
           {[0, 1, 2].map((i) => (
             <span
               key={i}
-              className="h-[5px] w-6 rounded-full border border-teal-500/60 bg-teal-500/20 dark:border-teal-400/60"
+              className="h-[5px] w-6 rounded-full border border-teal-600/60 bg-teal-500/20 dark:border-teal-400/60"
             />
           ))}
         </motion.div>
@@ -295,7 +295,7 @@ function DeviceTrioVisual({ still }: SceneProps) {
               animate={still ? undefined : { opacity: [0.25, 0.85, 0.25] }}
               transition={{ duration: 2, delay: i * 0.35, repeat: Infinity, ease: "easeInOut" }}
               style={{ width: `${w}%` }}
-              className="h-1.5 rounded-full bg-teal-500/60 dark:bg-teal-400/60"
+              className="h-1.5 rounded-full bg-teal-500/60 dark:bg-teal-500/60"
             />
           ))}
         </div>
@@ -318,7 +318,7 @@ function DeviceTrioVisual({ still }: SceneProps) {
               animate={still ? undefined : { opacity: [0.25, 0.85, 0.25] }}
               transition={{ duration: 2, delay: 0.4 + i * 0.35, repeat: Infinity, ease: "easeInOut" }}
               style={{ width: `${w}%` }}
-              className="h-1.5 rounded-full bg-emerald-500/60 dark:bg-emerald-400/60"
+              className="h-1.5 rounded-full bg-emerald-500/60 dark:bg-emerald-500/60"
             />
           ))}
         </motion.div>
@@ -339,7 +339,7 @@ function DeviceTrioVisual({ still }: SceneProps) {
               animate={still ? undefined : { opacity: [0.25, 0.85, 0.25] }}
               transition={{ duration: 2, delay: 0.8 + i * 0.35, repeat: Infinity, ease: "easeInOut" }}
               style={{ width: `${w}%` }}
-              className="h-1 rounded-full bg-teal-500/60 dark:bg-teal-400/60"
+              className="h-1 rounded-full bg-teal-500/60 dark:bg-teal-500/60"
             />
           ))}
         </motion.div>
@@ -371,7 +371,7 @@ function ShieldCheckVisual({ still, reverse }: SceneProps) {
       >
         <path
           d="M12 2.5 20 5.6v5.2c0 4.9-3.4 8.9-8 10.7-4.6-1.8-8-5.8-8-10.7V5.6L12 2.5Z"
-          className="fill-sky-500/10 stroke-sky-500 dark:fill-sky-400/10 dark:stroke-sky-400"
+          className="fill-sky-500/10 stroke-sky-600 dark:fill-sky-400/10 dark:stroke-sky-400"
           strokeWidth="0.9"
           strokeLinejoin="round"
         />
@@ -381,7 +381,7 @@ function ShieldCheckVisual({ still, reverse }: SceneProps) {
           strokeWidth="1.5"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="stroke-sky-500 dark:stroke-sky-400"
+          className="stroke-sky-600 dark:stroke-sky-400"
           animate={still ? undefined : reverse ? { pathLength: [1, 0, 0], opacity: [0, 1, 1, 1] } : { pathLength: [0, 1, 1], opacity: [1, 1, 1, 0] }}
           transition={{ duration: 3.2, times: [0, 0.3, 0.85, 1], repeat: Infinity, ease: "easeInOut" }}
         />
@@ -415,7 +415,7 @@ function FingerprintVisual({ still }: SceneProps) {
               strokeLinecap="round"
               strokeDasharray={a.dash}
               transform={`rotate(${a.rot} 32 32)`}
-              className="stroke-sky-500/70 dark:stroke-sky-400/70"
+              className="stroke-sky-600/70 dark:stroke-sky-400/70"
               initial={still ? false : { opacity: 0 }}
               animate={still ? { opacity: 0.7 } : { opacity: [0.25, 0.9, 0.25] }}
               transition={{ duration: 2.4, delay: i * 0.12, repeat: still ? 0 : Infinity, ease: "easeInOut" }}
@@ -470,7 +470,7 @@ function OrbitCoreVisual({ still, reverse }: SceneProps) {
               style={{ transformBox: "view-box", transformOrigin: "60px 60px" }}
             >
               {/* electron rides an invisible circular rail, flattened by the ellipse look */}
-              <circle cx={104} cy={60} r={2.6} className="fill-fuchsia-500 dark:fill-fuchsia-400" />
+              <circle cx={104} cy={60} r={2.6} className="fill-fuchsia-500 dark:fill-fuchsia-500" />
             </motion.g>
           </g>
         ))}
@@ -479,7 +479,7 @@ function OrbitCoreVisual({ still, reverse }: SceneProps) {
           cx={60}
           cy={60}
           r={7}
-          className="fill-fuchsia-500 dark:fill-fuchsia-400"
+          className="fill-fuchsia-500 dark:fill-fuchsia-500"
           style={{ transformBox: "fill-box", transformOrigin: "center" }}
           animate={still ? undefined : { scale: [1, 1.18, 1], opacity: [0.85, 1, 0.85] }}
           transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
@@ -527,7 +527,7 @@ function AiChipVisual({ still, reverse }: SceneProps) {
               cx={t.x1}
               cy={t.y1}
               r={1.8}
-              className="fill-fuchsia-500 dark:fill-fuchsia-400"
+              className="fill-fuchsia-500 dark:fill-fuchsia-500"
               animate={
                 still
                   ? undefined
@@ -546,7 +546,7 @@ function AiChipVisual({ still, reverse }: SceneProps) {
           width={56}
           height={56}
           rx={10}
-          className="fill-violet-500/10 stroke-violet-500 dark:fill-violet-400/10 dark:stroke-violet-400"
+          className="fill-violet-500/10 stroke-violet-600 dark:fill-violet-400/10 dark:stroke-violet-400"
           strokeWidth="1.4"
           style={{ transformBox: "fill-box", transformOrigin: "center" }}
           animate={still ? undefined : { scale: [1, 1.04, 1] }}
@@ -558,7 +558,7 @@ function AiChipVisual({ still, reverse }: SceneProps) {
           x={60}
           y={65}
           textAnchor="middle"
-          className="fill-fuchsia-500 font-mono text-[15px] font-bold dark:fill-fuchsia-400"
+          className="fill-fuchsia-600 font-mono text-[15px] font-bold dark:fill-fuchsia-500"
           animate={still ? undefined : { opacity: [0.65, 1, 0.65] }}
           transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
         >

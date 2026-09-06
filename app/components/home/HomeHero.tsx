@@ -73,21 +73,21 @@ const domainStyles: Record<
 > = {
   fullstack: {
     gradient:
-      "bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-500 bg-clip-text text-transparent",
+      "bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-600 bg-clip-text text-transparent dark:from-emerald-400 dark:via-teal-400 dark:to-cyan-400",
     glow: "bg-teal-400/[0.07]",
-    caret: "bg-teal-500",
+    caret: "bg-teal-600 dark:bg-teal-400",
   },
   cyber: {
     gradient:
-      "bg-gradient-to-r from-sky-500 via-blue-400 to-indigo-500 bg-clip-text text-transparent",
+      "bg-gradient-to-r from-sky-600 via-blue-500 to-indigo-600 bg-clip-text text-transparent dark:from-sky-400 dark:via-blue-400 dark:to-indigo-400",
     glow: "bg-blue-400/[0.07]",
-    caret: "bg-sky-500",
+    caret: "bg-sky-600 dark:bg-sky-400",
   },
   ai: {
     gradient:
-      "bg-gradient-to-r from-violet-500 via-fuchsia-400 to-pink-500 bg-clip-text text-transparent",
+      "bg-gradient-to-r from-violet-600 via-fuchsia-500 to-pink-600 bg-clip-text text-transparent dark:from-violet-400 dark:via-fuchsia-400 dark:to-pink-400",
     glow: "bg-fuchsia-400/[0.07]",
-    caret: "bg-fuchsia-500",
+    caret: "bg-fuchsia-600 dark:bg-fuchsia-400",
   },
 };
 
