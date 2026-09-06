@@ -208,7 +208,7 @@ export function Writings({
                     {/* Inset thumb — stretches the full card height so it sits
                         flush with the card padding on top, bottom, and left,
                         mirroring the featured card's inset cover. */}
-                    <div className="relative aspect-[16/10.95] w-full shrink-0 self-stretch overflow-hidden rounded-2xl md:aspect-auto md:w-[200px] lg:w-[152px]">
+                    <div className="relative aspect-[16/10.95] w-full shrink-0 self-stretch overflow-hidden rounded-2xl md:aspect-auto md:w-[220px] lg:w-[152px]">
                       {post.imageName ? (
                         <>
                           <Image
