@@ -766,9 +766,10 @@ export function CaseStudyCard({
               </span>
               {detailsOpen ? "Hide details" : "Details"}
             </button>
-            <span aria-hidden className="text-text-secondary">
-              ·
-            </span>
+            <span
+              aria-hidden
+              className="h-4 w-px shrink-0 bg-border-primary"
+            />
             <Link
               href={`/projects/${project.slug}`}
               className="group -my-1.5 inline-flex items-center gap-2 py-1.5 font-mono text-[11px] uppercase leading-none tracking-widest text-text-secondary transition-colors hover:text-text-primary"
