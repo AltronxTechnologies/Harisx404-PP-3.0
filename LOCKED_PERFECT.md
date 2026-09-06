@@ -1521,3 +1521,14 @@ locked source surfaces or their rendered behavior.
 If a future request appears to require changing a locked surface, stop and ask
 the owner to explicitly unlock that named page or component. Do not infer an
 unlock from a request to make another page similar to a locked reference.
+
+## 28. TEMPORARY OWNER UNLOCK - Home Only
+
+- **Date unlocked:** 2026-09-06
+- **Temporarily unlocked:** Home page and Home-specific component branches.
+- **Still locked:** About, Projects, project details, Blog, Blog articles,
+  Navbar, Search modal, Reach Out modal, Footer, shared CTA, and every other
+  surface frozen by entry 27.
+- Home work must not modify or indirectly change any still-locked route or
+  shared presentation branch. Home will remain temporarily open until the owner
+  explicitly instructs that it be re-locked.
