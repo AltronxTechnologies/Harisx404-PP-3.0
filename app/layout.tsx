@@ -65,8 +65,7 @@ export async function generateMetadata(): Promise<Metadata> {
   
   try {
     // Anonymous client (no cookies) so metadata reads don't force every route dynamic.
-    // Alloy previews prioritize immediate local rendering over remote CMS metadata.
-    const supabase = process.env.IS_ALLOY === "true" ? null : getPublicSupabase();
+    const supabase = getPublicSupabase();
     const { data: settings } = supabase
       ? await supabase.from('site_settings').select('*').limit(1).single()
       : { data: null };

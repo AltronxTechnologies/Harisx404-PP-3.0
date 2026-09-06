@@ -39,9 +39,7 @@ export default async function AboutPage() {
       fetchProjects(),
       fetchAndSortBlogPosts(),
       fetchTestimonials(),
-      process.env.IS_ALLOY === "true"
-        ? Promise.resolve(null)
-        : getServerStats().catch(() => null),
+      getServerStats().catch(() => null),
       getBuildTimeStats().catch(() => null),
     ]);
 

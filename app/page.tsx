@@ -70,9 +70,7 @@ export default async function Home() {
       fetchProjects(),
       fetchAndSortBlogPosts(),
       fetchTestimonials(),
-      process.env.IS_ALLOY === "true"
-        ? Promise.resolve(null)
-        : getServerStats().catch(() => null),
+      getServerStats().catch(() => null),
     ]);
 
   /* Live site-wide numbers for the bento — every value is counted from

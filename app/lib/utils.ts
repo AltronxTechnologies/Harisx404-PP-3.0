@@ -38,8 +38,6 @@ import { getPublicSupabase } from "@/app/lib/supabase/safe";
 import { extractHeadingsFromMdx } from "@/app/lib/toc-utils";
 
 const supabase = getPublicSupabase();
-const useAlloyFallbackContent =
-  typeof window === "undefined" && process.env.IS_ALLOY === "true";
 
 export const formatDate = (date: string) => {
   if (!date.includes("T")) {
@@ -115,7 +113,7 @@ export async function fetchAndSortChangelogEntrees(): Promise<Changelog[]> {
 }
 
 export async function fetchAndSortBlogPosts(): Promise<Blog[]> {
-  if (!supabase || useAlloyFallbackContent) return [];
+  if (!supabase) return [];
   try {
     const { data, error } = await supabase
       .from('blog_posts')
@@ -314,7 +312,7 @@ export function extractUniqueBlogCategories(posts: Blog[]): Set<string> {
 }
 
 export async function fetchProjects() {
-  if (!supabase || useAlloyFallbackContent) return [];
+  if (!supabase) return [];
   /* Server-side reads use the service key when present so the
      project_tags / project_images joins aren't blanked by RLS (those
      join tables have no public SELECT policy). The key is never exposed:
@@ -388,7 +386,7 @@ export async function getProjectBySlug(slug: string) {
 }
 
 export async function fetchTestimonials(): Promise<import("@/app/data/fallback-home").Testimonial[]> {
-  if (!supabase || useAlloyFallbackContent) return [];
+  if (!supabase) return [];
   try {
     const { data, error } = await supabase
       .from('testimonials')
@@ -452,7 +450,7 @@ export async function fetchCertifications(): Promise<CertificationRow[]> {
 export async function fetchExperiences(): Promise<
   import("./resume/types").Experience[]
 > {
-  if (!supabase || useAlloyFallbackContent) return [];
+  if (!supabase) return [];
   try {
     const { data, error } = await supabase
       .from("experience")
