@@ -609,7 +609,7 @@ export function DomainShowcase({ domain }: { domain: string }) {
       aria-hidden
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="dark group relative h-[150px] w-full max-w-[280px] sm:h-[156px] sm:max-w-[300px] md:max-w-[280px] lg:h-[172px] lg:max-w-[320px]"
+      className="group relative h-[150px] w-full max-w-[280px] sm:h-[156px] sm:max-w-[300px] md:max-w-[280px] lg:h-[172px] lg:max-w-[320px]"
     >
       {/* Backdrop glow removed (matches the headline) — the illustration's
          own colored strokes and dots carry the domain identity. */}
