@@ -11,6 +11,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import clsx from "clsx";
 import { optimizeImageUrl } from "@/app/lib/image-utils";
 import type { HomeProject } from "@/app/data/fallback-home";
+import { ArticleCardArrow } from "@/app/components/blog/ArticleCardArrow";
 import { SectionHeading } from "./SectionHeading";
 import { DoubleArrow } from "./DoubleArrow";
 
@@ -770,15 +771,10 @@ export function CaseStudyCard({
             </span>
             <Link
               href={`/projects/${project.slug}`}
-              className="group/cta inline-flex items-center gap-2 py-1.5 -my-1.5 font-mono text-xs uppercase tracking-widest text-text-secondary transition-colors hover:text-text-primary"
+              className="group -my-1.5 inline-flex items-center gap-2 py-1.5 font-mono text-[11px] uppercase leading-none tracking-widest text-text-secondary transition-colors hover:text-text-primary"
             >
               View case study
-              <span
-                aria-hidden
-                className="inline-block leading-none transition-transform duration-300 group-hover/cta:translate-x-1"
-              >
-                →
-              </span>
+              <ArticleCardArrow />
             </Link>
           </div>
         )}
