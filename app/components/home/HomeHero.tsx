@@ -73,21 +73,21 @@ const domainStyles: Record<
 > = {
   fullstack: {
     gradient:
-      "bg-gradient-to-r from-emerald-300 via-teal-400 to-cyan-400 bg-clip-text text-transparent",
+      "bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent dark:from-emerald-300 dark:via-teal-400 dark:to-cyan-400",
     glow: "bg-teal-400/[0.07]",
-    caret: "bg-teal-300",
+    caret: "bg-teal-600 dark:bg-teal-300",
   },
   cyber: {
     gradient:
-      "bg-gradient-to-r from-sky-300 via-blue-400 to-indigo-400 bg-clip-text text-transparent",
+      "bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent dark:from-sky-300 dark:via-blue-400 dark:to-indigo-400",
     glow: "bg-blue-400/[0.07]",
-    caret: "bg-sky-300",
+    caret: "bg-sky-600 dark:bg-sky-300",
   },
   ai: {
     gradient:
-      "bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent",
+      "bg-gradient-to-r from-violet-600 via-fuchsia-600 to-pink-600 bg-clip-text text-transparent dark:from-violet-400 dark:via-fuchsia-400 dark:to-pink-400",
     glow: "bg-fuchsia-400/[0.07]",
-    caret: "bg-fuchsia-300",
+    caret: "bg-fuchsia-600 dark:bg-fuchsia-300",
   },
 };
 
@@ -168,11 +168,11 @@ function HeadlineRotator({
     let cancelled = false;
     const t1 = headlines[index].line1;
     const t2 = headlines[index].line2;
-    /* Illustration swaps 300ms into the decode so the text appears to
-       "summon" the visual rather than both flipping at once. */
+    /* Start the illustration crossfade with the text decode so both domain
+       color systems remain synchronized throughout the transition. */
     const domainTimer = setTimeout(
       () => onDomainChange?.(headlines[index].accent),
-      firstRun.current ? 0 : 300
+      0,
     );
 
     /* Off-screen pause: resolve only once the headline is visible. */

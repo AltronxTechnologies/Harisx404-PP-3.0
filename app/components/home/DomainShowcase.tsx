@@ -613,7 +613,7 @@ export function DomainShowcase({ domain }: { domain: string }) {
     >
       {/* Backdrop glow removed (matches the headline) — the illustration's
          own colored strokes and dots carry the domain identity. */}
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="sync">
         <motion.div
           key={`${domain}-${idx}`}
           initial={still ? false : { opacity: 0, scale: 0.92 }}
