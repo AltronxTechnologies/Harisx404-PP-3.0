@@ -63,8 +63,8 @@ export default function Navbar() {
   // Greeting State
   const [greeting, setGreeting] = useState("Good Evening");
   const [greetingIcon, setGreetingIcon] = useState("🌙");
-  const [showGreeting, setShowGreeting] = useState(true);
-  const [sideControlsReady, setSideControlsReady] = useState(false);
+  const [showGreeting, setShowGreeting] = useState(false);
+  const [sideControlsReady, setSideControlsReady] = useState(true);
 
   // Mobile pill content cycle: 0 = Harisx404, 1 = logo, 2 = Explore now
   const [mobileCycle, setMobileCycle] = useState(0);
@@ -108,14 +108,8 @@ export default function Navbar() {
       setGreetingIcon("🌙");
     }
 
-    const timer = setTimeout(() => {
-      setShowGreeting(false);
-    }, 2200);
-    const controlsTimer = setTimeout(() => setSideControlsReady(true), 2600);
-    return () => {
-      clearTimeout(timer);
-      clearTimeout(controlsTimer);
-    };
+    setShowGreeting(false);
+    setSideControlsReady(true);
   }, [prefersReducedMotion]);
 
   // Keyboard shortcut: Cmd+K / Ctrl+K for search
