@@ -1,5 +1,7 @@
 "use client";
 
+/* LOCKED - owner-approved Home Blog section; see LOCKED_PERFECT.md entry 27. */
+
 import Link from "next/link";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";

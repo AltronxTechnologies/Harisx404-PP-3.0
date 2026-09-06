@@ -1487,3 +1487,37 @@ locked. Final re-lock awaits owner review of this limited amendment.
 
 The temporary Projects unlock in entry 25 is closed by this final lock. Do not
 modify any locked surface without a new explicit owner instruction.
+
+## 27. FINAL OWNER LOCK - Core Public Website
+
+- **Date locked:** 2026-09-06
+- **Owner instruction:** Freeze Home, About, Projects, Blog, Navbar, Search
+  modal, Reach Out modal, and Footer. A named surface must be explicitly
+  unlocked by the owner before any future modification.
+- **Locked routes:** `/`, `/about`, `/projects`, project-detail presentation,
+  `/blog`, and Blog article presentation.
+- **Locked global surfaces:** Navbar, Search modal, Reach Out modal, Footer,
+  shared CTA, and their presentation dependencies.
+- **Locked Home sections:** hero, status row, bento, case studies, writings,
+  About teaser, testimonials, site grid, FAQ, CTA, and all responsive variants.
+- **Home Projects final state:** below `xl`, Details and Blog-style View Case
+  Study actions are separated by the approved visible vertical divider; at
+  `xl+`, the sticky panel keeps only the Blog-style View Case Study action.
+- **Home Blog final state:** one featured card uses the same reaction-ranked
+  featured article as `/blog`; two Latest cards use the newest remaining
+  articles. All cards include responsive image badges, reading time left,
+  publication date right, title, description, reaction pill left, and the
+  Blog-style Read Article action right. Below `lg`, all three use matching
+  vertical card anatomy and image ratios.
+
+### Mandatory reference rule
+
+Future pages and components may reuse the properties and established patterns
+of these locked surfaces, including typography, spacing, colors, borders,
+controls, card anatomy, motion, responsive behavior, and accessibility. Reuse
+must not edit, refactor, restyle, rename, reorder, or indirectly change the
+locked source surfaces or their rendered behavior.
+
+If a future request appears to require changing a locked surface, stop and ask
+the owner to explicitly unlock that named page or component. Do not infer an
+unlock from a request to make another page similar to a locked reference.
