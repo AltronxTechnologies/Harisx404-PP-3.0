@@ -168,7 +168,7 @@ export function MySiteGrid() {
         {/* Line break only where there's room for two clean lines —
             on small screens the text wraps naturally instead. */}
         <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none] md:block">
-          explore &amp;&amp; say hello
+          explore &amp;&amp; say hello.
         </span>
       </SectionHeading>
 

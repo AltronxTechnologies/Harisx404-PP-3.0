@@ -952,7 +952,7 @@ export function CaseStudies({ projects }: { projects: HomeProject[] }) {
         <SectionHeading kicker="Case Studies">
           Selected{" "}
           <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
-            builds
+            builds.
           </span>
         </SectionHeading>
       </motion.div>

@@ -868,7 +868,7 @@ export function HomeBento({
       <SectionHeading kicker="Let's connect" animateWords>
         Find me across the{" "}
         <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
-          web
+          web.
         </span>
       </SectionHeading>
 

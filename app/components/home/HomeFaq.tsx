@@ -67,7 +67,7 @@ export async function HomeFaq() {
       <SectionHeading kicker="FAQs" className="mb-14" headingId="faq-heading">
         Frequently asked,{" "}
         <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
-          questions
+          questions.
         </span>
       </SectionHeading>
       <div className="space-y-2">

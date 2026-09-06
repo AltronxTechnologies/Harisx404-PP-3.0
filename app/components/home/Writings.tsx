@@ -99,7 +99,7 @@ export function Writings({
         <SectionHeading kicker="The Blog">
           Latest{" "}
           <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
-            write-ups
+            write-ups.
           </span>
         </SectionHeading>
       </motion.div>
