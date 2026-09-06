@@ -128,7 +128,7 @@ export default async function ProjectsPage() {
           <h1 className="heading-glow mx-auto mt-4 max-w-xl text-balance [font-family:var(--font-instrument-serif),serif] text-[46px] font-medium leading-none tracking-tight text-text-primary md:text-[56px] md:tracking-[-1.5px]">
             Things I&apos;ve{" "}
             <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
-              built
+              built.
             </span>
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-[15px] font-normal leading-6 text-text-secondary">
