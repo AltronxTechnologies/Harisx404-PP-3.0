@@ -202,11 +202,11 @@ export function Writings({
                   href={post.href ?? `/blog/${post.slug}`}
                   className="group flex h-full flex-col rounded-3xl border border-border-primary bg-white p-3 transition-all hover:border-neutral-400/70 hover:shadow-lg dark:hover:border-white/25 dark:bg-white/[0.02]"
                 >
-                  <div className="flex h-full flex-col items-stretch gap-4 xl:flex-row">
+                  <div className="flex h-full flex-col items-stretch gap-0 xl:flex-row xl:gap-4">
                     {/* Inset thumb — stretches the full card height so it sits
                         flush with the card padding on top, bottom, and left,
                         mirroring the featured card's inset cover. */}
-                    <div className="relative aspect-[16/7] w-full shrink-0 self-stretch overflow-hidden rounded-2xl xl:aspect-auto xl:w-[152px]">
+                    <div className="relative aspect-[16/10.95] w-full shrink-0 self-stretch overflow-hidden rounded-2xl md:aspect-[16/10.835] lg:aspect-[16/7] xl:aspect-auto xl:w-[152px]">
                       {post.imageName ? (
                         <>
                           <Image
@@ -232,8 +232,8 @@ export function Writings({
                         {post.badge || "Latest"}
                       </span>
                     </div>
-                    <div className="flex min-w-0 flex-1 flex-col px-2 pb-2 sm:px-3 xl:justify-center xl:px-0 xl:py-1 xl:pr-2">
-                      <div className="flex items-center justify-between gap-3 font-mono text-[11px] uppercase tracking-widest text-text-secondary">
+                    <div className="flex min-w-0 flex-1 flex-col px-2 pb-2 pt-5 sm:px-3 xl:justify-center xl:px-0 xl:py-1 xl:pr-2">
+                      <div className="flex items-center justify-between gap-3 font-mono text-[11px] uppercase tracking-widest text-text-secondary md:text-xs">
                         <span className="shrink-0">{post.readingTime}</span>
                         <time
                           className="truncate text-right"
@@ -243,7 +243,7 @@ export function Writings({
                           {formatShortDate(post.publishedAt)}
                         </time>
                       </div>
-                      <h3 className="mt-3 line-clamp-2 break-words font-display text-lg font-medium leading-tight text-text-primary sm:text-xl lg:text-[22px]">
+                      <h3 className="mt-3 line-clamp-2 break-words font-display text-2xl font-medium leading-tight text-text-primary lg:text-[22px]">
                         {post.title}
                       </h3>
                       <p className="mt-2 line-clamp-2 break-words text-[15px] leading-relaxed text-text-secondary">
