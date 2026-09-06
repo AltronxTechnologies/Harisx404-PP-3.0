@@ -768,7 +768,7 @@ export function CaseStudyCard({
             </button>
             <span
               aria-hidden
-              className="h-4 w-px shrink-0 bg-border-primary"
+              className="h-4 w-px shrink-0 bg-neutral-400/70 dark:bg-white/25"
             />
             <Link
               href={`/projects/${project.slug}`}
