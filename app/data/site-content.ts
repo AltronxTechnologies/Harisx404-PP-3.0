@@ -202,7 +202,7 @@ export const siteContent = {
       { label: "Email", href: "mailto:itsharis.tech@gmail.com" },
       { label: "LinkedIn", href: "https://www.linkedin.com/in/harisx404/" },
       { label: "GitHub", href: "https://github.com/harisx404" },
-      { label: "Twitter", href: "https://twitter.com/harisx404" },
+      { label: "Twitter", href: "#" },
     ],
   },
 

@@ -233,3 +233,9 @@ To show the embedded scheduling calendar there:
       - Redirect URLs: add `http://localhost:3000/auth/callback` and `http://localhost:3000/**`
         (add the production equivalents at deploy time)
 - [ ] Test: /community-wall → "Write a message..." → authorize on GitHub → composer appears → post a note
+## Contact form
+
+1. Run `migrations/2026_contact_messages.sql` in the Supabase SQL editor.
+2. Configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`,
+   `SMTP_PASSWORD`, and `SMTP_FROM_EMAIL` in the deployment environment.
+3. Keep `ADMIN_EMAIL` set to the inbox that should receive contact messages.

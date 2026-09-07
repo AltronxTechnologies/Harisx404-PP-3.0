@@ -15,6 +15,12 @@ services:
       SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
       GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY:-}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-itsharis.tech@gmail.com}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL:-}
     command: bash -lc "bash .alloy/populate-env.sh && set -a && . ./.env.local && set +a && npm ci --no-audit --no-fund && npm run dev -- --hostname 0.0.0.0 --port 3000"
     restart: unless-stopped
 

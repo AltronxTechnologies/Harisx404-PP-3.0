@@ -1,239 +1,316 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, type FormEvent } from "react";
 import {
-  Calendar,
-  MessageSquare,
-  Clock,
-  Video,
-  CheckSquare,
   ArrowRight,
-  Mail,
   Check,
+  Clock3,
+  Globe2,
+  Mail,
+  MessageSquareText,
+  ShieldCheck,
 } from "lucide-react";
-import { siteContent } from "@/app/data/site-content";
 import { BrandGlyph } from "@/app/components/BrandGlyph";
+import { siteContent } from "@/app/data/site-content";
+import {
+  submitContactMessage,
+  type ContactInput,
+} from "@/app/contact/actions";
 
 const OWNER_EMAIL = "itsharis.tech@gmail.com";
 
-type TabId = "call" | "message";
+const initialForm: ContactInput = {
+  name: "",
+  email: "",
+  subject: "",
+  projectType: "freelance",
+  message: "",
+  website: "",
+};
 
-/**
- * Renamed from `SocialPill` to `ContactSocialButton`: the shared
- * app/components/SocialPill.tsx exports a *different* component (the footer's
- * grouped pill, no props) under the same name. Two unrelated components with
- * one name is a trap. Brand paths now come from the shared BrandGlyph.
- */
+const fieldClass =
+  "mt-2 h-11 w-full rounded-xl border border-black/[0.16] bg-transparent px-3.5 text-[15px] text-text-primary outline-none transition-colors placeholder:text-neutral-400 hover:border-neutral-400/[0.72] focus:border-text-secondary focus-visible:ring-2 focus-visible:ring-neutral-300/60 dark:border-white/[0.12] dark:placeholder:text-white/30 dark:hover:border-white/[0.27] dark:focus-visible:ring-white/20";
+
 function ContactSocialButton({ label, href }: { label: string; href: string }) {
   const isMail = href.startsWith("mailto:");
+  const isExternal = /^https?:\/\//.test(href);
   return (
     <a
       href={href}
-      target={isMail ? undefined : "_blank"}
-      rel={isMail ? undefined : "noopener noreferrer"}
-      aria-label={label}
-      className="flex size-10 items-center justify-center rounded-xl bg-neutral-100 text-neutral-600 transition hover:bg-neutral-200 hover:text-neutral-900 dark:bg-white/[0.07] dark:text-white/70 dark:hover:bg-white/[0.12] dark:hover:text-white"
+      target={isExternal ? "_blank" : undefined}
+      rel={isExternal ? "noopener noreferrer" : undefined}
+      aria-label={isExternal ? `${label} (opens in a new tab)` : label}
+      className="inline-flex size-10 items-center justify-center rounded-xl border border-border-primary text-text-secondary outline-none transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25"
     >
-      {isMail ? (
-        <Mail className="size-4" />
-      ) : (
-        <BrandGlyph name={label} className="size-4" />
-      )}
+      {isMail ? <Mail className="size-4" aria-hidden /> : <BrandGlyph name={label} className="size-4" />}
     </a>
   );
 }
 
 export function ContactClient() {
   const { contact } = siteContent;
-  const [activeTab, setActiveTab] = useState<TabId>("call");
-  const [message, setMessage] = useState("");
-  const [isCopied, setIsCopied] = useState(false);
+  const [form, setForm] = useState<ContactInput>(initialForm);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [formError, setFormError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
-  const hasCalLink = contact.calLink.trim().length > 0;
-
-  const handleSend = () => {
-    if (!message.trim()) return;
-    const subject = encodeURIComponent("Project inquiry");
-    const body = encodeURIComponent(message);
-    window.location.href = `mailto:${OWNER_EMAIL}?subject=${subject}&body=${body}`;
-  };
-
-  const handleCopyEmail = async () => {
-    try {
-      await navigator.clipboard.writeText(OWNER_EMAIL);
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000);
-    } catch {
-      // clipboard unavailable — ignore
+  const updateField = <K extends keyof ContactInput>(key: K, value: ContactInput[K]) => {
+    setForm((current) => ({ ...current, [key]: value }));
+    if (fieldErrors[key]) {
+      setFieldErrors((current) => {
+        const next = { ...current };
+        delete next[key];
+        return next;
+      });
     }
   };
 
-  const tabs: { id: TabId; label: string; icon: typeof Calendar }[] = [
-    { id: "call", label: "Book a Call", icon: Calendar },
-    { id: "message", label: "Send Message", icon: MessageSquare },
-  ];
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    setFormError("");
+    const result = await submitContactMessage(form);
+    setIsSubmitting(false);
+
+    if (!result.success) {
+      setFieldErrors(result.fieldErrors || {});
+      setFormError(result.error);
+      return;
+    }
+
+    setFieldErrors({});
+    setSubmitted(true);
+  };
+
+  const labelClass =
+    "font-mono text-[11px] font-medium uppercase tracking-widest text-text-secondary";
 
   return (
-    <div className="w-full">
-      {/* Tabs + socials */}
-      <div className="flex flex-wrap items-center justify-center gap-3 lg:justify-start">
-        <div
-          role="tablist"
-          aria-label="Contact options"
-          className="flex items-center gap-1 rounded-2xl bg-neutral-100 p-1 dark:bg-white/[0.06]"
-        >
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              role="tab"
-              aria-selected={activeTab === tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition ${
-                activeTab === tab.id
-                  ? "bg-white text-neutral-900 shadow-sm dark:bg-white/[0.12] dark:text-white"
-                  : "text-neutral-500 hover:text-neutral-800 dark:text-white/50 dark:hover:text-white/80"
-              }`}
-            >
-              <tab.icon className="size-4" />
-              {tab.label}
-            </button>
-          ))}
-        </div>
+    <div className="grid items-start gap-3 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.7fr)]">
+      <aside className="rounded-3xl border border-border-primary bg-white p-3 dark:bg-white/[0.02] lg:sticky lg:top-28">
+        <div className="px-3 pb-4 pt-3 sm:px-5 sm:pb-6 sm:pt-5">
+          <p className="inline-flex items-center gap-2.5 font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
+            <span aria-hidden className="relative flex size-2">
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-500 opacity-75 motion-reduce:animate-none" />
+              <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+            </span>
+            Available for opportunities
+          </p>
+          <h2 className="mt-4 text-balance [font-family:var(--font-instrument-serif),serif] text-[32px] font-medium leading-none tracking-tight text-text-primary sm:text-[36px]">
+            Clear ideas deserve a thoughtful reply.
+          </h2>
+          <p className="mt-4 text-[15px] leading-6 text-text-secondary">
+            Full-time roles, freelance builds, security work, AI projects, and
+            useful collaborations are all welcome.
+          </p>
 
-        <div className="flex items-center gap-2">
-          {contact.socials.map((s) => (
-            <ContactSocialButton key={s.label} label={s.label} href={s.href} />
-          ))}
-        </div>
-      </div>
-
-      {/* Panels */}
-      <div className="mt-8">
-        <AnimatePresence mode="wait">
-          {activeTab === "call" ? (
-            <motion.div
-              key="call"
-              role="tabpanel"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.25 }}
-            >
-              {hasCalLink ? (
-                <div className="overflow-hidden rounded-3xl border border-border-primary bg-white dark:bg-white/[0.04]">
-                  <iframe
-                    src={`https://cal.com/${contact.calLink}?embed=true&theme=auto`}
-                    title="Book a call"
-                    className="h-[620px] w-full"
-                    loading="lazy"
-                  />
-                </div>
-              ) : (
-                <div className="rounded-3xl border border-border-primary bg-white p-8 dark:bg-white/[0.04]">
-                  <div className="flex items-center gap-3">
-                    <Image
-                      src="/harisx404.png"
-                      alt="Muhammad Haris"
-                      width={44}
-                      height={44}
-                      className="size-11 rounded-full object-cover"
-                    />
-                    <div>
-                      <p className="text-sm text-text-secondary">Muhammad Haris</p>
-                      <h2 className="text-xl font-semibold text-text-primary">
-                        {contact.call.title}
-                      </h2>
-                    </div>
-                  </div>
-
-                  <ul className="mt-6 space-y-3 text-sm text-text-secondary">
-                    <li className="flex items-center gap-2.5">
-                      <CheckSquare className="size-4 text-text-secondary" />
-                      {contact.call.note}
-                    </li>
-                    <li className="flex items-center gap-2.5">
-                      <Clock className="size-4 text-text-secondary" />
-                      {contact.call.duration}
-                    </li>
-                    <li className="flex items-center gap-2.5">
-                      <Video className="size-4 text-text-secondary" />
-                      {contact.call.platform}
-                    </li>
-                  </ul>
-
-                  <div className="mt-8 flex flex-wrap items-center gap-3">
-                    <a
-                      href={`mailto:${OWNER_EMAIL}?subject=${encodeURIComponent("Call request — 30 min meeting")}&body=${encodeURIComponent("Hey Haris, I'd like to book a 30 minute call. Here are a few times that work for me:\n\n1.\n2.\n3.\n\nTimezone:")}`}
-                      className="flex items-center gap-2 rounded-xl bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-neutral-700 dark:bg-white dark:text-neutral-900 dark:hover:bg-white/85"
-                    >
-                      Request a call by email <ArrowRight className="size-4" />
-                    </a>
-                    <button
-                      onClick={handleCopyEmail}
-                      className="flex items-center gap-2 rounded-xl border border-border-primary px-5 py-2.5 text-sm font-medium text-text-secondary transition hover:border-neutral-400/70 active:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25 dark:active:border-white/25"
-                    >
-                      {isCopied ? (
-                        <>
-                          <Check className="size-4 text-emerald-500" /> Copied!
-                        </>
-                      ) : (
-                        <>
-                          <Mail className="size-4" /> {OWNER_EMAIL}
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </motion.div>
-          ) : (
-            <motion.div
-              key="message"
-              role="tabpanel"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.25 }}
-              className="rounded-3xl border border-border-primary bg-white p-8 dark:bg-white/[0.04]"
-            >
+          <div className="mt-6 border-t border-border-primary pt-5">
+            <dl className="space-y-4 text-sm text-text-secondary">
               <div className="flex items-center gap-3">
-                <Image
-                  src="/harisx404.png"
-                  alt="Muhammad Haris"
-                  width={44}
-                  height={44}
-                  className="size-11 rounded-full object-cover"
-                />
+                <Clock3 className="size-4 shrink-0" aria-hidden />
                 <div>
-                  <h2 className="text-lg font-semibold text-text-primary">
-                    Send Haris a message
-                  </h2>
-                  <p className="text-sm text-text-secondary">I read every one</p>
+                  <dt className="sr-only">Response time</dt>
+                  <dd>Usually within 24 hours</dd>
                 </div>
               </div>
-
-              <textarea
-                value={message}
-                rows={6}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="Hey Haris, I have a project idea..."
-                className="mt-5 w-full resize-none rounded-2xl bg-neutral-100 p-4 text-base text-text-primary placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:bg-white/[0.06] dark:placeholder-white/30 dark:focus:ring-white/20"
-              />
-
-              <div className="mt-4 flex justify-end">
-                <button
-                  onClick={handleSend}
-                  disabled={!message.trim()}
-                  className="flex items-center gap-2 rounded-xl bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-white dark:text-neutral-900 dark:hover:bg-white/85"
-                >
-                  Send message <ArrowRight className="size-4" />
-                </button>
+              <div className="flex items-center gap-3">
+                <Globe2 className="size-4 shrink-0" aria-hidden />
+                <div>
+                  <dt className="sr-only">Location</dt>
+                  <dd>Pakistan, working worldwide</dd>
+                </div>
               </div>
-            </motion.div>
+              <div className="flex items-center gap-3">
+                <ShieldCheck className="size-4 shrink-0" aria-hidden />
+                <div>
+                  <dt className="sr-only">Privacy</dt>
+                  <dd>Your details stay private</dd>
+                </div>
+              </div>
+            </dl>
+          </div>
+
+          <div className="mt-6 border-t border-border-primary pt-5">
+            <a
+              href={`mailto:${OWNER_EMAIL}`}
+              className="block truncate text-[15px] font-medium text-text-primary underline decoration-border-primary underline-offset-4 transition-colors hover:decoration-text-primary"
+            >
+              {OWNER_EMAIL}
+            </a>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {contact.socials.map((social) => (
+                <ContactSocialButton key={social.label} label={social.label} href={social.href} />
+              ))}
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <div className="rounded-3xl border border-border-primary bg-white p-3 dark:bg-white/[0.02]">
+        <div className="px-3 pb-4 pt-3 sm:px-5 sm:pb-6 sm:pt-5 lg:px-7 lg:pb-8 lg:pt-7">
+          {submitted ? (
+            <div role="status" className="flex min-h-[520px] flex-col items-center justify-center text-center">
+              <span className="flex size-12 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                <Check className="size-5" aria-hidden />
+              </span>
+              <p className="mt-5 font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
+                Message received
+              </p>
+              <h2 className="mt-4 max-w-xl text-balance [font-family:var(--font-instrument-serif),serif] text-[38px] font-medium leading-none tracking-tight text-text-primary sm:text-[46px]">
+                Thanks for reaching out.
+              </h2>
+              <p className="mt-4 max-w-md text-[15px] leading-6 text-text-secondary">
+                Your message was saved securely. Haris will read it and respond
+                to the email address you provided.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setForm(initialForm);
+                  setSubmitted(false);
+                }}
+                className="mt-7 inline-flex min-h-10 items-center rounded-full border border-border-primary px-5 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25"
+              >
+                Send another message
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-start gap-3">
+                <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl border border-border-primary text-text-secondary">
+                  <MessageSquareText className="size-4" aria-hidden />
+                </span>
+                <div>
+                  <p className="font-mono text-[11px] font-medium uppercase tracking-widest text-text-secondary">
+                    Send a message
+                  </p>
+                  <h2 className="mt-2 text-balance [font-family:var(--font-instrument-serif),serif] text-[32px] font-medium leading-none tracking-tight text-text-primary sm:text-[40px]">
+                    Tell me what you&apos;re building.
+                  </h2>
+                </div>
+              </div>
+              <p className="mt-4 max-w-2xl text-[15px] leading-6 text-text-secondary">
+                A little context goes a long way. Include the outcome you need,
+                where the work stands, and any important timing.
+              </p>
+
+              <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-5">
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <label>
+                    <span className={labelClass}>Name</span>
+                    <input
+                      autoComplete="name"
+                      value={form.name}
+                      onChange={(event) => updateField("name", event.target.value)}
+                      maxLength={80}
+                      aria-invalid={Boolean(fieldErrors.name)}
+                      aria-describedby={fieldErrors.name ? "contact-name-error" : undefined}
+                      placeholder="Your name"
+                      className={fieldClass}
+                    />
+                    {fieldErrors.name && <span id="contact-name-error" className="mt-1.5 block text-xs text-red-600 dark:text-red-400">{fieldErrors.name}</span>}
+                  </label>
+                  <label>
+                    <span className={labelClass}>Email</span>
+                    <input
+                      type="email"
+                      autoComplete="email"
+                      value={form.email}
+                      onChange={(event) => updateField("email", event.target.value)}
+                      maxLength={120}
+                      aria-invalid={Boolean(fieldErrors.email)}
+                      aria-describedby={fieldErrors.email ? "contact-email-error" : undefined}
+                      placeholder="you@example.com"
+                      className={fieldClass}
+                    />
+                    {fieldErrors.email && <span id="contact-email-error" className="mt-1.5 block text-xs text-red-600 dark:text-red-400">{fieldErrors.email}</span>}
+                  </label>
+                </div>
+
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <label>
+                    <span className={labelClass}>Inquiry type</span>
+                    <select
+                      value={form.projectType}
+                      onChange={(event) => updateField("projectType", event.target.value as ContactInput["projectType"])}
+                      aria-invalid={Boolean(fieldErrors.projectType)}
+                      className={`${fieldClass} appearance-none bg-[linear-gradient(45deg,transparent_50%,currentColor_50%),linear-gradient(135deg,currentColor_50%,transparent_50%)] bg-[position:calc(100%-17px)_19px,calc(100%-12px)_19px] bg-[size:5px_5px,5px_5px] bg-no-repeat pr-10`}
+                    >
+                      <option value="freelance">Freelance project</option>
+                      <option value="full-time">Full-time role</option>
+                      <option value="collaboration">Collaboration</option>
+                      <option value="other">Other inquiry</option>
+                    </select>
+                    {fieldErrors.projectType && <span className="mt-1.5 block text-xs text-red-600 dark:text-red-400">{fieldErrors.projectType}</span>}
+                  </label>
+                  <label>
+                    <span className={labelClass}>Subject</span>
+                    <input
+                      value={form.subject}
+                      onChange={(event) => updateField("subject", event.target.value)}
+                      maxLength={120}
+                      aria-invalid={Boolean(fieldErrors.subject)}
+                      aria-describedby={fieldErrors.subject ? "contact-subject-error" : undefined}
+                      placeholder="What can I help with?"
+                      className={fieldClass}
+                    />
+                    {fieldErrors.subject && <span id="contact-subject-error" className="mt-1.5 block text-xs text-red-600 dark:text-red-400">{fieldErrors.subject}</span>}
+                  </label>
+                </div>
+
+                <label className="block">
+                  <span className={labelClass}>Message</span>
+                  <textarea
+                    value={form.message}
+                    onChange={(event) => updateField("message", event.target.value)}
+                    maxLength={3000}
+                    rows={7}
+                    aria-invalid={Boolean(fieldErrors.message)}
+                    aria-describedby={fieldErrors.message ? "contact-message-error" : "contact-message-count"}
+                    placeholder="Share the goal, current situation, timeline, and anything else that would help."
+                    className={`${fieldClass} min-h-40 resize-y py-3 leading-6`}
+                  />
+                  <span className="mt-1.5 flex items-start justify-between gap-4">
+                    <span id="contact-message-error" className="text-xs text-red-600 dark:text-red-400">{fieldErrors.message}</span>
+                    <span id="contact-message-count" className="ml-auto shrink-0 font-mono text-[10px] tabular-nums text-text-secondary">{form.message.length} / 3000</span>
+                  </span>
+                </label>
+
+                <label className="absolute -left-[9999px]" aria-hidden="true">
+                  Website
+                  <input
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={form.website || ""}
+                    onChange={(event) => updateField("website", event.target.value)}
+                  />
+                </label>
+
+                {formError && (
+                  <p role="alert" className="rounded-xl border border-red-500/25 bg-red-500/[0.06] px-4 py-3 text-sm text-red-700 dark:text-red-300">
+                    {formError}
+                  </p>
+                )}
+
+                <div className="flex flex-col gap-4 border-t border-border-primary pt-5 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="max-w-md text-xs leading-5 text-text-secondary">
+                    Your details are used only to respond to this inquiry.
+                  </p>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="group inline-flex min-h-11 items-center justify-center gap-3 rounded-full bg-text-primary px-6 text-sm font-medium text-bg-primary outline-none transition-opacity hover:opacity-85 focus-visible:ring-2 focus-visible:ring-neutral-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary disabled:cursor-wait disabled:opacity-60"
+                  >
+                    {isSubmitting ? "Sending message..." : "Send message"}
+                    <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
+                  </button>
+                </div>
+              </form>
+            </>
           )}
-        </AnimatePresence>
+        </div>
       </div>
     </div>
   );
