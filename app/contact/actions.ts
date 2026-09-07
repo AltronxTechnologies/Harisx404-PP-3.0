@@ -7,12 +7,12 @@ import { checkRateLimit } from "@/app/lib/rate-limit";
 import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 
 const projectTypes = [
-  "full-time",
+  "general-question",
+  "project-inquiry",
   "freelance",
-  "contract",
-  "web-development",
-  "cybersecurity",
-  "ai-ml",
+  "full-time",
+  "security-report",
+  "website-issue",
   "consulting",
   "collaboration",
   "other",
@@ -33,15 +33,15 @@ export type ContactResult =
   | { success: false; error: string; fieldErrors?: Record<string, string> };
 
 const projectTypeLabels: Record<ContactInput["projectType"], string> = {
-  "full-time": "Full-time role",
+  "general-question": "General question",
+  "project-inquiry": "Project inquiry",
   freelance: "Freelance project",
-  contract: "Contract engagement",
-  "web-development": "Web development",
-  cybersecurity: "Cybersecurity",
-  "ai-ml": "AI / ML",
-  consulting: "Technical consulting",
-  collaboration: "Collaboration",
-  other: "General inquiry",
+  "full-time": "Full-time opportunity",
+  "security-report": "Security report",
+  "website-issue": "Website issue",
+  consulting: "Consulting request",
+  collaboration: "Collaboration / partnership",
+  other: "Other inquiry",
 };
 
 function escapeHtml(value: string) {

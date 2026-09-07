@@ -6,8 +6,8 @@ ALTER TABLE public.contact_messages
 ALTER TABLE public.contact_messages
   ADD CONSTRAINT contact_messages_project_type_check CHECK (
     project_type IN (
-      'full-time', 'freelance', 'contract', 'web-development',
-      'cybersecurity', 'ai-ml', 'consulting', 'collaboration', 'other'
+      'general-question', 'project-inquiry', 'freelance', 'full-time',
+      'security-report', 'website-issue', 'consulting', 'collaboration', 'other'
     )
   );
 

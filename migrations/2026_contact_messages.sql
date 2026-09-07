@@ -7,8 +7,8 @@ CREATE TABLE IF NOT EXISTS public.contact_messages (
   subject TEXT NOT NULL CHECK (char_length(subject) BETWEEN 5 AND 120),
   project_type TEXT NOT NULL CHECK (
     project_type IN (
-      'full-time', 'freelance', 'contract', 'web-development',
-      'cybersecurity', 'ai-ml', 'consulting', 'collaboration', 'other'
+      'general-question', 'project-inquiry', 'freelance', 'full-time',
+      'security-report', 'website-issue', 'consulting', 'collaboration', 'other'
     )
   ),
   message TEXT NOT NULL CHECK (char_length(message) BETWEEN 30 AND 3000),

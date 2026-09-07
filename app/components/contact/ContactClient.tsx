@@ -28,7 +28,7 @@ const initialForm: ContactInput = {
   name: "",
   email: "",
   subject: "",
-  projectType: "freelance",
+  projectType: "project-inquiry",
   message: "",
   website: "",
 };
@@ -39,16 +39,53 @@ const fieldClass =
 const inquiryTypes: Array<{
   value: ContactInput["projectType"];
   label: string;
+  description: string;
 }> = [
-  { value: "full-time", label: "Full-time role" },
-  { value: "freelance", label: "Freelance project" },
-  { value: "contract", label: "Contract engagement" },
-  { value: "web-development", label: "Web development" },
-  { value: "cybersecurity", label: "Cybersecurity project" },
-  { value: "ai-ml", label: "AI / ML project" },
-  { value: "consulting", label: "Technical consulting" },
-  { value: "collaboration", label: "Collaboration / partnership" },
-  { value: "other", label: "General inquiry" },
+  {
+    value: "general-question",
+    label: "General question",
+    description: "Work, availability, experience, or anything you want to ask",
+  },
+  {
+    value: "project-inquiry",
+    label: "Project inquiry",
+    description: "A new product, feature, platform, or technical build",
+  },
+  {
+    value: "freelance",
+    label: "Freelance project",
+    description: "Short- or long-term independent project work",
+  },
+  {
+    value: "full-time",
+    label: "Full-time opportunity",
+    description: "Employment, engineering roles, or team opportunities",
+  },
+  {
+    value: "security-report",
+    label: "Security report",
+    description: "A vulnerability or responsible-disclosure report",
+  },
+  {
+    value: "website-issue",
+    label: "Website issue",
+    description: "A bug, broken link, content error, or accessibility issue",
+  },
+  {
+    value: "consulting",
+    label: "Consulting request",
+    description: "Architecture, security, AI, or technical guidance",
+  },
+  {
+    value: "collaboration",
+    label: "Collaboration / partnership",
+    description: "Content, community, open-source, or partnership ideas",
+  },
+  {
+    value: "other",
+    label: "Other inquiry",
+    description: "Anything that does not fit the options above",
+  },
 ];
 
 function ContactSocialButton({ label, href }: { label: string; href: string }) {
@@ -262,17 +299,24 @@ export function ContactClient() {
                           <ChevronDown className="size-4 shrink-0 text-text-secondary transition-transform duration-200 group-data-[open]:rotate-180" aria-hidden />
                         </ListboxButton>
                         <ListboxOptions
+                          anchor="bottom"
+                          modal={false}
                           transition
-                          className="absolute z-30 mt-2 max-h-72 w-full origin-top overflow-y-auto rounded-xl border border-border-primary bg-bg-primary p-1.5 shadow-xl outline-none transition duration-150 ease-out data-[closed]:scale-[0.98] data-[closed]:opacity-0 [scrollbar-width:thin] [scrollbar-color:var(--border-primary)_transparent]"
+                          className="z-30 max-h-72 w-[var(--button-width)] origin-top overflow-y-auto rounded-xl border border-border-primary bg-bg-primary p-1.5 shadow-xl outline-none [--anchor-gap:8px] transition duration-150 ease-out data-[closed]:scale-[0.98] data-[closed]:opacity-0 [scrollbar-width:thin] [scrollbar-color:var(--border-primary)_transparent]"
                         >
                           {inquiryTypes.map((type) => (
                             <ListboxOption
                               key={type.value}
                               value={type.value}
-                              className="group flex cursor-default items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-sm text-text-secondary outline-none transition-colors data-[focus]:bg-black/[0.04] data-[focus]:text-text-primary dark:data-[focus]:bg-white/[0.06]"
+                              className="group flex cursor-default items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-text-secondary outline-none transition-colors data-[focus]:bg-black/[0.04] data-[focus]:text-text-primary dark:data-[focus]:bg-white/[0.06]"
                             >
-                              <span className="truncate group-data-[selected]:font-medium group-data-[selected]:text-text-primary">
-                                {type.label}
+                              <span className="min-w-0">
+                                <span className="block truncate text-sm group-data-[selected]:font-medium group-data-[selected]:text-text-primary">
+                                  {type.label}
+                                </span>
+                                <span className="mt-0.5 block truncate text-[11px] text-text-secondary">
+                                  {type.description}
+                                </span>
                               </span>
                               <Check className="size-4 shrink-0 opacity-0 group-data-[selected]:opacity-100" aria-hidden />
                             </ListboxOption>

@@ -97,10 +97,16 @@ until visual approval is explicit.
 - Replaced the native select with an accessible Headless UI listbox using the
   same 44px field shell, approved light/dark borders, rotating chevron, selected
   checkmark, keyboard focus rows, compact shadow, and scroll-bounded popup.
-- Expanded inquiry types to Full-time Role, Freelance Project, Contract
-  Engagement, Web Development, Cybersecurity Project, AI / ML Project,
-  Technical Consulting, Collaboration / Partnership, and General Inquiry.
+- Inquiry types classify visitor intent rather than technical domain: General
+  Question, Project Inquiry, Freelance Project, Full-time Opportunity, Security
+  Report, Website Issue, Consulting Request, Collaboration / Partnership, and
+  Other Inquiry. Each popup row includes a concise disambiguating description.
 - Added `migrations/2026_contact_inquiry_types.sql` because the owner had already
   applied the original table constraint before the expanded list was approved.
-- Closed-state desktop and mobile renders pass without alignment drift or
-  overflow. TypeScript, targeted ESLint, and `git diff --check` pass.
+- The listbox uses viewport-aware anchoring and non-modal focus management, so
+  it remains attached to the field, flips when needed, scrolls internally, and
+  does not move the page or disappear beneath the fixed Navbar.
+- Live desktop interaction passed selected checkmark, internal scrolling,
+  rotating chevron, End/Enter selection, close-on-selection, and focus return.
+  Closed-state desktop/mobile renders pass without alignment drift or overflow.
+  TypeScript, targeted ESLint, and `git diff --check` pass.
