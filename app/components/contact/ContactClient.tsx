@@ -2,8 +2,15 @@
 
 import { useState, type FormEvent } from "react";
 import {
+  Listbox,
+  ListboxButton,
+  ListboxOption,
+  ListboxOptions,
+} from "@headlessui/react";
+import {
   ArrowRight,
   Check,
+  ChevronDown,
   Clock3,
   Globe2,
   Mail,
@@ -28,6 +35,21 @@ const initialForm: ContactInput = {
 
 const fieldClass =
   "mt-2 h-11 w-full rounded-xl border border-black/[0.16] bg-transparent px-3.5 text-[15px] text-text-primary outline-none transition-colors placeholder:text-neutral-400 hover:border-neutral-400/[0.72] focus:border-text-secondary focus-visible:ring-2 focus-visible:ring-neutral-300/60 dark:border-white/[0.12] dark:placeholder:text-white/30 dark:hover:border-white/[0.27] dark:focus-visible:ring-white/20";
+
+const inquiryTypes: Array<{
+  value: ContactInput["projectType"];
+  label: string;
+}> = [
+  { value: "full-time", label: "Full-time role" },
+  { value: "freelance", label: "Freelance project" },
+  { value: "contract", label: "Contract engagement" },
+  { value: "web-development", label: "Web development" },
+  { value: "cybersecurity", label: "Cybersecurity project" },
+  { value: "ai-ml", label: "AI / ML project" },
+  { value: "consulting", label: "Technical consulting" },
+  { value: "collaboration", label: "Collaboration / partnership" },
+  { value: "other", label: "General inquiry" },
+];
 
 function ContactSocialButton({ label, href }: { label: string; href: string }) {
   const isMail = href.startsWith("mailto:");
@@ -170,18 +192,18 @@ export function ContactClient() {
             </div>
           ) : (
             <>
-              <div className="flex items-start gap-3">
-                <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl border border-border-primary text-text-secondary">
+              <div>
+                <div className="flex h-9 items-center gap-3">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-border-primary text-text-secondary">
                   <MessageSquareText className="size-4" aria-hidden />
-                </span>
-                <div>
+                  </span>
                   <p className="font-mono text-[11px] font-medium uppercase tracking-widest text-text-secondary">
                     Send a message
                   </p>
-                  <h2 className="mt-2 text-balance [font-family:var(--font-instrument-serif),serif] text-[32px] font-medium leading-none tracking-tight text-text-primary sm:text-[40px]">
-                    Tell me what you&apos;re building.
-                  </h2>
                 </div>
+                <h2 className="mt-3 text-balance [font-family:var(--font-instrument-serif),serif] text-[32px] font-medium leading-none tracking-tight text-text-primary sm:text-[40px]">
+                  Tell me what you&apos;re building.
+                </h2>
               </div>
               <p className="mt-4 max-w-2xl text-[15px] leading-6 text-text-secondary">
                 A little context goes a long way. Include the outcome you need,
@@ -222,21 +244,44 @@ export function ContactClient() {
                 </div>
 
                 <div className="grid gap-5 sm:grid-cols-2">
-                  <label>
-                    <span className={labelClass}>Inquiry type</span>
-                    <select
+                  <div>
+                    <span id="contact-inquiry-label" className={labelClass}>Inquiry type</span>
+                    <Listbox
                       value={form.projectType}
-                      onChange={(event) => updateField("projectType", event.target.value as ContactInput["projectType"])}
-                      aria-invalid={Boolean(fieldErrors.projectType)}
-                      className={`${fieldClass} appearance-none bg-[linear-gradient(45deg,transparent_50%,currentColor_50%),linear-gradient(135deg,currentColor_50%,transparent_50%)] bg-[position:calc(100%-17px)_19px,calc(100%-12px)_19px] bg-[size:5px_5px,5px_5px] bg-no-repeat pr-10`}
+                      onChange={(value) => updateField("projectType", value)}
                     >
-                      <option value="freelance">Freelance project</option>
-                      <option value="full-time">Full-time role</option>
-                      <option value="collaboration">Collaboration</option>
-                      <option value="other">Other inquiry</option>
-                    </select>
+                      <div className="relative">
+                        <ListboxButton
+                          aria-labelledby="contact-inquiry-label"
+                          aria-invalid={Boolean(fieldErrors.projectType)}
+                          className={`${fieldClass} group flex items-center justify-between gap-3 pr-3 text-left`}
+                        >
+                          <span className="truncate">
+                            {inquiryTypes.find((type) => type.value === form.projectType)?.label}
+                          </span>
+                          <ChevronDown className="size-4 shrink-0 text-text-secondary transition-transform duration-200 group-data-[open]:rotate-180" aria-hidden />
+                        </ListboxButton>
+                        <ListboxOptions
+                          transition
+                          className="absolute z-30 mt-2 max-h-72 w-full origin-top overflow-y-auto rounded-xl border border-border-primary bg-bg-primary p-1.5 shadow-xl outline-none transition duration-150 ease-out data-[closed]:scale-[0.98] data-[closed]:opacity-0 [scrollbar-width:thin] [scrollbar-color:var(--border-primary)_transparent]"
+                        >
+                          {inquiryTypes.map((type) => (
+                            <ListboxOption
+                              key={type.value}
+                              value={type.value}
+                              className="group flex cursor-default items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-sm text-text-secondary outline-none transition-colors data-[focus]:bg-black/[0.04] data-[focus]:text-text-primary dark:data-[focus]:bg-white/[0.06]"
+                            >
+                              <span className="truncate group-data-[selected]:font-medium group-data-[selected]:text-text-primary">
+                                {type.label}
+                              </span>
+                              <Check className="size-4 shrink-0 opacity-0 group-data-[selected]:opacity-100" aria-hidden />
+                            </ListboxOption>
+                          ))}
+                        </ListboxOptions>
+                      </div>
+                    </Listbox>
                     {fieldErrors.projectType && <span className="mt-1.5 block text-xs text-red-600 dark:text-red-400">{fieldErrors.projectType}</span>}
-                  </label>
+                  </div>
                   <label>
                     <span className={labelClass}>Subject</span>
                     <input

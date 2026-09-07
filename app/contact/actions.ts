@@ -6,7 +6,17 @@ import * as z from "zod";
 import { checkRateLimit } from "@/app/lib/rate-limit";
 import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 
-const projectTypes = ["full-time", "freelance", "collaboration", "other"] as const;
+const projectTypes = [
+  "full-time",
+  "freelance",
+  "contract",
+  "web-development",
+  "cybersecurity",
+  "ai-ml",
+  "consulting",
+  "collaboration",
+  "other",
+] as const;
 
 const contactSchema = z.object({
   name: z.string().trim().min(2, "Please enter your name.").max(80, "Name must be 80 characters or fewer."),
@@ -25,8 +35,13 @@ export type ContactResult =
 const projectTypeLabels: Record<ContactInput["projectType"], string> = {
   "full-time": "Full-time role",
   freelance: "Freelance project",
+  contract: "Contract engagement",
+  "web-development": "Web development",
+  cybersecurity: "Cybersecurity",
+  "ai-ml": "AI / ML",
+  consulting: "Technical consulting",
   collaboration: "Collaboration",
-  other: "Other inquiry",
+  other: "General inquiry",
 };
 
 function escapeHtml(value: string) {

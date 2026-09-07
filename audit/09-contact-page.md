@@ -88,3 +88,19 @@ until visual approval is explicit.
   matching its placement on the approved public pages.
 - Rechecked full-height desktop and mobile renders: the icon row, form, CTA,
   glow containment, and Footer handoff remain aligned with no clipping.
+
+## Inquiry selector and form-heading alignment
+
+- Moved the message icon into the exact 36px `Send a message` kicker row. Its
+  center now aligns with the kicker rather than floating between the kicker and
+  heading; the heading starts on an independent baseline below.
+- Replaced the native select with an accessible Headless UI listbox using the
+  same 44px field shell, approved light/dark borders, rotating chevron, selected
+  checkmark, keyboard focus rows, compact shadow, and scroll-bounded popup.
+- Expanded inquiry types to Full-time Role, Freelance Project, Contract
+  Engagement, Web Development, Cybersecurity Project, AI / ML Project,
+  Technical Consulting, Collaboration / Partnership, and General Inquiry.
+- Added `migrations/2026_contact_inquiry_types.sql` because the owner had already
+  applied the original table constraint before the expanded list was approved.
+- Closed-state desktop and mobile renders pass without alignment drift or
+  overflow. TypeScript, targeted ESLint, and `git diff --check` pass.
