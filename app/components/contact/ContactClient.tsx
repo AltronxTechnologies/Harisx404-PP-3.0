@@ -17,8 +17,6 @@ import {
   type ContactInput,
 } from "@/app/contact/actions";
 
-const OWNER_EMAIL = "itsharis.tech@gmail.com";
-
 const initialForm: ContactInput = {
   name: "",
   email: "",
@@ -133,13 +131,7 @@ export function ContactClient() {
           </div>
 
           <div className="mt-6 border-t border-border-primary pt-5">
-            <a
-              href={`mailto:${OWNER_EMAIL}`}
-              className="block truncate text-[15px] font-medium text-text-primary underline decoration-border-primary underline-offset-4 transition-colors hover:decoration-text-primary"
-            >
-              {OWNER_EMAIL}
-            </a>
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2">
               {contact.socials.map((social) => (
                 <ContactSocialButton key={social.label} label={social.label} href={social.href} />
               ))}

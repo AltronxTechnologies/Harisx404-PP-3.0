@@ -71,10 +71,20 @@
 
 ## Deployment requirements
 
-1. Apply `migrations/2026_contact_messages.sql` in Supabase.
+1. Apply `migrations/2026_contact_messages.sql` in Supabase. Confirmed applied
+   successfully by the owner on 2026-09-07.
 2. Configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`,
    `SMTP_PASSWORD`, and `SMTP_FROM_EMAIL`.
 3. Keep `ADMIN_EMAIL` configured as the destination inbox.
 
 Contact remains open for owner review. Do not add it to the production lock
 until visual approval is explicit.
+
+## Final presentation amendment
+
+- Removed the repeated visible email address from the availability card; the
+  accessible email icon remains in the social action row.
+- Added the locked shared CTA 112px after the form, immediately before Footer,
+  matching its placement on the approved public pages.
+- Rechecked full-height desktop and mobile renders: the icon row, form, CTA,
+  glow containment, and Footer handoff remain aligned with no clipping.

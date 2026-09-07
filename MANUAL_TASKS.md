@@ -235,7 +235,8 @@ To show the embedded scheduling calendar there:
 - [ ] Test: /community-wall → "Write a message..." → authorize on GitHub → composer appears → post a note
 ## Contact form
 
-1. Run `migrations/2026_contact_messages.sql` in the Supabase SQL editor.
+1. `migrations/2026_contact_messages.sql` was applied successfully on
+   2026-09-07.
 2. Configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`,
    `SMTP_PASSWORD`, and `SMTP_FROM_EMAIL` in the deployment environment.
 3. Keep `ADMIN_EMAIL` set to the inbox that should receive contact messages.
