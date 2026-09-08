@@ -137,7 +137,7 @@ export default function LinksPage() {
             <p className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">Connect</p>
             <h1 className="heading-glow mx-auto mt-4 max-w-xl text-balance [font-family:var(--font-instrument-serif),serif] text-[46px] font-medium leading-none tracking-tight text-text-primary md:text-[56px] md:tracking-[-1.5px]">
               One handle,{" "}
-              <span className="animate-gradient-x bg-gradient-to-r from-indigo-600 via-fuchsia-600 to-pink-600 bg-clip-text px-1 pb-1 italic text-transparent [text-shadow:none] dark:from-blue-500 dark:via-violet-500 dark:to-pink-500">everywhere.</span>
+              <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">everywhere.</span>
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-pretty text-[15px] leading-6 text-text-secondary">
               Find my code, credentials, professional profiles, and the clearest way to start a conversation.

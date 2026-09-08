@@ -1597,7 +1597,7 @@ altering the locked Contact surface.
   `audit/10-links-page.md`.
 - **Hero baseline:** 56px page offset; 12px/500 mono kicker; 46/56px Instrument
   Serif heading; `max-w-xl` measure; 16px internal gaps; 15/24px supporting
-  copy; shared paper texture; accessible Links-owned animated accent.
+  copy; shared paper texture; exact shared `text-colorfull` animated accent.
 - **Profile baseline:** local portrait, social-platform presence badge inset 6px
   inside the image circumference, 18px cutout shell, 10px emerald core,
   restrained pulse, domain pills, location/response details, and CTA-style Send
@@ -1613,3 +1613,12 @@ altering the locked Contact surface.
 
 Do not modify Links or its dependencies without a new explicit owner unlock.
 Future pages may reuse its patterns without changing this locked surface.
+
+### 2026-09-07 owner-authorized Links gradient amendment
+
+The owner temporarily unlocked only the Links hero accent and requested exact
+cross-page parity. The custom Links-only gradient was removed and `everywhere.`
+now uses the same `animate-gradient-x text-colorfull px-1 pb-1 italic
+[text-shadow:none]` treatment as the other locked page headings. No other Links
+or shared presentation changed. This limited amendment is re-locked after its
+static and route checks.

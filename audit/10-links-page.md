@@ -75,9 +75,9 @@ release-gate and profile-presence review.
 ## Final release-gate amendment
 
 - Independent review found and resolved all release blockers.
-- Replaced the Links hero's shared orange-containing accent with a Links-owned
-  indigo/fuchsia/pink light gradient and blue/violet/pink dark gradient; every
-  meaningful light-theme stop now meets large-text contrast requirements.
+- The owner explicitly chose exact cross-page consistency for the final hero
+  accent. Links uses the same shared animated `text-colorfull` gradient as the
+  other locked page headings.
 - Strengthened the profile CTA focus ring to the theme's primary text token,
   preserving a visible offset and 3:1+ contrast in both themes.
 - Loading now marks all visual geometry `aria-hidden` while keeping only the
