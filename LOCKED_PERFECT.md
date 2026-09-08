@@ -1557,3 +1557,29 @@ The temporary Home unlock in entry 28 is closed. Home, About, Projects, Blog,
 Navbar, Search modal, Reach Out modal, Footer, and all other entry-27 surfaces
 are locked. Any future change requires an explicit owner unlock naming the
 specific page or component first.
+
+## 30. FINAL OWNER LOCK - Contact
+
+- **Date locked:** 2026-09-07
+- **Owner instruction:** Lock the completed Contact page and proceed to Links.
+- **Locked route:** `/contact`, including hero, availability card, form,
+  inquiry selector, shared CTA placement, loading state, error state, success
+  state, validation states, and all responsive/light/dark presentation.
+- **Locked implementation:** `app/contact/**`,
+  `app/components/contact/ContactClient.tsx`, the Contact block in
+  `app/data/site-content.ts`, `migrations/2026_contact_messages.sql`,
+  `migrations/2026_contact_inquiry_types.sql`, and Contact-specific SMTP and
+  environment wiring.
+- **Final control state:** message icon aligns with its kicker; Inquiry Type
+  shows four complete fixed-height rows with contained scrolling, dynamic edge
+  fog, selected checkmark, and full keyboard behavior; social controls are
+  48px; Send Message uses the approved shared-CTA hover choreography.
+- **Final backend state:** private RLS-protected storage, strict validation,
+  honeypot, atomic persistent rate limiting, salted signal hashing,
+  idempotency, checked delivery status, and SMTP retry metadata. Both Contact
+  migrations were owner-applied and the deployed RPC and all nine inquiry
+  values were verified.
+
+Do not modify Contact or its presentation/data dependencies without a new
+explicit owner unlock. Other pages may reuse its approved patterns without
+altering the locked Contact surface.

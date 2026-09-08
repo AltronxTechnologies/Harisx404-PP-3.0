@@ -2,7 +2,7 @@
 
 - Route: `/contact`
 - Audit date: 2026-09-07
-- Status: Implemented and awaiting owner approval
+- Status: Owner-approved and production-locked on 2026-09-07
 - Scope: Contact-owned page, form, route states, server action, migration, and
   SMTP environment contract. Locked reference surfaces were not modified.
 
@@ -77,8 +77,8 @@
    `SMTP_PASSWORD`, and `SMTP_FROM_EMAIL`.
 3. Keep `ADMIN_EMAIL` configured as the destination inbox.
 
-Contact remains open for owner review. Do not add it to the production lock
-until visual approval is explicit.
+Contact was owner-approved and added to the production lock after the final
+responsive, interaction, storage, and inquiry-selector audit.
 
 ## Final presentation amendment
 
