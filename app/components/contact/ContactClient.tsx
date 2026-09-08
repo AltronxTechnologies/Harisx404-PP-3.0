@@ -98,9 +98,9 @@ function ContactSocialButton({ label, href }: { label: string; href: string }) {
       target={isExternal ? "_blank" : undefined}
       rel={isExternal ? "noopener noreferrer" : undefined}
       aria-label={isExternal ? `${label} (opens in a new tab)` : label}
-      className="inline-flex size-11 items-center justify-center rounded-xl border border-border-primary text-text-secondary outline-none transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25"
+      className="inline-flex size-12 items-center justify-center rounded-xl border border-border-primary text-text-secondary outline-none transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25"
     >
-      {isMail ? <Mail className="size-4" aria-hidden /> : <BrandGlyph name={label} className="size-4" />}
+      {isMail ? <Mail className="size-[18px]" aria-hidden /> : <BrandGlyph name={label} className="size-[18px]" />}
     </a>
   );
 }
@@ -339,7 +339,7 @@ export function ContactClient() {
                           anchor="bottom"
                           modal={false}
                           transition
-                          className="z-30 max-h-72 w-[var(--button-width)] origin-top overflow-y-auto rounded-xl border border-border-primary bg-bg-primary p-1.5 shadow-xl outline-none [--anchor-gap:8px] transition duration-150 ease-out data-[closed]:scale-[0.98] data-[closed]:opacity-0 [scrollbar-width:thin] [scrollbar-color:var(--border-primary)_transparent]"
+                          className="z-30 max-h-[248px] w-[var(--button-width)] origin-top overflow-y-auto rounded-xl border border-border-primary bg-bg-primary p-1.5 shadow-xl outline-none [--anchor-gap:8px] transition duration-150 ease-out data-[closed]:scale-[0.98] data-[closed]:opacity-0 [scrollbar-width:thin] [scrollbar-color:var(--border-primary)_transparent]"
                         >
                           {inquiryTypes.map((type) => (
                             <ListboxOption
@@ -429,10 +429,25 @@ export function ContactClient() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="group inline-flex min-h-11 items-center justify-center gap-3 rounded-full bg-text-primary px-6 text-sm font-medium text-bg-primary outline-none transition-opacity hover:opacity-85 focus-visible:ring-2 focus-visible:ring-neutral-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary disabled:cursor-wait disabled:opacity-60"
+                    className="group relative inline-flex min-h-11 items-center justify-center gap-3 overflow-hidden rounded-full bg-text-primary py-1.5 pl-6 pr-1.5 text-sm font-medium text-bg-primary shadow-lg outline-none transition-all hover:shadow-[0_0_40px_-8px_rgba(139,92,246,0.5)] focus-visible:ring-2 focus-visible:ring-blue-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary disabled:cursor-wait disabled:opacity-60"
                   >
-                    {isSubmitting ? "Sending message..." : "Send message"}
-                    <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
+                    <span
+                      aria-hidden
+                      className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-full motion-reduce:hidden dark:via-black/10"
+                    />
+                    <span className="relative">
+                      {isSubmitting ? "Sending message..." : "Send message"}
+                    </span>
+                    <span className="relative flex size-8 items-center justify-center overflow-hidden rounded-full bg-bg-primary text-text-primary">
+                      <ArrowRight
+                        aria-hidden
+                        className="absolute size-4 transition-transform duration-300 group-hover:translate-x-6 group-hover:opacity-0 motion-reduce:group-hover:translate-x-0 motion-reduce:group-hover:opacity-100"
+                      />
+                      <ArrowRight
+                        aria-hidden
+                        className="absolute size-4 -translate-x-6 opacity-0 transition-transform duration-300 group-hover:translate-x-0 group-hover:opacity-100 motion-reduce:hidden"
+                      />
+                    </span>
                   </button>
                 </div>
               </form>

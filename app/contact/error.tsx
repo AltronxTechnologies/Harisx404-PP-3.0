@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { BlogStatePanel } from "@/app/components/blog/BlogStatePanel";
+import { siteMetadata } from "@/app/data/siteMetadata";
 
 export default function ContactError({ error, reset }: { error: Error; reset: () => void }) {
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -25,7 +26,7 @@ export default function ContactError({ error, reset }: { error: Error; reset: ()
         <button type="button" onClick={reset} className="rounded-full border border-text-primary bg-text-primary px-5 py-2.5 text-sm font-medium text-bg-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary">
           Try again
         </button>
-        <Link href="mailto:itsharis.tech@gmail.com" className="rounded-full border border-border-primary px-5 py-2.5 text-sm font-medium text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25">
+        <Link href={siteMetadata.email} className="rounded-full border border-border-primary px-5 py-2.5 text-sm font-medium text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25">
           Email Haris
         </Link>
       </BlogStatePanel>

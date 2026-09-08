@@ -132,3 +132,19 @@ until visual approval is explicit.
   responsive card columns, CTA reservation, and Footer handoff.
 - Added `npm run test:contact` coverage for route structure, removed booking UI,
   inquiry-value parity, idempotency, private rate limiting, and RLS.
+
+## Final owner-requested control polish
+
+- Follow-up schema is live: `check_contact_message_rate_limit` returned allowed,
+  and all nine inquiry values passed the deployed constraint through nine
+  temporary inserts followed by nine successful deletions.
+- Inquiry popup is capped at 248px so four complete intent rows are visible;
+  remaining options use internal scrolling without moving the page.
+- Social controls increased to 48px with 18px icons, preserving the same border,
+  focus, hover, and dark/light language.
+- Send Message now mirrors the locked CTA interaction: shine sweep, restrained
+  violet shadow bloom, inset 32px arrow circle, outgoing/incoming dual-arrow
+  motion, reduced-motion safeguards, and matching focus treatment.
+- Final full-page dark desktop and mobile renders pass. The form remains aligned
+  with no clipping or document overflow; the shared CTA and Footer remain
+  unchanged.

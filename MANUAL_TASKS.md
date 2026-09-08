@@ -237,8 +237,8 @@ To show the embedded scheduling calendar there:
 
 1. `migrations/2026_contact_messages.sql` was applied successfully on
    2026-09-07.
-2. Run `migrations/2026_contact_inquiry_types.sql` to enable the expanded
-   inquiry-type list on the already-created table.
+2. `migrations/2026_contact_inquiry_types.sql` was applied and verified on
+   2026-09-07.
 3. Configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`,
    `SMTP_PASSWORD`, and `SMTP_FROM_EMAIL` in the deployment environment.
 4. Keep `ADMIN_EMAIL` set to the inbox that should receive contact messages.
