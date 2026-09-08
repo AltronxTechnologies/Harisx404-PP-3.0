@@ -9,6 +9,7 @@
     "lint": "next lint",
     "test:blog": "node --test tests/blog.integration.test.mjs",
     "test:contact": "node --test tests/contact.integration.test.mjs",
+    "test:links": "node --test tests/links.integration.test.mjs",
     "generate-previews": "npx tsx scripts/generate-link-previews.ts",
     "fix-previews": "npx tsx scripts/fix-failed-previews.ts"
   },
