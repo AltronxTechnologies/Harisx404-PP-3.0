@@ -139,12 +139,18 @@ until visual approval is explicit.
   and all nine inquiry values passed the deployed constraint through nine
   temporary inserts followed by nine successful deletions.
 - Inquiry popup is capped at 248px so four complete intent rows are visible;
-  remaining options use internal scrolling without moving the page.
+  every option has a fixed 56px row and remaining options use contained
+  wheel/touch scrolling without moving the page. No partial fifth row appears.
+- Dynamic 16px top/bottom fog indicates additional options and disappears at
+  each respective scroll boundary. The scrollbar is narrow, token-colored, and
+  overscroll cannot chain into the page.
 - Social controls increased to 48px with 18px icons, preserving the same border,
   focus, hover, and dark/light language.
 - Send Message now mirrors the locked CTA interaction: shine sweep, restrained
   violet shadow bloom, inset 32px arrow circle, outgoing/incoming dual-arrow
   motion, reduced-motion safeguards, and matching focus treatment.
+- Social controls are 48px with 18px glyphs, improving visual presence and touch
+  ergonomics without changing the approved icon row hierarchy.
 - Final full-page dark desktop and mobile renders pass. The form remains aligned
   with no clipping or document overflow; the shared CTA and Footer remain
   unchanged.

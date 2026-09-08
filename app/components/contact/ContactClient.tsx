@@ -114,8 +114,20 @@ export function ContactClient() {
   const [submitted, setSubmitted] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const successHeadingRef = useRef<HTMLHeadingElement>(null);
+  const inquiryOptionsRef = useRef<HTMLDivElement>(null);
   const submittingRef = useRef(false);
   const requestIdRef = useRef("");
+  const [inquiryEdges, setInquiryEdges] = useState({ top: false, bottom: true });
+
+  const updateInquiryEdges = () => {
+    const options = inquiryOptionsRef.current;
+    if (!options) return;
+    const maxScroll = Math.max(0, options.scrollHeight - options.clientHeight);
+    setInquiryEdges({
+      top: options.scrollTop > 1,
+      bottom: options.scrollTop < maxScroll - 1,
+    });
+  };
 
   const updateField = <K extends keyof ContactInput>(key: K, value: ContactInput[K]) => {
     setForm((current) => ({ ...current, [key]: value }));
@@ -328,6 +340,7 @@ export function ContactClient() {
                           aria-required="true"
                           aria-invalid={Boolean(fieldErrors.projectType)}
                           aria-describedby={fieldErrors.projectType ? "contact-inquiry-error" : undefined}
+                          onClick={() => window.setTimeout(updateInquiryEdges, 0)}
                           className={`${fieldClass} group flex items-center justify-between gap-3 pr-3 text-left`}
                         >
                           <span id="contact-inquiry-value" className="truncate">
@@ -336,16 +349,24 @@ export function ContactClient() {
                           <ChevronDown className="size-4 shrink-0 text-text-secondary transition-transform duration-200 group-data-[open]:rotate-180" aria-hidden />
                         </ListboxButton>
                         <ListboxOptions
+                          ref={inquiryOptionsRef}
                           anchor="bottom"
                           modal={false}
                           transition
-                          className="z-30 max-h-[248px] w-[var(--button-width)] origin-top overflow-y-auto rounded-xl border border-border-primary bg-bg-primary p-1.5 shadow-xl outline-none [--anchor-gap:8px] transition duration-150 ease-out data-[closed]:scale-[0.98] data-[closed]:opacity-0 [scrollbar-width:thin] [scrollbar-color:var(--border-primary)_transparent]"
+                          onScroll={updateInquiryEdges}
+                          className="z-30 h-[238px] w-[var(--button-width)] origin-top touch-pan-y overscroll-contain overflow-y-auto scroll-smooth rounded-xl border border-border-primary bg-bg-primary p-1.5 shadow-xl outline-none [--anchor-gap:8px] transition duration-150 ease-out data-[closed]:scale-[0.98] data-[closed]:opacity-0 [scrollbar-color:color-mix(in_srgb,var(--border-primary)_80%,transparent)_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border-primary [&::-webkit-scrollbar-track]:bg-transparent"
                         >
+                          <span
+                            aria-hidden
+                            className={`pointer-events-none sticky top-0 z-10 -mb-4 block h-4 bg-gradient-to-b from-bg-primary to-transparent transition-opacity duration-200 ${
+                              inquiryEdges.top ? "opacity-100" : "opacity-0"
+                            }`}
+                          />
                           {inquiryTypes.map((type) => (
                             <ListboxOption
                               key={type.value}
                               value={type.value}
-                              className="group flex cursor-default items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-text-secondary outline-none transition-colors data-[focus]:bg-black/[0.04] data-[focus]:text-text-primary dark:data-[focus]:bg-white/[0.06]"
+                              className="group flex h-14 cursor-default items-center justify-between gap-3 rounded-lg px-3 text-text-secondary outline-none transition-colors data-[focus]:bg-black/[0.04] data-[focus]:text-text-primary dark:data-[focus]:bg-white/[0.06]"
                             >
                               <span className="min-w-0">
                                 <span className="block truncate text-sm group-data-[selected]:font-medium group-data-[selected]:text-text-primary">
@@ -358,6 +379,12 @@ export function ContactClient() {
                               <Check className="size-4 shrink-0 opacity-0 group-data-[selected]:opacity-100" aria-hidden />
                             </ListboxOption>
                           ))}
+                          <span
+                            aria-hidden
+                            className={`pointer-events-none sticky bottom-0 z-10 -mt-4 block h-4 bg-gradient-to-t from-bg-primary to-transparent transition-opacity duration-200 ${
+                              inquiryEdges.bottom ? "opacity-100" : "opacity-0"
+                            }`}
+                          />
                         </ListboxOptions>
                       </div>
                     </Listbox>
