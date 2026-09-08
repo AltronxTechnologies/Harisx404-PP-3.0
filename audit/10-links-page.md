@@ -66,3 +66,34 @@
 
 Links remains open for owner visual review and should be locked only after
 explicit approval.
+
+## Final release-gate amendment
+
+- Independent review found and resolved all release blockers.
+- Replaced the Links hero's shared orange-containing accent with a Links-owned
+  indigo/fuchsia/pink light gradient and blue/violet/pink dark gradient; every
+  meaningful light-theme stop now meets large-text contrast requirements.
+- Strengthened the profile CTA focus ring to the theme's primary text token,
+  preserving a visible offset and 3:1+ contrast in both themes.
+- Loading now marks all visual geometry `aria-hidden` while keeping only the
+  concise loading status live. CTA reservation is 464px mobile/458px desktop,
+  matching the resolved Footer handoff.
+- Mobile loading renders both group headers and all eight 92px card slots,
+  eliminating the previous single-slab height shift.
+- Removed whole-card opacity and disabled-control semantics from the unavailable
+  X information card; text and Soon status remain readable and noninteractive.
+- External cards preserve visible detail text in their accessible names and add
+  a screen-reader new-tab notice. Internal/email destinations stay current-tab.
+- External links use diagonal arrows; internal and email actions use horizontal
+  arrows. All interactive cards receive approved hover, active, and focus
+  border states.
+- Link collections now use semantic lists. Visual counts are aria-hidden and
+  paired with explicit entry totals for assistive technology.
+- Expanded `npm run test:links` to assert exactly eight scoped cards and the
+  destination/target/rel behavior of every external, internal, email, Contact,
+  and unavailable entry.
+
+Final release gate: Links tests 2/2, TypeScript, targeted ESLint,
+`git diff --check`, all internal routes, six responsive widths, light/dark
+renders, and locked-reference regression checks pass. No open release blocker
+remains; Links is ready for owner lock approval.

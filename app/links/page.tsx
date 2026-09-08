@@ -137,7 +137,7 @@ export default function LinksPage() {
             <p className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">Connect</p>
             <h1 className="heading-glow mx-auto mt-4 max-w-xl text-balance [font-family:var(--font-instrument-serif),serif] text-[46px] font-medium leading-none tracking-tight text-text-primary md:text-[56px] md:tracking-[-1.5px]">
               One handle,{" "}
-              <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">everywhere.</span>
+              <span className="animate-gradient-x bg-gradient-to-r from-indigo-600 via-fuchsia-600 to-pink-600 bg-clip-text px-1 pb-1 italic text-transparent [text-shadow:none] dark:from-blue-500 dark:via-violet-500 dark:to-pink-500">everywhere.</span>
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-pretty text-[15px] leading-6 text-text-secondary">
               Find my code, credentials, professional profiles, and the clearest way to start a conversation.
@@ -167,7 +167,7 @@ export default function LinksPage() {
                 <p className="flex items-center gap-3"><MapPin className="size-4 shrink-0" aria-hidden />Pakistan, working worldwide</p>
                 <p className="flex items-center gap-3"><MessageSquareText className="size-4 shrink-0" aria-hidden />Usually replies within one business day</p>
               </div>
-              <Link href="/contact" className="group relative mt-6 inline-flex min-h-11 w-full items-center justify-center gap-3 overflow-hidden rounded-full bg-text-primary py-1.5 pl-6 pr-1.5 text-sm font-medium text-bg-primary shadow-lg outline-none transition-all hover:shadow-[0_0_40px_-8px_rgba(139,92,246,0.5)] focus-visible:ring-2 focus-visible:ring-blue-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary">
+              <Link href="/contact" className="group relative mt-6 inline-flex min-h-11 w-full items-center justify-center gap-3 overflow-hidden rounded-full bg-text-primary py-1.5 pl-6 pr-1.5 text-sm font-medium text-bg-primary shadow-lg outline-none transition-all hover:shadow-[0_0_40px_-8px_rgba(139,92,246,0.5)] focus-visible:ring-2 focus-visible:ring-text-primary focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary">
                 <span aria-hidden className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-full motion-reduce:hidden dark:via-black/10" />
                 <span className="relative">Send a message</span>
                 <span className="relative ml-auto flex size-8 items-center justify-center overflow-hidden rounded-full bg-bg-primary text-text-primary">

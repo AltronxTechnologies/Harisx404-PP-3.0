@@ -21,8 +21,9 @@ function LinkGroupSkeleton() {
 
 export default function LinksLoading() {
   return (
-    <div className="relative mt-14" role="status">
-      <span className="sr-only">Loading links</span>
+    <div className="relative mt-14">
+      <span className="sr-only" role="status">Loading links</span>
+      <div aria-hidden="true">
       <GridWrapper>
         <div className="relative px-4 xl:px-0">
           <PaperHeroTexture className="-inset-x-2 bottom-0 top-[-128px] sm:-inset-x-3 sm:top-[-144px] md:top-[-176px] lg:inset-x-0" />
@@ -47,7 +48,8 @@ export default function LinksLoading() {
           <LinkGroupSkeleton />
         </div>
       </div>
-      <div className={`mx-2 mt-28 h-[390px] rounded-3xl bg-border-primary/15 sm:mx-4 ${pulse}`} />
+      <div className={`mx-2 mt-28 h-[464px] rounded-3xl bg-border-primary/15 sm:mx-4 md:h-[458px] ${pulse}`} />
+      </div>
     </div>
   );
 }
