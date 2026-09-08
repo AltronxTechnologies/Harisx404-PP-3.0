@@ -154,7 +154,7 @@ export default function LinksPage() {
                 <Image src="/harisx404.png" alt="Muhammad Haris" fill sizes="96px" className="rounded-full border border-border-primary object-cover" priority />
                 <span
                   aria-hidden
-                  className="absolute bottom-0 right-0 flex size-[18px] items-center justify-center rounded-full bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)] dark:bg-[#111112] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.12)]"
+                  className="absolute bottom-1.5 right-1.5 flex size-[18px] items-center justify-center rounded-full bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)] dark:bg-[#111112] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.12)]"
                 >
                   <span className="relative flex size-2.5">
                     <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-45 motion-reduce:animate-none" />
