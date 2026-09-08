@@ -39,7 +39,7 @@ function CredentialCard({ credential, index }: { credential: CertificationRow; i
 
   return (
     <article className="flex h-full flex-col rounded-3xl border border-border-primary bg-white p-3 dark:bg-white/[0.02]">
-      <div className="relative aspect-[16/9] overflow-hidden rounded-2xl border border-border-primary bg-neutral-50 dark:bg-white/[0.03]">
+      <div className="relative h-36 overflow-hidden rounded-2xl border border-border-primary bg-neutral-50 dark:bg-white/[0.03] sm:h-40">
         <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(99,102,241,0.10),transparent_38%),radial-gradient(circle_at_80%_80%,rgba(217,70,239,0.08),transparent_40%)] dark:bg-[radial-gradient(circle_at_20%_20%,rgba(99,102,241,0.18),transparent_38%),radial-gradient(circle_at_80%_80%,rgba(217,70,239,0.12),transparent_40%)]" />
         <span className="absolute left-3 top-3 rounded-full border border-border-primary bg-bg-primary/85 px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-text-secondary backdrop-blur-sm">
           {credential.category}
@@ -47,8 +47,8 @@ function CredentialCard({ credential, index }: { credential: CertificationRow; i
         <span className="absolute right-3 top-3 font-mono text-[10px] tabular-nums text-text-secondary">
           {String(index + 1).padStart(2, "0")}
         </span>
-        <div className="absolute inset-0 flex items-center justify-center p-10">
-          <span className="relative flex size-24 items-center justify-center rounded-[28px] border border-border-primary bg-white text-4xl font-medium text-text-primary shadow-lg dark:bg-[#151518]">
+        <div className="absolute inset-0 flex items-center justify-center p-8">
+          <span className="relative flex size-20 items-center justify-center rounded-3xl border border-border-primary bg-white text-3xl font-medium text-text-primary shadow-lg dark:bg-[#151518]">
             {issuerInitial}
             <CredentialImage src={credential.badge_image_url || credential.issuer_logo_url} className="absolute inset-3 size-[calc(100%-1.5rem)] object-contain" />
           </span>
@@ -64,9 +64,9 @@ function CredentialCard({ credential, index }: { credential: CertificationRow; i
         </span>
       </div>
 
-      <div className="flex flex-1 flex-col px-2 pb-3 pt-5 sm:px-3">
+      <div className="flex flex-1 flex-col px-2 pb-3 pt-4 sm:px-3">
         <div className="flex items-center gap-3">
-          <span className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border-primary bg-neutral-50 text-sm font-medium text-text-secondary dark:bg-white/[0.04]">
+          <span className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border-primary bg-neutral-50 text-sm font-medium text-text-secondary dark:bg-white/[0.04]">
             {issuerInitial}
             <CredentialImage src={credential.issuer_logo_url} className="absolute inset-2 size-[calc(100%-1rem)] object-contain" />
           </span>
@@ -76,14 +76,14 @@ function CredentialCard({ credential, index }: { credential: CertificationRow; i
           </div>
         </div>
 
-        <h2 className="mt-5 line-clamp-2 text-balance [font-family:var(--font-instrument-serif),serif] text-2xl font-medium leading-7 text-text-primary">
+        <h2 className="mt-4 line-clamp-2 text-balance [font-family:var(--font-instrument-serif),serif] text-[22px] font-medium leading-6 text-text-primary">
           {credential.title}
         </h2>
-        <p className="mt-2 line-clamp-3 min-h-[66px] text-[15px] leading-[22px] text-text-secondary">
-          {credential.description || "Credential details are managed through the portfolio administration panel."}
+        <p className="mt-2 line-clamp-3 min-h-[60px] text-sm leading-5 text-text-secondary">
+          {credential.description || "Professional credential with documented learning outcomes and verification details."}
         </p>
 
-        <dl className="mt-5 grid grid-cols-2 gap-3 border-y border-border-primary py-4 text-sm">
+        <dl className="mt-4 grid grid-cols-2 gap-3 border-y border-border-primary py-3 text-sm">
           <div>
             <dt className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-text-secondary"><CalendarDays className="size-3" aria-hidden />Issued</dt>
             <dd className="mt-1.5 text-text-primary">{issued}</dd>
@@ -95,17 +95,17 @@ function CredentialCard({ credential, index }: { credential: CertificationRow; i
         </dl>
 
         {credential.skills.length > 0 && (
-          <div className="mt-4 flex max-h-[68px] flex-wrap gap-2 overflow-hidden">
-            {credential.skills.slice(0, 6).map((skill) => (
+          <div className="mt-3 flex max-h-[60px] flex-wrap gap-1.5 overflow-hidden">
+            {credential.skills.slice(0, 4).map((skill) => (
               <span key={skill} className="rounded-full border border-border-primary px-2.5 py-1 font-mono text-[9px] uppercase tracking-widest text-text-secondary">{skill}</span>
             ))}
-            {credential.skills.length > 6 && (
-              <span className="rounded-full border border-dashed border-border-primary px-2.5 py-1 font-mono text-[9px] uppercase tracking-widest text-text-secondary">+{credential.skills.length - 6}</span>
+            {credential.skills.length > 4 && (
+              <span className="rounded-full border border-dashed border-border-primary px-2.5 py-1 font-mono text-[9px] uppercase tracking-widest text-text-secondary">+{credential.skills.length - 4}</span>
             )}
           </div>
         )}
 
-        <div className="mt-auto flex min-h-10 items-end justify-between gap-3 pt-5">
+        <div className="mt-auto flex min-h-10 items-end justify-between gap-3 pt-4">
           <div className="min-w-0">
             {credential.credential_id && (
               <p className="truncate font-mono text-[10px] text-text-secondary" title={credential.credential_id}>ID: {credential.credential_id}</p>
@@ -141,7 +141,7 @@ export default async function CredentialsPage() {
               Evidence behind the <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">expertise.</span>
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-pretty text-[15px] leading-6 text-text-secondary">
-              Certifications, validated skills, and professional learning milestones managed directly through this portfolio.
+              Certifications, validated skills, and professional learning milestones earned across engineering, security, cloud, and AI.
             </p>
           </header>
         </div>
@@ -151,7 +151,7 @@ export default async function CredentialsPage() {
         <div className="mb-6 flex flex-col gap-3 border-y border-border-primary px-2 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-4">
           <div>
             <h2 id="credential-collection-heading" className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">Credential collection</h2>
-            <p className="mt-1.5 text-sm text-text-secondary">Published and maintained from the administration panel.</p>
+            <p className="mt-1.5 text-sm text-text-secondary">Structured learning achievements with clear evidence and verification details.</p>
           </div>
           {credentials.length > 0 && (
             <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-text-secondary">
@@ -169,7 +169,7 @@ export default async function CredentialsPage() {
           <BlogStatePanel
             kicker="No credentials yet"
             title={<>The verified collection is being <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">prepared.</span></>}
-            description="Published credentials will appear here as soon as they are added through the administration panel."
+            description="Verified credentials will appear here as they are published."
           >
             <Link href="/resume" className="inline-flex min-h-9 items-center rounded-full border border-border-primary px-5 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25">View resume</Link>
           </BlogStatePanel>

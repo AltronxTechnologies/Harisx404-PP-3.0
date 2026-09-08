@@ -244,8 +244,6 @@ To show the embedded scheduling calendar there:
 4. Keep `ADMIN_EMAIL` set to the inbox that should receive contact messages.
 ## Credentials page
 
-1. Run `migrations/2026_certifications_expanded.sql` in the Supabase SQL
-   editor. It expands the admin-controlled credential model, removes only the
-   two exact legacy placeholder rows, and inserts three clearly marked demo
-   records for visual review.
+1. `migrations/2026_certifications_expanded.sql` was applied successfully on
+   2026-09-07. The review database contains six clearly marked demo records.
 2. Replace or delete demo rows from `/admin/certifications` after review.

@@ -11,7 +11,8 @@
 - `2026_certifications_expanded.sql` adds issuer logo, badge media, credential
   ID, issue/expiration state, description, skills, category, and demo status.
 - The migration removes only the two exact legacy placeholder rows and inserts
-  three clearly marked demo records for Web, Cybersecurity, and AI / ML review.
+  six clearly marked demo records across Web, Cybersecurity, AI / ML, Cloud,
+  API, and data-engineering review states.
 - Demo verification links use `example.com`; demo records are visibly labelled
   and can be edited or deleted through Admin.
 - Admin form controls every public field and validates URLs, limits, category,
@@ -30,7 +31,7 @@
 - Collection toolbar identifies the admin source and shows grammar-aware totals
   for published credentials and represented domains.
 - Cards use one/two/three-column responsive layouts, 3px grid gaps, 3xl shells,
-  16:9 evidence panels, issuer and badge media with initial fallbacks, explicit
+  compact 144/160px evidence panels, issuer and badge media with initial fallbacks, explicit
   demo and verification states, issuer identity, 24/28px titles, 15/22px copy,
   issue/validity metadata, skill evidence, credential ID, and 44px verification
   actions.

@@ -6,13 +6,13 @@ const pulse = "animate-pulse motion-reduce:animate-none";
 function CredentialSkeleton() {
   return (
     <div className="rounded-3xl border border-border-primary bg-white p-3 dark:bg-white/[0.02]">
-      <div className={`aspect-[16/9] rounded-2xl bg-border-primary/30 ${pulse}`} />
-      <div className="px-3 pb-3 pt-5">
+      <div className={`h-36 rounded-2xl bg-border-primary/30 sm:h-40 ${pulse}`} />
+      <div className="px-3 pb-3 pt-4">
         <div className={`h-10 w-3/5 rounded bg-border-primary/30 ${pulse}`} />
-        <div className={`mt-5 h-7 w-4/5 rounded bg-border-primary/40 ${pulse}`} />
-        <div className={`mt-3 h-16 w-full rounded bg-border-primary/20 ${pulse}`} />
-        <div className={`mt-5 h-16 w-full rounded bg-border-primary/20 ${pulse}`} />
-        <div className={`mt-5 h-9 w-28 rounded-full bg-border-primary/30 ${pulse}`} />
+        <div className={`mt-4 h-6 w-4/5 rounded bg-border-primary/40 ${pulse}`} />
+        <div className={`mt-3 h-14 w-full rounded bg-border-primary/20 ${pulse}`} />
+        <div className={`mt-4 h-14 w-full rounded bg-border-primary/20 ${pulse}`} />
+        <div className={`mt-4 h-11 w-28 rounded-full bg-border-primary/30 ${pulse}`} />
       </div>
     </div>
   );
@@ -33,7 +33,7 @@ export default function CredentialsLoading() {
                 <span className="absolute inset-0 rounded bg-border-primary/40" />
               </div>
               <div className="relative mx-auto mt-4 max-w-2xl text-pretty text-[15px] leading-6">
-                <span className="invisible">Certifications, validated skills, and professional learning milestones managed directly through this portfolio.</span>
+                <span className="invisible">Certifications, validated skills, and professional learning milestones earned across engineering, security, cloud, and AI.</span>
                 <span className="absolute inset-0 rounded bg-border-primary/30" />
               </div>
             </div>
@@ -42,6 +42,7 @@ export default function CredentialsLoading() {
         <div className="mt-14 px-2 sm:px-4">
           <div className={`mb-6 h-[78px] border-y border-border-primary bg-border-primary/10 ${pulse}`} />
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            <CredentialSkeleton /><CredentialSkeleton /><CredentialSkeleton />
             <CredentialSkeleton /><CredentialSkeleton /><CredentialSkeleton />
           </div>
         </div>

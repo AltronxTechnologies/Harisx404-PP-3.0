@@ -44,7 +44,7 @@ SELECT * FROM (VALUES
     'https://example.com/', 20, 'published',
     'https://www.microsoft.com/favicon.ico', 'https://www.microsoft.com/favicon.ico', 'DEMO-WEB-2026', NULL,
     TRUE, 'Production-focused web engineering across frontend architecture, APIs, data, testing, and deployment.',
-    ARRAY['React', 'TypeScript', 'APIs'], 'Web Development', TRUE
+    ARRAY['React', 'TypeScript', 'APIs', 'Testing'], 'Web Development', TRUE
   ),
   (
     'Demo: Applied Machine Learning', 'Google for Developers', '2025-11-22',
@@ -52,6 +52,27 @@ SELECT * FROM (VALUES
     'https://cdn.simpleicons.org/google/4285F4', 'https://cdn.simpleicons.org/google/4285F4', 'DEMO-AI-2025', '2028-11-22',
     FALSE, 'Applied machine-learning workflows covering model development, evaluation, responsible AI, and deployment.',
     ARRAY['Machine Learning', 'Model Evaluation', 'Responsible AI'], 'AI / ML', TRUE
+  ),
+  (
+    'Demo: Cloud Infrastructure Foundations', 'Google Cloud', '2025-09-14',
+    'https://example.com/', 40, 'published',
+    'https://cdn.simpleicons.org/googlecloud/4285F4', 'https://cdn.simpleicons.org/googlecloud/4285F4', 'DEMO-CLOUD-2025', NULL,
+    TRUE, 'Cloud architecture fundamentals spanning compute, networking, identity, observability, and reliable deployment.',
+    ARRAY['Cloud Architecture', 'IAM', 'Observability'], 'Cloud', TRUE
+  ),
+  (
+    'Demo: API Design and Testing', 'Postman Academy', '2025-07-08',
+    'https://example.com/', 50, 'published',
+    'https://cdn.simpleicons.org/postman/FF6C37', 'https://cdn.simpleicons.org/postman/FF6C37', 'DEMO-API-2025', NULL,
+    TRUE, 'Practical API design, automated testing, documentation, collaboration, and production-quality delivery workflows.',
+    ARRAY['API Design', 'Testing', 'Documentation'], 'Web Development', TRUE
+  ),
+  (
+    'Demo: Secure Data Engineering', 'PostgreSQL Learning Lab', '2025-05-19',
+    'https://example.com/', 60, 'published',
+    'https://cdn.simpleicons.org/postgresql/4169E1', 'https://cdn.simpleicons.org/postgresql/4169E1', 'DEMO-DATA-2025', NULL,
+    TRUE, 'Relational data modeling, secure access controls, query performance, migrations, and operational reliability.',
+    ARRAY['PostgreSQL', 'Data Modeling', 'Access Control'], 'Other', TRUE
   )
 ) AS demo(
   title, issuer, issue_date, credential_url, display_order, status,
