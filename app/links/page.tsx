@@ -152,9 +152,14 @@ export default function LinksPage() {
             <div className="px-3 pb-4 pt-3 text-center sm:px-5 sm:pb-6 sm:pt-5">
               <div className="relative mx-auto size-24">
                 <Image src="/harisx404.png" alt="Muhammad Haris" fill sizes="96px" className="rounded-full border border-border-primary object-cover" priority />
-                <span aria-hidden className="absolute bottom-1 right-1 flex size-2.5">
-                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-500 opacity-75 motion-reduce:animate-none" />
-                  <span className="relative inline-flex size-2.5 rounded-full bg-emerald-500 ring-2 ring-bg-primary" />
+                <span
+                  aria-hidden
+                  className="absolute bottom-0 right-0 flex size-[18px] items-center justify-center rounded-full bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)] dark:bg-[#111112] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.12)]"
+                >
+                  <span className="relative flex size-2.5">
+                    <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-45 motion-reduce:animate-none" />
+                    <span className="relative inline-flex size-2.5 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.45)]" />
+                  </span>
                 </span>
               </div>
               <p className="mt-5 font-mono text-[11px] font-medium uppercase tracking-widest text-text-secondary">Harisx404</p>

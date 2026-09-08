@@ -24,6 +24,9 @@
 - Profile uses a reliable local portrait, status indicator, mono handle,
   32px serif name, concise 14/20px supporting text, domain pills, location, and
   qualified response-time copy.
+- The profile presence indicator uses a social-platform-style 18px card-colored
+  cutout shell, crisp theme-aware separator, 10px emerald core, subtle halo,
+  restrained pulse, and reduced-motion fallback.
 - All obsolete Book a Call controls were removed. The single primary action is
   Send a Message and uses the approved CTA shine, shadow bloom, inset arrow
   circle, dual-arrow motion, focus treatment, and reduced-motion behavior.
