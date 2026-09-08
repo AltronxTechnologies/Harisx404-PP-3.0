@@ -1583,3 +1583,33 @@ specific page or component first.
 Do not modify Contact or its presentation/data dependencies without a new
 explicit owner unlock. Other pages may reuse its approved patterns without
 altering the locked Contact surface.
+
+## 31. FINAL OWNER LOCK - Links
+
+- **Date locked:** 2026-09-07
+- **Owner instruction:** Lock the completed Links page and proceed to the next
+  page.
+- **Locked route:** `/links`, including hero, profile card, grouped destination
+  cards, unavailable X state, shared CTA placement, loading state, error state,
+  responsive layouts, and light/dark presentation.
+- **Locked files:** `app/links/page.tsx`, `app/links/loading.tsx`,
+  `app/links/error.tsx`, `tests/links.integration.test.mjs`, and
+  `audit/10-links-page.md`.
+- **Hero baseline:** 56px page offset; 12px/500 mono kicker; 46/56px Instrument
+  Serif heading; `max-w-xl` measure; 16px internal gaps; 15/24px supporting
+  copy; shared paper texture; accessible Links-owned animated accent.
+- **Profile baseline:** local portrait, social-platform presence badge inset 6px
+  inside the image circumference, 18px cutout shell, 10px emerald core,
+  restrained pulse, domain pills, location/response details, and CTA-style Send
+  a Message action.
+- **Destination baseline:** eight semantic list entries, behavior-specific
+  arrows, 92px card minimum, 48px icon surfaces, readable noninteractive X
+  status, secure external tabs, current-tab internal/email links, and complete
+  hover/active/focus/touch states.
+- **Verification:** independent release review completed; Links tests 2/2;
+  TypeScript, targeted ESLint, and `git diff --check` pass; internal routes are
+  HTTP 200; six responsive widths and both themes pass without clipping or
+  overflow.
+
+Do not modify Links or its dependencies without a new explicit owner unlock.
+Future pages may reuse its patterns without changing this locked surface.

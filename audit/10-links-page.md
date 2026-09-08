@@ -2,7 +2,7 @@
 
 - Route: `/links`
 - Audit date: 2026-09-07
-- Status: Implemented and awaiting owner approval
+- Status: Owner-approved and production-locked on 2026-09-07
 - Scope: `app/links/page.tsx`, `app/links/loading.tsx`, and
   `app/links/error.tsx`. Locked reference surfaces were reused without edits.
 
@@ -26,7 +26,9 @@
   qualified response-time copy.
 - The profile presence indicator uses a social-platform-style 18px card-colored
   cutout shell, crisp theme-aware separator, 10px emerald core, subtle halo,
-  restrained pulse, and reduced-motion fallback.
+  restrained pulse, and reduced-motion fallback. Its final position is inset
+  6px from the portrait's bottom-right bounds so it sits inside the circular
+  image circumference.
 - All obsolete Book a Call controls were removed. The single primary action is
   Send a Message and uses the approved CTA shine, shadow bloom, inset arrow
   circle, dual-arrow motion, focus treatment, and reduced-motion behavior.
@@ -67,8 +69,8 @@
 - `npm run test:links`: 2/2 passing.
 - TypeScript, targeted ESLint, and `git diff --check`: passing.
 
-Links remains open for owner visual review and should be locked only after
-explicit approval.
+Links was owner-approved and added to the production lock after the final
+release-gate and profile-presence review.
 
 ## Final release-gate amendment
 
