@@ -414,10 +414,20 @@ export async function fetchTestimonials(): Promise<import("@/app/data/fallback-h
 // ---------------------------------------------------------------------------
 
 export type CertificationRow = {
+  id: string;
   title: string;
   issuer: string;
   issue_date: string;
   credential_url: string | null;
+  issuer_logo_url: string | null;
+  badge_image_url: string | null;
+  credential_id: string | null;
+  expiration_date: string | null;
+  does_not_expire: boolean;
+  description: string;
+  skills: string[];
+  category: "Web Development" | "Cybersecurity" | "AI / ML" | "Cloud" | "Other";
+  is_demo: boolean;
 };
 
 export async function fetchCertifications(): Promise<CertificationRow[]> {
@@ -431,10 +441,20 @@ export async function fetchCertifications(): Promise<CertificationRow[]> {
 
     if (error || !data) return [];
     return data.map((row: any): CertificationRow => ({
+      id: row.id,
       title: row.title ?? "",
       issuer: row.issuer ?? "",
       issue_date: row.issue_date ?? "",
       credential_url: row.credential_url ?? null,
+      issuer_logo_url: row.issuer_logo_url ?? null,
+      badge_image_url: row.badge_image_url ?? null,
+      credential_id: row.credential_id ?? null,
+      expiration_date: row.expiration_date ?? null,
+      does_not_expire: row.does_not_expire !== false,
+      description: row.description ?? "",
+      skills: Array.isArray(row.skills) ? row.skills.filter((value: unknown): value is string => typeof value === "string") : [],
+      category: row.category || "Other",
+      is_demo: row.is_demo === true,
     }));
   } catch {
     return [];

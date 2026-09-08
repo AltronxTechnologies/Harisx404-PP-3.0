@@ -1,13 +1,13 @@
-import createSupabaseServerClient from "@/app/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 import Link from "next/link";
 import { Plus, Edit } from "lucide-react";
 import { DeleteRowButton } from "@/app/components/admin/DeleteRowButton";
 
 export default async function AdminCertificationsPage() {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseAdminClient();
   const { data: entries } = await supabase
     .from("certifications")
-    .select("id, title, issuer, issue_date, status, display_order")
+    .select("id, title, issuer, issue_date, category, is_demo, status, display_order")
     .order("display_order", { ascending: true });
 
   return (
@@ -15,7 +15,7 @@ export default async function AdminCertificationsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Certifications</h1>
-          <p className="text-sm text-ink-secondary">Manage the certifications shown on the about page.</p>
+          <p className="text-sm text-ink-secondary">Manage the credentials shown on the public Credentials page.</p>
         </div>
         <Link
           href="/admin/certifications/new"
@@ -33,6 +33,7 @@ export default async function AdminCertificationsPage() {
               <tr>
                 <th className="px-6 py-4 font-medium">Title</th>
                 <th className="px-6 py-4 font-medium">Issued</th>
+                <th className="px-6 py-4 font-medium">Category</th>
                 <th className="px-6 py-4 font-medium">Status</th>
                 <th className="px-6 py-4 font-medium">Order</th>
                 <th className="px-6 py-4 font-medium text-right">Actions</th>
@@ -41,7 +42,7 @@ export default async function AdminCertificationsPage() {
             <tbody className="divide-y divide-border-hairline">
               {!entries || entries.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-ink-secondary">
+                  <td colSpan={6} className="px-6 py-8 text-center text-ink-secondary">
                     No certifications found. Create one to get started!
                   </td>
                 </tr>
@@ -53,10 +54,12 @@ export default async function AdminCertificationsPage() {
                       {entry.issuer && (
                         <div className="text-xs text-ink-secondary font-normal mt-1">{entry.issuer}</div>
                       )}
+                      {entry.is_demo && <span className="mt-1 inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">Demo</span>}
                     </td>
                     <td className="px-6 py-4 text-ink-secondary">
                       {entry.issue_date || "N/A"}
                     </td>
+                    <td className="px-6 py-4 text-ink-secondary">{entry.category || "Other"}</td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                         entry.status === "published"

@@ -1,10 +1,10 @@
 import { CertificationForm } from "@/app/components/admin/CertificationForm";
-import createSupabaseServerClient from "@/app/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 import { notFound } from "next/navigation";
 
 export default async function EditCertificationPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseAdminClient();
   const { data: entry, error } = await supabase
     .from("certifications")
     .select("*")
@@ -19,7 +19,7 @@ export default async function EditCertificationPage({ params }: { params: Promis
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Edit Certification</h1>
-        <p className="text-sm text-ink-secondary">Update this certification&apos;s details.</p>
+        <p className="text-sm text-ink-secondary">Update this credential&apos;s public details and verification data.</p>
       </div>
 
       <div className="rounded-xl border border-border-hairline bg-surface-raised p-6 shadow-sm">

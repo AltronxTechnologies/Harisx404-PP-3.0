@@ -1,170 +1,182 @@
 import type { Metadata } from "next";
-import { HeroTexture } from "@/app/components/HeroTexture";
+import Link from "next/link";
+import { ArrowUpRight, Award, CalendarDays, ShieldCheck } from "lucide-react";
+import { BlogStatePanel } from "@/app/components/blog/BlogStatePanel";
+import { GridWrapper } from "@/app/components/GridWrapper";
+import { PaperHeroTexture } from "@/app/components/PaperHeroTexture";
 import { CtaSection } from "@/app/components/home/CtaSection";
-import { fetchCertifications, type CertificationRow } from "@/app/lib/utils";
-import type { ReactNode } from "react";
+import type { CertificationRow } from "@/app/lib/utils";
+import { fetchCredentialCollection } from "./data";
+import { CredentialImage } from "./CredentialImage";
 
-export const revalidate = 3600; // Cache for 1 hour, revalidated on demand via admin panel
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Credentials",
   description:
-    "Licenses and certifications earned by Muhammad Haris across web development, cybersecurity, and AI/ML.",
+    "Verified certifications earned by Muhammad Haris across web development, cybersecurity, cloud, and AI/ML.",
 };
 
-const fallbackCertifications: CertificationRow[] = [
-  {
-    title: "Certified Ethical Hacking Fundamentals",
-    issuer: "Placeholder Academy",
-    issue_date: "2024",
-    credential_url: null,
-  },
-  {
-    title: "Cloud Practitioner Essentials",
-    issuer: "Placeholder Cloud",
-    issue_date: "2023",
-    credential_url: null,
-  },
-];
+function formatCredentialDate(value: string) {
+  if (!value) return "Date unavailable";
+  const date = new Date(value.length === 4 ? `${value}-01-01T00:00:00Z` : value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat("en-US", {
+    month: value.length === 4 ? undefined : "short",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(date);
+}
 
-function Icon({ children, className = "size-5" }: { children: ReactNode; className?: string }) {
+function CredentialCard({ credential, index }: { credential: CertificationRow; index: number }) {
+  const issued = formatCredentialDate(credential.issue_date);
+  const expires = credential.does_not_expire
+    ? "No expiration"
+    : credential.expiration_date
+      ? formatCredentialDate(credential.expiration_date)
+      : "Expiration unavailable";
+  const issuerInitial = credential.issuer.trim().charAt(0).toUpperCase() || "C";
+
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      {children}
-    </svg>
+    <article className="flex h-full flex-col rounded-3xl border border-border-primary bg-white p-3 dark:bg-white/[0.02]">
+      <div className="relative aspect-[16/9] overflow-hidden rounded-2xl border border-border-primary bg-neutral-50 dark:bg-white/[0.03]">
+        <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(99,102,241,0.10),transparent_38%),radial-gradient(circle_at_80%_80%,rgba(217,70,239,0.08),transparent_40%)] dark:bg-[radial-gradient(circle_at_20%_20%,rgba(99,102,241,0.18),transparent_38%),radial-gradient(circle_at_80%_80%,rgba(217,70,239,0.12),transparent_40%)]" />
+        <span className="absolute left-3 top-3 rounded-full border border-border-primary bg-bg-primary/85 px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-text-secondary backdrop-blur-sm">
+          {credential.category}
+        </span>
+        <span className="absolute right-3 top-3 font-mono text-[10px] tabular-nums text-text-secondary">
+          {String(index + 1).padStart(2, "0")}
+        </span>
+        <div className="absolute inset-0 flex items-center justify-center p-10">
+          <span className="relative flex size-24 items-center justify-center rounded-[28px] border border-border-primary bg-white text-4xl font-medium text-text-primary shadow-lg dark:bg-[#151518]">
+            {issuerInitial}
+            <CredentialImage src={credential.badge_image_url || credential.issuer_logo_url} className="absolute inset-3 size-[calc(100%-1.5rem)] object-contain" />
+          </span>
+        </div>
+        {credential.is_demo && (
+          <span className="absolute bottom-3 left-3 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 font-mono text-[9px] uppercase tracking-widest text-amber-700 dark:text-amber-300">
+            Demo record
+          </span>
+        )}
+        <span className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-1 font-mono text-[9px] uppercase tracking-widest text-emerald-700 dark:text-emerald-300">
+          <ShieldCheck className="size-3" aria-hidden />
+          {credential.credential_url ? "Verifiable" : "Recorded"}
+        </span>
+      </div>
+
+      <div className="flex flex-1 flex-col px-2 pb-3 pt-5 sm:px-3">
+        <div className="flex items-center gap-3">
+          <span className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border-primary bg-neutral-50 text-sm font-medium text-text-secondary dark:bg-white/[0.04]">
+            {issuerInitial}
+            <CredentialImage src={credential.issuer_logo_url} className="absolute inset-2 size-[calc(100%-1rem)] object-contain" />
+          </span>
+          <div className="min-w-0">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-text-secondary">Issued by</p>
+            <p className="mt-1 truncate text-sm font-medium text-text-primary" title={credential.issuer}>{credential.issuer}</p>
+          </div>
+        </div>
+
+        <h2 className="mt-5 line-clamp-2 text-balance [font-family:var(--font-instrument-serif),serif] text-2xl font-medium leading-7 text-text-primary">
+          {credential.title}
+        </h2>
+        <p className="mt-2 line-clamp-3 min-h-[66px] text-[15px] leading-[22px] text-text-secondary">
+          {credential.description || "Credential details are managed through the portfolio administration panel."}
+        </p>
+
+        <dl className="mt-5 grid grid-cols-2 gap-3 border-y border-border-primary py-4 text-sm">
+          <div>
+            <dt className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-text-secondary"><CalendarDays className="size-3" aria-hidden />Issued</dt>
+            <dd className="mt-1.5 text-text-primary">{issued}</dd>
+          </div>
+          <div>
+            <dt className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-text-secondary"><Award className="size-3" aria-hidden />Validity</dt>
+            <dd className="mt-1.5 text-text-primary">{expires}</dd>
+          </div>
+        </dl>
+
+        {credential.skills.length > 0 && (
+          <div className="mt-4 flex max-h-[68px] flex-wrap gap-2 overflow-hidden">
+            {credential.skills.slice(0, 6).map((skill) => (
+              <span key={skill} className="rounded-full border border-border-primary px-2.5 py-1 font-mono text-[9px] uppercase tracking-widest text-text-secondary">{skill}</span>
+            ))}
+            {credential.skills.length > 6 && (
+              <span className="rounded-full border border-dashed border-border-primary px-2.5 py-1 font-mono text-[9px] uppercase tracking-widest text-text-secondary">+{credential.skills.length - 6}</span>
+            )}
+          </div>
+        )}
+
+        <div className="mt-auto flex min-h-10 items-end justify-between gap-3 pt-5">
+          <div className="min-w-0">
+            {credential.credential_id && (
+              <p className="truncate font-mono text-[10px] text-text-secondary" title={credential.credential_id}>ID: {credential.credential_id}</p>
+            )}
+          </div>
+          {credential.credential_url ? (
+            <a href={credential.credential_url} target="_blank" rel="noopener noreferrer" className="group inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border border-border-primary px-4 font-mono text-[10px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25">
+              Verify
+              <ArrowUpRight className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 motion-reduce:transition-none" aria-hidden />
+              <span className="sr-only">{credential.title} (opens in a new tab)</span>
+            </a>
+          ) : (
+            <span className="font-mono text-[9px] uppercase tracking-widest text-text-secondary">Verification unavailable</span>
+          )}
+        </div>
+      </div>
+    </article>
   );
 }
 
-const badgeIcon = (
-  <Icon>
-    <circle cx="12" cy="9" r="6" />
-    <path d="m8.5 13.5-2 7 5.5-3 5.5 3-2-7" />
-  </Icon>
-);
-
-const arrowUpRight = (
-  <Icon className="size-3">
-    <path d="M7 17 17 7M7 7h10v10" />
-  </Icon>
-);
-
 export default async function CredentialsPage() {
-  const dbCertifications = await fetchCertifications();
-  const certifications: CertificationRow[] =
-    dbCertifications.length > 0 ? dbCertifications : fallbackCertifications;
+  const credentials = await fetchCredentialCollection();
+  const categories = new Set(credentials.map((credential) => credential.category)).size;
 
   return (
-    <div className="relative min-w-0 pb-24">
-      {/* Decorative hatched side rails */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 left-0 hidden w-3 border-r border-border-primary sm:block lg:w-8 [background-image:repeating-linear-gradient(45deg,rgba(0,0,0,0.04)_0px,rgba(0,0,0,0.04)_1px,transparent_1px,transparent_7px)] dark:[background-image:repeating-linear-gradient(45deg,rgba(255,255,255,0.05)_0px,rgba(255,255,255,0.05)_1px,transparent_1px,transparent_7px)]"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 right-0 hidden w-3 border-l border-border-primary sm:block lg:w-8 [background-image:repeating-linear-gradient(45deg,rgba(0,0,0,0.04)_0px,rgba(0,0,0,0.04)_1px,transparent_1px,transparent_7px)] dark:[background-image:repeating-linear-gradient(45deg,rgba(255,255,255,0.05)_0px,rgba(255,255,255,0.05)_1px,transparent_1px,transparent_7px)]"
-      />
-
-      <HeroTexture />
-
-      {/* Hero */}
-      <h1 className="relative z-[2] mx-auto mt-24 mb-14 max-w-xl text-balance text-center font-medium text-[46px] tracking-tight [text-shadow:rgba(255,255,255,0.05)_0px_4px_8px,rgba(255,255,255,0.2)_0px_8px_30px] max-sm:px-5 md:mt-28 md:text-6xl">
-        <p className="mb-4 font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
-          Credentials
-        </p>
-        <span className="inline-block text-text-primary [font-family:var(--font-instrument-serif),serif]">
-          Proof,{" "}
-          <span
-            className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]"
-            style={{
-              maskImage: "linear-gradient(to right, black 70%, transparent 100%)",
-              maskSize: "200% 100%",
-              maskPosition: "left center",
-              maskRepeat: "no-repeat",
-            }}
-          >
-            Verified
-          </span>
-        </span>
-      </h1>
-
-      {/* Split section — sticky header + certification cards */}
-      <div className="relative mx-auto w-full max-w-6xl border-t border-dashed border-neutral-200 px-4 dark:border-neutral-800 sm:px-8 lg:px-12">
-        <div className="grid grid-cols-1 lg:grid-cols-12">
-          <div className="p-4 lg:sticky lg:top-32 lg:col-span-3 lg:self-start lg:p-6 lg:pl-0">
-            <p className="font-mono text-xs font-bold text-text-secondary">01</p>
-            <h2 className="mt-1 font-display text-2xl font-bold leading-snug text-neutral-900 dark:text-neutral-100 md:text-3xl">
-              Certs.
-            </h2>
-            <p className="font-display text-2xl font-bold leading-snug text-neutral-400 dark:text-[#777B84] md:text-3xl">
-              Earned, Not Given
+    <div className="relative mt-14">
+      <GridWrapper>
+        <div className="relative px-4 xl:px-0">
+          <PaperHeroTexture className="-inset-x-2 bottom-0 top-[-128px] sm:-inset-x-3 sm:top-[-144px] md:top-[-176px] lg:inset-x-0" />
+          <header className="relative mx-auto max-w-3xl text-center">
+            <p className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">Credentials</p>
+            <h1 className="heading-glow mx-auto mt-4 max-w-xl text-balance [font-family:var(--font-instrument-serif),serif] text-[46px] font-medium leading-none tracking-tight text-text-primary md:text-[56px] md:tracking-[-1.5px]">
+              Evidence behind the <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">expertise.</span>
+            </h1>
+            <p className="mx-auto mt-4 max-w-2xl text-pretty text-[15px] leading-6 text-text-secondary">
+              Certifications, validated skills, and professional learning milestones managed directly through this portfolio.
             </p>
-            <p className="mt-3 max-w-[26ch] text-[13px] leading-[1.6] text-text-secondary">
-              Licenses and certifications across web development, cybersecurity, and AI/ML — every
-              one independently verifiable.
-            </p>
-            <a
-              href="https://www.credly.com/users/harisx404"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-border-primary bg-black/5 px-3 py-1 font-mono text-[10px] text-neutral-600 transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 hover:bg-black/10 dark:bg-neutral-900 dark:text-neutral-400 dark:hover:border-white/25 dark:active:border-white/25 dark:hover:bg-neutral-800"
-            >
-              credly.com/users/harisx404
-              {arrowUpRight}
-            </a>
-          </div>
-
-          <div aria-hidden="true" className="hidden border-x border-dashed border-neutral-200 dark:border-neutral-800 lg:col-span-1 lg:block" />
-
-          <div className="p-4 lg:col-span-8 lg:p-6 lg:pr-0">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {certifications.map((cert, i) => {
-                const inner = (
-                  <>
-                    <span className="flex size-12 shrink-0 items-center justify-center rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-600 transition-colors group-hover:bg-white dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:group-hover:bg-neutral-800">
-                      <span className="transition-transform duration-300 group-hover:scale-110">{badgeIcon}</span>
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-sm font-semibold leading-snug text-neutral-900 dark:text-white">
-                        {cert.title}
-                      </span>
-                      <span className="mt-0.5 block truncate font-mono text-[10px] text-text-secondary">
-                        {cert.issuer}
-                        {cert.issue_date ? ` · ${cert.issue_date}` : ""}
-                      </span>
-                    </span>
-                  </>
-                );
-                const cardClass =
-                  "group relative flex items-center gap-4 rounded-xl border border-neutral-200 bg-white p-4 transition-all hover:border-neutral-300 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900/30 dark:hover:border-neutral-700 dark:hover:bg-neutral-900";
-                return cert.credential_url ? (
-                  <a
-                    key={`${cert.title}-${i}`}
-                    href={cert.credential_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={cardClass}
-                  >
-                    {inner}
-                    <span className="absolute right-3 top-3 -translate-x-1 text-neutral-400 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100">
-                      {arrowUpRight}
-                    </span>
-                  </a>
-                ) : (
-                  <div key={`${cert.title}-${i}`} className={cardClass}>
-                    {inner}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          </header>
         </div>
-      </div>
+      </GridWrapper>
 
-      {/* Contact CTA */}
-      <div className="relative mt-16">
-        <CtaSection />
-      </div>
+      <section aria-labelledby="credential-collection-heading" className="mt-14 px-2 sm:px-4">
+        <div className="mb-6 flex flex-col gap-3 border-y border-border-primary px-2 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-4">
+          <div>
+            <h2 id="credential-collection-heading" className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">Credential collection</h2>
+            <p className="mt-1.5 text-sm text-text-secondary">Published and maintained from the administration panel.</p>
+          </div>
+          {credentials.length > 0 && (
+            <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-text-secondary">
+              <span className="rounded-full border border-border-primary px-3 py-1.5">{credentials.length} {credentials.length === 1 ? "credential" : "credentials"}</span>
+              <span className="rounded-full border border-border-primary px-3 py-1.5">{categories} {categories === 1 ? "domain" : "domains"}</span>
+            </div>
+          )}
+        </div>
+
+        {credentials.length > 0 ? (
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {credentials.map((credential, index) => <CredentialCard key={credential.id} credential={credential} index={index} />)}
+          </div>
+        ) : (
+          <BlogStatePanel
+            kicker="No credentials yet"
+            title={<>The verified collection is being <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">prepared.</span></>}
+            description="Published credentials will appear here as soon as they are added through the administration panel."
+          >
+            <Link href="/resume" className="inline-flex min-h-9 items-center rounded-full border border-border-primary px-5 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25">View resume</Link>
+          </BlogStatePanel>
+        )}
+      </section>
+
+      <div className="mt-28"><CtaSection /></div>
     </div>
   );
 }
