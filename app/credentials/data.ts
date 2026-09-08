@@ -35,6 +35,6 @@ const loadCredentialCollection = async (): Promise<CertificationRow[]> => {
 
 export const fetchCredentialCollection = unstable_cache(
   loadCredentialCollection,
-  ["credential-collection-v3"],
+  ["credential-collection-v4"],
   { revalidate: 3600, tags: ["credentials"] },
 );
