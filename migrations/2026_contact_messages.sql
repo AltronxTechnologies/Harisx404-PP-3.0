@@ -6,10 +6,7 @@ CREATE TABLE IF NOT EXISTS public.contact_messages (
   email TEXT NOT NULL CHECK (char_length(email) BETWEEN 3 AND 120),
   subject TEXT NOT NULL CHECK (char_length(subject) BETWEEN 5 AND 120),
   project_type TEXT NOT NULL CHECK (
-    project_type IN (
-      'general-question', 'project-inquiry', 'freelance', 'full-time',
-      'security-report', 'website-issue', 'consulting', 'collaboration', 'other'
-    )
+    project_type IN ('full-time', 'freelance', 'collaboration', 'other')
   ),
   message TEXT NOT NULL CHECK (char_length(message) BETWEEN 30 AND 3000),
   status TEXT NOT NULL DEFAULT 'new' CHECK (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import {
   Listbox,
   ListboxButton,
@@ -31,6 +31,7 @@ const initialForm: ContactInput = {
   projectType: "project-inquiry",
   message: "",
   website: "",
+  requestId: undefined,
 };
 
 const fieldClass =
@@ -97,7 +98,7 @@ function ContactSocialButton({ label, href }: { label: string; href: string }) {
       target={isExternal ? "_blank" : undefined}
       rel={isExternal ? "noopener noreferrer" : undefined}
       aria-label={isExternal ? `${label} (opens in a new tab)` : label}
-      className="inline-flex size-10 items-center justify-center rounded-xl border border-border-primary text-text-secondary outline-none transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25"
+      className="inline-flex size-11 items-center justify-center rounded-xl border border-border-primary text-text-secondary outline-none transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25"
     >
       {isMail ? <Mail className="size-4" aria-hidden /> : <BrandGlyph name={label} className="size-4" />}
     </a>
@@ -111,9 +112,14 @@ export function ContactClient() {
   const [formError, setFormError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const successHeadingRef = useRef<HTMLHeadingElement>(null);
+  const submittingRef = useRef(false);
+  const requestIdRef = useRef("");
 
   const updateField = <K extends keyof ContactInput>(key: K, value: ContactInput[K]) => {
     setForm((current) => ({ ...current, [key]: value }));
+    if (formError) setFormError("");
     if (fieldErrors[key]) {
       setFieldErrors((current) => {
         const next = { ...current };
@@ -125,20 +131,40 @@ export function ContactClient() {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (isSubmitting) return;
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     setIsSubmitting(true);
     setFormError("");
-    const result = await submitContactMessage(form);
-    setIsSubmitting(false);
 
-    if (!result.success) {
-      setFieldErrors(result.fieldErrors || {});
-      setFormError(result.error);
-      return;
+    try {
+      if (!requestIdRef.current) requestIdRef.current = crypto.randomUUID();
+      const result = await submitContactMessage({
+        ...form,
+        requestId: requestIdRef.current,
+      });
+
+      if (!result.success) {
+        setFieldErrors(result.fieldErrors || {});
+        setFormError(result.error);
+        window.setTimeout(() => {
+          formRef.current
+            ?.querySelector<HTMLElement>("[aria-invalid='true']")
+            ?.focus();
+        }, 0);
+        return;
+      }
+
+      setFieldErrors({});
+      setSubmitted(true);
+      window.setTimeout(() => successHeadingRef.current?.focus(), 0);
+    } catch {
+      setFormError(
+        "The connection was interrupted. Please try again; duplicate messages will not be created.",
+      );
+    } finally {
+      submittingRef.current = false;
+      setIsSubmitting(false);
     }
-
-    setFieldErrors({});
-    setSubmitted(true);
   };
 
   const labelClass =
@@ -169,7 +195,7 @@ export function ContactClient() {
                 <Clock3 className="size-4 shrink-0" aria-hidden />
                 <div>
                   <dt className="sr-only">Response time</dt>
-                  <dd>Usually within 24 hours</dd>
+                  <dd>Usually within one business day</dd>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -209,20 +235,21 @@ export function ContactClient() {
               <p className="mt-5 font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
                 Message received
               </p>
-              <h2 className="mt-4 max-w-xl text-balance [font-family:var(--font-instrument-serif),serif] text-[38px] font-medium leading-none tracking-tight text-text-primary sm:text-[46px]">
+              <h2 ref={successHeadingRef} tabIndex={-1} className="mt-4 max-w-xl text-balance [font-family:var(--font-instrument-serif),serif] text-[38px] font-medium leading-none tracking-tight text-text-primary outline-none sm:text-[46px]">
                 Thanks for reaching out.
               </h2>
               <p className="mt-4 max-w-md text-[15px] leading-6 text-text-secondary">
-                Your message was saved securely. Haris will read it and respond
-                to the email address you provided.
+                Your message and reply address were saved securely in the
+                contact queue.
               </p>
               <button
                 type="button"
                 onClick={() => {
                   setForm(initialForm);
                   setSubmitted(false);
+                  requestIdRef.current = "";
                 }}
-                className="mt-7 inline-flex min-h-10 items-center rounded-full border border-border-primary px-5 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25"
+                className="mt-7 inline-flex min-h-11 items-center rounded-full border border-border-primary px-5 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25"
               >
                 Send another message
               </button>
@@ -239,7 +266,7 @@ export function ContactClient() {
                   </p>
                 </div>
                 <h2 className="mt-3 text-balance [font-family:var(--font-instrument-serif),serif] text-[32px] font-medium leading-none tracking-tight text-text-primary sm:text-[40px]">
-                  Tell me what you&apos;re building.
+                  Tell me what you have in mind.
                 </h2>
               </div>
               <p className="mt-4 max-w-2xl text-[15px] leading-6 text-text-secondary">
@@ -247,12 +274,18 @@ export function ContactClient() {
                 where the work stands, and any important timing.
               </p>
 
-              <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-5">
+              <p className="mt-4 font-mono text-[10px] uppercase tracking-widest text-text-secondary">
+                All fields are required
+              </p>
+
+              <form ref={formRef} onSubmit={handleSubmit} noValidate aria-busy={isSubmitting} className="mt-8 space-y-5">
                 <div className="grid gap-5 sm:grid-cols-2">
                   <label>
                     <span className={labelClass}>Name</span>
                     <input
                       autoComplete="name"
+                      required
+                      aria-required="true"
                       value={form.name}
                       onChange={(event) => updateField("name", event.target.value)}
                       maxLength={80}
@@ -268,6 +301,8 @@ export function ContactClient() {
                     <input
                       type="email"
                       autoComplete="email"
+                      required
+                      aria-required="true"
                       value={form.email}
                       onChange={(event) => updateField("email", event.target.value)}
                       maxLength={120}
@@ -289,11 +324,13 @@ export function ContactClient() {
                     >
                       <div className="relative">
                         <ListboxButton
-                          aria-labelledby="contact-inquiry-label"
+                          aria-labelledby="contact-inquiry-label contact-inquiry-value"
+                          aria-required="true"
                           aria-invalid={Boolean(fieldErrors.projectType)}
+                          aria-describedby={fieldErrors.projectType ? "contact-inquiry-error" : undefined}
                           className={`${fieldClass} group flex items-center justify-between gap-3 pr-3 text-left`}
                         >
-                          <span className="truncate">
+                          <span id="contact-inquiry-value" className="truncate">
                             {inquiryTypes.find((type) => type.value === form.projectType)?.label}
                           </span>
                           <ChevronDown className="size-4 shrink-0 text-text-secondary transition-transform duration-200 group-data-[open]:rotate-180" aria-hidden />
@@ -314,7 +351,7 @@ export function ContactClient() {
                                 <span className="block truncate text-sm group-data-[selected]:font-medium group-data-[selected]:text-text-primary">
                                   {type.label}
                                 </span>
-                                <span className="mt-0.5 block truncate text-[11px] text-text-secondary">
+                                <span className="mt-0.5 block line-clamp-2 text-[11px] leading-4 text-text-secondary">
                                   {type.description}
                                 </span>
                               </span>
@@ -324,11 +361,13 @@ export function ContactClient() {
                         </ListboxOptions>
                       </div>
                     </Listbox>
-                    {fieldErrors.projectType && <span className="mt-1.5 block text-xs text-red-600 dark:text-red-400">{fieldErrors.projectType}</span>}
+                    {fieldErrors.projectType && <span id="contact-inquiry-error" className="mt-1.5 block text-xs text-red-600 dark:text-red-400">{fieldErrors.projectType}</span>}
                   </div>
                   <label>
                     <span className={labelClass}>Subject</span>
                     <input
+                      required
+                      aria-required="true"
                       value={form.subject}
                       onChange={(event) => updateField("subject", event.target.value)}
                       maxLength={120}
@@ -344,12 +383,14 @@ export function ContactClient() {
                 <label className="block">
                   <span className={labelClass}>Message</span>
                   <textarea
+                    required
+                    aria-required="true"
                     value={form.message}
                     onChange={(event) => updateField("message", event.target.value)}
                     maxLength={3000}
                     rows={7}
                     aria-invalid={Boolean(fieldErrors.message)}
-                    aria-describedby={fieldErrors.message ? "contact-message-error" : "contact-message-count"}
+                    aria-describedby={fieldErrors.message ? "contact-message-error contact-message-count" : "contact-message-count"}
                     placeholder="Share the goal, current situation, timeline, and anything else that would help."
                     className={`${fieldClass} min-h-40 resize-y py-3 leading-6`}
                   />
@@ -359,9 +400,11 @@ export function ContactClient() {
                   </span>
                 </label>
 
-                <label className="absolute -left-[9999px]" aria-hidden="true">
+                <label className="absolute -left-[9999px] size-px overflow-hidden">
                   Website
                   <input
+                    name="website"
+                    aria-hidden="true"
                     tabIndex={-1}
                     autoComplete="off"
                     value={form.website || ""}
@@ -374,6 +417,10 @@ export function ContactClient() {
                     {formError}
                   </p>
                 )}
+
+                <span className="sr-only" role="status" aria-live="polite">
+                  {isSubmitting ? "Sending your message." : ""}
+                </span>
 
                 <div className="flex flex-col gap-4 border-t border-border-primary pt-5 sm:flex-row sm:items-center sm:justify-between">
                   <p className="max-w-md text-xs leading-5 text-text-secondary">

@@ -23,7 +23,7 @@ export default function ContactPage() {
             <p className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
               {contact.kicker}
             </p>
-            <h1 className="heading-glow mx-auto mt-4 max-w-2xl text-balance [font-family:var(--font-instrument-serif),serif] text-[46px] font-medium leading-none tracking-tight text-text-primary md:text-[56px] md:tracking-[-1.5px]">
+            <h1 className="heading-glow mx-auto mt-4 max-w-xl text-balance [font-family:var(--font-instrument-serif),serif] text-[46px] font-medium leading-none tracking-tight text-text-primary md:text-[56px] md:tracking-[-1.5px]">
               {contact.heading}{" "}
               <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
                 {contact.headingAccent}
@@ -31,7 +31,7 @@ export default function ContactPage() {
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-pretty text-[15px] leading-6 text-text-secondary">
               Share the context, goals, and constraints. You will receive a
-              thoughtful response within one business day.
+              thoughtful response, usually within one business day.
             </p>
           </header>
         </div>

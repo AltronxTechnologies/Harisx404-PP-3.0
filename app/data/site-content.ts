@@ -184,19 +184,6 @@ export const siteContent = {
     heading: "A project, a role, or",
     headingAccent: "just a hello?",
 
-    // ✏️ EDIT HERE: your Cal.com booking link (e.g. "harisx404/30min").
-    // Leave empty ("") until you create one — the page then shows a
-    // "request a call by email" card instead of the embedded calendar.
-    calLink: "",
-
-    // Details shown on the booking card / fallback.
-    call: {
-      title: "30 Min Meeting",
-      duration: "30m",
-      platform: "Google Meet",
-      note: "Requires confirmation",
-    },
-
     // Social pills next to the tabs.
     socials: [
       { label: "Email", href: "mailto:itsharis.tech@gmail.com" },

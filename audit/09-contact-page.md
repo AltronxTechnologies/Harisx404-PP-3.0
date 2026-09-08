@@ -48,7 +48,7 @@
 - Route errors use the established shared state panel, focus the error heading,
   and provide retry and direct-email recovery actions.
 - Inputs preserve visible keyboard focus, labels remain visible, textarea has a
-  live character count, and all interactive targets meet the established size
+  passive associated character count, and all interactive targets meet the established size
   system.
 
 ## Verification
@@ -110,3 +110,25 @@ until visual approval is explicit.
   rotating chevron, End/Enter selection, close-on-selection, and focus return.
   Closed-state desktop/mobile renders pass without alignment drift or overflow.
   TypeScript, targeted ESLint, and `git diff --check` pass.
+
+## Final production-hardening pass
+
+- Contact hero now uses the locked `max-w-xl` heading measure and matching
+  qualified response-time language throughout.
+- Required semantics, selected-value announcement, inquiry-error association,
+  pending live status, first-invalid focus, success-heading focus, aggregate
+  error clearing, and 44px secondary targets are complete.
+- Rejected action requests always restore the submit button through `finally`;
+  a synchronous ref prevents rapid duplicate dispatches.
+- A client request UUID and unique database index make retries idempotent.
+- Contact rate limiting moved from process-local memory to an atomic private
+  Supabase RPC using a salted signal hash and ten-minute windows. Limiter
+  failures fail closed.
+- SMTP status updates are checked. Failed delivery records attempt count and a
+  retry timestamp while preserving the stored-message success contract.
+- The applied base migration is restored to its original immutable constraint;
+  every schema evolution lives in `2026_contact_inquiry_types.sql`.
+- Loading now uses the exact paper hero shell, natural heading/copy geometry,
+  responsive card columns, CTA reservation, and Footer handoff.
+- Added `npm run test:contact` coverage for route structure, removed booking UI,
+  inquiry-value parity, idempotency, private rate limiting, and RLS.

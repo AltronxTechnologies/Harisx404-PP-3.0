@@ -2,8 +2,8 @@
 
 import { headers } from "next/headers";
 import nodemailer from "nodemailer";
+import { createHash, randomUUID } from "crypto";
 import * as z from "zod";
-import { checkRateLimit } from "@/app/lib/rate-limit";
 import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 
 const projectTypes = [
@@ -25,6 +25,7 @@ const contactSchema = z.object({
   projectType: z.enum(projectTypes, { message: "Please choose an inquiry type." }),
   message: z.string().trim().min(30, "Please write at least 30 characters.").max(3000, "Message must be 3,000 characters or fewer."),
   website: z.string().max(200).optional(),
+  requestId: z.string().uuid().optional(),
 });
 
 export type ContactInput = z.infer<typeof contactSchema>;
@@ -90,6 +91,8 @@ async function sendOwnerEmail(data: ContactInput) {
 }
 
 export async function submitContactMessage(input: ContactInput): Promise<ContactResult> {
+  if (input.website) return { success: true, emailSent: true };
+
   const parsed = contactSchema.safeParse(input);
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
@@ -101,30 +104,43 @@ export async function submitContactMessage(input: ContactInput): Promise<Contact
   }
 
   const data = parsed.data;
-  if (data.website) return { success: true, emailSent: true };
 
+  let supabase: Awaited<ReturnType<typeof createSupabaseAdminClient>>;
   try {
     const headerList = await headers();
-    const ip =
-      headerList.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    const forwarded = headerList.get("x-forwarded-for")?.split(",").at(-1)?.trim();
+    const signal =
+      headerList.get("cf-connecting-ip") ||
+      headerList.get("x-vercel-forwarded-for") ||
       headerList.get("x-real-ip") ||
+      forwarded ||
       "unknown";
-    const limit = checkRateLimit(`contact-submit:${ip}`, {
-      maxRequests: 3,
-      windowMs: 10 * 60 * 1000,
-    });
-    if (!limit.success) {
+    const signalHash = createHash("sha256")
+      .update(`${process.env.SUPABASE_SERVICE_ROLE_KEY || "contact"}:${signal}`)
+      .digest("hex");
+    supabase = await createSupabaseAdminClient();
+    const { data: allowed, error: rateError } = await supabase.rpc(
+      "check_contact_message_rate_limit",
+      { target_signal_hash: signalHash },
+    );
+    if (rateError) throw rateError;
+    if (!allowed) {
       return { success: false, error: "Too many messages. Please try again in a few minutes." };
     }
-  } catch {
-    // Validation and the private service-role insert still protect submissions.
+  } catch (error) {
+    console.error("Contact rate-limit check failed:", error);
+    return {
+      success: false,
+      error: "Message submission is temporarily unavailable. Please try again shortly.",
+    };
   }
 
   try {
-    const supabase = await createSupabaseAdminClient();
+    const requestId = data.requestId || randomUUID();
     const { data: stored, error } = await supabase
       .from("contact_messages")
       .insert({
+        request_id: requestId,
         name: data.name,
         email: data.email,
         subject: data.subject,
@@ -134,21 +150,42 @@ export async function submitContactMessage(input: ContactInput): Promise<Contact
       .select("id")
       .single();
 
+    if (error?.code === "23505") {
+      const { data: existing, error: existingError } = await supabase
+        .from("contact_messages")
+        .select("email_status")
+        .eq("request_id", requestId)
+        .single();
+      if (existingError || !existing) throw existingError || error;
+      return { success: true, emailSent: existing.email_status === "sent" };
+    }
     if (error || !stored) throw error || new Error("Message was not stored.");
 
     try {
       await sendOwnerEmail(data);
-      await supabase
+      const { error: updateError } = await supabase
         .from("contact_messages")
-        .update({ email_status: "sent", emailed_at: new Date().toISOString() })
+        .update({
+          email_status: "sent",
+          emailed_at: new Date().toISOString(),
+          email_attempts: 1,
+          next_email_attempt_at: null,
+        })
         .eq("id", stored.id);
+      if (updateError) console.error("Contact email status update failed:", updateError);
       return { success: true, emailSent: true };
     } catch (emailError) {
       console.error("Contact email delivery failed:", emailError);
-      await supabase
+      const nextAttempt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+      const { error: updateError } = await supabase
         .from("contact_messages")
-        .update({ email_status: "failed" })
+        .update({
+          email_status: "failed",
+          email_attempts: 1,
+          next_email_attempt_at: nextAttempt,
+        })
         .eq("id", stored.id);
+      if (updateError) console.error("Contact email failure status update failed:", updateError);
       return { success: true, emailSent: false };
     }
   } catch (error) {
