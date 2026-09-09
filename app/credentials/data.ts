@@ -2,34 +2,32 @@ import "server-only";
 
 import { unstable_cache } from "next/cache";
 import { getPublicSupabase } from "@/app/lib/supabase/safe";
-import type { CertificationRow } from "@/app/lib/utils";
+export type PublicCredential = {
+  id: string;
+  title: string;
+  issuer: string;
+  issuer_logo_url: string | null;
+  credential_id: string | null;
+  credential_url: string | null;
+};
 
-const loadCredentialCollection = async (): Promise<CertificationRow[]> => {
+const loadCredentialCollection = async (): Promise<PublicCredential[]> => {
   const supabase = getPublicSupabase();
   if (!supabase) throw new Error("Credential data is unavailable.");
   const { data, error } = await supabase
     .from("certifications")
-    .select("*")
+    .select("id, title, issuer, issuer_logo_url, credential_id, credential_url")
     .eq("status", "published")
     .order("display_order", { ascending: true })
-    .order("issue_date", { ascending: false });
   if (error) throw new Error(`Unable to load credentials: ${error.message}`);
 
-  return (data || []).map((row): CertificationRow => ({
+  return (data || []).map((row): PublicCredential => ({
     id: row.id,
     title: row.title || "",
     issuer: row.issuer || "",
-    issue_date: row.issue_date || "",
     credential_url: row.credential_url || null,
     issuer_logo_url: row.issuer_logo_url || null,
-    badge_image_url: row.badge_image_url || null,
     credential_id: row.credential_id || null,
-    expiration_date: row.expiration_date || null,
-    does_not_expire: row.does_not_expire !== false,
-    description: row.description || "",
-    skills: Array.isArray(row.skills) ? row.skills.filter((value): value is string => typeof value === "string") : [],
-    category: row.category || "Other",
-    is_demo: row.is_demo === true,
   }));
 };
 

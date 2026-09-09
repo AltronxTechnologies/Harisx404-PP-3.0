@@ -11,9 +11,10 @@ export default async function EditCertificationPage({ params }: { params: Promis
     .eq("id", id)
     .single();
 
-  if (error || !entry) {
+  if (error?.code === "PGRST116" || !entry) {
     notFound();
   }
+  if (error) throw new Error(`Unable to load certification: ${error.message}`);
 
   return (
     <div className="flex flex-col gap-6">

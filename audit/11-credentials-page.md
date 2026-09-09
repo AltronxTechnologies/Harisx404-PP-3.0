@@ -10,11 +10,9 @@
 
 - `2026_certifications_expanded.sql` adds issuer logo, badge media, credential
   ID, issue/expiration state, description, skills, category, and demo status.
-- The migration removes only the two exact legacy placeholder rows and inserts
-  six clearly marked demo records across Web, Cybersecurity, AI / ML, Cloud,
-  API, and data-engineering review states.
-- Demo verification links use `example.com`; demo records are visibly labelled
-  and can be edited or deleted through Admin.
+- `2026_credentials_review_seed.sql` removes the earlier review demos and
+  inserts the five owner-supplied LinkedIn credentials with official issuer
+  names, media, IDs where supplied, and verification URLs where supplied.
 - Admin form controls every public field and validates URLs, limits, category,
   status, skill count, and expiration requirements.
 - Admin API uses verified `auth.getUser()`, ADMIN_EMAIL allowlisting,
@@ -28,16 +26,32 @@
 - Uses the locked 56px page offset and hero system: shared paper texture,
   12px/500 mono kicker, 46/56px Instrument Serif heading, `max-w-xl`, 16px
   internal gaps, shared animated accent, and 15/24px supporting copy.
-- Collection toolbar identifies the admin source and shows grammar-aware totals
-  for published credentials and represented domains.
-- Cards use one/two/three-column responsive layouts, 3px grid gaps, 3xl shells,
-  compact 144/160px evidence panels, issuer and badge media with initial fallbacks, explicit
-  demo and verification states, issuer identity, 24/28px titles, 15/22px copy,
-  issue/validity metadata, skill evidence, credential ID, and 44px verification
-  actions.
+- Collection toolbar uses professional public-facing copy and a zero-padded,
+  grammar-aware published credential count.
+- Cards use equal 232px heights, one/two/three-column responsive layouts, 3px
+  grid gaps, 2xl shells, 48px issuer-logo surfaces, 22/24px title typography,
+  optional credential ID, accurate status, and verification action.
 - Admin image failures fall back cleanly without exposing broken-image glyphs.
 - Empty collection uses the approved state panel and Resume recovery action.
 - Shared CTA begins 112px after the collection and remains unchanged.
+
+## Compact owner-directed revision
+
+- Replaced the large evidence-panel cards with equal 232px compact cards.
+- Public cards expose only issuer logo/name, credential title, optional
+  credential ID, verification status, and verification action. Dates,
+  descriptions, categories, badge media, and skills remain Admin-managed but
+  are not selected, serialized, or rendered publicly.
+- Removed every public skill/category tag and all expandable content so records
+  with different metadata cannot disturb card or grid geometry.
+- Grid uses equal-width one/two/three-column layouts at base, `sm`, and `xl`.
+- Replaced six visual demo rows with the five owner-supplied LinkedIn records:
+  Harvard CS50P, Cisco Introduction to Cybersecurity, Microsoft AI Skills Fest,
+  Apna College Delta 2.0, and Scaler Master Computer Networking.
+- Four cards expose official verification destinations. Delta 2.0 accurately
+  displays verification unavailable because no URL was supplied.
+- Admin remains the only content-management source and still controls all
+  extended metadata for future design changes.
 
 ## Responsive and theme verification
 
@@ -56,9 +70,14 @@
 - TypeScript, targeted ESLint, and `git diff --check`: passing.
 - `/credentials`: HTTP 200.
 - Every unauthenticated Certification API verb: HTTP 401.
-- Demo issuer media: Cisco, Microsoft, and Google URLs return HTTP 200.
+- Harvard, Cisco, Microsoft, Apna College, and Scaler media resolve or degrade
+  to the issuer initial without broken-image UI. All four supplied verification
+  URLs return HTTP 200 to browser-compatible requests.
 - `npm run test:credentials` covers route structure, no Credly/fallback code,
-  expanded schema, and admin authorization.
+  expanded schema, compact public-data boundaries, exact review seed, and admin
+  authorization.
 
-Apply `migrations/2026_certifications_expanded.sql`, then replace/delete demo
-records in Admin. Credentials remains unlocked pending owner visual approval.
+The expanded schema and five-record review dataset are live. Apply
+`migrations/2026_certifications_hardening.sql` before deployment to enforce the
+issuer requirement at the database layer. Credentials remains unlocked pending
+owner visual approval.

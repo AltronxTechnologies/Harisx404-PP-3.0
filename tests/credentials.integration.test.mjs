@@ -10,9 +10,30 @@ test("Credentials renders the admin-controlled collection", async () => {
   const html = await response.text();
   assert.match(html, /Evidence behind the/);
   assert.match(html, /Credential collection/);
-  assert.match(html, /Courses, certifications, and verifiable professional learning/);
+  assert.match(html, /Professional learning with direct verification where available/);
   assert.match(html, /From concept to creation/);
   assert.doesNotMatch(html, /credly\.com\/users/);
+  assert.equal((html.match(/<article/g) || []).length, 5);
+  assert.doesNotMatch(html, /2026-08-01/);
+  assert.doesNotMatch(html, /Pytest/);
+  assert.doesNotMatch(html, /Completed Harvard CS50P/);
+});
+
+test("Credentials review seed contains the five supplied records", async () => {
+  const seed = await readFile(
+    new URL("../migrations/2026_credentials_review_seed.sql", import.meta.url),
+    "utf8",
+  );
+  for (const title of [
+    "CS50''s Introduction to Programming with Python",
+    "Introduction to Cybersecurity",
+    "AI Skills Fest 2026",
+    "Delta 2.0: Full Stack Web Development",
+    "Master Computer Networking",
+  ]) {
+    assert.match(seed, new RegExp(title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  }
+  assert.match(seed, /DELETE FROM public\.certifications WHERE is_demo = TRUE/);
 });
 
 test("Credentials schema supports complete admin-managed records", async () => {

@@ -17,8 +17,6 @@ export const metadata: Metadata = {
 
 export default async function CredentialsPage() {
   const credentials = await fetchCredentialCollection();
-  const categories = new Set(credentials.map((credential) => credential.category)).size;
-
   return (
     <div className="relative mt-14">
       <GridWrapper>
@@ -40,13 +38,12 @@ export default async function CredentialsPage() {
         <div className="mb-6 flex flex-col gap-3 border-y border-border-primary px-2 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-4">
           <div>
             <h2 id="credential-collection-heading" className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">Credential collection</h2>
-            <p className="mt-1.5 text-sm text-text-secondary">Courses, certifications, and verifiable professional learning.</p>
+            <p className="mt-1.5 text-sm text-text-secondary">Professional learning with direct verification where available.</p>
           </div>
           {credentials.length > 0 && (
-            <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-text-secondary">
-              <span className="rounded-full border border-border-primary px-3 py-1.5">{credentials.length} {credentials.length === 1 ? "credential" : "credentials"}</span>
-              <span className="rounded-full border border-border-primary px-3 py-1.5">{categories} {categories === 1 ? "domain" : "domains"}</span>
-            </div>
+            <p className="font-mono text-[10px] uppercase tracking-widest text-text-secondary">
+              {String(credentials.length).padStart(2, "0")} published {credentials.length === 1 ? "credential" : "credentials"}
+            </p>
           )}
         </div>
 

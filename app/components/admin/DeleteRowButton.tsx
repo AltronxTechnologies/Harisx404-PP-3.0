@@ -37,6 +37,7 @@ export function DeleteRowButton({ id, endpoint, label }: DeleteRowButtonProps) {
 
   return (
     <button
+      aria-label={`Delete ${label}`}
       onClick={handleDelete}
       disabled={isDeleting}
       className="p-2 text-ink-secondary hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors disabled:opacity-50"

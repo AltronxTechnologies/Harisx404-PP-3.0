@@ -5,10 +5,11 @@ import { DeleteRowButton } from "@/app/components/admin/DeleteRowButton";
 
 export default async function AdminCertificationsPage() {
   const supabase = await createSupabaseAdminClient();
-  const { data: entries } = await supabase
+  const { data: entries, error } = await supabase
     .from("certifications")
     .select("id, title, issuer, issue_date, category, is_demo, status, display_order")
     .order("display_order", { ascending: true });
+  if (error) throw new Error(`Unable to load certifications: ${error.message}`);
 
   return (
     <div className="flex flex-col gap-6">
@@ -74,11 +75,12 @@ export default async function AdminCertificationsPage() {
                       <div className="flex items-center justify-end gap-2">
                         <Link
                           href={`/admin/certifications/${entry.id}`}
+                          aria-label={`Edit ${entry.title}`}
                           className="p-2 text-ink-secondary hover:text-accent-signal hover:bg-surface-base rounded-lg transition-colors"
                         >
                           <Edit className="h-4 w-4" />
                         </Link>
-                        <DeleteRowButton id={entry.id} endpoint="/api/admin/certifications" label="certification" />
+                        <DeleteRowButton id={entry.id} endpoint="/api/admin/certifications" label={entry.title} />
                       </div>
                     </td>
                   </tr>

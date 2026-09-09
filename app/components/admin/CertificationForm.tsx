@@ -7,7 +7,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Loader2 } from "lucide-react";
 
-const optionalUrl = z.string().trim().url("Enter a valid URL.").optional().or(z.literal(""));
+const optionalUrl = z.string().trim().refine((value) => {
+  if (!value) return true;
+  try {
+    return new URL(value).protocol === "https:";
+  } catch {
+    return false;
+  }
+}, "Enter a valid HTTPS URL.");
 const certificationSchema = z.object({
   title: z.string().trim().min(2, "Title is required.").max(140),
   issuer: z.string().trim().min(2, "Issuer is required.").max(120),

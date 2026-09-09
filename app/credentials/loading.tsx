@@ -5,7 +5,7 @@ const pulse = "animate-pulse motion-reduce:animate-none";
 
 function CredentialSkeleton() {
   return (
-    <div className="rounded-2xl border border-border-primary bg-white p-4 dark:bg-white/[0.02] sm:p-5">
+    <div className="h-[232px] rounded-2xl border border-border-primary bg-white p-4 dark:bg-white/[0.02] sm:p-5">
       <div className="flex items-center gap-3">
         <div className={`size-12 shrink-0 rounded-xl bg-border-primary/30 ${pulse}`} />
         <div className="flex-1">
@@ -13,13 +13,8 @@ function CredentialSkeleton() {
           <div className={`mt-2 h-3 w-1/4 rounded bg-border-primary/30 ${pulse}`} />
         </div>
       </div>
-      <div className={`mt-4 h-12 w-4/5 rounded bg-border-primary/40 ${pulse}`} />
-      <div className="mt-3 flex gap-2">
-        <div className={`h-7 w-24 rounded-full bg-border-primary/25 ${pulse}`} />
-        <div className={`h-7 w-20 rounded-full bg-border-primary/25 ${pulse}`} />
-      </div>
-      <div className="mt-4 flex items-center justify-between border-t border-border-primary pt-3">
-        <div className={`h-9 w-20 rounded bg-border-primary/20 ${pulse}`} />
+      <div className={`mt-5 h-12 w-4/5 rounded bg-border-primary/40 ${pulse}`} />
+      <div className="mt-7 flex items-center justify-end border-t border-border-primary pt-3">
         <div className={`h-9 w-32 rounded-full bg-border-primary/30 ${pulse}`} />
       </div>
     </div>
@@ -41,15 +36,21 @@ export default function CredentialsLoading() {
                 <span className="absolute inset-0 rounded bg-border-primary/40" />
               </div>
               <div className="relative mx-auto mt-4 max-w-2xl text-pretty text-[15px] leading-6">
-                <span className="invisible">Certifications, validated skills, and professional learning milestones earned across engineering, security, cloud, and AI.</span>
+                <span className="invisible">Certifications and learning milestones across programming, full-stack engineering, cybersecurity, networking, and AI.</span>
                 <span className="absolute inset-0 rounded bg-border-primary/30" />
               </div>
             </div>
           </div>
         </GridWrapper>
         <div className="mt-14 px-2 sm:px-4">
-          <div className={`mb-6 h-[78px] border-y border-border-primary bg-border-primary/10 ${pulse}`} />
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          <div className="mb-6 flex flex-col gap-3 border-y border-border-primary px-2 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-4">
+            <div>
+              <div className={`h-3 w-36 rounded bg-border-primary/40 ${pulse}`} />
+              <div className={`mt-2 h-4 w-72 max-w-full rounded bg-border-primary/25 ${pulse}`} />
+            </div>
+            <div className={`h-3 w-32 rounded bg-border-primary/30 ${pulse}`} />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             <CredentialSkeleton /><CredentialSkeleton /><CredentialSkeleton />
             <CredentialSkeleton /><CredentialSkeleton /><CredentialSkeleton />
           </div>

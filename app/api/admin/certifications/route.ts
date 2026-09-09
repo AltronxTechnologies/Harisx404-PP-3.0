@@ -5,7 +5,18 @@ import createSupabaseServerClient, {
   createSupabaseAdminClient,
 } from "@/app/lib/supabase/server";
 
-const optionalUrl = z.union([z.string().trim().url(), z.literal(""), z.null()]);
+const isHttpsUrl = (value: string) => {
+  try {
+    return new URL(value).protocol === "https:";
+  } catch {
+    return false;
+  }
+};
+const optionalUrl = z.union([
+  z.string().trim().refine(isHttpsUrl, "Use a valid HTTPS URL."),
+  z.literal(""),
+  z.null(),
+]);
 const certificationSchema = z.object({
   title: z.string().trim().min(2).max(140),
   issuer: z.string().trim().min(2).max(120),
@@ -33,8 +44,9 @@ async function requireAdmin(
 ) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return false;
-  const adminEmail = process.env.ADMIN_EMAIL;
-  return !adminEmail || user.email === adminEmail;
+  const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+  if (!adminEmail) return false;
+  return user.email?.trim().toLowerCase() === adminEmail;
 }
 
 function revalidateCertificationPaths() {

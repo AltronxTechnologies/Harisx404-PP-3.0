@@ -250,3 +250,5 @@ To show the embedded scheduling calendar there:
 3. `migrations/2026_credentials_review_seed.sql` contains the five LinkedIn
    credentials supplied for the compact-card review and removes the earlier
    visual-demo rows.
+4. Run `migrations/2026_certifications_hardening.sql` before deployment to make
+   issuing organization mandatory at the database layer.
