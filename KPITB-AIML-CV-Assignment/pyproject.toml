@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools==84.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "visionshield-ai"
+version = "0.1.0"
+description = "Explainable intrusion-first visual security intelligence"
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+license = { text = "AGPL-3.0-or-later" }
+authors = [{ name = "VisionShield AI Contributors" }]
+dependencies = [
+  "ImageHash==4.3.2",
+  "Pillow==11.0.0",
+  "pydantic==2.9.2",
+  "pydantic-settings==2.5.2",
+  "PyYAML==6.0.2",
+]
+
+[project.scripts]
+visionshield-data-audit = "visionshield.data:main"
+
+[project.optional-dependencies]
+dev = [
+  "mypy==1.11.2",
+  "pip-tools==7.4.1",
+  "pre-commit==3.8.0",
+  "pytest==8.3.3",
+  "pytest-cov==5.0.0",
+  "ruff==0.6.9",
+  "types-PyYAML==6.0.12.20240917",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "--strict-config --strict-markers --cov=visionshield --cov-report=term-missing --cov-fail-under=90"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+
+[tool.coverage.report]
+exclude_also = [
+  "if TYPE_CHECKING:",
+  "raise NotImplementedError",
+]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+plugins = ["pydantic.mypy"]
+files = ["src", "tests"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "RUF"]
+
+[tool.ruff.format]
+quote-style = "double"

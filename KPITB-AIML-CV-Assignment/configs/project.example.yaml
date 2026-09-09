@@ -19,13 +19,13 @@ dataset:
 
 training:
   framework: ultralytics
-  version: NEEDS_APPROVAL
+  version: 8.3.0
   model: yolo11n.pt
   epochs: 100
   patience: 20
   batch: NEEDS_HARDWARE_TEST
   seed: 42
-  device: NEEDS_APPROVAL
+  device: REQUIRED_PER_RUN
   online_augmentation: DISABLED_FOR_E1_E2_ABLATION
 
 inference:

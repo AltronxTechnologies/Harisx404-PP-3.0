@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 0 - Planning and governance.
+Phase 2 - Data acquisition tooling.
 
 ## Current Status
 
-`PLANNED`
+`BLOCKED`
 
 ## Completed
 
@@ -21,6 +21,14 @@ Phase 0 - Planning and governance.
 - Owner supplied the intrusion-first platform direction, camera/role/dashboard,
   evidence, Copilot, security, reliability, and delivery requirements; these are
   normalized in `PRODUCT_REQUIREMENTS.md`.
+- Phase 0 defaults and gate decisions recorded in `PHASE_00_APPROVAL.md` on
+  2026-09-09 after the owner delegated technical decisions.
+- Phase 1 engineering foundation implemented and evaluated in Docker. Lint,
+  formatting, strict typing, 7 tests, 94.82% branch coverage, configuration
+  smoke, and non-root container smoke passed; see `PHASE_01_REPORT.md`.
+- Phase 2 provenance, hashing, grouped-split, leakage, coverage, and manifest
+  tooling implemented and evaluated after independent review; 22 tests and
+  93.78% branch coverage passed. See `PHASE_02_TOOLING_REPORT.md`.
 
 ## Not Started
 
@@ -36,21 +44,12 @@ Phase 0 - Planning and governance.
 - Deployment
 - Presentation and viva artifacts
 
-## Blockers Before Phase 1
+## Phase 2 Work
 
-- Confirm assignment due date.
-- Confirm available GPU/Colab budget.
-- Confirm whether workplace footage can be collected legally and privately.
-- Confirm Roboflow workspace privacy. Free workspaces may expose uploaded data.
-- Confirm the YOLO package/version expected by the instructor.
-- Approve the four-class ontology and warehouse domain.
-- Decide which tracking/events are assignment requirements versus portfolio
-  extensions.
-- Approve subtree-isolated development and standalone release-repository policy.
-- Freeze the detector protocol and measurable dataset coverage targets; freeze
-  the event protocol only if events enter assignment scope.
+- Admit a complete licensed source set after file-level license/privacy review.
+- Obtain Roboflow workspace/export access for the required annotation phase.
 
 ## Next Gate
 
-Complete `PHASE_00_APPROVAL.md` and obtain explicit approval before creating
-implementation code or uploading any data.
+Acquisition remains `BLOCKED` until real media passes the evaluated audit tool.
+Phase 3 cannot begin without admitted media and Roboflow access.

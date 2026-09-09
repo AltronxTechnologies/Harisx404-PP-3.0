@@ -127,6 +127,8 @@ Do not use a source with unknown permission or license.
 - Remove exact duplicates with SHA-256.
 - Report near duplicates with perceptual hash or embeddings.
 - Reserve one unseen camera entirely for test.
+- Treat `viewpoint_id` as the canonical capture position for this gate; operational
+  `camera_id` alone does not prove a distinct viewpoint.
 - Never move difficult test images into training.
 - Never inspect test metrics while choosing model or thresholds.
 - Keep external auxiliary data in training only.

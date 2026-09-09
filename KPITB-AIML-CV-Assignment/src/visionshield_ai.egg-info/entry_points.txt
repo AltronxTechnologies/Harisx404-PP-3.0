@@ -1,0 +1,2 @@
+[console_scripts]
+visionshield-data-audit = visionshield.data:main
