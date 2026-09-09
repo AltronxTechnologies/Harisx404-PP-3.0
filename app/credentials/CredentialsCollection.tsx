@@ -77,7 +77,7 @@ function CredentialCard({ credential }: { credential: PublicCredential }) {
         ) : (
           <span className="inline-flex min-h-9 items-center gap-2 rounded-full border border-dashed border-border-primary px-3.5 font-mono text-[10px] uppercase tracking-widest text-text-secondary">
             <Link2Off className="size-3.5" aria-hidden />
-            No verification link
+            Verification unavailable
           </span>
         )}
       </div>

@@ -52,8 +52,8 @@
   displays verification unavailable because no URL was supplied.
 - Admin remains the only content-management source and still controls all
   extended metadata for future design changes.
-- Credentials without a URL use a same-size neutral dashed `No verification
-  link` status with a link-off glyph. It aligns with Verify actions without
+- Credentials without a URL use a same-size neutral dashed `Verification
+  unavailable` status with a link-off glyph. It aligns with Verify actions without
   implying that the status is clickable or externally validated.
 
 ## Minimal-card production hardening

@@ -1666,3 +1666,10 @@ credential ID remains, with a reduced 20px borderless copy target and 12px icon
 aligned directly to the 10px ID text. Security, Admin, schema, restricted public
 view, issuer logos, real credential data, and every other locked behavior remain
 unchanged. This limited amendment is re-locked after tests and visual review.
+
+### 2026-09-08 Credentials unavailable-label amendment
+
+The owner temporarily unlocked only the no-link footer wording. The neutral
+dashed status now reads `Verification unavailable`, retaining its link-off icon,
+36px geometry, alignment, and noninteractive semantics. This wording amendment
+is re-locked with all other Credentials presentation unchanged.

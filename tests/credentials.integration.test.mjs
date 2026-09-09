@@ -17,7 +17,7 @@ test("Credentials renders the admin-controlled collection", async () => {
   assert.doesNotMatch(html, /2026-08-01/);
   assert.doesNotMatch(html, /Pytest/);
   assert.doesNotMatch(html, /Completed Harvard CS50P/);
-  assert.match(html, /No verification link/);
+  assert.match(html, /Verification unavailable/);
 });
 
 test("Credentials review seed contains the five supplied records", async () => {
