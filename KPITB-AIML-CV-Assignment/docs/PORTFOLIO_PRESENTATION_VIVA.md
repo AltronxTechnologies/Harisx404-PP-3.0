@@ -4,7 +4,10 @@
 
 Assignment title:
 
-> VisionShield AI: Custom YOLO Detection and Explainable Warehouse Video Events
+> VisionShield AI: Custom YOLO Detection for Warehouse Images and Video
+
+If tracking/events are included and evaluated, the approved title may append
+“with Explainable Intrusion Events.”
 
 Portfolio title after full product phases:
 
@@ -27,8 +30,8 @@ production-ready, highly accurate, robust, compliant, or real-time.
 10. Experiment design
 11. Detector results
 12. Image testing
-13. Video tracking and event rules
-14. Event results
+13. Video inference; tracking and event rules if included in approved scope
+14. Event results if evaluated, otherwise planned portfolio extension
 15. Error analysis
 16. Security, privacy, ethics, and licensing
 17. Limitations
@@ -47,7 +50,7 @@ Ten core slides:
 5. Roboflow annotation and augmentation
 6. YOLO training and experiments
 7. Detector metrics and error analysis
-8. Video tracking, zones, and explainable event
+8. Video inference; evaluated tracking/zones/events if approved
 9. Live/offline demo, limitations, privacy
 10. Requirement coverage, learning, next steps
 
@@ -59,13 +62,17 @@ class counts, annotation policy, architecture, license inventory, threat model.
 1. State that events require human review.
 2. Show one correct image detection.
 3. Show one difficult image and explain uncertainty.
-4. Show prerecorded video tracking.
-5. Draw or load a restricted zone.
-6. Trigger one event and show its exact reasons/risk factors.
-7. Confirm/dismiss it in the product phase.
-8. Show one false positive or false negative.
-9. Open metrics/run manifest.
-10. Close with limitations and roadmap.
+4. Show prerecorded detector video output.
+5. If the approved assignment scope includes events, draw/load a restricted zone
+   and trigger one evaluated event.
+6. If events are included, show its exact reasons/risk factors and review it.
+7. Show one false positive or false negative.
+8. Open metrics/run manifest.
+9. Close with limitations and roadmap.
+
+Never demonstrate a planned product feature as an assignment result. If tracking,
+events, the dashboard, or Copilot are not evaluated by submission time, present
+them only as architecture/roadmap material.
 
 Prepare a 60-90 second offline backup video.
 
@@ -104,9 +111,9 @@ Delete any bullet whose evidence does not exist.
 ## LinkedIn Launch Template
 
 > I built VisionShield AI for my KPITB AI/ML computer-vision assignment: a
-> custom-trained YOLO warehouse detector extended with camera-local tracking,
-> configurable zones, deterministic temporal rules, and explainable events for
-> human review.
+> custom-trained YOLO warehouse detector evaluated on images and prerecorded
+> videos. [If evaluated: I extended it with camera-local tracking, configurable
+> zones, deterministic temporal rules, and explainable events for human review.]
 >
 > I completed the full pipeline in Roboflow, from annotation and justified
 > augmentation to locked image/video evaluation. The selected model achieved

@@ -15,5 +15,11 @@ Status values: `PLANNED`, `IMPLEMENTED`, `EVALUATED`, `RELEASED`, `BLOCKED`.
 | PORT-R01 | Strong GitHub project. | README, CI, cards, architecture, release | Clean clone passes setup/test/demo instructions | PLANNED |
 | PORT-R02 | Honest portfolio and resume evidence. | Verified metrics ledger and approved wording | Every claim maps to an artifact/run | PLANNED |
 | GOV-R01 | Human review and responsible use. | Non-goals, risk policy, review workflow, privacy assessment | No event is framed as intent or automatic guilt | PLANNED |
+| PROD-R01 | Policy-defined intrusion monitoring. | Versioned zone/line/schedule rules, event records, evidence | Golden scenarios explain each trigger without identity/intent claims | PLANNED |
+| PROD-R02 | Multi-source camera and upload processing. | Configurable camera registry, health, jobs, image/video/RTSP adapters | Limits, validation, progress, reconnect, and failure states pass tests | PLANNED |
+| PROD-R03 | Secure role-scoped operations. | Auth/session design, site-scoped RBAC, audit records | Admin/operator/viewer authorization and session tests pass | PLANNED |
+| PROD-R04 | Human review and evidence workflow. | Event detail, timeline, evidence, Confirm/Dismiss/Defer records | Review provenance and evidence authorization pass integration tests | PLANNED |
+| PROD-R05 | Controlled CCTV Copilot. | Allowlisted query contracts, authorization, citations, audit | Answers derive from accessible records and unknown data is not invented | PLANNED |
+| PROD-R06 | Observable, reproducible deployment. | Worker architecture, health, metrics, Docker, CI, version manifests | Clean startup, recovery, security, and named-hardware benchmarks pass | PLANNED |
 
 No row may be marked `EVALUATED` or `RELEASED` merely because a file exists.

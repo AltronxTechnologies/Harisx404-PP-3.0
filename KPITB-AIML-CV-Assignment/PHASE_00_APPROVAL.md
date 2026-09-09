@@ -23,6 +23,11 @@ evidence-status values.
 - [ ] Detector validation/test protocol approved; event protocol approved only
   if events are in assignment scope, otherwise marked `DEFERRED`.
 - [ ] Minimum per-class/source-group/slice targets recorded.
+- [ ] Intrusion-first product direction acknowledged; assignment delivery subset
+  and post-assignment product phases recorded separately.
+- [ ] Local credentials versus external OIDC deployment approach approved.
+- [ ] Copilot provider, privacy boundary, and no-LLM fallback approved or
+  `DEFERRED`.
 
 Approval record:
 

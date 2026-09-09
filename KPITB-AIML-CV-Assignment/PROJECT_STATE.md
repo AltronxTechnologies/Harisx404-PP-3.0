@@ -18,6 +18,9 @@ Phase 0 - Planning and governance.
   boundaries specified.
 - Source-only planning audit completed on 2026-09-09; contradictions found by the
   audit were corrected without beginning implementation.
+- Owner supplied the intrusion-first platform direction, camera/role/dashboard,
+  evidence, Copilot, security, reliability, and delivery requirements; these are
+  normalized in `PRODUCT_REQUIREMENTS.md`.
 
 ## Not Started
 

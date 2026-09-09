@@ -16,6 +16,8 @@
 - Risk score factors and clamping.
 - Event episode transitions/deduplication.
 - Temporary-file cleanup.
+- Camera-capacity, retention, and upload configuration boundaries.
+- Copilot intent/query allowlists and unknown-data responses.
 
 ### Property Tests
 
@@ -39,9 +41,22 @@
 - Video -> tracks -> events -> evidence.
 - Event and outbox created transactionally.
 - API auth and site-scoped authorization.
+- Account status, failed login, expiry, refresh/session rotation, and password
+  reset behavior.
+- Camera slots, health, reconnect, upload progress, retry, and failed-job states.
 - Review state and immutable event provenance.
 - Object-store failure and evidence retry.
 - WebSocket cursor replay and reconnect.
+- Copilot authorization, parameterized query, citation, and audit behavior.
+
+### Browser Tests
+
+- Login/logout and expired-session recovery.
+- Dashboard, camera list/detail, and system-health states.
+- Event search/filter/detail, evidence access, and review actions.
+- Zone/line/rule configuration and validation.
+- Copilot results, evidence links, denied scope, and unknown-data behavior.
+- Responsive layout, keyboard operation, focus, contrast, and accessible names.
 
 ### Golden Video Tests
 

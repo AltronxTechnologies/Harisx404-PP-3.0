@@ -33,7 +33,11 @@
 - Require three unique points.
 - Reject self-intersection and zero area.
 - Version every change.
-- Define zone type: public, monitored, restricted, forklift lane, PPE required.
+- Define a canonical zone type: public, monitoring, restricted, critical,
+  hazardous, loading, parking, or custom.
+- Attach independent versioned policy capabilities such as perimeter,
+  forklift-lane, PPE-required, occupancy, schedule, and dwell. Do not overload
+  the display type to determine rule behavior.
 - Draw anchor point and polygon in evidence overlays.
 
 ## Geometry Tests
@@ -51,12 +55,17 @@
 
 Open after person anchor is inside for configured consecutive observations.
 Close after stable exit plus grace. Record track, zone, timestamps, model, and
-rule version.
+rule version. A configured perimeter boundary can label this event as a
+`potential_intrusion` or `perimeter_breach`; this remains a policy label, not a
+claim about identity, permission, motive, or crime.
 
 ### Line Crossing
 
 Use consecutive stable signed-side values and finite segment intersection.
 Require minimum displacement, track age, and cooldown. Store direction.
+Compare the observed direction with configured allowed directions. A repeated
+crossing rule counts distinct cooled-down crossing episodes within a configured
+window rather than counting frame-level intersections.
 
 ### Prolonged Presence
 

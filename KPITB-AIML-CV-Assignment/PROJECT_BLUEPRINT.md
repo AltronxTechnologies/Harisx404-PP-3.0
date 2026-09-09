@@ -2,10 +2,12 @@
 
 ## 1. Product Definition
 
-VisionShield AI is a human-in-the-loop warehouse video analytics prototype. It
-detects visible physical objects with a custom YOLO model, preserves camera-local
-track IDs, applies explicit geometric and temporal rules, creates explainable
-event episodes, and presents evidence for operator review.
+VisionShield AI is a human-in-the-loop, intrusion-first visual security platform.
+It detects visible physical objects with a custom YOLO model, preserves
+camera-local track IDs, applies explicit geometric and temporal rules, creates
+explainable event episodes, and presents evidence for operator review. The first
+planned evaluation domain remains fixed-camera warehouse/industrial footage; the product
+architecture can support other controlled environments only after evaluation.
 
 It is not an autonomous surveillance authority, intent classifier, facial
 recognition system, or safety-certified control system.
@@ -18,7 +20,8 @@ conditions such as a tracked person entering a restricted polygon or remaining
 in a zone beyond a threshold.
 
 The system assists an operator. It does not decide whether activity is criminal,
-malicious, authorized, or legally noncompliant.
+malicious, identity-authorized, or legally noncompliant. “Unauthorized” product
+events mean only that a configured zone, line, direction, or schedule rule fired.
 
 ## 3. Users
 
@@ -90,7 +93,7 @@ the separate event evaluation protocol can be completed.
 ## 6. Architecture
 
 ```text
-Image / Prerecorded Video
+RTSP / Image / Prerecorded Video
           |
           v
 Input Validation and Decode
@@ -133,8 +136,13 @@ Zones and Lines               Position and Time
               REST and WebSocket Events
                         |
                         v
-                Human Review Dashboard
+         Human Review Dashboard / CCTV Copilot
 ```
+
+The Copilot queries authorized structured records and cites event/evidence IDs;
+it never guesses directly from raw video. Product requirements, camera/auth
+contracts, routes, capacity, worker, alert, privacy, and Copilot boundaries are
+defined in `PRODUCT_REQUIREMENTS.md`.
 
 ## 7. Repository Architecture After Implementation
 

@@ -203,9 +203,15 @@ event has measured results on the separate locked event-test set.
 - FastAPI REST and resumable WebSocket contracts.
 - PostgreSQL migrations for cameras, geometry, rules, events, reviews, evidence,
   outbox, and audit history.
-- OIDC-compatible authentication and site-scoped RBAC.
+- Secure account/session architecture, failed-login controls, password reset,
+  OIDC compatibility, and site-scoped Admin/Operator/Viewer RBAC.
 - S3-compatible evidence storage.
 - Transactional event/outbox creation.
+- Configurable camera capacity, protected RTSP references, camera health and
+  reconnect state.
+- Asynchronous image/video/stream jobs with progress, bounded queues, retries,
+  failure states, and worker recovery.
+- Adapter-based in-app/WebSocket/email notifications.
 
 Exit gate: authorization, RLS, idempotency, failure injection, and API contract
 tests pass.
@@ -219,6 +225,10 @@ tests pass.
   persisted review states.
 - Filtered event history and measured analytics.
 - Model/config versions and audit history.
+- Route set and operations-center interaction model from
+  `PRODUCT_REQUIREMENTS.md`.
+- Controlled CCTV Copilot over authorized, structured event data with cited
+  records and auditable queries.
 
 Exit gate: responsive/accessibility/browser tests pass and every screen uses real
 API data.
@@ -230,6 +240,9 @@ API data.
 - Non-root containers, resource limits, health checks, SBOM and scans.
 - Bounded uploads, decode isolation, cleanup, rate/concurrency limits.
 - Signed/hashed model and evidence manifests.
+- Frontend, API, worker, PostgreSQL, object-storage, and migration containers.
+- Retention jobs, camera limits, health/readiness, metrics, structured logs, and
+  recovery checks.
 - GitHub release, portfolio assets, LinkedIn post, resume bullets.
 
 Exit gate: clean deployment test, security review, restore/rollback exercise,

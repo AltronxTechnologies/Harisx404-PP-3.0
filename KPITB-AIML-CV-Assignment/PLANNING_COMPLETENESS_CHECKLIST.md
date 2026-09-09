@@ -26,6 +26,9 @@
 
 ## Product Engineering
 
+- [x] Intrusion-first product direction and policy meaning.
+- [x] Camera, authentication, roles, routes, worker, alert, and Copilot
+  requirements.
 - [x] Detection/tracking/event architecture.
 - [x] Geometry and episode algorithms.
 - [x] Explainable policy score.

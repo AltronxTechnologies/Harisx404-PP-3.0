@@ -2,10 +2,11 @@
 
 **Status: PLANNED**
 
-VisionShield AI is an explainable industrial video-intelligence prototype that
-combines a custom YOLO detector, object tracking, configurable spatial zones,
-temporal rules, evidence capture, and human review to surface observable safety
-and security events in warehouse video.
+VisionShield AI is an explainable, intrusion-first visual security platform. It
+combines custom YOLO detection, camera-local tracking, configurable zones and
+boundaries, temporal rules, evidence capture, risk policy, and human review. Its
+initial planned evaluation domain is fixed-camera warehouse/industrial footage; broader
+controlled environments require separate evidence.
 
 This directory currently contains the researched project blueprint and execution
 system. It does not yet contain a trained model or verified performance results.
@@ -58,6 +59,7 @@ Video -> YOLO -> Tracker -> Geometry -> Temporal Rules -> Risk Policy
 ## Documentation Map
 
 - `PROJECT_BLUEPRINT.md`: product definition and architecture.
+- `PRODUCT_REQUIREMENTS.md`: authoritative product functions and quality needs.
 - `IMPLEMENTATION_PLAN.md`: phased build and acceptance gates.
 - `AI_EXECUTION_PLAYBOOK.md`: bounded prompts for AI-assisted execution.
 - `REQUIREMENTS_TRACEABILITY.md`: assignment-to-evidence mapping.

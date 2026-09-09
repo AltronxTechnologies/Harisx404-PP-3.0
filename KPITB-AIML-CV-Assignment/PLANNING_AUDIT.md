@@ -28,6 +28,17 @@ implementation artifact was inspected because none exists.
 - Review actions/states, moving-forklift terminology, generated output paths,
   disclosure templates, and evidence status are normalized.
 
+## Intrusion-First Revision Audit
+
+The owner-supplied product direction was normalized into
+`PRODUCT_REQUIREMENTS.md` and checked against the assignment boundary, security,
+event, testing, and implementation plans. The revision records camera capacity
+and health, authentication/roles, asynchronous processing, dashboard routes,
+alerts, retention, controlled Copilot queries, observability, deployment, and
+future modules without claiming they are implemented. Zone types and independent
+policy capabilities are normalized, and presentation requirements remain
+conditional on evaluated assignment scope.
+
 ## Remaining Blockers
 
 All unchecked decisions in `PHASE_00_APPROVAL.md` remain `BLOCKED` for Phase 1.

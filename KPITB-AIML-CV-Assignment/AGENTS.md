@@ -26,11 +26,12 @@ portfolio project. Work performed under this plan MUST remain inside
 
 1. `ASSIGNMENT_BRIEF.md`
 2. `REQUIREMENTS_TRACEABILITY.md`
-3. `PROJECT_BLUEPRINT.md`
-4. `IMPLEMENTATION_PLAN.md`
-5. `AI_EXECUTION_PLAYBOOK.md`
-6. Relevant document under `docs/` for the active phase
-7. `PROJECT_STATE.md`
+3. `PRODUCT_REQUIREMENTS.md`
+4. `PROJECT_BLUEPRINT.md`
+5. `IMPLEMENTATION_PLAN.md`
+6. `AI_EXECUTION_PLAYBOOK.md`
+7. Relevant document under `docs/` for the active phase
+8. `PROJECT_STATE.md`
 
 ## Evidence Vocabulary
 
