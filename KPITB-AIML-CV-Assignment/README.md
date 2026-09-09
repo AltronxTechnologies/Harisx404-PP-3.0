@@ -1,0 +1,83 @@
+# VisionShield AI
+
+**Status: PLANNED**
+
+VisionShield AI is an explainable industrial video-intelligence prototype that
+combines a custom YOLO detector, object tracking, configurable spatial zones,
+temporal rules, evidence capture, and human review to surface observable safety
+and security events in warehouse video.
+
+This directory currently contains the researched project blueprint and execution
+system. It does not yet contain a trained model or verified performance results.
+
+## Assignment Outcome
+
+The assignment release will demonstrate the complete computer-vision pipeline:
+
+1. Collect or curate a custom warehouse dataset.
+2. Annotate it in Roboflow.
+3. Create a raw dataset version and a justified augmented version.
+4. Fine-tune a pinned YOLO detector.
+5. Evaluate it on a locked source-grouped test set.
+6. Test it on unseen images and prerecorded videos.
+7. If Phase 0 approves the extension, add tracking and explainable zone/event
+   overlays; detector-only video testing remains the assignment core.
+8. Present measured results, successes, failures, and limitations.
+
+## Proposed Product MVP
+
+Environment: fixed-camera warehouse or industrial facility.
+
+YOLO classes:
+
+- `person`
+- `forklift`
+- `hardhat`
+- `high_visibility_vest`
+
+Derived events:
+
+- Restricted-zone person entry
+- Virtual-line crossing and direction
+- Prolonged presence/dwell threshold
+- After-hours person presence
+- Visible-track occupancy/overcrowding threshold
+- Person and moving-forklift-lane co-occupancy warning
+- PPE visibility warning inside a configured PPE-required zone
+
+Events are deterministic policy outputs requiring human review. They are not
+predictions of intent, crime, or legal safety compliance.
+
+## Planned Product Layers
+
+```text
+Video -> YOLO -> Tracker -> Geometry -> Temporal Rules -> Risk Policy
+      -> Event Episode -> Evidence -> FastAPI/WebSocket -> Review Dashboard
+```
+
+## Documentation Map
+
+- `PROJECT_BLUEPRINT.md`: product definition and architecture.
+- `IMPLEMENTATION_PLAN.md`: phased build and acceptance gates.
+- `AI_EXECUTION_PLAYBOOK.md`: bounded prompts for AI-assisted execution.
+- `REQUIREMENTS_TRACEABILITY.md`: assignment-to-evidence mapping.
+- `EVIDENCE_LEDGER.md`: current claims, proof, limitations, and blockers.
+- `PLANNING_AUDIT.md`: source-audit scope, corrections, and readiness judgment.
+- `docs/DATASET_AND_ANNOTATION.md`: collection, ontology, QA, and leakage rules.
+- `docs/TRAINING_AND_EVALUATION.md`: experiments, metrics, and model selection.
+- `docs/EVENT_ENGINE.md`: tracking, geometry, events, scoring, and evidence.
+- `docs/SECURITY_PRIVACY_ETHICS.md`: privacy, misuse, threat model, and licensing.
+- `docs/TESTING_AND_RELEASE.md`: test pyramid, CI, deployment, and release gates.
+- `docs/PORTFOLIO_PRESENTATION_VIVA.md`: assignment, GitHub, resume, LinkedIn,
+  presentation, and viva packaging.
+- `templates/`: evidence-first cards and records completed during implementation.
+
+## Current Truth
+
+- No dataset has been approved or downloaded.
+- No Roboflow project has been created.
+- No annotations have been verified.
+- No model has been trained.
+- No metric has been measured.
+- No real-time claim has been established.
+- No production deployment exists.
