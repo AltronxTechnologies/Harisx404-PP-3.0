@@ -48,6 +48,9 @@ Phase 2 - Data acquisition tooling.
 
 - Admit a complete licensed source set after file-level license/privacy review.
 - Obtain Roboflow workspace/export access for the required annotation phase.
+- Roboflow access was tested on 2026-09-09: Universe returned HTTP 403 and the
+  API returned HTTP 401 without credentials. Wikimedia API discovery works, but
+  its candidates still require full-resolution privacy/ontology review.
 
 ## Next Gate
 

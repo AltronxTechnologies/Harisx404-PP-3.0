@@ -61,3 +61,13 @@ Phase 2 tooling is evaluated, but acquisition remains `BLOCKED` until a complete
 source set can pass `visionshield-data-audit` against real local media. Roboflow
 annotation/export also requires workspace access that is not present in the
 sandbox. These are external evidence dependencies, not code defects.
+
+## Access Verification
+
+On 2026-09-09, all three selected Roboflow Universe pages returned HTTP 403 to
+the sandbox fetcher and the official Roboflow API returned HTTP 401 without an
+API key. No `ROBOFLOW_API_KEY` is available. No attempt was made to bypass these
+controls. Wikimedia Commons' official API was reachable and returned file-level
+license metadata for forklift, hard-hat, and high-visibility-clothing categories;
+those files remain candidates because full-resolution privacy and ontology review
+has not occurred.
