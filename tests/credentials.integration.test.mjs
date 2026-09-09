@@ -54,9 +54,7 @@ test("Credentials schema supports complete admin-managed records", async () => {
     assert.match(migration, new RegExp(column));
   }
   assert.match(migration, /Demo record|is_demo/);
-  assert.match(collection, /h-\[240px\]/);
-  assert.match(collection, /Verification available/);
-  assert.match(collection, /\? "Available" : "Not linked"/);
+  assert.match(collection, /h-\[232px\]/);
   assert.match(collection, /Copy credential ID/);
   assert.doesNotMatch(collection, /issue_date|expiration_date|description|skills|category/);
   assert.match(dataSource, /public_certifications/);

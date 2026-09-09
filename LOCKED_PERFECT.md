@@ -1655,3 +1655,14 @@ static and route checks.
 
 Do not modify Credentials, its Admin controls, schema, data source, or public
 presentation without a new explicit owner unlock.
+
+### 2026-09-08 owner-authorized Credentials visual rollback
+
+The owner temporarily unlocked only the last Credentials card refinements and
+restored the previously approved visual baseline: equal 232px cards,
+`Verifiable`/`Recorded` status wording, 36px Verify/No Verification Link footer
+controls, and the prior title/spacing rhythm. The compact middle-ellipsis Cisco
+credential ID remains, with a reduced 20px borderless copy target and 12px icon
+aligned directly to the 10px ID text. Security, Admin, schema, restricted public
+view, issuer logos, real credential data, and every other locked behavior remain
+unchanged. This limited amendment is re-locked after tests and visual review.

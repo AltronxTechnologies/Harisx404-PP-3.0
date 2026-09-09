@@ -28,7 +28,7 @@
   internal gaps, shared animated accent, and 15/24px supporting copy.
 - Collection toolbar uses professional public-facing copy and a zero-padded,
   grammar-aware published credential count.
-- Cards use equal 240px heights, one/two/three-column responsive layouts, 3px
+- Cards use equal 232px heights, one/two/three-column responsive layouts, 3px
   grid gaps, 2xl shells, 48px issuer-logo surfaces, 22/24px title typography,
   optional credential ID, accurate status, and verification action.
 - Admin image failures fall back cleanly without exposing broken-image glyphs.
@@ -37,7 +37,7 @@
 
 ## Compact owner-directed revision
 
-- Replaced the large evidence-panel cards with equal 240px compact cards.
+- Replaced the large evidence-panel cards with equal 232px compact cards.
 - Public cards expose only issuer logo/name, credential title, optional
   credential ID, verification status, and verification action. Dates,
   descriptions, categories, badge media, and skills remain Admin-managed but
@@ -58,7 +58,7 @@
 
 ## Minimal-card production hardening
 
-- Final public cards are fixed at 240px and expose only issuer logo/name,
+- Final public cards are fixed at 232px and expose only issuer logo/name,
   credential title, optional credential ID, verification status, and optional
   verification action. All public tag, date, description, skill, category,
   badge, and expansion UI is removed.
@@ -111,7 +111,7 @@ The expanded schema, hardening constraints, restricted public view, and
 five-record review dataset are live and verified. A reversible full-field CRUD
 cycle passed create, update, publish visibility, archive hiding, and delete;
 the temporary row was removed and all five supplied credentials remain.
-The final card status uses concise `Available`/`Not linked` visual labels with
-complete accessible names. Verification actions are 44px; the supplied Cisco
-ID uses a compact middle-ellipsis display and full-value copy control.
+The final card status uses the approved `Verifiable`/`Recorded` wording and
+36px footer controls. The supplied Cisco ID uses a compact middle-ellipsis
+display and a small aligned 20px borderless full-value copy control.
 Credentials was owner-approved and production-locked on 2026-09-08.

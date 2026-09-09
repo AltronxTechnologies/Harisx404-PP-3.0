@@ -5,7 +5,7 @@ const pulse = "animate-pulse motion-reduce:animate-none";
 
 function CredentialSkeleton() {
   return (
-    <div className="h-[240px] rounded-2xl border border-border-primary bg-white p-4 dark:bg-white/[0.02] sm:p-5">
+    <div className="h-[232px] rounded-2xl border border-border-primary bg-white p-4 dark:bg-white/[0.02] sm:p-5">
       <div className="flex items-center gap-3">
         <div className={`size-12 shrink-0 rounded-xl bg-border-primary/30 ${pulse}`} />
         <div className="flex-1">
