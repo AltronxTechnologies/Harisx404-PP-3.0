@@ -246,11 +246,11 @@ To show the embedded scheduling calendar there:
 
 1. `migrations/2026_certifications_expanded.sql` was applied successfully on
    2026-09-07.
-2. Run `migrations/2026_certifications_hardening.sql` to enforce issuer,
-   status, ordering, HTTPS URL, skill-count, expiration, and unique identity
-   rules.
+2. `migrations/2026_certifications_hardening.sql` was applied and verified on
+   2026-09-08.
 3. `migrations/2026_credentials_review_seed.sql` contains the five LinkedIn
    credentials supplied for the compact-card review and removes the earlier
    visual-demo rows. It is idempotent after the hardening migration.
-4. Run `migrations/2026_certifications_public_view.sql` to expose only the six
-   approved public fields and revoke anonymous access to hidden metadata.
+4. `migrations/2026_certifications_public_view.sql` was applied and verified on
+   2026-09-08. Anonymous base-table access is blocked and the six-field public
+   view is readable.

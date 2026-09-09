@@ -107,7 +107,8 @@
   expanded schema, compact public-data boundaries, exact review seed, and admin
   authorization.
 
-The expanded schema and five-record review dataset are live. Apply
-`migrations/2026_certifications_hardening.sql` before deployment to enforce the
-issuer requirement at the database layer. Credentials remains unlocked pending
-owner visual approval.
+The expanded schema, hardening constraints, restricted public view, and
+five-record review dataset are live and verified. A reversible full-field CRUD
+cycle passed create, update, publish visibility, archive hiding, and delete;
+the temporary row was removed and all five supplied credentials remain.
+Credentials remains unlocked pending owner visual approval.
