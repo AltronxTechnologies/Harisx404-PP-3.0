@@ -12,6 +12,7 @@ function CredentialSkeleton() {
           <div className={`h-4 w-2/5 rounded bg-border-primary/40 ${pulse}`} />
           <div className={`mt-2 h-3 w-1/4 rounded bg-border-primary/30 ${pulse}`} />
         </div>
+        <div className={`h-7 w-20 rounded-full bg-border-primary/25 ${pulse}`} />
       </div>
       <div className={`mt-5 h-12 w-4/5 rounded bg-border-primary/40 ${pulse}`} />
       <div className="mt-7 flex items-center justify-end border-t border-border-primary pt-3">
@@ -52,7 +53,7 @@ export default function CredentialsLoading() {
           </div>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             <CredentialSkeleton /><CredentialSkeleton /><CredentialSkeleton />
-            <CredentialSkeleton /><CredentialSkeleton /><CredentialSkeleton />
+            <CredentialSkeleton /><CredentialSkeleton />
           </div>
         </div>
         <div className={`mx-2 mt-28 h-[464px] rounded-3xl bg-border-primary/15 sm:mx-4 md:h-[458px] ${pulse}`} />

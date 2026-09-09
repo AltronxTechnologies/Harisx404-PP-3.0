@@ -114,7 +114,11 @@ export function CertificationForm({ initialData }: { initialData?: InitialCertif
   };
 
   const FieldError = ({ name }: { name: keyof CertificationFormValues }) =>
-    errors[name] ? <p className="mt-1.5 text-xs text-red-500">{errors[name]?.message}</p> : null;
+    errors[name] ? <p id={`${name}-error`} role="alert" className="mt-1.5 text-xs text-red-500">{errors[name]?.message}</p> : null;
+  const errorProps = (name: keyof CertificationFormValues) => ({
+    "aria-invalid": Boolean(errors[name]),
+    "aria-describedby": errors[name] ? `${name}-error` : undefined,
+  });
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
@@ -122,17 +126,17 @@ export function CertificationForm({ initialData }: { initialData?: InitialCertif
 
       <div className="grid gap-6 md:grid-cols-2">
         <label className="text-sm font-medium">Credential title
-          <input {...register("title")} className={`mt-2 ${inputClass}`} placeholder="Security Operations Fundamentals" />
+          <input {...register("title")} {...errorProps("title")} className={`mt-2 ${inputClass}`} placeholder="Security Operations Fundamentals" />
           <FieldError name="title" />
         </label>
         <label className="text-sm font-medium">Issuing organization
-          <input {...register("issuer")} className={`mt-2 ${inputClass}`} placeholder="Cisco Networking Academy" />
+          <input {...register("issuer")} {...errorProps("issuer")} className={`mt-2 ${inputClass}`} placeholder="Cisco Networking Academy" />
           <FieldError name="issuer" />
         </label>
       </div>
 
       <label className="block text-sm font-medium">Description
-        <textarea {...register("description")} rows={4} maxLength={600} className={`mt-2 resize-y ${inputClass}`} placeholder="What this credential validates and why it matters." />
+        <textarea {...register("description")} {...errorProps("description")} rows={4} maxLength={600} className={`mt-2 resize-y ${inputClass}`} placeholder="What this credential validates and why it matters." />
         <FieldError name="description" />
       </label>
 
@@ -146,7 +150,7 @@ export function CertificationForm({ initialData }: { initialData?: InitialCertif
           <input type="date" {...register("issue_date")} className={`mt-2 ${inputClass}`} />
         </label>
         <label className="text-sm font-medium">Expiration date
-          <input type="date" disabled={doesNotExpire} {...register("expiration_date")} className={`mt-2 disabled:cursor-not-allowed disabled:opacity-50 ${inputClass}`} />
+          <input type="date" disabled={doesNotExpire} {...register("expiration_date")} {...errorProps("expiration_date")} className={`mt-2 disabled:cursor-not-allowed disabled:opacity-50 ${inputClass}`} />
           <FieldError name="expiration_date" />
         </label>
       </div>
@@ -161,30 +165,31 @@ export function CertificationForm({ initialData }: { initialData?: InitialCertif
           <input {...register("credential_id")} className={`mt-2 ${inputClass}`} placeholder="CERT-2026-001" />
         </label>
         <label className="text-sm font-medium">Verification URL
-          <input type="url" {...register("credential_url")} className={`mt-2 ${inputClass}`} placeholder="https://issuer.example/verify/..." />
+          <input type="url" {...register("credential_url")} {...errorProps("credential_url")} className={`mt-2 ${inputClass}`} placeholder="https://issuer.example/verify/..." />
           <FieldError name="credential_url" />
         </label>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         <label className="text-sm font-medium">Issuer logo URL
-          <input type="url" {...register("issuer_logo_url")} className={`mt-2 ${inputClass}`} placeholder="https://.../issuer-logo.svg" />
+          <input type="url" {...register("issuer_logo_url")} {...errorProps("issuer_logo_url")} className={`mt-2 ${inputClass}`} placeholder="https://.../issuer-logo.svg" />
           <FieldError name="issuer_logo_url" />
         </label>
         <label className="text-sm font-medium">Badge image URL
-          <input type="url" {...register("badge_image_url")} className={`mt-2 ${inputClass}`} placeholder="https://.../credential-badge.png" />
+          <input type="url" {...register("badge_image_url")} {...errorProps("badge_image_url")} className={`mt-2 ${inputClass}`} placeholder="https://.../credential-badge.png" />
           <FieldError name="badge_image_url" />
         </label>
       </div>
 
       <label className="block text-sm font-medium">Skills
-        <input {...register("skills")} className={`mt-2 ${inputClass}`} placeholder="Network Security, Incident Response, Threat Analysis" />
-        <p className="mt-1.5 text-xs text-ink-secondary">Separate skills with commas. Up to 12 skills are shown.</p>
+        <input {...register("skills")} {...errorProps("skills")} className={`mt-2 ${inputClass}`} placeholder="Network Security, Incident Response, Threat Analysis" />
+        <p className="mt-1.5 text-xs text-ink-secondary">Separate skills with commas. Stored as administrative metadata; not displayed on the compact public cards.</p>
+        <FieldError name="skills" />
       </label>
 
       <div className="grid gap-6 md:grid-cols-3">
         <label className="text-sm font-medium">Display order
-          <input type="number" {...register("display_order")} className={`mt-2 ${inputClass}`} />
+          <input type="number" {...register("display_order")} {...errorProps("display_order")} className={`mt-2 ${inputClass}`} />
           <FieldError name="display_order" />
         </label>
         <label className="text-sm font-medium">Status

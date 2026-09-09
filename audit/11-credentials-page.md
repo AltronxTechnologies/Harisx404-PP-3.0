@@ -53,6 +53,33 @@
 - Admin remains the only content-management source and still controls all
   extended metadata for future design changes.
 
+## Minimal-card production hardening
+
+- Final public cards are fixed at 232px and expose only issuer logo/name,
+  credential title, optional credential ID, verification status, and optional
+  verification action. All public tag, date, description, skill, category,
+  badge, and expansion UI is removed.
+- Public loader selects only `id`, `title`, `issuer`, `issuer_logo_url`,
+  `credential_id`, and `credential_url`. The restricted public view migration
+  revokes anonymous base-table access so hidden Admin metadata cannot be queried
+  directly.
+- Cards use h3 beneath the collection h2, essential labels are at least 10px,
+  all issuer media renders as logo-or-fallback rather than both, and Harvard's
+  final visible shield asset is verified.
+- Admin authorization fails closed without `ADMIN_EMAIL` and compares normalized
+  addresses. Verification/media fields require HTTPS in both client and server
+  validation.
+- Database hardening enforces issuer, title/issuer lengths, status, nonnegative
+  ordering, HTTPS URLs, skill count, expiration consistency, and unique
+  issuer/title identity.
+- The five-record seed uses `ON CONFLICT ... DO UPDATE`, making reruns
+  deterministic without duplicating credentials.
+- Loading mirrors the exact responsive toolbar, five fixed-height cards,
+  status row, and CTA/Footer reservation.
+- Admin list/edit failures are distinguished from empty/missing records and
+  edit/delete controls have record-specific accessible names. Field errors are
+  announced and programmatically associated.
+
 ## Responsive and theme verification
 
 - Dark full-page renders passed at 1440, 768, and 390px with no visible

@@ -34,6 +34,7 @@ test("Credentials review seed contains the five supplied records", async () => {
     assert.match(seed, new RegExp(title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   }
   assert.match(seed, /DELETE FROM public\.certifications WHERE is_demo = TRUE/);
+  assert.match(seed, /ON CONFLICT \(issuer, title\) DO UPDATE/);
 });
 
 test("Credentials schema supports complete admin-managed records", async () => {

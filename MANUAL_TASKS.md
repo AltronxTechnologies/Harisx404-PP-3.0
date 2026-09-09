@@ -245,10 +245,12 @@ To show the embedded scheduling calendar there:
 ## Credentials page
 
 1. `migrations/2026_certifications_expanded.sql` was applied successfully on
-   2026-09-07. The review database contains six clearly marked demo records.
-2. Replace or delete demo rows from `/admin/certifications` after review.
+   2026-09-07.
+2. Run `migrations/2026_certifications_hardening.sql` to enforce issuer,
+   status, ordering, HTTPS URL, skill-count, expiration, and unique identity
+   rules.
 3. `migrations/2026_credentials_review_seed.sql` contains the five LinkedIn
    credentials supplied for the compact-card review and removes the earlier
-   visual-demo rows.
-4. Run `migrations/2026_certifications_hardening.sql` before deployment to make
-   issuing organization mandatory at the database layer.
+   visual-demo rows. It is idempotent after the hardening migration.
+4. Run `migrations/2026_certifications_public_view.sql` to expose only the six
+   approved public fields and revoke anonymous access to hidden metadata.
