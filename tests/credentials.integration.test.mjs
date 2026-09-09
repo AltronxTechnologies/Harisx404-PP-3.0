@@ -17,6 +17,7 @@ test("Credentials renders the admin-controlled collection", async () => {
   assert.doesNotMatch(html, /2026-08-01/);
   assert.doesNotMatch(html, /Pytest/);
   assert.doesNotMatch(html, /Completed Harvard CS50P/);
+  assert.match(html, /No verification link/);
 });
 
 test("Credentials review seed contains the five supplied records", async () => {
@@ -57,4 +58,24 @@ test("Certification admin API rejects unauthenticated access", async () => {
     const response = await fetch(`${baseUrl}/api/admin/certifications`, { method });
     assert.equal(response.status, 401, `${method} should require admin authentication`);
   }
+});
+
+test("Admin form, API, and cache invalidation cover the complete credential model", async () => {
+  const [form, api] = await Promise.all([
+    readFile(new URL("../app/components/admin/CertificationForm.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/admin/certifications/route.ts", import.meta.url), "utf8"),
+  ]);
+  const fields = [
+    "title", "issuer", "description", "category", "issue_date",
+    "expiration_date", "does_not_expire", "credential_id", "credential_url",
+    "issuer_logo_url", "badge_image_url", "skills", "is_demo",
+    "display_order", "status",
+  ];
+  fields.forEach((field) => {
+    assert.match(form, new RegExp(field));
+    assert.match(api, new RegExp(field));
+  });
+  assert.match(api, /revalidatePath\("\/credentials"\)/);
+  assert.match(api, /revalidateTag\("credentials"\)/);
+  assert.match(api, /auth\.getUser\(\)/);
 });
