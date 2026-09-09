@@ -1622,3 +1622,36 @@ now uses the same `animate-gradient-x text-colorfull px-1 pb-1 italic
 [text-shadow:none]` treatment as the other locked page headings. No other Links
 or shared presentation changed. This limited amendment is re-locked after its
 static and route checks.
+
+## 32. FINAL OWNER LOCK - Credentials
+
+- **Date locked:** 2026-09-08
+- **Owner instruction:** Apply the final professional refinements and lock the
+  completed Credentials page.
+- **Locked route:** `/credentials`, including hero, collection toolbar, compact
+  cards, issuer media, verification states/actions, empty/loading/error states,
+  shared CTA placement, responsive layouts, and light/dark presentation.
+- **Locked files:** `app/credentials/**`, Credentials-specific code in
+  `app/lib/utils.ts`, `app/components/admin/CertificationForm.tsx`,
+  `app/api/admin/certifications/route.ts`, Admin certification routes,
+  Credentials migrations/tests, and `audit/11-credentials-page.md`.
+- **Public card baseline:** equal 240px cards; one/two/three-column responsive
+  grid; issuer logo and full organization name; 22/24px credential title;
+  optional compact copyable credential ID; concise Available/Not linked status
+  with complete accessible naming; 44px Verify Credential or neutral dashed No
+  Verification Link state. No public dates, descriptions, categories, skill
+  tags, badge panels, or expandable content.
+- **Data baseline:** five owner-supplied credentials (Harvard CS50P, Cisco
+  Introduction to Cybersecurity, Microsoft AI Skills Fest, Apna College Delta
+  2.0, and Scaler Master Computer Networking); four verification links and one
+  supplied credential ID.
+- **Security baseline:** Admin-only fail-closed CRUD, normalized ADMIN_EMAIL
+  allowlist, strict HTTPS validation, database invariants, deterministic seed,
+  anonymous base-table denial, and restricted six-field public view.
+- **Verification:** reversible full-field create/update/publish/archive/delete
+  cycle passed and was cleaned up; five real rows remain; Credentials tests 5/5,
+  TypeScript, targeted ESLint, and `git diff --check` pass; all public routes are
+  HTTP 200; responsive and light/dark renders pass without clipping or overflow.
+
+Do not modify Credentials, its Admin controls, schema, data source, or public
+presentation without a new explicit owner unlock.

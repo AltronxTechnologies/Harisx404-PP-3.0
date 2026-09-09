@@ -39,9 +39,12 @@ test("Credentials review seed contains the five supplied records", async () => {
 });
 
 test("Credentials schema supports complete admin-managed records", async () => {
-  const [page, migration] = await Promise.all([
+  const [page, collection, dataSource, migration, hardening] = await Promise.all([
     readFile(new URL("../app/credentials/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/credentials/CredentialsCollection.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/credentials/data.ts", import.meta.url), "utf8"),
     readFile(new URL("../migrations/2026_certifications_expanded.sql", import.meta.url), "utf8"),
+    readFile(new URL("../migrations/2026_certifications_hardening.sql", import.meta.url), "utf8"),
   ]);
   assert.doesNotMatch(page, /fallbackCertifications/);
   for (const column of [
@@ -51,6 +54,15 @@ test("Credentials schema supports complete admin-managed records", async () => {
     assert.match(migration, new RegExp(column));
   }
   assert.match(migration, /Demo record|is_demo/);
+  assert.match(collection, /h-\[240px\]/);
+  assert.match(collection, /Verification available/);
+  assert.match(collection, /\? "Available" : "Not linked"/);
+  assert.match(collection, /Copy credential ID/);
+  assert.doesNotMatch(collection, /issue_date|expiration_date|description|skills|category/);
+  assert.match(dataSource, /public_certifications/);
+  assert.match(dataSource, /id, title, issuer, issuer_logo_url, credential_id, credential_url/);
+  assert.match(hardening, /certifications_https_urls_check/);
+  assert.match(hardening, /certifications_issuer_title_idx/);
 });
 
 test("Certification admin API rejects unauthenticated access", async () => {
