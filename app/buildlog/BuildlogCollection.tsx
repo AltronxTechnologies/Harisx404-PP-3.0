@@ -106,15 +106,7 @@ export function BuildlogCollection({
     if (filter === "completed") return !hasPlanned;
     return true;
   };
-  const visibleProjects = projects
-    .filter((project) => projectMatches(project, activeFilter))
-    .sort((left, right) => {
-      if (activeFilter !== "all") return left.display_order - right.display_order;
-      const leftHasPlanned = left.items.some((item) => !item.done);
-      const rightHasPlanned = right.items.some((item) => !item.done);
-      if (leftHasPlanned !== rightHasPlanned) return leftHasPlanned ? -1 : 1;
-      return left.display_order - right.display_order;
-    });
+  const visibleProjects = projects.filter((project) => projectMatches(project, activeFilter));
 
   return (
     <>
@@ -145,50 +137,6 @@ export function BuildlogCollection({
         </div>
       </div>
 
-      {visibleProjects.length > 0 && (
-        <nav aria-label="Buildlog project directory" className="mb-8">
-          <div className="mb-3 flex items-end justify-between gap-4 px-1">
-            <div>
-              <p className="font-mono text-[10px] font-medium uppercase tracking-widest text-text-secondary">
-                Project directory
-              </p>
-              <p className="mt-1 text-xs text-text-secondary">
-                Jump directly to a project ledger.
-              </p>
-            </div>
-            <p className="shrink-0 font-mono text-[10px] uppercase tracking-widest text-text-secondary">
-              {String(visibleProjects.length).padStart(2, "0")} visible
-            </p>
-          </div>
-          <div className="grid grid-cols-2 gap-px border border-border-primary bg-border-primary lg:grid-cols-4">
-            {visibleProjects.map((project) => {
-              const projectIndex = projects.findIndex((candidate) => candidate.id === project.id);
-              const planned = project.items.filter((item) => !item.done).length;
-              return (
-                <a
-                  key={project.id}
-                  href={`#buildlog-project-${project.id}`}
-                  className="group min-w-0 bg-bg-primary px-3 py-3.5 transition-colors hover:bg-neutral-900/[0.025] focus-visible:relative focus-visible:z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-text-primary dark:hover:bg-white/[0.025] sm:px-4"
-                >
-                  <span className="flex items-center justify-between gap-2 font-mono text-[9px] uppercase tracking-widest text-text-secondary">
-                    <span>{String(projectIndex + 1).padStart(2, "0")}</span>
-                    <span>{planned > 0 ? "Active" : "Complete"}</span>
-                  </span>
-                  <span className="mt-2 block truncate text-sm font-medium text-text-primary">
-                    {project.name}
-                  </span>
-                  <span className="mt-1 block font-mono text-[9px] uppercase tracking-wider text-text-secondary">
-                    {planned > 0
-                      ? `${planned} planned ${planned === 1 ? "update" : "updates"}`
-                      : `${project.items.length} shipped`}
-                  </span>
-                </a>
-              );
-            })}
-          </div>
-        </nav>
-      )}
-
       {visibleProjects.length > 0 ? (
         <div className="border-b border-border-primary">
           {visibleProjects.map((project) => {
@@ -204,14 +152,12 @@ export function BuildlogCollection({
             return (
               <article
                 key={project.id}
-                id={`buildlog-project-${project.id}`}
-                className="grid min-w-0 scroll-mt-28 grid-cols-1 border-t border-border-primary lg:grid-cols-12"
+                className="grid min-w-0 grid-cols-1 border-t border-border-primary lg:grid-cols-12"
               >
-                <header className="border-b border-border-primary bg-neutral-900/[0.012] p-4 dark:bg-white/[0.012] lg:sticky lg:top-28 lg:col-span-4 lg:self-start lg:border-b-0 lg:p-6 xl:col-span-3">
-                  <div className="flex items-center justify-between gap-3 font-mono text-[10px] font-medium uppercase tracking-widest text-text-secondary">
-                    <span>{String(projectIndex + 1).padStart(2, "0")}</span>
-                    <span>{plannedItems.length > 0 ? "In progress" : "Completed"}</span>
-                  </div>
+                <header className="border-b border-border-primary p-4 lg:sticky lg:top-28 lg:col-span-4 lg:self-start lg:border-b-0 lg:p-6 xl:col-span-3">
+                  <p className="font-mono text-xs font-medium tracking-widest text-text-secondary">
+                    {String(projectIndex + 1).padStart(2, "0")}
+                  </p>
                   <h3 className="mt-2 [font-family:var(--font-instrument-serif),serif] text-2xl font-medium leading-tight text-text-primary md:text-[30px]">
                     {project.name}
                   </h3>

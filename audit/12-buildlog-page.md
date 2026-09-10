@@ -25,17 +25,12 @@ Legacy Changelog admin/API files remain byte-identical to their locked baseline.
 - Added URL-backed All/In progress/Completed filtering and one-at-a-time shipped
   history disclosures. Planned work remains visible; completed projects preview
   only their latest two shipped updates.
-- Added a compact project directory with anchored navigation, lifecycle state,
-  planned/shipped counts, and active-before-completed organization.
 - Added optional, independently managed GitHub/live project actions with strict
   HTTPS validation and secure external-link behavior.
 - Added responsive 4/8 and 3/9 project layouts, mobile badge stacking, bounded
   copy, and empty per-project handling.
 - Added geometry-matched loading, accessible empty, and focused assertive error
   states.
-- Loading geometry includes mobile-visible totals, filter controls, the full
-  four-project directory, and live-height directory cells to prevent content
-  shift during route transitions.
 - Removed three unsupported placeholder projects from the fallback collection
   and softened unverified performance wording.
 - Added a dedicated admin-managed `buildlog_projects` model rather than forcing
