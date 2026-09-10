@@ -28,6 +28,7 @@ test("Buildlog filtering and shipped disclosures work across themes and widths",
           return {
             overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
             articles: document.querySelectorAll("article").length,
+            directoryLinks: document.querySelectorAll("nav[aria-label='Buildlog project directory'] a").length,
             items: document.querySelectorAll("article li").length,
             duplicateIds: ids.length - new Set(ids).size,
             insecureLinks: externalLinks.filter(
@@ -37,9 +38,20 @@ test("Buildlog filtering and shipped disclosures work across themes and widths",
         });
         assert.equal(initial.overflow, 0, `${theme} ${width}px overflow`);
         assert.ok(initial.articles > 0, `${theme} ${width}px has projects`);
+        assert.equal(initial.directoryLinks, initial.articles, `${theme} ${width}px directory parity`);
         assert.equal(initial.duplicateIds, 0, `${theme} ${width}px duplicate IDs`);
         assert.equal(initial.insecureLinks, 0, `${theme} ${width}px external-link security`);
         assert.deepEqual(errors, [], `${theme} ${width}px console errors`);
+
+        if (theme === "light" && width === 360) {
+          const directoryLink = page.locator("nav[aria-label='Buildlog project directory'] a").nth(1);
+          const target = await directoryLink.getAttribute("href");
+          await directoryLink.click();
+          await page.waitForTimeout(100);
+          assert.ok(target && page.url().endsWith(target), "directory link updates the URL hash");
+          const targetTop = await page.locator(target).evaluate((element) => element.getBoundingClientRect().top);
+          assert.ok(targetTop >= 80 && targetTop <= 180, `directory target offset was ${targetTop}px`);
+        }
 
         let disclosures = page.locator("button[aria-controls^='buildlog-shipped']");
         assert.ok((await disclosures.count()) > 0, `${theme} ${width}px disclosures exist`);

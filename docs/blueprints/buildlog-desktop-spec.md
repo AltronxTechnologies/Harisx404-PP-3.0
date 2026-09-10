@@ -13,8 +13,10 @@ Status: implemented and verified; owner lock pending.
 4. Release toolbar 56px below the hero, with collection description and
    shipped/planned totals.
 5. URL-backed All/In progress/Completed filter rail.
-6. Project regions separated by solid `border-border-primary` rules.
-7. Shared locked CTA 112px below the collection, followed by the shared Footer.
+6. Compact editorial project directory with number, lifecycle state, and update
+   count; each cell anchors to its project ledger.
+7. Project regions separated by solid `border-border-primary` rules.
+8. Shared locked CTA 112px below the collection, followed by the shared Footer.
 
 ## Project Region
 
@@ -32,6 +34,8 @@ Status: implemented and verified; owner lock pending.
 - Projects without planned work preview their latest two shipped items.
 - Optional GitHub and Live project actions appear below version metadata only
   when validated HTTPS links exist.
+- In the All view, active projects precede completed projects while preserving
+  administrator order within each group.
 
 ## Responsive Rules
 

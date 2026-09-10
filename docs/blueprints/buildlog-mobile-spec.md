@@ -11,6 +11,8 @@ Companion: `buildlog-desktop-spec.md`.
 - Toolbar stacks its count below the collection description.
 - Filters use the established horizontally scrollable pill rail; a partial next
   option communicates horizontal continuation on narrow phones.
+- The project directory uses a compact two-column editorial index with no
+  rounded-card treatment or additional accent colors.
 - Project headers use 16px padding; release rows use 16px horizontal and 20px
   vertical padding.
 - Status glyph and copy stay aligned at the top of each row.

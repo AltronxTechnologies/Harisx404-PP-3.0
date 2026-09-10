@@ -13,6 +13,8 @@ test("Buildlog renders the responsive release collection", async () => {
   assert.match(html, /Build\. Ship\./);
   assert.match(html, /Release archive/);
   assert.match(html, /Shipped work and clearly labelled plans/);
+  assert.match(html, /Project directory/);
+  assert.match(html, /Jump directly to a project ledger/);
   assert.match(html, /Show 5 shipped updates/);
   assert.match(html, /aria-expanded="false"/);
   assert.match(html, />GitHub</);
@@ -90,6 +92,8 @@ test("Buildlog schema, seed, links, API, admin form, and cache contract agree", 
   assert.match(collection, /window\.history\.pushState/);
   assert.match(collection, /In progress/);
   assert.match(collection, /Completed/);
+  assert.match(collection, /Buildlog project directory/);
+  assert.match(collection, /scroll-mt-28/);
 });
 
 test("Legacy changelog admin routes redirect to Buildlog", async () => {
