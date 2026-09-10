@@ -1,6 +1,5 @@
-/** Buildlog data — projects/apps with shipped features and upcoming updates.
- *  Edit this file to add releases: `done: true` rows render as checked with a
- *  version/date badge; `done: false` rows are upcoming plans. */
+/** Environment-safe fallback shown until the admin-managed Buildlog migration
+ *  is available. The database is the canonical production source. */
 
 export interface BuildlogItem {
   title: string;
@@ -53,7 +52,7 @@ export const buildlogProjects: BuildlogProject[] = [
       },
       {
         title: "Buildlog redesign",
-        description: "This page — per-project changelogs with shipped and planned work.",
+        description: "Per-project release notes with shipped and planned work.",
         badge: "v2.1",
         done: true,
       },
@@ -74,7 +73,7 @@ export const buildlogProjects: BuildlogProject[] = [
   {
     name: "IntruShield NIDS",
     tagline: "Smart. Secure. Scalable.",
-    info: "Enterprise-grade SOC platform with real-time network intrusion detection built on Suricata 7 and FastAPI.",
+    info: "SOC platform for network intrusion detection built with Suricata 7 and FastAPI.",
     currentVersion: "v1.2",
     items: [
       {
@@ -91,7 +90,7 @@ export const buildlogProjects: BuildlogProject[] = [
       },
       {
         title: "Threat timeline & severity analytics",
-        description: "PostgreSQL-backed analytics with sub-second query paths.",
+        description: "PostgreSQL-backed filtering and severity analytics for alert review.",
         badge: "v1.2",
         done: true,
       },
@@ -174,108 +173,6 @@ export const buildlogProjects: BuildlogProject[] = [
       {
         title: "Web dashboard",
         description: "Move the UI to the browser with a FastAPI backend.",
-        badge: "planned",
-        done: false,
-      },
-    ],
-  },
-  {
-    name: "TaskFlow Workspace",
-    tagline: "Teamwork, in sync.",
-    info: "Collaborative project-management SaaS with kanban boards, live cursors, and team analytics.",
-    currentVersion: "v1.1",
-    items: [
-      {
-        title: "Realtime kanban",
-        description: "Drag-and-drop with presence avatars and live cursors via Supabase channels.",
-        badge: "v1.0",
-        done: true,
-      },
-      {
-        title: "Row-level-security data model",
-        description: "Every workspace, board, and comment isolated per team.",
-        badge: "v1.0",
-        done: true,
-      },
-      {
-        title: "Team analytics dashboard",
-        description: "Burndown, cycle time, and workload heatmaps rendered server-side.",
-        badge: "v1.1",
-        done: true,
-      },
-      {
-        title: "Automations & rules",
-        description: "Trigger actions when cards move, age, or get labeled.",
-        badge: "planned",
-        done: false,
-      },
-      {
-        title: "Native mobile app",
-        description: "Boards on the go with offline-first sync.",
-        badge: "planned",
-        done: false,
-      },
-    ],
-  },
-  {
-    name: "NeuroDoc AI",
-    tagline: "Ask your documents.",
-    info: "RAG-powered document assistant answering questions over private PDFs with cited sources.",
-    currentVersion: "v1.0",
-    items: [
-      {
-        title: "RAG pipeline",
-        description: "Chunking, embeddings, and pgvector similarity search.",
-        badge: "v1.0",
-        done: true,
-      },
-      {
-        title: "Streaming answers with citations",
-        description: "Inline citations deep-link to the exact page of the source PDF.",
-        badge: "v1.0",
-        done: true,
-      },
-      {
-        title: "Per-workspace vector isolation",
-        description: "Usage metering ready for multi-tenant billing.",
-        badge: "v1.0",
-        done: true,
-      },
-      {
-        title: "Multi-format ingestion",
-        description: "DOCX, HTML, and scanned-PDF OCR support.",
-        badge: "planned",
-        done: false,
-      },
-    ],
-  },
-  {
-    name: "VisionForge ML",
-    tagline: "Train. Export. Deploy.",
-    info: "End-to-end machine learning studio for image classification with one-click model export.",
-    currentVersion: "v1.0",
-    items: [
-      {
-        title: "In-browser dataset labeling",
-        description: "Keyboard-first shortcuts with class-balancing hints.",
-        badge: "v1.0",
-        done: true,
-      },
-      {
-        title: "Transfer-learning training runs",
-        description: "MobileNet/ResNet backbones with live loss and accuracy charts.",
-        badge: "v1.0",
-        done: true,
-      },
-      {
-        title: "TFLite & ONNX export",
-        description: "Instant hosted inference endpoint for testing.",
-        badge: "v1.0",
-        done: true,
-      },
-      {
-        title: "Object detection support",
-        description: "Bounding-box labeling and YOLO-family training.",
         badge: "planned",
         done: false,
       },

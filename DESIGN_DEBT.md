@@ -111,8 +111,8 @@ Used **correctly** by: `about/page.tsx:75,128,145,238`, `home/Writings.tsx:104`,
 `home/CaseStudies.tsx:922`, `home/MySiteGrid.tsx:166`, `home/AboutTeaser.tsx:97`.
 
 ### 10 inline page-hero clones (all use `font-normal` + `text-black/80 dark:text-white/70`)
-`app/blog/page.tsx:105-124` · `app/buildlog/page.tsx:30-48` ·
-`app/community-wall/page.tsx:52-70` · `app/contact/page.tsx:47-65` ·
+`app/blog/page.tsx:105-124` · `app/community-wall/page.tsx:52-70` ·
+`app/contact/page.tsx:47-65` ·
 `app/credentials/page.tsx:71-89` · `app/legal/privacy/page.tsx:110-128` ·
 `app/legal/terms/page.tsx:80-98` · `app/links/page.tsx:179-197` ·
 `app/resume/page.tsx:104-122` · `app/test/page.tsx:28-35`

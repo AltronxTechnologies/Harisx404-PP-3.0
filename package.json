@@ -11,6 +11,7 @@
     "test:contact": "node --test tests/contact.integration.test.mjs",
     "test:links": "node --test tests/links.integration.test.mjs",
     "test:credentials": "node --test tests/credentials.integration.test.mjs",
+    "test:buildlog": "node --test tests/buildlog.integration.test.mjs",
     "generate-previews": "npx tsx scripts/generate-link-previews.ts",
     "fix-previews": "npx tsx scripts/fix-failed-previews.ts"
   },

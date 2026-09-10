@@ -10,6 +10,7 @@ const navItems = [
   { name: "Blogs", href: "/admin/blogs", icon: FileText },
   { name: "Projects", href: "/admin/projects", icon: Briefcase },
   { name: "Changelogs", href: "/admin/changelogs", icon: List },
+  { name: "Buildlog", href: "/admin/buildlog", icon: List },
   { name: "Testimonials", href: "/admin/testimonials", icon: Quote },
   { name: "FAQs", href: "/admin/faqs", icon: HelpCircle },
   { name: "Experience", href: "/admin/experience", icon: History },

@@ -1,7 +1,11 @@
+"use client";
+
+import { useId } from "react";
+
 /** Hand-drawn sketch checkbox — reference component: SVG turbulence filter
  *  gives the box a wobbly, pencil-drawn look. */
 export function SketchCheckbox({ checked }: { checked: boolean }) {
-  const filterId = checked ? "sketch-wobble-checked" : "sketch-wobble";
+  const filterId = useId().replaceAll(":", "");
   return (
     <svg viewBox="0 0 24 24" className="mt-[1px] size-[22px] shrink-0" aria-hidden="true">
       <defs>

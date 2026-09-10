@@ -1,119 +1,175 @@
-import { HeroTexture } from "@/app/components/HeroTexture";
-import { CtaSection } from "@/app/components/home/CtaSection";
-import { SketchCheckbox } from "@/app/components/buildlog/SketchCheckbox";
-import { buildlogProjects } from "@/app/data/buildlog";
 import type { Metadata } from "next";
+import Link from "next/link";
+import { GridWrapper } from "@/app/components/GridWrapper";
+import { PaperHeroTexture } from "@/app/components/PaperHeroTexture";
+import { BlogStatePanel } from "@/app/components/blog/BlogStatePanel";
+import { SketchCheckbox } from "@/app/components/buildlog/SketchCheckbox";
+import { CtaSection } from "@/app/components/home/CtaSection";
+import { fetchBuildlogProjects } from "./data";
+
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Buildlog | What I Ship",
   description:
-    "Per-project buildlogs — shipped features, versions, and upcoming updates for the apps and tools Muhammad Haris builds.",
+    "A project-by-project record of shipped features, releases, and carefully scoped next steps from Muhammad Haris.",
 };
 
-export default function BuildlogPage() {
+export default async function BuildlogPage() {
+  const projects = await fetchBuildlogProjects();
+  const shippedCount = projects.reduce(
+    (count, project) => count + project.items.filter((item) => item.done).length,
+    0,
+  );
+  const plannedCount = projects.reduce(
+    (count, project) => count + project.items.filter((item) => !item.done).length,
+    0,
+  );
+
   return (
-    <div className="relative min-w-0 pb-24">
-      {/* Decorative hatched side rails — 12px mobile / 32px desktop */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 left-0 hidden w-3 border-r border-border-primary sm:block lg:w-8 [background-image:repeating-linear-gradient(45deg,rgba(0,0,0,0.04)_0px,rgba(0,0,0,0.04)_1px,transparent_1px,transparent_7px)] dark:[background-image:repeating-linear-gradient(45deg,rgba(255,255,255,0.05)_0px,rgba(255,255,255,0.05)_1px,transparent_1px,transparent_7px)]"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 right-0 hidden w-3 border-l border-border-primary sm:block lg:w-8 [background-image:repeating-linear-gradient(45deg,rgba(0,0,0,0.04)_0px,rgba(0,0,0,0.04)_1px,transparent_1px,transparent_7px)] dark:[background-image:repeating-linear-gradient(45deg,rgba(255,255,255,0.05)_0px,rgba(255,255,255,0.05)_1px,transparent_1px,transparent_7px)]"
-      />
-
-      <HeroTexture />
-
-      {/* Hero — reference structure: mono super-title inside h1 + Instrument
-          Serif headline with shimmering gradient accent word */}
-      <h1 className="relative z-[2] mx-auto mt-24 mb-14 max-w-xl text-balance text-center font-medium text-[46px] tracking-tight [text-shadow:rgba(255,255,255,0.05)_0px_4px_8px,rgba(255,255,255,0.2)_0px_8px_30px] max-sm:px-5 md:mt-28 md:text-6xl">
-        <p className="mb-4 font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
-          The build never stops
-        </p>
-        <span className="inline-block text-text-primary [font-family:var(--font-instrument-serif),serif]">
-          Build. Ship.{" "}
-          <span
-            className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]"
-            style={{
-              maskImage: "linear-gradient(to right, black 70%, transparent 100%)",
-              maskSize: "200% 100%",
-              maskPosition: "left center",
-              maskRepeat: "no-repeat",
-            }}
-          >
-            Evolve.
-          </span>
-        </span>
-      </h1>
-
-      {/* Project regions */}
-      <div className="relative mx-auto w-full max-w-6xl px-4 sm:px-8 lg:px-12">
-        {buildlogProjects.map((project, projectIndex) => (
-          <section
-            key={project.name}
-            className="grid grid-cols-1 border-t border-dashed border-neutral-200 dark:border-neutral-800 lg:grid-cols-12"
-          >
-            {/* Sticky project header */}
-            <div className="p-4 lg:sticky lg:top-32 lg:col-span-3 lg:self-start lg:p-6">
-              <p className="font-mono text-xs font-bold text-text-secondary">
-                {String(projectIndex + 1).padStart(2, "0")}
-              </p>
-              <h2 className="mt-1 font-display text-2xl font-bold leading-snug text-neutral-900 dark:text-neutral-100 md:text-3xl">
-                {project.name}
-              </h2>
-              <p className="font-display text-2xl font-bold leading-snug text-neutral-400 dark:text-[#777B84] md:text-3xl">
-                {project.tagline}
-              </p>
-              <p className="mt-3 max-w-[26ch] text-[13px] leading-[1.6] text-text-secondary">
-                {project.info}
-              </p>
-              <span className="mt-3 inline-block shrink-0 whitespace-nowrap rounded-full border border-border-primary bg-black/5 px-3 py-1 font-mono text-[10px] text-neutral-600 dark:bg-neutral-900 dark:text-neutral-400">
-                current {project.currentVersion}
+    <div className="relative mt-14 pb-24">
+      <GridWrapper>
+        <div className="relative px-4 xl:px-0">
+          <PaperHeroTexture className="-inset-x-2 bottom-0 top-[-128px] sm:-inset-x-3 sm:top-[-144px] md:top-[-176px] lg:inset-x-0" />
+          <header className="relative mx-auto max-w-3xl text-center">
+            <p className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
+              The build never stops
+            </p>
+            <h1 className="heading-glow mx-auto mt-4 max-w-xl text-balance [font-family:var(--font-instrument-serif),serif] text-[46px] font-medium leading-none tracking-tight text-text-primary md:text-[56px] md:tracking-[-1.5px]">
+              Build. Ship.{" "}
+              <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
+                Evolve.
               </span>
-            </div>
+            </h1>
+            <p className="mx-auto mt-4 max-w-2xl text-pretty text-[15px] leading-6 text-text-secondary">
+              A transparent record of what I shipped, what changed, and what I am
+              building next across active projects.
+            </p>
+          </header>
+        </div>
+      </GridWrapper>
 
-            {/* Checklist rows */}
-            <div className="lg:col-span-9 lg:border-l lg:border-dashed lg:border-neutral-200 lg:dark:border-neutral-800">
-              {project.items.map((item) => (
-                <div
-                  key={item.title}
-                  className="group/item relative border-b border-neutral-200/50 dark:border-neutral-800/50"
+      <section aria-labelledby="buildlog-collection-heading" className="mt-14 px-2 sm:px-4">
+        <div className="mb-6 flex flex-col gap-3 border-y border-border-primary px-2 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-4">
+          <div>
+            <h2
+              id="buildlog-collection-heading"
+              className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary"
+            >
+              Release archive
+            </h2>
+            <p className="mt-1.5 text-sm text-text-secondary">
+              Shipped work and clearly labelled plans, organized by project.
+            </p>
+          </div>
+          {projects.length > 0 && (
+            <p className="font-mono text-[10px] uppercase tracking-widest text-text-secondary">
+              {String(shippedCount).padStart(2, "0")} shipped ·{" "}
+              {String(plannedCount).padStart(2, "0")} planned
+            </p>
+          )}
+        </div>
+
+        {projects.length > 0 ? (
+          <div className="border-b border-border-primary">
+            {projects.map((project, projectIndex) => {
+              const shipped = project.items.filter((item) => item.done).length;
+              return (
+                <article
+                  key={project.id}
+                  className="grid min-w-0 grid-cols-1 border-t border-border-primary lg:grid-cols-12"
                 >
-                  <div
-                    aria-hidden="true"
-                    className="absolute inset-0 bg-neutral-900/[0.015] opacity-0 transition-opacity duration-300 group-hover/item:opacity-100 dark:bg-white/[0.015]"
-                  />
-                  <div className="relative flex items-start gap-4 px-4 py-5 md:px-6">
-                    <SketchCheckbox checked={item.done} />
-                    <div className="min-w-0 flex-1 space-y-1.5">
-                      <h3
-                        className={`text-base font-medium leading-[22px] tracking-[-0.01em] transition-colors duration-300 ${
-                          item.done
-                            ? "text-neutral-900 dark:text-neutral-100"
-                            : "text-neutral-500 group-hover/item:text-neutral-800 dark:group-hover/item:text-neutral-200"
-                        }`}
-                      >
-                        {item.title}
-                      </h3>
-                      {item.description && (
-                        <p className="text-[13px] leading-[1.6] text-text-secondary">{item.description}</p>
-                      )}
+                  <header className="border-b border-border-primary p-4 lg:sticky lg:top-28 lg:col-span-4 lg:self-start lg:border-b-0 lg:p-6 xl:col-span-3">
+                    <p className="font-mono text-xs font-medium tracking-widest text-text-secondary">
+                      {String(projectIndex + 1).padStart(2, "0")}
+                    </p>
+                    <h3 className="mt-2 [font-family:var(--font-instrument-serif),serif] text-2xl font-medium leading-tight text-text-primary md:text-[30px]">
+                      {project.name}
+                    </h3>
+                    <p className="mt-1 [font-family:var(--font-instrument-serif),serif] text-xl font-medium leading-tight text-text-secondary md:text-2xl">
+                      {project.tagline}
+                    </p>
+                    <p className="mt-4 max-w-[34ch] text-sm leading-6 text-text-secondary">
+                      {project.info}
+                    </p>
+                    <div className="mt-4 flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-text-secondary">
+                      <span className="rounded-full border border-border-primary px-3 py-1.5">
+                        {project.current_version}
+                      </span>
+                      <span>{shipped}/{project.items.length} shipped</span>
                     </div>
-                    <span className="shrink-0 whitespace-nowrap rounded-full border border-border-primary bg-black/5 px-3 py-1 font-mono text-[10px] text-neutral-600 dark:bg-neutral-900 dark:text-neutral-400">
-                      {item.badge}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        ))}
-        <div aria-hidden="true" className="border-t border-dashed border-neutral-200 dark:border-neutral-800" />
-      </div>
+                  </header>
 
-      {/* Contact CTA — shared section */}
-      <div className="relative mt-16">
+                  <ol className="min-w-0 lg:col-span-8 lg:border-l lg:border-border-primary xl:col-span-9">
+                    {project.items.length > 0 ? (
+                      project.items.map((item) => (
+                        <li
+                          key={item.id}
+                          className="group/item relative border-b border-border-primary last:border-b-0 lg:last:border-b"
+                        >
+                          <div
+                            aria-hidden="true"
+                            className="absolute inset-0 bg-neutral-900/[0.025] opacity-0 transition-opacity duration-200 group-hover/item:opacity-100 dark:bg-white/[0.025] motion-reduce:transition-none"
+                          />
+                          <div className="relative flex items-start gap-3 px-4 py-5 sm:gap-4 sm:px-6">
+                            <SketchCheckbox checked={item.done} />
+                            <div className="flex min-w-0 flex-1 flex-col gap-3 min-[430px]:flex-row min-[430px]:items-start min-[430px]:justify-between">
+                              <div className="min-w-0">
+                                <p
+                                  className={`text-base font-medium leading-[22px] tracking-[-0.01em] ${
+                                    item.done ? "text-text-primary" : "text-text-secondary"
+                                  }`}
+                                >
+                                  <span className="sr-only">{item.done ? "Shipped" : "Planned"}: </span>
+                                  {item.title}
+                                </p>
+                                {item.description && (
+                                  <p className="mt-1.5 max-w-2xl text-[13px] leading-[1.6] text-text-secondary">
+                                    {item.description}
+                                  </p>
+                                )}
+                              </div>
+                              <span className="w-fit shrink-0 whitespace-nowrap rounded-full border border-border-primary px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-text-secondary">
+                                {item.badge}
+                              </span>
+                            </div>
+                          </div>
+                        </li>
+                      ))
+                    ) : (
+                      <li className="px-6 py-10 text-sm text-text-secondary">
+                        No release items have been published for this project yet.
+                      </li>
+                    )}
+                  </ol>
+                </article>
+              );
+            })}
+          </div>
+        ) : (
+          <BlogStatePanel
+            kicker="No entries yet"
+            title={
+              <>
+                The next release notes are being{" "}
+                <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
+                  prepared.
+                </span>
+              </>
+            }
+            description="Published project updates will appear here as they are added through the admin panel."
+          >
+            <Link
+              href="/projects"
+              className="inline-flex min-h-9 items-center rounded-full border border-border-primary px-5 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25"
+            >
+              View projects
+            </Link>
+          </BlogStatePanel>
+        )}
+      </section>
+
+      <div className="mt-28">
         <CtaSection />
       </div>
     </div>
