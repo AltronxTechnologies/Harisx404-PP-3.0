@@ -45,6 +45,10 @@ Legacy Changelog admin/API files remain byte-identical to their locked baseline.
 | TypeScript | Passed, 0 errors |
 | Targeted ESLint | Passed, 0 errors/warnings |
 | Buildlog integration | 5/5 passed |
+| Clean PostgreSQL 16 migration test | Passed |
+| Seed rerun | Passed; inserted 0 duplicate rows |
+| Published-only view and grants | Passed |
+| `updated_at` trigger | Passed |
 | Browser matrix | 14/14 light/dark combinations passed |
 | Widths | 320, 360, 375, 390, 768, 1024, 1440px |
 | Document overflow | 0px in every browser case |
@@ -72,7 +76,8 @@ Apply in this order:
 1. `migrations/2026_buildlog_projects.sql`
 2. `migrations/2026_buildlog_seed.sql`
 
-The connected Supabase project currently returns 404 for `buildlog_projects`, so
+The migrations and `tests/buildlog.database.test.sql` pass against a clean
+PostgreSQL 16 database. The connected Supabase project currently returns 404 for `buildlog_projects`, so
 the public page intentionally uses its synchronized static fallback. The new
 admin page becomes operational after migration. No migration success is claimed
 until the owner applies it in Supabase and an authenticated CRUD cycle is tested.
