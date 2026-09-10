@@ -13,6 +13,8 @@ export type BuildlogProject = {
   tagline: string;
   info: string;
   current_version: string;
+  github_url: string | null;
+  live_url: string | null;
   display_order: number;
   items: BuildlogItem[];
 };

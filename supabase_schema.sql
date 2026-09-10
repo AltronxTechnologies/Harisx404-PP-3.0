@@ -371,6 +371,8 @@ CREATE TABLE IF NOT EXISTS public.buildlog_projects (
   tagline text NOT NULL,
   info text NOT NULL,
   current_version text NOT NULL,
+  github_url text,
+  live_url text,
   items jsonb NOT NULL DEFAULT '[]'::jsonb,
   display_order integer NOT NULL DEFAULT 0,
   status text NOT NULL DEFAULT 'draft',
@@ -383,6 +385,10 @@ CREATE TABLE IF NOT EXISTS public.buildlog_projects (
   CONSTRAINT buildlog_version_length CHECK (char_length(current_version) BETWEEN 1 AND 40),
   CONSTRAINT buildlog_display_order CHECK (display_order >= 0),
   CONSTRAINT buildlog_status CHECK (status IN ('draft', 'published', 'archived')),
+  CONSTRAINT buildlog_https_urls CHECK (
+    (github_url IS NULL OR github_url ~ '^https://') AND
+    (live_url IS NULL OR live_url ~ '^https://')
+  ),
   CONSTRAINT buildlog_items_array CHECK (
     jsonb_typeof(items) = 'array' AND jsonb_array_length(items) BETWEEN 1 AND 50
   )
@@ -400,7 +406,7 @@ DROP VIEW IF EXISTS public.public_buildlog_projects;
 CREATE VIEW public.public_buildlog_projects
 WITH (security_barrier = true)
 AS
-SELECT id, name, tagline, info, current_version, display_order, items
+SELECT id, name, tagline, info, current_version, github_url, live_url, display_order, items
 FROM public.buildlog_projects
 WHERE status = 'published'
 ORDER BY display_order ASC, created_at DESC;

@@ -16,6 +16,8 @@ export default async function EditBuildlogProjectPage({ params }: { params: Prom
     tagline: data.tagline,
     info: data.info,
     current_version: data.current_version,
+    github_url: data.github_url || null,
+    live_url: data.live_url || null,
     display_order: data.display_order,
     status: data.status,
     is_demo: data.is_demo,

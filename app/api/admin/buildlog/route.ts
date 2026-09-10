@@ -15,11 +15,19 @@ const itemSchema = z.object({
   display_order: z.number().int().min(0).max(10000),
 }).strict();
 
+const optionalHttpsUrl = z.union([
+  z.string().trim().url().refine((value) => new URL(value).protocol === "https:", "Use an HTTPS URL."),
+  z.literal(""),
+  z.null(),
+]).optional();
+
 const projectSchema = z.object({
   name: z.string().trim().min(2).max(100),
   tagline: z.string().trim().min(2).max(120),
   info: z.string().trim().min(10).max(360),
   current_version: z.string().trim().min(1).max(40),
+  github_url: optionalHttpsUrl,
+  live_url: optionalHttpsUrl,
   display_order: z.number().int().min(0).max(10000),
   status: z.enum(["draft", "published", "archived"]),
   is_demo: z.boolean().default(false),
@@ -42,6 +50,8 @@ function parseProject(value: unknown) {
   return {
     data: {
       ...parsed.data,
+      github_url: parsed.data.github_url || null,
+      live_url: parsed.data.live_url || null,
       items: parsed.data.items.map((item) => ({
         ...item,
         id: item.id || randomUUID(),
@@ -72,7 +82,7 @@ export async function GET(request: Request) {
     const db = await createSupabaseAdminClient();
     const { data, error } = await db
       .from("buildlog_projects")
-      .select("id, name, tagline, info, current_version, display_order, status, is_demo, items")
+      .select("id, name, tagline, info, current_version, github_url, live_url, display_order, status, is_demo, items")
       .order("display_order", { ascending: true })
       .limit(limit);
     if (error) throw error;

@@ -3,7 +3,7 @@
 - Date: 2026-09-10
 - Route: `/buildlog`
 - Status: implementation and local verification complete; owner lock pending
-- Deployment dependency: apply the two Buildlog Supabase migrations
+- Deployment dependency: apply the three Buildlog Supabase migrations
 
 ## Scope
 
@@ -22,6 +22,11 @@ Legacy Changelog admin/API files remain byte-identical to their locked baseline.
 - Removed duplicate Buildlog-local rails; the global frame is the only frame.
 - Added release totals, stable project/item keys, unique SVG filter IDs, and
   explicit per-item Shipped/Planned screen-reader text.
+- Added URL-backed All/In progress/Completed filtering and one-at-a-time shipped
+  history disclosures. Planned work remains visible; completed projects preview
+  only their latest two shipped updates.
+- Added optional, independently managed GitHub/live project actions with strict
+  HTTPS validation and secure external-link behavior.
 - Added responsive 4/8 and 3/9 project layouts, mobile badge stacking, bounded
   copy, and empty per-project handling.
 - Added geometry-matched loading, accessible empty, and focused assertive error
@@ -50,6 +55,12 @@ Legacy Changelog admin/API files remain byte-identical to their locked baseline.
 | Published-only view and grants | Passed |
 | `updated_at` trigger | Passed |
 | Browser matrix | 14/14 light/dark combinations passed |
+| Filter/disclosure UX matrix | 14/14 combinations passed |
+| Checked-in browser interaction test | `tests/buildlog.browser.test.mjs` |
+| Link migration rerun | Passed; idempotent |
+| URL state and browser Back | Passed |
+| One open shipped history | Passed |
+| Secure external project links | Passed |
 | Widths | 320, 360, 375, 390, 768, 1024, 1440px |
 | Document overflow | 0px in every browser case |
 | Badge overflow | 0 in every browser case |
@@ -75,6 +86,7 @@ Apply in this order:
 
 1. `migrations/2026_buildlog_projects.sql`
 2. `migrations/2026_buildlog_seed.sql`
+3. `migrations/2026_buildlog_zz_project_links.sql`
 
 The migrations and `tests/buildlog.database.test.sql` pass against a clean
 PostgreSQL 16 database. The connected Supabase project currently returns 404 for `buildlog_projects`, so

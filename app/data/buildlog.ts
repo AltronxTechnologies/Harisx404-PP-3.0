@@ -16,6 +16,8 @@ export interface BuildlogProject {
   /** One-liner about what the project is. */
   info: string;
   currentVersion: string;
+  githubUrl?: string;
+  liveUrl?: string;
   items: BuildlogItem[];
 }
 
@@ -25,6 +27,8 @@ export const buildlogProjects: BuildlogProject[] = [
     tagline: "Portfolio & blog.",
     info: "Next.js 15 portfolio with Supabase, MDX articles, live stats, and an admin dashboard.",
     currentVersion: "v2.1",
+    githubUrl: "https://github.com/harisx404/harisx404-portfolio",
+    liveUrl: "https://harisx404.vercel.app",
     items: [
       {
         title: "Blog details reading experience",
@@ -113,6 +117,7 @@ export const buildlogProjects: BuildlogProject[] = [
     tagline: "Care, connected.",
     info: "Hospital management SaaS on the MERN stack with AI assistance and real-time updates.",
     currentVersion: "v1.1",
+    githubUrl: "https://github.com/harisx404/MedicaLink-HMS",
     items: [
       {
         title: "Multi-role portals",

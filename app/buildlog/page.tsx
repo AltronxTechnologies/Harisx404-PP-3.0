@@ -3,9 +3,9 @@ import Link from "next/link";
 import { GridWrapper } from "@/app/components/GridWrapper";
 import { PaperHeroTexture } from "@/app/components/PaperHeroTexture";
 import { BlogStatePanel } from "@/app/components/blog/BlogStatePanel";
-import { SketchCheckbox } from "@/app/components/buildlog/SketchCheckbox";
 import { CtaSection } from "@/app/components/home/CtaSection";
 import { fetchBuildlogProjects } from "./data";
+import { BuildlogCollection } from "./BuildlogCollection";
 
 export const revalidate = 3600;
 
@@ -15,8 +15,19 @@ export const metadata: Metadata = {
     "A project-by-project record of shipped features, releases, and carefully scoped next steps from Muhammad Haris.",
 };
 
-export default async function BuildlogPage() {
+export default async function BuildlogPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ filter?: string; open?: string }>;
+}) {
   const projects = await fetchBuildlogProjects();
+  const query = await searchParams;
+  const initialFilter = query.filter === "in-progress" || query.filter === "completed"
+    ? query.filter
+    : "all";
+  const initialOpen = query.open && projects.some((project) => project.id === query.open)
+    ? query.open
+    : null;
   const shippedCount = projects.reduce(
     (count, project) => count + project.items.filter((item) => item.done).length,
     0,
@@ -71,81 +82,11 @@ export default async function BuildlogPage() {
         </div>
 
         {projects.length > 0 ? (
-          <div className="border-b border-border-primary">
-            {projects.map((project, projectIndex) => {
-              const shipped = project.items.filter((item) => item.done).length;
-              return (
-                <article
-                  key={project.id}
-                  className="grid min-w-0 grid-cols-1 border-t border-border-primary lg:grid-cols-12"
-                >
-                  <header className="border-b border-border-primary p-4 lg:sticky lg:top-28 lg:col-span-4 lg:self-start lg:border-b-0 lg:p-6 xl:col-span-3">
-                    <p className="font-mono text-xs font-medium tracking-widest text-text-secondary">
-                      {String(projectIndex + 1).padStart(2, "0")}
-                    </p>
-                    <h3 className="mt-2 [font-family:var(--font-instrument-serif),serif] text-2xl font-medium leading-tight text-text-primary md:text-[30px]">
-                      {project.name}
-                    </h3>
-                    <p className="mt-1 [font-family:var(--font-instrument-serif),serif] text-xl font-medium leading-tight text-text-secondary md:text-2xl">
-                      {project.tagline}
-                    </p>
-                    <p className="mt-4 max-w-[34ch] text-sm leading-6 text-text-secondary">
-                      {project.info}
-                    </p>
-                    <div className="mt-4 flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-text-secondary">
-                      <span className="rounded-full border border-border-primary px-3 py-1.5">
-                        {project.current_version}
-                      </span>
-                      <span>{shipped}/{project.items.length} shipped</span>
-                    </div>
-                  </header>
-
-                  <ol className="min-w-0 lg:col-span-8 lg:border-l lg:border-border-primary xl:col-span-9">
-                    {project.items.length > 0 ? (
-                      project.items.map((item) => (
-                        <li
-                          key={item.id}
-                          className="group/item relative border-b border-border-primary last:border-b-0 lg:last:border-b"
-                        >
-                          <div
-                            aria-hidden="true"
-                            className="absolute inset-0 bg-neutral-900/[0.025] opacity-0 transition-opacity duration-200 group-hover/item:opacity-100 dark:bg-white/[0.025] motion-reduce:transition-none"
-                          />
-                          <div className="relative flex items-start gap-3 px-4 py-5 sm:gap-4 sm:px-6">
-                            <SketchCheckbox checked={item.done} />
-                            <div className="flex min-w-0 flex-1 flex-col gap-3 min-[430px]:flex-row min-[430px]:items-start min-[430px]:justify-between">
-                              <div className="min-w-0">
-                                <p
-                                  className={`text-base font-medium leading-[22px] tracking-[-0.01em] ${
-                                    item.done ? "text-text-primary" : "text-text-secondary"
-                                  }`}
-                                >
-                                  <span className="sr-only">{item.done ? "Shipped" : "Planned"}: </span>
-                                  {item.title}
-                                </p>
-                                {item.description && (
-                                  <p className="mt-1.5 max-w-2xl text-[13px] leading-[1.6] text-text-secondary">
-                                    {item.description}
-                                  </p>
-                                )}
-                              </div>
-                              <span className="w-fit shrink-0 whitespace-nowrap rounded-full border border-border-primary px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-text-secondary">
-                                {item.badge}
-                              </span>
-                            </div>
-                          </div>
-                        </li>
-                      ))
-                    ) : (
-                      <li className="px-6 py-10 text-sm text-text-secondary">
-                        No release items have been published for this project yet.
-                      </li>
-                    )}
-                  </ol>
-                </article>
-              );
-            })}
-          </div>
+          <BuildlogCollection
+            projects={projects}
+            initialFilter={initialFilter}
+            initialOpen={initialOpen}
+          />
         ) : (
           <BlogStatePanel
             kicker="No entries yet"

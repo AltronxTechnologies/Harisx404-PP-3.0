@@ -6,6 +6,8 @@ DECLARE
   public_count integer;
   original_updated_at timestamptz;
   changed_updated_at timestamptz;
+  website_github_url text;
+  website_live_url text;
 BEGIN
   SELECT count(*) INTO project_count FROM public.buildlog_projects;
   IF project_count <> 4 THEN
@@ -25,6 +27,15 @@ BEGIN
   END IF;
   IF NOT has_table_privilege('anon', 'public.public_buildlog_projects', 'SELECT') THEN
     RAISE EXCEPTION 'anon must be able to read the restricted public view';
+  END IF;
+
+  SELECT github_url, live_url
+  INTO website_github_url, website_live_url
+  FROM public.public_buildlog_projects
+  WHERE name = 'This Website';
+  IF website_github_url IS DISTINCT FROM 'https://github.com/harisx404/harisx404-portfolio'
+     OR website_live_url IS DISTINCT FROM 'https://harisx404.vercel.app' THEN
+    RAISE EXCEPTION 'verified website links were not seeded correctly';
   END IF;
 
   INSERT INTO public.buildlog_projects (

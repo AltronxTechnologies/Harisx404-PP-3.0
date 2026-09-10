@@ -17,11 +17,22 @@ const itemSchema = z.object({
   display_order: z.number(),
 });
 
+const optionalHttpsUrl = z.string().trim().refine((value) => {
+  if (!value) return true;
+  try {
+    return new URL(value).protocol === "https:";
+  } catch {
+    return false;
+  }
+}, "Enter a valid HTTPS URL.");
+
 const formSchema = z.object({
   name: z.string().trim().min(2, "Project name is required.").max(100),
   tagline: z.string().trim().min(2, "Tagline is required.").max(120),
   info: z.string().trim().min(10, "Add a short project summary.").max(360),
   current_version: z.string().trim().min(1, "Version is required.").max(40),
+  github_url: optionalHttpsUrl,
+  live_url: optionalHttpsUrl,
   display_order: z.coerce.number().int().min(0).max(10000),
   status: z.enum(["draft", "published", "archived"]),
   is_demo: z.boolean(),
@@ -55,6 +66,8 @@ export function BuildlogForm({ initialData }: { initialData?: BuildlogProjectAdm
     defaultValues: initialData
       ? {
           ...initialData,
+          github_url: initialData.github_url || "",
+          live_url: initialData.live_url || "",
           items: initialData.items.map((item) => ({
             ...item,
             description: item.description || "",
@@ -65,6 +78,8 @@ export function BuildlogForm({ initialData }: { initialData?: BuildlogProjectAdm
           tagline: "",
           info: "",
           current_version: "v1.0",
+          github_url: "",
+          live_url: "",
           display_order: 0,
           status: "draft",
           is_demo: false,
@@ -82,10 +97,16 @@ export function BuildlogForm({ initialData }: { initialData?: BuildlogProjectAdm
         description: item.description || null,
         display_order: index,
       }));
+      const project = {
+        ...values,
+        github_url: values.github_url || null,
+        live_url: values.live_url || null,
+        items,
+      };
       const response = await fetch("/api/admin/buildlog", {
         method: initialData?.id ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(initialData?.id ? { id: initialData.id, ...values, items } : { ...values, items }),
+        body: JSON.stringify(initialData?.id ? { id: initialData.id, ...project } : project),
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Failed to save Buildlog project.");
@@ -124,6 +145,21 @@ export function BuildlogForm({ initialData }: { initialData?: BuildlogProjectAdm
         <textarea {...register("info")} rows={3} maxLength={360} className={`${inputClass} resize-y`} />
         {errors.info && <span role="alert" className="mt-1.5 block text-xs text-red-500">{errors.info.message}</span>}
       </label>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        <label className="text-sm font-medium">
+          GitHub repository URL
+          <input type="url" {...register("github_url")} className={inputClass} placeholder="https://github.com/username/project" />
+          <span className="mt-1.5 block text-xs font-normal text-ink-secondary">Optional. Leave blank for private or unavailable repositories.</span>
+          {errors.github_url && <span role="alert" className="mt-1.5 block text-xs text-red-500">{errors.github_url.message}</span>}
+        </label>
+        <label className="text-sm font-medium">
+          Live project URL
+          <input type="url" {...register("live_url")} className={inputClass} placeholder="https://project.example.com" />
+          <span className="mt-1.5 block text-xs font-normal text-ink-secondary">Optional. Displayed only when a deployed project is available.</span>
+          {errors.live_url && <span role="alert" className="mt-1.5 block text-xs text-red-500">{errors.live_url.message}</span>}
+        </label>
+      </div>
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <label className="text-sm font-medium">
