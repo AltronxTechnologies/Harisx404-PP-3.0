@@ -37,7 +37,7 @@ export default function BuildlogLoading() {
               <div className="lg:col-span-8 lg:border-l lg:border-border-primary xl:col-span-9">
                 {[0, 1, 2].map((item) => (
                   <div key={item} className="flex gap-4 border-b border-border-primary px-4 py-5 sm:px-6">
-                    <div className={`size-[22px] shrink-0 rounded bg-border-primary/35 ${pulse}`} />
+                    <div className={`size-5 shrink-0 rounded-md bg-border-primary/35 ${pulse}`} />
                     <div className="flex-1 space-y-2">
                       <div className={`h-4 w-2/3 rounded bg-border-primary/40 ${pulse}`} />
                       <div className={`h-3 w-4/5 rounded bg-border-primary/25 ${pulse}`} />

@@ -22,8 +22,10 @@ test("Buildlog renders the responsive release collection", async () => {
 });
 
 test("Buildlog source has valid hero semantics and explicit route states", async () => {
-  const [page, loading, error] = await Promise.all([
+  const [page, collection, mark, loading, error] = await Promise.all([
     readFile(new URL("../app/buildlog/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/buildlog/BuildlogCollection.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/buildlog/SketchCheckbox.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/buildlog/loading.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/buildlog/error.tsx", import.meta.url), "utf8"),
   ]);
@@ -32,6 +34,14 @@ test("Buildlog source has valid hero semantics and explicit route states", async
   assert.match(page, /PaperHeroTexture/);
   assert.match(page, /border-border-primary/);
   assert.match(page, /projects\.length > 0/);
+  assert.ok(
+    collection.indexOf("aria-controls={shippedRegionId}") <
+      collection.indexOf("<div id={shippedRegionId}>")
+  );
+  assert.match(collection, /data-project-links/);
+  assert.match(collection, /col-span-2/);
+  assert.doesNotMatch(mark, /feTurbulence|feDisplacementMap/);
+  assert.match(mark, /fill-text-primary/);
   assert.match(loading, /Loading Buildlog/);
   assert.match(error, /role="alert"/);
   assert.match(error, /headingRef\.current\?\.focus/);

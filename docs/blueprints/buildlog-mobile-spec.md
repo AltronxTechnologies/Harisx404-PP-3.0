@@ -13,10 +13,13 @@ Companion: `buildlog-desktop-spec.md`.
   option communicates horizontal continuation on narrow phones.
 - Project headers use 16px padding; release rows use 16px horizontal and 20px
   vertical padding.
-- Status glyph and copy stay aligned at the top of each row.
+- Crisp shipped/planned status marks and copy stay aligned at the top of each row.
 - Badges stack below release copy under 430px and retain content width.
 - Optional GitHub/live actions wrap below project metadata without overflow.
+- Two actions remain equal-width; one action fills the bounded row; no empty
+  placeholder is reserved when links are unavailable.
 - Planned rows remain visible; shipped rows use one full-width disclosure.
+- The same disclosure stays above expanded shipped rows in both states.
 - Project sections remain one column; sticky behavior starts only at `lg`.
 
 ## Verified Behavior

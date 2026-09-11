@@ -20,13 +20,16 @@ Legacy Changelog admin/API files remain byte-identical to their locked baseline.
 - Reused `GridWrapper`, `PaperHeroTexture`, type scales, color tokens, border
   language, spacing, CTA placement, and responsive hierarchy from locked pages.
 - Removed duplicate Buildlog-local rails; the global frame is the only frame.
-- Added release totals, stable project/item keys, unique SVG filter IDs, and
+- Added release totals, stable project/item keys, collision-free IDs, and
   explicit per-item Shipped/Planned screen-reader text.
 - Added URL-backed All/In progress/Completed filtering and one-at-a-time shipped
   history disclosures. Planned work remains visible; completed projects preview
   only their latest two shipped updates.
 - Added optional, independently managed GitHub/live project actions with strict
   HTTPS validation and secure external-link behavior.
+- Kept one stable shipped-history control above its content in both states,
+  replaced sketch filters with crisp 20px status marks, and formalized optional
+  links as two equal columns, one full-span column, or no rendered container.
 - Added responsive 4/8 and 3/9 project layouts, mobile badge stacking, bounded
   copy, and empty per-project handling.
 - Added geometry-matched loading, accessible empty, and focused assertive error
@@ -61,10 +64,12 @@ Legacy Changelog admin/API files remain byte-identical to their locked baseline.
 | URL state and browser Back | Passed |
 | One open shipped history | Passed |
 | Secure external project links | Passed |
+| Stable open/close position | Passed at all 14 viewport/theme combinations |
+| Optional project-link geometry | Two equal, one full-span, none omitted |
 | Widths | 320, 360, 375, 390, 768, 1024, 1440px |
 | Document overflow | 0px in every browser case |
 | Badge overflow | 0 in every browser case |
-| Duplicate SVG filter IDs | 0 |
+| Duplicate element IDs | 0 |
 | Broken images | 0 |
 | Buildlog console/page errors | 0 in normal-motion matrix |
 | Secondary-text contrast | 5.88:1 light, 7.51:1 dark |

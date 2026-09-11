@@ -33,20 +33,70 @@ test("Buildlog filtering and shipped disclosures work across themes and widths",
             insecureLinks: externalLinks.filter(
               (link) => link.getAttribute("rel") !== "noopener noreferrer",
             ).length,
+            invalidLinkLayouts: [...document.querySelectorAll("[data-project-links]")].filter(
+              (group) => {
+                const links = [...group.querySelectorAll("a")];
+                if (links.length === 1) {
+                  return Math.abs(links[0].getBoundingClientRect().width - group.getBoundingClientRect().width) > 1;
+                }
+                return links.length === 2 && Math.abs(
+                  links[0].getBoundingClientRect().width - links[1].getBoundingClientRect().width,
+                ) > 1;
+              },
+            ).length,
+            emptyLinkContainers: [...document.querySelectorAll("article")].filter(
+              (article) =>
+                article.querySelectorAll("a[target='_blank']").length === 0 &&
+                article.querySelector("[data-project-links]"),
+            ).length,
           };
         });
         assert.equal(initial.overflow, 0, `${theme} ${width}px overflow`);
         assert.ok(initial.articles > 0, `${theme} ${width}px has projects`);
         assert.equal(initial.duplicateIds, 0, `${theme} ${width}px duplicate IDs`);
         assert.equal(initial.insecureLinks, 0, `${theme} ${width}px external-link security`);
+        assert.equal(initial.invalidLinkLayouts, 0, `${theme} ${width}px project-link layout`);
+        assert.equal(initial.emptyLinkContainers, 0, `${theme} ${width}px empty project-link containers`);
         assert.deepEqual(errors, [], `${theme} ${width}px console errors`);
 
         let disclosures = page.locator("button[aria-controls^='buildlog-shipped']");
         assert.ok((await disclosures.count()) > 0, `${theme} ${width}px disclosures exist`);
-        await disclosures.nth(0).click();
+        const firstDisclosure = disclosures.nth(0);
+        const disclosureTop = await firstDisclosure.evaluate(
+          (element) => element.getBoundingClientRect().top + window.scrollY,
+        );
+        const controlledId = await firstDisclosure.getAttribute("aria-controls");
+        await firstDisclosure.click();
         await page.waitForTimeout(200);
         assert.equal(await page.locator("button[aria-expanded='true']").count(), 1);
         assert.ok((await page.locator("article li").count()) > initial.items);
+        assert.equal(
+          await firstDisclosure.evaluate(
+            (element) => element.getBoundingClientRect().top + window.scrollY,
+          ),
+          disclosureTop,
+          `${theme} ${width}px disclosure position remains stable`,
+        );
+        assert.ok(controlledId);
+        const disclosureBottom = await firstDisclosure.evaluate(
+          (element) => element.getBoundingClientRect().bottom + window.scrollY,
+        );
+        const shippedTop = await page.locator(`#${controlledId}`).evaluate(
+          (element) => element.getBoundingClientRect().top + window.scrollY,
+        );
+        assert.ok(shippedTop >= disclosureBottom - 1, `${theme} ${width}px shipped rows open below control`);
+        await firstDisclosure.click();
+        await page.waitForTimeout(200);
+        assert.equal(await firstDisclosure.getAttribute("aria-expanded"), "false");
+        assert.equal(
+          await firstDisclosure.evaluate(
+            (element) => element.getBoundingClientRect().top + window.scrollY,
+          ),
+          disclosureTop,
+          `${theme} ${width}px close control position remains stable`,
+        );
+        await firstDisclosure.click();
+        await page.waitForTimeout(200);
 
         if ((await disclosures.count()) > 1) {
           disclosures = page.locator("button[aria-controls^='buildlog-shipped']");

@@ -148,6 +148,7 @@ export function BuildlogCollection({
             const visibleShipped = expanded ? shippedItems : shippedPreview;
             const hiddenShippedCount = shippedItems.length - visibleShipped.length;
             const shippedRegionId = `buildlog-shipped-${project.id}`;
+            const hasBothProjectLinks = Boolean(project.github_url && project.live_url);
 
             return (
               <article
@@ -174,14 +175,17 @@ export function BuildlogCollection({
                     <span>{shippedItems.length}/{project.items.length} shipped</span>
                   </div>
                   {(project.github_url || project.live_url) && (
-                    <div className="mt-4 flex flex-wrap gap-2">
+                    <div
+                      data-project-links
+                      className="mt-4 grid w-full max-w-sm grid-cols-2 gap-2"
+                    >
                       {project.github_url && (
                         <a
                           href={project.github_url}
                           target="_blank"
                           rel="noopener noreferrer"
                           aria-label={`View ${project.name} source code on GitHub`}
-                          className="inline-flex min-h-9 items-center gap-2 rounded-full border border-border-primary px-3.5 font-mono text-[10px] uppercase tracking-wider text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25"
+                          className={`inline-flex min-h-9 min-w-0 items-center justify-center gap-2 rounded-full border border-border-primary px-3 font-mono text-[10px] uppercase tracking-wider text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25 ${hasBothProjectLinks ? "" : "col-span-2"}`}
                         >
                           <BrandGlyph name="github" className="size-3.5" /> GitHub
                         </a>
@@ -192,7 +196,7 @@ export function BuildlogCollection({
                           target="_blank"
                           rel="noopener noreferrer"
                           aria-label={`Open live ${project.name} project`}
-                          className="inline-flex min-h-9 items-center gap-2 rounded-full border border-border-primary px-3.5 font-mono text-[10px] uppercase tracking-wider text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25"
+                          className={`inline-flex min-h-9 min-w-0 items-center justify-center gap-2 rounded-full border border-border-primary px-3 font-mono text-[10px] uppercase tracking-wider text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25 ${hasBothProjectLinks ? "" : "col-span-2"}`}
                         >
                           <ExternalLink aria-hidden="true" className="size-3.5" /> Live project
                         </a>
@@ -211,19 +215,6 @@ export function BuildlogCollection({
                     </section>
                   )}
 
-                  {shippedItems.length > 0 && (
-                    <div id={shippedRegionId}>
-                      {visibleShipped.length > 0 && (
-                        <section aria-labelledby={`${shippedRegionId}-heading`}>
-                          <h4 id={`${shippedRegionId}-heading`} className="border-b border-border-primary px-4 py-3 font-mono text-[10px] font-medium uppercase tracking-widest text-text-secondary sm:px-6">
-                            Shipped · {String(shippedItems.length).padStart(2, "0")}
-                          </h4>
-                          <ol>{visibleShipped.map((item) => <ReleaseRow key={item.id} item={item} />)}</ol>
-                        </section>
-                      )}
-                    </div>
-                  )}
-
                   {shippedItems.length > 0 && (hiddenShippedCount > 0 || expanded) && (
                     <button
                       type="button"
@@ -239,6 +230,19 @@ export function BuildlogCollection({
                       </span>
                       <ChevronDown aria-hidden="true" className={`size-4 shrink-0 transition-transform duration-200 motion-reduce:transition-none ${expanded ? "rotate-180" : ""}`} />
                     </button>
+                  )}
+
+                  {shippedItems.length > 0 && (
+                    <div id={shippedRegionId}>
+                      {visibleShipped.length > 0 && (
+                        <section aria-labelledby={`${shippedRegionId}-heading`}>
+                          <h4 id={`${shippedRegionId}-heading`} className="border-b border-border-primary px-4 py-3 font-mono text-[10px] font-medium uppercase tracking-widest text-text-secondary sm:px-6">
+                            Shipped · {String(shippedItems.length).padStart(2, "0")}
+                          </h4>
+                          <ol>{visibleShipped.map((item) => <ReleaseRow key={item.id} item={item} />)}</ol>
+                        </section>
+                      )}
+                    </div>
                   )}
                 </div>
               </article>

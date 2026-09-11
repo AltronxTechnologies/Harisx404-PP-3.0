@@ -23,15 +23,19 @@ Status: implemented and verified; owner lock pending.
 - `xl`: 3/9-column split.
 - Project header uses a 12px mono index, 30px Instrument Serif project name,
   24px serif tagline, 14/24px summary, version pill, and shipped count.
-- Release rows use a unique hand-drawn status glyph, 16/22px title, 13px/1.6
-  description, and 10px uppercase badge.
+- Release rows use a crisp 20px rounded-square status mark, 16/22px title,
+  13px/1.6 description, and 10px uppercase badge.
 - Each row exposes `Shipped` or `Planned` text to assistive technology.
 - Hover is a neutral 2.5% surface step with motion-reduced transition support.
 - Planned items remain visible. Shipped history is collapsed by default, and
   only one project history can be expanded at a time.
+- The same disclosure remains above the shipped region when closed and open, so
+  the close action never moves below a long expanded list.
 - Projects without planned work preview their latest two shipped items.
 - Optional GitHub and Live project actions appear below version metadata only
   when validated HTTPS links exist.
+- Project actions use a bounded two-column grid: two links split equally, one
+  link spans both columns, and no grid renders when neither link exists.
 
 ## Responsive Rules
 
