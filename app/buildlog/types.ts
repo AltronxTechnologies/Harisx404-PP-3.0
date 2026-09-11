@@ -15,6 +15,7 @@ export type BuildlogProject = {
   current_version: string;
   github_url: string | null;
   live_url: string | null;
+  project_status: "in_progress" | "live" | "completed";
   display_order: number;
   items: BuildlogItem[];
 };

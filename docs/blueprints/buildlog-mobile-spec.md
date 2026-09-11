@@ -9,8 +9,8 @@ Companion: `buildlog-desktop-spec.md`.
 - Hero uses the locked 46px Instrument Serif page-heading scale and wraps to two
   balanced lines where necessary.
 - Toolbar stacks its count below the collection description.
-- Filters use the established horizontally scrollable pill rail; a partial next
-  option communicates horizontal continuation on narrow phones.
+- No project filter rail is rendered; lifecycle is communicated directly beside
+  each project title block.
 - Project headers use 16px padding; release rows use 16px horizontal and 20px
   vertical padding.
 - Crisp shipped/planned status marks and copy stay aligned at the top of each row.
@@ -29,5 +29,5 @@ Companion: `buildlog-desktop-spec.md`.
   errors.
 - Every release item exposes a textual Shipped/Planned state.
 - Heading order is one H1, collection H2, project H3 headings, then shared CTA H2.
-- Disclosure, filtering, URL state, and browser Back behavior pass at every
+- Disclosure, lifecycle labels, URL state, and browser Back behavior pass at every
   verified phone width.

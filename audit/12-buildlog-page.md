@@ -3,7 +3,7 @@
 - Date: 2026-09-10
 - Route: `/buildlog`
 - Status: implementation and local verification complete; owner lock pending
-- Deployment dependency: apply the three Buildlog Supabase migrations
+- Deployment dependency: apply the four Buildlog Supabase migrations
 
 ## Scope
 
@@ -22,9 +22,14 @@ Legacy Changelog admin/API files remain byte-identical to their locked baseline.
 - Removed duplicate Buildlog-local rails; the global frame is the only frame.
 - Added release totals, stable project/item keys, collision-free IDs, and
   explicit per-item Shipped/Planned screen-reader text.
-- Added URL-backed All/In progress/Completed filtering and one-at-a-time shipped
-  history disclosures. Planned work remains visible; completed projects preview
-  only their latest two shipped updates.
+- Added one-at-a-time shipped history disclosures. Planned work remains visible;
+  completed projects preview only their latest two shipped updates.
+- Replaced the public filter rail with an admin-managed lifecycle label beside
+  every project heading: In progress, Live, or Completed. Publication visibility
+  remains independently controlled by Draft/Published/Archived.
+- Enforced lifecycle values and the Completed-with-no-planned-items invariant in
+  the Admin form, API, and PostgreSQL constraint. Migration reruns preserve later
+  administrator lifecycle changes.
 - Added optional, independently managed GitHub/live project actions with strict
   HTTPS validation and secure external-link behavior.
 - Kept one stable shipped-history control above its content in both states,
@@ -58,7 +63,7 @@ Legacy Changelog admin/API files remain byte-identical to their locked baseline.
 | Published-only view and grants | Passed |
 | `updated_at` trigger | Passed |
 | Browser matrix | 14/14 light/dark combinations passed |
-| Filter/disclosure UX matrix | 14/14 combinations passed |
+| Lifecycle/disclosure UX matrix | 14/14 combinations passed |
 | Checked-in browser interaction test | `tests/buildlog.browser.test.mjs` |
 | Link migration rerun | Passed; idempotent |
 | URL state and browser Back | Passed |
@@ -66,6 +71,8 @@ Legacy Changelog admin/API files remain byte-identical to their locked baseline.
 | Secure external project links | Passed |
 | Stable open/close position | Passed at all 14 viewport/theme combinations |
 | Optional project-link geometry | Two equal, one full-span, none omitted |
+| Lifecycle database constraint | Invalid Completed + planned state rejected |
+| Lifecycle migration rerun | Preserved administrator-selected status |
 | Widths | 320, 360, 375, 390, 768, 1024, 1440px |
 | Document overflow | 0px in every browser case |
 | Badge overflow | 0 in every browser case |
@@ -92,6 +99,7 @@ Apply in this order:
 1. `migrations/2026_buildlog_projects.sql`
 2. `migrations/2026_buildlog_seed.sql`
 3. `migrations/2026_buildlog_zz_project_links.sql`
+4. `migrations/2026_buildlog_zzz_project_status.sql`
 
 The migrations and `tests/buildlog.database.test.sql` pass against a clean
 PostgreSQL 16 database. The connected Supabase project currently returns 404 for `buildlog_projects`, so

@@ -33,10 +33,19 @@ const formSchema = z.object({
   current_version: z.string().trim().min(1, "Version is required.").max(40),
   github_url: optionalHttpsUrl,
   live_url: optionalHttpsUrl,
+  project_status: z.enum(["in_progress", "live", "completed"]),
   display_order: z.coerce.number().int().min(0).max(10000),
   status: z.enum(["draft", "published", "archived"]),
   is_demo: z.boolean(),
   items: z.array(itemSchema).min(1, "Add at least one release item.").max(50),
+}).superRefine((project, context) => {
+  if (project.project_status === "completed" && project.items.some((item) => !item.done)) {
+    context.addIssue({
+      code: "custom",
+      path: ["project_status"],
+      message: "Mark every release item as shipped before completing a project.",
+    });
+  }
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -80,6 +89,7 @@ export function BuildlogForm({ initialData }: { initialData?: BuildlogProjectAdm
           current_version: "v1.0",
           github_url: "",
           live_url: "",
+          project_status: "in_progress",
           display_order: 0,
           status: "draft",
           is_demo: false,
@@ -161,7 +171,7 @@ export function BuildlogForm({ initialData }: { initialData?: BuildlogProjectAdm
         </label>
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
         <label className="text-sm font-medium">
           Current version
           <input {...register("current_version")} className={inputClass} placeholder="v1.0" />
@@ -177,6 +187,15 @@ export function BuildlogForm({ initialData }: { initialData?: BuildlogProjectAdm
             <option value="published">Published</option>
             <option value="archived">Archived</option>
           </select>
+        </label>
+        <label className="text-sm font-medium">
+          Project lifecycle
+          <select {...register("project_status")} className={inputClass}>
+            <option value="in_progress">In progress</option>
+            <option value="live">Live</option>
+            <option value="completed">Completed</option>
+          </select>
+          {errors.project_status && <span role="alert" className="mt-1.5 block text-xs text-red-500">{errors.project_status.message}</span>}
         </label>
         <label className="mt-7 flex items-center gap-3 rounded-xl border border-border-hairline bg-surface-base px-3 py-2.5 text-sm font-medium">
           <input type="checkbox" {...register("is_demo")} className="size-4 rounded border-border-hairline" />

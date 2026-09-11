@@ -7,7 +7,7 @@ export default async function AdminBuildlogPage() {
   const supabase = await createSupabaseAdminClient();
   const { data: projects, error } = await supabase
     .from("buildlog_projects")
-    .select("id, name, current_version, status, display_order, is_demo, items")
+    .select("id, name, current_version, project_status, status, display_order, is_demo, items")
     .order("display_order", { ascending: true });
   if (error) throw new Error(`Unable to load Buildlog projects: ${error.message}`);
 
@@ -25,19 +25,20 @@ export default async function AdminBuildlogPage() {
 
       <div className="overflow-hidden rounded-xl border border-border-hairline bg-surface-raised shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[680px] text-left text-sm">
+          <table className="w-full min-w-[780px] text-left text-sm">
             <thead className="border-b border-border-hairline bg-surface-base text-ink-secondary">
               <tr>
                 <th className="px-6 py-4 font-medium">Project</th>
                 <th className="px-6 py-4 font-medium">Items</th>
-                <th className="px-6 py-4 font-medium">Status</th>
+                <th className="px-6 py-4 font-medium">Lifecycle</th>
+                <th className="px-6 py-4 font-medium">Visibility</th>
                 <th className="px-6 py-4 font-medium">Order</th>
                 <th className="px-6 py-4 text-right font-medium">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border-hairline">
               {!projects || projects.length === 0 ? (
-                <tr><td colSpan={5} className="px-6 py-10 text-center text-ink-secondary">No Buildlog projects found. Create one to publish your first release record.</td></tr>
+                <tr><td colSpan={6} className="px-6 py-10 text-center text-ink-secondary">No Buildlog projects found. Create one to publish your first release record.</td></tr>
               ) : projects.map((project) => (
                 <tr key={project.id} className="transition-colors hover:bg-surface-base/50">
                   <td className="px-6 py-4 font-medium text-ink-primary">
@@ -46,6 +47,7 @@ export default async function AdminBuildlogPage() {
                     {project.is_demo && <span className="mt-1 inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">Demo</span>}
                   </td>
                   <td className="px-6 py-4 text-ink-secondary">{Array.isArray(project.items) ? project.items.length : 0}</td>
+                  <td className="px-6 py-4 text-ink-secondary">{project.project_status === "in_progress" ? "In progress" : project.project_status === "live" ? "Live" : "Completed"}</td>
                   <td className="px-6 py-4"><span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${project.status === "published" ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"}`}>{project.status}</span></td>
                   <td className="px-6 py-4 text-ink-secondary">{project.display_order}</td>
                   <td className="px-6 py-4 text-right">

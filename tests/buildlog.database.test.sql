@@ -8,6 +8,7 @@ DECLARE
   changed_updated_at timestamptz;
   website_github_url text;
   website_live_url text;
+  website_project_status text;
 BEGIN
   SELECT count(*) INTO project_count FROM public.buildlog_projects;
   IF project_count <> 4 THEN
@@ -29,14 +30,26 @@ BEGIN
     RAISE EXCEPTION 'anon must be able to read the restricted public view';
   END IF;
 
-  SELECT github_url, live_url
-  INTO website_github_url, website_live_url
+  SELECT github_url, live_url, project_status
+  INTO website_github_url, website_live_url, website_project_status
   FROM public.public_buildlog_projects
   WHERE name = 'This Website';
   IF website_github_url IS DISTINCT FROM 'https://github.com/harisx404/harisx404-portfolio'
      OR website_live_url IS DISTINCT FROM 'https://harisx404.vercel.app' THEN
     RAISE EXCEPTION 'verified website links were not seeded correctly';
   END IF;
+  IF website_project_status IS DISTINCT FROM 'live' THEN
+    RAISE EXCEPTION 'website lifecycle status was not seeded as live';
+  END IF;
+
+  BEGIN
+    UPDATE public.buildlog_projects
+    SET project_status = 'completed'
+    WHERE name = 'PacketVision';
+    RAISE EXCEPTION 'completed project with planned items was accepted';
+  EXCEPTION
+    WHEN check_violation THEN NULL;
+  END;
 
   INSERT INTO public.buildlog_projects (
     name, tagline, info, current_version, items, display_order, status

@@ -18,13 +18,10 @@ export const metadata: Metadata = {
 export default async function BuildlogPage({
   searchParams,
 }: {
-  searchParams: Promise<{ filter?: string; open?: string }>;
+  searchParams: Promise<{ open?: string }>;
 }) {
   const projects = await fetchBuildlogProjects();
   const query = await searchParams;
-  const initialFilter = query.filter === "in-progress" || query.filter === "completed"
-    ? query.filter
-    : "all";
   const initialOpen = query.open && projects.some((project) => project.id === query.open)
     ? query.open
     : null;
@@ -84,7 +81,6 @@ export default async function BuildlogPage({
         {projects.length > 0 ? (
           <BuildlogCollection
             projects={projects}
-            initialFilter={initialFilter}
             initialOpen={initialOpen}
           />
         ) : (

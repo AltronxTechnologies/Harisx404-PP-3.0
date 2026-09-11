@@ -18,6 +18,7 @@ export interface BuildlogProject {
   currentVersion: string;
   githubUrl?: string;
   liveUrl?: string;
+  projectStatus: "in_progress" | "live" | "completed";
   items: BuildlogItem[];
 }
 
@@ -29,6 +30,7 @@ export const buildlogProjects: BuildlogProject[] = [
     currentVersion: "v2.1",
     githubUrl: "https://github.com/harisx404/harisx404-portfolio",
     liveUrl: "https://harisx404.vercel.app",
+    projectStatus: "live",
     items: [
       {
         title: "Blog details reading experience",
@@ -79,6 +81,7 @@ export const buildlogProjects: BuildlogProject[] = [
     tagline: "Smart. Secure. Scalable.",
     info: "SOC platform for network intrusion detection built with Suricata 7 and FastAPI.",
     currentVersion: "v1.2",
+    projectStatus: "in_progress",
     items: [
       {
         title: "Suricata 7 deep-packet inspection",
@@ -118,6 +121,7 @@ export const buildlogProjects: BuildlogProject[] = [
     info: "Hospital management SaaS on the MERN stack with AI assistance and real-time updates.",
     currentVersion: "v1.1",
     githubUrl: "https://github.com/harisx404/MedicaLink-HMS",
+    projectStatus: "in_progress",
     items: [
       {
         title: "Multi-role portals",
@@ -156,6 +160,7 @@ export const buildlogProjects: BuildlogProject[] = [
     tagline: "See every packet.",
     info: "High-performance network packet inspection engine using Python and Scapy.",
     currentVersion: "v1.0",
+    projectStatus: "in_progress",
     items: [
       {
         title: "Live capture & protocol decoding",

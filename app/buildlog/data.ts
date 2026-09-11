@@ -29,6 +29,7 @@ const staticFallback: BuildlogProject[] = fallbackProjects.map((project, project
   current_version: project.currentVersion,
   github_url: project.githubUrl || null,
   live_url: project.liveUrl || null,
+  project_status: project.projectStatus,
   display_order: projectIndex,
   items: project.items.map((item, itemIndex) => ({
     id: `fallback-project-${projectIndex + 1}-item-${itemIndex + 1}`,
@@ -46,7 +47,7 @@ const loadBuildlogProjects = async (): Promise<BuildlogProject[]> => {
 
   const { data, error } = await supabase
     .from("public_buildlog_projects")
-    .select("id, name, tagline, info, current_version, github_url, live_url, display_order, items")
+    .select("id, name, tagline, info, current_version, github_url, live_url, project_status, display_order, items")
     .order("display_order", { ascending: true });
 
   if (error && /relation|column|does not exist|schema cache|not find/i.test(error.message)) {
@@ -62,6 +63,10 @@ const loadBuildlogProjects = async (): Promise<BuildlogProject[]> => {
     current_version: project.current_version,
     github_url: project.github_url || null,
     live_url: project.live_url || null,
+    project_status:
+      project.project_status === "live" || project.project_status === "completed"
+        ? project.project_status
+        : "in_progress",
     display_order: project.display_order,
     items: normalizeItems(project.items),
   }));
@@ -69,6 +74,6 @@ const loadBuildlogProjects = async (): Promise<BuildlogProject[]> => {
 
 export const fetchBuildlogProjects = unstable_cache(
   loadBuildlogProjects,
-  ["buildlog-projects-v3"],
+  ["buildlog-projects-v4"],
   { revalidate: 3600, tags: ["buildlog"] },
 );

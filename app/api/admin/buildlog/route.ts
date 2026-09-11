@@ -28,11 +28,20 @@ const projectSchema = z.object({
   current_version: z.string().trim().min(1).max(40),
   github_url: optionalHttpsUrl,
   live_url: optionalHttpsUrl,
+  project_status: z.enum(["in_progress", "live", "completed"]),
   display_order: z.number().int().min(0).max(10000),
   status: z.enum(["draft", "published", "archived"]),
   is_demo: z.boolean().default(false),
   items: z.array(itemSchema).min(1).max(50),
-}).strict();
+}).strict().superRefine((project, context) => {
+  if (project.project_status === "completed" && project.items.some((item) => !item.done)) {
+    context.addIssue({
+      code: "custom",
+      path: ["project_status"],
+      message: "Completed projects cannot contain planned release items.",
+    });
+  }
+});
 
 async function requireAdmin(
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
@@ -82,7 +91,7 @@ export async function GET(request: Request) {
     const db = await createSupabaseAdminClient();
     const { data, error } = await db
       .from("buildlog_projects")
-      .select("id, name, tagline, info, current_version, github_url, live_url, display_order, status, is_demo, items")
+      .select("id, name, tagline, info, current_version, github_url, live_url, project_status, display_order, status, is_demo, items")
       .order("display_order", { ascending: true })
       .limit(limit);
     if (error) throw error;

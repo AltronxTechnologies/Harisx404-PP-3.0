@@ -6,16 +6,11 @@ import { BrandGlyph } from "@/app/components/BrandGlyph";
 import { SketchCheckbox } from "@/app/components/buildlog/SketchCheckbox";
 import type { BuildlogItem, BuildlogProject } from "./types";
 
-type ProjectFilter = "all" | "in-progress" | "completed";
-
-const filters: { value: ProjectFilter; label: string }[] = [
-  { value: "all", label: "All" },
-  { value: "in-progress", label: "In progress" },
-  { value: "completed", label: "Completed" },
-];
-
-const isFilter = (value: string | null): value is ProjectFilter =>
-  value === "all" || value === "in-progress" || value === "completed";
+const projectStatus = {
+  in_progress: { label: "In progress", dot: "bg-blue-500" },
+  live: { label: "Live", dot: "bg-emerald-500" },
+  completed: { label: "Completed", dot: "bg-text-secondary" },
+} as const;
 
 function ReleaseRow({ item }: { item: BuildlogItem }) {
   return (
@@ -53,93 +48,42 @@ function ReleaseRow({ item }: { item: BuildlogItem }) {
 
 export function BuildlogCollection({
   projects,
-  initialFilter,
   initialOpen,
 }: {
   projects: BuildlogProject[];
-  initialFilter: ProjectFilter;
   initialOpen: string | null;
 }) {
-  const [activeFilter, setActiveFilter] = useState<ProjectFilter>(initialFilter);
   const [expandedProjectId, setExpandedProjectId] = useState<string | null>(initialOpen);
 
   useEffect(() => {
     const syncFromUrl = () => {
       const params = new URLSearchParams(window.location.search);
-      const filter = params.get("filter");
-      setActiveFilter(isFilter(filter) ? filter : "all");
       setExpandedProjectId(params.get("open"));
     };
     window.addEventListener("popstate", syncFromUrl);
     return () => window.removeEventListener("popstate", syncFromUrl);
   }, []);
 
-  const updateUrl = (filter: ProjectFilter, open: string | null) => {
+  const updateUrl = (open: string | null) => {
     const params = new URLSearchParams(window.location.search);
-    if (filter === "all") params.delete("filter");
-    else params.set("filter", filter);
+    params.delete("filter");
     if (open) params.set("open", open);
     else params.delete("open");
     const query = params.toString();
     window.history.pushState({}, "", `${window.location.pathname}${query ? `?${query}` : ""}`);
   };
 
-  const chooseFilter = (filter: ProjectFilter) => {
-    startTransition(() => {
-      setActiveFilter(filter);
-      setExpandedProjectId(null);
-      updateUrl(filter, null);
-    });
-  };
-
   const toggleShipped = (projectId: string) => {
     const next = expandedProjectId === projectId ? null : projectId;
     startTransition(() => {
       setExpandedProjectId(next);
-      updateUrl(activeFilter, next);
+      updateUrl(next);
     });
   };
 
-  const projectMatches = (project: BuildlogProject, filter: ProjectFilter) => {
-    const hasPlanned = project.items.some((item) => !item.done);
-    if (filter === "in-progress") return hasPlanned;
-    if (filter === "completed") return !hasPlanned;
-    return true;
-  };
-  const visibleProjects = projects.filter((project) => projectMatches(project, activeFilter));
-
   return (
-    <>
-      <div className="mb-6 overflow-x-auto border-b border-border-primary [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <div aria-label="Filter Buildlog projects" className="flex min-w-max items-center gap-2 pb-3">
-          {filters.map((filter) => {
-            const count = projects.filter((project) => projectMatches(project, filter.value)).length;
-            const selected = activeFilter === filter.value;
-            return (
-              <button
-                key={filter.value}
-                type="button"
-                aria-pressed={selected}
-                onClick={() => chooseFilter(filter.value)}
-                className={`inline-flex min-h-9 items-center gap-2 whitespace-nowrap rounded-full border px-4 font-mono text-[10px] uppercase tracking-widest transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary ${
-                  selected
-                    ? "border-text-primary bg-text-primary text-bg-primary"
-                    : "border-border-primary text-text-secondary hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 dark:hover:border-white/25 dark:active:border-white/25"
-                }`}
-              >
-                {filter.label}
-                <span aria-hidden="true" className={selected ? "text-bg-primary/70" : "text-text-secondary"}>
-                  {String(count).padStart(2, "0")}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {visibleProjects.length > 0 ? (
-        <div className="border-b border-border-primary">
-          {visibleProjects.map((project) => {
+    <div className="border-b border-border-primary">
+          {projects.map((project) => {
             const projectIndex = projects.findIndex((candidate) => candidate.id === project.id);
             const plannedItems = project.items.filter((item) => !item.done);
             const shippedItems = project.items.filter((item) => item.done);
@@ -149,6 +93,7 @@ export function BuildlogCollection({
             const hiddenShippedCount = shippedItems.length - visibleShipped.length;
             const shippedRegionId = `buildlog-shipped-${project.id}`;
             const hasBothProjectLinks = Boolean(project.github_url && project.live_url);
+            const lifecycle = projectStatus[project.project_status];
 
             return (
               <article
@@ -156,9 +101,13 @@ export function BuildlogCollection({
                 className="grid min-w-0 grid-cols-1 border-t border-border-primary lg:grid-cols-12"
               >
                 <header className="border-b border-border-primary p-4 lg:sticky lg:top-28 lg:col-span-4 lg:self-start lg:border-b-0 lg:p-6 xl:col-span-3">
-                  <p className="font-mono text-xs font-medium tracking-widest text-text-secondary">
-                    {String(projectIndex + 1).padStart(2, "0")}
-                  </p>
+                  <div className="flex items-center justify-between gap-3 font-mono text-[10px] font-medium uppercase tracking-widest text-text-secondary">
+                    <span>{String(projectIndex + 1).padStart(2, "0")}</span>
+                    <span className="inline-flex items-center gap-2">
+                      <span aria-hidden="true" className={`size-1.5 rounded-full ${lifecycle.dot}`} />
+                      {lifecycle.label}
+                    </span>
+                  </div>
                   <h3 className="mt-2 [font-family:var(--font-instrument-serif),serif] text-2xl font-medium leading-tight text-text-primary md:text-[30px]">
                     {project.name}
                   </h3>
@@ -248,24 +197,6 @@ export function BuildlogCollection({
               </article>
             );
           })}
-        </div>
-      ) : (
-        <div className="border-y border-border-primary px-4 py-14 text-center sm:px-6">
-          <p className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
-            No matching projects
-          </p>
-          <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-text-secondary">
-            No projects currently match this view. Choose another filter to continue browsing.
-          </p>
-          <button
-            type="button"
-            onClick={() => chooseFilter("all")}
-            className="mt-5 min-h-9 rounded-full border border-border-primary px-5 font-mono text-[10px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25"
-          >
-            Show all projects
-          </button>
-        </div>
-      )}
-    </>
+    </div>
   );
 }

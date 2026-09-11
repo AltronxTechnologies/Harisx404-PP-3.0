@@ -5,7 +5,7 @@ import { chromium } from "playwright";
 const baseUrl = process.env.BUILDLOG_BASE_URL || "http://localhost:3000";
 const widths = [320, 360, 375, 390, 768, 1024, 1440];
 
-test("Buildlog filtering and shipped disclosures work across themes and widths", async () => {
+test("Buildlog lifecycle and shipped disclosures work across themes and widths", async () => {
   const browser = await chromium.launch({ headless: true });
   try {
     for (const theme of ["light", "dark"]) {
@@ -29,6 +29,9 @@ test("Buildlog filtering and shipped disclosures work across themes and widths",
             overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
             articles: document.querySelectorAll("article").length,
             items: document.querySelectorAll("article li").length,
+            lifecycleLabels: [...document.querySelectorAll("article header")].filter(
+              (header) => /In progress|Live|Completed/.test(header.textContent || ""),
+            ).length,
             duplicateIds: ids.length - new Set(ids).size,
             insecureLinks: externalLinks.filter(
               (link) => link.getAttribute("rel") !== "noopener noreferrer",
@@ -53,6 +56,7 @@ test("Buildlog filtering and shipped disclosures work across themes and widths",
         });
         assert.equal(initial.overflow, 0, `${theme} ${width}px overflow`);
         assert.ok(initial.articles > 0, `${theme} ${width}px has projects`);
+        assert.equal(initial.lifecycleLabels, initial.articles, `${theme} ${width}px lifecycle labels`);
         assert.equal(initial.duplicateIds, 0, `${theme} ${width}px duplicate IDs`);
         assert.equal(initial.insecureLinks, 0, `${theme} ${width}px external-link security`);
         assert.equal(initial.invalidLinkLayouts, 0, `${theme} ${width}px project-link layout`);
@@ -108,16 +112,7 @@ test("Buildlog filtering and shipped disclosures work across themes and widths",
           assert.equal(await page.locator("button[aria-expanded='true']").count(), 1);
         }
 
-        await page.getByRole("button", { name: /^Completed/ }).click();
-        await page.waitForTimeout(200);
-        assert.match(page.url(), /filter=completed/);
-        assert.equal(
-          await page.getByRole("button", { name: /^Completed/ }).getAttribute("aria-pressed"),
-          "true",
-        );
-        await page.getByRole("button", { name: /^All/ }).click();
-        await page.waitForTimeout(200);
-        assert.equal(await page.locator("article").count(), initial.articles);
+        assert.equal(await page.locator("[aria-label='Filter Buildlog projects']").count(), 0);
 
         await page.close();
       }

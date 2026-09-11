@@ -17,6 +17,9 @@ test("Buildlog renders the responsive release collection", async () => {
   assert.match(html, /aria-expanded="false"/);
   assert.match(html, />GitHub</);
   assert.match(html, /Live project/);
+  assert.match(html, /Live/);
+  assert.match(html, /In progress/);
+  assert.doesNotMatch(html, /Filter Buildlog projects|All 04|Completed 00/);
   const filterIds = [...html.matchAll(/<filter id="([^"]+)"/g)].map((match) => match[1]);
   assert.equal(new Set(filterIds).size, filterIds.length);
 });
@@ -54,11 +57,12 @@ test("Buildlog admin API is fail-closed for every method", async () => {
   }
 });
 
-test("Buildlog schema, seed, links, API, admin form, and cache contract agree", async () => {
-  const [migration, seed, linksMigration, api, form, publicData, collection] = await Promise.all([
+test("Buildlog schema, seed, lifecycle, links, API, admin form, and cache contract agree", async () => {
+  const [migration, seed, linksMigration, statusMigration, api, form, publicData, collection] = await Promise.all([
     readFile(new URL("../migrations/2026_buildlog_projects.sql", import.meta.url), "utf8"),
     readFile(new URL("../migrations/2026_buildlog_seed.sql", import.meta.url), "utf8"),
     readFile(new URL("../migrations/2026_buildlog_zz_project_links.sql", import.meta.url), "utf8"),
+    readFile(new URL("../migrations/2026_buildlog_zzz_project_status.sql", import.meta.url), "utf8"),
     readFile(new URL("../app/api/admin/buildlog/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/components/admin/BuildlogForm.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/buildlog/data.ts", import.meta.url), "utf8"),
@@ -85,6 +89,12 @@ test("Buildlog schema, seed, links, API, admin form, and cache contract agree", 
     assert.match(api, new RegExp(field));
     assert.match(form, new RegExp(field));
   }
+  for (const source of [statusMigration, api, form, publicData, collection]) {
+    assert.match(source, /project_status/);
+  }
+  assert.match(statusMigration, /in_progress.*live.*completed/s);
+  assert.match(statusMigration, /buildlog_items_all_done/);
+  assert.match(statusMigration, /status_column_was_missing/);
   assert.match(api, /auth\.getUser\(\)/);
   assert.match(api, /revalidatePath\("\/buildlog"\)/);
   assert.match(api, /revalidateTag\("buildlog"\)/);
@@ -100,6 +110,8 @@ test("Buildlog schema, seed, links, API, admin form, and cache contract agree", 
   assert.match(collection, /window\.history\.pushState/);
   assert.match(collection, /In progress/);
   assert.match(collection, /Completed/);
+  assert.match(collection, /Live/);
+  assert.doesNotMatch(collection, /Filter Buildlog projects/);
 });
 
 test("Legacy changelog admin routes redirect to Buildlog", async () => {

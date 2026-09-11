@@ -12,9 +12,8 @@ Status: implemented and verified; owner lock pending.
    Instrument Serif heading, 16px supporting-copy gap.
 4. Release toolbar 56px below the hero, with collection description and
    shipped/planned totals.
-5. URL-backed All/In progress/Completed filter rail.
-6. Project regions separated by solid `border-border-primary` rules.
-7. Shared locked CTA 112px below the collection, followed by the shared Footer.
+5. Project regions separated by solid `border-border-primary` rules.
+6. Shared locked CTA 112px below the collection, followed by the shared Footer.
 
 ## Project Region
 
@@ -23,6 +22,8 @@ Status: implemented and verified; owner lock pending.
 - `xl`: 3/9-column split.
 - Project header uses a 12px mono index, 30px Instrument Serif project name,
   24px serif tagline, 14/24px summary, version pill, and shipped count.
+- An admin-managed lifecycle label appears beside the index: In progress, Live,
+  or Completed. Draft/Published/Archived remains a separate visibility setting.
 - Release rows use a crisp 20px rounded-square status mark, 16/22px title,
   13px/1.6 description, and 10px uppercase badge.
 - Each row exposes `Shipped` or `Planned` text to assistive technology.
@@ -44,8 +45,8 @@ Status: implemented and verified; owner lock pending.
   with long titles or overflow.
 - At 430px and above, copy and badge share one horizontal row.
 - Page and row containers use `min-w-0`; no horizontal overflow is accepted.
-- Filter and expansion state is reflected in the URL and restored by browser
-  Back/Forward navigation.
+- Expansion state is reflected in the URL and restored by browser Back/Forward
+  navigation.
 
 ## Data and States
 
@@ -56,3 +57,5 @@ Status: implemented and verified; owner lock pending.
 - Empty collection and route error have explicit accessible recovery states.
 - Admin management uses `/admin/buildlog` and `/api/admin/buildlog`.
 - Admin links are independent and optional: both, one, or neither may be shown.
+- Project lifecycle is independently managed as In progress, Live, or Completed.
+  Completed is accepted only when every release item is shipped.

@@ -365,6 +365,19 @@ CREATE POLICY "Public can view published certifications"
 -- ADMIN: service-role client bypasses RLS (matches existing tables).
 
 -- BUILDLOG PROJECTS
+CREATE OR REPLACE FUNCTION public.buildlog_items_all_done(value jsonb)
+RETURNS boolean
+LANGUAGE sql
+IMMUTABLE
+SET search_path = public
+AS $$
+  SELECT COALESCE(
+    bool_and(jsonb_typeof(item) = 'object' AND item->>'done' = 'true'),
+    false
+  )
+  FROM jsonb_array_elements(value) AS item;
+$$;
+
 CREATE TABLE IF NOT EXISTS public.buildlog_projects (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name text NOT NULL,
@@ -373,6 +386,7 @@ CREATE TABLE IF NOT EXISTS public.buildlog_projects (
   current_version text NOT NULL,
   github_url text,
   live_url text,
+  project_status text NOT NULL DEFAULT 'in_progress',
   items jsonb NOT NULL DEFAULT '[]'::jsonb,
   display_order integer NOT NULL DEFAULT 0,
   status text NOT NULL DEFAULT 'draft',
@@ -388,6 +402,13 @@ CREATE TABLE IF NOT EXISTS public.buildlog_projects (
   CONSTRAINT buildlog_https_urls CHECK (
     (github_url IS NULL OR github_url ~ '^https://') AND
     (live_url IS NULL OR live_url ~ '^https://')
+  ),
+  CONSTRAINT buildlog_project_status CHECK (
+    project_status IN ('in_progress', 'live', 'completed') AND
+    (
+      project_status <> 'completed' OR
+      public.buildlog_items_all_done(items)
+    )
   ),
   CONSTRAINT buildlog_items_array CHECK (
     jsonb_typeof(items) = 'array' AND jsonb_array_length(items) BETWEEN 1 AND 50
@@ -406,7 +427,7 @@ DROP VIEW IF EXISTS public.public_buildlog_projects;
 CREATE VIEW public.public_buildlog_projects
 WITH (security_barrier = true)
 AS
-SELECT id, name, tagline, info, current_version, github_url, live_url, display_order, items
+SELECT id, name, tagline, info, current_version, github_url, live_url, project_status, display_order, items
 FROM public.buildlog_projects
 WHERE status = 'published'
 ORDER BY display_order ASC, created_at DESC;
