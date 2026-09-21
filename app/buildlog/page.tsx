@@ -60,7 +60,7 @@ export default async function BuildlogPage({
       <section aria-labelledby="buildlog-collection-heading" className="mt-14 px-2 sm:px-4">
         <div
           data-release-summary
-          className="relative -mx-2 mb-6 flex flex-col gap-3 px-4 py-4 before:absolute before:left-1/2 before:top-0 before:h-px before:w-screen before:-translate-x-1/2 before:bg-border-primary before:content-[''] sm:-mx-4 sm:flex-row sm:items-center sm:justify-between sm:px-8"
+          className="-mx-2 flex items-center gap-3 px-4 py-4 sm:-mx-4 sm:gap-4 sm:px-8"
         >
           <h2
             id="buildlog-collection-heading"
@@ -68,8 +68,13 @@ export default async function BuildlogPage({
           >
             Release archive
           </h2>
+          <span
+            data-release-summary-line
+            aria-hidden="true"
+            className="h-px min-w-4 flex-1 bg-border-primary"
+          />
           {projects.length > 0 && (
-            <p className="font-mono text-[10px] uppercase tracking-widest text-text-secondary">
+            <p className="shrink-0 whitespace-nowrap font-mono text-[9px] uppercase tracking-widest text-text-secondary min-[360px]:text-[10px]">
               {String(shippedCount).padStart(2, "0")} shipped ·{" "}
               {String(plannedCount).padStart(2, "0")} planned
             </p>

@@ -11,7 +11,7 @@
     "test:contact": "node --test tests/contact.integration.test.mjs",
     "test:links": "node --test tests/links.integration.test.mjs",
     "test:credentials": "node --test tests/credentials.integration.test.mjs",
-    "test:buildlog": "node --test tests/buildlog.integration.test.mjs",
+    "test:buildlog": "node --test tests/buildlog.integration.test.mjs && tsx --test tests/buildlog-version.test.ts",
     "test:buildlog:browser": "node --test tests/buildlog.browser.test.mjs",
     "test:preview": "node --test tests/preview-runtime.integration.test.mjs",
     "test:preview:browser": "node --test tests/preview-runtime.browser.test.mjs",

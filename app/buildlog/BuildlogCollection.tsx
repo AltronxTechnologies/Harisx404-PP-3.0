@@ -5,6 +5,7 @@ import { ChevronDown, ExternalLink } from "lucide-react";
 import { BrandGlyph } from "@/app/components/BrandGlyph";
 import { SketchCheckbox } from "@/app/components/buildlog/SketchCheckbox";
 import type { BuildlogItem, BuildlogProject } from "./types";
+import { getLatestShippedVersion, sortShippedNewest } from "./version";
 
 const projectStatus = {
   in_progress: { label: "In progress", dot: "bg-blue-500" },
@@ -54,7 +55,7 @@ function ReleaseList({ items, label }: { items: BuildlogItem[]; label: string })
       tabIndex={scrollable ? 0 : undefined}
       className={
         scrollable
-          ? "max-h-[444px] overflow-y-auto overscroll-contain focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-text-primary min-[430px]:max-h-[312px] [scrollbar-color:var(--border-primary)_transparent] [scrollbar-width:thin]"
+          ? "max-h-[444px] overflow-y-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-text-primary min-[430px]:max-h-[312px] [scrollbar-color:var(--border-primary)_transparent] [scrollbar-width:thin]"
           : undefined
       }
     >
@@ -63,30 +64,6 @@ function ReleaseList({ items, label }: { items: BuildlogItem[]; label: string })
       ))}
     </ol>
   );
-}
-
-function parseSemanticVersion(value: string) {
-  const match = value.trim().match(/^v?(\d+)(?:\.(\d+))?(?:\.(\d+))?$/i);
-  return match
-    ? [Number(match[1]), Number(match[2] || 0), Number(match[3] || 0)]
-    : null;
-}
-
-function compareShipped(left: BuildlogItem, right: BuildlogItem) {
-  const leftVersion = parseSemanticVersion(left.badge);
-  const rightVersion = parseSemanticVersion(right.badge);
-  if (leftVersion && rightVersion) {
-    for (let index = 0; index < leftVersion.length; index += 1) {
-      if (leftVersion[index] !== rightVersion[index]) {
-        return rightVersion[index] - leftVersion[index];
-      }
-    }
-  } else if (leftVersion) {
-    return -1;
-  } else if (rightVersion) {
-    return 1;
-  }
-  return left.display_order - right.display_order;
 }
 
 export function BuildlogCollection({
@@ -129,15 +106,18 @@ export function BuildlogCollection({
           {projects.map((project) => {
             const projectIndex = projects.findIndex((candidate) => candidate.id === project.id);
             const plannedItems = project.items.filter((item) => !item.done);
-            const shippedItems = project.items.filter((item) => item.done).sort(compareShipped);
+            const shippedItems = sortShippedNewest(
+              project.items.filter((item) => item.done),
+            );
             const expanded = expandedProjectId === project.id;
             const visibleShipped = expanded ? shippedItems : [];
             const shippedRegionId = `buildlog-shipped-${project.id}`;
             const hasBothProjectLinks = Boolean(project.github_url && project.live_url);
             const lifecycle = projectStatus[project.project_status];
-            const latestVersion =
-              shippedItems.find((item) => parseSemanticVersion(item.badge))?.badge ||
-              project.current_version;
+            const latestVersion = getLatestShippedVersion(
+              shippedItems,
+              project.current_version,
+            );
 
             return (
               <article
@@ -208,20 +188,23 @@ export function BuildlogCollection({
                       onClick={() => toggleShipped(project.id)}
                       className="group flex min-h-12 w-full items-center justify-between gap-4 border-b border-border-primary px-4 text-left font-mono text-[10px] font-medium uppercase tracking-widest text-text-secondary transition-colors hover:bg-neutral-900/[0.025] hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-text-primary dark:hover:bg-white/[0.025] sm:px-6"
                     >
-                      <span>
-                        {expanded
-                          ? "Hide shipped updates"
-                          : "Show shipped updates"}
-                        <span className="ml-1.5 text-text-secondary">
-                          · {String(shippedItems.length).padStart(2, "0")}
+                      <span
+                        data-shipped-label-group
+                        className="flex min-w-0 items-center gap-2.5"
+                      >
+                        <span className="whitespace-nowrap">
+                          {expanded
+                            ? "Hide shipped updates"
+                            : "Show shipped updates"}
+                          <span className="ml-1.5 text-text-secondary">
+                            · {String(shippedItems.length).padStart(2, "0")}
+                          </span>
                         </span>
-                      </span>
-                      <span className="flex shrink-0 items-center gap-3">
-                        <span className="rounded-full border border-border-primary px-2.5 py-1 font-mono text-[9px] tracking-wider text-text-secondary">
+                        <span data-project-version className="rounded-full border border-border-primary px-2.5 py-1 font-mono text-[9px] tracking-wider text-text-secondary">
                           {latestVersion}
                         </span>
-                        <ChevronDown aria-hidden="true" className={`size-4 shrink-0 transition-transform duration-200 motion-reduce:transition-none ${expanded ? "rotate-180" : ""}`} />
                       </span>
+                      <ChevronDown aria-hidden="true" className={`size-4 shrink-0 transition-transform duration-200 motion-reduce:transition-none ${expanded ? "rotate-180" : ""}`} />
                     </button>
                   )}
 
@@ -244,7 +227,7 @@ export function BuildlogCollection({
                       >
                         <span>Planned next · {String(plannedItems.length).padStart(2, "0")}</span>
                         {shippedItems.length === 0 && (
-                          <span className="rounded-full border border-border-primary px-2.5 py-1 font-mono text-[9px] tracking-wider text-text-secondary">
+                          <span data-project-version className="rounded-full border border-border-primary px-2.5 py-1 font-mono text-[9px] tracking-wider text-text-secondary">
                             {project.current_version}
                           </span>
                         )}

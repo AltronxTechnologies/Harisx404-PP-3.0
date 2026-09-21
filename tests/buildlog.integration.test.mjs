@@ -38,8 +38,8 @@ test("Buildlog source has valid hero semantics and explicit route states", async
   assert.match(page, /PaperHeroTexture/);
   assert.match(page, /border-border-primary/);
   assert.match(page, /data-release-summary/);
-  assert.match(page, /before:w-screen/);
-  assert.doesNotMatch(page, /data-release-summary[\s\S]{0,250}border-y/);
+  assert.match(page, /data-release-summary-line/);
+  assert.doesNotMatch(page, /before:w-screen|data-release-summary[\s\S]{0,250}border-[ty]/);
   assert.match(page, /className="mt-28"/);
   assert.match(page, /<CtaSection \/>/);
   assert.match(page, /projects\.length > 0/);
@@ -56,13 +56,15 @@ test("Buildlog source has valid hero semantics and explicit route states", async
   assert.match(collection, /before:bg-neutral-400\/60/);
   assert.match(collection, /dark:before:bg-white\/20/);
   assert.match(collection, /shippedItems\.length === 0/);
-  assert.match(collection, /parseSemanticVersion/);
+  assert.match(collection, /getLatestShippedVersion/);
+  assert.match(collection, /sortShippedNewest/);
   assert.match(collection, /String\(shippedItems\.length\)\.padStart\(2, "0"\)/);
-  assert.match(collection, /sort\(compareShipped\)/);
-  assert.match(collection, /find\(\(item\) => parseSemanticVersion\(item\.badge\)\)/);
+  assert.match(collection, /data-shipped-label-group/);
+  assert.match(collection, /data-project-version/);
   assert.match(collection, /line-clamp-2/);
   assert.match(collection, /max-h-\[444px\]/);
   assert.match(collection, /min-\[430px\]:max-h-\[312px\]/);
+  assert.doesNotMatch(collection, /overscroll-contain/);
   assert.doesNotMatch(collection, /Shipped ·/);
   assert.ok(
     collection.indexOf("aria-controls={shippedRegionId}") <

@@ -40,14 +40,17 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
                 Math.abs(sectionRect.right - summaryRect.right),
               );
             })(),
-            invalidReleaseTopRule: (() => {
+            invalidReleaseSummary: (() => {
               const summary = document.querySelector("[data-release-summary]");
-              if (!summary) return true;
-              const style = getComputedStyle(summary, "::before");
+              const line = document.querySelector("[data-release-summary-line]");
+              if (!summary || !line) return true;
+              const summaryStyle = getComputedStyle(summary);
+              const lineRect = line.getBoundingClientRect();
               return (
-                Math.abs(Number.parseFloat(style.width) - window.innerWidth) > 1 ||
-                Math.abs(Number.parseFloat(style.height) - 1) > 0.5 ||
-                getComputedStyle(summary).borderBottomWidth !== "0px"
+                summaryStyle.borderTopWidth !== "0px" ||
+                summaryStyle.borderBottomWidth !== "0px" ||
+                lineRect.width < 16 ||
+                Math.abs(lineRect.height - 1) > 0.5
               );
             })(),
             lifecycleLabels: [...document.querySelectorAll("article header")].filter(
@@ -100,7 +103,7 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
         assert.equal(initial.overflow, 0, `${theme} ${width}px overflow`);
         assert.ok(initial.articles > 0, `${theme} ${width}px has projects`);
         assert.ok(initial.releaseSummaryInset <= 0.5, `${theme} ${width}px release summary width`);
-        assert.equal(initial.invalidReleaseTopRule, false, `${theme} ${width}px release top rule`);
+        assert.equal(initial.invalidReleaseSummary, false, `${theme} ${width}px release summary`);
         assert.equal(initial.lifecycleLabels, initial.articles, `${theme} ${width}px lifecycle labels`);
         assert.equal(initial.misalignedLedgerRows, 0, `${theme} ${width}px ledger row alignment`);
         assert.equal(initial.invalidProjectBoundaries, 0, `${theme} ${width}px project boundaries`);
@@ -118,6 +121,7 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
           (element) => element.getBoundingClientRect().top + window.scrollY,
         );
         const controlledId = await firstDisclosure.getAttribute("aria-controls");
+        assert.equal(await firstDisclosure.locator("[data-shipped-label-group] [data-project-version]").count(), 1);
         await firstDisclosure.click();
         await page.waitForTimeout(200);
         assert.equal(await page.locator("button[aria-expanded='true']").count(), 1);
@@ -154,6 +158,21 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
           ) <= 1,
           `${theme} ${width}px shows exactly three shipped rows`,
         );
+        if (theme === "light" && width === 360) {
+          await shippedList.evaluate((element) => {
+            element.scrollTop = element.scrollHeight;
+          });
+          const listBox = await shippedList.boundingBox();
+          assert.ok(listBox);
+          const pageScrollBefore = await page.evaluate(() => window.scrollY);
+          await page.mouse.move(listBox.x + listBox.width / 2, listBox.y + listBox.height / 2);
+          await page.mouse.wheel(0, 500);
+          await page.waitForTimeout(150);
+          assert.ok(
+            (await page.evaluate(() => window.scrollY)) > pageScrollBefore,
+            "page scroll resumes when shipped list reaches its end",
+          );
+        }
         await firstDisclosure.click();
         await page.waitForTimeout(200);
         assert.equal(await firstDisclosure.getAttribute("aria-expanded"), "false");

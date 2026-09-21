@@ -27,8 +27,9 @@ Status: implemented and verified; owner lock pending.
 - Project-to-project boundaries use a 1.5px neutral rule (`neutral-400/60` light
   and `white/20` dark) extended through the section padding to the full content
   width, while internal rows retain the quieter 1px shared border token.
-- The Release archive uses one viewport-wide top rule and no bottom rule; the
-  first project boundary provides the lower separation.
+- The Release archive has no outer top or bottom rule. A flexible inline
+  connector separates its label from totals, and the first project boundary
+  provides the lower separation.
 - An admin-managed lifecycle label appears beside the index: In progress, Live,
   or Completed. Draft/Published/Archived remains a separate visibility setting.
 - Release rows use a crisp 20px rounded-square status mark, 16/22px title,
@@ -43,9 +44,13 @@ Status: implemented and verified; owner lock pending.
   `Shipped updates · NN` and the highest semantic shipped version; no separate
   Shipped heading row is rendered. When no shipped item exists, the project
   version appears in Planned Next.
+- Semantic ordering supports major/minor/patch, prerelease identifiers, and
+  build metadata; non-version badges fall back to the Admin Current Version.
 - Shipped and planned lists show exactly three fixed-geometry rows before using
   contained keyboard-focusable vertical scrolling. Titles and descriptions are
   each limited to two lines.
+- Nested release scrolling uses normal scroll chaining: after reaching the top
+  or bottom, continued wheel/touchpad input resumes overall page scrolling.
 - All shipped rows remain collapsed until the top shipped-control row is opened.
 - Optional GitHub and Live project actions appear below version metadata only
   when validated HTTPS links exist.

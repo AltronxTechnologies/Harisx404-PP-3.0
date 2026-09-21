@@ -9,8 +9,8 @@ Companion: `buildlog-desktop-spec.md`.
 - Hero uses the locked 46px Instrument Serif page-heading scale and wraps to two
   balanced lines where necessary.
 - Toolbar stacks its count below the collection description.
-- A single Release archive top rule spans the full viewport; the first project
-  boundary supplies the lower separation.
+- The Release archive uses no outer rules; a flexible inline connector separates
+  its label and totals, followed directly by the first project boundary.
 - No project filter rail is rendered; lifecycle is communicated directly beside
   each project title block.
 - The number/lifecycle row and shipped-control row share the same 48px height and
@@ -28,6 +28,7 @@ Companion: `buildlog-desktop-spec.md`.
   release-control row.
 - Both shipped and planned lists show three complete rows before scrolling;
   descriptions are clamped to two lines for stable geometry.
+- Release-list scrolling chains naturally back to page scrolling at either edge.
 - The same disclosure stays above expanded shipped rows in both states.
 - Project sections remain one column; sticky behavior starts only at `lg`.
 

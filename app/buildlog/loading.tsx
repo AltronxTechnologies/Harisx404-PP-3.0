@@ -19,8 +19,9 @@ export default function BuildlogLoading() {
           </div>
         </GridWrapper>
         <section className="mt-14 px-2 sm:px-4">
-          <div className="relative -mx-2 mb-6 flex flex-col gap-3 px-4 py-4 before:absolute before:left-1/2 before:top-0 before:h-px before:w-screen before:-translate-x-1/2 before:bg-border-primary before:content-[''] sm:-mx-4 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+          <div className="-mx-2 flex items-center gap-3 px-4 py-4 sm:-mx-4 sm:gap-4 sm:px-8">
             <div className={`h-3 w-32 rounded bg-border-primary/40 ${pulse}`} />
+            <div className={`h-px min-w-4 flex-1 bg-border-primary/50 ${pulse}`} />
             <div className={`h-3 w-32 rounded bg-border-primary/30 ${pulse}`} />
           </div>
           {[0, 1, 2].map((project) => (
@@ -38,8 +39,11 @@ export default function BuildlogLoading() {
               </div>
               <div className="lg:col-span-8 lg:border-l lg:border-border-primary xl:col-span-9">
                 <div className="flex min-h-12 items-center justify-between gap-4 border-b border-border-primary px-4 sm:px-6">
-                  <div className={`h-3 w-36 rounded bg-border-primary/40 ${pulse}`} />
-                  <div className={`h-6 w-12 rounded-full bg-border-primary/30 ${pulse}`} />
+                  <div className="flex items-center gap-2.5">
+                    <div className={`h-3 w-36 rounded bg-border-primary/40 ${pulse}`} />
+                    <div className={`h-6 w-12 rounded-full bg-border-primary/30 ${pulse}`} />
+                  </div>
+                  <div className={`size-4 rounded bg-border-primary/30 ${pulse}`} />
                 </div>
                 <div className="flex min-h-12 items-center border-b border-border-primary px-4 sm:px-6">
                   <div className={`h-3 w-28 rounded bg-border-primary/35 ${pulse}`} />
