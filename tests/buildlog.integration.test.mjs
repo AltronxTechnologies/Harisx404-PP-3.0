@@ -39,7 +39,8 @@ test("Buildlog source has valid hero semantics and explicit route states", async
   assert.match(page, /PaperHeroTexture/);
   assert.match(page, /border-border-primary/);
   assert.match(page, /data-release-summary/);
-  assert.match(page, /data-release-summary-line/);
+  assert.match(page, /tabular-nums/);
+  assert.doesNotMatch(page, /data-release-summary-line/);
   assert.doesNotMatch(page, /before:w-screen|data-release-summary[\s\S]{0,250}border-[ty]/);
   assert.match(page, /className="mt-28"/);
   assert.match(page, /<CtaSection \/>/);
@@ -63,7 +64,7 @@ test("Buildlog source has valid hero semantics and explicit route states", async
   assert.match(collection, /data-shipped-label-group/);
   assert.match(collection, /data-project-version/);
   assert.match(collection, /line-clamp-2/);
-  assert.match(collection, /max-h-\[444px\]/);
+  assert.match(collection, /max-h-\[336px\]/);
   assert.match(collection, /min-\[430px\]:max-h-\[312px\]/);
   assert.doesNotMatch(collection, /overscroll-contain/);
   assert.doesNotMatch(collection, /Shipped ·/);

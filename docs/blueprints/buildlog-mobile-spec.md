@@ -9,8 +9,8 @@ Companion: `buildlog-desktop-spec.md`.
 - Hero uses the locked 46px Instrument Serif page-heading scale and wraps to two
   balanced lines where necessary.
 - Toolbar stacks its count below the collection description.
-- The Release archive uses no outer rules; a flexible inline connector separates
-  its label and totals, followed directly by the first project boundary.
+- The Release archive uses no outer rules; compact shipped/planned metrics stay
+  right-aligned opposite the label, followed directly by the first project boundary.
 - No project filter rail is rendered; lifecycle is communicated directly beside
   each project title block.
 - The number/lifecycle row and shipped-control row share the same 48px height and
@@ -18,7 +18,8 @@ Companion: `buildlog-desktop-spec.md`.
 - Project headers use 16px padding; fixed-height release rows use 16px horizontal
   padding and 12px vertical padding below `sm` (16px from `sm` upward).
 - Crisp shipped/planned status marks and copy stay aligned at the top of each row.
-- Badges stack below release copy under 430px and retain content width.
+- Badges remain to the right of release copy at every width, matching tablet and
+  desktop alignment.
 - Optional GitHub/live actions wrap below project metadata without overflow.
 - Two actions remain equal-width; one action fills the bounded row; no empty
   placeholder is reserved when links are unavailable.
@@ -26,7 +27,7 @@ Companion: `buildlog-desktop-spec.md`.
 - Planned rows remain visible; shipped rows use one full-width disclosure.
 - Shipped updates appear before Planned Next, with the version pill in the top
   release-control row.
-- Both shipped and planned lists show three complete rows before scrolling;
+- Both shipped and planned lists show three complete 112px rows before scrolling;
   descriptions are clamped to two lines for stable geometry.
 - Release-list scrolling chains naturally back to page scrolling at either edge.
 - The same disclosure stays above expanded shipped rows in both states.

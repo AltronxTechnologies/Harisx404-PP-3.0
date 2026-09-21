@@ -26,9 +26,9 @@ Legacy Changelog admin/API files remain byte-identical to their locked baseline.
 - Strengthened only project-to-project boundaries with a darker neutral
   1.5px rule extended through the section padding, preserving quieter internal
   row dividers for clear grouping.
-- Removed both outer Release archive rules, added a flexible inline connector
-  between label and totals, and retained the first project boundary as the lower
-  separation.
+- Removed both outer Release archive rules and replaced the connector treatment
+  with compact right-aligned shipped/planned metrics separated by a vertical
+  hairline; the first project boundary remains the lower separation.
 - Derived the latest shipped semantic version automatically, merged shipped
   count into the top disclosure, removed the separate Shipped heading, ordered
   shipped before planned, and constrained both lists to three visible rows with
@@ -37,6 +37,8 @@ Legacy Changelog admin/API files remain byte-identical to their locked baseline.
   Admin Current Version as the safe fallback for date or status badges.
 - Positioned the version immediately beside the shipped-control title and
   enabled scroll chaining back to the page when nested lists reach either edge.
+- Kept release badges right-aligned at mobile widths and reduced mobile rows to
+  112px so content has balanced top/bottom whitespace without wasted space.
 - Removed duplicate Buildlog-local rails; the global frame is the only frame.
 - Added release totals, stable project/item keys, collision-free IDs, and
   explicit per-item Shipped/Planned screen-reader text.

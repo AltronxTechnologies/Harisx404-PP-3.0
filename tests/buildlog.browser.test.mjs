@@ -42,15 +42,18 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
             })(),
             invalidReleaseSummary: (() => {
               const summary = document.querySelector("[data-release-summary]");
-              const line = document.querySelector("[data-release-summary-line]");
-              if (!summary || !line) return true;
+              if (!summary) return true;
               const summaryStyle = getComputedStyle(summary);
-              const lineRect = line.getBoundingClientRect();
+              const metrics = summary.querySelectorAll(":scope > div > p");
+              const separator = summary.querySelector(":scope > div > span[aria-hidden='true']");
+              const separatorRect = separator?.getBoundingClientRect();
               return (
                 summaryStyle.borderTopWidth !== "0px" ||
                 summaryStyle.borderBottomWidth !== "0px" ||
-                lineRect.width < 16 ||
-                Math.abs(lineRect.height - 1) > 0.5
+                metrics.length !== 2 ||
+                !separatorRect ||
+                Math.abs(separatorRect.width - 1) > 0.5 ||
+                Math.abs(separatorRect.height - 16) > 0.5
               );
             })(),
             lifecycleLabels: [...document.querySelectorAll("article header")].filter(

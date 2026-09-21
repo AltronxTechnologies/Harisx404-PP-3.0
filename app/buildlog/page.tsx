@@ -60,7 +60,7 @@ export default async function BuildlogPage({
       <section aria-labelledby="buildlog-collection-heading" className="mt-14 px-2 sm:px-4">
         <div
           data-release-summary
-          className="-mx-2 flex items-center gap-3 px-4 py-4 sm:-mx-4 sm:gap-4 sm:px-8"
+          className="-mx-2 flex min-h-14 items-center justify-between gap-4 px-4 py-3 sm:-mx-4 sm:px-8"
         >
           <h2
             id="buildlog-collection-heading"
@@ -68,16 +68,26 @@ export default async function BuildlogPage({
           >
             Release archive
           </h2>
-          <span
-            data-release-summary-line
-            aria-hidden="true"
-            className="h-px min-w-4 flex-1 bg-border-primary"
-          />
           {projects.length > 0 && (
-            <p className="shrink-0 whitespace-nowrap font-mono text-[9px] uppercase tracking-widest text-text-secondary min-[360px]:text-[10px]">
-              {String(shippedCount).padStart(2, "0")} shipped ·{" "}
-              {String(plannedCount).padStart(2, "0")} planned
-            </p>
+            <div className="flex shrink-0 items-center gap-2.5 font-mono uppercase sm:gap-3">
+              <p className="flex items-baseline gap-1.5 whitespace-nowrap">
+                <span className="text-sm font-semibold tabular-nums text-text-primary">
+                  {String(shippedCount).padStart(2, "0")}
+                </span>
+                <span className="text-[9px] tracking-widest text-text-secondary min-[360px]:text-[10px]">
+                  shipped
+                </span>
+              </p>
+              <span aria-hidden="true" className="h-4 w-px bg-border-primary" />
+              <p className="flex items-baseline gap-1.5 whitespace-nowrap">
+                <span className="text-sm font-semibold tabular-nums text-text-primary">
+                  {String(plannedCount).padStart(2, "0")}
+                </span>
+                <span className="text-[9px] tracking-widest text-text-secondary min-[360px]:text-[10px]">
+                  planned
+                </span>
+              </p>
+            </div>
           )}
         </div>
 
