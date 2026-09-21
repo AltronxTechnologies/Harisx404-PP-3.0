@@ -11,6 +11,8 @@ Companion: `buildlog-desktop-spec.md`.
 - Toolbar stacks its count below the collection description.
 - No project filter rail is rendered; lifecycle is communicated directly beside
   each project title block.
+- The number/lifecycle row and shipped-control row share the same 48px height and
+  full-width bottom divider.
 - Project headers use 16px padding; release rows use 16px horizontal and 20px
   vertical padding.
 - Crisp shipped/planned status marks and copy stay aligned at the top of each row.
@@ -20,6 +22,8 @@ Companion: `buildlog-desktop-spec.md`.
   placeholder is reserved when links are unavailable.
 - GitHub and Live project labels remain single-line down to 320px.
 - Planned rows remain visible; shipped rows use one full-width disclosure.
+- Shipped updates appear before Planned Next, with the version pill in the top
+  release-control row.
 - The same disclosure stays above expanded shipped rows in both states.
 - Project sections remain one column; sticky behavior starts only at `lg`.
 

@@ -20,6 +20,7 @@ test("Buildlog renders the responsive release collection", async () => {
   assert.match(html, /Live/);
   assert.match(html, /In progress/);
   assert.doesNotMatch(html, /Filter Buildlog projects|All 04|Completed 00/);
+  assert.doesNotMatch(html, /\d+\/\d+ shipped/);
   const filterIds = [...html.matchAll(/<filter id="([^"]+)"/g)].map((match) => match[1]);
   assert.equal(new Set(filterIds).size, filterIds.length);
 });
@@ -44,7 +45,13 @@ test("Buildlog source has valid hero semantics and explicit route states", async
       collection.indexOf("<div id={shippedRegionId}>")
   );
   assert.match(collection, /data-project-links/);
-  assert.match(collection, /data-project-header-divider/);
+  assert.match(collection, /data-project-status-row/);
+  assert.match(collection, /data-release-top-row/);
+  assert.match(collection, /shippedItems\.length === 0/);
+  assert.ok(
+    collection.indexOf("aria-controls={shippedRegionId}") <
+      collection.indexOf("id={`${shippedRegionId}-planned`}")
+  );
   assert.match(collection, /col-span-2/);
   assert.match(collection, /whitespace-nowrap/);
   assert.doesNotMatch(mark, /feTurbulence|feDisplacementMap/);

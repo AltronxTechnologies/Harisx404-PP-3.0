@@ -88,9 +88,7 @@ export function BuildlogCollection({
             const plannedItems = project.items.filter((item) => !item.done);
             const shippedItems = project.items.filter((item) => item.done);
             const expanded = expandedProjectId === project.id;
-            const shippedPreview = plannedItems.length === 0 && !expanded ? shippedItems.slice(0, 2) : [];
-            const visibleShipped = expanded ? shippedItems : shippedPreview;
-            const hiddenShippedCount = shippedItems.length - visibleShipped.length;
+            const visibleShipped = expanded ? shippedItems : [];
             const shippedRegionId = `buildlog-shipped-${project.id}`;
             const hasBothProjectLinks = Boolean(project.github_url && project.live_url);
             const lifecycle = projectStatus[project.project_status];
@@ -100,89 +98,80 @@ export function BuildlogCollection({
                 key={project.id}
                 className="grid min-w-0 grid-cols-1 border-t border-border-primary lg:grid-cols-12"
               >
-                <header className="border-b border-border-primary p-4 lg:sticky lg:top-28 lg:col-span-4 lg:self-start lg:border-b-0 lg:p-6 xl:col-span-3">
-                  <div className="flex items-center justify-between gap-3 font-mono text-[10px] font-medium uppercase tracking-widest text-text-secondary">
+                <header className="border-b border-border-primary lg:sticky lg:top-28 lg:col-span-4 lg:self-start lg:border-b-0 xl:col-span-3">
+                  <div
+                    data-project-status-row
+                    className="flex min-h-12 items-center justify-between gap-3 border-b border-border-primary px-4 font-mono text-[10px] font-medium uppercase tracking-widest text-text-secondary sm:px-6"
+                  >
                     <span>{String(projectIndex + 1).padStart(2, "0")}</span>
                     <span className="inline-flex items-center gap-2">
                       <span aria-hidden="true" className={`size-1.5 rounded-full ${lifecycle.dot}`} />
                       {lifecycle.label}
                     </span>
                   </div>
-                  <div
-                    data-project-header-divider
-                    aria-hidden="true"
-                    className="mt-3 h-px w-12 bg-border-primary"
-                  />
-                  <h3 className="mt-4 [font-family:var(--font-instrument-serif),serif] text-2xl font-medium leading-tight text-text-primary md:text-[30px]">
-                    {project.name}
-                  </h3>
-                  <p className="mt-1 [font-family:var(--font-instrument-serif),serif] text-xl font-medium leading-tight text-text-secondary md:text-2xl">
-                    {project.tagline}
-                  </p>
-                  <p className="mt-4 max-w-[34ch] text-sm leading-6 text-text-secondary">
-                    {project.info}
-                  </p>
-                  <div className="mt-4 flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-text-secondary">
-                    <span className="rounded-full border border-border-primary px-3 py-1.5">
-                      {project.current_version}
-                    </span>
-                    <span>{shippedItems.length}/{project.items.length} shipped</span>
+                  <div className="p-4 lg:p-6">
+                    <h3 className="[font-family:var(--font-instrument-serif),serif] text-2xl font-medium leading-tight text-text-primary md:text-[30px]">
+                      {project.name}
+                    </h3>
+                    <p className="mt-1 [font-family:var(--font-instrument-serif),serif] text-xl font-medium leading-tight text-text-secondary md:text-2xl">
+                      {project.tagline}
+                    </p>
+                    <p className="mt-4 max-w-[34ch] text-sm leading-6 text-text-secondary">
+                      {project.info}
+                    </p>
+                    {(project.github_url || project.live_url) && (
+                      <div
+                        data-project-links
+                        className="mt-4 grid w-full max-w-sm grid-cols-2 gap-2"
+                      >
+                        {project.github_url && (
+                          <a
+                            href={project.github_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label={`View ${project.name} source code on GitHub`}
+                            className={`inline-flex min-h-9 min-w-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-border-primary px-2.5 font-mono text-[9px] uppercase tracking-wide text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25 min-[360px]:text-[10px] ${hasBothProjectLinks ? "" : "col-span-2"}`}
+                          >
+                            <BrandGlyph name="github" className="size-3.5" /> GitHub
+                          </a>
+                        )}
+                        {project.live_url && (
+                          <a
+                            href={project.live_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label={`Open live ${project.name} project`}
+                            className={`inline-flex min-h-9 min-w-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-border-primary px-2.5 font-mono text-[9px] uppercase tracking-wide text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25 min-[360px]:text-[10px] ${hasBothProjectLinks ? "" : "col-span-2"}`}
+                          >
+                            <ExternalLink aria-hidden="true" className="size-3.5" /> Live project
+                          </a>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  {(project.github_url || project.live_url) && (
-                    <div
-                      data-project-links
-                      className="mt-4 grid w-full max-w-sm grid-cols-2 gap-2"
-                    >
-                      {project.github_url && (
-                        <a
-                          href={project.github_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label={`View ${project.name} source code on GitHub`}
-                          className={`inline-flex min-h-9 min-w-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-border-primary px-2.5 font-mono text-[9px] uppercase tracking-wide text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25 min-[360px]:text-[10px] ${hasBothProjectLinks ? "" : "col-span-2"}`}
-                        >
-                          <BrandGlyph name="github" className="size-3.5" /> GitHub
-                        </a>
-                      )}
-                      {project.live_url && (
-                        <a
-                          href={project.live_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label={`Open live ${project.name} project`}
-                          className={`inline-flex min-h-9 min-w-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-border-primary px-2.5 font-mono text-[9px] uppercase tracking-wide text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25 min-[360px]:text-[10px] ${hasBothProjectLinks ? "" : "col-span-2"}`}
-                        >
-                          <ExternalLink aria-hidden="true" className="size-3.5" /> Live project
-                        </a>
-                      )}
-                    </div>
-                  )}
                 </header>
 
                 <div className="min-w-0 lg:col-span-8 lg:border-l lg:border-border-primary xl:col-span-9">
-                  {plannedItems.length > 0 && (
-                    <section aria-labelledby={`${shippedRegionId}-planned`}>
-                      <h4 id={`${shippedRegionId}-planned`} className="border-b border-border-primary px-4 py-3 font-mono text-[10px] font-medium uppercase tracking-widest text-text-secondary sm:px-6">
-                        Planned next · {String(plannedItems.length).padStart(2, "0")}
-                      </h4>
-                      <ol>{plannedItems.map((item) => <ReleaseRow key={item.id} item={item} />)}</ol>
-                    </section>
-                  )}
-
-                  {shippedItems.length > 0 && (hiddenShippedCount > 0 || expanded) && (
+                  {shippedItems.length > 0 && (
                     <button
+                      data-release-top-row
                       type="button"
                       aria-expanded={expanded}
                       aria-controls={shippedRegionId}
                       onClick={() => toggleShipped(project.id)}
-                      className="group flex min-h-12 w-full items-center justify-between gap-4 border-t border-border-primary px-4 py-3 text-left font-mono text-[10px] font-medium uppercase tracking-widest text-text-secondary transition-colors hover:bg-neutral-900/[0.025] hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-text-primary dark:hover:bg-white/[0.025] sm:px-6"
+                      className="group flex min-h-12 w-full items-center justify-between gap-4 border-b border-border-primary px-4 text-left font-mono text-[10px] font-medium uppercase tracking-widest text-text-secondary transition-colors hover:bg-neutral-900/[0.025] hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-text-primary dark:hover:bg-white/[0.025] sm:px-6"
                     >
                       <span>
                         {expanded
                           ? "Hide shipped updates"
-                          : `Show ${hiddenShippedCount || shippedItems.length} shipped ${hiddenShippedCount === 1 ? "update" : "updates"}`}
+                          : `Show ${shippedItems.length} shipped ${shippedItems.length === 1 ? "update" : "updates"}`}
                       </span>
-                      <ChevronDown aria-hidden="true" className={`size-4 shrink-0 transition-transform duration-200 motion-reduce:transition-none ${expanded ? "rotate-180" : ""}`} />
+                      <span className="flex shrink-0 items-center gap-3">
+                        <span className="rounded-full border border-border-primary px-2.5 py-1 font-mono text-[9px] tracking-wider text-text-secondary">
+                          {project.current_version}
+                        </span>
+                        <ChevronDown aria-hidden="true" className={`size-4 shrink-0 transition-transform duration-200 motion-reduce:transition-none ${expanded ? "rotate-180" : ""}`} />
+                      </span>
                     </button>
                   )}
 
@@ -197,6 +186,24 @@ export function BuildlogCollection({
                         </section>
                       )}
                     </div>
+                  )}
+
+                  {plannedItems.length > 0 && (
+                    <section aria-labelledby={`${shippedRegionId}-planned`}>
+                      <h4
+                        id={`${shippedRegionId}-planned`}
+                        data-release-top-row={shippedItems.length === 0 ? "true" : undefined}
+                        className="flex min-h-12 items-center justify-between gap-3 border-b border-border-primary px-4 font-mono text-[10px] font-medium uppercase tracking-widest text-text-secondary sm:px-6"
+                      >
+                        <span>Planned next · {String(plannedItems.length).padStart(2, "0")}</span>
+                        {shippedItems.length === 0 && (
+                          <span className="rounded-full border border-border-primary px-2.5 py-1 font-mono text-[9px] tracking-wider text-text-secondary">
+                            {project.current_version}
+                          </span>
+                        )}
+                      </h4>
+                      <ol>{plannedItems.map((item) => <ReleaseRow key={item.id} item={item} />)}</ol>
+                    </section>
                   )}
                 </div>
               </article>

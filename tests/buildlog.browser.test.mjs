@@ -32,12 +32,19 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
             lifecycleLabels: [...document.querySelectorAll("article header")].filter(
               (header) => /In progress|Live|Completed/.test(header.textContent || ""),
             ).length,
-            invalidHeaderDividers: [...document.querySelectorAll("[data-project-header-divider]")].filter(
-              (divider) => {
-                const rect = divider.getBoundingClientRect();
-                return Math.abs(rect.width - 48) > 0.5 || Math.abs(rect.height - 1) > 0.5;
-              },
-            ).length,
+            misalignedLedgerRows:
+              window.innerWidth < 1024
+                ? 0
+                : [...document.querySelectorAll("article")].filter((article) => {
+                    const left = article.querySelector("[data-project-status-row]")?.getBoundingClientRect();
+                    const right = article.querySelector("[data-release-top-row]")?.getBoundingClientRect();
+                    return (
+                      !left ||
+                      !right ||
+                      Math.abs(left.top - right.top) > 0.5 ||
+                      Math.abs(left.bottom - right.bottom) > 0.5
+                    );
+                  }).length,
             duplicateIds: ids.length - new Set(ids).size,
             insecureLinks: externalLinks.filter(
               (link) => link.getAttribute("rel") !== "noopener noreferrer",
@@ -68,7 +75,7 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
         assert.equal(initial.overflow, 0, `${theme} ${width}px overflow`);
         assert.ok(initial.articles > 0, `${theme} ${width}px has projects`);
         assert.equal(initial.lifecycleLabels, initial.articles, `${theme} ${width}px lifecycle labels`);
-        assert.equal(initial.invalidHeaderDividers, 0, `${theme} ${width}px header dividers`);
+        assert.equal(initial.misalignedLedgerRows, 0, `${theme} ${width}px ledger row alignment`);
         assert.equal(initial.duplicateIds, 0, `${theme} ${width}px duplicate IDs`);
         assert.equal(initial.insecureLinks, 0, `${theme} ${width}px external-link security`);
         assert.equal(initial.invalidLinkLayouts, 0, `${theme} ${width}px project-link layout`);

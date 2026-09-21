@@ -20,10 +20,10 @@ Status: implemented and verified; owner lock pending.
 - Below `lg`: one-column project header followed by release rows.
 - `lg`: 4/8-column split with a sticky project header.
 - `xl`: 3/9-column split.
-- Project header uses a 12px mono index, 30px Instrument Serif project name,
-  24px serif tagline, 14/24px summary, version pill, and shipped count.
-- A quiet 48px token divider separates the project number/lifecycle row from
-  the project title.
+- Project header uses a 48px number/lifecycle bar followed by a 30px Instrument
+  Serif project name, 24px serif tagline, and 14/24px summary.
+- At `lg+`, the left number/lifecycle bar and right shipped-control bar use the
+  same height, padding, and bottom divider, forming one aligned ledger row.
 - An admin-managed lifecycle label appears beside the index: In progress, Live,
   or Completed. Draft/Published/Archived remains a separate visibility setting.
 - Release rows use a crisp 20px rounded-square status mark, 16/22px title,
@@ -34,7 +34,9 @@ Status: implemented and verified; owner lock pending.
   only one project history can be expanded at a time.
 - The same disclosure remains above the shipped region when closed and open, so
   the close action never moves below a long expanded list.
-- Projects without planned work preview their latest two shipped items.
+- Shipped controls and content precede Planned Next. The version pill lives in
+  the shipped-control row, or in Planned Next when a project has no shipped items.
+- All shipped rows remain collapsed until the top shipped-control row is opened.
 - Optional GitHub and Live project actions appear below version metadata only
   when validated HTTPS links exist.
 - Project actions use a bounded two-column grid: two links split equally, one
