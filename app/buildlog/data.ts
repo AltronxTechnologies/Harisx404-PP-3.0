@@ -76,6 +76,6 @@ const loadBuildlogProjects = async (): Promise<BuildlogProject[]> => {
 
 export const fetchBuildlogProjects = unstable_cache(
   loadBuildlogProjects,
-  ["buildlog-projects-v4"],
+  ["buildlog-projects-v5"],
   { revalidate: 3600, tags: ["buildlog"] },
 );

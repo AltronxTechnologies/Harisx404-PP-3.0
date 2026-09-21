@@ -40,8 +40,11 @@ Legacy Changelog admin/API files remain byte-identical to their locked baseline.
 - Removed duplicate Buildlog-local rails; the global frame is the only frame.
 - Added release totals, stable project/item keys, collision-free IDs, and
   explicit per-item Shipped/Planned screen-reader text.
-- Added one-at-a-time shipped history disclosures. Planned work remains visible;
-  completed projects preview only their latest two shipped updates.
+- Added one-at-a-time shipped history disclosures. All shipped rows remain
+  collapsed until requested, while planned work remains visible.
+- Added one clearly labelled temporary shipped and planned preview item per
+  project in fallback and clean-database seed data. Database items can be removed
+  through Admin; fallback fixtures require removal from source before deployment.
 - Replaced the public filter rail with an admin-managed lifecycle label beside
   every project heading: In progress, Live, or Completed. Publication visibility
   remains independently controlled by Draft/Published/Archived.
@@ -76,6 +79,7 @@ Legacy Changelog admin/API files remain byte-identical to their locked baseline.
 | TypeScript | Passed, 0 errors |
 | Targeted ESLint | Passed, 0 errors/warnings |
 | Buildlog integration | 5/5 passed |
+| Semantic-version behavior | 4/4 passed |
 | Clean PostgreSQL 16 migration test | Passed |
 | Seed rerun | Passed; inserted 0 duplicate rows |
 | Published-only view and grants | Passed |

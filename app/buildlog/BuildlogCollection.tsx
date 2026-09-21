@@ -20,9 +20,9 @@ function ReleaseRow({ item }: { item: BuildlogItem }) {
         aria-hidden="true"
         className="absolute inset-0 bg-neutral-900/[0.025] opacity-0 transition-opacity duration-200 group-hover/item:opacity-100 dark:bg-white/[0.025] motion-reduce:transition-none"
       />
-      <div className="relative flex h-full items-start gap-3 px-4 py-3 sm:gap-4 sm:px-6 sm:py-4">
+      <div className="relative flex h-full items-center gap-3 px-4 sm:gap-4 sm:px-6">
         <SketchCheckbox checked={item.done} />
-        <div className="flex min-w-0 flex-1 flex-col gap-3 min-[430px]:flex-row min-[430px]:items-start min-[430px]:justify-between">
+        <div data-release-content className="flex min-w-0 flex-1 flex-col gap-3 min-[430px]:flex-row min-[430px]:items-start min-[430px]:justify-between">
           <div className="min-w-0">
             <p
               className={`line-clamp-2 text-base font-medium leading-[22px] tracking-[-0.01em] ${

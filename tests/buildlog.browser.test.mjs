@@ -56,6 +56,19 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
             lifecycleLabels: [...document.querySelectorAll("article header")].filter(
               (header) => /In progress|Live|Completed/.test(header.textContent || ""),
             ).length,
+            misalignedReleaseContent: [...document.querySelectorAll("article li")].filter(
+              (row) => {
+                const rowRect = row.getBoundingClientRect();
+                const markRect = row.querySelector("[data-release-state-mark]")?.getBoundingClientRect();
+                const contentRect = row.querySelector("[data-release-content]")?.getBoundingClientRect();
+                if (!markRect || !contentRect) return true;
+                const rowCenter = rowRect.top + rowRect.height / 2;
+                return (
+                  Math.abs(markRect.top + markRect.height / 2 - rowCenter) > 1 ||
+                  Math.abs(contentRect.top + contentRect.height / 2 - rowCenter) > 1
+                );
+              },
+            ).length,
             misalignedLedgerRows:
               window.innerWidth < 1024
                 ? 0
@@ -105,6 +118,7 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
         assert.ok(initial.releaseSummaryInset <= 0.5, `${theme} ${width}px release summary width`);
         assert.equal(initial.invalidReleaseSummary, false, `${theme} ${width}px release summary`);
         assert.equal(initial.lifecycleLabels, initial.articles, `${theme} ${width}px lifecycle labels`);
+        assert.equal(initial.misalignedReleaseContent, 0, `${theme} ${width}px release content alignment`);
         assert.equal(initial.misalignedLedgerRows, 0, `${theme} ${width}px ledger row alignment`);
         assert.equal(initial.invalidProjectBoundaries, 0, `${theme} ${width}px project boundaries`);
         assert.equal(initial.duplicateIds, 0, `${theme} ${width}px duplicate IDs`);
@@ -126,7 +140,10 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
         await page.waitForTimeout(200);
         assert.equal(await page.locator("button[aria-expanded='true']").count(), 1);
         assert.ok((await page.locator("article li").count()) > initial.items);
-        assert.match(await firstDisclosure.textContent(), /Hide shipped updates\s*·\s*05\s*v2\.1/i);
+        assert.ok(
+          (await page.getByText(/Demo: shipped update preview/).count()) > 0,
+        );
+        assert.match(await firstDisclosure.textContent(), /Hide shipped updates\s*·\s*06\s*v2\.1/i);
         assert.equal(
           await firstDisclosure.evaluate(
             (element) => element.getBoundingClientRect().top + window.scrollY,

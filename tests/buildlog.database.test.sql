@@ -42,6 +42,24 @@ BEGIN
     RAISE EXCEPTION 'website lifecycle status was not seeded as live';
   END IF;
 
+  IF (
+    SELECT count(*)
+    FROM public.buildlog_projects AS project,
+      jsonb_array_elements(project.items) AS item
+    WHERE item->>'title' = 'Demo: shipped update preview'
+  ) <> 4 THEN
+    RAISE EXCEPTION 'expected one shipped preview item per seeded project';
+  END IF;
+
+  IF (
+    SELECT count(*)
+    FROM public.buildlog_projects AS project,
+      jsonb_array_elements(project.items) AS item
+    WHERE item->>'title' = 'Demo: planned update preview'
+  ) <> 4 THEN
+    RAISE EXCEPTION 'expected one planned preview item per seeded project';
+  END IF;
+
   BEGIN
     UPDATE public.buildlog_projects
     SET project_status = 'completed'

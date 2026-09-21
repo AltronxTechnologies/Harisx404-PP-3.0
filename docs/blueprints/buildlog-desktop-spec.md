@@ -80,3 +80,6 @@ Status: implemented and verified; owner lock pending.
 - Admin links are independent and optional: both, one, or neither may be shown.
 - Project lifecycle is independently managed as In progress, Live, or Completed.
   Completed is accepted only when every release item is shipped.
+- Temporary `Demo:` shipped/planned fixtures exist in fallback and initial seed
+  data only to exercise long-list layout. Remove database items through Admin and
+  remove fallback fixtures from source before deployment.

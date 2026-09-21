@@ -2,6 +2,7 @@
 export function SketchCheckbox({ checked }: { checked: boolean }) {
   return (
     <svg
+      data-release-state-mark
       viewBox="0 0 20 20"
       className="mt-0.5 size-5 shrink-0"
       aria-hidden="true"

@@ -22,6 +22,20 @@ export interface BuildlogProject {
   items: BuildlogItem[];
 }
 
+const shippedPreviewItem: BuildlogItem = {
+  title: "Demo: shipped update preview",
+  description: "Temporary layout preview. Replace or remove this item from the Buildlog Admin before deployment.",
+  badge: "preview",
+  done: true,
+};
+
+const plannedPreviewItem: BuildlogItem = {
+  title: "Demo: planned update preview",
+  description: "Temporary layout preview. Replace or remove this item from the Buildlog Admin before deployment.",
+  badge: "preview",
+  done: false,
+};
+
 export const buildlogProjects: BuildlogProject[] = [
   {
     name: "This Website",
@@ -74,6 +88,8 @@ export const buildlogProjects: BuildlogProject[] = [
         badge: "planned",
         done: false,
       },
+      { ...shippedPreviewItem },
+      { ...plannedPreviewItem },
     ],
   },
   {
@@ -113,6 +129,8 @@ export const buildlogProjects: BuildlogProject[] = [
         badge: "planned",
         done: false,
       },
+      { ...shippedPreviewItem },
+      { ...plannedPreviewItem },
     ],
   },
   {
@@ -153,6 +171,8 @@ export const buildlogProjects: BuildlogProject[] = [
         badge: "planned",
         done: false,
       },
+      { ...shippedPreviewItem },
+      { ...plannedPreviewItem },
     ],
   },
   {
@@ -186,6 +206,8 @@ export const buildlogProjects: BuildlogProject[] = [
         badge: "planned",
         done: false,
       },
+      { ...shippedPreviewItem },
+      { ...plannedPreviewItem },
     ],
   },
 ];

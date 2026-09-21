@@ -17,6 +17,7 @@ test("Buildlog renders the responsive release collection", async () => {
   assert.match(html, /aria-expanded="false"/);
   assert.match(html, />GitHub</);
   assert.match(html, /Live project/);
+  assert.match(html, /Demo: planned update preview/);
   assert.match(html, /Live/);
   assert.match(html, /In progress/);
   assert.doesNotMatch(html, /Filter Buildlog projects|All 04|Completed 00/);
@@ -124,6 +125,8 @@ test("Buildlog schema, seed, lifecycle, links, API, admin form, and cache contra
   assert.match(statusMigration, /in_progress.*live.*completed/s);
   assert.match(statusMigration, /buildlog_items_all_done/);
   assert.match(statusMigration, /status_column_was_missing/);
+  assert.match(seed, /Demo: shipped update preview/);
+  assert.match(seed, /Demo: planned update preview/);
   assert.match(api, /auth\.getUser\(\)/);
   assert.match(api, /revalidatePath\("\/buildlog"\)/);
   assert.match(api, /revalidateTag\("buildlog"\)/);
