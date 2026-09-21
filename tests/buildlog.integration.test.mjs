@@ -12,7 +12,7 @@ test("Buildlog renders the responsive release collection", async () => {
   assert.match(html, /The build never stops/);
   assert.match(html, /Build\. Ship\./);
   assert.match(html, /Release archive/);
-  assert.match(html, /Shipped work and clearly labelled plans/);
+  assert.doesNotMatch(html, /Shipped work and clearly labelled plans/);
   assert.match(html, /Show 5 shipped updates/);
   assert.match(html, /aria-expanded="false"/);
   assert.match(html, />GitHub</);
@@ -44,6 +44,7 @@ test("Buildlog source has valid hero semantics and explicit route states", async
       collection.indexOf("<div id={shippedRegionId}>")
   );
   assert.match(collection, /data-project-links/);
+  assert.match(collection, /data-project-header-divider/);
   assert.match(collection, /col-span-2/);
   assert.match(collection, /whitespace-nowrap/);
   assert.doesNotMatch(mark, /feTurbulence|feDisplacementMap/);

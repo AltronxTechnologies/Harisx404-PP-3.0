@@ -108,7 +108,12 @@ export function BuildlogCollection({
                       {lifecycle.label}
                     </span>
                   </div>
-                  <h3 className="mt-2 [font-family:var(--font-instrument-serif),serif] text-2xl font-medium leading-tight text-text-primary md:text-[30px]">
+                  <div
+                    data-project-header-divider
+                    aria-hidden="true"
+                    className="mt-3 h-px w-12 bg-border-primary"
+                  />
+                  <h3 className="mt-4 [font-family:var(--font-instrument-serif),serif] text-2xl font-medium leading-tight text-text-primary md:text-[30px]">
                     {project.name}
                   </h3>
                   <p className="mt-1 [font-family:var(--font-instrument-serif),serif] text-xl font-medium leading-tight text-text-secondary md:text-2xl">

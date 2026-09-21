@@ -22,6 +22,8 @@ Status: implemented and verified; owner lock pending.
 - `xl`: 3/9-column split.
 - Project header uses a 12px mono index, 30px Instrument Serif project name,
   24px serif tagline, 14/24px summary, version pill, and shipped count.
+- A quiet 48px token divider separates the project number/lifecycle row from
+  the project title.
 - An admin-managed lifecycle label appears beside the index: In progress, Live,
   or Completed. Draft/Published/Archived remains a separate visibility setting.
 - Release rows use a crisp 20px rounded-square status mark, 16/22px title,

@@ -59,17 +59,12 @@ export default async function BuildlogPage({
 
       <section aria-labelledby="buildlog-collection-heading" className="mt-14 px-2 sm:px-4">
         <div className="mb-6 flex flex-col gap-3 border-y border-border-primary px-2 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-4">
-          <div>
-            <h2
-              id="buildlog-collection-heading"
-              className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary"
-            >
-              Release archive
-            </h2>
-            <p className="mt-1.5 text-sm text-text-secondary">
-              Shipped work and clearly labelled plans, organized by project.
-            </p>
-          </div>
+          <h2
+            id="buildlog-collection-heading"
+            className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary"
+          >
+            Release archive
+          </h2>
           {projects.length > 0 && (
             <p className="font-mono text-[10px] uppercase tracking-widest text-text-secondary">
               {String(shippedCount).padStart(2, "0")} shipped ·{" "}

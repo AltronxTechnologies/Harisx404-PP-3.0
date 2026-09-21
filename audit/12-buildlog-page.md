@@ -19,6 +19,8 @@ Legacy Changelog admin/API files remain byte-identical to their locked baseline.
 - Replaced invalid paragraph-inside-H1 markup with the locked page-header rhythm.
 - Reused `GridWrapper`, `PaperHeroTexture`, type scales, color tokens, border
   language, spacing, CTA placement, and responsive hierarchy from locked pages.
+- Removed the redundant release-archive description and added a restrained 48px
+  divider beneath each project number/lifecycle row.
 - Removed duplicate Buildlog-local rails; the global frame is the only frame.
 - Added release totals, stable project/item keys, collision-free IDs, and
   explicit per-item Shipped/Planned screen-reader text.
