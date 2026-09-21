@@ -71,7 +71,7 @@ export default async function BuildlogPage({
           {projects.length > 0 && (
             <div className="flex shrink-0 items-center gap-2.5 font-mono uppercase sm:gap-3">
               <p className="flex items-baseline gap-1.5 whitespace-nowrap">
-                <span className="text-sm font-semibold tabular-nums text-text-primary">
+                <span className="tabular-nums text-[9px] tracking-widest text-text-secondary min-[360px]:text-[10px]">
                   {String(shippedCount).padStart(2, "0")}
                 </span>
                 <span className="text-[9px] tracking-widest text-text-secondary min-[360px]:text-[10px]">
@@ -80,7 +80,7 @@ export default async function BuildlogPage({
               </p>
               <span aria-hidden="true" className="h-4 w-px bg-border-primary" />
               <p className="flex items-baseline gap-1.5 whitespace-nowrap">
-                <span className="text-sm font-semibold tabular-nums text-text-primary">
+                <span className="tabular-nums text-[9px] tracking-widest text-text-secondary min-[360px]:text-[10px]">
                   {String(plannedCount).padStart(2, "0")}
                 </span>
                 <span className="text-[9px] tracking-widest text-text-secondary min-[360px]:text-[10px]">

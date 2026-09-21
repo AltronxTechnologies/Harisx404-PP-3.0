@@ -28,7 +28,8 @@ Status: implemented and verified; owner lock pending.
   and `white/20` dark) extended through the section padding to the full content
   width, while internal rows retain the quieter 1px shared border token.
 - The Release archive has no outer rules. Its label sits left while two compact
-  tabular-number metrics sit right, separated by one 16px vertical hairline; the
+  metrics sit right with numbers and labels sharing one mono treatment, separated
+  by a 16px vertical hairline; the
   first project boundary provides the lower separation.
 - An admin-managed lifecycle label appears beside the index: In progress, Live,
   or Completed. Draft/Published/Archived remains a separate visibility setting.

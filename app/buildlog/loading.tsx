@@ -22,9 +22,9 @@ export default function BuildlogLoading() {
           <div className="-mx-2 flex min-h-14 items-center justify-between gap-4 px-4 py-3 sm:-mx-4 sm:px-8">
             <div className={`h-3 w-32 rounded bg-border-primary/40 ${pulse}`} />
             <div className="flex items-center gap-3">
-              <div className={`h-4 w-20 rounded bg-border-primary/30 ${pulse}`} />
+              <div className={`h-3 w-20 rounded bg-border-primary/30 ${pulse}`} />
               <div className="h-4 w-px bg-border-primary" />
-              <div className={`h-4 w-20 rounded bg-border-primary/30 ${pulse}`} />
+              <div className={`h-3 w-20 rounded bg-border-primary/30 ${pulse}`} />
             </div>
           </div>
           {[0, 1, 2].map((project) => (
