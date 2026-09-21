@@ -60,7 +60,7 @@ export default async function BuildlogPage({
       <section aria-labelledby="buildlog-collection-heading" className="mt-14 px-2 sm:px-4">
         <div
           data-release-summary
-          className="-mx-2 mb-6 flex flex-col gap-3 border-y border-border-primary px-4 py-4 sm:-mx-4 sm:flex-row sm:items-center sm:justify-between sm:px-8"
+          className="relative -mx-2 mb-6 flex flex-col gap-3 px-4 py-4 before:absolute before:left-1/2 before:top-0 before:h-px before:w-screen before:-translate-x-1/2 before:bg-border-primary before:content-[''] sm:-mx-4 sm:flex-row sm:items-center sm:justify-between sm:px-8"
         >
           <h2
             id="buildlog-collection-heading"

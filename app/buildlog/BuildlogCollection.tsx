@@ -14,17 +14,17 @@ const projectStatus = {
 
 function ReleaseRow({ item }: { item: BuildlogItem }) {
   return (
-    <li className="group/item relative border-b border-border-primary last:border-b-0">
+    <li className="group/item relative h-[148px] border-b border-border-primary last:border-b-0 min-[430px]:h-[104px]">
       <div
         aria-hidden="true"
         className="absolute inset-0 bg-neutral-900/[0.025] opacity-0 transition-opacity duration-200 group-hover/item:opacity-100 dark:bg-white/[0.025] motion-reduce:transition-none"
       />
-      <div className="relative flex items-start gap-3 px-4 py-5 sm:gap-4 sm:px-6">
+      <div className="relative flex h-full items-start gap-3 px-4 py-3 sm:gap-4 sm:px-6 sm:py-4">
         <SketchCheckbox checked={item.done} />
         <div className="flex min-w-0 flex-1 flex-col gap-3 min-[430px]:flex-row min-[430px]:items-start min-[430px]:justify-between">
           <div className="min-w-0">
             <p
-              className={`text-base font-medium leading-[22px] tracking-[-0.01em] ${
+              className={`line-clamp-2 text-base font-medium leading-[22px] tracking-[-0.01em] ${
                 item.done ? "text-text-primary" : "text-text-secondary"
               }`}
             >
@@ -32,7 +32,7 @@ function ReleaseRow({ item }: { item: BuildlogItem }) {
               {item.title}
             </p>
             {item.description && (
-              <p className="mt-1.5 max-w-2xl text-[13px] leading-[1.6] text-text-secondary">
+              <p className="mt-1.5 line-clamp-2 max-w-2xl text-[13px] leading-[1.6] text-text-secondary">
                 {item.description}
               </p>
             )}
@@ -44,6 +44,49 @@ function ReleaseRow({ item }: { item: BuildlogItem }) {
       </div>
     </li>
   );
+}
+
+function ReleaseList({ items, label }: { items: BuildlogItem[]; label: string }) {
+  const scrollable = items.length > 3;
+  return (
+    <ol
+      aria-label={label}
+      tabIndex={scrollable ? 0 : undefined}
+      className={
+        scrollable
+          ? "max-h-[444px] overflow-y-auto overscroll-contain focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-text-primary min-[430px]:max-h-[312px] [scrollbar-color:var(--border-primary)_transparent] [scrollbar-width:thin]"
+          : undefined
+      }
+    >
+      {items.map((item) => (
+        <ReleaseRow key={item.id} item={item} />
+      ))}
+    </ol>
+  );
+}
+
+function parseSemanticVersion(value: string) {
+  const match = value.trim().match(/^v?(\d+)(?:\.(\d+))?(?:\.(\d+))?$/i);
+  return match
+    ? [Number(match[1]), Number(match[2] || 0), Number(match[3] || 0)]
+    : null;
+}
+
+function compareShipped(left: BuildlogItem, right: BuildlogItem) {
+  const leftVersion = parseSemanticVersion(left.badge);
+  const rightVersion = parseSemanticVersion(right.badge);
+  if (leftVersion && rightVersion) {
+    for (let index = 0; index < leftVersion.length; index += 1) {
+      if (leftVersion[index] !== rightVersion[index]) {
+        return rightVersion[index] - leftVersion[index];
+      }
+    }
+  } else if (leftVersion) {
+    return -1;
+  } else if (rightVersion) {
+    return 1;
+  }
+  return left.display_order - right.display_order;
 }
 
 export function BuildlogCollection({
@@ -86,18 +129,21 @@ export function BuildlogCollection({
           {projects.map((project) => {
             const projectIndex = projects.findIndex((candidate) => candidate.id === project.id);
             const plannedItems = project.items.filter((item) => !item.done);
-            const shippedItems = project.items.filter((item) => item.done);
+            const shippedItems = project.items.filter((item) => item.done).sort(compareShipped);
             const expanded = expandedProjectId === project.id;
             const visibleShipped = expanded ? shippedItems : [];
             const shippedRegionId = `buildlog-shipped-${project.id}`;
             const hasBothProjectLinks = Boolean(project.github_url && project.live_url);
             const lifecycle = projectStatus[project.project_status];
+            const latestVersion =
+              shippedItems.find((item) => parseSemanticVersion(item.badge))?.badge ||
+              project.current_version;
 
             return (
               <article
                 key={project.id}
                 data-project-boundary
-                className="relative grid min-w-0 grid-cols-1 before:absolute before:-left-2 before:-right-2 before:top-0 before:h-0.5 before:bg-neutral-400/60 before:content-[''] dark:before:bg-white/20 sm:before:-left-4 sm:before:-right-4 lg:grid-cols-12"
+                className="relative grid min-w-0 grid-cols-1 before:absolute before:-left-2 before:-right-2 before:top-0 before:h-[1.5px] before:bg-neutral-400/60 before:content-[''] dark:before:bg-white/20 sm:before:-left-4 sm:before:-right-4 lg:grid-cols-12"
               >
                 <header className="border-b border-border-primary lg:sticky lg:top-28 lg:col-span-4 lg:self-start lg:border-b-0 xl:col-span-3">
                   <div
@@ -165,11 +211,14 @@ export function BuildlogCollection({
                       <span>
                         {expanded
                           ? "Hide shipped updates"
-                          : `Show ${shippedItems.length} shipped ${shippedItems.length === 1 ? "update" : "updates"}`}
+                          : "Show shipped updates"}
+                        <span className="ml-1.5 text-text-secondary">
+                          · {String(shippedItems.length).padStart(2, "0")}
+                        </span>
                       </span>
                       <span className="flex shrink-0 items-center gap-3">
                         <span className="rounded-full border border-border-primary px-2.5 py-1 font-mono text-[9px] tracking-wider text-text-secondary">
-                          {project.current_version}
+                          {latestVersion}
                         </span>
                         <ChevronDown aria-hidden="true" className={`size-4 shrink-0 transition-transform duration-200 motion-reduce:transition-none ${expanded ? "rotate-180" : ""}`} />
                       </span>
@@ -179,11 +228,8 @@ export function BuildlogCollection({
                   {shippedItems.length > 0 && (
                     <div id={shippedRegionId}>
                       {visibleShipped.length > 0 && (
-                        <section aria-labelledby={`${shippedRegionId}-heading`}>
-                          <h4 id={`${shippedRegionId}-heading`} className="border-b border-border-primary px-4 py-3 font-mono text-[10px] font-medium uppercase tracking-widest text-text-secondary sm:px-6">
-                            Shipped · {String(shippedItems.length).padStart(2, "0")}
-                          </h4>
-                          <ol>{visibleShipped.map((item) => <ReleaseRow key={item.id} item={item} />)}</ol>
+                        <section aria-label="Shipped updates">
+                          <ReleaseList items={visibleShipped} label="Shipped updates" />
                         </section>
                       )}
                     </div>
@@ -203,7 +249,7 @@ export function BuildlogCollection({
                           </span>
                         )}
                       </h4>
-                      <ol>{plannedItems.map((item) => <ReleaseRow key={item.id} item={item} />)}</ol>
+                      <ReleaseList items={plannedItems} label="Planned updates" />
                     </section>
                   )}
                 </div>

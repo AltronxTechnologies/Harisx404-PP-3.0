@@ -19,12 +19,12 @@ export default function BuildlogLoading() {
           </div>
         </GridWrapper>
         <section className="mt-14 px-2 sm:px-4">
-          <div className="-mx-2 mb-6 flex flex-col gap-3 border-y border-border-primary px-4 py-4 sm:-mx-4 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+          <div className="relative -mx-2 mb-6 flex flex-col gap-3 px-4 py-4 before:absolute before:left-1/2 before:top-0 before:h-px before:w-screen before:-translate-x-1/2 before:bg-border-primary before:content-[''] sm:-mx-4 sm:flex-row sm:items-center sm:justify-between sm:px-8">
             <div className={`h-3 w-32 rounded bg-border-primary/40 ${pulse}`} />
             <div className={`h-3 w-32 rounded bg-border-primary/30 ${pulse}`} />
           </div>
           {[0, 1, 2].map((project) => (
-            <div key={project} className="relative grid before:absolute before:-left-2 before:-right-2 before:top-0 before:h-0.5 before:bg-neutral-400/60 before:content-[''] dark:before:bg-white/20 sm:before:-left-4 sm:before:-right-4 lg:grid-cols-12">
+            <div key={project} className="relative grid before:absolute before:-left-2 before:-right-2 before:top-0 before:h-[1.5px] before:bg-neutral-400/60 before:content-[''] dark:before:bg-white/20 sm:before:-left-4 sm:before:-right-4 lg:grid-cols-12">
               <div className="border-b border-border-primary lg:col-span-4 lg:border-b-0 xl:col-span-3">
                 <div className="flex min-h-12 items-center justify-between gap-3 border-b border-border-primary px-4 sm:px-6">
                   <div className={`h-3 w-6 rounded bg-border-primary/35 ${pulse}`} />
@@ -44,8 +44,8 @@ export default function BuildlogLoading() {
                 <div className="flex min-h-12 items-center border-b border-border-primary px-4 sm:px-6">
                   <div className={`h-3 w-28 rounded bg-border-primary/35 ${pulse}`} />
                 </div>
-                {[0, 1].map((item) => (
-                  <div key={item} className="flex gap-4 border-b border-border-primary px-4 py-5 sm:px-6">
+                {[0, 1, 2].map((item) => (
+                  <div key={item} className="flex h-[148px] gap-4 border-b border-border-primary px-4 py-3 min-[430px]:h-[104px] sm:px-6 sm:py-4">
                     <div className={`size-5 shrink-0 rounded-md bg-border-primary/35 ${pulse}`} />
                     <div className="flex-1 space-y-2">
                       <div className={`h-4 w-2/3 rounded bg-border-primary/40 ${pulse}`} />

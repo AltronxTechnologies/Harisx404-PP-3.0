@@ -13,7 +13,7 @@ test("Buildlog renders the responsive release collection", async () => {
   assert.match(html, /Build\. Ship\./);
   assert.match(html, /Release archive/);
   assert.doesNotMatch(html, /Shipped work and clearly labelled plans/);
-  assert.match(html, /Show 5 shipped updates/);
+  assert.match(html, /Show shipped updates/);
   assert.match(html, /aria-expanded="false"/);
   assert.match(html, />GitHub</);
   assert.match(html, /Live project/);
@@ -38,7 +38,8 @@ test("Buildlog source has valid hero semantics and explicit route states", async
   assert.match(page, /PaperHeroTexture/);
   assert.match(page, /border-border-primary/);
   assert.match(page, /data-release-summary/);
-  assert.match(page, /-mx-2.*sm:-mx-4/);
+  assert.match(page, /before:w-screen/);
+  assert.doesNotMatch(page, /data-release-summary[\s\S]{0,250}border-y/);
   assert.match(page, /className="mt-28"/);
   assert.match(page, /<CtaSection \/>/);
   assert.match(page, /projects\.length > 0/);
@@ -51,10 +52,18 @@ test("Buildlog source has valid hero semantics and explicit route states", async
   assert.match(collection, /data-release-top-row/);
   assert.match(collection, /data-project-boundary/);
   assert.match(collection, /before:-left-2 before:-right-2/);
-  assert.match(collection, /before:h-0\.5/);
+  assert.match(collection, /before:h-\[1\.5px\]/);
   assert.match(collection, /before:bg-neutral-400\/60/);
   assert.match(collection, /dark:before:bg-white\/20/);
   assert.match(collection, /shippedItems\.length === 0/);
+  assert.match(collection, /parseSemanticVersion/);
+  assert.match(collection, /String\(shippedItems\.length\)\.padStart\(2, "0"\)/);
+  assert.match(collection, /sort\(compareShipped\)/);
+  assert.match(collection, /find\(\(item\) => parseSemanticVersion\(item\.badge\)\)/);
+  assert.match(collection, /line-clamp-2/);
+  assert.match(collection, /max-h-\[444px\]/);
+  assert.match(collection, /min-\[430px\]:max-h-\[312px\]/);
+  assert.doesNotMatch(collection, /Shipped ·/);
   assert.ok(
     collection.indexOf("aria-controls={shippedRegionId}") <
       collection.indexOf("id={`${shippedRegionId}-planned`}")

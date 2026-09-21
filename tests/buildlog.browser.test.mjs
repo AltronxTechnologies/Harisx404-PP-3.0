@@ -40,6 +40,16 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
                 Math.abs(sectionRect.right - summaryRect.right),
               );
             })(),
+            invalidReleaseTopRule: (() => {
+              const summary = document.querySelector("[data-release-summary]");
+              if (!summary) return true;
+              const style = getComputedStyle(summary, "::before");
+              return (
+                Math.abs(Number.parseFloat(style.width) - window.innerWidth) > 1 ||
+                Math.abs(Number.parseFloat(style.height) - 1) > 0.5 ||
+                getComputedStyle(summary).borderBottomWidth !== "0px"
+              );
+            })(),
             lifecycleLabels: [...document.querySelectorAll("article header")].filter(
               (header) => /In progress|Live|Completed/.test(header.textContent || ""),
             ).length,
@@ -56,6 +66,10 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
                       Math.abs(left.bottom - right.bottom) > 0.5
                     );
                   }).length,
+            invalidProjectBoundaries: [...document.querySelectorAll("[data-project-boundary]")].filter(
+              (article) =>
+                Math.abs(Number.parseFloat(getComputedStyle(article, "::before").height) - 1.5) > 0.1,
+            ).length,
             duplicateIds: ids.length - new Set(ids).size,
             insecureLinks: externalLinks.filter(
               (link) => link.getAttribute("rel") !== "noopener noreferrer",
@@ -86,8 +100,10 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
         assert.equal(initial.overflow, 0, `${theme} ${width}px overflow`);
         assert.ok(initial.articles > 0, `${theme} ${width}px has projects`);
         assert.ok(initial.releaseSummaryInset <= 0.5, `${theme} ${width}px release summary width`);
+        assert.equal(initial.invalidReleaseTopRule, false, `${theme} ${width}px release top rule`);
         assert.equal(initial.lifecycleLabels, initial.articles, `${theme} ${width}px lifecycle labels`);
         assert.equal(initial.misalignedLedgerRows, 0, `${theme} ${width}px ledger row alignment`);
+        assert.equal(initial.invalidProjectBoundaries, 0, `${theme} ${width}px project boundaries`);
         assert.equal(initial.duplicateIds, 0, `${theme} ${width}px duplicate IDs`);
         assert.equal(initial.insecureLinks, 0, `${theme} ${width}px external-link security`);
         assert.equal(initial.invalidLinkLayouts, 0, `${theme} ${width}px project-link layout`);
@@ -106,6 +122,7 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
         await page.waitForTimeout(200);
         assert.equal(await page.locator("button[aria-expanded='true']").count(), 1);
         assert.ok((await page.locator("article li").count()) > initial.items);
+        assert.match(await firstDisclosure.textContent(), /Hide shipped updates\s*·\s*05\s*v2\.1/i);
         assert.equal(
           await firstDisclosure.evaluate(
             (element) => element.getBoundingClientRect().top + window.scrollY,
@@ -121,6 +138,22 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
           (element) => element.getBoundingClientRect().top + window.scrollY,
         );
         assert.ok(shippedTop >= disclosureBottom - 1, `${theme} ${width}px shipped rows open below control`);
+        const shippedList = page.locator(`#${controlledId} ol`);
+        const scrollMetrics = await shippedList.evaluate((element) => ({
+          clientHeight: element.clientHeight,
+          scrollHeight: element.scrollHeight,
+          rowHeights: [...element.children]
+            .slice(0, 3)
+            .map((child) => child.getBoundingClientRect().height),
+        }));
+        assert.ok(scrollMetrics.scrollHeight > scrollMetrics.clientHeight);
+        assert.ok(
+          Math.abs(
+            scrollMetrics.rowHeights.reduce((sum, height) => sum + height, 0) -
+              scrollMetrics.clientHeight,
+          ) <= 1,
+          `${theme} ${width}px shows exactly three shipped rows`,
+        );
         await firstDisclosure.click();
         await page.waitForTimeout(200);
         assert.equal(await firstDisclosure.getAttribute("aria-expanded"), "false");

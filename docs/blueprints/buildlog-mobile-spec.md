@@ -9,13 +9,14 @@ Companion: `buildlog-desktop-spec.md`.
 - Hero uses the locked 46px Instrument Serif page-heading scale and wraps to two
   balanced lines where necessary.
 - Toolbar stacks its count below the collection description.
-- Release archive top and bottom rules extend to the full central content width.
+- A single Release archive top rule spans the full viewport; the first project
+  boundary supplies the lower separation.
 - No project filter rail is rendered; lifecycle is communicated directly beside
   each project title block.
 - The number/lifecycle row and shipped-control row share the same 48px height and
   full-width bottom divider.
-- Project headers use 16px padding; release rows use 16px horizontal and 20px
-  vertical padding.
+- Project headers use 16px padding; fixed-height release rows use 16px horizontal
+  padding and 12px vertical padding below `sm` (16px from `sm` upward).
 - Crisp shipped/planned status marks and copy stay aligned at the top of each row.
 - Badges stack below release copy under 430px and retain content width.
 - Optional GitHub/live actions wrap below project metadata without overflow.
@@ -25,6 +26,8 @@ Companion: `buildlog-desktop-spec.md`.
 - Planned rows remain visible; shipped rows use one full-width disclosure.
 - Shipped updates appear before Planned Next, with the version pill in the top
   release-control row.
+- Both shipped and planned lists show three complete rows before scrolling;
+  descriptions are clamped to two lines for stable geometry.
 - The same disclosure stays above expanded shipped rows in both states.
 - Project sections remain one column; sticky behavior starts only at `lg`.
 

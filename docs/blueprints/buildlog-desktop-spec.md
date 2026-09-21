@@ -24,11 +24,11 @@ Status: implemented and verified; owner lock pending.
   Serif project name, 24px serif tagline, and 14/24px summary.
 - At `lg+`, the left number/lifecycle bar and right shipped-control bar use the
   same height, padding, and bottom divider, forming one aligned ledger row.
-- Project-to-project boundaries use a 2px neutral rule (`neutral-400/60` light
+- Project-to-project boundaries use a 1.5px neutral rule (`neutral-400/60` light
   and `white/20` dark) extended through the section padding to the full content
   width, while internal rows retain the quieter 1px shared border token.
-- Release archive top/bottom rules use the same full content width at every
-  breakpoint while their text remains aligned to the page content inset.
+- The Release archive uses one viewport-wide top rule and no bottom rule; the
+  first project boundary provides the lower separation.
 - An admin-managed lifecycle label appears beside the index: In progress, Live,
   or Completed. Draft/Published/Archived remains a separate visibility setting.
 - Release rows use a crisp 20px rounded-square status mark, 16/22px title,
@@ -39,8 +39,13 @@ Status: implemented and verified; owner lock pending.
   only one project history can be expanded at a time.
 - The same disclosure remains above the shipped region when closed and open, so
   the close action never moves below a long expanded list.
-- Shipped controls and content precede Planned Next. The version pill lives in
-  the shipped-control row, or in Planned Next when a project has no shipped items.
+- Shipped controls and content precede Planned Next. The disclosure includes
+  `Shipped updates · NN` and the highest semantic shipped version; no separate
+  Shipped heading row is rendered. When no shipped item exists, the project
+  version appears in Planned Next.
+- Shipped and planned lists show exactly three fixed-geometry rows before using
+  contained keyboard-focusable vertical scrolling. Titles and descriptions are
+  each limited to two lines.
 - All shipped rows remain collapsed until the top shipped-control row is opened.
 - Optional GitHub and Live project actions appear below version metadata only
   when validated HTTPS links exist.
