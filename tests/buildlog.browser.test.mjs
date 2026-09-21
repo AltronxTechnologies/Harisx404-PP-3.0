@@ -29,6 +29,17 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
             overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
             articles: document.querySelectorAll("article").length,
             items: document.querySelectorAll("article li").length,
+            releaseSummaryInset: (() => {
+              const section = document.querySelector("section[aria-labelledby='buildlog-collection-heading']");
+              const summary = document.querySelector("[data-release-summary]");
+              if (!section || !summary) return Number.POSITIVE_INFINITY;
+              const sectionRect = section.getBoundingClientRect();
+              const summaryRect = summary.getBoundingClientRect();
+              return Math.max(
+                Math.abs(sectionRect.left - summaryRect.left),
+                Math.abs(sectionRect.right - summaryRect.right),
+              );
+            })(),
             lifecycleLabels: [...document.querySelectorAll("article header")].filter(
               (header) => /In progress|Live|Completed/.test(header.textContent || ""),
             ).length,
@@ -74,6 +85,7 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
         });
         assert.equal(initial.overflow, 0, `${theme} ${width}px overflow`);
         assert.ok(initial.articles > 0, `${theme} ${width}px has projects`);
+        assert.ok(initial.releaseSummaryInset <= 0.5, `${theme} ${width}px release summary width`);
         assert.equal(initial.lifecycleLabels, initial.articles, `${theme} ${width}px lifecycle labels`);
         assert.equal(initial.misalignedLedgerRows, 0, `${theme} ${width}px ledger row alignment`);
         assert.equal(initial.duplicateIds, 0, `${theme} ${width}px duplicate IDs`);

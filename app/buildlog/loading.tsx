@@ -19,7 +19,7 @@ export default function BuildlogLoading() {
           </div>
         </GridWrapper>
         <section className="mt-14 px-2 sm:px-4">
-          <div className="mb-6 flex flex-col gap-3 border-y border-border-primary px-2 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-4">
+          <div className="-mx-2 mb-6 flex flex-col gap-3 border-y border-border-primary px-4 py-4 sm:-mx-4 sm:flex-row sm:items-center sm:justify-between sm:px-8">
             <div className={`h-3 w-32 rounded bg-border-primary/40 ${pulse}`} />
             <div className={`h-3 w-32 rounded bg-border-primary/30 ${pulse}`} />
           </div>

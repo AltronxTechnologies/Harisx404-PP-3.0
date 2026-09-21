@@ -26,6 +26,8 @@ Legacy Changelog admin/API files remain byte-identical to their locked baseline.
 - Strengthened only project-to-project boundaries with a darker neutral
   2px rule extended through the section padding, preserving quieter internal
   row dividers for clear grouping.
+- Extended the Release archive row's top and bottom rules through section
+  padding at every breakpoint while preserving its existing text alignment.
 - Removed duplicate Buildlog-local rails; the global frame is the only frame.
 - Added release totals, stable project/item keys, collision-free IDs, and
   explicit per-item Shipped/Planned screen-reader text.

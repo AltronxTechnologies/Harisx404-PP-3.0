@@ -58,7 +58,10 @@ export default async function BuildlogPage({
       </GridWrapper>
 
       <section aria-labelledby="buildlog-collection-heading" className="mt-14 px-2 sm:px-4">
-        <div className="mb-6 flex flex-col gap-3 border-y border-border-primary px-2 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-4">
+        <div
+          data-release-summary
+          className="-mx-2 mb-6 flex flex-col gap-3 border-y border-border-primary px-4 py-4 sm:-mx-4 sm:flex-row sm:items-center sm:justify-between sm:px-8"
+        >
           <h2
             id="buildlog-collection-heading"
             className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary"

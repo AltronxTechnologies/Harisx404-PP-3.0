@@ -9,6 +9,7 @@ Companion: `buildlog-desktop-spec.md`.
 - Hero uses the locked 46px Instrument Serif page-heading scale and wraps to two
   balanced lines where necessary.
 - Toolbar stacks its count below the collection description.
+- Release archive top and bottom rules extend to the full central content width.
 - No project filter rail is rendered; lifecycle is communicated directly beside
   each project title block.
 - The number/lifecycle row and shipped-control row share the same 48px height and

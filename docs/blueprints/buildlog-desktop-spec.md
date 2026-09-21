@@ -10,7 +10,7 @@ Status: implemented and verified; owner lock pending.
 2. `mt-14` page start with `GridWrapper` and `PaperHeroTexture`.
 3. Centered hero: 12px/500 mono kicker, 16px gap, 46px mobile/56px desktop
    Instrument Serif heading, 16px supporting-copy gap.
-4. Release toolbar 56px below the hero, with collection description and
+4. Release toolbar 56px below the hero, with the archive label and
    shipped/planned totals.
 5. Project regions separated by slightly stronger neutral hairlines.
 6. Shared locked CTA 112px below the collection, followed by the shared Footer.
@@ -27,6 +27,8 @@ Status: implemented and verified; owner lock pending.
 - Project-to-project boundaries use a 2px neutral rule (`neutral-400/60` light
   and `white/20` dark) extended through the section padding to the full content
   width, while internal rows retain the quieter 1px shared border token.
+- Release archive top/bottom rules use the same full content width at every
+  breakpoint while their text remains aligned to the page content inset.
 - An admin-managed lifecycle label appears beside the index: In progress, Live,
   or Completed. Draft/Published/Archived remains a separate visibility setting.
 - Release rows use a crisp 20px rounded-square status mark, 16/22px title,

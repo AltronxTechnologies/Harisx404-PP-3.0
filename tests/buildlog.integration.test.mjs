@@ -37,6 +37,8 @@ test("Buildlog source has valid hero semantics and explicit route states", async
   assert.doesNotMatch(page, /<h1[^>]*>\s*<p/);
   assert.match(page, /PaperHeroTexture/);
   assert.match(page, /border-border-primary/);
+  assert.match(page, /data-release-summary/);
+  assert.match(page, /-mx-2.*sm:-mx-4/);
   assert.match(page, /className="mt-28"/);
   assert.match(page, /<CtaSection \/>/);
   assert.match(page, /projects\.length > 0/);
