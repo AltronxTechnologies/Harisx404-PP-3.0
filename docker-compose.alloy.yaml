@@ -8,7 +8,7 @@ services:
       - web_node_modules:/workspace/node_modules
       - web_next_cache:/workspace/.next
     environment:
-      IS_ALLOY: ${IS_ALLOY:-false}
+      IS_ALLOY: ${IS_ALLOY:-true}
       NEXT_TELEMETRY_DISABLED: "1"
       NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}
@@ -21,7 +21,7 @@ services:
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
       SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL:-}
-    command: bash -lc "bash .alloy/populate-env.sh && set -a && . ./.env.local && set +a && npm ci --no-audit --no-fund && npm run dev -- --hostname 0.0.0.0 --port 3000"
+    command: bash -lc "bash .alloy/populate-env.sh && set -a && . ./.env.local && set +a && bash .alloy/install-deps.sh && npm run dev -- --turbopack --hostname 0.0.0.0 --port 3000"
     restart: unless-stopped
 
 volumes:

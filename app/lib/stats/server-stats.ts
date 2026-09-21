@@ -15,18 +15,25 @@ export const getServerStats = unstable_cache(
   async (): Promise<ServerStats> => {
     const supabase = await createSupabaseAdminClient();
 
-    // Total views across all articles
-    const { data: viewsData } = await supabase
-      .from("article_views")
-      .select("slug, view_count");
+    const [viewsResult, reactionsResult, postsResult, messagesResult] =
+      await Promise.all([
+        supabase.from("article_views").select("slug, view_count"),
+        supabase
+          .from("article_reactions")
+          .select("article_slug, reaction_type, count"),
+        supabase
+          .from("blog_posts")
+          .select("slug, title, cover_image_url")
+          .eq("status", "published"),
+        supabase.from("messages").select("*", { count: "exact", head: true }),
+      ]);
+
+    const viewsData = viewsResult.data;
+    const reactionsData = reactionsResult.data;
+    const posts = postsResult.data;
 
     const totalViews =
       viewsData?.reduce((sum, row) => sum + row.view_count, 0) || 0;
-
-    // Total reactions by type
-    const { data: reactionsData } = await supabase
-      .from("article_reactions")
-      .select("article_slug, reaction_type, count");
 
     const reactionsByType: Record<ReactionType, number> = {
       like: 0,
@@ -45,12 +52,6 @@ export const getServerStats = unstable_cache(
       (sum, count) => sum + count,
       0
     );
-
-    // Stats only need display metadata; avoid loading every article body.
-    const { data: posts } = await supabase
-      .from("blog_posts")
-      .select("slug, title, cover_image_url")
-      .eq("status", "published");
 
     // Top 5 most viewed articles
     const topViewedRaw =
@@ -87,18 +88,13 @@ export const getServerStats = unstable_cache(
         };
       });
 
-    // Community wall message count
-    const { count: messageCount } = await supabase
-      .from("messages")
-      .select("*", { count: "exact", head: true });
-
     return {
       totalViews,
       totalReactions,
       reactionsByType,
       topViewedArticles: topViewedRaw,
       topReactedArticles: topReactedRaw,
-      communityWallMessages: messageCount || 0,
+      communityWallMessages: messagesResult.count || 0,
     };
   },
   ["server-stats"],

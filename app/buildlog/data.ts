@@ -42,6 +42,8 @@ const staticFallback: BuildlogProject[] = fallbackProjects.map((project, project
 }));
 
 const loadBuildlogProjects = async (): Promise<BuildlogProject[]> => {
+  if (process.env.IS_ALLOY === "true") return staticFallback;
+
   const supabase = getPublicSupabase();
   if (!supabase) return staticFallback;
 

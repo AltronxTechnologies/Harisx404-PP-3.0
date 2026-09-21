@@ -15,8 +15,10 @@ function estimateWordCount(mdxCode: string): number {
 }
 
 export async function getBuildTimeStats(): Promise<BuildTimeStats> {
-  const posts = await fetchAndSortBlogPosts();
-  const changelogItems = await fetchAndSortChangelogPosts();
+  const [posts, changelogItems] = await Promise.all([
+    fetchAndSortBlogPosts(),
+    fetchAndSortChangelogPosts(),
+  ]);
 
   const publishedPosts = posts.filter((post) => !post.draft);
   const publishedChangelog = changelogItems.filter((item) => !item.draft);

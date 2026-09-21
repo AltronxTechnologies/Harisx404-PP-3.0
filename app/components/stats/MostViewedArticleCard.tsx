@@ -57,6 +57,15 @@ export function MostViewedArticleCard({
 
   // Use actual value immediately if animations are reduced to prevent flash from 0
   const effectiveDisplayCount = shouldReduceAnimations ? viewCount : displayCount;
+  const fallbackImage =
+    "https://res.cloudinary.com/i22q5puf/image/upload/v1786526260/portfolio/haris_primary_photo.png";
+  const imageSource = imageName?.startsWith("https://")
+    ? imageName
+    : imageName && !imageName.includes("://")
+      ? imageName.startsWith("/")
+        ? imageName
+        : `/blog/${imageName}`
+      : fallbackImage;
 
   const cardClassName = "group relative flex h-full min-h-[420px] flex-col overflow-hidden rounded-2xl border border-border-primary bg-bg-primary transition-all duration-300 hover:border-indigo-400 hover:bg-white dark:bg-[#1A1F2B] dark:hover:bg-[#1A1F2B]";
 
@@ -96,7 +105,7 @@ export function MostViewedArticleCard({
               {/* Banner image with title overlay - like actual article page */}
               <div className="relative h-[100px] w-full flex-shrink-0 overflow-hidden">
                 <Image
-                  src={imageName ? (imageName.startsWith("http") ? imageName : `/blog/${imageName}`) : "https://res.cloudinary.com/i22q5puf/image/upload/v1786526260/portfolio/haris_primary_photo.png"}
+                  src={imageSource}
                   alt={title}
                   fill
                   className="object-cover object-top"
@@ -232,7 +241,7 @@ export function MostViewedArticleCard({
             {/* Banner image with title overlay - like actual article page */}
             <div className="relative h-[100px] w-full flex-shrink-0 overflow-hidden">
               <Image
-                src={`/blog/${imageName}`}
+                src={imageSource}
                 alt={title}
                 fill
                 className="object-cover object-top"

@@ -4,6 +4,7 @@ const config = {
   // Allows CI/verification builds to run alongside the dev server without
   // clobbering its .next dir (e.g. NEXT_DIST_DIR=.next-build npx next build)
   distDir: process.env.NEXT_DIST_DIR || ".next",
+  allowedDevOrigins: ["127.0.0.1"],
   images: {
     remotePatterns: [
       {

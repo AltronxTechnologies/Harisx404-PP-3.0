@@ -18,6 +18,8 @@ interface PageSpeedResponse {
   };
 }
 
+const requestTimeoutMs = process.env.NODE_ENV === "production" ? 15000 : 3000;
+
 async function fetchLighthouseScores(
   strategy: "mobile" | "desktop"
 ): Promise<LighthouseScores | null> {
@@ -38,7 +40,9 @@ async function fetchLighthouseScores(
   }
 
   try {
-    const response = await fetch(apiUrl.toString());
+    const response = await fetch(apiUrl.toString(), {
+      signal: AbortSignal.timeout(requestTimeoutMs),
+    });
 
     if (!response.ok) {
       // Don't log quota errors as errors - they're expected without API key
@@ -78,6 +82,10 @@ async function fetchLighthouseScores(
 
 export const getLighthouseStats = unstable_cache(
   async (): Promise<LighthouseStats> => {
+    if (process.env.IS_ALLOY === "true") {
+      return { mobile: null, desktop: null };
+    }
+
     // Fetch both mobile and desktop scores in parallel
     const [mobile, desktop] = await Promise.all([
       fetchLighthouseScores("mobile"),
@@ -90,5 +98,5 @@ export const getLighthouseStats = unstable_cache(
     };
   },
   ["lighthouse-stats"],
-  { revalidate: 2592000 } // Revalidate every 30 days
+  { revalidate: 3600 }
 );
