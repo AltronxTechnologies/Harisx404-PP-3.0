@@ -47,6 +47,11 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
                 ) > 1;
               },
             ).length,
+            wrappedProjectLinks: externalLinks.filter(
+              (link) =>
+                getComputedStyle(link).whiteSpace !== "nowrap" ||
+                link.scrollWidth > link.clientWidth + 1,
+            ).length,
             emptyLinkContainers: [...document.querySelectorAll("article")].filter(
               (article) =>
                 article.querySelectorAll("a[target='_blank']").length === 0 &&
@@ -60,6 +65,7 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
         assert.equal(initial.duplicateIds, 0, `${theme} ${width}px duplicate IDs`);
         assert.equal(initial.insecureLinks, 0, `${theme} ${width}px external-link security`);
         assert.equal(initial.invalidLinkLayouts, 0, `${theme} ${width}px project-link layout`);
+        assert.equal(initial.wrappedProjectLinks, 0, `${theme} ${width}px project-link wrapping`);
         assert.equal(initial.emptyLinkContainers, 0, `${theme} ${width}px empty project-link containers`);
         assert.deepEqual(errors, [], `${theme} ${width}px console errors`);
 

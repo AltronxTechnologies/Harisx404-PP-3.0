@@ -71,6 +71,7 @@ Legacy Changelog admin/API files remain byte-identical to their locked baseline.
 | Secure external project links | Passed |
 | Stable open/close position | Passed at all 14 viewport/theme combinations |
 | Optional project-link geometry | Two equal, one full-span, none omitted |
+| Project-link wrapping | 0 wrapped or clipped labels across all 14 cases |
 | Lifecycle database constraint | Invalid Completed + planned state rejected |
 | Lifecycle migration rerun | Preserved administrator-selected status |
 | Widths | 320, 360, 375, 390, 768, 1024, 1440px |

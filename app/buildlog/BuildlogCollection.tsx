@@ -134,7 +134,7 @@ export function BuildlogCollection({
                           target="_blank"
                           rel="noopener noreferrer"
                           aria-label={`View ${project.name} source code on GitHub`}
-                          className={`inline-flex min-h-9 min-w-0 items-center justify-center gap-2 rounded-full border border-border-primary px-3 font-mono text-[10px] uppercase tracking-wider text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25 ${hasBothProjectLinks ? "" : "col-span-2"}`}
+                          className={`inline-flex min-h-9 min-w-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-border-primary px-2.5 font-mono text-[9px] uppercase tracking-wide text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25 min-[360px]:text-[10px] ${hasBothProjectLinks ? "" : "col-span-2"}`}
                         >
                           <BrandGlyph name="github" className="size-3.5" /> GitHub
                         </a>
@@ -145,7 +145,7 @@ export function BuildlogCollection({
                           target="_blank"
                           rel="noopener noreferrer"
                           aria-label={`Open live ${project.name} project`}
-                          className={`inline-flex min-h-9 min-w-0 items-center justify-center gap-2 rounded-full border border-border-primary px-3 font-mono text-[10px] uppercase tracking-wider text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25 ${hasBothProjectLinks ? "" : "col-span-2"}`}
+                          className={`inline-flex min-h-9 min-w-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-border-primary px-2.5 font-mono text-[9px] uppercase tracking-wide text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25 min-[360px]:text-[10px] ${hasBothProjectLinks ? "" : "col-span-2"}`}
                         >
                           <ExternalLink aria-hidden="true" className="size-3.5" /> Live project
                         </a>

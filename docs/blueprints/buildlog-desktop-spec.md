@@ -37,6 +37,8 @@ Status: implemented and verified; owner lock pending.
   when validated HTTPS links exist.
 - Project actions use a bounded two-column grid: two links split equally, one
   link spans both columns, and no grid renders when neither link exists.
+- Project-action labels remain on one line at every breakpoint, with compact
+  responsive type, padding, and icon gaps inside the equal-width grid.
 
 ## Responsive Rules
 

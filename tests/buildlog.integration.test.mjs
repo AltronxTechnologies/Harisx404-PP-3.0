@@ -36,6 +36,8 @@ test("Buildlog source has valid hero semantics and explicit route states", async
   assert.doesNotMatch(page, /<h1[^>]*>\s*<p/);
   assert.match(page, /PaperHeroTexture/);
   assert.match(page, /border-border-primary/);
+  assert.match(page, /className="mt-28"/);
+  assert.match(page, /<CtaSection \/>/);
   assert.match(page, /projects\.length > 0/);
   assert.ok(
     collection.indexOf("aria-controls={shippedRegionId}") <
@@ -43,6 +45,7 @@ test("Buildlog source has valid hero semantics and explicit route states", async
   );
   assert.match(collection, /data-project-links/);
   assert.match(collection, /col-span-2/);
+  assert.match(collection, /whitespace-nowrap/);
   assert.doesNotMatch(mark, /feTurbulence|feDisplacementMap/);
   assert.match(mark, /fill-text-primary/);
   assert.match(loading, /Loading Buildlog/);

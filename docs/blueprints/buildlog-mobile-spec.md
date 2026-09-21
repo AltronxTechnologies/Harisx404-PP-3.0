@@ -18,6 +18,7 @@ Companion: `buildlog-desktop-spec.md`.
 - Optional GitHub/live actions wrap below project metadata without overflow.
 - Two actions remain equal-width; one action fills the bounded row; no empty
   placeholder is reserved when links are unavailable.
+- GitHub and Live project labels remain single-line down to 320px.
 - Planned rows remain visible; shipped rows use one full-width disclosure.
 - The same disclosure stays above expanded shipped rows in both states.
 - Project sections remain one column; sticky behavior starts only at `lg`.
