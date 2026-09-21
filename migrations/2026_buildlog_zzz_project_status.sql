@@ -56,7 +56,7 @@ SELECT
   id, name, tagline, info, current_version, github_url, live_url,
   project_status, display_order, items
 FROM public.buildlog_projects
-WHERE status = 'published'
+WHERE status = 'published' AND is_demo = FALSE
 ORDER BY display_order ASC, created_at DESC;
 
 REVOKE ALL ON TABLE public.public_buildlog_projects FROM PUBLIC;

@@ -17,9 +17,7 @@ FROM (VALUES
       {"title":"Admin dashboard","description":"Manage blogs, projects, certifications, and testimonials with a Tiptap editor.","badge":"v2.0","done":true,"display_order":3},
       {"title":"Buildlog redesign","description":"Per-project release notes with shipped and planned work.","badge":"v2.1","done":true,"display_order":4},
       {"title":"AI article assistant","description":"Gemini-powered drafting and summaries inside the admin editor.","badge":"planned","done":false,"display_order":5},
-      {"title":"Audio articles","description":"Listen to write-ups with generated narration and a mini player.","badge":"planned","done":false,"display_order":6},
-      {"title":"Demo: shipped update preview","description":"Temporary layout preview. Replace or remove this item from the Buildlog Admin before deployment.","badge":"preview","done":true,"display_order":7},
-      {"title":"Demo: planned update preview","description":"Temporary layout preview. Replace or remove this item from the Buildlog Admin before deployment.","badge":"preview","done":false,"display_order":8}
+      {"title":"Audio articles","description":"Listen to write-ups with generated narration and a mini player.","badge":"planned","done":false,"display_order":6}
     ]'::jsonb,
     10,
     'published',
@@ -35,9 +33,7 @@ FROM (VALUES
       {"title":"Rule management & alert triage","description":"FastAPI backend with role-based analyst access and triage workflows.","badge":"v1.1","done":true,"display_order":1},
       {"title":"Threat timeline & severity analytics","description":"PostgreSQL-backed filtering and severity analytics for alert review.","badge":"v1.2","done":true,"display_order":2},
       {"title":"ML-based anomaly scoring","description":"Score flows with a trained model to cut alert fatigue.","badge":"planned","done":false,"display_order":3},
-      {"title":"Multi-sensor fleet management","description":"Deploy and monitor sensors across networks from one console.","badge":"planned","done":false,"display_order":4},
-      {"title":"Demo: shipped update preview","description":"Temporary layout preview. Replace or remove this item from the Buildlog Admin before deployment.","badge":"preview","done":true,"display_order":5},
-      {"title":"Demo: planned update preview","description":"Temporary layout preview. Replace or remove this item from the Buildlog Admin before deployment.","badge":"preview","done":false,"display_order":6}
+      {"title":"Multi-sensor fleet management","description":"Deploy and monitor sensors across networks from one console.","badge":"planned","done":false,"display_order":4}
     ]'::jsonb,
     20,
     'published',
@@ -53,9 +49,7 @@ FROM (VALUES
       {"title":"Live status over WebSockets","description":"Appointments and queues update in real time across portals.","badge":"v1.0","done":true,"display_order":1},
       {"title":"Gemini clinical assistant","description":"Drafts clinical summaries and answers records queries in context.","badge":"v1.1","done":true,"display_order":2},
       {"title":"Pharmacy & inventory module","description":"Stock tracking with reorder alerts and dispensing history.","badge":"planned","done":false,"display_order":3},
-      {"title":"Insurance claims workflow","description":"Submit, track, and reconcile claims from the admin portal.","badge":"planned","done":false,"display_order":4},
-      {"title":"Demo: shipped update preview","description":"Temporary layout preview. Replace or remove this item from the Buildlog Admin before deployment.","badge":"preview","done":true,"display_order":5},
-      {"title":"Demo: planned update preview","description":"Temporary layout preview. Replace or remove this item from the Buildlog Admin before deployment.","badge":"preview","done":false,"display_order":6}
+      {"title":"Insurance claims workflow","description":"Submit, track, and reconcile claims from the admin portal.","badge":"planned","done":false,"display_order":4}
     ]'::jsonb,
     30,
     'published',
@@ -70,9 +64,7 @@ FROM (VALUES
       {"title":"Live capture & protocol decoding","description":"Scapy engine with per-protocol filters.","badge":"v1.0","done":true,"display_order":0},
       {"title":"Wireshark-compatible PCAP export","description":"One-click export for deeper offline analysis.","badge":"v1.0","done":true,"display_order":1},
       {"title":"Real-time traffic graphs","description":"Tkinter UI with conversation tracking.","badge":"v1.0","done":true,"display_order":2},
-      {"title":"Web dashboard","description":"Move the UI to the browser with a FastAPI backend.","badge":"planned","done":false,"display_order":3},
-      {"title":"Demo: shipped update preview","description":"Temporary layout preview. Replace or remove this item from the Buildlog Admin before deployment.","badge":"preview","done":true,"display_order":4},
-      {"title":"Demo: planned update preview","description":"Temporary layout preview. Replace or remove this item from the Buildlog Admin before deployment.","badge":"preview","done":false,"display_order":5}
+      {"title":"Web dashboard","description":"Move the UI to the browser with a FastAPI backend.","badge":"planned","done":false,"display_order":3}
     ]'::jsonb,
     40,
     'published',

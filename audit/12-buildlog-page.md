@@ -1,9 +1,9 @@
 # Buildlog Production Audit
 
-- Date: 2026-09-10
+- Date: 2026-09-21
 - Route: `/buildlog`
 - Status: implementation and local verification complete; owner lock pending
-- Deployment dependency: apply the four Buildlog Supabase migrations
+- Deployment dependency: apply the six Buildlog Supabase migrations
 
 ## Scope
 
@@ -44,9 +44,6 @@ Legacy Changelog admin/API files remain byte-identical to their locked baseline.
   explicit per-item Shipped/Planned screen-reader text.
 - Added one-at-a-time shipped history disclosures. All shipped rows remain
   collapsed until requested, while planned work remains visible.
-- Added one clearly labelled temporary shipped and planned preview item per
-  project in fallback and clean-database seed data. Database items can be removed
-  through Admin; fallback fixtures require removal from source before deployment.
 - Replaced the public filter rail with an admin-managed lifecycle label beside
   every project heading: In progress, Live, or Completed. Publication visibility
   remains independently controlled by Draft/Published/Archived.
@@ -69,9 +66,46 @@ Legacy Changelog admin/API files remain byte-identical to their locked baseline.
 - Added strict server/client validation, UUID assignment, Admin-email
   authorization, generic server errors, bounded list/item sizes, live-route and
   tag revalidation, and non-destructive ordered release-item editing.
+- Added secured singleton page settings so the Buildlog kicker, heading, accent,
+  description, and archive label are Admin-managed while counts remain derived.
 - Added a published-only public view while denying anonymous/authenticated base
   table access.
 - Added clean-install schema parity, updated-at trigger, and conflict-safe seed.
+- Removed temporary preview records and unverified dead links before release.
+- Added Admin-managed hero/archive/SEO settings through a restricted singleton
+  view and fail-closed production data loading.
+- Added route-owned Open Graph and Twitter metadata so shared links use the
+  Admin-managed Buildlog title and description instead of root portfolio copy.
+- Added deterministic project ordering, semantic shipped-badge enforcement,
+  database-level JSON item validation, accurate 400/404 Admin responses, URL-hash
+  preservation, touch-active disclosure feedback, and new-tab announcements.
+- Moved the Admin-managed hero outside the page loading boundary, so loading
+  renders the exact live hero at every copy length rather than approximating its
+  wrapping. The collection skeleton still mirrors four project regions, optional
+  link controls, badge columns, and the shared CTA/Footer handoff.
+- Aligned PostgreSQL and application validation for trimmed required copy and
+  SemVer leading-zero rules in core and numeric prerelease identifiers.
+- Added an idempotent upgrade cleanup for the exact historical preview fixtures
+  and exact dead website URLs before installing stricter constraints, without
+  overwriting administrator-authored records.
+- Added field-specific Admin errors for project version/order and release title,
+  description, badge, and semantic-version validation.
+
+## Admin Ownership
+
+- Page settings manage the hero kicker, heading, accent, supporting description,
+  archive label, SEO title, SEO description, and route-owned social metadata.
+- Project management covers project name, tagline, summary, current version,
+  lifecycle, publication visibility, display order, demo state, GitHub URL, live
+  URL, and every release item's title, description, badge, state, and order.
+- Shipped/planned totals and project numbering are derived from managed records;
+  they are not duplicate editable values that can drift out of sync.
+- Shipped/planned controls, lifecycle vocabulary, accessibility text, and empty
+  and error recovery are interface behavior rather than editorial content.
+- CTA and Footer content come from the locked shared site components and are not
+  duplicated in Buildlog settings.
+- Production reads only the restricted database views and fails closed when the
+  schema is unavailable. The synchronized static collection is development-only.
 
 ## Verification
 
@@ -80,20 +114,22 @@ Legacy Changelog admin/API files remain byte-identical to their locked baseline.
 | `/buildlog` | HTTP 200 |
 | TypeScript | Passed, 0 errors |
 | Targeted ESLint | Passed, 0 errors/warnings |
-| Buildlog integration | 5/5 passed |
+| Buildlog integration | 6/6 passed |
 | Semantic-version behavior | 4/4 passed |
 | Clean PostgreSQL 16 migration test | Passed |
+| Historical-data PostgreSQL 16 upgrade test | Passed; preview fixtures and dead URLs removed |
 | Seed rerun | Passed; inserted 0 duplicate rows |
 | Published-only view and grants | Passed |
 | `updated_at` trigger | Passed |
 | Browser matrix | 14/14 light/dark combinations passed |
 | Lifecycle/disclosure UX matrix | 14/14 combinations passed |
 | Checked-in browser interaction test | `tests/buildlog.browser.test.mjs` |
-| Link migration rerun | Passed; idempotent |
+| Link migration rerun | Passed; schema-aware and idempotent after lifecycle migration |
 | URL state and browser Back | Passed |
 | One open shipped history | Passed |
 | Secure external project links | Passed |
 | Stable open/close position | Passed at all 14 viewport/theme combinations |
+| CTA-to-Footer handoff | 0px, identical shared CTA geometry to locked Links |
 | Optional project-link geometry | Two equal, one full-span, none omitted |
 | Project-link wrapping | 0 wrapped or clipped labels across all 14 cases |
 | Lifecycle database constraint | Invalid Completed + planned state rejected |
@@ -125,6 +161,8 @@ Apply in this order:
 2. `migrations/2026_buildlog_seed.sql`
 3. `migrations/2026_buildlog_zz_project_links.sql`
 4. `migrations/2026_buildlog_zzz_project_status.sql`
+5. `migrations/2026_buildlog_zzzz_settings.sql`
+6. `migrations/2026_buildlog_zzzzz_item_validation.sql`
 
 The migrations and `tests/buildlog.database.test.sql` pass against a clean
 PostgreSQL 16 database. The connected Supabase project currently returns 404 for `buildlog_projects`, so

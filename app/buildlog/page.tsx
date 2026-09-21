@@ -1,26 +1,51 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { GridWrapper } from "@/app/components/GridWrapper";
-import { PaperHeroTexture } from "@/app/components/PaperHeroTexture";
 import { BlogStatePanel } from "@/app/components/blog/BlogStatePanel";
 import { CtaSection } from "@/app/components/home/CtaSection";
-import { fetchBuildlogProjects } from "./data";
+import { siteMetadata } from "@/app/data/siteMetadata";
+import { fetchBuildlogProjects, fetchBuildlogSettings } from "./data";
 import { BuildlogCollection } from "./BuildlogCollection";
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = {
-  title: "Buildlog | What I Ship",
-  description:
-    "A project-by-project record of shipped features, releases, and carefully scoped next steps from Muhammad Haris.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await fetchBuildlogSettings();
+  const socialImage = `${siteMetadata.siteUrl}/brand/logo-wide.png`;
+  return {
+    title: settings.seo_title,
+    description: settings.seo_description,
+    openGraph: {
+      title: settings.seo_title,
+      description: settings.seo_description,
+      type: "website",
+      url: `${siteMetadata.siteUrl}/buildlog`,
+      images: [
+        {
+          url: socialImage,
+          width: 1200,
+          height: 630,
+          alt: settings.seo_title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: settings.seo_title,
+      description: settings.seo_description,
+      images: [socialImage],
+    },
+  };
+}
 
 export default async function BuildlogPage({
   searchParams,
 }: {
   searchParams: Promise<{ open?: string }>;
 }) {
-  const projects = await fetchBuildlogProjects();
+  const [projects, settings] = await Promise.all([
+    fetchBuildlogProjects(),
+    fetchBuildlogSettings(),
+  ]);
   const query = await searchParams;
   const initialOpen = query.open && projects.some((project) => project.id === query.open)
     ? query.open
@@ -35,28 +60,7 @@ export default async function BuildlogPage({
   );
 
   return (
-    <div className="relative mt-14 pb-24">
-      <GridWrapper>
-        <div className="relative px-4 xl:px-0">
-          <PaperHeroTexture className="-inset-x-2 bottom-0 top-[-128px] sm:-inset-x-3 sm:top-[-144px] md:top-[-176px] lg:inset-x-0" />
-          <header className="relative mx-auto max-w-3xl text-center">
-            <p className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
-              The build never stops
-            </p>
-            <h1 className="heading-glow mx-auto mt-4 max-w-xl text-balance [font-family:var(--font-instrument-serif),serif] text-[46px] font-medium leading-none tracking-tight text-text-primary md:text-[56px] md:tracking-[-1.5px]">
-              Build. Ship.{" "}
-              <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
-                Evolve.
-              </span>
-            </h1>
-            <p className="mx-auto mt-4 max-w-2xl text-pretty text-[15px] leading-6 text-text-secondary">
-              A transparent record of what I shipped, what changed, and what I am
-              building next across active projects.
-            </p>
-          </header>
-        </div>
-      </GridWrapper>
-
+    <>
       <section aria-labelledby="buildlog-collection-heading" className="mt-14 px-2 sm:px-4">
         <div
           data-release-summary
@@ -66,7 +70,7 @@ export default async function BuildlogPage({
             id="buildlog-collection-heading"
             className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary"
           >
-            Release archive
+            {settings.archive_label}
           </h2>
           {projects.length > 0 && (
             <div className="flex shrink-0 items-center gap-2.5 font-mono uppercase sm:gap-3">
@@ -122,6 +126,6 @@ export default async function BuildlogPage({
       <div className="mt-28">
         <CtaSection />
       </div>
-    </div>
+    </>
   );
 }

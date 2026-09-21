@@ -24,7 +24,8 @@ test("preview data paths are bounded and route-specific", async () => {
       readFile(new URL("../.alloy/install-deps.sh", import.meta.url), "utf8"),
     ]);
 
-  assert.match(buildlogData, /process\.env\.IS_ALLOY === "true"/);
+  assert.match(buildlogData, /public_buildlog_projects/);
+  assert.match(buildlogData, /process\.env\.NODE_ENV === "production"/);
   assert.match(serverStats, /Promise\.all/);
   assert.match(lighthouseStats, /requestTimeoutMs/);
   assert.match(lighthouseStats, /15000/);

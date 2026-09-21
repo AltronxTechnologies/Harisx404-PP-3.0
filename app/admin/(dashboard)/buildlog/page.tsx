@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Edit, Plus } from "lucide-react";
+import { Edit, Plus, Settings } from "lucide-react";
 import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 import { DeleteBuildlogButton } from "@/app/components/admin/DeleteBuildlogButton";
 
@@ -8,7 +8,8 @@ export default async function AdminBuildlogPage() {
   const { data: projects, error } = await supabase
     .from("buildlog_projects")
     .select("id, name, current_version, project_status, status, display_order, is_demo, items")
-    .order("display_order", { ascending: true });
+    .order("display_order", { ascending: true })
+    .order("name", { ascending: true });
   if (error) throw new Error(`Unable to load Buildlog projects: ${error.message}`);
 
   return (
@@ -18,9 +19,14 @@ export default async function AdminBuildlogPage() {
           <h1 className="text-2xl font-bold tracking-tight">Buildlog</h1>
           <p className="text-sm text-ink-secondary">Manage projects and release items shown on the public Buildlog.</p>
         </div>
-        <Link href="/admin/buildlog/new" className="inline-flex items-center justify-center rounded-xl bg-accent-signal px-4 py-2 text-sm font-medium text-white shadow transition-opacity hover:opacity-90">
-          <Plus className="mr-2 size-4" /> New project
-        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link href="/admin/buildlog/settings" className="inline-flex items-center justify-center rounded-xl border border-border-hairline bg-surface-raised px-4 py-2 text-sm font-medium text-ink-secondary transition-colors hover:bg-surface-base hover:text-ink-primary">
+            <Settings className="mr-2 size-4" /> Page settings
+          </Link>
+          <Link href="/admin/buildlog/new" className="inline-flex items-center justify-center rounded-xl bg-accent-signal px-4 py-2 text-sm font-medium text-white shadow transition-opacity hover:opacity-90">
+            <Plus className="mr-2 size-4" /> New project
+          </Link>
+        </div>
       </div>
 
       <div className="overflow-hidden rounded-xl border border-border-hairline bg-surface-raised shadow-sm">

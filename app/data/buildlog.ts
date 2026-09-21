@@ -4,7 +4,7 @@
 export interface BuildlogItem {
   title: string;
   description?: string;
-  /** Version, ship date, or status shown in the badge (e.g. "v2.1", "Q2 2026", "planned"). */
+  /** Shipped rows use a semantic version; planned rows may use a target/status label. */
   badge: string;
   done: boolean;
 }
@@ -22,28 +22,12 @@ export interface BuildlogProject {
   items: BuildlogItem[];
 }
 
-const shippedPreviewItem: BuildlogItem = {
-  title: "Demo: shipped update preview",
-  description: "Temporary layout preview. Replace or remove this item from the Buildlog Admin before deployment.",
-  badge: "preview",
-  done: true,
-};
-
-const plannedPreviewItem: BuildlogItem = {
-  title: "Demo: planned update preview",
-  description: "Temporary layout preview. Replace or remove this item from the Buildlog Admin before deployment.",
-  badge: "preview",
-  done: false,
-};
-
 export const buildlogProjects: BuildlogProject[] = [
   {
     name: "This Website",
     tagline: "Portfolio & blog.",
     info: "Next.js 15 portfolio with Supabase, MDX articles, live stats, and an admin dashboard.",
     currentVersion: "v2.1",
-    githubUrl: "https://github.com/harisx404/harisx404-portfolio",
-    liveUrl: "https://harisx404.vercel.app",
     projectStatus: "live",
     items: [
       {
@@ -88,8 +72,6 @@ export const buildlogProjects: BuildlogProject[] = [
         badge: "planned",
         done: false,
       },
-      { ...shippedPreviewItem },
-      { ...plannedPreviewItem },
     ],
   },
   {
@@ -129,8 +111,6 @@ export const buildlogProjects: BuildlogProject[] = [
         badge: "planned",
         done: false,
       },
-      { ...shippedPreviewItem },
-      { ...plannedPreviewItem },
     ],
   },
   {
@@ -171,8 +151,6 @@ export const buildlogProjects: BuildlogProject[] = [
         badge: "planned",
         done: false,
       },
-      { ...shippedPreviewItem },
-      { ...plannedPreviewItem },
     ],
   },
   {
@@ -206,8 +184,6 @@ export const buildlogProjects: BuildlogProject[] = [
         badge: "planned",
         done: false,
       },
-      { ...shippedPreviewItem },
-      { ...plannedPreviewItem },
     ],
   },
 ];

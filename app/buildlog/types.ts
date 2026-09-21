@@ -24,3 +24,13 @@ export type BuildlogProjectAdmin = BuildlogProject & {
   status: "draft" | "published" | "archived";
   is_demo: boolean;
 };
+
+export type BuildlogSettings = {
+  kicker: string;
+  heading: string;
+  heading_accent: string;
+  description: string;
+  archive_label: string;
+  seo_title: string;
+  seo_description: string;
+};

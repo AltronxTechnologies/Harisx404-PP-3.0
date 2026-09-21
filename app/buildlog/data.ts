@@ -3,7 +3,19 @@ import "server-only";
 import { unstable_cache } from "next/cache";
 import { buildlogProjects as fallbackProjects } from "@/app/data/buildlog";
 import { getPublicSupabase } from "@/app/lib/supabase/safe";
-import type { BuildlogItem, BuildlogProject } from "./types";
+import type { BuildlogItem, BuildlogProject, BuildlogSettings } from "./types";
+
+export const fallbackBuildlogSettings: BuildlogSettings = {
+  kicker: "The build never stops",
+  heading: "Build. Ship.",
+  heading_accent: "Evolve.",
+  description:
+    "A transparent record of what I shipped, what changed, and what I am building next across active projects.",
+  archive_label: "Release archive",
+  seo_title: "Buildlog | What I Ship",
+  seo_description:
+    "A project-by-project record of shipped features, releases, and carefully scoped next steps from Muhammad Haris.",
+};
 
 const normalizeItems = (value: unknown): BuildlogItem[] => {
   if (!Array.isArray(value)) return [];
@@ -42,17 +54,24 @@ const staticFallback: BuildlogProject[] = fallbackProjects.map((project, project
 }));
 
 const loadBuildlogProjects = async (): Promise<BuildlogProject[]> => {
-  if (process.env.IS_ALLOY === "true") return staticFallback;
-
   const supabase = getPublicSupabase();
-  if (!supabase) return staticFallback;
+  if (!supabase) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("Buildlog database configuration is unavailable.");
+    }
+    return staticFallback;
+  }
 
   const { data, error } = await supabase
     .from("public_buildlog_projects")
     .select("id, name, tagline, info, current_version, github_url, live_url, project_status, display_order, items")
-    .order("display_order", { ascending: true });
+    .order("display_order", { ascending: true })
+    .order("name", { ascending: true });
 
   if (error && /relation|column|does not exist|schema cache|not find/i.test(error.message)) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("Buildlog database schema is unavailable.");
+    }
     return staticFallback;
   }
   if (error) throw new Error("Unable to load the Buildlog collection.");
@@ -76,6 +95,35 @@ const loadBuildlogProjects = async (): Promise<BuildlogProject[]> => {
 
 export const fetchBuildlogProjects = unstable_cache(
   loadBuildlogProjects,
-  ["buildlog-projects-v5"],
+  ["buildlog-projects-v7"],
+  { revalidate: 3600, tags: ["buildlog"] },
+);
+
+const loadBuildlogSettings = async (): Promise<BuildlogSettings> => {
+  const supabase = getPublicSupabase();
+  if (!supabase) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("Buildlog settings configuration is unavailable.");
+    }
+    return fallbackBuildlogSettings;
+  }
+
+  const { data, error } = await supabase
+    .from("public_buildlog_settings")
+    .select("kicker, heading, heading_accent, description, archive_label, seo_title, seo_description")
+    .single();
+  if (error && /relation|column|does not exist|schema cache|not find|no rows/i.test(error.message)) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("Buildlog settings schema is unavailable.");
+    }
+    return fallbackBuildlogSettings;
+  }
+  if (error || !data) throw new Error("Unable to load Buildlog settings.");
+  return data;
+};
+
+export const fetchBuildlogSettings = unstable_cache(
+  loadBuildlogSettings,
+  ["buildlog-settings-v1"],
   { revalidate: 3600, tags: ["buildlog"] },
 );

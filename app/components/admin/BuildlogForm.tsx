@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useFieldArray, useForm } from "react-hook-form";
 import * as z from "zod";
 import type { BuildlogProjectAdmin } from "@/app/buildlog/types";
+import { parseSemanticVersion } from "@/app/buildlog/version";
 
 const itemSchema = z.object({
   id: z.string().optional(),
@@ -39,6 +40,13 @@ const formSchema = z.object({
   is_demo: z.boolean(),
   items: z.array(itemSchema).min(1, "Add at least one release item.").max(50),
 }).superRefine((project, context) => {
+  if (project.is_demo && project.status === "published") {
+    context.addIssue({
+      code: "custom",
+      path: ["status"],
+      message: "Demo projects cannot be published.",
+    });
+  }
   if (project.project_status === "completed" && project.items.some((item) => !item.done)) {
     context.addIssue({
       code: "custom",
@@ -46,6 +54,15 @@ const formSchema = z.object({
       message: "Mark every release item as shipped before completing a project.",
     });
   }
+  project.items.forEach((item, index) => {
+    if (item.done && !parseSemanticVersion(item.badge)) {
+      context.addIssue({
+        code: "custom",
+        path: ["items", index, "badge"],
+        message: "Shipped items require a semantic version badge, for example v2.1.",
+      });
+    }
+  });
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -175,10 +192,12 @@ export function BuildlogForm({ initialData }: { initialData?: BuildlogProjectAdm
         <label className="text-sm font-medium">
           Current version
           <input {...register("current_version")} className={inputClass} placeholder="v1.0" />
+          {errors.current_version && <span role="alert" className="mt-1.5 block text-xs text-red-500">{errors.current_version.message}</span>}
         </label>
         <label className="text-sm font-medium">
           Display order
           <input type="number" {...register("display_order")} className={inputClass} />
+          {errors.display_order && <span role="alert" className="mt-1.5 block text-xs text-red-500">{errors.display_order.message}</span>}
         </label>
         <label className="text-sm font-medium">
           Status
@@ -234,21 +253,23 @@ export function BuildlogForm({ initialData }: { initialData?: BuildlogProjectAdm
               <label className="text-sm font-medium">
                 Title
                 <input {...register(`items.${index}.title`)} className={inputClass} />
+                {errors.items?.[index]?.title && <span role="alert" className="mt-1.5 block text-xs text-red-500">{errors.items[index]?.title?.message}</span>}
               </label>
               <label className="text-sm font-medium">
                 Badge
                 <input {...register(`items.${index}.badge`)} className={inputClass} placeholder="v1.0" />
+                {errors.items?.[index]?.badge && <span role="alert" className="mt-1.5 block text-xs text-red-500">{errors.items[index]?.badge?.message}</span>}
               </label>
             </div>
             <label className="mt-4 block text-sm font-medium">
               Description
               <textarea {...register(`items.${index}.description`)} rows={2} maxLength={400} className={`${inputClass} resize-y`} />
+              {errors.items?.[index]?.description && <span role="alert" className="mt-1.5 block text-xs text-red-500">{errors.items[index]?.description?.message}</span>}
             </label>
             <label className="mt-4 flex items-center gap-3 text-sm font-medium">
               <input type="checkbox" {...register(`items.${index}.done`)} className="size-4 rounded border-border-hairline" />
               Shipped
             </label>
-            {errors.items?.[index] && <p role="alert" className="mt-3 text-xs text-red-500">Complete the required item fields.</p>}
           </div>
         ))}
         {errors.items?.root && <p role="alert" className="text-xs text-red-500">{errors.items.root.message}</p>}

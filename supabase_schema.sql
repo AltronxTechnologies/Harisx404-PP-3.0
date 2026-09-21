@@ -378,6 +378,83 @@ AS $$
   FROM jsonb_array_elements(value) AS item;
 $$;
 
+CREATE OR REPLACE FUNCTION public.buildlog_semver_valid(value text)
+RETURNS boolean
+LANGUAGE plpgsql
+IMMUTABLE
+SET search_path = public
+AS $$
+DECLARE
+  matched text[];
+  identifier text;
+BEGIN
+  matched := regexp_match(
+    btrim(value),
+    '^v?([0-9]+)\.([0-9]+)(?:\.([0-9]+))?(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$'
+  );
+  IF matched IS NULL THEN RETURN false; END IF;
+  IF (char_length(matched[1]) > 1 AND left(matched[1], 1) = '0')
+     OR (char_length(matched[2]) > 1 AND left(matched[2], 1) = '0')
+     OR (matched[3] IS NOT NULL AND char_length(matched[3]) > 1 AND left(matched[3], 1) = '0')
+     THEN RETURN false; END IF;
+  IF matched[4] IS NOT NULL THEN
+    FOREACH identifier IN ARRAY string_to_array(matched[4], '.')
+    LOOP
+      IF identifier ~ '^[0-9]+$' AND char_length(identifier) > 1
+         AND left(identifier, 1) = '0' THEN RETURN false; END IF;
+    END LOOP;
+  END IF;
+  RETURN true;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.buildlog_items_valid(value jsonb)
+RETURNS boolean
+LANGUAGE plpgsql
+IMMUTABLE
+SET search_path = public
+AS $$
+DECLARE
+  item jsonb;
+  item_count integer;
+BEGIN
+  IF jsonb_typeof(value) <> 'array' THEN RETURN false; END IF;
+  item_count := jsonb_array_length(value);
+  IF item_count < 1 OR item_count > 50 THEN RETURN false; END IF;
+  FOR item IN SELECT * FROM jsonb_array_elements(value)
+  LOOP
+    IF jsonb_typeof(item) <> 'object' THEN RETURN false; END IF;
+    IF jsonb_typeof(item->'title') <> 'string'
+       OR char_length(btrim(item->>'title')) NOT BETWEEN 2 AND 160 THEN RETURN false; END IF;
+    IF item ? 'description' AND item->'description' <> 'null'::jsonb
+       AND (jsonb_typeof(item->'description') <> 'string'
+         OR char_length(btrim(item->>'description')) > 400) THEN RETURN false; END IF;
+    IF jsonb_typeof(item->'badge') <> 'string'
+       OR char_length(btrim(item->>'badge')) NOT BETWEEN 1 AND 40 THEN RETURN false; END IF;
+    IF jsonb_typeof(item->'done') <> 'boolean' THEN RETURN false; END IF;
+    IF jsonb_typeof(item->'display_order') <> 'number'
+       OR item->>'display_order' !~ '^\d+$'
+       OR (item->>'display_order')::numeric > 10000 THEN RETURN false; END IF;
+    IF item ? 'id' AND item->'id' <> 'null'::jsonb
+       AND (jsonb_typeof(item->'id') <> 'string'
+         OR item->>'id' !~* '^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$')
+       THEN RETURN false; END IF;
+    IF (item->>'done')::boolean
+       AND NOT public.buildlog_semver_valid(item->>'badge')
+       THEN RETURN false; END IF;
+  END LOOP;
+  IF (SELECT count(DISTINCT element->>'display_order') FROM jsonb_array_elements(value) AS element) <> item_count
+    THEN RETURN false; END IF;
+  IF EXISTS (
+    SELECT 1 FROM jsonb_array_elements(value) AS element
+    WHERE element ? 'id' AND element->'id' <> 'null'::jsonb
+    GROUP BY element->>'id' HAVING count(*) > 1
+  ) THEN RETURN false; END IF;
+  RETURN true;
+EXCEPTION WHEN OTHERS THEN RETURN false;
+END;
+$$;
+
 CREATE TABLE IF NOT EXISTS public.buildlog_projects (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name text NOT NULL,
@@ -393,10 +470,10 @@ CREATE TABLE IF NOT EXISTS public.buildlog_projects (
   is_demo boolean NOT NULL DEFAULT false,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
-  CONSTRAINT buildlog_name_length CHECK (char_length(name) BETWEEN 2 AND 100),
-  CONSTRAINT buildlog_tagline_length CHECK (char_length(tagline) BETWEEN 2 AND 120),
-  CONSTRAINT buildlog_info_length CHECK (char_length(info) BETWEEN 10 AND 360),
-  CONSTRAINT buildlog_version_length CHECK (char_length(current_version) BETWEEN 1 AND 40),
+  CONSTRAINT buildlog_name_length CHECK (char_length(btrim(name)) BETWEEN 2 AND 100),
+  CONSTRAINT buildlog_tagline_length CHECK (char_length(btrim(tagline)) BETWEEN 2 AND 120),
+  CONSTRAINT buildlog_info_length CHECK (char_length(btrim(info)) BETWEEN 10 AND 360),
+  CONSTRAINT buildlog_version_length CHECK (char_length(btrim(current_version)) BETWEEN 1 AND 40),
   CONSTRAINT buildlog_display_order CHECK (display_order >= 0),
   CONSTRAINT buildlog_status CHECK (status IN ('draft', 'published', 'archived')),
   CONSTRAINT buildlog_https_urls CHECK (
@@ -411,7 +488,7 @@ CREATE TABLE IF NOT EXISTS public.buildlog_projects (
     )
   ),
   CONSTRAINT buildlog_items_array CHECK (
-    jsonb_typeof(items) = 'array' AND jsonb_array_length(items) BETWEEN 1 AND 50
+    public.buildlog_items_valid(items)
   )
 );
 
@@ -429,7 +506,7 @@ WITH (security_barrier = true)
 AS
 SELECT id, name, tagline, info, current_version, github_url, live_url, project_status, display_order, items
 FROM public.buildlog_projects
-WHERE status = 'published'
+WHERE status = 'published' AND is_demo = false
 ORDER BY display_order ASC, created_at DESC;
 
 REVOKE ALL ON TABLE public.public_buildlog_projects FROM PUBLIC;
@@ -449,4 +526,59 @@ $$;
 DROP TRIGGER IF EXISTS set_buildlog_updated_at ON public.buildlog_projects;
 CREATE TRIGGER set_buildlog_updated_at
 BEFORE UPDATE ON public.buildlog_projects
+FOR EACH ROW EXECUTE FUNCTION public.set_buildlog_updated_at();
+
+CREATE TABLE IF NOT EXISTS public.buildlog_settings (
+  id boolean PRIMARY KEY DEFAULT true CHECK (id = true),
+  kicker text NOT NULL,
+  heading text NOT NULL,
+  heading_accent text NOT NULL,
+  description text NOT NULL,
+  archive_label text NOT NULL,
+  seo_title text NOT NULL,
+  seo_description text NOT NULL,
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT buildlog_settings_kicker_length CHECK (char_length(btrim(kicker)) BETWEEN 2 AND 80),
+  CONSTRAINT buildlog_settings_heading_length CHECK (char_length(btrim(heading)) BETWEEN 2 AND 100),
+  CONSTRAINT buildlog_settings_accent_length CHECK (char_length(btrim(heading_accent)) BETWEEN 1 AND 60),
+  CONSTRAINT buildlog_settings_description_length CHECK (char_length(btrim(description)) BETWEEN 10 AND 300),
+  CONSTRAINT buildlog_settings_archive_length CHECK (char_length(btrim(archive_label)) BETWEEN 2 AND 60),
+  CONSTRAINT buildlog_settings_seo_title_length CHECK (char_length(btrim(seo_title)) BETWEEN 2 AND 100),
+  CONSTRAINT buildlog_settings_seo_description_length CHECK (char_length(btrim(seo_description)) BETWEEN 10 AND 300)
+);
+
+ALTER TABLE public.buildlog_settings ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON TABLE public.buildlog_settings FROM anon, authenticated;
+
+INSERT INTO public.buildlog_settings (
+  id, kicker, heading, heading_accent, description, archive_label,
+  seo_title, seo_description
+) VALUES (
+  true,
+  'The build never stops',
+  'Build. Ship.',
+  'Evolve.',
+  'A transparent record of what I shipped, what changed, and what I am building next across active projects.',
+  'Release archive',
+  'Buildlog | What I Ship',
+  'A project-by-project record of shipped features, releases, and carefully scoped next steps from Muhammad Haris.'
+)
+ON CONFLICT (id) DO NOTHING;
+
+DROP VIEW IF EXISTS public.public_buildlog_settings;
+CREATE VIEW public.public_buildlog_settings
+WITH (security_barrier = true)
+AS
+SELECT kicker, heading, heading_accent, description, archive_label,
+  seo_title, seo_description
+FROM public.buildlog_settings
+WHERE id = true;
+
+REVOKE ALL ON TABLE public.public_buildlog_settings FROM PUBLIC;
+GRANT SELECT ON TABLE public.public_buildlog_settings TO anon, authenticated;
+
+DROP TRIGGER IF EXISTS set_buildlog_settings_updated_at
+  ON public.buildlog_settings;
+CREATE TRIGGER set_buildlog_settings_updated_at
+BEFORE UPDATE ON public.buildlog_settings
 FOR EACH ROW EXECUTE FUNCTION public.set_buildlog_updated_at();

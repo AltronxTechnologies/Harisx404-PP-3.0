@@ -114,6 +114,17 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
                 article.querySelectorAll("a[target='_blank']").length === 0 &&
                 article.querySelector("[data-project-links]"),
             ).length,
+            ctaFooterGap: (() => {
+              const footer = document.querySelector("footer");
+              const ctaKicker = [...document.querySelectorAll("p")].find(
+                (element) => element.textContent?.trim() === "Available for opportunities",
+              );
+              const cta = ctaKicker?.closest("section");
+              if (!footer || !cta) return Number.POSITIVE_INFINITY;
+              return Math.abs(
+                footer.getBoundingClientRect().top - cta.getBoundingClientRect().bottom,
+              );
+            })(),
           };
         });
         assert.equal(initial.overflow, 0, `${theme} ${width}px overflow`);
@@ -129,7 +140,16 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
         assert.equal(initial.invalidLinkLayouts, 0, `${theme} ${width}px project-link layout`);
         assert.equal(initial.wrappedProjectLinks, 0, `${theme} ${width}px project-link wrapping`);
         assert.equal(initial.emptyLinkContainers, 0, `${theme} ${width}px empty project-link containers`);
+        assert.ok(initial.ctaFooterGap <= 0.5, `${theme} ${width}px CTA-to-Footer handoff`);
         assert.deepEqual(errors, [], `${theme} ${width}px console errors`);
+
+        const externalLinks = page.locator("article a[target='_blank']");
+        for (let link = 0; link < (await externalLinks.count()); link += 1) {
+          assert.match(
+            (await externalLinks.nth(link).getAttribute("aria-label")) || "",
+            /opens in a new tab/i,
+          );
+        }
 
         let disclosures = page.locator("button[aria-controls^='buildlog-shipped']");
         assert.ok((await disclosures.count()) > 0, `${theme} ${width}px disclosures exist`);
@@ -138,15 +158,14 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
           (element) => element.getBoundingClientRect().top + window.scrollY,
         );
         const controlledId = await firstDisclosure.getAttribute("aria-controls");
+        await page.evaluate(() => history.replaceState({}, "", `${location.pathname}${location.search}#audit-anchor`));
         assert.equal(await firstDisclosure.locator("[data-shipped-label-group] [data-project-version]").count(), 1);
         await firstDisclosure.click();
         await page.waitForTimeout(200);
         assert.equal(await page.locator("button[aria-expanded='true']").count(), 1);
+        assert.equal(await page.evaluate(() => location.hash), "#audit-anchor");
         assert.ok((await page.locator("article li").count()) > initial.items);
-        assert.ok(
-          (await page.getByText(/Demo: shipped update preview/).count()) > 0,
-        );
-        assert.match(await firstDisclosure.textContent(), /Hide shipped updates\s*·\s*06\s*v2\.1/i);
+        assert.match(await firstDisclosure.textContent(), /Hide shipped updates\s*·\s*05\s*v2\.1/i);
         assert.equal(
           await firstDisclosure.evaluate(
             (element) => element.getBoundingClientRect().top + window.scrollY,

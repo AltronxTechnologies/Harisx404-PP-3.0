@@ -25,7 +25,7 @@ export default function BuildlogError({ error, reset }: { error: Error; reset: (
           </>
         }
         description="This is a temporary data issue. Try again, or browse the published project collection."
-        headingLevel="h1"
+        headingLevel="h2"
         headingRef={headingRef}
         headingTabIndex={-1}
       >

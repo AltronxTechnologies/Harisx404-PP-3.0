@@ -15,8 +15,14 @@ ALTER TABLE public.buildlog_projects
 
 UPDATE public.buildlog_projects
 SET
-  github_url = COALESCE(github_url, 'https://github.com/harisx404/harisx404-portfolio'),
-  live_url = COALESCE(live_url, 'https://harisx404.vercel.app')
+  github_url = CASE
+    WHEN github_url = 'https://github.com/harisx404/harisx404-portfolio' THEN NULL
+    ELSE github_url
+  END,
+  live_url = CASE
+    WHEN live_url = 'https://harisx404.vercel.app' THEN NULL
+    ELSE live_url
+  END
 WHERE lower(name) = lower('This Website');
 
 UPDATE public.buildlog_projects
@@ -24,15 +30,41 @@ SET github_url = COALESCE(github_url, 'https://github.com/harisx404/MedicaLink-H
 WHERE lower(name) = lower('MedicaLink-HMS');
 
 DROP VIEW IF EXISTS public.public_buildlog_projects;
-CREATE VIEW public.public_buildlog_projects
-WITH (security_barrier = true)
-AS
-SELECT
-  id, name, tagline, info, current_version, github_url, live_url,
-  display_order, items
-FROM public.buildlog_projects
-WHERE status = 'published'
-ORDER BY display_order ASC, created_at DESC;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'buildlog_projects'
+      AND column_name = 'project_status'
+  ) THEN
+    EXECUTE $view$
+      CREATE VIEW public.public_buildlog_projects
+      WITH (security_barrier = true)
+      AS
+      SELECT
+        id, name, tagline, info, current_version, github_url, live_url,
+        project_status, display_order, items
+      FROM public.buildlog_projects
+      WHERE status = 'published' AND is_demo = FALSE
+      ORDER BY display_order ASC, created_at DESC
+    $view$;
+  ELSE
+    EXECUTE $view$
+      CREATE VIEW public.public_buildlog_projects
+      WITH (security_barrier = true)
+      AS
+      SELECT
+        id, name, tagline, info, current_version, github_url, live_url,
+        display_order, items
+      FROM public.buildlog_projects
+      WHERE status = 'published' AND is_demo = FALSE
+      ORDER BY display_order ASC, created_at DESC
+    $view$;
+  END IF;
+END;
+$$;
 
 REVOKE ALL ON TABLE public.public_buildlog_projects FROM PUBLIC;
 GRANT SELECT ON TABLE public.public_buildlog_projects TO anon, authenticated;

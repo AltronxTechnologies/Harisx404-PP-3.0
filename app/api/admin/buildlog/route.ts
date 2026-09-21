@@ -5,6 +5,7 @@ import * as z from "zod";
 import createSupabaseServerClient, {
   createSupabaseAdminClient,
 } from "@/app/lib/supabase/server";
+import { parseSemanticVersion } from "@/app/buildlog/version";
 
 const itemSchema = z.object({
   id: z.union([z.string().uuid(), z.literal("")]).optional(),
@@ -34,6 +35,13 @@ const projectSchema = z.object({
   is_demo: z.boolean().default(false),
   items: z.array(itemSchema).min(1).max(50),
 }).strict().superRefine((project, context) => {
+  if (project.is_demo && project.status === "published") {
+    context.addIssue({
+      code: "custom",
+      path: ["status"],
+      message: "Demo projects cannot be published.",
+    });
+  }
   if (project.project_status === "completed" && project.items.some((item) => !item.done)) {
     context.addIssue({
       code: "custom",
@@ -41,6 +49,15 @@ const projectSchema = z.object({
       message: "Completed projects cannot contain planned release items.",
     });
   }
+  project.items.forEach((item, index) => {
+    if (item.done && !parseSemanticVersion(item.badge)) {
+      context.addIssue({
+        code: "custom",
+        path: ["items", index, "badge"],
+        message: "Shipped items require a semantic version badge, for example v2.1.",
+      });
+    }
+  });
 });
 
 async function requireAdmin(
@@ -93,6 +110,7 @@ export async function GET(request: Request) {
       .from("buildlog_projects")
       .select("id, name, tagline, info, current_version, github_url, live_url, project_status, display_order, status, is_demo, items")
       .order("display_order", { ascending: true })
+      .order("name", { ascending: true })
       .limit(limit);
     if (error) throw error;
     return NextResponse.json({ data });
@@ -107,7 +125,13 @@ export async function POST(request: Request) {
     if (!(await requireAdmin(auth))) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const parsed = parseProject(await request.json());
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
+    }
+    const parsed = parseProject(body);
     if ("error" in parsed) return NextResponse.json({ error: parsed.error }, { status: 400 });
     const db = await createSupabaseAdminClient();
     const { data, error } = await db.from("buildlog_projects").insert(parsed.data).select().single();
@@ -125,7 +149,12 @@ export async function PUT(request: Request) {
     if (!(await requireAdmin(auth))) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const body: unknown = await request.json();
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
+    }
     const id = typeof body === "object" && body && "id" in body ? String(body.id) : "";
     if (!z.string().uuid().safeParse(id).success) {
       return NextResponse.json({ error: "Invalid Buildlog project ID." }, { status: 400 });
@@ -141,6 +170,9 @@ export async function PUT(request: Request) {
       .eq("id", id)
       .select()
       .single();
+    if (error?.code === "PGRST116") {
+      return NextResponse.json({ error: "Buildlog project not found." }, { status: 404 });
+    }
     if (error) throw error;
     revalidateBuildlog();
     return NextResponse.json({ data: updated });
@@ -160,8 +192,16 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Invalid Buildlog project ID." }, { status: 400 });
     }
     const db = await createSupabaseAdminClient();
-    const { error } = await db.from("buildlog_projects").delete().eq("id", id);
+    const { data, error } = await db
+      .from("buildlog_projects")
+      .delete()
+      .eq("id", id)
+      .select("id")
+      .maybeSingle();
     if (error) throw error;
+    if (!data) {
+      return NextResponse.json({ error: "Buildlog project not found." }, { status: 404 });
+    }
     revalidateBuildlog();
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -90,7 +90,11 @@ export function BuildlogCollection({
     if (open) params.set("open", open);
     else params.delete("open");
     const query = params.toString();
-    window.history.pushState({}, "", `${window.location.pathname}${query ? `?${query}` : ""}`);
+    window.history.pushState(
+      {},
+      "",
+      `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`,
+    );
   };
 
   const toggleShipped = (projectId: string) => {
@@ -103,8 +107,7 @@ export function BuildlogCollection({
 
   return (
     <div className="border-b border-border-primary">
-          {projects.map((project) => {
-            const projectIndex = projects.findIndex((candidate) => candidate.id === project.id);
+          {projects.map((project, projectIndex) => {
             const plannedItems = project.items.filter((item) => !item.done);
             const shippedItems = sortShippedNewest(
               project.items.filter((item) => item.done),
@@ -156,7 +159,7 @@ export function BuildlogCollection({
                             href={project.github_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            aria-label={`View ${project.name} source code on GitHub`}
+                            aria-label={`View ${project.name} source code on GitHub (opens in a new tab)`}
                             className={`inline-flex min-h-9 min-w-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-border-primary px-2.5 font-mono text-[9px] uppercase tracking-wide text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25 min-[360px]:text-[10px] ${hasBothProjectLinks ? "" : "col-span-2"}`}
                           >
                             <BrandGlyph name="github" className="size-3.5" /> GitHub
@@ -167,7 +170,7 @@ export function BuildlogCollection({
                             href={project.live_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            aria-label={`Open live ${project.name} project`}
+                            aria-label={`Open live ${project.name} project (opens in a new tab)`}
                             className={`inline-flex min-h-9 min-w-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-border-primary px-2.5 font-mono text-[9px] uppercase tracking-wide text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25 min-[360px]:text-[10px] ${hasBothProjectLinks ? "" : "col-span-2"}`}
                           >
                             <ExternalLink aria-hidden="true" className="size-3.5" /> Live project
@@ -186,7 +189,7 @@ export function BuildlogCollection({
                       aria-expanded={expanded}
                       aria-controls={shippedRegionId}
                       onClick={() => toggleShipped(project.id)}
-                      className="group flex min-h-12 w-full items-center justify-between gap-4 border-b border-border-primary px-4 text-left font-mono text-[10px] font-medium uppercase tracking-widest text-text-secondary transition-colors hover:bg-neutral-900/[0.025] hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-text-primary dark:hover:bg-white/[0.025] sm:px-6"
+                      className="group flex min-h-12 w-full items-center justify-between gap-4 border-b border-border-primary px-4 text-left font-mono text-[10px] font-medium uppercase tracking-widest text-text-secondary transition-colors hover:bg-neutral-900/[0.025] hover:text-text-primary active:bg-neutral-900/[0.05] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-text-primary dark:hover:bg-white/[0.025] dark:active:bg-white/[0.05] sm:px-6"
                     >
                       <span
                         data-shipped-label-group

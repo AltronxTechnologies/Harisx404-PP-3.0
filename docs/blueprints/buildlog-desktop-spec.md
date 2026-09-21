@@ -63,9 +63,8 @@ Status: implemented and verified; owner lock pending.
 ## Responsive Rules
 
 - Global rails remain the only rails; Buildlog does not draw a duplicate frame.
-- At less than 430px, release badges move below the copy so they cannot collide
-  with long titles or overflow.
-- At 430px and above, copy and badge share one horizontal row.
+- Release copy and badge share one horizontal row at every breakpoint; titles
+  and descriptions clamp to preserve the badge column without overflow.
 - Page and row containers use `min-w-0`; no horizontal overflow is accepted.
 - Expansion state is reflected in the URL and restored by browser Back/Forward
   navigation.
@@ -73,14 +72,21 @@ Status: implemented and verified; owner lock pending.
 ## Data and States
 
 - Public source: published rows from `public_buildlog_projects`.
+- Hero kicker, heading, accent, supporting copy, and archive label come from the
+  restricted `public_buildlog_settings` view and are editable in Admin.
 - Environment-safe fallback: `app/data/buildlog.ts` only when the database/view
   is unavailable.
-- Loading skeleton mirrors hero, toolbar, project headers, and release rows.
+- The Admin-managed hero renders outside the page loading boundary, eliminating
+  copy-dependent layout mismatch. The loading skeleton mirrors the toolbar,
+  project headers, release rows, and shared CTA footprint.
 - Empty collection and route error have explicit accessible recovery states.
 - Admin management uses `/admin/buildlog` and `/api/admin/buildlog`.
+- Page copy is managed at `/admin/buildlog/settings` through the secured settings
+  API, including search and social metadata; aggregate shipped/planned totals
+  remain derived from release items.
+- All project editorial content, lifecycle, visibility, links, releases, and
+  ordering are managed at `/admin/buildlog`; shared CTA/Footer copy remains owned
+  by the locked site-wide components.
 - Admin links are independent and optional: both, one, or neither may be shown.
 - Project lifecycle is independently managed as In progress, Live, or Completed.
   Completed is accepted only when every release item is shipped.
-- Temporary `Demo:` shipped/planned fixtures exist in fallback and initial seed
-  data only to exercise long-list layout. Remove database items through Admin and
-  remove fallback fixtures from source before deployment.

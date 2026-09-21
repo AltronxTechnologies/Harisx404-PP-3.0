@@ -16,18 +16,22 @@ test("Buildlog renders the responsive release collection", async () => {
   assert.match(html, /Show shipped updates/);
   assert.match(html, /aria-expanded="false"/);
   assert.match(html, />GitHub</);
-  assert.match(html, /Live project/);
-  assert.match(html, /Demo: planned update preview/);
+  assert.doesNotMatch(html, /github\.com\/harisx404\/harisx404-portfolio/);
+  assert.doesNotMatch(html, /Demo: (?:shipped|planned) update preview/);
   assert.match(html, /Live/);
   assert.match(html, /In progress/);
   assert.doesNotMatch(html, /Filter Buildlog projects|All 04|Completed 00/);
   assert.doesNotMatch(html, /\d+\/\d+ shipped/);
   const filterIds = [...html.matchAll(/<filter id="([^"]+)"/g)].map((match) => match[1]);
   assert.equal(new Set(filterIds).size, filterIds.length);
+
+  const fallback = await readFile(new URL("../app/data/buildlog.ts", import.meta.url), "utf8");
+  assert.doesNotMatch(fallback, /harisx404-portfolio|liveUrl:\s*"https:\/\/harisx404\.vercel\.app"/);
 });
 
 test("Buildlog source has valid hero semantics and explicit route states", async () => {
-  const [page, collection, mark, loading, error] = await Promise.all([
+  const [layout, page, collection, mark, loading, error] = await Promise.all([
+    readFile(new URL("../app/buildlog/layout.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/buildlog/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/buildlog/BuildlogCollection.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/components/buildlog/SketchCheckbox.tsx", import.meta.url), "utf8"),
@@ -35,8 +39,9 @@ test("Buildlog source has valid hero semantics and explicit route states", async
     readFile(new URL("../app/buildlog/error.tsx", import.meta.url), "utf8"),
   ]);
 
-  assert.doesNotMatch(page, /<h1[^>]*>\s*<p/);
-  assert.match(page, /PaperHeroTexture/);
+  assert.doesNotMatch(layout, /<h1[^>]*>\s*<p/);
+  assert.match(layout, /PaperHeroTexture/);
+  assert.match(layout, /fetchBuildlogSettings/);
   assert.match(page, /border-border-primary/);
   assert.match(page, /data-release-summary/);
   assert.match(page, /tabular-nums/);
@@ -44,6 +49,7 @@ test("Buildlog source has valid hero semantics and explicit route states", async
   assert.doesNotMatch(page, /before:w-screen|data-release-summary[\s\S]{0,250}border-[ty]/);
   assert.match(page, /className="mt-28"/);
   assert.match(page, /<CtaSection \/>/);
+  assert.doesNotMatch(page, /mt-14 pb-24/);
   assert.match(page, /projects\.length > 0/);
   assert.ok(
     collection.indexOf("aria-controls={shippedRegionId}") <
@@ -77,6 +83,12 @@ test("Buildlog source has valid hero semantics and explicit route states", async
   assert.doesNotMatch(mark, /feTurbulence|feDisplacementMap/);
   assert.match(mark, /fill-text-primary/);
   assert.match(loading, /Loading Buildlog/);
+  assert.equal((loading.match(/data-loading-project/g) || []).length >= 1, true);
+  assert.match(loading, /\[0, 1, 2, 3\]\.map/);
+  assert.match(loading, /data-loading-project-links/);
+  assert.doesNotMatch(loading, /data-loading-hero-heading/);
+  assert.match(loading, /data-loading-release-badge/);
+  assert.match(loading, /data-loading-cta/);
   assert.match(error, /role="alert"/);
   assert.match(error, /headingRef\.current\?\.focus/);
 });
@@ -86,14 +98,19 @@ test("Buildlog admin API is fail-closed for every method", async () => {
     const response = await fetch(`${baseUrl}/api/admin/buildlog`, { method });
     assert.equal(response.status, 401, `${method} should require administrator authorization`);
   }
+  for (const method of ["GET", "PUT"]) {
+    const response = await fetch(`${baseUrl}/api/admin/buildlog/settings`, { method });
+    assert.equal(response.status, 401, `${method} settings should require administrator authorization`);
+  }
 });
 
 test("Buildlog schema, seed, lifecycle, links, API, admin form, and cache contract agree", async () => {
-  const [migration, seed, linksMigration, statusMigration, api, form, publicData, collection] = await Promise.all([
+  const [migration, seed, linksMigration, statusMigration, validationMigration, api, form, publicData, collection] = await Promise.all([
     readFile(new URL("../migrations/2026_buildlog_projects.sql", import.meta.url), "utf8"),
     readFile(new URL("../migrations/2026_buildlog_seed.sql", import.meta.url), "utf8"),
     readFile(new URL("../migrations/2026_buildlog_zz_project_links.sql", import.meta.url), "utf8"),
     readFile(new URL("../migrations/2026_buildlog_zzz_project_status.sql", import.meta.url), "utf8"),
+    readFile(new URL("../migrations/2026_buildlog_zzzzz_item_validation.sql", import.meta.url), "utf8"),
     readFile(new URL("../app/api/admin/buildlog/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/components/admin/BuildlogForm.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/buildlog/data.ts", import.meta.url), "utf8"),
@@ -115,6 +132,12 @@ test("Buildlog schema, seed, lifecycle, links, API, admin form, and cache contra
     assert.match(api, new RegExp(field));
     assert.match(form, new RegExp(field));
   });
+  for (const field of ["title", "description", "badge", "done", "display_order"]) {
+    const pattern = new RegExp(field);
+    assert.match(validationMigration, pattern);
+    assert.match(api, pattern);
+    assert.match(form, pattern);
+  }
   for (const field of ["github_url", "live_url"]) {
     assert.match(linksMigration, new RegExp(field));
     assert.match(api, new RegExp(field));
@@ -126,11 +149,17 @@ test("Buildlog schema, seed, lifecycle, links, API, admin form, and cache contra
   assert.match(statusMigration, /in_progress.*live.*completed/s);
   assert.match(statusMigration, /buildlog_items_all_done/);
   assert.match(statusMigration, /status_column_was_missing/);
-  assert.match(seed, /Demo: shipped update preview/);
-  assert.match(seed, /Demo: planned update preview/);
+  assert.match(validationMigration, /buildlog_items_valid/);
+  assert.match(validationMigration, /semantic version badge/);
+  assert.match(validationMigration, /Demo: shipped update preview/);
+  assert.match(linksMigration, /harisx404-portfolio/);
+  assert.match(linksMigration, /harisx404\.vercel\.app/);
+  assert.doesNotMatch(seed, /Demo: (?:shipped|planned) update preview/);
   assert.match(api, /auth\.getUser\(\)/);
   assert.match(api, /revalidatePath\("\/buildlog"\)/);
   assert.match(api, /revalidateTag\("buildlog"\)/);
+  assert.match(api, /Invalid JSON body/);
+  assert.match(api, /Buildlog project not found/);
   assert.match(migration, /REVOKE ALL ON TABLE public\.buildlog_projects FROM anon, authenticated/);
   assert.match(migration, /public_buildlog_projects/);
   assert.match(publicData, /public_buildlog_projects/);
@@ -145,6 +174,33 @@ test("Buildlog schema, seed, lifecycle, links, API, admin form, and cache contra
   assert.match(collection, /Completed/);
   assert.match(collection, /Live/);
   assert.doesNotMatch(collection, /Filter Buildlog projects/);
+});
+
+test("Buildlog page copy is managed through restricted settings", async () => {
+  const [migration, route, form, dataSource, layout, page] = await Promise.all([
+    readFile(new URL("../migrations/2026_buildlog_zzzz_settings.sql", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/admin/buildlog/settings/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/admin/BuildlogSettingsForm.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/buildlog/data.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/buildlog/layout.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/buildlog/page.tsx", import.meta.url), "utf8"),
+  ]);
+  for (const field of ["kicker", "heading", "heading_accent", "description", "archive_label", "seo_title", "seo_description"]) {
+    const pattern = new RegExp(field);
+    assert.match(migration, pattern);
+    assert.match(route, pattern);
+    assert.match(form, pattern);
+    assert.match(dataSource, pattern);
+  }
+  assert.match(migration, /REVOKE ALL ON TABLE public\.buildlog_settings FROM anon, authenticated/);
+  assert.match(migration, /public_buildlog_settings/);
+  assert.match(route, /auth\.getUser\(\)/);
+  assert.match(route, /revalidateTag\("buildlog"\)/);
+  assert.match(layout, /settings\.kicker/);
+  assert.match(layout, /settings\.heading_accent/);
+  assert.match(page, /settings\.seo_title/);
+  assert.match(page, /openGraph:/);
+  assert.match(page, /twitter:/);
 });
 
 test("Legacy changelog admin routes redirect to Buildlog", async () => {

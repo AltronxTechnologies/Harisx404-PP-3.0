@@ -6,9 +6,11 @@ Companion: `buildlog-desktop-spec.md`.
 
 - Verified widths: 320, 360, 375, and 390px.
 - Shared mobile Navbar and global rails remain unchanged.
+- The exact Admin-managed hero renders before the collection loading boundary;
+  no fallback copy is used to guess mobile heading or description wrapping.
 - Hero uses the locked 46px Instrument Serif page-heading scale and wraps to two
   balanced lines where necessary.
-- Toolbar stacks its count below the collection description.
+- Archive metrics remain right-aligned opposite the archive label.
 - The Release archive uses no outer rules; compact shipped/planned metrics stay
   right-aligned opposite the label, followed directly by the first project boundary.
 - No project filter rail is rendered; lifecycle is communicated directly beside
@@ -16,7 +18,7 @@ Companion: `buildlog-desktop-spec.md`.
 - The number/lifecycle row and shipped-control row share the same 48px height and
   full-width bottom divider.
 - Project headers use 16px padding; fixed-height release rows use 16px horizontal
-  padding and 12px vertical padding below `sm` (16px from `sm` upward).
+  padding with vertically centered content.
 - Crisp shipped/planned status marks and copy stay aligned at the top of each row.
 - Badges remain to the right of release copy at every width, matching tablet and
   desktop alignment.
@@ -42,3 +44,5 @@ Companion: `buildlog-desktop-spec.md`.
 - Heading order is one H1, collection H2, project H3 headings, then shared CTA H2.
 - Disclosure, lifecycle labels, URL state, and browser Back behavior pass at every
   verified phone width.
+- The shared CTA section ends directly at the Footer boundary with no
+  Buildlog-owned margin or padding after it.
