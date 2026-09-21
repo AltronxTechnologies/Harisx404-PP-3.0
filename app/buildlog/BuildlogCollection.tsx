@@ -96,7 +96,8 @@ export function BuildlogCollection({
             return (
               <article
                 key={project.id}
-                className="grid min-w-0 grid-cols-1 border-t border-border-primary lg:grid-cols-12"
+                data-project-boundary
+                className="grid min-w-0 grid-cols-1 border-t border-neutral-400/60 dark:border-white/20 lg:grid-cols-12"
               >
                 <header className="border-b border-border-primary lg:sticky lg:top-28 lg:col-span-4 lg:self-start lg:border-b-0 xl:col-span-3">
                   <div

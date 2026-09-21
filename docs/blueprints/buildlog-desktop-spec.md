@@ -12,7 +12,7 @@ Status: implemented and verified; owner lock pending.
    Instrument Serif heading, 16px supporting-copy gap.
 4. Release toolbar 56px below the hero, with collection description and
    shipped/planned totals.
-5. Project regions separated by solid `border-border-primary` rules.
+5. Project regions separated by slightly stronger neutral hairlines.
 6. Shared locked CTA 112px below the collection, followed by the shared Footer.
 
 ## Project Region
@@ -24,6 +24,9 @@ Status: implemented and verified; owner lock pending.
   Serif project name, 24px serif tagline, and 14/24px summary.
 - At `lg+`, the left number/lifecycle bar and right shipped-control bar use the
   same height, padding, and bottom divider, forming one aligned ledger row.
+- Project-to-project boundaries use a slightly stronger neutral hairline
+  (`neutral-400/60` light and `white/20` dark) while internal rows retain the
+  quieter shared border token.
 - An admin-managed lifecycle label appears beside the index: In progress, Live,
   or Completed. Draft/Published/Archived remains a separate visibility setting.
 - Release rows use a crisp 20px rounded-square status mark, 16/22px title,
