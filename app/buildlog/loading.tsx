@@ -24,7 +24,7 @@ export default function BuildlogLoading() {
             <div className={`h-3 w-32 rounded bg-border-primary/30 ${pulse}`} />
           </div>
           {[0, 1, 2].map((project) => (
-            <div key={project} className="grid border-t border-neutral-400/60 dark:border-white/20 lg:grid-cols-12">
+            <div key={project} className="relative grid before:absolute before:-left-2 before:-right-2 before:top-0 before:h-0.5 before:bg-neutral-400/60 before:content-[''] dark:before:bg-white/20 sm:before:-left-4 sm:before:-right-4 lg:grid-cols-12">
               <div className="border-b border-border-primary lg:col-span-4 lg:border-b-0 xl:col-span-3">
                 <div className="flex min-h-12 items-center justify-between gap-3 border-b border-border-primary px-4 sm:px-6">
                   <div className={`h-3 w-6 rounded bg-border-primary/35 ${pulse}`} />

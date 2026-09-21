@@ -24,7 +24,8 @@ Legacy Changelog admin/API files remain byte-identical to their locked baseline.
 - Removed the redundant shipped ratio, moved the version pill into release
   controls, and ordered shipped updates before Planned Next.
 - Strengthened only project-to-project boundaries with a darker neutral
-  hairline, preserving quieter internal row dividers for clear grouping.
+  2px rule extended through the section padding, preserving quieter internal
+  row dividers for clear grouping.
 - Removed duplicate Buildlog-local rails; the global frame is the only frame.
 - Added release totals, stable project/item keys, collision-free IDs, and
   explicit per-item Shipped/Planned screen-reader text.

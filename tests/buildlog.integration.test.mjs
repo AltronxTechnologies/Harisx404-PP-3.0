@@ -48,7 +48,10 @@ test("Buildlog source has valid hero semantics and explicit route states", async
   assert.match(collection, /data-project-status-row/);
   assert.match(collection, /data-release-top-row/);
   assert.match(collection, /data-project-boundary/);
-  assert.match(collection, /border-neutral-400\/60 dark:border-white\/20/);
+  assert.match(collection, /before:-left-2 before:-right-2/);
+  assert.match(collection, /before:h-0\.5/);
+  assert.match(collection, /before:bg-neutral-400\/60/);
+  assert.match(collection, /dark:before:bg-white\/20/);
   assert.match(collection, /shippedItems\.length === 0/);
   assert.ok(
     collection.indexOf("aria-controls={shippedRegionId}") <

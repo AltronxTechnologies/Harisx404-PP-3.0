@@ -24,9 +24,9 @@ Status: implemented and verified; owner lock pending.
   Serif project name, 24px serif tagline, and 14/24px summary.
 - At `lg+`, the left number/lifecycle bar and right shipped-control bar use the
   same height, padding, and bottom divider, forming one aligned ledger row.
-- Project-to-project boundaries use a slightly stronger neutral hairline
-  (`neutral-400/60` light and `white/20` dark) while internal rows retain the
-  quieter shared border token.
+- Project-to-project boundaries use a 2px neutral rule (`neutral-400/60` light
+  and `white/20` dark) extended through the section padding to the full content
+  width, while internal rows retain the quieter 1px shared border token.
 - An admin-managed lifecycle label appears beside the index: In progress, Live,
   or Completed. Draft/Published/Archived remains a separate visibility setting.
 - Release rows use a crisp 20px rounded-square status mark, 16/22px title,
