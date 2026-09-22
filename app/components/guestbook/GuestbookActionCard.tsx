@@ -59,6 +59,21 @@ export function GuestbookActionCard({ user, action, copy, authError = false }: P
     if (!open) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    const background = [...document.body.children].filter(
+      (element): element is HTMLElement =>
+        element instanceof HTMLElement &&
+        !element.hasAttribute("data-community-wall-modal") &&
+        !["SCRIPT", "STYLE"].includes(element.tagName),
+    );
+    const previousState = background.map((element) => ({
+      element,
+      ariaHidden: element.getAttribute("aria-hidden"),
+      inert: element.inert,
+    }));
+    background.forEach((element) => {
+      element.setAttribute("aria-hidden", "true");
+      element.inert = true;
+    });
     closeRef.current?.focus();
     const keydown = (event: KeyboardEvent) => {
       if (event.key === "Escape") close();
@@ -70,7 +85,15 @@ export function GuestbookActionCard({ user, action, copy, authError = false }: P
       else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
     };
     document.addEventListener("keydown", keydown);
-    return () => { document.body.style.overflow = previousOverflow; document.removeEventListener("keydown", keydown); };
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      previousState.forEach(({ element, ariaHidden, inert }) => {
+        if (ariaHidden === null) element.removeAttribute("aria-hidden");
+        else element.setAttribute("aria-hidden", ariaHidden);
+        element.inert = inert;
+      });
+      document.removeEventListener("keydown", keydown);
+    };
   }, [close, open]);
 
   return <>
@@ -85,8 +108,8 @@ export function GuestbookActionCard({ user, action, copy, authError = false }: P
     </article>
 
     {mounted && createPortal(<AnimatePresence>{open && <>
-      <motion.button type="button" aria-label="Close dialog" className="fixed inset-0 z-[4999] cursor-default bg-black/60 backdrop-blur-sm dark:bg-black/75" onClick={close} initial={{ opacity: reduceMotion ? 1 : 0 }} animate={{ opacity: 1 }} exit={{ opacity: reduceMotion ? 1 : 0 }} transition={{ duration: reduceMotion ? 0 : 0.2 }} />
-      <motion.div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="community-wall-dialog-title" className="fixed left-1/2 top-1/2 z-[5000] w-[calc(100%-32px)] max-w-[400px] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-neutral-900" initial={{ opacity: reduceMotion ? 1 : 0, scale: reduceMotion ? 1 : 0.95, x: "-50%", y: "-50%" }} animate={{ opacity: 1, scale: 1, x: "-50%", y: "-50%" }} exit={{ opacity: reduceMotion ? 1 : 0, scale: reduceMotion ? 1 : 0.95, x: "-50%", y: "-50%" }} transition={{ duration: reduceMotion ? 0 : 0.25, ease: [0.16, 1, 0.3, 1] }}>
+      <motion.div data-community-wall-modal aria-hidden="true" className="fixed inset-0 z-[4999] bg-black/60 backdrop-blur-sm dark:bg-black/75" onClick={close} initial={{ opacity: reduceMotion ? 1 : 0 }} animate={{ opacity: 1 }} exit={{ opacity: reduceMotion ? 1 : 0 }} transition={{ duration: reduceMotion ? 0 : 0.2 }} />
+      <motion.div data-community-wall-modal ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="community-wall-dialog-title" className="fixed left-1/2 top-1/2 z-[5000] w-[calc(100%-32px)] max-w-[400px] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-neutral-900" initial={{ opacity: reduceMotion ? 1 : 0, scale: reduceMotion ? 1 : 0.95, x: "-50%", y: "-50%" }} animate={{ opacity: 1, scale: 1, x: "-50%", y: "-50%" }} exit={{ opacity: reduceMotion ? 1 : 0, scale: reduceMotion ? 1 : 0.95, x: "-50%", y: "-50%" }} transition={{ duration: reduceMotion ? 0 : 0.25, ease: [0.16, 1, 0.3, 1] }}>
         <button ref={closeRef} type="button" onClick={close} aria-label="Close Community Wall dialog" className="absolute right-3 top-3 z-20 flex size-9 items-center justify-center rounded-full border border-white/20 bg-black/15 text-white hover:bg-black/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"><X aria-hidden="true" className="size-4" /></button>
         <div className="relative flex min-h-44 flex-col items-center justify-center overflow-hidden px-8 py-7 pb-10 text-center text-white" style={{ background: gradient }}><Doodles /><div className="relative z-10"><h2 id="community-wall-dialog-title" className="[font-family:var(--font-instrument-serif),serif] text-2xl font-medium italic">{copy.composerTitle}</h2><p className="mt-2 text-sm leading-5 text-white/60">{user ? copy.composerDescription : copy.signInDescription}</p></div><ScallopDivider /></div>
         <div className="-mt-2 px-8 pb-8">

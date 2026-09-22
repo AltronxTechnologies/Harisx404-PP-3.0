@@ -27,8 +27,9 @@ test("Community Wall moderation and settings APIs are fail-closed", async () => 
 });
 
 test("Community Wall source enforces moderation, bounded reads, and managed copy", async () => {
-  const [page, data, action, migration, adminApi, settingsApi, adminPage, form, loading, error] = await Promise.all([
+  const [page, entry, data, action, migration, adminApi, settingsApi, adminPage, form, loading, error] = await Promise.all([
     readFile(new URL("../app/community-wall/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/guestbook/GuestbookEntryCard.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/community-wall/data.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/community-wall/actions.ts", import.meta.url), "utf8"),
     readFile(new URL("../migrations/2026_community_wall_messages.sql", import.meta.url), "utf8"),
@@ -42,6 +43,8 @@ test("Community Wall source enforces moderation, bounded reads, and managed copy
 
   assert.doesNotMatch(page, /<h1[^>]*>\s*<p/);
   assert.match(page, /PaperHeroTexture/);
+  assert.match(page, /GuestbookEntryCard/);
+  assert.match(entry, /aria-labelledby={`entry-\$\{id\}-title`}/);
   assert.match(page, /COMMUNITY_WALL_PAGE_SIZE/);
   assert.match(data, /public_community_wall_messages/);
   assert.match(data, /\.range\(start, end\)/);

@@ -62,6 +62,18 @@ test("Community Wall remains aligned and accessible across themes and widths", a
           const box = await dialog.boundingBox();
           assert.ok(box && box.width <= 400 && box.width <= width - 32, "mobile dialog width");
           assert.equal(await page.locator("body").evaluate((body) => getComputedStyle(body).overflow), "hidden");
+          assert.equal(
+            await page.locator("main").evaluate((element) => Boolean(element.closest("[inert]"))),
+            true,
+            "dialog inerts background application content",
+          );
+          assert.equal(
+            await page.locator("[data-community-wall-modal][aria-hidden='true']").evaluate(
+              (element) => element.tagName,
+            ),
+            "DIV",
+            "backdrop is not a focusable button",
+          );
           assert.ok(await dialog.getByRole("link", { name: /Continue with GitHub/i }).isVisible());
           await page.keyboard.press("Escape");
           await dialog.waitFor({ state: "hidden" });
@@ -71,6 +83,11 @@ test("Community Wall remains aligned and accessible across themes and widths", a
             ),
             true,
             "Escape restores focus to the dialog trigger",
+          );
+          assert.equal(
+            await page.locator("main").evaluate((element) => Boolean(element.closest("[inert]"))),
+            false,
+            "dialog restores background application content",
           );
         }
         assert.deepEqual(errors, [], `${theme} ${width}px console warnings/errors`);

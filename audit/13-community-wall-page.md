@@ -2,7 +2,7 @@
 
 - Date: 2026-09-22
 - Route: `/community-wall`
-- Status: implementation and production-path verification complete; owner visual review with temporary preview notes in progress
+- Status: implementation, live Supabase, and production-path verification complete; owner lock pending
 
 ## Scope
 
@@ -26,6 +26,11 @@ were not modified.
   400px shell, animated scale/fade entry, and functional GitHub OAuth.
 - Dialog and card motion honor `prefers-reduced-motion`; every dismissal path,
   including Escape, restores focus to the original card trigger.
+- Modal open state inerts and hides background application roots from assistive
+  technology, while the click-away backdrop remains non-focusable and the close
+  control stays inside the dialog.
+- Every published note is a labelled article whose visible message is its H3,
+  preserving H1 → H2 → H3 → shared CTA H2 navigation semantics.
 - Added explicit loading, empty, OAuth-failure, submission success/error, and
   focused route-error states.
 - Added strict 24-note public pagination and independent 50-note Admin pending and
@@ -74,7 +79,9 @@ were not modified.
 | Reduced motion | Dialog duration 0; card tilt/transition removed |
 | Live Supabase cutover | Passed; published-only views and managed settings live |
 | Atomic authenticated submission | Passed with temporary user and cleanup |
+| Signed-in composer browser flow | Session, modal, server action, pending insert, success feedback passed |
 | Authenticated moderation lifecycle | Pending → published → archived → pending → deleted |
+| Admin moderation UI | Approve, archive, restore, delete, settings page passed |
 | Public cache invalidation | Passed after every moderation transition |
 | Authenticated settings roundtrip | Passed with public revalidation |
 | Blog regression | 3/3 passed |
@@ -83,6 +90,7 @@ were not modified.
 | Credentials regression | 5/5 passed |
 | Full public preview sweep | Passed |
 | Independent code/design review | No high or medium blockers |
+| Temporary fixture cleanup | 7/7 removed; no verification users or notes remain |
 | `git diff --check` | Passed |
 
 ## Live Cutover
@@ -97,8 +105,7 @@ records remain. The page is ready for final owner visual approval before locking
 
 ## Temporary Visual Preview
 
-At the owner's request, seven natural-looking published preview notes were added
-to exercise the complete multi-row wall across all five palettes and varied copy
-lengths. They use the author names Maya Chen, Omar Khan, Sofia Martinez, Noah
-Williams, Ava Patel, Liam Brooks, and Elena Rossi. Remove these seven exact preview
-records before production lock unless the owner explicitly chooses to retain them.
+Seven natural-looking published fixtures exercised the complete multi-row wall
+across all five palettes and varied copy lengths. The populated responsive matrix
+passed, then all seven fixtures were removed. The production table contains only
+the two pre-existing published owner records and no verification users or notes.

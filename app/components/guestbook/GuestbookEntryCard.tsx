@@ -49,6 +49,7 @@ export function GuestbookEntryCard({
   return (
     <article
       id={`entry-${id}`}
+      aria-labelledby={`entry-${id}-title`}
       className={`group relative flex scroll-mt-40 flex-col overflow-hidden rounded-2xl bg-white shadow-2xl transition-transform duration-300 target:ring-2 target:ring-white/40 target:ring-offset-2 target:ring-offset-transparent hover:z-10 motion-reduce:transform-none motion-reduce:transition-none motion-reduce:hover:transform-none dark:bg-neutral-900 ${ROTATIONS[order % ROTATIONS.length]}`}
     >
       {/* Inner highlight border (dark mode) */}
@@ -65,9 +66,9 @@ export function GuestbookEntryCard({
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 overflow-hidden opacity-50 mix-blend-color-dodge">
           {doodle}
         </div>
-        <p className="relative z-10 line-clamp-6 text-balance text-lg font-bold leading-snug text-neutral-100">
+        <h3 id={`entry-${id}-title`} className="relative z-10 line-clamp-6 text-balance text-lg font-bold leading-snug text-neutral-100">
           {message}
-        </p>
+        </h3>
         <ScallopDivider />
       </div>
 
