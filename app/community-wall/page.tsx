@@ -72,7 +72,7 @@ export default async function CommunityWallPage({
   const totalPages = Math.max(1, Math.ceil(count / COMMUNITY_WALL_PAGE_SIZE));
 
   return (
-    <div className="relative mt-14">
+    <div className="relative mt-[88px] sm:mt-[72px]">
       <GridWrapper>
         <div className="relative px-4 xl:px-0">
           <PaperHeroTexture className="-inset-x-2 bottom-0 top-[-128px] sm:-inset-x-3 sm:top-[-144px] md:top-[-176px] lg:inset-x-0" />
@@ -80,7 +80,7 @@ export default async function CommunityWallPage({
             <p className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
               {settings.kicker}
             </p>
-            <h1 className="heading-glow mx-auto mt-4 max-w-2xl text-balance [font-family:var(--font-instrument-serif),serif] text-[46px] font-medium leading-none tracking-tight text-text-primary md:text-[56px] md:tracking-[-1.5px]">
+            <h1 className="heading-glow mx-auto mt-4 max-w-2xl text-balance [font-family:var(--font-instrument-serif),serif] text-5xl font-medium leading-none tracking-tight text-text-primary md:text-6xl md:tracking-[-1.5px]">
               {settings.heading}{" "}
               <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
                 {settings.heading_accent}
@@ -93,8 +93,8 @@ export default async function CommunityWallPage({
         </div>
       </GridWrapper>
 
-      <section aria-labelledby="community-wall-heading" className="mt-14 px-2 sm:px-4">
-        <div className="-mx-2 flex min-h-14 items-center justify-between gap-4 px-4 py-3 sm:-mx-4 sm:px-8">
+      <section aria-labelledby="community-wall-heading" className="mx-auto mt-24 w-full max-w-6xl px-2 sm:px-8 lg:px-0">
+        <div className="flex min-h-14 items-center justify-between gap-4 py-3">
           <h2 id="community-wall-heading" className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
             {settings.collection_label}
           </h2>
@@ -103,7 +103,7 @@ export default async function CommunityWallPage({
           </p>
         </div>
 
-        <div className="grid grid-cols-1 items-stretch gap-4 border-b border-border-primary pb-4 sm:gap-5 sm:pb-5 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-2 lg:grid-cols-3">
           {page === 1 && (
             <GuestbookActionCard
               user={user}
@@ -117,7 +117,7 @@ export default async function CommunityWallPage({
               }}
             />
           )}
-          {messages.map((message) => (
+          {messages.map((message, index) => (
             <GuestbookEntryCard
               key={message.id}
               id={message.id}
@@ -126,10 +126,11 @@ export default async function CommunityWallPage({
               author={message.creator_name}
               avatarUrl={message.creator_avatar_url}
               createdAt={message.created_at}
+              order={index}
             />
           ))}
           {messages.length === 0 && page === 1 && (
-            <div className="flex min-h-[286px] flex-col items-center justify-center rounded-2xl border border-dashed border-border-primary px-6 text-center md:col-span-1 lg:col-span-2">
+            <div className="flex min-h-[224px] flex-col items-center justify-center rounded-2xl border border-dashed border-border-primary px-6 text-center md:col-span-1 lg:col-span-2">
               <p className="[font-family:var(--font-instrument-serif),serif] text-2xl font-medium text-text-primary">{settings.empty_title}</p>
               <p className="mt-2 max-w-md text-sm leading-6 text-text-secondary">{settings.empty_description}</p>
             </div>

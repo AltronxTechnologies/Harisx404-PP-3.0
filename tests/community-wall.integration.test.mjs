@@ -10,7 +10,7 @@ test("Community Wall renders managed production states", async () => {
   const html = await response.text();
   assert.match(html, /The wall remembers/i);
   assert.match(html, /Visitor notes/i);
-  assert.match(html, /Moderated submissions/i);
+  assert.match(html, /Write a message/i);
   assert.match(html, /Available for opportunities/i);
   assert.doesNotMatch(html, /Community Wall route error/i);
 });

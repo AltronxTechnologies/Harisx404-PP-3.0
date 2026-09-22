@@ -5,7 +5,7 @@ const pulse = "animate-pulse motion-reduce:animate-none";
 
 export default function CommunityWallLoading() {
   return (
-    <div className="relative mt-14">
+    <div className="relative mt-[88px] sm:mt-[72px]">
       <span className="sr-only" role="status">Loading Community Wall</span>
       <div aria-hidden="true">
       <GridWrapper>
@@ -18,10 +18,10 @@ export default function CommunityWallLoading() {
           </div>
         </div>
       </GridWrapper>
-      <section className="mt-14 px-2 sm:px-4">
-        <div className="flex min-h-14 items-center justify-between px-2 sm:px-4"><div className={`h-3 w-28 rounded bg-border-primary/35 ${pulse}`} /><div className={`h-3 w-20 rounded bg-border-primary/25 ${pulse}`} /></div>
-        <div className="grid gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {[0, 1, 2, 3, 4, 5].map((item) => <div key={item} className={`h-[286px] rounded-2xl border border-border-primary bg-border-primary/15 ${pulse}`} />)}
+      <section className="mx-auto mt-24 w-full max-w-6xl px-2 sm:px-8 lg:px-0">
+        <div className="flex min-h-14 items-center justify-between"><div className={`h-3 w-28 rounded bg-border-primary/35 ${pulse}`} /><div className={`h-3 w-20 rounded bg-border-primary/25 ${pulse}`} /></div>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {[0, 1, 2, 3, 4, 5].map((item) => <div key={item} className={`h-[224px] rounded-2xl bg-border-primary/15 ${pulse}`} />)}
         </div>
       </section>
       <div className={`mx-2 mt-28 h-[464px] rounded-3xl bg-border-primary/15 sm:mx-4 md:h-[458px] ${pulse}`} />

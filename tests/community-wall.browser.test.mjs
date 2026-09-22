@@ -34,7 +34,7 @@ test("Community Wall remains aligned and accessible across themes and widths", a
             duplicateIds: ids.length - new Set(ids).size,
             cards: cards.length,
             narrowCards: cards.filter((card) => card.getBoundingClientRect().width < 250).length,
-            shortCards: cards.filter((card) => card.getBoundingClientRect().height < 286).length,
+            shortCards: cards.filter((card) => card.getBoundingClientRect().height < 220).length,
             ctaFooterGap: footer && cta
               ? Math.abs(footer.getBoundingClientRect().top - cta.getBoundingClientRect().bottom)
               : Number.POSITIVE_INFINITY,
@@ -51,10 +51,28 @@ test("Community Wall remains aligned and accessible across themes and widths", a
         assert.equal(result.narrowCards, 0, `${theme} ${width}px card widths`);
         assert.equal(result.shortCards, 0, `${theme} ${width}px card heights`);
         assert.ok(result.ctaFooterGap <= 0.5, `${theme} ${width}px CTA/Footer handoff`);
-        assert.ok(result.buttonHeight >= 40, `${theme} ${width}px primary control height`);
+        assert.ok(result.buttonHeight >= 36, `${theme} ${width}px card trigger height`);
         assert.equal(result.extraContentInfo, 1, `${theme} ${width}px footer landmarks`);
         assert.match(result.ogTitle || "", /Community Wall/i);
         assert.match(result.twitterTitle || "", /Community Wall/i);
+        if (theme === "light" && width === 320) {
+          await page.getByRole("button", { name: "Write a message..." }).click();
+          const dialog = page.getByRole("dialog", { name: "Leave your mark" });
+          await dialog.waitFor();
+          const box = await dialog.boundingBox();
+          assert.ok(box && box.width <= 400 && box.width <= width - 32, "mobile dialog width");
+          assert.equal(await page.locator("body").evaluate((body) => getComputedStyle(body).overflow), "hidden");
+          assert.ok(await dialog.getByRole("link", { name: /Continue with GitHub/i }).isVisible());
+          await page.keyboard.press("Escape");
+          await dialog.waitFor({ state: "hidden" });
+          assert.equal(
+            await page.getByRole("button", { name: "Write a message..." }).evaluate(
+              (element) => document.activeElement === element,
+            ),
+            true,
+            "Escape restores focus to the dialog trigger",
+          );
+        }
         assert.deepEqual(errors, [], `${theme} ${width}px console warnings/errors`);
         await page.close();
       }

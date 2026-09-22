@@ -2,7 +2,7 @@
 
 - Date: 2026-09-22
 - Route: `/community-wall`
-- Status: implementation and local verification complete; live migration and owner lock pending
+- Status: implementation, live Supabase, and production-path verification complete; owner lock pending
 
 ## Scope
 
@@ -18,9 +18,14 @@ were not modified.
   the locked page-header rhythm, shared paper texture, global rails, and shared CTA.
 - Added managed supporting copy, collection label, empty state, composer/sign-in
   copy, SEO, Open Graph, and Twitter metadata.
-- Replaced rotated shadow-heavy cards with equal 286px aligned cards, shared border
-  language, stable one/two/three-column layouts, bounded copy, safe avatars, and
-  accessible copy-link feedback.
+- Rebuilt cards to the supplied reference: 176px stamp bodies, scalloped tear
+  edges, `shadow-2xl`, subtle deterministic tilts, 24px masonry gaps, bounded copy,
+  safe avatars, and accessible copy-link feedback.
+- Added the reference centered auth/composer dialog with blurred backdrop,
+  focus trap, Escape/click-away close, focus restoration, scroll lock, responsive
+  400px shell, animated scale/fade entry, and functional GitHub OAuth.
+- Dialog and card motion honor `prefers-reduced-motion`; every dismissal path,
+  including Escape, restores focus to the original card trigger.
 - Added explicit loading, empty, OAuth-failure, submission success/error, and
   focused route-error states.
 - Added strict 24-note public pagination and independent 50-note Admin pending and
@@ -56,17 +61,36 @@ were not modified.
 | `updated_at` trigger | Passed with `clock_timestamp()` |
 | Atomic cooldown/daily limits | Passed |
 | Consolidated schema | Passed on clean PostgreSQL 16 |
-| 320px empty-state geometry | 266px cards, equal 286px heights, 0px overflow |
-| Desktop empty-state geometry | Equal 286px heights, 0px overflow |
+| 320px empty-state geometry | At least 266px cards, 24px stack gap, 0px overflow |
+| Desktop empty-state geometry | Reference 3-column stamp grid, 0px overflow |
 | CTA-to-Footer handoff | 0px |
 | Duplicate IDs | 0 |
 | Browser console warnings/errors | 0 |
+| Reference mobile hero geometry | 152px top, 48px H1, 96px hero-to-wall gap |
+| Reference desktop hero scale | 60px H1 |
+| Reference mobile card width | 266px before tilt at 320px viewport |
+| Reference mobile dialog | 288px wide, 16px viewport insets, centered |
+| Dialog accessibility | Focus trap, scroll lock, Escape/click-away, focus restoration passed |
+| Reduced motion | Dialog duration 0; card tilt/transition removed |
+| Live Supabase cutover | Passed; published-only views and managed settings live |
+| Atomic authenticated submission | Passed with temporary user and cleanup |
+| Authenticated moderation lifecycle | Pending → published → archived → pending → deleted |
+| Public cache invalidation | Passed after every moderation transition |
+| Authenticated settings roundtrip | Passed with public revalidation |
+| Blog regression | 3/3 passed |
+| Contact regression | 2/2 passed |
+| Links regression | 2/2 passed |
+| Credentials regression | 5/5 passed |
+| Full public preview sweep | Passed |
+| Independent code/design review | No high or medium blockers |
 | `git diff --check` | Passed |
 
 ## Live Cutover
 
-Apply `migrations/2026_community_wall_messages.sql` once in the connected Supabase
-SQL Editor. The migration is rerunnable and upgrades the existing `messages` table
-without deleting valid notes. After cutover, verify a reversible authenticated
-submit/approve/archive/delete cycle, settings save, public cache invalidation, and
-the full responsive browser matrix before owner lock approval.
+`migrations/2026_community_wall_messages.sql` is applied to the connected Supabase
+project. Existing notes were preserved as published and malformed legacy values
+were safely normalized. A reversible temporary-user submission and authenticated
+Admin moderation cycle passed through pending, published, archived, pending, and
+deleted states with public cache invalidation at each transition. The settings API
+passed an authenticated save/revalidation roundtrip. No temporary auth or note
+records remain. The page is ready for final owner visual approval before locking.

@@ -2,26 +2,27 @@
 
 Route: `/community-wall`
 
-Status: implemented locally; live Supabase cutover and owner lock pending.
+Status: implemented and live-verified; owner lock pending.
 
 ## Structure
 
 1. Shared locked Navbar and global rails.
 2. `mt-14` page start with `GridWrapper` and `PaperHeroTexture`.
-3. Centered Admin-managed hero: 12px/500 mono kicker, 16px gap, 46px
-   mobile/56px desktop Instrument Serif heading, and 15/24px supporting copy.
-4. Collection toolbar 56px below the hero with managed label and derived approved
+3. Centered Admin-managed hero: 12px/500 mono kicker, 16px gap, 48px
+   mobile/60px desktop Instrument Serif heading, and 15/24px supporting copy.
+4. Collection toolbar 96px below the hero with managed label and derived approved
    count.
 5. Equal-height card grid: one column mobile, two columns at `md`, three at `lg`.
 6. Shared locked CTA 112px after the collection and exact 0px Footer handoff.
 
 ## Cards
 
-- Composer and message cards use equal `286px` minimum geometry, 16px radii,
-  shared borders, restrained shadows, and 56px metadata bars.
+- Composer and message cards use the reference stamp proportions: 176px minimum
+  visual body, 16px radii, `shadow-2xl`, scalloped tear edge, and compact metadata bar.
 - Message panels preserve the five Community Wall color identities with bounded
   decorative SVGs and six-line clamped 18px/600 copy.
-- Cards remain aligned; the former random visual rotations are removed.
+- Message cards use deterministic subtle 1-2 degree rotations that deepen by one
+  degree on hover; the action card remains straight and raised at `z-20`.
 - Author identity is GitHub-derived, length-bounded, and rendered with a sanitized
   HTTPS GitHub avatar or deterministic initial fallback.
 - Copy-link controls are 36px, keyboard-visible, securely copy the stable hash URL,
@@ -30,9 +31,14 @@ Status: implemented locally; live Supabase cutover and owner lock pending.
 
 ## Composer
 
-- Signed out: managed title/description and a 40px GitHub OAuth action.
-- Signed in: managed title/description, labelled three-row textarea, 200-character
-  limit/counter, honeypot, and 40px submit action.
+- The permanent action card opens a centered, focus-trapped dialog rather than
+  navigating directly to OAuth.
+- Signed out dialog: managed title/description and a 48px GitHub OAuth action.
+- Signed in dialog: managed title/description, labelled textarea, 200-character
+  limit/counter, honeypot, and 48px submit action.
+- Dialog uses a black/60 blurred backdrop, 400px maximum shell, 16px mobile inset,
+  purple stamp header, scalloped edge, 200ms backdrop fade, and 250ms 0.95-to-1
+  scale/fade transition.
 - Success and failure states are announced; successful submission clears the form.
 - Notes enter `pending` status and clearly state that moderation occurs before
   publication.
