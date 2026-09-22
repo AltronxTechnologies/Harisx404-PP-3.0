@@ -26,11 +26,12 @@ Status: implemented and live-verified; owner lock pending.
   degree on hover; the action card remains straight and raised at `z-20`.
 - Author identity is provider-derived and length-bounded. Sanitized GitHub/Google
   photos render when available; load failure or missing media falls back to one of
-  24 deterministic emoji/color identities.
+  24 deterministic illustrated profile/color identities.
 - Scallops have no light-mode seam and use a dark-only 0.75px white/18 stroke to
   distinguish the stamp body from its metadata surface.
 - Copy-link controls are 36px, keyboard-visible, securely copy the stable hash URL,
-  announce success, and clear timers on unmount.
+  show a visible Copied/Copy failed status, announce the result, include a legacy
+  clipboard fallback, and clear timers on unmount.
 - Hash targets use a visible route-token outline with a 144px scroll offset.
 
 ## Composer

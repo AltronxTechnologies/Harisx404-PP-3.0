@@ -15,7 +15,7 @@ Companion: `community-wall-desktop-spec.md`.
   prevent document overflow.
 - Author uses 12px/600 copy and timestamp uses 10px mono.
 - Provider photos use 28px circles; missing or failed photos receive a stable
-  emoji/color identity selected from 24 variants.
+  illustrated profile/color identity selected from 24 variants.
 - The dark theme adds a thin scallop stroke for clear body/footer separation;
   light mode remains seam-free.
 - Dialog uses `width: calc(100% - 32px)` with a 400px maximum and centered fixed

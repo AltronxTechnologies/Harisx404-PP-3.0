@@ -219,7 +219,7 @@ INSERT INTO public.community_wall_settings (
   'Words that echo',
   'always.',
   'A collection of notes, hellos, and thoughtful messages left by visitors.',
-  'Visitor notes',
+  'Community notes',
   'Join the wall',
   'Continue with GitHub or Google to leave one note on the wall.',
   'Leave your mark',
@@ -244,6 +244,10 @@ SET
   seo_description = CASE WHEN seo_description = 'Read moderated notes from visitors and leave a thoughtful message on Muhammad Haris''s community wall.'
     THEN 'Read notes from visitors and leave one thoughtful message on Muhammad Haris''s community wall.' ELSE seo_description END
 WHERE id = TRUE;
+
+UPDATE public.community_wall_settings
+SET collection_label = 'Community notes'
+WHERE id = TRUE AND collection_label = 'Visitor notes';
 
 DROP VIEW IF EXISTS public.public_community_wall_settings;
 CREATE VIEW public.public_community_wall_settings

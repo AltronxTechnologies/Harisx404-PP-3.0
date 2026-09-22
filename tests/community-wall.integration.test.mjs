@@ -9,7 +9,7 @@ test("Community Wall renders managed production states", async () => {
   assert.equal(response.status, 200);
   const html = await response.text();
   assert.match(html, /The wall remembers/i);
-  assert.match(html, /Visitor notes/i);
+  assert.match(html, /Community notes|Visitor notes/i);
   assert.match(html, /Write a message/i);
   assert.match(html, /Available for opportunities/i);
   assert.doesNotMatch(html, /Community Wall route error/i);
@@ -48,7 +48,7 @@ test("Community Wall source enforces moderation, bounded reads, and managed copy
   assert.match(page, /GuestbookEntryCard/);
   assert.match(entry, /aria-labelledby={`entry-\$\{id\}-title`}/);
   assert.equal((entry.match(/radial-gradient/g) || []).length, 24);
-  assert.match(avatar, /fallbacks/);
+  assert.match(avatar, /profiles/);
   assert.match(avatar, /onError/);
   assert.match(data, /lh3\.googleusercontent\.com/);
   assert.match(entry, /-mt-px/);

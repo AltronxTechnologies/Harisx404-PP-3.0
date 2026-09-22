@@ -48,9 +48,12 @@ were not modified.
   are normalized; strict message/name/avatar/pattern/rotation/status constraints
   and deterministic indexes remain enforced.
 - Expanded visual identity to 24 high-contrast card palettes and 24 deterministic
-  emoji/color avatar fallbacks. Real provider photos take precedence and switch to
+  illustrated profile/color avatar fallbacks. Real provider photos take precedence and switch to
   fallback automatically on load failure. Decorative SVGs are smaller/quieter,
   message shadow is restrained, and dark scallops have a thin separation stroke.
+- Copy-link controls now provide visible and announced Copied/Copy failed feedback,
+  use a legacy fallback when the modern Clipboard API is unavailable, and reset
+  cleanly without leaking timers.
 - Added safe migration normalization so legacy blank copy, long names, HTTP avatars,
   and old -5..5 rotations cannot block cutover; valid existing notes remain published.
 - Removed five disconnected legacy modal/canvas components and repaired OAuth error

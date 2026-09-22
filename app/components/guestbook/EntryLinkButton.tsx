@@ -1,12 +1,29 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Check, Link as LinkIcon } from "lucide-react";
+import { Check, Link as LinkIcon, X } from "lucide-react";
 
-/** Copy-a-link-to-this-entry button in the card meta bar (reference has the
- *  same affordance on each guestbook card). */
+type CopyState = "idle" | "copied" | "error";
+
+async function copyText(value: string) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(value);
+    return;
+  }
+  const input = document.createElement("textarea");
+  input.value = value;
+  input.setAttribute("readonly", "");
+  input.style.position = "fixed";
+  input.style.opacity = "0";
+  document.body.appendChild(input);
+  input.select();
+  const copied = document.execCommand("copy");
+  input.remove();
+  if (!copied) throw new Error("Clipboard unavailable");
+}
+
 export function EntryLinkButton({ entryId }: { entryId: string }) {
-  const [copied, setCopied] = useState(false);
+  const [state, setState] = useState<CopyState>("idle");
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => () => {
@@ -14,26 +31,23 @@ export function EntryLinkButton({ entryId }: { entryId: string }) {
   }, []);
 
   const copy = async () => {
+    if (timer.current) clearTimeout(timer.current);
     try {
-      const url = `${window.location.origin}/community-wall#entry-${entryId}`;
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      if (timer.current) clearTimeout(timer.current);
-      timer.current = setTimeout(() => setCopied(false), 2000);
+      await copyText(`${window.location.origin}/community-wall#entry-${entryId}`);
+      setState("copied");
     } catch {
-      /* clipboard unavailable */
+      setState("error");
     }
+    timer.current = setTimeout(() => setState("idle"), 2200);
   };
 
+  const label = state === "copied" ? "Link copied" : state === "error" ? "Copy failed" : "Copy link to this note";
   return (
-    <button
-      type="button"
-      onClick={copy}
-      aria-label={copied ? "Link copied" : "Copy link to this note"}
-      className="flex size-9 shrink-0 items-center justify-center rounded-full text-text-secondary transition-colors hover:bg-neutral-100 hover:text-text-primary active:bg-neutral-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:bg-white/[0.08] dark:active:bg-white/[0.12]"
-    >
-      {copied ? <Check aria-hidden="true" className="size-4" /> : <LinkIcon aria-hidden="true" className="size-4" />}
-      <span className="sr-only" aria-live="polite">{copied ? "Link copied" : ""}</span>
-    </button>
+    <div className="relative shrink-0">
+      <button type="button" onClick={copy} aria-label={label} title={label} className="flex size-9 items-center justify-center rounded-full text-text-secondary transition-colors hover:bg-neutral-100 hover:text-text-primary active:bg-neutral-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:bg-white/[0.08] dark:active:bg-white/[0.12]">
+        {state === "copied" ? <Check aria-hidden="true" className="size-4 text-emerald-500" /> : state === "error" ? <X aria-hidden="true" className="size-4 text-red-500" /> : <LinkIcon aria-hidden="true" className="size-4" />}
+      </button>
+      {state !== "idle" && <span role="status" className={`pointer-events-none absolute bottom-full right-0 mb-2 whitespace-nowrap rounded-md border border-border-primary bg-bg-primary px-2 py-1 font-mono text-[9px] uppercase tracking-wide shadow-sm ${state === "copied" ? "text-emerald-600 dark:text-emerald-300" : "text-red-600 dark:text-red-300"}`}>{state === "copied" ? "Copied" : "Copy failed"}</span>}
+    </div>
   );
 }

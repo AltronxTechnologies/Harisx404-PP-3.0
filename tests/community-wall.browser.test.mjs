@@ -17,6 +17,7 @@ test("Community Wall remains aligned and accessible across themes and widths", a
         });
         page.on("pageerror", (error) => errors.push(error.message));
         await page.addInitScript((value) => localStorage.setItem("theme", value), theme);
+        await page.context().grantPermissions(["clipboard-read", "clipboard-write"], { origin: baseUrl });
         const response = await page.goto(`${baseUrl}/community-wall`, { waitUntil: "networkidle" });
         assert.equal(response?.status(), 200);
         const result = await page.evaluate(() => {
@@ -59,6 +60,7 @@ test("Community Wall remains aligned and accessible across themes and widths", a
           await page.getByRole("button", { name: "Write a message..." }).click();
           const dialog = page.getByRole("dialog", { name: "Leave your mark" });
           await dialog.waitFor();
+          await page.waitForTimeout(300);
           const box = await dialog.boundingBox();
           assert.ok(box && box.width <= 400 && box.width <= width - 32, "mobile dialog width");
           assert.equal(await page.locator("body").evaluate((body) => getComputedStyle(body).overflow), "hidden");
@@ -76,6 +78,14 @@ test("Community Wall remains aligned and accessible across themes and widths", a
           );
           assert.ok(await dialog.getByRole("link", { name: /Continue with GitHub/i }).isVisible());
           assert.ok(await dialog.getByRole("link", { name: /Continue with Google/i }).isVisible());
+          const oauthHeights = await dialog.getByRole("link").evaluateAll(
+            (links) => links.map((link) => link.getBoundingClientRect().height),
+          );
+          assert.ok(
+            oauthHeights.every((height) => Math.abs(height - 48) <= 0.5) &&
+              Math.abs(oauthHeights[0] - oauthHeights[1]) <= 0.1,
+            "OAuth actions use equal 48px geometry",
+          );
           await page.keyboard.press("Escape");
           await dialog.waitFor({ state: "hidden" });
           assert.equal(
@@ -90,6 +100,10 @@ test("Community Wall remains aligned and accessible across themes and widths", a
             false,
             "dialog restores background application content",
           );
+          const copy = page.getByRole("button", { name: "Copy link to this note" }).first();
+          await copy.click();
+          await page.getByRole("status").filter({ hasText: "Copied" }).waitFor();
+          assert.match(await page.evaluate(() => navigator.clipboard.readText()), /\/community-wall#entry-/);
         }
         assert.deepEqual(errors, [], `${theme} ${width}px console warnings/errors`);
         await page.close();

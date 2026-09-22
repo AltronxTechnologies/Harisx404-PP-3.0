@@ -104,7 +104,7 @@ export default async function CommunityWallPage({
             {settings.collection_label}
           </h2>
           <p className="font-mono text-[10px] uppercase tracking-widest text-text-secondary">
-            <span className="tabular-nums">{String(count).padStart(2, "0")}</span> approved
+            <span className="tabular-nums">{String(count).padStart(2, "0")}</span> messages
           </p>
         </div>
 
