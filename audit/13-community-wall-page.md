@@ -2,7 +2,7 @@
 
 - Date: 2026-09-22
 - Route: `/community-wall`
-- Status: implementation, live Supabase, and production-path verification complete; owner lock pending
+- Status: implementation and production-path verification complete; owner visual review with temporary preview notes in progress
 
 ## Scope
 
@@ -109,3 +109,9 @@ Seven natural-looking published fixtures exercised the complete multi-row wall
 across all five palettes and varied copy lengths. The populated responsive matrix
 passed, then all seven fixtures were removed. The production table contains only
 the two pre-existing published owner records and no verification users or notes.
+
+A second owner-requested preview set currently adds ten published cards under the
+names Daniel Kim, Fatima Noor, Lucas Meyer, Priya Shah, Ethan Cole, Hana Suzuki,
+Marcus Reed, Amara Okafor, Theo Martin, and Nadia Ali. These exact ten records are
+temporary and must be removed before production lock unless the owner explicitly
+chooses to retain them.
