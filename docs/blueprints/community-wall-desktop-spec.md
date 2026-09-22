@@ -7,10 +7,10 @@ Status: implemented and live-verified; owner lock pending.
 ## Structure
 
 1. Shared locked Navbar and global rails.
-2. `mt-14` page start with `GridWrapper` and `PaperHeroTexture`.
-3. Centered Admin-managed hero: 12px/500 mono kicker, 16px gap, 48px
-   mobile/60px desktop Instrument Serif heading, and 15/24px supporting copy.
-4. Collection toolbar 96px below the hero with managed label and derived approved
+2. `mt-14` page start with `GridWrapper` and `PaperHeroTexture`, matching locked pages.
+3. Centered Admin-managed hero: 12px/500 mono kicker, 16px gap, 46px
+   mobile/56px desktop Instrument Serif heading, and 15/24px supporting copy.
+4. Collection toolbar 56px below the hero with managed label and derived message
    count.
 5. Equal-height card grid: one column mobile, two columns at `md`, three at `lg`.
 6. Shared locked CTA 112px after the collection and exact 0px Footer handoff.

@@ -1784,9 +1784,9 @@ re-locked after responsive verification.
   Community Wall schema sections in `migrations/2026_community_wall_messages.sql`
   and `supabase_schema.sql`, Community Wall tests/blueprints, and
   `audit/13-community-wall-page.md`.
-- **Hero baseline:** 152px viewport top, 12px/400 mono kicker, 16px gap, 48px
-  mobile/60px desktop Instrument Serif H1, managed supporting copy, and 96px
-  hero-to-wall gap.
+- **Hero baseline:** exact locked-page parity: 120px mobile/136px desktop viewport
+  top, 12px/500 mono kicker, 16px gap, 46px mobile/56px desktop Instrument Serif
+  H1, managed 15/24px supporting copy, and 56px hero-to-wall gap.
 - **Wall baseline:** managed `Visitor notes` label and derived message count share
   one exact centered mono scale (11px mobile, 12px at `sm+`); 24px grid gaps;
   one/two/three columns; 266px usable card width at 320px; no duplicate local rails.
@@ -1838,3 +1838,15 @@ Do not modify Community Wall, its dialog, cards, Admin controls, schema, data
 source, migrations, metadata, responsive geometry, or public presentation without
 a new explicit owner unlock. Shared locked Navbar, Search, Reach Out, CTA, and
 Footer remain independently frozen under their existing entries.
+
+### 2026-09-22 owner-authorized Community Wall hero-rhythm amendment
+
+The owner temporarily unlocked only Community Wall hero placement and scale after
+requesting measured parity with the other locked pages. The former reference-only
+152px top / 48px mobile / 60px desktop / 96px collection gap was replaced with the
+site baseline measured from Buildlog, Links, Credentials, Contact, Projects, and
+Blog: kicker at 120px mobile and 136px desktop, H1 at 46px mobile and 56px desktop,
+and a 56px hero-to-collection gap. Kicker 12px/500, 16px internal gaps, supporting
+copy 15/24px, font families, weights, tracking, texture, cards, dialog, data, Admin,
+CTA, and Footer remain unchanged. Exact geometry is regression-tested at every
+responsive light/dark viewport. This limited amendment is re-locked.

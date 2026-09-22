@@ -6,7 +6,7 @@ Companion: `community-wall-desktop-spec.md`.
 
 - Required widths: 320, 360, 375, and 390px in light and dark themes.
 - Shared mobile Navbar and global rails remain unchanged.
-- Hero uses the reference 48px Instrument Serif page-heading scale with balanced
+- Hero uses the locked 46px Instrument Serif page-heading scale with balanced
   wrapping and 16px supporting-copy gap.
 - Collection toolbar stays one row and exposes the approved total without
   wrapping.

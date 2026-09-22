@@ -83,8 +83,8 @@ were not modified.
 | CTA-to-Footer handoff | 0px |
 | Duplicate IDs | 0 |
 | Browser console warnings/errors | 0 |
-| Reference mobile hero geometry | 152px top, 48px H1, 96px hero-to-wall gap |
-| Reference desktop hero scale | 60px H1 |
+| Locked mobile hero geometry | 120px top, 46px H1, 56px hero-to-wall gap |
+| Locked desktop hero geometry | 136px top, 56px H1, 56px hero-to-wall gap |
 | Reference mobile card width | 266px before tilt at 320px viewport |
 | Reference mobile dialog | 288px wide, 16px viewport insets, centered |
 | Dialog accessibility | Focus trap, scroll lock, Escape/click-away, focus restoration passed |
@@ -125,13 +125,16 @@ deployment dependency rather than a Community Wall implementation defect.
 
 Seven natural-looking published fixtures exercised the complete multi-row wall
 across all five palettes and varied copy lengths. The populated responsive matrix
-passed, then all seven fixtures were removed. The production table contains only
-the two pre-existing published owner records and no verification users or notes.
+passed, then all seven fixtures were removed.
 
 A second owner-requested preview set added ten published cards under the names
 Daniel Kim, Fatima Noor, Lucas Meyer, Priya Shah, Ethan Cole, Hana Suzuki, Marcus
 Reed, Amara Okafor, Theo Martin, and Nadia Ali. The populated 12-case responsive
 matrix passed, then all ten records were removed before production lock.
+
+The final live table currently contains no notes, so the managed empty state is the
+production view. Populated and empty-state matrices both pass; no preview,
+verification, or temporary auth records remain.
 
 ## Owner Lock
 

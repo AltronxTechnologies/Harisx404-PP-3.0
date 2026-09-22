@@ -43,6 +43,19 @@ test("Community Wall remains aligned and accessible across themes and widths", a
             extraContentInfo: document.querySelectorAll("footer").length,
             ogTitle: document.querySelector("meta[property='og:title']")?.getAttribute("content"),
             twitterTitle: document.querySelector("meta[name='twitter:title']")?.getAttribute("content"),
+            heroGeometry: (() => {
+              const header = document.querySelector("main header");
+              const heading = header?.querySelector("h1");
+              const collection = document.querySelector("section[aria-labelledby='community-wall-heading']");
+              if (!header || !heading || !collection) return null;
+              const headerBox = header.getBoundingClientRect();
+              const collectionBox = collection.getBoundingClientRect();
+              return {
+                top: headerBox.top,
+                headingSize: Number.parseFloat(getComputedStyle(heading).fontSize),
+                collectionGap: collectionBox.top - headerBox.bottom,
+              };
+            })(),
             toolbarTypography: (() => {
               const toolbar = section?.querySelector(":scope > div:first-child");
               const label = toolbar?.querySelector("h2");
@@ -67,6 +80,19 @@ test("Community Wall remains aligned and accessible across themes and widths", a
         assert.equal(result.extraContentInfo, 1, `${theme} ${width}px footer landmarks`);
         assert.match(result.ogTitle || "", /Community Wall/i);
         assert.match(result.twitterTitle || "", /Community Wall/i);
+        assert.ok(result.heroGeometry, `${theme} ${width}px hero geometry exists`);
+        assert.ok(
+          Math.abs(result.heroGeometry.top - (width < 768 ? 120 : 136)) <= 0.5,
+          `${theme} ${width}px locked kicker position`,
+        );
+        assert.ok(
+          Math.abs(result.heroGeometry.headingSize - (width < 768 ? 46 : 56)) <= 0.1,
+          `${theme} ${width}px locked heading scale`,
+        );
+        assert.ok(
+          Math.abs(result.heroGeometry.collectionGap - 56) <= 0.5,
+          `${theme} ${width}px locked hero-to-collection gap`,
+        );
         assert.equal(result.toolbarTypography, true, `${theme} ${width}px toolbar typography`);
         if (theme === "light" && width === 320) {
           await page.getByRole("button", { name: "Write a message..." }).click();
@@ -115,9 +141,11 @@ test("Community Wall remains aligned and accessible across themes and widths", a
             "dialog restores background application content",
           );
           const copy = page.getByRole("button", { name: "Copy link to this note" }).first();
-          await copy.click();
-          await page.getByRole("status").filter({ hasText: "Copied" }).waitFor();
-          assert.match(await page.evaluate(() => navigator.clipboard.readText()), /\/community-wall#entry-/);
+          if (await copy.count()) {
+            await copy.click();
+            await page.getByRole("status").filter({ hasText: "Copied" }).waitFor();
+            assert.match(await page.evaluate(() => navigator.clipboard.readText()), /\/community-wall#entry-/);
+          }
         }
         assert.deepEqual(errors, [], `${theme} ${width}px console warnings/errors`);
         await page.close();
