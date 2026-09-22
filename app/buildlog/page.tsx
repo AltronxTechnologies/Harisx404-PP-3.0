@@ -64,32 +64,28 @@ export default async function BuildlogPage({
       <section aria-labelledby="buildlog-collection-heading" className="mt-14 px-2 sm:px-4">
         <div
           data-release-summary
-          className="-mx-2 flex min-h-14 items-center justify-between gap-4 px-4 py-3 sm:-mx-4 sm:px-8"
+          className="-mx-2 flex min-h-14 items-center justify-between gap-2 px-4 py-3 sm:-mx-4 sm:gap-4 sm:px-8"
         >
           <h2
             id="buildlog-collection-heading"
-            className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary"
+            className="font-mono text-[11px] font-medium uppercase leading-none tracking-wider text-text-secondary min-[360px]:text-xs"
           >
             {settings.archive_label}
           </h2>
           {projects.length > 0 && (
-            <div className="flex shrink-0 items-center gap-2.5 font-mono uppercase sm:gap-3">
-              <p className="flex items-baseline gap-1.5 whitespace-nowrap">
-                <span className="tabular-nums text-[9px] tracking-widest text-text-secondary min-[360px]:text-[10px]">
+            <div className="flex shrink-0 items-center gap-2.5 font-mono text-[11px] uppercase leading-none tracking-wider text-text-secondary min-[360px]:text-xs sm:gap-3">
+              <p className="flex items-center gap-1.5 whitespace-nowrap">
+                <span className="tabular-nums">
                   {String(shippedCount).padStart(2, "0")}
                 </span>
-                <span className="text-[9px] tracking-widest text-text-secondary min-[360px]:text-[10px]">
-                  shipped
-                </span>
+                <span>shipped</span>
               </p>
               <span aria-hidden="true" className="h-4 w-px bg-border-primary" />
-              <p className="flex items-baseline gap-1.5 whitespace-nowrap">
-                <span className="tabular-nums text-[9px] tracking-widest text-text-secondary min-[360px]:text-[10px]">
+              <p className="flex items-center gap-1.5 whitespace-nowrap">
+                <span className="tabular-nums">
                   {String(plannedCount).padStart(2, "0")}
                 </span>
-                <span className="text-[9px] tracking-widest text-text-secondary min-[360px]:text-[10px]">
-                  planned
-                </span>
+                <span>planned</span>
               </p>
             </div>
           )}

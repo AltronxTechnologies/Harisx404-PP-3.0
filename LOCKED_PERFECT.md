@@ -1734,3 +1734,13 @@ Do not modify Buildlog, its Admin controls, schema, data source, migrations,
 metadata, responsive geometry, or public presentation without a new explicit
 owner unlock. Shared locked Navbar, Search, Reach Out, CTA, and Footer remain
 independently frozen under their existing entries.
+
+### 2026-09-22 owner-authorized Buildlog archive-toolbar amendment
+
+The owner temporarily unlocked only the Buildlog archive-toolbar typography and
+alignment. `Release archive`, both tabular counts, and `shipped` / `planned` now
+use one exact centered mono scale: 11px at 320px and 12px from 360px upward, with
+identical `leading-none` and `tracking-wider`. The toolbar uses an 8px narrow-phone
+gap and retains the 16px separator. Full wording stays on one line with no
+overflow. No project, release, Admin, database, CTA, Footer, or shared behavior
+changed. This limited amendment is re-locked after responsive verification.

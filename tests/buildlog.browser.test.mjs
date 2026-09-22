@@ -61,6 +61,21 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
                 Math.abs(separatorRect.height - 16) > 0.5
               );
             })(),
+            invalidReleaseSummaryTypography: (() => {
+              const summary = document.querySelector("[data-release-summary]");
+              const heading = summary?.querySelector("h2");
+              const metricText = summary
+                ? [...summary.querySelectorAll(":scope > div > p > span")]
+                : [];
+              if (!heading || metricText.length !== 4) return true;
+              const text = [heading, ...metricText];
+              const sizes = new Set(text.map((element) => getComputedStyle(element).fontSize));
+              const center = heading.getBoundingClientRect().top + heading.getBoundingClientRect().height / 2;
+              return sizes.size !== 1 || text.some((element) => {
+                const rect = element.getBoundingClientRect();
+                return Math.abs(rect.top + rect.height / 2 - center) > 1;
+              });
+            })(),
             lifecycleLabels: [...document.querySelectorAll("article header")].filter(
               (header) => /In progress|Live|Completed/.test(header.textContent || ""),
             ).length,
@@ -137,6 +152,11 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
         assert.equal(initial.invalidReleaseRowHeights, 0, `${theme} ${width}px release row heights`);
         assert.ok(initial.releaseSummaryInset <= 0.5, `${theme} ${width}px release summary width`);
         assert.equal(initial.invalidReleaseSummary, false, `${theme} ${width}px release summary`);
+        assert.equal(
+          initial.invalidReleaseSummaryTypography,
+          false,
+          `${theme} ${width}px release summary typography alignment`,
+        );
         assert.equal(initial.lifecycleLabels, initial.articles, `${theme} ${width}px lifecycle labels`);
         assert.equal(initial.misalignedReleaseContent, 0, `${theme} ${width}px release content alignment`);
         assert.equal(initial.misalignedLedgerRows, 0, `${theme} ${width}px ledger row alignment`);

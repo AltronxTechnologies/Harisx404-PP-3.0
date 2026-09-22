@@ -91,6 +91,9 @@ Legacy Changelog admin/API files remain byte-identical to their locked baseline.
   overwriting administrator-authored records.
 - Added field-specific Admin errors for project version/order and release title,
   description, badge, and semantic-version validation.
+- Re-aligned the archive toolbar after owner review: archive label, both counts,
+  and both metric labels now share one centered mono scale (11px at 320px and
+  12px from 360px upward) with identical line-height and tracking.
 
 ## Admin Ownership
 
