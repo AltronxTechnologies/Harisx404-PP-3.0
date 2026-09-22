@@ -587,19 +587,19 @@ FOR EACH ROW EXECUTE FUNCTION public.set_buildlog_updated_at();
 CREATE TABLE IF NOT EXISTS public.messages (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   message text NOT NULL CHECK (char_length(btrim(message)) BETWEEN 1 AND 200),
-  patternindex integer NOT NULL DEFAULT 0 CHECK (patternindex BETWEEN 0 AND 4),
+  patternindex integer NOT NULL DEFAULT 0 CHECK (patternindex BETWEEN 0 AND 23),
   rotation integer NOT NULL DEFAULT 0 CHECK (rotation BETWEEN -3 AND 3),
   user_id uuid REFERENCES auth.users (id) ON DELETE SET NULL,
   creator_name text NOT NULL DEFAULT 'Anonymous' CHECK (char_length(btrim(creator_name)) BETWEEN 1 AND 80),
   creator_avatar_url text CHECK (creator_avatar_url IS NULL OR creator_avatar_url ~ '^https://'),
-  status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'published', 'archived')),
+  status text NOT NULL DEFAULT 'published' CHECK (status IN ('pending', 'published', 'archived')),
   moderated_at timestamptz,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
 CREATE INDEX IF NOT EXISTS community_wall_public_order_idx ON public.messages (status, created_at DESC);
-CREATE INDEX IF NOT EXISTS community_wall_user_rate_idx ON public.messages (user_id, created_at DESC);
+CREATE UNIQUE INDEX IF NOT EXISTS community_wall_one_note_per_user_idx ON public.messages (user_id) WHERE user_id IS NOT NULL;
 ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON TABLE public.messages FROM anon, authenticated;
 
@@ -624,17 +624,14 @@ CREATE OR REPLACE FUNCTION public.submit_community_wall_message(
 )
 RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER
 SET search_path = public, pg_temp AS $$
-DECLARE submitted_id uuid; recent_count integer; latest_submission timestamptz;
+DECLARE submitted_id uuid;
 BEGIN
   PERFORM pg_advisory_xact_lock(hashtextextended(p_user_id::text, 0));
-  SELECT count(*), max(created_at) INTO recent_count, latest_submission
-  FROM public.messages WHERE user_id = p_user_id
-    AND created_at >= clock_timestamp() - interval '24 hours';
-  IF recent_count >= 3 THEN RAISE EXCEPTION 'daily_limit' USING ERRCODE = 'P0001'; END IF;
-  IF latest_submission IS NOT NULL AND latest_submission > clock_timestamp() - interval '60 seconds'
-    THEN RAISE EXCEPTION 'cooldown' USING ERRCODE = 'P0001'; END IF;
-  INSERT INTO public.messages (message, patternindex, rotation, user_id, creator_name, creator_avatar_url, status)
-  VALUES (p_message, p_patternindex, p_rotation, p_user_id, p_creator_name, p_creator_avatar_url, 'pending')
+  IF EXISTS (SELECT 1 FROM public.messages WHERE user_id = p_user_id) THEN
+    RAISE EXCEPTION 'already_submitted' USING ERRCODE = 'P0001';
+  END IF;
+  INSERT INTO public.messages (message, patternindex, rotation, user_id, creator_name, creator_avatar_url, status, moderated_at)
+  VALUES (p_message, p_patternindex, p_rotation, p_user_id, p_creator_name, p_creator_avatar_url, 'published', clock_timestamp())
   RETURNING id INTO submitted_id;
   RETURN submitted_id;
 END;
@@ -666,7 +663,7 @@ CREATE TABLE IF NOT EXISTS public.community_wall_settings (
 ALTER TABLE public.community_wall_settings ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON TABLE public.community_wall_settings FROM anon, authenticated;
 INSERT INTO public.community_wall_settings (id, kicker, heading, heading_accent, description, collection_label, sign_in_title, sign_in_description, composer_title, composer_description, empty_title, empty_description, seo_title, seo_description)
-VALUES (true, 'The wall remembers', 'Words that echo', 'always.', 'A moderated collection of notes, hellos, and thoughtful messages left by visitors.', 'Visitor notes', 'Join the wall', 'Sign in with GitHub to leave a note for review.', 'Leave your mark', 'Share a thoughtful note. Submissions are reviewed before they appear.', 'The first note is waiting', 'Approved visitor messages will appear here after moderation.', 'Community Wall | Leave Your Mark', 'Read moderated notes from visitors and leave a thoughtful message on Muhammad Haris''s community wall.') ON CONFLICT (id) DO NOTHING;
+VALUES (true, 'The wall remembers', 'Words that echo', 'always.', 'A collection of notes, hellos, and thoughtful messages left by visitors.', 'Visitor notes', 'Join the wall', 'Continue with GitHub or Google to leave one note on the wall.', 'Leave your mark', 'Share one thoughtful note. It appears immediately and can be managed by the site Admin.', 'The first note is waiting', 'Visitor messages will appear here.', 'Community Wall | Leave Your Mark', 'Read notes from visitors and leave one thoughtful message on Muhammad Haris''s community wall.') ON CONFLICT (id) DO NOTHING;
 DROP VIEW IF EXISTS public.public_community_wall_settings;
 CREATE VIEW public.public_community_wall_settings WITH (security_barrier = true) AS
 SELECT kicker, heading, heading_accent, description, collection_label, sign_in_title, sign_in_description, composer_title, composer_description, empty_title, empty_description, seo_title, seo_description FROM public.community_wall_settings WHERE id = true;

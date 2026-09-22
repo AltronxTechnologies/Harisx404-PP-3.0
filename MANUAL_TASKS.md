@@ -221,18 +221,24 @@ To show the embedded scheduling calendar there:
 
 - [ ] Step 9 — Cal.com account created + `contact.calLink` filled in
 
-## Community Wall — GitHub OAuth setup (required for posting notes)
+## Community Wall — GitHub and Google OAuth setup (required for posting notes)
 
-- [x] `messages` table migration run in Supabase (2026_community_wall_messages.sql)
+- [ ] Rerun the latest `migrations/2026_community_wall_messages.sql` revision for
+      one-note-per-account publication and the 24-pattern range
 - [ ] GitHub OAuth App created (github.com → Settings → Developer settings → OAuth Apps → New):
       - Authorization callback URL (exact): `https://ripmzkazzihyafqhtapv.supabase.co/auth/v1/callback`
       - Copy Client ID + generate Client Secret
 - [ ] Supabase → Authentication → Providers → GitHub: toggle ON, paste Client ID + Secret, Save
+- [ ] Google Cloud Console → APIs & Services → Credentials → OAuth client:
+      - Authorized redirect URI (exact): `https://ripmzkazzihyafqhtapv.supabase.co/auth/v1/callback`
+      - Add the required consent-screen details and copy Client ID + Client Secret
+- [ ] Supabase → Authentication → Providers → Google: toggle ON, paste Client ID + Secret, Save
 - [ ] Supabase → Authentication → URL Configuration:
       - Site URL: production domain (use `http://localhost:3000` while developing)
       - Redirect URLs: add `http://localhost:3000/auth/callback` and `http://localhost:3000/**`
         (add the production equivalents at deploy time)
-- [ ] Test: /community-wall → "Write a message..." → authorize on GitHub → composer appears → post a note
+- [ ] Test both providers: `/community-wall` → `Write a message...` → authorize →
+      composer appears → publish one note → composer becomes already-submitted state
 ## Contact form
 
 1. `migrations/2026_contact_messages.sql` was applied successfully on

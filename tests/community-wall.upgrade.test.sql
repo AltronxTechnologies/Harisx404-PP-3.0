@@ -32,7 +32,7 @@ BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM public.messages
     WHERE message = 'Legacy note unavailable' AND status = 'archived'
-      AND patternindex = 4 AND rotation = 3
+      AND patternindex = 23 AND rotation = 3
       AND char_length(creator_name) = 80 AND creator_avatar_url IS NULL
   ) THEN RAISE EXCEPTION 'legacy invalid row was not safely normalized'; END IF;
 END;

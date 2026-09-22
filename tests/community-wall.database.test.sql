@@ -15,10 +15,10 @@ BEGIN
   INSERT INTO public.messages (message, patternindex, rotation, user_id, creator_name, status)
   VALUES ('Published database fixture', 1, 0, '00000000-0000-4000-8000-000000000001', 'Test Visitor', 'published')
   RETURNING id INTO published_id;
-  INSERT INTO public.messages (message, patternindex, rotation, user_id, creator_name, status)
-  VALUES ('Pending database fixture', 2, 1, '00000000-0000-4000-8000-000000000001', 'Test Visitor', 'pending');
-  INSERT INTO public.messages (message, patternindex, rotation, user_id, creator_name, status)
-  VALUES ('Archived database fixture', 3, -1, '00000000-0000-4000-8000-000000000001', 'Test Visitor', 'archived');
+  INSERT INTO public.messages (message, patternindex, rotation, creator_name, status)
+  VALUES ('Pending database fixture', 2, 1, 'Test Visitor', 'pending');
+  INSERT INTO public.messages (message, patternindex, rotation, creator_name, status)
+  VALUES ('Archived database fixture', 3, -1, 'Test Visitor', 'archived');
 
   SELECT count(*) INTO public_count FROM public.public_community_wall_messages;
   IF public_count <> 1 THEN RAISE EXCEPTION 'expected one public note, got %', public_count; END IF;
@@ -43,7 +43,7 @@ BEGIN
     RAISE EXCEPTION 'blank Community Wall message was accepted';
   EXCEPTION WHEN check_violation THEN NULL; END;
   BEGIN
-    INSERT INTO public.messages (message, creator_name, patternindex) VALUES ('Invalid pattern', 'Test', 9);
+    INSERT INTO public.messages (message, creator_name, patternindex) VALUES ('Invalid pattern', 'Test', 99);
     RAISE EXCEPTION 'invalid Community Wall pattern was accepted';
   EXCEPTION WHEN check_violation THEN NULL; END;
   BEGIN
@@ -63,7 +63,7 @@ BEGIN
   SELECT count(*) INTO public_count FROM public.public_community_wall_messages;
   IF public_count <> 0 THEN RAISE EXCEPTION 'archived note remains in public view'; END IF;
 
-  DELETE FROM public.messages WHERE user_id = '00000000-0000-4000-8000-000000000001';
+  DELETE FROM public.messages WHERE message IN ('Published database fixture', 'Pending database fixture', 'Archived database fixture');
   DELETE FROM auth.users WHERE id = '00000000-0000-4000-8000-000000000001';
 
   INSERT INTO auth.users (id) VALUES ('00000000-0000-4000-8000-000000000003');
@@ -71,32 +71,16 @@ BEGIN
     '00000000-0000-4000-8000-000000000003', 'Atomic submission one', 0, 0,
     'Rate Test', NULL
   );
+  IF NOT EXISTS (SELECT 1 FROM public.public_community_wall_messages WHERE id = submitted_id) THEN
+    RAISE EXCEPTION 'automatic Community Wall publication failed';
+  END IF;
   BEGIN
     PERFORM public.submit_community_wall_message(
-      '00000000-0000-4000-8000-000000000003', 'Too soon', 0, 0, 'Rate Test', NULL
+      '00000000-0000-4000-8000-000000000003', 'Second account note', 0, 0, 'Rate Test', NULL
     );
-    RAISE EXCEPTION 'Community Wall cooldown was not enforced';
+    RAISE EXCEPTION 'Community Wall account uniqueness was not enforced';
   EXCEPTION WHEN raise_exception THEN
-    IF SQLERRM <> 'cooldown' THEN RAISE; END IF;
-  END;
-  UPDATE public.messages SET created_at = clock_timestamp() - interval '2 minutes' WHERE id = submitted_id;
-  PERFORM public.submit_community_wall_message(
-    '00000000-0000-4000-8000-000000000003', 'Atomic submission two', 0, 0,
-    'Rate Test', NULL
-  );
-  UPDATE public.messages SET created_at = created_at - interval '2 minutes'
-    WHERE user_id = '00000000-0000-4000-8000-000000000003';
-  PERFORM public.submit_community_wall_message(
-    '00000000-0000-4000-8000-000000000003', 'Atomic submission three', 0, 0,
-    'Rate Test', NULL
-  );
-  BEGIN
-    PERFORM public.submit_community_wall_message(
-      '00000000-0000-4000-8000-000000000003', 'Daily overflow', 0, 0, 'Rate Test', NULL
-    );
-    RAISE EXCEPTION 'Community Wall daily limit was not enforced';
-  EXCEPTION WHEN raise_exception THEN
-    IF SQLERRM <> 'daily_limit' THEN RAISE; END IF;
+    IF SQLERRM <> 'already_submitted' THEN RAISE; END IF;
   END;
   DELETE FROM public.messages WHERE user_id = '00000000-0000-4000-8000-000000000003';
   DELETE FROM auth.users WHERE id = '00000000-0000-4000-8000-000000000003';

@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS public.messages (
   user_id UUID REFERENCES auth.users (id) ON DELETE SET NULL,
   creator_name TEXT NOT NULL DEFAULT 'Anonymous',
   creator_avatar_url TEXT,
-  status TEXT NOT NULL DEFAULT 'pending',
+  status TEXT NOT NULL DEFAULT 'published',
   moderated_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -24,7 +24,7 @@ BEGIN
   ) INTO status_was_missing;
 
   ALTER TABLE public.messages
-    ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'pending',
+    ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'published',
     ADD COLUMN IF NOT EXISTS moderated_at TIMESTAMPTZ,
     ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT now();
 
@@ -45,12 +45,27 @@ SET
     WHEN creator_avatar_url ~ '^https://' THEN creator_avatar_url
     ELSE NULL
   END,
-  patternindex = ((patternindex % 5) + 5) % 5,
+  patternindex = ((patternindex % 24) + 24) % 24,
   rotation = greatest(-3, least(3, rotation)),
   status = CASE
     WHEN char_length(btrim(message)) = 0 THEN 'archived'
     ELSE status
   END;
+
+ALTER TABLE public.messages ALTER COLUMN status SET DEFAULT 'published';
+
+WITH ranked_accounts AS (
+  SELECT id, row_number() OVER (
+    PARTITION BY user_id ORDER BY created_at DESC, id DESC
+  ) AS account_note
+  FROM public.messages
+  WHERE user_id IS NOT NULL
+)
+UPDATE public.messages AS message
+SET user_id = NULL
+FROM ranked_accounts
+WHERE message.id = ranked_accounts.id
+  AND ranked_accounts.account_note > 1;
 
 ALTER TABLE public.messages
   DROP CONSTRAINT IF EXISTS messages_message_check,
@@ -67,7 +82,7 @@ ALTER TABLE public.messages
   ADD CONSTRAINT community_wall_creator_name_length
     CHECK (char_length(btrim(creator_name)) BETWEEN 1 AND 80),
   ADD CONSTRAINT community_wall_pattern_range
-    CHECK (patternindex BETWEEN 0 AND 4),
+    CHECK (patternindex BETWEEN 0 AND 23),
   ADD CONSTRAINT community_wall_rotation_range
     CHECK (rotation BETWEEN -3 AND 3),
   ADD CONSTRAINT community_wall_status
@@ -91,6 +106,10 @@ BEGIN
 END;
 $$;
 
+DROP INDEX IF EXISTS public.community_wall_user_rate_idx;
+CREATE UNIQUE INDEX IF NOT EXISTS community_wall_one_note_per_user_idx
+  ON public.messages (user_id) WHERE user_id IS NOT NULL;
+
 DROP TRIGGER IF EXISTS set_community_wall_updated_at ON public.messages;
 CREATE TRIGGER set_community_wall_updated_at
 BEFORE UPDATE ON public.messages
@@ -111,31 +130,19 @@ SET search_path = public, pg_temp
 AS $$
 DECLARE
   submitted_id UUID;
-  recent_count integer;
-  latest_submission TIMESTAMPTZ;
 BEGIN
   PERFORM pg_advisory_xact_lock(hashtextextended(p_user_id::text, 0));
 
-  SELECT count(*), max(created_at)
-  INTO recent_count, latest_submission
-  FROM public.messages
-  WHERE user_id = p_user_id
-    AND created_at >= clock_timestamp() - interval '24 hours';
-
-  IF recent_count >= 3 THEN
-    RAISE EXCEPTION 'daily_limit' USING ERRCODE = 'P0001';
-  END IF;
-  IF latest_submission IS NOT NULL
-     AND latest_submission > clock_timestamp() - interval '60 seconds' THEN
-    RAISE EXCEPTION 'cooldown' USING ERRCODE = 'P0001';
+  IF EXISTS (SELECT 1 FROM public.messages WHERE user_id = p_user_id) THEN
+    RAISE EXCEPTION 'already_submitted' USING ERRCODE = 'P0001';
   END IF;
 
   INSERT INTO public.messages (
     message, patternindex, rotation, user_id, creator_name,
-    creator_avatar_url, status
+    creator_avatar_url, status, moderated_at
   ) VALUES (
     p_message, p_patternindex, p_rotation, p_user_id, p_creator_name,
-    p_creator_avatar_url, 'pending'
+    p_creator_avatar_url, 'published', clock_timestamp()
   ) RETURNING id INTO submitted_id;
   RETURN submitted_id;
 END;
@@ -211,18 +218,32 @@ INSERT INTO public.community_wall_settings (
   'The wall remembers',
   'Words that echo',
   'always.',
-  'A moderated collection of notes, hellos, and thoughtful messages left by visitors.',
+  'A collection of notes, hellos, and thoughtful messages left by visitors.',
   'Visitor notes',
   'Join the wall',
-  'Sign in with GitHub to leave a note for review.',
+  'Continue with GitHub or Google to leave one note on the wall.',
   'Leave your mark',
-  'Share a thoughtful note. Submissions are reviewed before they appear.',
+  'Share one thoughtful note. It appears immediately and can be managed by the site Admin.',
   'The first note is waiting',
-  'Approved visitor messages will appear here after moderation.',
+  'Visitor messages will appear here.',
   'Community Wall | Leave Your Mark',
-  'Read moderated notes from visitors and leave a thoughtful message on Muhammad Haris''s community wall.'
+  'Read notes from visitors and leave one thoughtful message on Muhammad Haris''s community wall.'
 )
 ON CONFLICT (id) DO NOTHING;
+
+UPDATE public.community_wall_settings
+SET
+  description = CASE WHEN description = 'A moderated collection of notes, hellos, and thoughtful messages left by visitors.'
+    THEN 'A collection of notes, hellos, and thoughtful messages left by visitors.' ELSE description END,
+  sign_in_description = CASE WHEN sign_in_description = 'Sign in with GitHub to leave a note for review.'
+    THEN 'Continue with GitHub or Google to leave one note on the wall.' ELSE sign_in_description END,
+  composer_description = CASE WHEN composer_description = 'Share a thoughtful note. Submissions are reviewed before they appear.'
+    THEN 'Share one thoughtful note. It appears immediately and can be managed by the site Admin.' ELSE composer_description END,
+  empty_description = CASE WHEN empty_description = 'Approved visitor messages will appear here after moderation.'
+    THEN 'Visitor messages will appear here.' ELSE empty_description END,
+  seo_description = CASE WHEN seo_description = 'Read moderated notes from visitors and leave a thoughtful message on Muhammad Haris''s community wall.'
+    THEN 'Read notes from visitors and leave one thoughtful message on Muhammad Haris''s community wall.' ELSE seo_description END
+WHERE id = TRUE;
 
 DROP VIEW IF EXISTS public.public_community_wall_settings;
 CREATE VIEW public.public_community_wall_settings

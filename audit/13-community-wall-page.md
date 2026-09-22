@@ -2,11 +2,11 @@
 
 - Date: 2026-09-22
 - Route: `/community-wall`
-- Status: implementation and production-path verification complete; owner visual review with temporary preview notes in progress
+- Status: implementation verified; latest one-note migration, OAuth provider configuration, and temporary-preview cleanup pending
 
 ## Scope
 
-The pass covers the public Community Wall route, managed settings, GitHub-authenticated
+The pass covers the public Community Wall route, managed settings, GitHub/Google-authenticated
 submission flow, moderation model, Admin queue/actions, database schema/views/RLS,
 rate limiting, pagination, loading/empty/error states, metadata, tests, and route
 blueprints. Locked Navbar, Search, Reach Out, CTA, Footer, and other locked pages
@@ -39,13 +39,18 @@ were not modified.
   focused route-error states.
 - Added strict 24-note public pagination and independent 50-note Admin pending and
   reviewed pagination with canonical out-of-range recovery.
-- Added pending-by-default moderation, published-only restricted public view,
+- Added immediate account publication, published-only restricted public view,
   anonymous/authenticated base-table denial, and removal of public `user_id`.
 - Added Admin-email-protected list/approve/archive/return/delete endpoints and
   settings management.
-- Added atomic database submission with per-user advisory locking, 60-second
-  cooldown, three-per-24-hour limit, normalized verified GitHub identity, strict
-  message/name/avatar/pattern/rotation/status constraints, and deterministic indexes.
+- Added atomic database submission with per-user advisory locking and a partial
+  unique index enforcing one note per account. GitHub/Google identities and photos
+  are normalized; strict message/name/avatar/pattern/rotation/status constraints
+  and deterministic indexes remain enforced.
+- Expanded visual identity to 24 high-contrast card palettes and 24 deterministic
+  emoji/color avatar fallbacks. Real provider photos take precedence and switch to
+  fallback automatically on load failure. Decorative SVGs are smaller/quieter,
+  message shadow is restrained, and dark scallops have a thin separation stroke.
 - Added safe migration normalization so legacy blank copy, long names, HTTP avatars,
   and old -5..5 rotations cannot block cutover; valid existing notes remain published.
 - Removed five disconnected legacy modal/canvas components and repaired OAuth error
@@ -68,7 +73,7 @@ were not modified.
 | Pending/published/archive visibility | Passed |
 | Database validation failures | Passed |
 | `updated_at` trigger | Passed with `clock_timestamp()` |
-| Atomic cooldown/daily limits | Passed |
+| Atomic one-note-per-account limit | Passed |
 | Consolidated schema | Passed on clean PostgreSQL 16 |
 | 320px empty-state geometry | At least 266px cards, 24px stack gap, 0px overflow |
 | Desktop empty-state geometry | Reference 3-column stamp grid, 0px overflow |
@@ -83,7 +88,7 @@ were not modified.
 | Reduced motion | Dialog duration 0; card tilt/transition removed |
 | Live Supabase cutover | Passed; published-only views and managed settings live |
 | Atomic authenticated submission | Passed with temporary user and cleanup |
-| Signed-in composer browser flow | Session, modal, server action, pending insert, success feedback passed |
+| Signed-in composer browser flow | Session, modal, server action, immediate publication, success feedback passed |
 | Authenticated moderation lifecycle | Pending → published → archived → pending → deleted |
 | Admin moderation UI | Approve, archive, restore, delete, settings page passed |
 | Public cache invalidation | Passed after every moderation transition |
@@ -106,6 +111,11 @@ Admin moderation cycle passed through pending, published, archived, pending, and
 deleted states with public cache invalidation at each transition. The settings API
 passed an authenticated save/revalidation roundtrip. No temporary auth or note
 records remain. The page is ready for final owner visual approval before locking.
+
+The latest revision must now be rerun to activate immediate publication,
+one-note-per-account uniqueness, and the 24-pattern range. Supabase Auth currently
+reports GitHub and Google providers disabled; both must be enabled with OAuth
+credentials before either provider flow can be declared production-functional.
 
 ## Temporary Visual Preview
 

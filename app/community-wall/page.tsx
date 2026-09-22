@@ -8,7 +8,7 @@ import { GuestbookEntryCard } from "@/app/components/guestbook/GuestbookEntryCar
 import { CtaSection } from "@/app/components/home/CtaSection";
 import { siteMetadata } from "@/app/data/siteMetadata";
 import { getSupabaseEnv } from "@/app/lib/supabase/safe";
-import createSupabaseServerClient from "@/app/lib/supabase/server";
+import createSupabaseServerClient, { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 import { createGuestbookEntry } from "./actions";
 import {
   COMMUNITY_WALL_PAGE_SIZE,
@@ -57,15 +57,20 @@ export default async function CommunityWallPage({
     redirect(page === 1 ? "/community-wall" : `/community-wall?page=${page}`);
   }
 
-  let user: { name: string; avatarUrl: string | null } | null = null;
+  let user: { id: string; name: string; avatarUrl: string | null } | null = null;
+  let hasSubmitted = false;
   if (getSupabaseEnv()) {
     const supabase = await createSupabaseServerClient();
     const { data } = await supabase.auth.getUser();
     if (data.user) {
       user = {
+        id: data.user.id,
         name: String(data.user.user_metadata?.full_name || data.user.user_metadata?.user_name || data.user.email?.split("@")[0] || "Visitor"),
         avatarUrl: safeCommunityAvatar(data.user.user_metadata?.avatar_url),
       };
+      const db = await createSupabaseAdminClient();
+      const { count } = await db.from("messages").select("id", { count: "exact", head: true }).eq("user_id", data.user.id);
+      hasSubmitted = (count ?? 0) > 0;
     }
   }
 
@@ -109,6 +114,7 @@ export default async function CommunityWallPage({
               user={user}
               action={createGuestbookEntry}
               authError={query.auth === "error"}
+              hasSubmitted={hasSubmitted}
               copy={{
                 signInTitle: settings.sign_in_title,
                 signInDescription: settings.sign_in_description,

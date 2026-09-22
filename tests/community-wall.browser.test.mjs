@@ -75,6 +75,7 @@ test("Community Wall remains aligned and accessible across themes and widths", a
             "backdrop is not a focusable button",
           );
           assert.ok(await dialog.getByRole("link", { name: /Continue with GitHub/i }).isVisible());
+          assert.ok(await dialog.getByRole("link", { name: /Continue with Google/i }).isVisible());
           await page.keyboard.press("Escape");
           await dialog.waitFor({ state: "hidden" });
           assert.equal(

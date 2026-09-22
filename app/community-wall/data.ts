@@ -10,18 +10,18 @@ export const fallbackCommunityWallSettings: CommunityWallSettings = {
   heading: "Words that echo",
   heading_accent: "always.",
   description:
-    "A moderated collection of notes, hellos, and thoughtful messages left by visitors.",
+    "A collection of notes, hellos, and thoughtful messages left by visitors.",
   collection_label: "Visitor notes",
   sign_in_title: "Join the wall",
-  sign_in_description: "Sign in with GitHub to leave a note for review.",
+  sign_in_description: "Continue with GitHub or Google to leave one note on the wall.",
   composer_title: "Leave your mark",
   composer_description:
-    "Share a thoughtful note. Submissions are reviewed before they appear.",
+    "Share one thoughtful note. It appears immediately and can be managed by the site Admin.",
   empty_title: "The first note is waiting",
-  empty_description: "Approved visitor messages will appear here after moderation.",
+  empty_description: "Visitor messages will appear here.",
   seo_title: "Community Wall | Leave Your Mark",
   seo_description:
-    "Read moderated notes from visitors and leave a thoughtful message on Muhammad Haris's community wall.",
+    "Read notes from visitors and leave one thoughtful message on Muhammad Haris's community wall.",
 };
 
 export function safeCommunityAvatar(value: unknown) {
@@ -30,6 +30,7 @@ export function safeCommunityAvatar(value: unknown) {
     const url = new URL(value);
     return url.protocol === "https:" && [
       "avatars.githubusercontent.com",
+      "lh3.googleusercontent.com",
       "github.com",
       "user-images.githubusercontent.com",
     ].includes(url.hostname)

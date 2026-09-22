@@ -27,9 +27,10 @@ test("Community Wall moderation and settings APIs are fail-closed", async () => 
 });
 
 test("Community Wall source enforces moderation, bounded reads, and managed copy", async () => {
-  const [page, entry, scallop, data, action, migration, adminApi, settingsApi, adminPage, form, loading, error] = await Promise.all([
+  const [page, entry, avatar, scallop, data, action, migration, adminApi, settingsApi, adminPage, form, loading, error] = await Promise.all([
     readFile(new URL("../app/community-wall/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/components/guestbook/GuestbookEntryCard.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/guestbook/CommunityWallAvatar.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/components/guestbook/ScallopDivider.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/community-wall/data.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/community-wall/actions.ts", import.meta.url), "utf8"),
@@ -46,8 +47,13 @@ test("Community Wall source enforces moderation, bounded reads, and managed copy
   assert.match(page, /PaperHeroTexture/);
   assert.match(page, /GuestbookEntryCard/);
   assert.match(entry, /aria-labelledby={`entry-\$\{id\}-title`}/);
+  assert.equal((entry.match(/radial-gradient/g) || []).length, 24);
+  assert.match(avatar, /fallbacks/);
+  assert.match(avatar, /onError/);
+  assert.match(data, /lh3\.googleusercontent\.com/);
   assert.match(entry, /-mt-px/);
-  assert.doesNotMatch(scallop, /stroke=/);
+  assert.match(scallop, /className="hidden dark:block"/);
+  assert.match(scallop, /strokeWidth="0\.75"/);
   assert.match(page, /COMMUNITY_WALL_PAGE_SIZE/);
   assert.match(data, /public_community_wall_messages/);
   assert.match(data, /\.range\(start, end\)/);
@@ -58,8 +64,10 @@ test("Community Wall source enforces moderation, bounded reads, and managed copy
   assert.match(migration, /community_wall_message_length/);
   assert.match(migration, /community_wall_user_rate_idx/);
   assert.match(migration, /pg_advisory_xact_lock/);
-  assert.match(migration, /recent_count >= 3/);
-  assert.match(migration, /interval '60 seconds'/);
+  assert.match(migration, /already_submitted/);
+  assert.match(migration, /community_wall_one_note_per_user_idx/);
+  assert.match(migration, /patternindex BETWEEN 0 AND 23/);
+  assert.match(action, /Math\.random\(\) \* 24/);
   assert.match(adminApi, /auth\.getUser\(\)/);
   assert.match(adminApi, /ADMIN_EMAIL/);
   assert.match(adminApi, /Community Wall note not found/);
@@ -88,4 +96,6 @@ test("disconnected legacy Community Wall implementation is removed", async () =>
   const github = await readFile(new URL("../app/auth/github/route.ts", import.meta.url), "utf8");
   assert.match(github, /signInWithOAuth/);
   assert.match(github, /provider: "github"/);
+  const google = await readFile(new URL("../app/auth/google/route.ts", import.meta.url), "utf8");
+  assert.match(google, /provider: "google"/);
 });
