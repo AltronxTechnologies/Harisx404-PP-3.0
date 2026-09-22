@@ -1,9 +1,9 @@
 # Buildlog Production Audit
 
-- Date: 2026-09-21
+- Date: 2026-09-22
 - Route: `/buildlog`
-- Status: implementation and local verification complete; owner lock pending
-- Deployment dependency: apply the six Buildlog Supabase migrations
+- Status: implementation, live Supabase, and production-path verification complete; owner lock pending
+- Site-wide deployment dependency: restore or replace the configured production origin
 
 ## Scope
 
@@ -118,6 +118,11 @@ Legacy Changelog admin/API files remain byte-identical to their locked baseline.
 | Semantic-version behavior | 4/4 passed |
 | Clean PostgreSQL 16 migration test | Passed |
 | Historical-data PostgreSQL 16 upgrade test | Passed; preview fixtures and dead URLs removed |
+| Live Supabase cutover | Passed; 4 published UUID-backed projects and 1 settings row |
+| Anonymous base-table isolation | Passed; projects/settings base reads denied |
+| Authenticated project CRUD | Passed; create/publish/archive/delete and cleanup |
+| Authenticated settings roundtrip | Passed; save and public revalidation |
+| Public cache invalidation | Passed after publish, archive, delete, and settings save |
 | Seed rerun | Passed; inserted 0 duplicate rows |
 | Published-only view and grants | Passed |
 | `updated_at` trigger | Passed |
@@ -164,13 +169,23 @@ Apply in this order:
 5. `migrations/2026_buildlog_zzzz_settings.sql`
 6. `migrations/2026_buildlog_zzzzz_item_validation.sql`
 
-The migrations and `tests/buildlog.database.test.sql` pass against a clean
-PostgreSQL 16 database. The connected Supabase project currently returns 404 for `buildlog_projects`, so
-the public page intentionally uses its synchronized static fallback. The new
-admin page becomes operational after migration. No migration success is claimed
-until the owner applies it in Supabase and an authenticated CRUD cycle is tested.
+The migrations are applied to the connected Supabase project. Public rendering
+uses UUID-backed records from the restricted views, not the development fallback.
+Anonymous base-table reads are denied. A reversible authenticated Admin cycle
+passed for project create, publish, archive, and delete, with immediate public
+cache invalidation and complete cleanup. The settings API also passed an
+authenticated read/save roundtrip and public revalidation.
+
+The remaining deployment issue is site-wide rather than Buildlog-specific:
+`siteMetadata.siteUrl` points to `https://harisx404.vercel.app`, which currently
+returns Vercel `DEPLOYMENT_NOT_FOUND`. Buildlog's canonical and Open Graph URL
+correctly derive from that shared origin, so the deployment/domain must be
+restored or the locked shared metadata must be explicitly updated before calling
+the site production-live.
 
 ## Remaining Decision
 
-The page should be added to `LOCKED_PERFECT.md` only after owner visual approval
-and post-migration CRUD verification. No production lock is claimed yet.
+Buildlog has passed implementation, database, authenticated Admin, responsive,
+accessibility, metadata, and independent release reviews and is ready for owner
+lock approval. It should be added to `LOCKED_PERFECT.md` only after the owner
+explicitly declares it perfect. No production lock is claimed yet.
