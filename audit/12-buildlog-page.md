@@ -2,7 +2,7 @@
 
 - Date: 2026-09-22
 - Route: `/buildlog`
-- Status: implementation, live Supabase, and production-path verification complete; owner lock pending
+- Status: owner-approved and locked; implementation, live Supabase, and production-path verification complete
 - Site-wide deployment dependency: restore or replace the configured production origin
 
 ## Scope
@@ -184,9 +184,10 @@ correctly derive from that shared origin, so the deployment/domain must be
 restored or the locked shared metadata must be explicitly updated before calling
 the site production-live.
 
-## Remaining Decision
+## Owner Lock
 
-Buildlog has passed implementation, database, authenticated Admin, responsive,
-accessibility, metadata, and independent release reviews and is ready for owner
-lock approval. It should be added to `LOCKED_PERFECT.md` only after the owner
-explicitly declares it perfect. No production lock is claimed yet.
+The owner explicitly locked Buildlog on 2026-09-22 after implementation,
+database, authenticated Admin, responsive, accessibility, metadata, and
+independent release reviews passed. The frozen contract is recorded in entry 33
+of `LOCKED_PERFECT.md`. Future Buildlog changes require a new explicit owner
+unlock. The separate site-wide production-domain note above remains open.

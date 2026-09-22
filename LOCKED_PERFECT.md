@@ -1673,3 +1673,64 @@ The owner temporarily unlocked only the no-link footer wording. The neutral
 dashed status now reads `Verification unavailable`, retaining its link-off icon,
 36px geometry, alignment, and noninteractive semantics. This wording amendment
 is re-locked with all other Credentials presentation unchanged.
+
+## 33. FINAL OWNER LOCK - Buildlog
+
+- **Date locked:** 2026-09-22
+- **Owner instruction:** Lock the completed Buildlog page and move to the next
+  surface.
+- **Implementation commit:** `baa7a52` (`Reduce dropdown option height for updates`)
+- **Locked route:** `/buildlog`, including the Admin-managed hero, release archive,
+  project regions, lifecycle labels, shipped disclosures, planned lists, optional
+  project links, empty/loading/error states, shared CTA placement, responsive
+  layouts, metadata, and light/dark presentation.
+- **Locked files and surfaces:** `app/buildlog/**`, `app/data/buildlog.ts`,
+  `app/components/buildlog/**`, Buildlog-specific Admin routes and forms under
+  `app/admin/(dashboard)/buildlog/**` and `app/components/admin/Buildlog*`,
+  `app/api/admin/buildlog/**`, all six `migrations/2026_buildlog*.sql` migrations,
+  Buildlog-specific sections of `supabase_schema.sql`, `tests/buildlog*`,
+  `docs/blueprints/buildlog-*`, and `audit/12-buildlog-page.md`.
+- **Public visual baseline:** locked page-header typography and paper texture;
+  56px hero-to-archive rhythm; compact archive totals; 1.5px project boundaries;
+  responsive one-column, 4/8, and 3/9 project layouts; 48px aligned lifecycle and
+  disclosure controls; right-aligned release badges at every width; shipped
+  updates before Planned Next; and exactly one open shipped history.
+- **Release-row baseline:** shipped and planned entries are identical in geometry:
+  104px below 430px and 96px from 430px upward. Scrollable lists expose exactly
+  three complete rows (`312px` / `288px`) before contained scrolling, with normal
+  page scroll chaining at list boundaries. Titles and descriptions remain
+  two-line clamped; status marks, copy, and badges remain vertically aligned.
+- **Project-action baseline:** independently managed HTTPS GitHub/live links use
+  two equal columns, one full-span column, or no rendered container; all external
+  actions announce new-tab behavior and use `noopener noreferrer`.
+- **Admin/data baseline:** page hero/archive/SEO/social metadata and all project,
+  lifecycle, visibility, ordering, link, version, and release-item content are
+  Admin-managed. Totals and project numbering remain derived. Production reads
+  UUID-backed records from restricted public views and fails closed rather than
+  using development fallback data.
+- **Security baseline:** normalized Admin-email authorization; fail-closed CRUD;
+  strict input and HTTPS validation; SemVer parity across application and
+  PostgreSQL; Completed-with-no-planned-items enforcement; anonymous and regular
+  authenticated base-table denial; published/non-demo public views; bounded JSON
+  release data; idempotent clean-install and historical-upgrade migrations.
+- **Shared-component boundary:** Buildlog reuses the locked `CtaSection` and Footer
+  without changing either. CTA starts 112px after the collection and ends at the
+  Footer with an exact 0px handoff, matching locked Links and Credentials.
+- **Verification at lock:** live Supabase contains four published UUID-backed
+  projects and one settings row; no preview, dead-link, or temporary verification
+  residue remains. Authenticated create/publish/archive/delete and settings-save
+  cycles passed with immediate public cache invalidation and cleanup. TypeScript,
+  targeted ESLint, Buildlog integration 6/6, SemVer 4/4, clean and historical
+  PostgreSQL tests, locked-page regressions, `git diff --check`, responsive
+  light/dark checks from 320px through 1440px, URL/Back behavior, exact three-row
+  scrolling, zero overflow/clipping/duplicate IDs, secure links, and zero
+  Buildlog console errors all passed.
+- **Site-wide deployment note:** the shared configured production origin currently
+  returns Vercel `DEPLOYMENT_NOT_FOUND`. This is not a Buildlog implementation or
+  data defect, but the global deployment/domain must be restored or explicitly
+  unlocked and updated before describing the overall site as production-live.
+
+Do not modify Buildlog, its Admin controls, schema, data source, migrations,
+metadata, responsive geometry, or public presentation without a new explicit
+owner unlock. Shared locked Navbar, Search, Reach Out, CTA, and Footer remain
+independently frozen under their existing entries.
