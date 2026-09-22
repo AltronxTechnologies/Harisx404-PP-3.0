@@ -66,14 +66,14 @@ export function GuestbookEntryCard({
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 overflow-hidden opacity-50 mix-blend-color-dodge">
           {doodle}
         </div>
-        <h3 id={`entry-${id}-title`} className="relative z-10 line-clamp-6 text-balance text-lg font-bold leading-snug text-neutral-100">
+        <h3 id={`entry-${id}-title`} className="relative z-10 line-clamp-6 max-w-[28ch] text-balance text-lg font-bold leading-snug tracking-[-0.01em] text-neutral-100 [text-shadow:0_1px_2px_rgba(0,0,0,0.28)]">
           {message}
         </h3>
         <ScallopDivider />
       </div>
 
       {/* Meta bar */}
-      <div className="flex items-center justify-between gap-3 px-4 pb-3 pt-1">
+      <div className="relative z-10 -mt-px flex items-center justify-between gap-3 bg-white px-4 pb-3 pt-1 dark:bg-neutral-900">
         <div className="flex min-w-0 items-center gap-2.5">
           {avatarUrl ? (
             <Image

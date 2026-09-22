@@ -21,6 +21,10 @@ were not modified.
 - Rebuilt cards to the supplied reference: 176px stamp bodies, scalloped tear
   edges, `shadow-2xl`, subtle deterministic tilts, 24px masonry gaps, bounded copy,
   safe avatars, and accessible copy-link feedback.
+- Removed the redundant scallop stroke and overlapped metadata surfaces by one
+  pixel to eliminate light/dark raster seams. Message copy retains the reference
+  18px/700 scale with a 28-character measure, tightened tracking, and restrained
+  contrast shadow for clearer reading across every palette.
 - Added the reference centered auth/composer dialog with blurred backdrop,
   focus trap, Escape/click-away close, focus restoration, scroll lock, responsive
   400px shell, animated scale/fade entry, and functional GitHub OAuth.

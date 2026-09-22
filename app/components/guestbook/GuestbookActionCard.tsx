@@ -104,7 +104,7 @@ export function GuestbookActionCard({ user, action, copy, authError = false }: P
         <button ref={triggerRef} type="button" onClick={() => setOpen(true)} className="relative z-10 inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-white/20 bg-white/10 px-5 text-sm font-medium text-white transition-colors hover:bg-white/20 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70"><PenLine aria-hidden="true" className="size-3.5" />Write a message...</button>
         <ScallopDivider />
       </div>
-      <div className="flex min-h-12 items-center justify-center gap-3 px-4 pb-3 pt-2 text-text-secondary"><span className="flex size-7 items-center justify-center rounded-full border border-border-primary"><BrandGlyph name="github" className="size-3.5" /></span></div>
+      <div className="relative z-10 -mt-px flex min-h-12 items-center justify-center gap-3 bg-white px-4 pb-3 pt-2 text-text-secondary dark:bg-neutral-900"><span className="flex size-7 items-center justify-center rounded-full border border-border-primary"><BrandGlyph name="github" className="size-3.5" /></span></div>
     </article>
 
     {mounted && createPortal(<AnimatePresence>{open && <>
