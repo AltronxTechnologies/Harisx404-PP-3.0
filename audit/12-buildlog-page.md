@@ -92,8 +92,11 @@ Legacy Changelog admin/API files remain byte-identical to their locked baseline.
 - Added field-specific Admin errors for project version/order and release title,
   description, badge, and semantic-version validation.
 - Re-aligned the archive toolbar after owner review: archive label, both counts,
-  and both metric labels now share one centered mono scale (11px at 320px and
-  12px from 360px upward) with identical line-height and tracking.
+  and both metric labels share one centered mono scale (10px below 640px and
+  12px from `sm` upward) with identical line-height and tracking.
+- Reduced only mobile tag geometry after owner review: release-state badges use
+  9px type and version pills use 8.5px type with proportionally tighter padding;
+  the established 10px/9px desktop sizes remain unchanged.
 
 ## Admin Ownership
 

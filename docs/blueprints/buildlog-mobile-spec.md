@@ -22,6 +22,9 @@ Companion: `buildlog-desktop-spec.md`.
 - Crisp shipped/planned status marks and copy stay aligned at the top of each row.
 - Badges remain to the right of release copy at every width, matching tablet and
   desktop alignment.
+- Release-state badges use compact 9px mono type and reduced mobile padding;
+  version pills use 8.5px mono type. Both return to their established 10px/9px
+  desktop scales at `sm` without changing alignment.
 - Optional GitHub/live actions wrap below project metadata without overflow.
 - Two actions remain equal-width; one action fills the bounded row; no empty
   placeholder is reserved when links are unavailable.

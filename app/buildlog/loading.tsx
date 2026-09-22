@@ -56,7 +56,7 @@ export default function BuildlogLoading() {
                         <div className={`h-4 w-2/3 rounded bg-border-primary/40 ${pulse}`} />
                         <div className={`h-3 w-4/5 rounded bg-border-primary/25 ${pulse}`} />
                       </div>
-                      <div data-loading-release-badge className={`h-6 w-16 shrink-0 rounded-full bg-border-primary/30 ${pulse}`} />
+                      <div data-loading-release-badge className={`h-[22px] w-14 shrink-0 rounded-full bg-border-primary/30 sm:h-6 sm:w-16 ${pulse}`} />
                     </div>
                   </div>
                 ))}

@@ -1744,3 +1744,14 @@ identical `leading-none` and `tracking-wider`. The toolbar uses an 8px narrow-ph
 gap and retains the 16px separator. Full wording stays on one line with no
 overflow. No project, release, Admin, database, CTA, Footer, or shared behavior
 changed. This limited amendment is re-locked after responsive verification.
+
+### 2026-09-22 owner-authorized Buildlog mobile-type amendment
+
+The owner temporarily unlocked only small-screen archive and tag sizing. Below
+640px, all archive-toolbar text now shares one exact 10px centered mono scale;
+at `sm+` it remains 12px. Release-state tags use 9px mobile type with tighter
+padding and return to 10px at `sm`; version pills use 8.5px mobile type and return
+to 9px at `sm`. Shipped and planned entries remain identical, right-aligned, and
+single-line. Desktop geometry, release-row heights, three-row scrolling, Admin,
+database, CTA, Footer, and shared behavior are unchanged. This limited amendment
+is re-locked after responsive verification.

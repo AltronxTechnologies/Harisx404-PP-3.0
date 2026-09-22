@@ -68,12 +68,12 @@ export default async function BuildlogPage({
         >
           <h2
             id="buildlog-collection-heading"
-            className="font-mono text-[11px] font-medium uppercase leading-none tracking-wider text-text-secondary min-[360px]:text-xs"
+            className="shrink-0 whitespace-nowrap font-mono text-[10px] font-medium uppercase leading-none tracking-wider text-text-secondary sm:text-xs"
           >
             {settings.archive_label}
           </h2>
           {projects.length > 0 && (
-            <div className="flex shrink-0 items-center gap-2.5 font-mono text-[11px] uppercase leading-none tracking-wider text-text-secondary min-[360px]:text-xs sm:gap-3">
+            <div className="flex shrink-0 items-center gap-2.5 font-mono text-[10px] uppercase leading-none tracking-wider text-text-secondary sm:gap-3 sm:text-xs">
               <p className="flex items-center gap-1.5 whitespace-nowrap">
                 <span className="tabular-nums">
                   {String(shippedCount).padStart(2, "0")}
