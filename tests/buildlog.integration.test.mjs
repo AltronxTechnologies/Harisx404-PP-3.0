@@ -70,8 +70,8 @@ test("Buildlog source has valid hero semantics and explicit route states", async
   assert.match(collection, /data-shipped-label-group/);
   assert.match(collection, /data-project-version/);
   assert.match(collection, /line-clamp-2/);
-  assert.match(collection, /max-h-\[336px\]/);
-  assert.match(collection, /min-\[430px\]:max-h-\[312px\]/);
+  assert.match(collection, /max-h-\[312px\]/);
+  assert.match(collection, /min-\[430px\]:max-h-72/);
   assert.doesNotMatch(collection, /overscroll-contain/);
   assert.doesNotMatch(collection, /Shipped ·/);
   assert.ok(

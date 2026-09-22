@@ -37,8 +37,9 @@ Legacy Changelog admin/API files remain byte-identical to their locked baseline.
   Admin Current Version as the safe fallback for date or status badges.
 - Positioned the version immediately beside the shipped-control title and
   enabled scroll chaining back to the page when nested lists reach either edge.
-- Kept release badges right-aligned at mobile widths and reduced mobile rows to
-  112px so content has balanced top/bottom whitespace without wasted space.
+- Kept release badges right-aligned at mobile widths and reduced release rows to
+  104px on narrow phones and 96px from 430px upward, preserving balanced
+  whitespace while making shipped and planned lists more compact.
 - Removed duplicate Buildlog-local rails; the global frame is the only frame.
 - Added release totals, stable project/item keys, collision-free IDs, and
   explicit per-item Shipped/Planned screen-reader text.

@@ -48,8 +48,9 @@ Status: implemented and verified; owner lock pending.
 - Semantic ordering supports major/minor/patch, prerelease identifiers, and
   build metadata; non-version badges fall back to the Admin Current Version.
 - Shipped and planned lists show exactly three fixed-geometry rows before using
-  contained keyboard-focusable vertical scrolling. Mobile rows are 112px and
-  wider rows are 104px; titles and descriptions are each limited to two lines.
+  contained keyboard-focusable vertical scrolling. Narrow-phone rows are 104px
+  and rows from 430px upward are 96px; titles and descriptions are each limited
+  to two lines.
 - Nested release scrolling uses normal scroll chaining: after reaching the top
   or bottom, continued wheel/touchpad input resumes overall page scrolling.
 - All shipped rows remain collapsed until the top shipped-control row is opened.

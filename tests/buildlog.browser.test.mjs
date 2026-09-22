@@ -29,6 +29,11 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
             overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
             articles: document.querySelectorAll("article").length,
             items: document.querySelectorAll("article li").length,
+            invalidReleaseRowHeights: [...document.querySelectorAll("article li")].filter(
+              (row) => Math.abs(
+                row.getBoundingClientRect().height - (window.innerWidth < 430 ? 104 : 96),
+              ) > 0.5,
+            ).length,
             releaseSummaryInset: (() => {
               const section = document.querySelector("section[aria-labelledby='buildlog-collection-heading']");
               const summary = document.querySelector("[data-release-summary]");
@@ -129,6 +134,7 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
         });
         assert.equal(initial.overflow, 0, `${theme} ${width}px overflow`);
         assert.ok(initial.articles > 0, `${theme} ${width}px has projects`);
+        assert.equal(initial.invalidReleaseRowHeights, 0, `${theme} ${width}px release row heights`);
         assert.ok(initial.releaseSummaryInset <= 0.5, `${theme} ${width}px release summary width`);
         assert.equal(initial.invalidReleaseSummary, false, `${theme} ${width}px release summary`);
         assert.equal(initial.lifecycleLabels, initial.articles, `${theme} ${width}px lifecycle labels`);

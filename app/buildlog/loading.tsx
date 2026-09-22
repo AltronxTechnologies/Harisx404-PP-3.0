@@ -49,7 +49,7 @@ export default function BuildlogLoading() {
                   <div className={`h-3 w-28 rounded bg-border-primary/35 ${pulse}`} />
                 </div>
                 {Array.from({ length: plannedCount }).map((_, item) => (
-                  <div key={item} className="flex h-[112px] items-center gap-4 border-b border-border-primary px-4 min-[430px]:h-[104px] sm:px-6">
+                  <div key={item} className="flex h-[104px] items-center gap-4 border-b border-border-primary px-4 min-[430px]:h-24 sm:px-6">
                     <div className={`size-5 shrink-0 rounded-md bg-border-primary/35 ${pulse}`} />
                     <div className="flex min-w-0 flex-1 items-start justify-between gap-3">
                       <div className="min-w-0 flex-1 space-y-2">

@@ -29,7 +29,7 @@ Companion: `buildlog-desktop-spec.md`.
 - Planned rows remain visible; shipped rows use one full-width disclosure.
 - Shipped updates appear before Planned Next, with the version pill in the top
   release-control row.
-- Both shipped and planned lists show three complete 112px rows before scrolling;
+- Both shipped and planned lists show three complete 104px rows before scrolling;
   descriptions are clamped to two lines for stable geometry.
 - Release-list scrolling chains naturally back to page scrolling at either edge.
 - The same disclosure stays above expanded shipped rows in both states.
