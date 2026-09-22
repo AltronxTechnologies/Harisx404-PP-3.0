@@ -97,6 +97,8 @@ Legacy Changelog admin/API files remain byte-identical to their locked baseline.
 - Reduced only mobile tag geometry after owner review: release-state badges use
   9px type and version pills use 8.5px type with proportionally tighter padding;
   the established 10px/9px desktop sizes remain unchanged.
+- Centered pill text using fixed-height inline-flex shells and `leading-none`;
+  measured text-to-pill center delta is within one pixel in both responsive modes.
 
 ## Admin Ownership
 

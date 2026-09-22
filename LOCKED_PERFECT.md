@@ -1755,3 +1755,13 @@ to 9px at `sm`. Shipped and planned entries remain identical, right-aligned, and
 single-line. Desktop geometry, release-row heights, three-row scrolling, Admin,
 database, CTA, Footer, and shared behavior are unchanged. This limited amendment
 is re-locked after responsive verification.
+
+### 2026-09-22 owner-authorized Buildlog pill-alignment amendment
+
+The owner temporarily unlocked only the vertical alignment inside release-state
+and version pills. Pills now use fixed responsive heights, `inline-flex`,
+`items-center`, `justify-center`, and `leading-none`, with the previously approved
+mobile/desktop type sizes unchanged. The loading badge shell matches. Text glyph
+centers are verified within one pixel of pill centers with no clipping or
+overflow. No other Buildlog or shared behavior changed. This amendment is
+re-locked after responsive verification.

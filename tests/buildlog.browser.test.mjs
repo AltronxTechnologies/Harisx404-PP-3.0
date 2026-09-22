@@ -141,6 +141,17 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
                   (window.innerWidth < 640 ? 8.5 : 9),
               ) > 0.1,
             ).length,
+            misalignedBadgeText: [
+              ...document.querySelectorAll("[data-release-content] > span, [data-project-version]"),
+            ].filter((badge) => {
+              const range = document.createRange();
+              range.selectNodeContents(badge);
+              const text = range.getBoundingClientRect();
+              const pill = badge.getBoundingClientRect();
+              return Math.abs(
+                text.top + text.height / 2 - (pill.top + pill.height / 2),
+              ) > 1;
+            }).length,
             emptyLinkContainers: [...document.querySelectorAll("article")].filter(
               (article) =>
                 article.querySelectorAll("a[target='_blank']").length === 0 &&
@@ -179,6 +190,7 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
         assert.equal(initial.wrappedProjectLinks, 0, `${theme} ${width}px project-link wrapping`);
         assert.equal(initial.invalidReleaseBadgeSizes, 0, `${theme} ${width}px release badge sizing`);
         assert.equal(initial.invalidVersionBadgeSizes, 0, `${theme} ${width}px version badge sizing`);
+        assert.equal(initial.misalignedBadgeText, 0, `${theme} ${width}px badge text alignment`);
         assert.equal(initial.emptyLinkContainers, 0, `${theme} ${width}px empty project-link containers`);
         assert.ok(initial.ctaFooterGap <= 0.5, `${theme} ${width}px CTA-to-Footer handoff`);
         assert.deepEqual(errors, [], `${theme} ${width}px console errors`);

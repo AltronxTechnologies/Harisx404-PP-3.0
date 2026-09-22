@@ -38,7 +38,7 @@ function ReleaseRow({ item }: { item: BuildlogItem }) {
               </p>
             )}
           </div>
-          <span className="w-fit shrink-0 whitespace-nowrap rounded-full border border-border-primary px-2.5 py-1 font-mono text-[9px] uppercase tracking-wider text-text-secondary sm:px-3 sm:py-1.5 sm:text-[10px]">
+          <span className="inline-flex h-5 w-fit shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-border-primary px-2.5 font-mono text-[9px] uppercase leading-none tracking-wider text-text-secondary sm:h-6 sm:px-3 sm:text-[10px]">
             {item.badge}
           </span>
         </div>
@@ -203,7 +203,7 @@ export function BuildlogCollection({
                             · {String(shippedItems.length).padStart(2, "0")}
                           </span>
                         </span>
-                        <span data-project-version className="rounded-full border border-border-primary px-2 py-0.5 font-mono text-[8.5px] tracking-wider text-text-secondary sm:px-2.5 sm:py-1 sm:text-[9px]">
+                        <span data-project-version className="inline-flex h-[18px] items-center justify-center rounded-full border border-border-primary px-2 font-mono text-[8.5px] leading-none tracking-wider text-text-secondary sm:h-5 sm:px-2.5 sm:text-[9px]">
                           {latestVersion}
                         </span>
                       </span>
@@ -230,7 +230,7 @@ export function BuildlogCollection({
                       >
                         <span>Planned next · {String(plannedItems.length).padStart(2, "0")}</span>
                         {shippedItems.length === 0 && (
-                          <span data-project-version className="rounded-full border border-border-primary px-2 py-0.5 font-mono text-[8.5px] tracking-wider text-text-secondary sm:px-2.5 sm:py-1 sm:text-[9px]">
+                          <span data-project-version className="inline-flex h-[18px] items-center justify-center rounded-full border border-border-primary px-2 font-mono text-[8.5px] leading-none tracking-wider text-text-secondary sm:h-5 sm:px-2.5 sm:text-[9px]">
                             {project.current_version}
                           </span>
                         )}
