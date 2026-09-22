@@ -43,6 +43,17 @@ test("Community Wall remains aligned and accessible across themes and widths", a
             extraContentInfo: document.querySelectorAll("footer").length,
             ogTitle: document.querySelector("meta[property='og:title']")?.getAttribute("content"),
             twitterTitle: document.querySelector("meta[name='twitter:title']")?.getAttribute("content"),
+            toolbarTypography: (() => {
+              const toolbar = section?.querySelector(":scope > div:first-child");
+              const label = toolbar?.querySelector("h2");
+              const count = toolbar?.querySelector("p");
+              if (!label || !count) return false;
+              const labelRect = label.getBoundingClientRect();
+              const countRect = count.getBoundingClientRect();
+              return getComputedStyle(label).fontSize === getComputedStyle(count).fontSize &&
+                getComputedStyle(label).lineHeight === getComputedStyle(count).lineHeight &&
+                Math.abs(labelRect.top + labelRect.height / 2 - (countRect.top + countRect.height / 2)) <= 0.5;
+            })(),
           };
         });
         assert.equal(result.overflow, 0, `${theme} ${width}px overflow`);
@@ -56,6 +67,7 @@ test("Community Wall remains aligned and accessible across themes and widths", a
         assert.equal(result.extraContentInfo, 1, `${theme} ${width}px footer landmarks`);
         assert.match(result.ogTitle || "", /Community Wall/i);
         assert.match(result.twitterTitle || "", /Community Wall/i);
+        assert.equal(result.toolbarTypography, true, `${theme} ${width}px toolbar typography`);
         if (theme === "light" && width === 320) {
           await page.getByRole("button", { name: "Write a message..." }).click();
           const dialog = page.getByRole("dialog", { name: "Leave your mark" });
@@ -63,6 +75,7 @@ test("Community Wall remains aligned and accessible across themes and widths", a
           await page.waitForTimeout(300);
           const box = await dialog.boundingBox();
           assert.ok(box && box.width <= 400 && box.width <= width - 32, "mobile dialog width");
+          assert.ok(box && box.height <= 900 - 32, "mobile dialog remains inside the viewport");
           assert.equal(await page.locator("body").evaluate((body) => getComputedStyle(body).overflow), "hidden");
           assert.equal(
             await page.locator("main").evaluate((element) => Boolean(element.closest("[inert]"))),
@@ -78,6 +91,7 @@ test("Community Wall remains aligned and accessible across themes and widths", a
           );
           assert.ok(await dialog.getByRole("link", { name: /Continue with GitHub/i }).isVisible());
           assert.ok(await dialog.getByRole("link", { name: /Continue with Google/i }).isVisible());
+          assert.ok(await dialog.getByText(/One note per account/i).isVisible());
           const oauthHeights = await dialog.getByRole("link").evaluateAll(
             (links) => links.map((link) => link.getBoundingClientRect().height),
           );

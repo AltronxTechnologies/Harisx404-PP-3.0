@@ -2,7 +2,7 @@
 
 - Date: 2026-09-22
 - Route: `/community-wall`
-- Status: implementation verified; latest one-note migration, OAuth provider configuration, and temporary-preview cleanup pending
+- Status: owner-approved and locked; implementation, live Supabase, and production-path verification complete
 
 ## Scope
 
@@ -102,23 +102,24 @@ were not modified.
 | Credentials regression | 5/5 passed |
 | Full public preview sweep | Passed |
 | Independent code/design review | No high or medium blockers |
-| Temporary fixture cleanup | 7/7 removed; no verification users or notes remain |
+| Temporary fixture cleanup | 17/17 removed; no verification users or notes remain |
 | `git diff --check` | Passed |
 
 ## Live Cutover
 
-`migrations/2026_community_wall_messages.sql` is applied to the connected Supabase
-project. Existing notes were preserved as published and malformed legacy values
-were safely normalized. A reversible temporary-user submission and authenticated
-Admin moderation cycle passed through pending, published, archived, pending, and
-deleted states with public cache invalidation at each transition. The settings API
-passed an authenticated save/revalidation roundtrip. No temporary auth or note
-records remain. The page is ready for final owner visual approval before locking.
+The latest `migrations/2026_community_wall_messages.sql` revision is applied to the
+connected Supabase project. Existing notes were preserved, duplicate legacy account
+ownership was normalized, and immediate publication, one-note-per-account
+uniqueness, and pattern 23 were verified with a reversible temporary user. Admin
+moderation and settings cycles passed with public cache invalidation. No temporary
+auth or verification records remain.
 
-The latest revision must now be rerun to activate immediate publication,
-one-note-per-account uniqueness, and the 24-pattern range. Supabase Auth currently
-reports GitHub and Google providers disabled; both must be enabled with OAuth
-credentials before either provider flow can be declared production-functional.
+Supabase Auth currently reports GitHub and Google providers disabled. The owner has
+classified provider credentials as deployment-time configuration; callback routes,
+equal provider controls, failure recovery, and OAuth redirect generation are code-
+verified. Both providers must be enabled before the deployed sign-in controls are
+operational. The shared configured production domain also remains a site-wide
+deployment dependency rather than a Community Wall implementation defect.
 
 ## Temporary Visual Preview
 
@@ -127,8 +128,16 @@ across all five palettes and varied copy lengths. The populated responsive matri
 passed, then all seven fixtures were removed. The production table contains only
 the two pre-existing published owner records and no verification users or notes.
 
-A second owner-requested preview set currently adds ten published cards under the
-names Daniel Kim, Fatima Noor, Lucas Meyer, Priya Shah, Ethan Cole, Hana Suzuki,
-Marcus Reed, Amara Okafor, Theo Martin, and Nadia Ali. These exact ten records are
-temporary and must be removed before production lock unless the owner explicitly
-chooses to retain them.
+A second owner-requested preview set added ten published cards under the names
+Daniel Kim, Fatima Noor, Lucas Meyer, Priya Shah, Ethan Cole, Hana Suzuki, Marcus
+Reed, Amara Okafor, Theo Martin, and Nadia Ali. The populated 12-case responsive
+matrix passed, then all ten records were removed before production lock.
+
+## Owner Lock
+
+The owner explicitly authorized locking Community Wall on 2026-09-22 after the
+reference-aligned visual pass, live database verification, signed-in composer,
+Admin moderation/settings workflows, responsive browser matrix, cross-page
+regressions, and independent code/design reviews passed. The frozen contract is
+recorded in entry 34 of `LOCKED_PERFECT.md`. Future Community Wall changes require
+a new explicit owner unlock.

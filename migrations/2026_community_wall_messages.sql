@@ -219,7 +219,7 @@ INSERT INTO public.community_wall_settings (
   'Words that echo',
   'always.',
   'A collection of notes, hellos, and thoughtful messages left by visitors.',
-  'Community notes',
+  'Visitor notes',
   'Join the wall',
   'Continue with GitHub or Google to leave one note on the wall.',
   'Leave your mark',
@@ -246,8 +246,8 @@ SET
 WHERE id = TRUE;
 
 UPDATE public.community_wall_settings
-SET collection_label = 'Community notes'
-WHERE id = TRUE AND collection_label = 'Visitor notes';
+SET collection_label = 'Visitor notes'
+WHERE id = TRUE AND collection_label = 'Community notes';
 
 DROP VIEW IF EXISTS public.public_community_wall_settings;
 CREATE VIEW public.public_community_wall_settings

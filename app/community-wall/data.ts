@@ -11,7 +11,7 @@ export const fallbackCommunityWallSettings: CommunityWallSettings = {
   heading_accent: "always.",
   description:
     "A collection of notes, hellos, and thoughtful messages left by visitors.",
-  collection_label: "Community notes",
+  collection_label: "Visitor notes",
   sign_in_title: "Join the wall",
   sign_in_description: "Continue with GitHub or Google to leave one note on the wall.",
   composer_title: "Leave your mark",
@@ -31,8 +31,6 @@ export function safeCommunityAvatar(value: unknown) {
     return url.protocol === "https:" && [
       "avatars.githubusercontent.com",
       "lh3.googleusercontent.com",
-      "github.com",
-      "user-images.githubusercontent.com",
     ].includes(url.hostname)
       ? url.toString()
       : null;

@@ -100,10 +100,10 @@ export default async function CommunityWallPage({
 
       <section aria-labelledby="community-wall-heading" className="mx-auto mt-24 w-full max-w-6xl px-2 sm:px-8 lg:px-0">
         <div className="flex min-h-14 items-center justify-between gap-4 py-3">
-          <h2 id="community-wall-heading" className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
+          <h2 id="community-wall-heading" className="font-mono text-[11px] font-medium uppercase leading-none tracking-wider text-text-secondary sm:text-xs">
             {settings.collection_label}
           </h2>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-text-secondary">
+          <p className="font-mono text-[11px] uppercase leading-none tracking-wider text-text-secondary sm:text-xs">
             <span className="tabular-nums">{String(count).padStart(2, "0")}</span> messages
           </p>
         </div>

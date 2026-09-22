@@ -1765,3 +1765,76 @@ mobile/desktop type sizes unchanged. The loading badge shell matches. Text glyph
 centers are verified within one pixel of pill centers with no clipping or
 overflow. No other Buildlog or shared behavior changed. This amendment is
 re-locked after responsive verification.
+
+## 34. FINAL OWNER LOCK - Community Wall
+
+- **Date locked:** 2026-09-22
+- **Owner instruction:** Complete the professional production pass and lock the
+  Community Wall when all page gates pass.
+- **Implementation commits:** `a717682`, `e65ccb4`, `bb837ba`, `2a44ef2`, and
+  `1ce81f0`, followed by the owner-authorized final dialog, accessibility, avatar,
+  clipboard, and toolbar refinements recorded in this lock change.
+- **Locked route:** `/community-wall`, including the managed hero, collection
+  toolbar, responsive masonry wall, Join the Wall card, GitHub/Google dialog,
+  signed-in composer, note cards, pagination, loading/empty/error states, shared
+  CTA placement, metadata, and light/dark presentation.
+- **Locked files and surfaces:** `app/community-wall/**`,
+  `app/components/guestbook/**`, `app/auth/github/route.ts`,
+  `app/auth/google/route.ts`, Community Wall-specific Admin routes/forms/APIs,
+  Community Wall schema sections in `migrations/2026_community_wall_messages.sql`
+  and `supabase_schema.sql`, Community Wall tests/blueprints, and
+  `audit/13-community-wall-page.md`.
+- **Hero baseline:** 152px viewport top, 12px/400 mono kicker, 16px gap, 48px
+  mobile/60px desktop Instrument Serif H1, managed supporting copy, and 96px
+  hero-to-wall gap.
+- **Wall baseline:** managed `Visitor notes` label and derived message count share
+  one exact centered mono scale (11px mobile, 12px at `sm+`); 24px grid gaps;
+  one/two/three columns; 266px usable card width at 320px; no duplicate local rails.
+- **Card baseline:** 176px stamp body, 16px shell, `shadow-2xl`, scalloped edge,
+  deterministic 1-2 degree tilt, six-line 18px/700 message with 28ch measure and
+  restrained downward shadow, quieter side-biased doodles, 24 dark high-contrast
+  radial palettes, compact 12px/600 author and 10px mono date.
+- **Scallop baseline:** light mode is seam-free with a one-pixel metadata overlap;
+  dark mode adds only a 0.75px white/18 scallop stroke for body/footer separation.
+- **Identity baseline:** sanitized provider photos are limited to
+  `avatars.githubusercontent.com` and `lh3.googleusercontent.com`; absent or failed
+  images use one of 24 deterministic professional illustrated profile/color
+  fallbacks. Public views never expose auth user IDs.
+- **Dialog baseline:** fixed centered `max-w-[400px]`, 16px mobile viewport insets,
+  `max-height: calc(100dvh - 32px)`, blurred black backdrop, subtle shell ring,
+  purple stamp header, mono kicker, 26px italic serif title, managed description,
+  explicit account-choice hierarchy, equal 48px GitHub/Google controls, and trust
+  copy explaining one-note/immediate-publication/Admin management.
+- **Dialog accessibility:** background roots are inert and `aria-hidden`; backdrop
+  is non-focusable; close button starts focused; Tab/Shift+Tab trap; Escape,
+  click-away, and close control restore trigger focus; body scroll locks; reduced
+  motion removes modal duration and card tilts.
+- **Link baseline:** 36px labelled copy control writes the stable note deep link,
+  visibly and accessibly reports Copied/Copy failed, supports a legacy clipboard
+  fallback, uses target hash highlighting, and clears timers on unmount.
+- **Data baseline:** verified users publish exactly one note immediately through a
+  service-role-only atomic function protected by per-user advisory lock and a
+  partial unique index. Admin can archive, restore, and permanently delete notes.
+  Public reads use a bounded published-only view; base message/settings tables deny
+  anonymous and normal authenticated access.
+- **Admin baseline:** `/admin/community-wall` provides independently paginated
+  pending/reviewed management; `/admin/community-wall/settings` manages hero,
+  collection, sign-in, composer, empty-state, SEO, Open Graph, and Twitter copy.
+- **Verification at lock:** TypeScript and targeted ESLint clean; Community Wall
+  integration 4/4; 12/12 populated and clean-state responsive light/dark browser
+  combinations; clean migration/rerun/legacy upgrade/consolidated schema passed;
+  immediate publication, pattern 23, second-note rejection, signed-in composer,
+  Admin moderation UI, settings save, public cache invalidation, clipboard, modal
+  geometry/focus/inert/reduced-motion, zero overflow/duplicate IDs/console errors,
+  0px CTA/Footer handoff, full preview sweep, locked-page regressions, and
+  independent reviews passed. All 17 visual fixtures and all verification users/
+  notes were removed before lock.
+- **Accepted deployment configuration:** GitHub and Google provider credentials
+  must be enabled in Supabase Auth, and the shared production domain must be
+  restored or updated. These are external deployment tasks; do not alter the locked
+  Community Wall implementation to work around missing credentials or domain state.
+
+Do not modify Community Wall, its dialog, cards, Admin controls, schema, data
+source, migrations, metadata, responsive geometry, or public presentation without
+a new explicit owner unlock. Shared locked Navbar, Search, Reach Out, CTA, and
+Footer remain independently frozen under their existing entries.

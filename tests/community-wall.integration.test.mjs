@@ -51,6 +51,7 @@ test("Community Wall source enforces moderation, bounded reads, and managed copy
   assert.match(avatar, /profiles/);
   assert.match(avatar, /onError/);
   assert.match(data, /lh3\.googleusercontent\.com/);
+  assert.doesNotMatch(data, /user-images\.githubusercontent\.com/);
   assert.match(entry, /-mt-px/);
   assert.match(scallop, /className="hidden dark:block"/);
   assert.match(scallop, /strokeWidth="0\.75"/);
