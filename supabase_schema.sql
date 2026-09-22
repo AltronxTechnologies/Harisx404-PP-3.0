@@ -582,3 +582,96 @@ DROP TRIGGER IF EXISTS set_buildlog_settings_updated_at
 CREATE TRIGGER set_buildlog_settings_updated_at
 BEFORE UPDATE ON public.buildlog_settings
 FOR EACH ROW EXECUTE FUNCTION public.set_buildlog_updated_at();
+
+-- COMMUNITY WALL
+CREATE TABLE IF NOT EXISTS public.messages (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  message text NOT NULL CHECK (char_length(btrim(message)) BETWEEN 1 AND 200),
+  patternindex integer NOT NULL DEFAULT 0 CHECK (patternindex BETWEEN 0 AND 4),
+  rotation integer NOT NULL DEFAULT 0 CHECK (rotation BETWEEN -3 AND 3),
+  user_id uuid REFERENCES auth.users (id) ON DELETE SET NULL,
+  creator_name text NOT NULL DEFAULT 'Anonymous' CHECK (char_length(btrim(creator_name)) BETWEEN 1 AND 80),
+  creator_avatar_url text CHECK (creator_avatar_url IS NULL OR creator_avatar_url ~ '^https://'),
+  status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'published', 'archived')),
+  moderated_at timestamptz,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS community_wall_public_order_idx ON public.messages (status, created_at DESC);
+CREATE INDEX IF NOT EXISTS community_wall_user_rate_idx ON public.messages (user_id, created_at DESC);
+ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON TABLE public.messages FROM anon, authenticated;
+
+DROP VIEW IF EXISTS public.public_community_wall_messages;
+CREATE VIEW public.public_community_wall_messages WITH (security_barrier = true) AS
+SELECT id, message, patternindex, creator_name, creator_avatar_url, created_at
+FROM public.messages WHERE status = 'published' ORDER BY created_at DESC;
+REVOKE ALL ON TABLE public.public_community_wall_messages FROM PUBLIC;
+GRANT SELECT ON TABLE public.public_community_wall_messages TO anon, authenticated;
+
+CREATE OR REPLACE FUNCTION public.set_community_wall_updated_at()
+RETURNS trigger LANGUAGE plpgsql SET search_path = public AS $$
+BEGIN NEW.updated_at = clock_timestamp(); RETURN NEW; END;
+$$;
+DROP TRIGGER IF EXISTS set_community_wall_updated_at ON public.messages;
+CREATE TRIGGER set_community_wall_updated_at BEFORE UPDATE ON public.messages
+FOR EACH ROW EXECUTE FUNCTION public.set_community_wall_updated_at();
+
+CREATE OR REPLACE FUNCTION public.submit_community_wall_message(
+  p_user_id uuid, p_message text, p_patternindex integer, p_rotation integer,
+  p_creator_name text, p_creator_avatar_url text
+)
+RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public, pg_temp AS $$
+DECLARE submitted_id uuid; recent_count integer; latest_submission timestamptz;
+BEGIN
+  PERFORM pg_advisory_xact_lock(hashtextextended(p_user_id::text, 0));
+  SELECT count(*), max(created_at) INTO recent_count, latest_submission
+  FROM public.messages WHERE user_id = p_user_id
+    AND created_at >= clock_timestamp() - interval '24 hours';
+  IF recent_count >= 3 THEN RAISE EXCEPTION 'daily_limit' USING ERRCODE = 'P0001'; END IF;
+  IF latest_submission IS NOT NULL AND latest_submission > clock_timestamp() - interval '60 seconds'
+    THEN RAISE EXCEPTION 'cooldown' USING ERRCODE = 'P0001'; END IF;
+  INSERT INTO public.messages (message, patternindex, rotation, user_id, creator_name, creator_avatar_url, status)
+  VALUES (p_message, p_patternindex, p_rotation, p_user_id, p_creator_name, p_creator_avatar_url, 'pending')
+  RETURNING id INTO submitted_id;
+  RETURN submitted_id;
+END;
+$$;
+REVOKE ALL ON FUNCTION public.submit_community_wall_message(uuid, text, integer, integer, text, text) FROM PUBLIC;
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN
+    GRANT EXECUTE ON FUNCTION public.submit_community_wall_message(uuid, text, integer, integer, text, text) TO service_role;
+  END IF;
+END $$;
+
+CREATE TABLE IF NOT EXISTS public.community_wall_settings (
+  id boolean PRIMARY KEY DEFAULT true CHECK (id = true),
+  kicker text NOT NULL CHECK (char_length(btrim(kicker)) BETWEEN 2 AND 80),
+  heading text NOT NULL CHECK (char_length(btrim(heading)) BETWEEN 2 AND 100),
+  heading_accent text NOT NULL CHECK (char_length(btrim(heading_accent)) BETWEEN 1 AND 60),
+  description text NOT NULL CHECK (char_length(btrim(description)) BETWEEN 10 AND 300),
+  collection_label text NOT NULL CHECK (char_length(btrim(collection_label)) BETWEEN 2 AND 60),
+  sign_in_title text NOT NULL CHECK (char_length(btrim(sign_in_title)) BETWEEN 2 AND 100),
+  sign_in_description text NOT NULL CHECK (char_length(btrim(sign_in_description)) BETWEEN 5 AND 200),
+  composer_title text NOT NULL CHECK (char_length(btrim(composer_title)) BETWEEN 2 AND 100),
+  composer_description text NOT NULL CHECK (char_length(btrim(composer_description)) BETWEEN 5 AND 200),
+  empty_title text NOT NULL CHECK (char_length(btrim(empty_title)) BETWEEN 2 AND 100),
+  empty_description text NOT NULL CHECK (char_length(btrim(empty_description)) BETWEEN 5 AND 240),
+  seo_title text NOT NULL CHECK (char_length(btrim(seo_title)) BETWEEN 2 AND 100),
+  seo_description text NOT NULL CHECK (char_length(btrim(seo_description)) BETWEEN 10 AND 300),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+ALTER TABLE public.community_wall_settings ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON TABLE public.community_wall_settings FROM anon, authenticated;
+INSERT INTO public.community_wall_settings (id, kicker, heading, heading_accent, description, collection_label, sign_in_title, sign_in_description, composer_title, composer_description, empty_title, empty_description, seo_title, seo_description)
+VALUES (true, 'The wall remembers', 'Words that echo', 'always.', 'A moderated collection of notes, hellos, and thoughtful messages left by visitors.', 'Visitor notes', 'Join the wall', 'Sign in with GitHub to leave a note for review.', 'Leave your mark', 'Share a thoughtful note. Submissions are reviewed before they appear.', 'The first note is waiting', 'Approved visitor messages will appear here after moderation.', 'Community Wall | Leave Your Mark', 'Read moderated notes from visitors and leave a thoughtful message on Muhammad Haris''s community wall.') ON CONFLICT (id) DO NOTHING;
+DROP VIEW IF EXISTS public.public_community_wall_settings;
+CREATE VIEW public.public_community_wall_settings WITH (security_barrier = true) AS
+SELECT kicker, heading, heading_accent, description, collection_label, sign_in_title, sign_in_description, composer_title, composer_description, empty_title, empty_description, seo_title, seo_description FROM public.community_wall_settings WHERE id = true;
+REVOKE ALL ON TABLE public.public_community_wall_settings FROM PUBLIC;
+GRANT SELECT ON TABLE public.public_community_wall_settings TO anon, authenticated;
+DROP TRIGGER IF EXISTS set_community_wall_settings_updated_at ON public.community_wall_settings;
+CREATE TRIGGER set_community_wall_settings_updated_at BEFORE UPDATE ON public.community_wall_settings
+FOR EACH ROW EXECUTE FUNCTION public.set_community_wall_updated_at();

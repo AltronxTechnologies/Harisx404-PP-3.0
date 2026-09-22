@@ -1,97 +1,151 @@
-import { HeroTexture } from "@/app/components/HeroTexture";
-import createSupabaseServerClient from "@/app/lib/supabase/server";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { GridWrapper } from "@/app/components/GridWrapper";
+import { PaperHeroTexture } from "@/app/components/PaperHeroTexture";
 import { GuestbookActionCard } from "@/app/components/guestbook/GuestbookActionCard";
 import { GuestbookEntryCard } from "@/app/components/guestbook/GuestbookEntryCard";
 import { CtaSection } from "@/app/components/home/CtaSection";
+import { siteMetadata } from "@/app/data/siteMetadata";
+import { getSupabaseEnv } from "@/app/lib/supabase/safe";
+import createSupabaseServerClient from "@/app/lib/supabase/server";
 import { createGuestbookEntry } from "./actions";
-import type { Metadata } from "next";
+import {
+  COMMUNITY_WALL_PAGE_SIZE,
+  fetchCommunityWall,
+  fetchCommunityWallSettings,
+  safeCommunityAvatar,
+} from "./data";
 
-// User-generated content must be fresh on every request — keep this route dynamic.
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "Community Wall | Leave Your Mark",
-  description:
-    "Leave a note on the community wall — messages, doodles, and hellos from visitors of Muhammad Haris's site.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await fetchCommunityWallSettings();
+  const image = `${siteMetadata.siteUrl}/brand/logo-wide.png`;
+  return {
+    title: settings.seo_title,
+    description: settings.seo_description,
+    openGraph: {
+      title: settings.seo_title,
+      description: settings.seo_description,
+      type: "website",
+      url: `${siteMetadata.siteUrl}/community-wall`,
+      images: [{ url: image, width: 1200, height: 630, alt: settings.seo_title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: settings.seo_title,
+      description: settings.seo_description,
+      images: [image],
+    },
+  };
+}
 
-export default async function Page() {
-  const supabase = await createSupabaseServerClient();
-
-  const [{ data: messages }, { data: userData }] = await Promise.all([
-    supabase.from("messages").select("*").order("created_at", { ascending: false }),
-    supabase.auth.getUser(),
+export default async function CommunityWallPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; auth?: string }>;
+}) {
+  const query = await searchParams;
+  const pageValue = query.page || "1";
+  const requestedPage = /^\d{1,4}$/.test(pageValue) ? Number(pageValue) : 1;
+  const [{ messages, count, page }, settings] = await Promise.all([
+    fetchCommunityWall(requestedPage),
+    fetchCommunityWallSettings(),
   ]);
+  if (page !== requestedPage) {
+    redirect(page === 1 ? "/community-wall" : `/community-wall?page=${page}`);
+  }
 
-  const user = userData?.user
-    ? {
-        name:
-          userData.user.user_metadata?.full_name ||
-          userData.user.email?.split("@")[0] ||
-          "Visitor",
-        avatarUrl: userData.user.user_metadata?.avatar_url ?? null,
-      }
-    : null;
+  let user: { name: string; avatarUrl: string | null } | null = null;
+  if (getSupabaseEnv()) {
+    const supabase = await createSupabaseServerClient();
+    const { data } = await supabase.auth.getUser();
+    if (data.user) {
+      user = {
+        name: String(data.user.user_metadata?.full_name || data.user.user_metadata?.user_name || data.user.email?.split("@")[0] || "Visitor"),
+        avatarUrl: safeCommunityAvatar(data.user.user_metadata?.avatar_url),
+      };
+    }
+  }
+
+  const totalPages = Math.max(1, Math.ceil(count / COMMUNITY_WALL_PAGE_SIZE));
 
   return (
-    <div className="relative min-w-0 pb-24">
-      {/* Decorative hatched side rails — 12px mobile / 32px desktop */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 left-0 hidden w-3 border-r border-border-primary sm:block lg:w-8 [background-image:repeating-linear-gradient(45deg,rgba(0,0,0,0.04)_0px,rgba(0,0,0,0.04)_1px,transparent_1px,transparent_7px)] dark:[background-image:repeating-linear-gradient(45deg,rgba(255,255,255,0.05)_0px,rgba(255,255,255,0.05)_1px,transparent_1px,transparent_7px)]"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 right-0 hidden w-3 border-l border-border-primary sm:block lg:w-8 [background-image:repeating-linear-gradient(45deg,rgba(0,0,0,0.04)_0px,rgba(0,0,0,0.04)_1px,transparent_1px,transparent_7px)] dark:[background-image:repeating-linear-gradient(45deg,rgba(255,255,255,0.05)_0px,rgba(255,255,255,0.05)_1px,transparent_1px,transparent_7px)]"
-      />
+    <div className="relative mt-14">
+      <GridWrapper>
+        <div className="relative px-4 xl:px-0">
+          <PaperHeroTexture className="-inset-x-2 bottom-0 top-[-128px] sm:-inset-x-3 sm:top-[-144px] md:top-[-176px] lg:inset-x-0" />
+          <header className="relative mx-auto max-w-3xl text-center">
+            <p className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
+              {settings.kicker}
+            </p>
+            <h1 className="heading-glow mx-auto mt-4 max-w-2xl text-balance [font-family:var(--font-instrument-serif),serif] text-[46px] font-medium leading-none tracking-tight text-text-primary md:text-[56px] md:tracking-[-1.5px]">
+              {settings.heading}{" "}
+              <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
+                {settings.heading_accent}
+              </span>
+            </h1>
+            <p className="mx-auto mt-4 max-w-2xl text-pretty text-[15px] leading-6 text-text-secondary">
+              {settings.description}
+            </p>
+          </header>
+        </div>
+      </GridWrapper>
 
-      <HeroTexture />
+      <section aria-labelledby="community-wall-heading" className="mt-14 px-2 sm:px-4">
+        <div className="-mx-2 flex min-h-14 items-center justify-between gap-4 px-4 py-3 sm:-mx-4 sm:px-8">
+          <h2 id="community-wall-heading" className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
+            {settings.collection_label}
+          </h2>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-text-secondary">
+            <span className="tabular-nums">{String(count).padStart(2, "0")}</span> approved
+          </p>
+        </div>
 
-      {/* Hero — reference: super-title inside h1 + Instrument Serif headline
-          with shimmering gradient accent word */}
-      <h1 className="relative z-[2] mx-auto mt-24 mb-14 max-w-xl text-balance text-center font-medium text-[46px] tracking-tight [text-shadow:rgba(255,255,255,0.05)_0px_4px_8px,rgba(255,255,255,0.2)_0px_8px_30px] max-sm:px-5 md:mt-28 md:text-6xl">
-        <p className="mb-4 font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
-          The wall remembers
-        </p>
-        <span className="inline-block text-text-primary [font-family:var(--font-instrument-serif),serif]">
-          Words That Echo{" "}
-          <span
-            className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]"
-            style={{
-              maskImage: "linear-gradient(to right, black 70%, transparent 100%)",
-              maskSize: "200% 100%",
-              maskPosition: "left center",
-              maskRepeat: "no-repeat",
-            }}
-          >
-            Always
-          </span>
-        </span>
-      </h1>
-
-      {/* Guestbook card grid — sign-in/composer card first, then sticky notes */}
-      <div className="relative mx-auto w-full max-w-6xl px-5 sm:px-8 lg:px-12">
-        <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <GuestbookActionCard user={user} action={createGuestbookEntry} />
-          {(messages ?? []).map((message, index) => (
+        <div className="grid grid-cols-1 items-stretch gap-4 border-b border-border-primary pb-4 sm:gap-5 sm:pb-5 md:grid-cols-2 lg:grid-cols-3">
+          {page === 1 && (
+            <GuestbookActionCard
+              user={user}
+              action={createGuestbookEntry}
+              authError={query.auth === "error"}
+              copy={{
+                signInTitle: settings.sign_in_title,
+                signInDescription: settings.sign_in_description,
+                composerTitle: settings.composer_title,
+                composerDescription: settings.composer_description,
+              }}
+            />
+          )}
+          {messages.map((message) => (
             <GuestbookEntryCard
               key={message.id}
-              id={String(message.id)}
+              id={message.id}
               message={message.message}
-              patternIndex={message.patternindex ?? 0}
-              author={message.creator_name || "Anonymous"}
+              patternIndex={message.patternindex}
+              author={message.creator_name}
               avatarUrl={message.creator_avatar_url}
               createdAt={message.created_at}
-              order={index}
             />
           ))}
+          {messages.length === 0 && page === 1 && (
+            <div className="flex min-h-[286px] flex-col items-center justify-center rounded-2xl border border-dashed border-border-primary px-6 text-center md:col-span-1 lg:col-span-2">
+              <p className="[font-family:var(--font-instrument-serif),serif] text-2xl font-medium text-text-primary">{settings.empty_title}</p>
+              <p className="mt-2 max-w-md text-sm leading-6 text-text-secondary">{settings.empty_description}</p>
+            </div>
+          )}
         </div>
-      </div>
 
-      {/* Contact CTA — same shared section as the rest of the site */}
-      <div className="relative mt-16">
-        <CtaSection />
-      </div>
+        {totalPages > 1 && (
+          <nav aria-label="Community Wall pages" className="mt-6 flex items-center justify-center gap-3">
+            {page > 1 && <Link href={page === 2 ? "/community-wall" : `/community-wall?page=${page - 1}`} className="inline-flex min-h-10 items-center rounded-full border border-border-primary px-4 font-mono text-[10px] uppercase tracking-widest text-text-secondary hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary">Previous</Link>}
+            <span className="font-mono text-[10px] uppercase tracking-widest text-text-secondary">Page {page} of {totalPages}</span>
+            {page < totalPages && <Link href={`/community-wall?page=${page + 1}`} className="inline-flex min-h-10 items-center rounded-full border border-border-primary px-4 font-mono text-[10px] uppercase tracking-widest text-text-secondary hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary">Next</Link>}
+          </nav>
+        )}
+      </section>
+
+      <div className="mt-28"><CtaSection /></div>
     </div>
   );
 }

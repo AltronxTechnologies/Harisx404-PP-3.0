@@ -25,7 +25,7 @@ export const getServerStats = unstable_cache(
           .from("blog_posts")
           .select("slug, title, cover_image_url")
           .eq("status", "published"),
-        supabase.from("messages").select("*", { count: "exact", head: true }),
+        supabase.from("public_community_wall_messages").select("id", { count: "exact", head: true }),
       ]);
 
     const viewsData = viewsResult.data;
@@ -98,5 +98,5 @@ export const getServerStats = unstable_cache(
     };
   },
   ["server-stats"],
-  { revalidate: 3600 } // Revalidate every hour
+  { revalidate: 3600, tags: ["server-stats"] } // Revalidate every hour
 );

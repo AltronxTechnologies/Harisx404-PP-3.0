@@ -1,31 +1,28 @@
-# Community Wall (Guestbook) — Blueprint Spec (MOBILE)
+# Community Wall - Mobile Specification
 
-Reference: guestbook page (mobile capture, ~375–500px). Route: `/community-wall`.
-Companion: `community-wall-desktop-spec.md` (shares tokens/components; this file records mobile deltas + mobile-specific values).
+Companion: `community-wall-desktop-spec.md`.
 
----
+## Mobile Geometry
 
-## Layout (top to bottom)
-1. Header fixed `top-2.5`, blur mask `h-[90px]`.
-2. Hero/title `max-w-xl`, `pt-38` (152px) main top pad, `text-center`, `max-sm:px-5`, `mb-pagebuilder`.
-3. Super-title mono 12px uppercase tracking-widest `mb-4`.
-4. **Cards: 1-column vertical stack** `grid grid-cols-1 items-start gap-6`. Sign-in card first, then entry sticky notes.
-5. CTA (#contact) `py-10`, badge centered `top-10 left-1/2 -translate-x-1/2`, button `max-md:scale-110`.
-6. Footer 1-col stack (bio hidden), `px-4 py-6`, `max-sm:px-1`.
-7. Frame rails: `grid-cols-[12px_1fr_12px]` hatched.
+- Required widths: 320, 360, 375, and 390px in light and dark themes.
+- Shared mobile Navbar and global rails remain unchanged.
+- Hero uses the locked 46px Instrument Serif page-heading scale with balanced
+  wrapping and 16px supporting-copy gap.
+- Collection toolbar stays one row and exposes the approved total without
+  wrapping.
+- Cards form a single aligned column with 16px gap, 266px minimum usable width at
+  320px, and equal 286px minimum height.
+- Card message/footer geometry and action positions remain stable across states.
+- Author uses 14px/500 copy and timestamp uses 12px mono on phones; both return to
+  compact desktop scales at `sm`.
+- No card rotation, horizontal clipping, badge overflow, or duplicated local rails.
+- Shared CTA begins 112px after the collection and ends directly at Footer.
 
-## Mobile typography deltas
-| Style | Mobile | Desktop |
-| --- | --- | --- |
-| H1 hero (Instrument Serif) | 48px / 1.0 | 60px |
-| CTA title | 24px | 48px |
-| User name in meta bar | 14px/500, #3f3f46 / #d4d4d8 | 12px/500, #262626 / #e5e5e5 |
-| Timestamp | 12px mono | 10px mono |
+## Interaction
 
-Everything else (colors, gradients, sign-in card, sticky note structure, wavy perforation, avatar size-7 ring-1, spacing: min-h-44 banner, p-6 pb-10, meta px-4 pt-1 pb-3, gap-2.5, gap-6 stack, pb-24 main) identical to the desktop spec.
-
-## Interactions (same as desktop)
-- Rotation tilt deepens on hover 300ms, `hover:z-10`.
-- `target:` ring for `#entry-...` anchors.
-- Hero accent gradient shimmer (`animate-gradient-x` masked).
-- CTA clip-path reveal 500ms; spin-slow badge, draggable.
+- OAuth and submit controls remain at least 40px high.
+- Textarea does not resize and reports the 200-character limit.
+- Focus treatment is visible in both themes.
+- Hash links scroll notes below the fixed Navbar and announce copy success.
+- Pagination actions remain 40px and preserve canonical `/community-wall` for page
+  one.

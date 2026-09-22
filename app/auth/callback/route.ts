@@ -7,7 +7,7 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   // if "next" is in param, use it as the redirect URL
-  const next = searchParams.get("next") ?? "/community-wall?show=true";
+  const next = searchParams.get("next") ?? "/community-wall";
 
   const env = getSupabaseEnv();
   if (code && env) {
@@ -37,6 +37,6 @@ export async function GET(request: Request) {
 
   // return the user to an error page with instructions
   return NextResponse.redirect(
-    `${origin}/login?message=Could not login with provider`,
+    `${origin}/community-wall?auth=error`,
   );
 }
