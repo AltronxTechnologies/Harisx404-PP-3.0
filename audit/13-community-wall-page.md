@@ -2,7 +2,7 @@
 
 - Date: 2026-09-22
 - Route: `/community-wall`
-- Status: implementation, live Supabase, and production-path verification complete; owner lock pending
+- Status: implementation and production-path verification complete; owner visual review with temporary preview notes in progress
 
 ## Scope
 
@@ -94,3 +94,11 @@ Admin moderation cycle passed through pending, published, archived, pending, and
 deleted states with public cache invalidation at each transition. The settings API
 passed an authenticated save/revalidation roundtrip. No temporary auth or note
 records remain. The page is ready for final owner visual approval before locking.
+
+## Temporary Visual Preview
+
+At the owner's request, seven natural-looking published preview notes were added
+to exercise the complete multi-row wall across all five palettes and varied copy
+lengths. They use the author names Maya Chen, Omar Khan, Sofia Martinez, Noah
+Williams, Ava Patel, Liam Brooks, and Elena Rossi. Remove these seven exact preview
+records before production lock unless the owner explicitly chooses to retain them.
