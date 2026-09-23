@@ -755,11 +755,11 @@ function ContributionCalendar({ weeks }: { weeks: GitHubLive["weeks"] }) {
   }
 
   return (
-    <div ref={containerRef} className="relative w-full min-w-0 pt-5">
+    <div ref={containerRef} className="relative w-full min-w-0">
       {activeDay && (
         <div
           data-github-activity-tooltip
-          className="pointer-events-none absolute right-0 top-0 rounded-md border border-border-primary bg-bg-primary px-2 py-1 font-mono text-[9px] tracking-wide text-text-secondary shadow-sm"
+          className="pointer-events-none absolute left-1/2 top-[-30px] z-20 -translate-x-1/2 whitespace-nowrap rounded-md border border-border-primary bg-bg-primary px-2 py-1 font-mono text-[9px] tracking-wide text-text-secondary shadow-sm"
           aria-hidden="true"
         >
           <span className="font-semibold text-text-primary">{activeDay.count}</span>{" "}
@@ -831,9 +831,9 @@ export function GitHubActivityBento({
   const hasActivity = Boolean(github?.weeks.length);
   const isCached = github?.freshness === "cached";
   return (
-    <BentoCard height={height} appearance="home" showHoverGradient={false} className="!p-5">
-      <div className="z-20 flex items-center justify-between gap-3">
-        <h3 className="text-base font-medium text-text-primary">
+    <BentoCard height={height} appearance="home" showHoverGradient={false} className="!px-5 !py-4">
+      <div className="relative z-20 text-center">
+        <h3 className="text-[15px] font-medium text-text-primary sm:text-base">
           <a
             href="https://github.com/harisx404"
             target="_blank"
@@ -844,15 +844,30 @@ export function GitHubActivityBento({
             GitHub activity
           </a>
         </h3>
-        <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2 py-1 font-mono text-[9px] font-semibold uppercase tracking-wider sm:text-[10px] ${hasActivity ? isCached ? "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300" : "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300" : "border-border-primary bg-neutral-100 text-text-secondary dark:bg-white/[0.05]"}`}>
+        {hasActivity && (
+          <p className="mt-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-text-secondary sm:text-[10px]">
+            <span className="font-semibold text-text-primary">{github!.contributions.toLocaleString("en-US")}</span>{" "}
+            contributions · last 12 months
+          </p>
+        )}
+        <span className={`absolute right-0 top-0 inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2 py-1 font-mono text-[9px] font-semibold uppercase tracking-wider sm:text-[10px] ${hasActivity ? isCached ? "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300" : "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300" : "border-border-primary bg-neutral-100 text-text-secondary dark:bg-white/[0.05]"}`}>
           <span className={`size-1.5 rounded-full ${hasActivity ? isCached ? "bg-amber-500" : "bg-emerald-500" : "bg-neutral-400"}`} />
           {hasActivity ? isCached ? "Cached" : "Live" : "Unavailable"}
         </span>
       </div>
 
       {hasActivity ? (
-        <div className="z-20 mt-3 flex flex-1 items-center">
+        <div className="z-20 mt-2 flex flex-1 flex-col items-center justify-center">
           <ContributionCalendar weeks={github!.weeks} />
+          <div className="mt-2 flex items-center justify-center gap-1.5 font-mono text-[8px] uppercase tracking-[0.12em] text-text-secondary sm:text-[9px]" aria-label="Contribution intensity from less to more">
+            <span>Less</span>
+            <span className="flex items-center gap-1" aria-hidden="true">
+              {contributionColors.map((color, index) => (
+                <i key={index} className={`size-2 rounded-[2px] ring-1 ring-inset ring-black/[0.04] dark:ring-white/[0.04] ${color.split(" ")[0]}`} />
+              ))}
+            </span>
+            <span>More</span>
+          </div>
         </div>
       ) : (
         <div data-github-activity-fallback className="z-20 mt-3 flex flex-1 items-center justify-between gap-5 rounded-xl border border-dashed border-border-primary bg-neutral-50/60 px-4 py-3 dark:bg-white/[0.02]">

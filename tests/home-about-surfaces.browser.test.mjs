@@ -34,6 +34,10 @@ test("Home and About live replacement cards remain responsive and aligned", asyn
           const result = await page.evaluate(() => ({
             overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
             githubCards: [...document.querySelectorAll("h3")].filter((heading) => heading.textContent?.startsWith("GitHub activity")).length,
+            githubTotals: [...document.querySelectorAll("p")].filter((paragraph) =>
+              /contributions · last 12 months/.test(paragraph.textContent || ""),
+            ).length,
+            githubLegends: document.querySelectorAll("[aria-label='Contribution intensity from less to more']").length,
             contributionCalendars: document.querySelectorAll("[data-github-contribution-calendar]").length,
             contributionCells: document.querySelectorAll("[data-github-contribution-calendar] > button").length,
             visibleContributionCells: [...document.querySelectorAll("[data-github-contribution-calendar] > button")].filter(
@@ -87,6 +91,8 @@ test("Home and About live replacement cards remain responsive and aligned", asyn
           }));
           assert.equal(result.overflow, 0, `${route} ${theme} ${width}px overflow`);
           assert.equal(result.githubCards, 1, `${route} ${theme} ${width}px GitHub card`);
+          assert.equal(result.githubTotals, result.contributionCalendars, `${route} ${theme} ${width}px GitHub total`);
+          assert.equal(result.githubLegends, result.contributionCalendars, `${route} ${theme} ${width}px GitHub legend`);
           assert.equal(result.contributionCalendars + result.contributionFallbacks, 1, `${route} ${theme} ${width}px contribution state`);
           if (result.contributionCalendars) {
             assert.equal(result.contributionCells, result.visibleContributionCells, `${route} ${theme} ${width}px visible contribution cells`);
