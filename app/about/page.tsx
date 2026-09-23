@@ -198,7 +198,7 @@ export default async function AboutPage() {
             <SectionHeading kicker="Beyond the resume" className="mx-auto max-w-2xl">
               {"One handle, "}
               <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
-                proof in public.
+                live numbers.
               </span>
             </SectionHeading>
           </GridWrapper>
