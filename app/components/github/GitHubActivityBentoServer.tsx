@@ -17,12 +17,18 @@ export function GitHubActivityBentoSkeleton({
   height?: string;
 }) {
   return (
-    <BentoCard height={height} appearance="home" className="animate-pulse motion-reduce:animate-none">
+    <BentoCard height={height} appearance="home" className="!p-5 animate-pulse motion-reduce:animate-none">
       <div aria-hidden="true" className="flex h-full flex-col">
-        <div className="mx-auto h-5 w-36 rounded bg-border-primary/40" />
-        <div className="mx-auto mt-2 h-4 w-56 max-w-full rounded bg-border-primary/25" />
-        <div className="mt-5 min-h-[92px] flex-1 rounded-xl bg-border-primary/20" />
-        <div className="mx-auto mt-3 h-3 w-40 rounded bg-border-primary/25" />
+        <div className="flex items-center justify-between">
+          <div className="h-3 w-28 rounded bg-border-primary/40" />
+          <div className="h-5 w-14 rounded-full bg-border-primary/30" />
+        </div>
+        <div className="mt-3 flex items-end justify-between gap-4">
+          <div className="h-8 w-36 rounded bg-border-primary/40" />
+          <div className="h-5 w-44 max-w-[45%] rounded bg-border-primary/25" />
+        </div>
+        <div className="mt-2 min-h-[70px] flex-1 rounded-xl bg-border-primary/20" />
+        <div className="mt-2 h-4 w-full rounded bg-border-primary/25" />
       </div>
       <span className="sr-only" role="status">Loading GitHub activity</span>
     </BentoCard>

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import clsx from "clsx";
 import createGlobe from "cobe";
 import { BentoCard } from "../BentoCard";
@@ -694,34 +694,105 @@ function TechStackBento({
 
 /* ── 4. Live GitHub contribution calendar ────────────────────── */
 const contributionColors = [
-  "bg-neutral-200 dark:bg-white/[0.07]",
-  "bg-emerald-200 dark:bg-emerald-950",
-  "bg-emerald-400 dark:bg-emerald-800",
-  "bg-emerald-600 dark:bg-emerald-600",
-  "bg-emerald-800 dark:bg-emerald-400",
+  "bg-neutral-200/80 hover:bg-neutral-300 dark:bg-white/[0.07] dark:hover:bg-white/[0.12]",
+  "bg-emerald-200 hover:bg-emerald-300 dark:bg-emerald-950 dark:hover:bg-emerald-900",
+  "bg-emerald-400 hover:bg-emerald-500 dark:bg-emerald-800 dark:hover:bg-emerald-700",
+  "bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500",
+  "bg-emerald-800 hover:bg-emerald-900 dark:bg-emerald-400 dark:hover:bg-emerald-300",
 ] as const;
 
-function ContributionCalendar({ weeks }: { weeks: number[][] }) {
+function formatContributionDate(date: string) {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(`${date}T00:00:00Z`));
+}
+
+function ContributionCalendar({ weeks }: { weeks: GitHubLive["weeks"] }) {
+  const reduced = useReducedMotion();
   const visibleWeeks = weeks.slice(-53);
+  const days = visibleWeeks.flatMap((week) =>
+    Array.from({ length: 7 }, (_, dayIndex) => week[dayIndex] ?? null),
+  );
+  const mobileStartIndex = Math.max(0, (visibleWeeks.length - 26) * 7);
+  const latestIndex = Math.max(0, days.findLastIndex(Boolean));
+  const [selectedIndex, setSelectedIndex] = useState(latestIndex);
+  const selectedDay = days[selectedIndex] ?? days[latestIndex];
+
+  function moveSelection(index: number, offset: number, element: HTMLButtonElement) {
+    let next = index + offset;
+    while (next >= 0 && next < days.length && !days[next]) next += offset;
+    if (next < 0 || next >= days.length) return;
+    setSelectedIndex(next);
+    (element.parentElement?.children[next] as HTMLButtonElement | undefined)?.focus();
+  }
+
   return (
-    <div
-      data-github-contribution-calendar
-      className="grid min-h-[92px] w-full grid-flow-col grid-rows-7 gap-1"
-      style={{ gridTemplateColumns: `repeat(${Math.max(visibleWeeks.length, 1)}, minmax(3px, 1fr))` }}
-      aria-label="GitHub contribution activity for the last year"
-    >
-      {visibleWeeks.flatMap((week, weekIndex) =>
-        Array.from({ length: 7 }, (_, dayIndex) => {
-          const level = week[dayIndex] ?? 0;
+    <div className="min-w-0">
+      <motion.div
+        data-github-contribution-calendar
+        className="grid min-h-[70px] w-full grid-flow-col grid-rows-7 gap-1 [grid-template-columns:repeat(26,minmax(3px,1fr))] sm:[grid-template-columns:repeat(53,minmax(1px,1fr))]"
+        initial={reduced ? false : { opacity: 0, y: 6 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.6 }}
+        transition={{ duration: reduced ? 0 : 0.45, ease: "easeOut" }}
+        role="grid"
+        aria-label="GitHub contribution activity for the last year. Use arrow keys to inspect days."
+        onMouseLeave={() => setSelectedIndex(latestIndex)}
+      >
+        {days.map((day, index) => {
+          const level = day?.level ?? 0;
+          const label = day
+            ? `${day.count} ${day.count === 1 ? "contribution" : "contributions"} on ${formatContributionDate(day.date)}`
+            : "No date in this calendar week";
           return (
-            <span
-              key={`${weekIndex}-${dayIndex}`}
-              className={`min-h-1 rounded-[2px] ring-1 ring-inset ring-black/[0.03] dark:ring-white/[0.04] ${contributionColors[Math.max(0, Math.min(4, level))]}`}
-              title={`Activity level ${level}`}
+            <button
+              key={`${Math.floor(index / 7)}-${index % 7}`}
+              type="button"
+              role="gridcell"
+              tabIndex={day && index === selectedIndex ? 0 : -1}
+              disabled={!day}
+              aria-label={label}
+              title={label}
+              data-contribution-day={day?.date || ""}
+              onMouseEnter={() => day && setSelectedIndex(index)}
+              onFocus={() => day && setSelectedIndex(index)}
+              onKeyDown={(event) => {
+                if (event.key === "ArrowUp") {
+                  event.preventDefault();
+                  moveSelection(index, -1, event.currentTarget);
+                } else if (event.key === "ArrowDown") {
+                  event.preventDefault();
+                  moveSelection(index, 1, event.currentTarget);
+                } else if (event.key === "ArrowLeft") {
+                  event.preventDefault();
+                  moveSelection(index, -7, event.currentTarget);
+                } else if (event.key === "ArrowRight") {
+                  event.preventDefault();
+                  moveSelection(index, 7, event.currentTarget);
+                }
+              }}
+              className={`${index < mobileStartIndex ? "hidden sm:block" : ""} min-h-1 rounded-[2px] ring-1 ring-inset ring-black/[0.04] transition-colors duration-150 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 motion-reduce:transition-none disabled:pointer-events-none dark:ring-white/[0.04] ${contributionColors[Math.max(0, Math.min(4, level))]}`}
             />
           );
-        }),
-      )}
+        })}
+      </motion.div>
+      <div className="mt-2 flex min-h-4 items-center justify-between gap-3 font-mono text-[9px] uppercase tracking-[0.12em] text-text-secondary sm:text-[10px]">
+        <span className="truncate" aria-live="polite">
+          {selectedDay
+            ? `${selectedDay.count} ${selectedDay.count === 1 ? "contribution" : "contributions"} · ${formatContributionDate(selectedDay.date)}`
+            : "Activity details unavailable"}
+        </span>
+        <span className="hidden shrink-0 items-center gap-1 sm:flex" aria-label="Contribution intensity from less to more">
+          Less
+          {contributionColors.map((color, index) => (
+            <i key={index} className={`size-2 rounded-[2px] ${color.split(" ")[0]}`} />
+          ))}
+          More
+        </span>
+      </div>
     </div>
   );
 }
@@ -734,27 +805,66 @@ export function GitHubActivityBento({
   height?: string;
 }) {
   const hasActivity = Boolean(github?.weeks.length);
+  const isCached = github?.freshness === "cached";
   return (
-    <BentoCard height={height} appearance="home" linkTo="https://github.com/harisx404">
-      <div className="z-20 text-center">
-        <div className="flex items-center justify-center gap-2">
-          <h3 className="text-base font-medium text-text-primary">GitHub activity</h3>
-          <span className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-mono text-[10px] font-medium ${hasActivity ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "border-border-primary bg-neutral-100 text-text-secondary dark:bg-white/[0.05]"}`}>
-            <span className="relative flex size-1.5">
-              {hasActivity && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75 motion-reduce:animate-none" />}
-              <span className={`relative inline-flex size-1.5 rounded-full ${hasActivity ? "bg-emerald-500" : "bg-neutral-400"}`} />
-            </span>
-            {hasActivity ? "LIVE" : "UNAVAILABLE"}
-          </span>
+    <BentoCard height={height} appearance="home" showHoverGradient={false} className="!p-5">
+      <div className="z-20 flex items-center justify-between gap-3">
+        <div>
+          <p className="font-mono text-[9px] font-medium uppercase tracking-[0.18em] text-text-secondary sm:text-[10px]">
+            GitHub · last 365 days
+          </p>
+          <h3 className="mt-0.5 text-base font-medium text-text-primary">
+            <a
+              href="https://github.com/harisx404"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-sm transition-colors hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 motion-reduce:transition-none dark:hover:text-emerald-300"
+            >
+              GitHub activity <span aria-hidden>↗</span>
+            </a>
+          </h3>
         </div>
-        <p className="mt-1 text-sm text-text-secondary md:text-base">
-          {github ? `${github.contributions.toLocaleString("en-US")} contributions in the last year.` : "Live contribution data is temporarily unavailable."}
-        </p>
+        <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2 py-1 font-mono text-[9px] font-semibold uppercase tracking-wider sm:text-[10px] ${hasActivity ? isCached ? "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300" : "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300" : "border-border-primary bg-neutral-100 text-text-secondary dark:bg-white/[0.05]"}`}>
+          <span className={`size-1.5 rounded-full ${hasActivity ? isCached ? "bg-amber-500" : "bg-emerald-500" : "bg-neutral-400"}`} />
+          {hasActivity ? isCached ? "Cached" : "Live" : "Unavailable"}
+        </span>
       </div>
-      <div className="z-20 mt-4 flex flex-1 items-center">
-        {hasActivity ? <ContributionCalendar weeks={github!.weeks} /> : <div className="flex h-[92px] w-full items-center justify-center rounded-xl border border-dashed border-border-primary font-mono text-[10px] uppercase tracking-widest text-text-secondary">Awaiting GitHub activity</div>}
-      </div>
-      <p className="z-20 mt-2 text-center font-mono text-[10px] uppercase tracking-widest text-text-secondary">@harisx404 · live GitHub data</p>
+
+      {hasActivity ? (
+        <>
+          <div className="z-20 mt-2 flex items-end justify-between gap-4">
+            <p className="flex items-baseline gap-2 text-text-primary">
+              <span className="[font-family:var(--font-source-serif),Georgia,serif] text-[30px] font-semibold leading-none tracking-tight sm:text-[34px]">
+                {github!.contributions.toLocaleString("en-US")}
+              </span>
+              <span className="text-xs text-text-secondary sm:text-sm">contributions</span>
+            </p>
+            <div className="hidden items-center gap-3 text-right font-mono text-[9px] uppercase tracking-wider text-text-secondary sm:flex">
+              <span><b className="text-text-primary">{github!.repos}</b> repos</span>
+              <span><b className="text-text-primary">{github!.stars}</b> stars</span>
+              <span><b className="text-text-primary">{github!.followers}</b> followers</span>
+            </div>
+          </div>
+          <div className="z-20 mt-2 flex-1">
+            <ContributionCalendar weeks={github!.weeks} />
+          </div>
+        </>
+      ) : (
+        <div data-github-activity-fallback className="z-20 mt-3 flex flex-1 items-center justify-between gap-5 rounded-xl border border-dashed border-border-primary bg-neutral-50/60 px-4 py-3 dark:bg-white/[0.02]">
+          <div>
+            <p className="text-sm font-medium text-text-primary">Activity is taking a brief pause.</p>
+            <p className="mt-1 text-xs leading-relaxed text-text-secondary">GitHub could not be reached and no verified snapshot is available yet.</p>
+          </div>
+          <a
+            href="https://github.com/harisx404"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 rounded-full border border-border-primary px-3 py-1.5 font-mono text-[9px] uppercase tracking-wider text-text-primary transition-colors hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 motion-reduce:transition-none dark:hover:bg-white/[0.06]"
+          >
+            Profile ↗
+          </a>
+        </div>
+      )}
     </BentoCard>
   );
 }

@@ -14,6 +14,14 @@
 - GitHub activity is isolated behind a card-level Suspense boundary and an hourly
   shared server cache, so a cold or unavailable GitHub response cannot delay the
   Home or About page shell.
+- The final portfolio-editorial activity card presents the real annual total,
+  repositories, stars, followers, and exact per-day contribution counts. It uses
+  a 53-week desktop grid and a legible recent 26-week mobile view of the same data.
+- Hover, focus, and arrow-key inspection update a live date/count readout; the
+  chart entrance respects reduced-motion preferences.
+- A last-known-good in-process snapshot is reused with an explicit `Cached` badge
+  when GitHub fails. With no verified snapshot, the card shows a neutral profile
+  fallback and never invents zero activity.
 - Repeated Home/About project, testimonial, and experience reads use tagged
   server caches that are invalidated by their Admin mutation routes.
 - Home Behind-the-site and About bento Stats cards now render published credential
@@ -54,6 +62,8 @@
 | Targeted ESLint | Passed |
 | Home/About source contracts | 3/3 passed |
 | Home/About responsive matrix | 12/12 page/theme/viewport combinations passed |
+| GitHub day-detail accessibility | One tab stop, arrow navigation, real date/count labels |
+| GitHub resilient states | Live, Cached, and neutral unavailable contracts verified |
 | Streamed response timing | Home 0.266s TTFB; About 0.338s TTFB |
 | Warm full response timing | Home 1.948s; About 1.694s |
 | Live GitHub data | 827 contributions rendered during verification |

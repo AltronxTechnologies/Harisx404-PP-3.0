@@ -23,16 +23,18 @@ test("Home and About live replacement cards remain responsive and aligned", asyn
           assert.equal(response?.status(), 200);
           const result = await page.evaluate(() => ({
             overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-            githubCards: [...document.querySelectorAll("h3")].filter((heading) => heading.textContent === "GitHub activity").length,
+            githubCards: [...document.querySelectorAll("h3")].filter((heading) => heading.textContent?.startsWith("GitHub activity")).length,
             contributionCalendars: document.querySelectorAll("[data-github-contribution-calendar]").length,
-            contributionCells: document.querySelectorAll("[data-github-contribution-calendar] > span").length,
-            contributionFallbacks: [...document.querySelectorAll("div")].filter(
-              (element) => element.textContent?.trim() === "Awaiting GitHub activity",
+            contributionCells: document.querySelectorAll("[data-github-contribution-calendar] > button").length,
+            contributionTabStops: document.querySelectorAll("[data-github-contribution-calendar] > button[tabindex='0']").length,
+            contributionLabels: [...document.querySelectorAll("[data-github-contribution-calendar] > button")].filter(
+              (cell) => /contributions? on [A-Z][a-z]{2}/.test(cell.getAttribute("aria-label") || ""),
             ).length,
+            contributionFallbacks: document.querySelectorAll("[data-github-activity-fallback]").length,
             credentialLinks: document.querySelectorAll("a[href='/credentials'] [data-credential-bento-preview]").length,
             statsLinks: document.querySelectorAll("a[href='/stats']").length,
             shortCards: [...document.querySelectorAll("[data-github-contribution-calendar]")].filter(
-              (calendar) => calendar.getBoundingClientRect().height < 80,
+              (calendar) => calendar.getBoundingClientRect().height < 68,
             ).length,
             scrapbookOverlap: (() => {
               const heading = [...document.querySelectorAll("h3")].find(
@@ -53,6 +55,8 @@ test("Home and About live replacement cards remain responsive and aligned", asyn
           assert.equal(result.contributionCalendars + result.contributionFallbacks, 1, `${route} ${theme} ${width}px contribution state`);
           if (result.contributionCalendars) {
             assert.ok(result.contributionCells >= 300, `${route} ${theme} ${width}px live contribution cells`);
+            assert.equal(result.contributionTabStops, 1, `${route} ${theme} ${width}px contribution tab stop`);
+            assert.ok(result.contributionLabels >= 300, `${route} ${theme} ${width}px contribution labels`);
           }
           assert.equal(result.credentialLinks, 1, `${route} ${theme} ${width}px credential card`);
           assert.equal(result.statsLinks, 0, `${route} ${theme} ${width}px retired Stats links`);
@@ -61,6 +65,13 @@ test("Home and About live replacement cards remain responsive and aligned", asyn
           assert.deepEqual(errors, [], `${route} ${theme} ${width}px errors`);
 
           if (route === "/" && width === 1440) {
+            const selectedCell = page.locator("[data-github-contribution-calendar] > button[tabindex='0']");
+            const selectedLabel = await selectedCell.getAttribute("aria-label");
+            await selectedCell.focus();
+            await selectedCell.press("ArrowLeft");
+            const movedLabel = await page.evaluate(() => document.activeElement?.getAttribute("aria-label"));
+            assert.notEqual(movedLabel, selectedLabel, "GitHub calendar arrow-key navigation");
+
             await page.getByRole("button", { name: "More" }).hover();
             const panel = page.locator("#navbar-more-panel");
             await panel.waitFor();

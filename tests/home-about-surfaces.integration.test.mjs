@@ -64,9 +64,13 @@ test("GitHub activity and credential cards use real bounded data contracts", asy
   assert.match(live, /revalidate: 3600/);
   assert.match(live, /REQUEST_TIMEOUT_MS = 2500/);
   assert.match(live, /AbortSignal\.timeout/);
-  assert.match(live, /if \(!totalMatch\) return null/);
+  assert.match(live, /if \(!totalMatch\) return cachedOrUnavailable\(\)/);
+  assert.match(live, /githubLastSuccessfulActivity/);
+  assert.match(live, /freshness: "cached"/);
+  assert.match(live, /tooltipPattern/);
+  assert.match(live, /count: number/);
   assert.match(live, /unstable_cache/);
-  assert.match(live, /github-public-activity-v1/);
+  assert.match(live, /github-public-activity-v2/);
   assert.match(githubServer, /await fetchGitHubActivity\(\)/);
   for (const source of [home, about]) {
     assert.match(source, /<Suspense fallback={<GitHubActivityBentoSkeleton/);
@@ -74,6 +78,9 @@ test("GitHub activity and credential cards use real bounded data contracts", asy
   }
   assert.match(homeBento, /data-github-contribution-calendar/);
   assert.match(homeBento, /contributionColors/);
+  assert.match(homeBento, /useReducedMotion/);
+  assert.match(homeBento, /Use arrow keys to inspect days/);
+  assert.match(homeBento, /mobileStartIndex/);
   assert.match(credentialData, /public_certifications/);
   assert.match(credentialSummary, /slice\(0, 3\)/);
   assert.match(preview, /credential\.issuer\.trim\(\)\.charAt\(0\)/);
