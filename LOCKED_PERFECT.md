@@ -1924,3 +1924,11 @@ Do not restore `/stats`, its navigation links, synthetic activity charts, or the
 old public counter card without a new explicit owner request. Home, About, Navbar,
 Footer, Credentials, Buildlog, and Community Wall remain locked with only the
 precise content/data substitutions documented here.
+
+### 2026-09-22 owner-authorized Footer Links-group amendment
+
+The owner temporarily unlocked only the Footer group assignment for the existing
+`Links` destination. `Links` moved from `Specifics` to the first position in
+`Extra`, directly above `Buildlog`. Its route, label, typography, interaction,
+responsive behavior, and every other Footer destination/order remain unchanged.
+The Footer is re-locked after source and browser verification.

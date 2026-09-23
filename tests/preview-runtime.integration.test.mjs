@@ -44,6 +44,10 @@ test("retired Test, Attribution, and Stats routes are fully removed", async () =
     readFile(new URL("../app/legal/terms/page.tsx", import.meta.url), "utf8"),
   ]);
   assert.doesNotMatch(footer, /\/test|\/attribution|\/stats|Test Page/);
+  const specifics = footer.slice(footer.indexOf('title: "Specifics"'), footer.indexOf('title: "Extra"'));
+  const extra = footer.slice(footer.indexOf('title: "Extra"'), footer.indexOf("const metaLinks"));
+  assert.doesNotMatch(specifics, /href: "\/links"/);
+  assert.ok(extra.indexOf('href: "/links"') < extra.indexOf('href: "/buildlog"'));
   assert.doesNotMatch(sitemap, /\/test|\/attribution|\/stats/);
   assert.match(terms, /https:\/\/aayushbharti\.in/);
   assert.doesNotMatch(terms, /nofollow/);
