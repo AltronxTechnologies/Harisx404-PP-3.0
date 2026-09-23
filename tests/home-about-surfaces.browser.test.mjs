@@ -60,7 +60,7 @@ test("Home and About live replacement cards remain responsive and aligned", asyn
             assert.ok(result.contributionCells >= 300, `${route} ${theme} ${width}px live contribution cells`);
             assert.equal(
               result.visibleContributionCells,
-              width < 640 ? 91 : width < 1024 ? 182 : 273,
+              width < 640 ? 91 : width < 1024 ? 140 : 182,
               `${route} ${theme} ${width}px responsive contribution window`,
             );
             assert.equal(result.contributionTabStops, 1, `${route} ${theme} ${width}px contribution tab stop`);
@@ -73,12 +73,6 @@ test("Home and About live replacement cards remain responsive and aligned", asyn
           assert.deepEqual(errors, [], `${route} ${theme} ${width}px errors`);
 
           if (route === "/" && width === 1440) {
-            const activeCell = page.locator("[data-github-contribution-calendar] > button[aria-label^='91 contributions']");
-            await activeCell.hover();
-            const tooltip = page.locator("[data-github-activity-tooltip]");
-            await tooltip.waitFor();
-            assert.match((await tooltip.textContent()) || "", /91 contributions/);
-
             const selectedCell = page.locator("[data-github-contribution-calendar] > button[tabindex='0']");
             const selectedLabel = await selectedCell.getAttribute("aria-label");
             await selectedCell.focus();

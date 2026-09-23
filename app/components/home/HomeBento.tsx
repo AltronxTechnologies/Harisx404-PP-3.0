@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import clsx from "clsx";
 import createGlobe from "cobe";
 import { BentoCard } from "../BentoCard";
@@ -711,25 +711,21 @@ function formatContributionDate(date: string) {
 }
 
 function ContributionCalendar({ weeks }: { weeks: GitHubLive["weeks"] }) {
-  const reduced = useReducedMotion();
   const visibleWeeks = weeks.slice(-53);
   const days = visibleWeeks.flatMap((week) =>
     Array.from({ length: 7 }, (_, dayIndex) => week[dayIndex] ?? null),
   );
-  const desktopStartIndex = Math.max(0, (visibleWeeks.length - 39) * 7);
-  const tabletStartIndex = Math.max(0, (visibleWeeks.length - 26) * 7);
+  const desktopStartIndex = Math.max(0, (visibleWeeks.length - 26) * 7);
+  const tabletStartIndex = Math.max(0, (visibleWeeks.length - 20) * 7);
   const mobileStartIndex = Math.max(0, (visibleWeeks.length - 13) * 7);
   const latestIndex = Math.max(0, days.findLastIndex(Boolean));
   const [selectedIndex, setSelectedIndex] = useState(latestIndex);
-  const [detailIndex, setDetailIndex] = useState<number | null>(null);
-  const detailDay = detailIndex === null ? null : days[detailIndex];
 
   function moveSelection(index: number, offset: number, element: HTMLButtonElement) {
     let next = index + offset;
     while (next >= 0 && next < days.length && !days[next]) next += offset;
     if (next < 0 || next >= days.length) return;
     setSelectedIndex(next);
-    setDetailIndex(next);
     (element.parentElement?.children[next] as HTMLButtonElement | undefined)?.focus();
   }
 
@@ -741,30 +737,12 @@ function ContributionCalendar({ weeks }: { weeks: GitHubLive["weeks"] }) {
   }
 
   return (
-    <div className="relative min-w-0 pt-6">
-      {detailDay && (
-        <motion.div
-          initial={reduced ? false : { opacity: 0, y: 3 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: reduced ? 0 : 0.14 }}
-          data-github-activity-tooltip
-          className="pointer-events-none absolute right-0 top-0 rounded-md border border-border-primary bg-bg-primary px-2 py-1 font-mono text-[9px] tracking-wide text-text-secondary shadow-sm"
-          aria-hidden="true"
-        >
-          <span className="font-semibold text-text-primary">{detailDay.count}</span>{" "}
-          {detailDay.count === 1 ? "contribution" : "contributions"} · {formatContributionDate(detailDay.date)}
-        </motion.div>
-      )}
-      <motion.div
+    <div className="w-full min-w-0">
+      <div
         data-github-contribution-calendar
-        className="grid min-h-[96px] w-full grid-flow-col grid-rows-7 gap-1 [grid-template-columns:repeat(13,minmax(7px,1fr))] sm:[grid-template-columns:repeat(26,minmax(5px,1fr))] lg:[grid-template-columns:repeat(39,minmax(5px,1fr))]"
-        initial={reduced ? false : { opacity: 0, y: 6 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.6 }}
-        transition={{ duration: reduced ? 0 : 0.45, ease: "easeOut" }}
+        className="grid w-full grid-flow-col grid-rows-7 justify-center gap-1 [grid-template-columns:repeat(13,12px)] sm:[grid-template-columns:repeat(20,13px)] lg:[grid-template-columns:repeat(26,14px)]"
         role="grid"
         aria-label="Recent GitHub contribution activity. Use arrow keys to inspect days."
-        onMouseLeave={() => setDetailIndex(null)}
       >
         {days.map((day, index) => {
           const level = day?.level ?? 0;
@@ -781,13 +759,10 @@ function ContributionCalendar({ weeks }: { weeks: GitHubLive["weeks"] }) {
               aria-label={label}
               title={label}
               data-contribution-day={day?.date || ""}
-              onMouseEnter={() => day && setDetailIndex(index)}
               onFocus={() => {
                 if (!day) return;
                 setSelectedIndex(index);
-                setDetailIndex(index);
               }}
-              onBlur={() => setDetailIndex(null)}
               onKeyDown={(event) => {
                 if (event.key === "ArrowUp") {
                   event.preventDefault();
@@ -803,11 +778,11 @@ function ContributionCalendar({ weeks }: { weeks: GitHubLive["weeks"] }) {
                   moveSelection(index, 7, event.currentTarget);
                 }
               }}
-              className={`${visibilityClass(index)} min-h-2 rounded-[3px] ring-1 ring-inset ring-black/[0.035] transition-[background-color,box-shadow,filter] duration-150 hover:brightness-105 hover:ring-2 hover:ring-emerald-700/30 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 motion-reduce:transition-none disabled:pointer-events-none dark:ring-white/[0.035] dark:hover:ring-emerald-300/35 ${contributionColors[Math.max(0, Math.min(4, level))]}`}
+              className={`${visibilityClass(index)} size-3 rounded-[3px] ring-1 ring-inset ring-black/[0.035] transition-[background-color,box-shadow,filter] duration-150 hover:brightness-110 hover:ring-2 hover:ring-emerald-700/35 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 motion-reduce:transition-none disabled:pointer-events-none dark:ring-white/[0.035] dark:hover:ring-emerald-300/40 sm:size-[13px] lg:size-3.5 ${contributionColors[Math.max(0, Math.min(4, level))]}`}
             />
           );
         })}
-      </motion.div>
+      </div>
     </div>
   );
 }

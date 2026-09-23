@@ -15,12 +15,12 @@
   shared server cache, so a cold or unavailable GitHub response cannot delay the
   Home or About page shell.
 - The final portfolio-editorial card intentionally limits persistent copy to its
-  title and status. It shows 13 weeks on phones, 26 on tablets, and 39 on desktop
-  with larger cells and a restrained neutral-to-emerald palette tuned separately
+  title and status. It shows 13 weeks on phones, 20 on tablets, and 26 on desktop
+  with large fixed square cells and a restrained neutral-to-emerald palette tuned separately
   for light and dark themes.
-- Hover and keyboard focus reveal the real date/count only while inspecting a day;
-  arrow-key navigation remains available and chart entrance motion respects the
-  reduced-motion preference.
+- Native hover labels expose the real date/count only while inspecting a day;
+  keyboard focus and arrow-key navigation remain available. The chart renders
+  immediately without a viewport animation that could leave the card blank.
 - A last-known-good in-process snapshot is reused with an explicit `Cached` badge
   when GitHub fails. With no verified snapshot, the card shows a neutral profile
   fallback and never invents zero activity.
