@@ -296,7 +296,7 @@ export function ScrapbookBento({ className }: { className?: string }) {
 
   return (
     <BentoCard
-      height="h-[300px]"
+      height="h-[400px] sm:h-[300px]"
       showHoverGradient={false}
       hideOverflow={false}
     >
@@ -311,7 +311,7 @@ export function ScrapbookBento({ className }: { className?: string }) {
       <div className="absolute inset-0 overflow-hidden rounded-2xl bg-[radial-gradient(#e5e7eb_1px,transparent_2px)] [background-size:14px_14px] [mask-image:radial-gradient(ellipse_80%_70%_at_50%_50%,black_40%,transparent_100%)] dark:bg-[radial-gradient(#333_1px,transparent_2px)]"></div>
       <div
         className={cn(
-          "absolute inset-x-0 bottom-5 top-14 @container",
+          "absolute inset-x-0 bottom-5 top-24 @container sm:top-14",
           className,
         )}
       >
@@ -319,7 +319,7 @@ export function ScrapbookBento({ className }: { className?: string }) {
           variants={container}
           initial={reduced ? false : "hidden"}
           animate="shown"
-          className="flex h-full w-full flex-wrap content-center items-center justify-center gap-x-5 gap-y-1 px-6 md:flex-nowrap md:gap-5 md:px-8 lg:gap-4 lg:px-8 xl:gap-6 xl:px-10"
+          className="grid h-full w-full grid-cols-2 place-items-center content-center gap-x-2 gap-y-4 px-3 sm:flex sm:flex-wrap sm:gap-x-5 sm:gap-y-1 sm:px-6 md:flex-nowrap md:gap-5 md:px-8 lg:gap-4 lg:px-8 xl:gap-6 xl:px-10"
         >
           <Sticker
             caption="One mark on everything I build — if it wears the monogram, I stand behind it."

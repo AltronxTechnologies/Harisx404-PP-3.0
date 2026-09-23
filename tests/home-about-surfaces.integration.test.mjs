@@ -69,7 +69,7 @@ test("GitHub activity and credential cards use real bounded data contracts", asy
   assert.match(live, /github-public-activity-v1/);
   assert.match(githubServer, /await fetchGitHubActivity\(\)/);
   for (const source of [home, about]) {
-    assert.match(source, /<Suspense fallback={<GitHubActivityBentoSkeleton \/>}>/);
+    assert.match(source, /<Suspense fallback={<GitHubActivityBentoSkeleton/);
     assert.doesNotMatch(source, /fetchGitHubActivity\(\)/);
   }
   assert.match(homeBento, /data-github-contribution-calendar/);

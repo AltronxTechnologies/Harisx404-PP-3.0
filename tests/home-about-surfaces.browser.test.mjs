@@ -34,6 +34,19 @@ test("Home and About live replacement cards remain responsive and aligned", asyn
             shortCards: [...document.querySelectorAll("[data-github-contribution-calendar]")].filter(
               (calendar) => calendar.getBoundingClientRect().height < 80,
             ).length,
+            scrapbookOverlap: (() => {
+              const heading = [...document.querySelectorAll("h3")].find(
+                (element) => element.textContent === "Behind the handle",
+              );
+              const card = heading?.parentElement?.parentElement;
+              const subtitle = heading?.nextElementSibling;
+              const stickers = card?.querySelectorAll("[role='img']") || [];
+              if (!subtitle || stickers.length === 0) return false;
+              const subtitleBottom = subtitle.getBoundingClientRect().bottom;
+              return [...stickers].some(
+                (sticker) => sticker.getBoundingClientRect().top < subtitleBottom,
+              );
+            })(),
           }));
           assert.equal(result.overflow, 0, `${route} ${theme} ${width}px overflow`);
           assert.equal(result.githubCards, 1, `${route} ${theme} ${width}px GitHub card`);
@@ -44,6 +57,7 @@ test("Home and About live replacement cards remain responsive and aligned", asyn
           assert.equal(result.credentialLinks, 1, `${route} ${theme} ${width}px credential card`);
           assert.equal(result.statsLinks, 0, `${route} ${theme} ${width}px retired Stats links`);
           assert.equal(result.shortCards, 0, `${route} ${theme} ${width}px chart geometry`);
+          assert.equal(result.scrapbookOverlap, false, `${route} ${theme} ${width}px scrapbook overlap`);
           assert.deepEqual(errors, [], `${route} ${theme} ${width}px errors`);
 
           if (route === "/" && width === 1440) {

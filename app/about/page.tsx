@@ -217,9 +217,11 @@ export default async function AboutPage() {
               {/* Right stack (7) — mirrors homepage: Scrapbook + GitHub activity */}
               <div className="flex flex-col gap-2 lg:col-span-7">
                 <ScrapbookBento />
-                <Suspense fallback={<GitHubActivityBentoSkeleton />}>
-                  <GitHubActivityBentoServer />
-                </Suspense>
+                <div className="h-[220px] shrink-0">
+                  <Suspense fallback={<GitHubActivityBentoSkeleton height="h-full" />}>
+                    <GitHubActivityBentoServer height="h-full" />
+                  </Suspense>
+                </div>
               </div>
             </div>
           </GridWrapper>
