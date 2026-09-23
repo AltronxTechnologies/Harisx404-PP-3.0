@@ -711,38 +711,68 @@ function formatContributionDate(date: string) {
 }
 
 function ContributionCalendar({ weeks }: { weeks: GitHubLive["weeks"] }) {
-  const visibleWeeks = weeks.slice(-53);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const latestDate = weeks.flat().at(-1)?.date || "";
+  const [layout, setLayout] = useState({ weekCount: 13, cellSize: 12 });
+  const [selectedDate, setSelectedDate] = useState(latestDate);
+  const [activeDay, setActiveDay] = useState<GitHubLive["weeks"][number][number] | null>(null);
+  const visibleWeeks = weeks.slice(-layout.weekCount);
   const days = visibleWeeks.flatMap((week) =>
     Array.from({ length: 7 }, (_, dayIndex) => week[dayIndex] ?? null),
   );
-  const desktopStartIndex = Math.max(0, (visibleWeeks.length - 26) * 7);
-  const tabletStartIndex = Math.max(0, (visibleWeeks.length - 20) * 7);
-  const mobileStartIndex = Math.max(0, (visibleWeeks.length - 13) * 7);
-  const latestIndex = Math.max(0, days.findLastIndex(Boolean));
-  const [selectedIndex, setSelectedIndex] = useState(latestIndex);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const updateLayout = () => {
+      const width = container.clientWidth;
+      const cellSize = width >= 500 ? 14 : width >= 300 ? 13 : 12;
+      const weekCount = Math.max(
+        8,
+        Math.min(53, Math.floor((width + 4) / (cellSize + 4))),
+      );
+      setLayout((current) =>
+        current.weekCount === weekCount && current.cellSize === cellSize
+          ? current
+          : { weekCount, cellSize },
+      );
+    };
+
+    updateLayout();
+    const observer = new ResizeObserver(updateLayout);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
   function moveSelection(index: number, offset: number, element: HTMLButtonElement) {
     let next = index + offset;
     while (next >= 0 && next < days.length && !days[next]) next += offset;
     if (next < 0 || next >= days.length) return;
-    setSelectedIndex(next);
+    setSelectedDate(days[next]!.date);
+    setActiveDay(days[next]);
     (element.parentElement?.children[next] as HTMLButtonElement | undefined)?.focus();
   }
 
-  function visibilityClass(index: number) {
-    if (index < desktopStartIndex) return "hidden";
-    if (index < tabletStartIndex) return "hidden lg:block";
-    if (index < mobileStartIndex) return "hidden sm:block";
-    return "";
-  }
-
   return (
-    <div className="w-full min-w-0">
+    <div ref={containerRef} className="relative w-full min-w-0 pt-5">
+      {activeDay && (
+        <div
+          data-github-activity-tooltip
+          className="pointer-events-none absolute right-0 top-0 rounded-md border border-border-primary bg-bg-primary px-2 py-1 font-mono text-[9px] tracking-wide text-text-secondary shadow-sm"
+          aria-hidden="true"
+        >
+          <span className="font-semibold text-text-primary">{activeDay.count}</span>{" "}
+          {activeDay.count === 1 ? "contribution" : "contributions"} · {formatContributionDate(activeDay.date)}
+        </div>
+      )}
       <div
         data-github-contribution-calendar
-        className="grid w-full grid-flow-col grid-rows-7 justify-center gap-1 [grid-template-columns:repeat(13,12px)] sm:[grid-template-columns:repeat(20,13px)] lg:[grid-template-columns:repeat(26,14px)]"
+        className="grid w-full grid-flow-col grid-rows-7 justify-center gap-1"
+        style={{ gridTemplateColumns: `repeat(${visibleWeeks.length}, ${layout.cellSize}px)` }}
         role="grid"
         aria-label="Recent GitHub contribution activity. Use arrow keys to inspect days."
+        onMouseLeave={() => setActiveDay(null)}
       >
         {days.map((day, index) => {
           const level = day?.level ?? 0;
@@ -754,15 +784,18 @@ function ContributionCalendar({ weeks }: { weeks: GitHubLive["weeks"] }) {
               key={`${Math.floor(index / 7)}-${index % 7}`}
               type="button"
               role="gridcell"
-              tabIndex={day && index === selectedIndex ? 0 : -1}
+              tabIndex={day && day.date === selectedDate ? 0 : -1}
               disabled={!day}
               aria-label={label}
               title={label}
               data-contribution-day={day?.date || ""}
+              onMouseEnter={() => day && setActiveDay(day)}
               onFocus={() => {
                 if (!day) return;
-                setSelectedIndex(index);
+                setSelectedDate(day.date);
+                setActiveDay(day);
               }}
+              onBlur={() => setActiveDay(null)}
               onKeyDown={(event) => {
                 if (event.key === "ArrowUp") {
                   event.preventDefault();
@@ -778,7 +811,8 @@ function ContributionCalendar({ weeks }: { weeks: GitHubLive["weeks"] }) {
                   moveSelection(index, 7, event.currentTarget);
                 }
               }}
-              className={`${visibilityClass(index)} size-3 rounded-[3px] ring-1 ring-inset ring-black/[0.035] transition-[background-color,box-shadow,filter] duration-150 hover:brightness-110 hover:ring-2 hover:ring-emerald-700/35 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 motion-reduce:transition-none disabled:pointer-events-none dark:ring-white/[0.035] dark:hover:ring-emerald-300/40 sm:size-[13px] lg:size-3.5 ${contributionColors[Math.max(0, Math.min(4, level))]}`}
+              className={`rounded-[3px] ring-1 ring-inset ring-black/[0.035] transition-[background-color,box-shadow,filter] duration-150 hover:z-10 hover:brightness-110 hover:ring-2 hover:ring-emerald-700/40 hover:shadow-[0_0_0_3px_rgba(23,99,63,0.10),0_0_14px_rgba(23,99,63,0.18)] focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:shadow-[0_0_0_3px_rgba(23,99,63,0.12)] motion-reduce:transition-none disabled:pointer-events-none dark:ring-white/[0.035] dark:hover:ring-[#72d59b]/50 dark:hover:shadow-[0_0_0_3px_rgba(90,200,137,0.10),0_0_14px_rgba(90,200,137,0.18)] ${contributionColors[Math.max(0, Math.min(4, level))]}`}
+              style={{ width: layout.cellSize, height: layout.cellSize }}
             />
           );
         })}

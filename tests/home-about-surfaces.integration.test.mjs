@@ -79,7 +79,8 @@ test("GitHub activity and credential cards use real bounded data contracts", asy
   assert.match(homeBento, /data-github-contribution-calendar/);
   assert.match(homeBento, /contributionColors/);
   assert.match(homeBento, /Use arrow keys to inspect days/);
-  assert.match(homeBento, /mobileStartIndex/);
+  assert.match(homeBento, /ResizeObserver/);
+  assert.match(homeBento, /weekCount/);
   assert.match(credentialData, /public_certifications/);
   assert.match(credentialSummary, /slice\(0, 3\)/);
   assert.match(preview, /credential\.issuer\.trim\(\)\.charAt\(0\)/);
