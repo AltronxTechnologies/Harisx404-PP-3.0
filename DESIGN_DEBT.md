@@ -110,12 +110,12 @@ Used **correctly** by: `about/page.tsx:75,128,145,238`, `home/Writings.tsx:104`,
 `home/Testimonials.tsx:142`, `home/HomeFaq.tsx:67`, `home/HomeBento.tsx:926`,
 `home/CaseStudies.tsx:922`, `home/MySiteGrid.tsx:166`, `home/AboutTeaser.tsx:97`.
 
-### 10 inline page-hero clones (all use `font-normal` + `text-black/80 dark:text-white/70`)
+### Inline page-hero clones (all use `font-normal` + `text-black/80 dark:text-white/70`)
 `app/blog/page.tsx:105-124` · `app/community-wall/page.tsx:52-70` ·
 `app/contact/page.tsx:47-65` ·
 `app/credentials/page.tsx:71-89` · `app/legal/privacy/page.tsx:110-128` ·
 `app/legal/terms/page.tsx:80-98` · `app/links/page.tsx:179-197` ·
-`app/resume/page.tsx:104-122` · `app/test/page.tsx:28-35`
+`app/resume/page.tsx:104-122`
 
 Kicker conflicts: weight `font-medium` vs `font-normal` vs unset; colour
 `text-text-secondary` vs `text-black/80 dark:text-white/70` vs
@@ -123,7 +123,6 @@ Kicker conflicts: weight `font-medium` vs `font-normal` vs unset; colour
 
 ### Other competing variants
 - `app/components/stats/StatsPageHeader.tsx:16,44` — `tracking-[0.35em]`
-- `app/test/page.tsx:28` `Kicker` + `:35` `SectionHeader` — no `heading-glow`, uses `text-black dark:text-white` not the token
 - `app/components/SectionTitlePill.tsx:11` — pill variant, `text-base`
 
 ### ⚠️ OPEN QUESTION FOR THE OWNER
@@ -165,18 +164,18 @@ means picking one size, so outliers shift by a few px. Verify screen by screen.
 - `home/TestimonialSubmitModal.tsx:168-175` — `h-9 w-9` + `h-4 w-4` (also uses `h-/w-` instead of the project's `size-*` shorthand)
 - `blog/ImageLightbox.tsx:67`, `TableOfContents.tsx:126` (`size-7` container, `size-4` glyph)
 
-### Tag / chip — 9 recipes
+### Tag / chip — 8 recipes
 `home/CaseStudies.tsx:77,78,369` · `projects/[slug]/ProjectDetail.tsx:291` ·
 `blog/FeaturedBlogCard.tsx:80` · `links/page.tsx:225` · `home/MySiteGrid.tsx:198` ·
-`EducationCards.tsx:100` · `test/page.tsx:232`
+`EducationCards.tsx:100`
 Text sizes `text-[8px]`, `text-[10px]`, `text-[11px]`, `text-xs`; two colour
 systems (`text-text-secondary` vs `text-neutral-600 dark:text-neutral-400`).
 
-### Avatar — 9 treatments, no shared component
+### Avatar — 7 treatments, no shared component
 `ReachOutModal.tsx:230` · `ContactClient.tsx:140,206` (all `size-11`) ·
 `home/HomeHero.tsx:362` (`size-24 → lg:size-[140px]`) ·
 `home/AboutTeaser.tsx:117` (`rounded-2xl`, not round) ·
-`links/page.tsx:205` (`size-24`) · `test/page.tsx:157,382` ·
+`links/page.tsx:205` (`size-24`) ·
 `ConnectionsBento.tsx:98` (raw `<img>`) · `ProfilePicture.tsx:114` (raw `motion.img`)
 
 **⚠️ Correction (2026-09-01, owner-reviewed):** an earlier note here claimed
@@ -217,9 +216,8 @@ Also `links/page.tsx:59,68` re-declare the mail/globe paths already in
 `projects/ProjectsIndex.tsx:264` (bespoke `size-4`) · `SearchModal.tsx:356` (lucide `size-7`).
 The Navbar, modal, BlogFilterBar, and ProjectsIndex launchers now share Lucide.
 
-### `DoubleArrow` fork
-Shared: `app/components/home/DoubleArrow.tsx:6`. Fork with different animation
-distance/direction and no `size-8` circle: `app/test/page.tsx:64`.
+### `DoubleArrow`
+Shared: `app/components/home/DoubleArrow.tsx:6`.
 `app/resume/page.tsx:379` uses `tracking-[0.25em]` and a literal `↓`.
 
 ---
@@ -247,9 +245,8 @@ Changing any of these is a **regression**, not a fix.
 
 ## Unrelated open items (pre-existing, not design)
 
-- `/test` page is a self-declared throwaway ("Delete this file … when done") and
-  is still linked from `Footer.tsx` "Test Page". Deleting both was proposed but
-  never approved.
+- **Resolved 2026-09-22:** the owner permanently removed the throwaway `/test`
+  route and its Footer link.
 - `/stats` PageSpeed API returns 400.
 - GitHub contribution graph shows 0.
 - Admin changelog revalidate is stale.

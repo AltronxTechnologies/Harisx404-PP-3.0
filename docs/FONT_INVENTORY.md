@@ -139,8 +139,6 @@ Actual application requests primarily use:
 | `font-medium` | 500 | Buttons, navigation, card titles, emphasis |
 | `font-semibold` | 600 | Strong UI labels and subheadings |
 | `font-bold` | 700 | Strong labels and article h2 text |
-| `font-light` | 300 | Limited `/test` display copy |
-| `font-extrabold` | 800 | Limited `/test` display copy |
 
 Only a normal face is declared. Any inherited italic Outfit text is synthetic
 browser slanting. Examples include italic emphasis on error/404 content.
@@ -389,7 +387,7 @@ It is used for:
   `app/components/home/SectionHeading.tsx`.
 - Homepage CTA heading in `app/components/home/CtaSection.tsx`.
 - Large page-title spans on Blog, Buildlog, Resume, Links, Contact,
-  Credentials, Community Wall, Privacy, Terms, and Test Page.
+  Credentials, Community Wall, Privacy, and Terms.
 - Guestbook action-card quotations.
 
 ### Requested weights, styles, and sizes
@@ -400,9 +398,8 @@ It is used for:
   is still synthesized.
 - Standard section headings: 46px mobile, 56px from `md`.
 - CTA heading: 40px mobile, 48px at `sm`, 56px at `md`, 60px at `lg`.
-- Standalone page titles: generally 46px mobile and 60px at larger widths.
+- Standalone page titles: generally 46px mobile and 56px at larger widths.
 - Guestbook quotations: 24px italic.
-- The `/test` route exercises a much wider display-size range up to 96px.
 
 ### Fallback behavior
 

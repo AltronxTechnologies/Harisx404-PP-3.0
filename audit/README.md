@@ -45,7 +45,8 @@ design are proprietary: cloning or replicating the site in its entirety is
 prohibited; studying specific UI components for education/inspiration is
 permitted; and substantial usage requires a visible dofollow backlink to the
 site. Consequences for this project:
-1. A visible credit + backlink to the reference has been added to /attribution.
+1. A visible credit + backlink to the reference is maintained in `/legal/terms`
+   after the dedicated `/attribution` route was retired by the owner on 2026-09-22.
 2. Further "pixel-identical whole-site" refinement passes are STOPPED.
    The site keeps its current inspiration-informed state; future design work
    should deliberately differentiate rather than converge further.

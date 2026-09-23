@@ -100,7 +100,7 @@ Same for the About page photo stack and the Know-About-Me visual.
   (`itsharis.tech@gmail.com`) — done 2026-08-15.
 - Read `/legal/privacy` and `/legal/terms` — they are clearly-marked templates.
   Adjust wording to match reality (analytics you actually use, newsletter, etc.).
-- `/attribution` — review the credits text.
+- Review the design-inspiration credit in `/legal/terms`.
 
 ## STEP 6 — Enable AI extras (optional, 5 min)
 
@@ -165,7 +165,7 @@ just tell any AI agent the file path listed here plus your image URL/filename.
 - Testimonials: replace the 6 seeded placeholder quotes with real ones
 - Experience: replace the 3 seeded placeholder entries with your real history
 - Site settings: confirm name, SEO description, social URLs
-- Legal pages (`/legal/privacy`, `/legal/terms`) + `/attribution`: review wording once before deploy
+- Legal pages (`/legal/privacy`, `/legal/terms`): review wording once before deploy
 
 ### Contact email
 

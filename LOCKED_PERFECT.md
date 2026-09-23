@@ -884,9 +884,9 @@ must not flatten them:
    square editorial portrait, an intentional choice.
 6. **StatusRow** hover arrows and the **TestimonialSubmitModal** placeholder
    keep `text-text-tertiary`: decorative/placeholder, exempt from the AA sweep.
-7. **Footer "Test Page" link** to `/test` is retained at the owner's explicit
-   request ("i am using it for testing pages") despite `/test` being a
-   throwaway prototype. Do not remove it.
+7. **SUPERSEDED 2026-09-22:** the former Footer "Test Page" retention request was
+   explicitly revoked by the owner. `/test` and its Footer link are permanently
+   removed; see entry 35.
 8. **SocialPill** icons keep `text-gray-400`: they sit on an always-dark
    `#3C3C3F` chip, so the page-background token would be near-invisible.
 
@@ -1850,3 +1850,28 @@ and a 56px hero-to-collection gap. Kicker 12px/500, 16px internal gaps, supporti
 copy 15/24px, font families, weights, tracking, texture, cards, dialog, data, Admin,
 CTA, and Footer remain unchanged. Exact geometry is regression-tested at every
 responsive light/dark viewport. This limited amendment is re-locked.
+
+## 35. FINAL OWNER REMOVAL - Test And Attribution Routes
+
+- **Date removed:** 2026-09-22
+- **Owner instruction:** Permanently remove the Test page and Attribution page;
+  leave Stats unchanged pending a later decision.
+- **Removed routes:** `/test` and `/attribution`, including route metadata and all
+  route-local implementation.
+- **Shared-navigation amendment:** only the corresponding `Test Page` and
+  `Attribution` entries were removed from the locked Footer. Footer structure,
+  typography, spacing, responsive layout, remaining destinations, CTA handoff,
+  and every other shared behavior remain frozen.
+- **Discovery amendment:** `/attribution` was removed from sitemap generation and
+  public preview route expectations. `/test` was already excluded from sitemap.
+- **Credit preservation:** the documented visible dofollow design-inspiration
+  credit to Aayush Bharti was moved into the existing public `/legal/terms` Rights
+  section. The dedicated Attribution route remains removed; do not recreate it.
+- **Removal behavior:** both retired URLs return the standard application 404 and
+  neither appears in Footer HTML or sitemap XML.
+- **Stats boundary:** `/stats`, its Footer link, implementation, and tests were not
+  changed by this removal and remain pending a separate owner decision.
+
+Do not restore `/test`, `/attribution`, or their Footer/sitemap entries without a
+new explicit owner request. Historical audits may retain dated references to the
+former routes, but active inventories and instructions must treat them as removed.

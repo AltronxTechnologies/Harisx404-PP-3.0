@@ -192,8 +192,8 @@ testimonials & experience tables + admin CRUD + project columns + seeds.
 
 **Remaining (see PROJECT_PHASES.md for full specs):**
 - Phase 7 — harmonize changelog/community-wall/connections/links/speaking/
-  stats/toolbox pages; add /attribution, /legal/privacy, /legal/terms; RSS
-  route; 404 restyle; fix footer Privacy link.
+  stats/toolbox pages; maintain `/legal/privacy` and `/legal/terms`; RSS route;
+  404 restyle. The retired `/attribution` route's required credit now lives in Terms.
 - Phase 8 — AI polish (needs GEMINI_API_KEY): chatbot context, ⌘K search
   wiring, blog embeddings/pgvector, admin AI assist.
 - Phase 9 — final gate: `npm run build` clean, sitemap/robots audit, per-page

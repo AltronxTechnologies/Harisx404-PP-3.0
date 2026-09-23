@@ -137,6 +137,23 @@ export default function TermsOfUsePage() {
               Content and code on this site are my original work unless credited otherwise.
               Here&apos;s exactly what you can and can&apos;t do with them.
             </p>
+            <div id="design-inspiration" className="rounded-xl border border-neutral-200 bg-neutral-50/50 p-5 dark:border-neutral-800 dark:bg-neutral-900/20">
+              <p className="font-mono text-xs font-bold uppercase tracking-wider text-neutral-900 dark:text-white">
+                Design inspiration
+              </p>
+              <p className="mt-2 text-sm leading-relaxed text-text-secondary">
+                Selected interface patterns were inspired by the portfolio work of{" "}
+                <a
+                  href="https://aayushbharti.in"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-text-primary underline decoration-dotted underline-offset-4 hover:text-text-secondary"
+                >
+                  Aayush Bharti
+                </a>
+                . All writing, photographs, projects, and personal content remain original to Muhammad Haris.
+              </p>
+            </div>
             <div className="grid gap-6 md:grid-cols-2">
               {/* Restriction card (red) */}
               <div className="rounded-xl border border-red-200 bg-red-50/50 p-6 dark:border-red-900/30 dark:bg-red-950/10">

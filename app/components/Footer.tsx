@@ -39,7 +39,6 @@ const footerSections: FooterSection[] = [
       { href: "/stats", label: "Stats" },
       { href: "/buildlog", label: "Buildlog" },
       { href: "/community-wall", label: "Community\nWall" },
-      { href: "/test", label: "Test Page" },
     ],
   },
 ];
@@ -47,7 +46,6 @@ const footerSections: FooterSection[] = [
 const metaLinks: FooterLink[] = [
   { href: "/legal/privacy", label: "Privacy" },
   { href: "/legal/terms", label: "Terms" },
-  { href: "/attribution", label: "Attribution" },
   { href: "/sitemap.xml", label: "Sitemap" },
   { href: "/rss.xml", label: "RSS" },
 ];

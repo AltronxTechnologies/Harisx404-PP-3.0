@@ -36,3 +36,20 @@ test("preview data paths are bounded and route-specific", async () => {
   assert.doesNotMatch(imageCard, /src=\{`\/blog\/\$\{imageName\}`\}/);
   assert.match(installer, /\.alloy-package-lock\.sha256/);
 });
+
+test("retired Test and Attribution routes are fully removed", async () => {
+  for (const route of ["/test", "/attribution"]) {
+    const response = await fetch(`${baseUrl}${route}`, { redirect: "manual" });
+    assert.equal(response.status, 404, `${route} should be removed`);
+  }
+
+  const [footer, sitemap, terms] = await Promise.all([
+    readFile(new URL("../app/components/Footer.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/sitemap.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/legal/terms/page.tsx", import.meta.url), "utf8"),
+  ]);
+  assert.doesNotMatch(footer, /\/test|\/attribution|Test Page/);
+  assert.doesNotMatch(sitemap, /\/test|\/attribution/);
+  assert.match(terms, /https:\/\/aayushbharti\.in/);
+  assert.doesNotMatch(terms, /nofollow/);
+});

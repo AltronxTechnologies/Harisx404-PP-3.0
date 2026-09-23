@@ -17,7 +17,6 @@ const routes = [
   "/resume",
   "/legal/privacy",
   "/legal/terms",
-  "/attribution",
 ];
 
 test("public preview routes settle without persistent loaders or runtime errors", async () => {
