@@ -5,23 +5,19 @@ import { HorizontalLine } from "@/app/components/HorizontalLine";
 import { ScrapbookBento } from "@/app/components/ScrapbookBento";
 import { ShadowBox } from "@/app/components/ShadowBox";
 import { Resume } from "app/components/Resume";
-import { StatsBento } from "@/app/components/StatsBento";
+import { CredentialBento } from "@/app/components/CredentialBento";
 import { GridWrapper } from "@/app/components/GridWrapper";
 import { BsitCard, KpitbCard } from "../components/EducationCards";
 import { AboutTrackPattern } from "@/app/components/AboutTrackPattern";
 import { EduReveal, EduCardHover } from "@/app/components/EducationMotion";
 import { SectionHeading } from "@/app/components/home/SectionHeading";
 import { CtaSection } from "@/app/components/home/CtaSection";
-import { AccountsBento, SiteStatsBento } from "@/app/components/home/HomeBento";
+import { AccountsBento, GitHubActivityBento } from "@/app/components/home/HomeBento";
 import { PaperHeroTexture } from "@/app/components/PaperHeroTexture";
-import {
-  fetchExperiences,
-  fetchProjects,
-  fetchAndSortBlogPosts,
-  fetchTestimonials,
-} from "@/app/lib/utils";
-import { getServerStats } from "@/app/lib/stats/server-stats";
-import { getBuildTimeStats } from "@/app/lib/stats/build-time-stats";
+import { fetchExperiences } from "@/app/lib/utils";
+import { fetchGitHubActivity } from "@/app/lib/live-stats";
+import { fetchCredentialCollection } from "@/app/credentials/data";
+import { summarizeCredentials } from "@/app/credentials/summary";
 
 export const revalidate = 3600; // Cache for 1 hour, revalidated on demand via admin panel
 
@@ -33,24 +29,13 @@ export const metadata: Metadata = {
 
 
 export default async function AboutPage() {
-  const [dbExperiences, dbProjects, dbPosts, dbTestimonials, serverStats, buildStats] =
+  const [dbExperiences, github, credentials] =
     await Promise.all([
       fetchExperiences(),
-      fetchProjects(),
-      fetchAndSortBlogPosts(),
-      fetchTestimonials(),
-      getServerStats().catch(() => null),
-      getBuildTimeStats().catch(() => null),
+      fetchGitHubActivity().catch(() => null),
+      fetchCredentialCollection().catch(() => []),
     ]);
-
-  /* Same live counters as the homepage "Shipped, counted, public" card. */
-  const siteStats = {
-    projects: dbProjects.length > 0 ? dbProjects.length : null,
-    posts: buildStats?.totalArticles ?? (dbPosts.length > 0 ? dbPosts.length : null),
-    notes: serverStats?.communityWallMessages ?? null,
-    testimonials: dbTestimonials.length > 0 ? dbTestimonials.length : null,
-    views: serverStats?.totalViews ?? null,
-  };
+  const credentialSummary = summarizeCredentials(credentials);
 
   // SITE STANDARD (locked): every page except home uses mt-14 (56px)
   // as its page top margin. Home keeps its own hero spacing.
@@ -213,7 +198,7 @@ export default async function AboutPage() {
             <SectionHeading kicker="Beyond the resume" className="mx-auto max-w-2xl">
               {"One handle, "}
               <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
-                live numbers.
+                proof in public.
               </span>
             </SectionHeading>
           </GridWrapper>
@@ -221,15 +206,15 @@ export default async function AboutPage() {
           {/* About Grid */}
           <GridWrapper>
             <div className="grid grid-cols-1 gap-2 px-2 sm:px-4 lg:grid-cols-12">
-              {/* Left stack (5) — mirrors homepage: Accounts (220) + Stats (300) */}
+              {/* Left stack (5) — mirrors homepage: Accounts + Credentials */}
               <div className="flex flex-col gap-2 lg:col-span-5">
                 <AccountsBento />
-                <StatsBento height="h-[220px] lg:h-[300px]" />
+                <CredentialBento summary={credentialSummary} height="h-[220px] lg:h-[300px]" />
               </div>
-              {/* Right stack (7) — mirrors homepage: Scrapbook (300) + Site stats (220) */}
+              {/* Right stack (7) — mirrors homepage: Scrapbook + GitHub activity */}
               <div className="flex flex-col gap-2 lg:col-span-7">
                 <ScrapbookBento />
-                <SiteStatsBento site={siteStats} />
+                <GitHubActivityBento github={github} />
               </div>
             </div>
           </GridWrapper>

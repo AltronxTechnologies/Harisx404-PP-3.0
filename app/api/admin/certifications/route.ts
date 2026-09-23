@@ -53,6 +53,7 @@ function revalidateCertificationPaths() {
   try {
     revalidatePath("/credentials");
     revalidatePath("/about");
+    revalidatePath("/");
     revalidateTag("credentials");
   } catch (error) {
     console.error("Certification revalidation failed:", error);

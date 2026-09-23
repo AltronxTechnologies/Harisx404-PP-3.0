@@ -35,7 +35,7 @@ SELECT * FROM (VALUES
   (
     'Demo: Cybersecurity Operations', 'Cisco Networking Academy', '2026-04-18',
     'https://example.com/', 10, 'published',
-    'https://cdn.simpleicons.org/cisco/049FD9', 'https://cdn.simpleicons.org/cisco/049FD9', 'DEMO-CYBER-2026', NULL,
+    NULL, NULL, 'DEMO-CYBER-2026', NULL,
     TRUE, 'Hands-on security operations, network defense, incident analysis, and threat response fundamentals.',
     ARRAY['Network Security', 'Incident Response', 'Threat Analysis'], 'Cybersecurity', TRUE
   ),

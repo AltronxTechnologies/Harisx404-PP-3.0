@@ -45,7 +45,6 @@ async function fetchLighthouseScores(
     });
 
     if (!response.ok) {
-      // Don't log quota errors as errors - they're expected without API key
       const errorText = await response.text();
       if (response.status === 429) {
         console.warn(
@@ -54,7 +53,7 @@ async function fetchLighthouseScores(
       } else {
         console.error(`PageSpeed API error (${strategy}):`, response.status, errorText);
       }
-      return null;
+      throw new Error(`PageSpeed ${strategy} request failed with ${response.status}.`);
     }
 
     const data: PageSpeedResponse = await response.json();
@@ -62,39 +61,47 @@ async function fetchLighthouseScores(
 
     if (!categories) {
       console.error(`No categories in PageSpeed response (${strategy})`);
-      return null;
+      throw new Error(`PageSpeed ${strategy} response did not include categories.`);
+    }
+    const scores = [
+      categories.performance?.score,
+      categories.accessibility?.score,
+      categories["best-practices"]?.score,
+      categories.seo?.score,
+    ];
+    if (scores.some((score) => typeof score !== "number")) {
+      throw new Error(`PageSpeed ${strategy} response omitted one or more category scores.`);
     }
 
     return {
-      performance: Math.round((categories.performance?.score ?? 0) * 100),
-      accessibility: Math.round((categories.accessibility?.score ?? 0) * 100),
-      bestPractices: Math.round(
-        (categories["best-practices"]?.score ?? 0) * 100
-      ),
-      seo: Math.round((categories.seo?.score ?? 0) * 100),
+      performance: Math.round(categories.performance!.score * 100),
+      accessibility: Math.round(categories.accessibility!.score * 100),
+      bestPractices: Math.round(categories["best-practices"]!.score * 100),
+      seo: Math.round(categories.seo!.score * 100),
       fetchedAt: data.lighthouseResult?.fetchTime ?? new Date().toISOString(),
     };
   } catch (error) {
     console.error(`Error fetching Lighthouse scores (${strategy}):`, error);
-    return null;
+    throw error;
   }
 }
 
 export const getLighthouseStats = unstable_cache(
   async (): Promise<LighthouseStats> => {
     if (process.env.IS_ALLOY === "true") {
-      return { mobile: null, desktop: null };
+      return { mobile: null, desktop: null, partialFailure: false };
     }
 
     // Fetch both mobile and desktop scores in parallel
-    const [mobile, desktop] = await Promise.all([
+    const [mobileResult, desktopResult] = await Promise.allSettled([
       fetchLighthouseScores("mobile"),
       fetchLighthouseScores("desktop"),
     ]);
 
     return {
-      mobile,
-      desktop,
+      mobile: mobileResult.status === "fulfilled" ? mobileResult.value : null,
+      desktop: desktopResult.status === "fulfilled" ? desktopResult.value : null,
+      partialFailure: mobileResult.status === "rejected" || desktopResult.status === "rejected",
     };
   },
   ["lighthouse-stats"],

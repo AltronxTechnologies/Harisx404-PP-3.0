@@ -198,7 +198,7 @@ export default function Navbar() {
   if (isRouteActive("/about")) activeTab = "About";
   else if (isRouteActive("/projects")) activeTab = "Projects";
   else if (isRouteActive("/blog")) activeTab = "Blog";
-  const isMoreActive = ["/community-wall", "/stats", "/credentials", "/contact", "/links"]
+  const isMoreActive = ["/community-wall", "/buildlog", "/credentials", "/contact", "/links"]
     .some(isRouteActive);
 
   return (
@@ -567,27 +567,27 @@ export default function Navbar() {
                           </Link>
                         </motion.div>
 
-                        {/* Stats Card */}
+                        {/* Buildlog Card */}
                         <motion.div
                           className="flex-1 min-h-[160px] max-md:flex-none max-md:h-40"
                         >
                           <Link 
-                            href="/stats" 
-                            aria-current={isRouteActive("/stats") ? "page" : undefined}
+                            href="/buildlog"
+                            aria-current={isRouteActive("/buildlog") ? "page" : undefined}
                             onClick={() => setIsDropdownOpen(false)}
                             className="group relative flex h-full w-full flex-col justify-end overflow-hidden rounded-2xl bg-neutral-900 p-4 ring-1 ring-black/5 dark:ring-white/10 hover:ring-black/15 dark:hover:ring-white/25 transition-all duration-300 shadow-sm hover:shadow-md"
                           >
                             <Image 
-                              src="/images/nav-stats.jpg"
-                              alt="Stats"
+                              src="/blog/introducing_blogfolio_v5_changelog_page.jpg"
+                              alt="Buildlog"
                               fill
                               sizes="(max-width: 768px) 92vw, 250px"
                               className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.08] opacity-60 group-hover:opacity-80 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                             <div className="relative z-10 flex flex-col items-start">
-                              <span className="font-sans font-bold text-lg text-white mb-0.5 tracking-tight group-hover:translate-x-0.5 transition-transform motion-reduce:transition-none motion-reduce:group-hover:translate-x-0">Stats</span>
-                              <p className="text-[13px] text-white/75 font-normal">The numbers behind this site</p>
+                              <span className="font-sans font-bold text-lg text-white mb-0.5 tracking-tight group-hover:translate-x-0.5 transition-transform motion-reduce:transition-none motion-reduce:group-hover:translate-x-0">Buildlog</span>
+                              <p className="text-[13px] text-white/75 font-normal">What shipped and what comes next</p>
                             </div>
                           </Link>
                         </motion.div>

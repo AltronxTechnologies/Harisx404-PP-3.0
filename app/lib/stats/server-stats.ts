@@ -28,6 +28,12 @@ export const getServerStats = unstable_cache(
         supabase.from("public_community_wall_messages").select("id", { count: "exact", head: true }),
       ]);
 
+    const sourceError =
+      viewsResult.error || reactionsResult.error || postsResult.error || messagesResult.error;
+    if (sourceError) {
+      throw new Error("Unable to load one or more analytics data sources.");
+    }
+
     const viewsData = viewsResult.data;
     const reactionsData = reactionsResult.data;
     const posts = postsResult.data;

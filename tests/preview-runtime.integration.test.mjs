@@ -5,7 +5,7 @@ import test from "node:test";
 const baseUrl = process.env.PREVIEW_BASE_URL || "http://localhost:3000";
 
 test("core preview routes render without persistent loading markup", async () => {
-  for (const route of ["/", "/buildlog", "/stats", "/projects", "/blog"]) {
+  for (const route of ["/", "/buildlog", "/projects", "/blog"]) {
     const response = await fetch(`${baseUrl}${route}`);
     assert.equal(response.status, 200, `${route} should render`);
     const html = await response.text();
@@ -14,13 +14,11 @@ test("core preview routes render without persistent loading markup", async () =>
 });
 
 test("preview data paths are bounded and route-specific", async () => {
-  const [buildlogData, serverStats, lighthouseStats, statsLoading, imageCard, installer] =
+  const [buildlogData, serverStats, lighthouseStats, installer] =
     await Promise.all([
       readFile(new URL("../app/buildlog/data.ts", import.meta.url), "utf8"),
       readFile(new URL("../app/lib/stats/server-stats.ts", import.meta.url), "utf8"),
       readFile(new URL("../app/lib/stats/lighthouse-stats.ts", import.meta.url), "utf8"),
-      readFile(new URL("../app/stats/loading.tsx", import.meta.url), "utf8"),
-      readFile(new URL("../app/components/stats/MostViewedArticleCard.tsx", import.meta.url), "utf8"),
       readFile(new URL("../.alloy/install-deps.sh", import.meta.url), "utf8"),
     ]);
 
@@ -31,14 +29,11 @@ test("preview data paths are bounded and route-specific", async () => {
   assert.match(lighthouseStats, /15000/);
   assert.match(lighthouseStats, /revalidate: 3600/);
   assert.match(lighthouseStats, /process\.env\.IS_ALLOY === "true"/);
-  assert.match(statsLoading, /Loading site statistics/);
-  assert.equal((imageCard.match(/src=\{imageSource\}/g) || []).length, 2);
-  assert.doesNotMatch(imageCard, /src=\{`\/blog\/\$\{imageName\}`\}/);
   assert.match(installer, /\.alloy-package-lock\.sha256/);
 });
 
-test("retired Test and Attribution routes are fully removed", async () => {
-  for (const route of ["/test", "/attribution"]) {
+test("retired Test, Attribution, and Stats routes are fully removed", async () => {
+  for (const route of ["/test", "/attribution", "/stats"]) {
     const response = await fetch(`${baseUrl}${route}`, { redirect: "manual" });
     assert.equal(response.status, 404, `${route} should be removed`);
   }
@@ -48,8 +43,8 @@ test("retired Test and Attribution routes are fully removed", async () => {
     readFile(new URL("../app/sitemap.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/legal/terms/page.tsx", import.meta.url), "utf8"),
   ]);
-  assert.doesNotMatch(footer, /\/test|\/attribution|Test Page/);
-  assert.doesNotMatch(sitemap, /\/test|\/attribution/);
+  assert.doesNotMatch(footer, /\/test|\/attribution|\/stats|Test Page/);
+  assert.doesNotMatch(sitemap, /\/test|\/attribution|\/stats/);
   assert.match(terms, /https:\/\/aayushbharti\.in/);
   assert.doesNotMatch(terms, /nofollow/);
 });

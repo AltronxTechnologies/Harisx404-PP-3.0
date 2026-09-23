@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { SectionHeading } from "./SectionHeading";
+import { CredentialBentoPreview } from "@/app/components/credentials/CredentialBentoPreview";
+import type { CredentialSummary } from "@/app/credentials/summary";
 
 const cardBase =
   "group relative flex h-full min-h-[260px] flex-col justify-between overflow-hidden rounded-3xl bg-white p-6 ring-1 ring-border-primary transition-all duration-300 card-light-edge hover:shadow-lg active:shadow-lg dark:bg-white/[0.03] hover:dark:bg-white/[0.05] active:dark:bg-white/[0.05] outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 dark:focus-visible:ring-white/25";
@@ -60,64 +62,6 @@ function useScrollPulse<T extends HTMLElement>(ref: React.RefObject<T | null>) {
   return pulse;
 }
 
-/* ── Stats card visual: contribution heatmap ─────────────────────────
-   GitHub-style activity grid, 5 rows × 16 weeks. Deterministic pattern
-   (SSR-safe, no Math.random) that trends busier toward the right —
-   "recent activity". Neutral token grays for levels 0–2; level 3 uses
-   the site's emerald "live" accent (same hue as the LIVE badge and
-   status pings). On hover a diagonal wave brightens every cell, each
-   delayed by its row+column — decorative; real numbers live on /stats. */
-const HEATMAP_COLS = 18;
-// prettier-ignore
-const heatmapLevels = [
-  1, 3, 2, 1, 3, 0, 1, 2, 0, 3, 2, 0, 3, 1, 0, 2, 3, 1,
-  0, 2, 1, 3, 0, 1, 2, 0, 1, 3, 0, 2, 1, 0, 3, 1, 0, 2,
-  2, 0, 3, 0, 2, 3, 0, 1, 2, 0, 1, 3, 0, 3, 1, 0, 2, 3,
-  0, 1, 3, 1, 0, 2, 1, 3, 0, 2, 0, 1, 3, 0, 2, 3, 1, 0,
-  3, 0, 1, 2, 3, 0, 2, 0, 3, 1, 2, 0, 1, 3, 0, 2, 0, 3,
-];
-const heatmapLevelClass = [
-  "bg-neutral-200 group-hover:bg-neutral-300 group-active:bg-neutral-300 dark:bg-white/[0.06] dark:group-hover:bg-white/[0.12] dark:group-active:bg-white/[0.12]",
-  "bg-neutral-300 group-hover:bg-neutral-400/70 group-active:bg-neutral-400/70 dark:bg-white/[0.14] dark:group-hover:bg-white/[0.24] dark:group-active:bg-white/[0.24]",
-  "bg-neutral-400/80 group-hover:bg-neutral-500 group-active:bg-neutral-500 dark:bg-white/[0.28] dark:group-hover:bg-white/[0.45] dark:group-active:bg-white/[0.45]",
-  "bg-emerald-500/45 group-hover:bg-emerald-500/85 group-active:bg-emerald-500/85 dark:bg-emerald-400/40 dark:group-hover:bg-emerald-400/75 dark:group-active:bg-emerald-400/75",
-];
-/* Pulse state: same target colors the hover/press wave uses, applied
-   without a pointer while the one-shot scroll pulse is active. */
-const heatmapLitClass = [
-  "bg-neutral-300 dark:bg-white/[0.12]",
-  "bg-neutral-400/70 dark:bg-white/[0.24]",
-  "bg-neutral-500 dark:bg-white/[0.45]",
-  "bg-emerald-500/85 dark:bg-emerald-400/75",
-];
-
-function StatsHeatmap({ pulse }: { pulse: boolean }) {
-  return (
-    <div className="flex h-28 items-center" aria-hidden>
-      {/* Responsive density (same idea as the accounts bento tiles): the
-          md 3-col row squeezes each card, so the grid drops to 10 columns
-          there — bigger squares, no "thin strip" — and shows all 18
-          columns on mobile (single, wide card) and lg+. Touch devices get
-          the brightness wave on press via the group-active variants. */}
-      <div className="grid w-full gap-1 [grid-template-columns:repeat(18,minmax(0,1fr))] md:[grid-template-columns:repeat(10,minmax(0,1fr))] lg:[grid-template-columns:repeat(18,minmax(0,1fr))]">
-        {heatmapLevels.map((level, i) => {
-          const row = Math.floor(i / HEATMAP_COLS);
-          const col = i % HEATMAP_COLS;
-          return (
-            <span
-              key={i}
-              className={`aspect-square w-full rounded-[3px] transition-colors duration-500 ease-out motion-reduce:transition-none ${
-                pulse ? heatmapLitClass[level] : heatmapLevelClass[level]
-              } ${col >= 10 ? "md:hidden lg:block" : ""}`}
-              style={{ transitionDelay: `${(row + col) * 25}ms` }}
-            />
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
 function Ambient() {
   return (
     <>
@@ -133,7 +77,7 @@ function Ambient() {
   );
 }
 
-export function MySiteGrid() {
+export function MySiteGrid({ credentialSummary }: { credentialSummary: CredentialSummary }) {
   const prefersReducedMotion = useReducedMotion();
   const rowRef = useRef<HTMLDivElement | null>(null);
   const scrollPulse = useScrollPulse(rowRef);
@@ -232,19 +176,19 @@ export function MySiteGrid() {
           </Link>
         </motion.div>
 
-        {/* Stats */}
+        {/* Credentials */}
         <motion.div {...cardMotion}>
-          <Link href="/stats" className={`${cardBase} hover:ring-neutral-400/70 active:ring-neutral-400/70 dark:hover:ring-white/25 dark:active:ring-white/25`}>
+          <Link href="/credentials" className={`${cardBase} hover:ring-neutral-400/70 active:ring-neutral-400/70 dark:hover:ring-white/25 dark:active:ring-white/25`}>
             <Ambient />
-            {/* Contribution heatmap — activity grid that brightens in a
-                diagonal wave on hover. Decorative; numbers live on /stats. */}
-            <StatsHeatmap pulse={pulse} />
+            <CredentialBentoPreview summary={credentialSummary} />
             <div>
               <p className="font-mono text-xs uppercase tracking-widest text-text-secondary">
-                STATS
+                CREDENTIALS
               </p>
               <h3 className="mt-2 font-display text-xl font-medium leading-snug text-text-primary md:text-lg lg:text-2xl">
-                Live metrics for views and write-ups.
+                {credentialSummary.count > 0
+                  ? `${String(credentialSummary.count).padStart(2, "0")} published milestones, backed by proof.`
+                  : "Verified learning milestones, collected in one place."}
               </h3>
             </div>
           </Link>

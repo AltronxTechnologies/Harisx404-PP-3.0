@@ -1,13 +1,12 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import Link from "next/link";
-import { motion, useInView } from "framer-motion";
+import { motion } from "framer-motion";
 import clsx from "clsx";
 import createGlobe from "cobe";
-import { FileText, FolderGit2, MessagesSquare, Quote } from "lucide-react";
 import { BentoCard } from "../BentoCard";
 import { SectionHeading } from "./SectionHeading";
+import type { GitHubLive } from "@/app/lib/live-stats";
 
 /* Shared recessed tile (frame + inset panel) used across cards */
 function RecessedTile({
@@ -144,39 +143,6 @@ export function AccountsBento() {
         ))}
       </div>
     </BentoCard>
-  );
-}
-
-/* Shared count-up value — animates 0 → n the first time it scrolls
-   into view; honors prefers-reduced-motion. */
-function CountUpValue({ to, pad = 2 }: { to: number; pad?: number }) {
-  const ref = useRef<HTMLSpanElement | null>(null);
-  const inView = useInView(ref, { once: true, margin: "-40px" });
-  const [value, setValue] = useState(0);
-
-  useEffect(() => {
-    if (!inView) return;
-    /* honor reduced motion — jump straight to the final value */
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setValue(to);
-      return;
-    }
-    let raf: number;
-    const start = performance.now();
-    const duration = 1100;
-    const tick = (t: number) => {
-      const p = Math.min(1, (t - start) / duration);
-      setValue(Math.round(to * (1 - Math.pow(1 - p, 3))));
-      if (p < 1) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [inView, to]);
-
-  return (
-    <span ref={ref} className="tabular-nums">
-      {String(value).padStart(pad, "0")}
-    </span>
   );
 }
 
@@ -726,124 +692,69 @@ function TechStackBento({
   );
 }
 
-/* ── 4. By-the-numbers card — live totals from this site's database ── */
-/* Each tile deep-links to the thing it counts; icons sit gray at rest
-   and take their accent color on hover, matching the sibling cards. */
-
-const siteStatMeta = [
-  {
-    key: "projects",
-    label: "Projects",
-    href: "/projects",
-    icon: FolderGit2,
-    hoverClass: "group-hover/tile:text-indigo-500",
-  },
-  {
-    key: "posts",
-    label: "Write-ups",
-    href: "/blog",
-    icon: FileText,
-    hoverClass: "group-hover/tile:text-sky-500",
-  },
-  {
-    key: "notes",
-    label: "Wall notes",
-    href: "/community-wall",
-    icon: MessagesSquare,
-    hoverClass: "group-hover/tile:text-amber-500",
-  },
-  {
-    key: "testimonials",
-    label: "Testimonials",
-    href: "/#testimonials",
-    icon: Quote,
-    hoverClass: "group-hover/tile:text-emerald-500",
-  },
+/* ── 4. Live GitHub contribution calendar ────────────────────── */
+const contributionColors = [
+  "bg-neutral-200 dark:bg-white/[0.07]",
+  "bg-emerald-200 dark:bg-emerald-950",
+  "bg-emerald-400 dark:bg-emerald-800",
+  "bg-emerald-600 dark:bg-emerald-600",
+  "bg-emerald-800 dark:bg-emerald-400",
 ] as const;
 
-export type SiteStats = {
-  projects: number | null;
-  posts: number | null;
-  notes: number | null;
-  testimonials: number | null;
-  views: number | null;
-};
+function ContributionCalendar({ weeks }: { weeks: number[][] }) {
+  const visibleWeeks = weeks.slice(-53);
+  return (
+    <div
+      data-github-contribution-calendar
+      className="grid min-h-[92px] w-full grid-flow-col grid-rows-7 gap-1"
+      style={{ gridTemplateColumns: `repeat(${Math.max(visibleWeeks.length, 1)}, minmax(3px, 1fr))` }}
+      aria-label="GitHub contribution activity for the last year"
+    >
+      {visibleWeeks.flatMap((week, weekIndex) =>
+        Array.from({ length: 7 }, (_, dayIndex) => {
+          const level = week[dayIndex] ?? 0;
+          return (
+            <span
+              key={`${weekIndex}-${dayIndex}`}
+              className={`min-h-1 rounded-[2px] ring-1 ring-inset ring-black/[0.03] dark:ring-white/[0.04] ${contributionColors[Math.max(0, Math.min(4, level))]}`}
+              title={`Activity level ${level}`}
+            />
+          );
+        }),
+      )}
+    </div>
+  );
+}
 
-export function SiteStatsBento({
-  site,
+export function GitHubActivityBento({
+  github,
   height = "h-auto sm:h-[240px] lg:h-[220px]",
 }: {
-  site: SiteStats | null;
+  github: GitHubLive | null;
   height?: string;
 }) {
+  const hasActivity = Boolean(github?.weeks.length);
   return (
-    <BentoCard height={height} appearance="home">
-      {/* Header — same centered voice as the other bento cards */}
+    <BentoCard height={height} appearance="home" linkTo="https://github.com/harisx404">
       <div className="z-20 text-center">
         <div className="flex items-center justify-center gap-2">
-          <h3 className="text-base font-medium text-text-primary">
-            Shipped, counted, public
-          </h3>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+          <h3 className="text-base font-medium text-text-primary">GitHub activity</h3>
+          <span className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-mono text-[10px] font-medium ${hasActivity ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "border-border-primary bg-neutral-100 text-text-secondary dark:bg-white/[0.05]"}`}>
             <span className="relative flex size-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75 motion-reduce:animate-none" />
-              <span className="relative inline-flex size-1.5 rounded-full bg-emerald-500" />
+              {hasActivity && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75 motion-reduce:animate-none" />}
+              <span className={`relative inline-flex size-1.5 rounded-full ${hasActivity ? "bg-emerald-500" : "bg-neutral-400"}`} />
             </span>
-            LIVE
+            {hasActivity ? "LIVE" : "UNAVAILABLE"}
           </span>
         </div>
         <p className="mt-1 text-sm text-text-secondary md:text-base">
-          No hand-typed numbers — the database does the talking.
+          {github ? `${github.contributions.toLocaleString("en-US")} contributions in the last year.` : "Live contribution data is temporarily unavailable."}
         </p>
       </div>
-
-      {/* Stat tiles — each one links to what it counts */}
-      <div className="z-20 mt-4 grid flex-1 grid-cols-2 gap-2 sm:grid-cols-4">
-        {siteStatMeta.map((stat) => {
-          const Icon = stat.icon;
-          const value = site?.[stat.key] ?? null;
-          return (
-            <Link
-              key={stat.key}
-              href={stat.href}
-              title={`${stat.label} →`}
-              className="group/tile block rounded-[14px] border border-border-primary p-1 transition-all duration-300 hover:-translate-y-1 hover:border-neutral-400 motion-reduce:hover:translate-y-0 motion-reduce:transition-none dark:hover:border-white/30"
-            >
-              <div
-                className="flex h-full flex-col items-center justify-center gap-1 rounded-[10px] border-2 border-[#A5AEB81F]/10 bg-[#EDEEF0] px-2 py-2.5 dark:bg-white/5"
-                style={{ boxShadow: "0px 2px 1.5px 0px #A5AEB852 inset" }}
-              >
-                <Icon
-                  className={clsx(
-                    "size-4 text-neutral-600 transition-all duration-300 ease-out group-hover/tile:scale-110 motion-reduce:group-hover/tile:scale-100 motion-reduce:transition-none dark:text-neutral-300",
-                    stat.hoverClass
-                  )}
-                  aria-hidden
-                />
-                <span className="text-[15px] font-medium leading-none text-text-primary">
-                  {value !== null ? (
-                    <CountUpValue to={value} pad={2} />
-                  ) : (
-                    <span className="text-text-secondary">—</span>
-                  )}
-                </span>
-                <span className="text-center font-mono text-[10px] uppercase tracking-widest text-text-secondary transition-colors duration-300 group-hover/tile:text-text-primary motion-reduce:transition-none">
-                  {stat.label}
-                </span>
-              </div>
-            </Link>
-          );
-        })}
+      <div className="z-20 mt-4 flex flex-1 items-center">
+        {hasActivity ? <ContributionCalendar weeks={github!.weeks} /> : <div className="flex h-[92px] w-full items-center justify-center rounded-xl border border-dashed border-border-primary font-mono text-[10px] uppercase tracking-widest text-text-secondary">Awaiting GitHub activity</div>}
       </div>
-
-      {/* Footer — live view total + link to the full breakdown */}
-      <Link
-        href="/stats"
-        className="z-20 mt-2 block py-1.5 -my-1.5 text-center font-mono text-[11px] text-text-secondary transition-colors duration-300 hover:text-text-primary motion-reduce:transition-none"
-      >
-        {site?.views != null && <>{site.views.toLocaleString("en-US")} views · </>}
-        Explore stats →
-      </Link>
+      <p className="z-20 mt-2 text-center font-mono text-[10px] uppercase tracking-widest text-text-secondary">@harisx404 · live GitHub data</p>
     </BentoCard>
   );
 }
@@ -856,10 +767,10 @@ const bentoCardVariants = {
 } as const;
 
 export function HomeBento({
-  site,
+  github,
   projectTech,
 }: {
-  site?: SiteStats | null;
+  github?: GitHubLive | null;
   projectTech?: ProjectTech | null;
 }) {
   return (
@@ -896,7 +807,7 @@ export function HomeBento({
             <TechStackBento linkTo="/about" projectTech={projectTech} />
           </motion.div>
           <motion.div variants={bentoCardVariants} className="flex-1">
-            <SiteStatsBento site={site ?? null} />
+            <GitHubActivityBento github={github ?? null} />
           </motion.div>
         </div>
       </motion.div>

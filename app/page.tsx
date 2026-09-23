@@ -17,7 +17,9 @@ import {
   fallbackPosts,
   type HomeProject,
 } from "./data/fallback-home";
-import { getServerStats } from "./lib/stats/server-stats";
+import { fetchGitHubActivity } from "./lib/live-stats";
+import { fetchCredentialCollection } from "./credentials/data";
+import { summarizeCredentials } from "./credentials/summary";
 import { HomeHero } from "./components/home/HomeHero";
 import { StatusRow } from "./components/home/StatusRow";
 import { HomeBento } from "./components/home/HomeBento";
@@ -68,23 +70,15 @@ const personJsonLd = {
 };
 
 export default async function Home() {
-  const [dbProjects, dbPosts, dbTestimonials, serverStats] =
+  const [dbProjects, dbPosts, dbTestimonials, github, credentials] =
     await Promise.all([
       fetchProjects(),
       fetchBlogIndexPosts().catch((): BlogIndexPost[] => []),
       fetchTestimonials(),
-      getServerStats().catch(() => null),
+      fetchGitHubActivity().catch(() => null),
+      fetchCredentialCollection().catch(() => []),
     ]);
-
-  /* Live site-wide numbers for the bento — every value is counted from
-     the database (projects, blog_posts, messages, testimonials, views). */
-  const siteStats = {
-    projects: dbProjects.length > 0 ? dbProjects.length : fallbackProjects.length,
-    posts: dbPosts.length > 0 ? dbPosts.length : fallbackPosts.length,
-    notes: serverStats?.communityWallMessages ?? null,
-    testimonials: dbTestimonials.length > 0 ? dbTestimonials.length : null,
-    views: serverStats?.totalViews ?? null,
-  };
+  const credentialSummary = summarizeCredentials(credentials);
 
   /* Homepage case studies are owner-curated from the admin panel: any
      project with the "Featured Project" toggle on shows here (up to 6,
@@ -230,12 +224,12 @@ export default async function Home() {
         <HomeHero latestLaunch={latestLaunch} />
         <StatusRow data={statusData} />
         <div className="mt-16 space-y-28 md:mt-24">
-          <HomeBento site={siteStats} projectTech={projectTech} />
+          <HomeBento github={github} projectTech={projectTech} />
           <CaseStudies projects={projects} />
           <Writings posts={posts} formattedDates={formattedDates} />
           <AboutTeaser />
           <Testimonials items={dbTestimonials} />
-          <MySiteGrid />
+          <MySiteGrid credentialSummary={credentialSummary} />
           <HomeFaq />
           <CtaSection />
         </div>

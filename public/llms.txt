@@ -14,7 +14,6 @@
 - [Blog](https://harisx404.vercel.app/blog): Technical write-ups on web development, security, and AI.
 - [Contact](https://harisx404.vercel.app/contact): Hire or reach out — itsharis.tech@gmail.com.
 - [Resume](https://harisx404.vercel.app/resume): Downloadable resume.
-- [Stats](https://harisx404.vercel.app/stats): Live site and content metrics.
 
 ## Facts
 

@@ -58,7 +58,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       "/buildlog",
       "/community-wall",
       "/links",
-      "/stats",
       "/legal/privacy",
       "/legal/terms",
     ].map((path) => ({

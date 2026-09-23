@@ -1,6 +1,7 @@
-import { FileText, Briefcase, Image, Settings, Plus, ExternalLink, ArrowUpRight, Layers } from "lucide-react";
+import { FileText, Briefcase, Image, Settings, Plus, ExternalLink, ArrowUpRight, Layers, Eye, Heart, ChartNoAxesCombined } from "lucide-react";
 import Link from "next/link";
 import createSupabaseServerClient from "@/app/lib/supabase/server";
+import { getServerStats } from "@/app/lib/stats/server-stats";
 
 export const metadata = {
   title: "Dashboard | Admin",
@@ -17,6 +18,7 @@ export default async function AdminDashboard() {
     { count: projectCount },
     { data: recentPosts },
     { data: recentProjects },
+    serverStats,
   ] = await Promise.all([
     supabase.from("blog_posts").select("*", { count: "exact", head: true }),
     supabase.from("blog_posts").select("*", { count: "exact", head: true }).eq("status", "published"),
@@ -24,6 +26,7 @@ export default async function AdminDashboard() {
     supabase.from("projects").select("*", { count: "exact", head: true }),
     supabase.from("blog_posts").select("id, title, slug, status, publishedAt").order("created_at", { ascending: false }).limit(5),
     supabase.from("projects").select("id, title, slug, status").order("created_at", { ascending: false }).limit(5),
+    getServerStats().catch(() => null),
   ]);
 
   const statCards = [
@@ -31,6 +34,8 @@ export default async function AdminDashboard() {
     { label: "Published Posts", value: publishedBlogCount ?? 0, icon: FileText, href: "/admin/blogs", color: "text-green-600", bg: "bg-green-50 dark:bg-green-950/30" },
     { label: "Draft Posts", value: draftBlogCount ?? 0, icon: FileText, href: "/admin/blogs", color: "text-amber-600", bg: "bg-amber-50 dark:bg-amber-950/30" },
     { label: "Total Projects", value: projectCount ?? 0, icon: Briefcase, href: "/admin/projects", color: "text-purple-600", bg: "bg-purple-50 dark:bg-purple-950/30" },
+    { label: "Article Views", value: serverStats ? serverStats.totalViews : "—", icon: Eye, href: "/admin/analytics", color: "text-sky-600", bg: "bg-sky-50 dark:bg-sky-950/30" },
+    { label: "Reactions", value: serverStats ? serverStats.totalReactions : "—", icon: Heart, href: "/admin/analytics", color: "text-rose-600", bg: "bg-rose-50 dark:bg-rose-950/30" },
   ];
 
   const quickActions = [
@@ -38,6 +43,7 @@ export default async function AdminDashboard() {
     { label: "New Project", href: "/admin/projects/new", icon: Plus },
     { label: "Upload Media", href: "/admin/media", icon: Image },
     { label: "Site Settings", href: "/admin/settings", icon: Settings },
+    { label: "View Analytics", href: "/admin/analytics", icon: ChartNoAxesCombined },
     { label: "View Live Site", href: "/", icon: ExternalLink, external: true },
   ];
 
@@ -50,7 +56,7 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {statCards.map((card) => {
           const Icon = card.icon;
           return (

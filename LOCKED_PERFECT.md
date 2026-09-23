@@ -1312,7 +1312,7 @@ Layout/behavior baseline (audited 2026-08-24):
 | Area | Files and dependencies |
 |---|---|
 | Home page | `app/page.tsx`, `app/components/home/**` |
-| About page | `app/about/page.tsx`, `app/components/Resume.tsx`, `app/components/EducationCards.tsx`, `app/components/EducationMotion.tsx`, `app/components/AboutTrackPattern.tsx`, `app/components/ScrapbookBento.tsx`, `app/components/StatsBento.tsx` |
+| About page | `app/about/page.tsx`, `app/components/Resume.tsx`, `app/components/EducationCards.tsx`, `app/components/EducationMotion.tsx`, `app/components/AboutTrackPattern.tsx`, `app/components/ScrapbookBento.tsx`, `app/components/CredentialBento.tsx` |
 | Navbar | `app/components/Navbar.tsx`, `app/components/ThemeToggle.tsx` |
 | Search modal | `app/components/navbar/SearchModal.tsx` |
 | Reach Out modal | `app/components/navbar/ReachOutModal.tsx` |
@@ -1391,7 +1391,7 @@ headings; TypeScript, targeted ESLint, and `git diff --check` passed.
 | Area | Frozen files and dependencies |
 |---|---|
 | Home page | `app/page.tsx`, `app/components/home/**`, and Home-affecting layout/global presentation |
-| About page | `app/about/page.tsx`, `app/components/Resume.tsx`, `app/components/EducationCards.tsx`, `app/components/EducationMotion.tsx`, `app/components/AboutTrackPattern.tsx`, `app/components/ScrapbookBento.tsx`, `app/components/StatsBento.tsx` |
+| About page | `app/about/page.tsx`, `app/components/Resume.tsx`, `app/components/EducationCards.tsx`, `app/components/EducationMotion.tsx`, `app/components/AboutTrackPattern.tsx`, `app/components/ScrapbookBento.tsx`, `app/components/CredentialBento.tsx` |
 | Projects index | `app/projects/page.tsx`, `app/projects/ProjectsIndex.tsx`, `app/projects/loading.tsx`, and Projects use of `app/components/home/CaseStudies.tsx` |
 | Navbar | `app/components/Navbar.tsx`, `app/components/ThemeToggle.tsx` |
 | Search modal | `app/components/navbar/SearchModal.tsx` |
@@ -1869,9 +1869,58 @@ responsive light/dark viewport. This limited amendment is re-locked.
   section. The dedicated Attribution route remains removed; do not recreate it.
 - **Removal behavior:** both retired URLs return the standard application 404 and
   neither appears in Footer HTML or sitemap XML.
-- **Stats boundary:** `/stats`, its Footer link, implementation, and tests were not
-  changed by this removal and remain pending a separate owner decision.
+- **Stats boundary (superseded):** `/stats` was unchanged by this removal, then
+  permanently retired under the later owner decision recorded in entry 36.
 
 Do not restore `/test`, `/attribution`, or their Footer/sitemap entries without a
 new explicit owner request. Historical audits may retain dated references to the
 former routes, but active inventories and instructions must treat them as removed.
+
+## 36. FINAL OWNER REMOVAL - Public Stats And Locked-Surface Replacements
+
+- **Date removed:** 2026-09-22
+- **Owner instruction:** Remove the public Stats page after relocating useful
+  analytics to Admin; replace public stats cards with live GitHub activity and
+  credentials; replace Navbar Stats with Buildlog.
+- **Removed route:** `/stats`, including route metadata/loading, public-only Stats
+  component tree, token-dependent GitHub stats loader, performance hook, Footer
+  link, sitemap entry, Navbar Stats card, tests expecting HTTP 200, and orphaned
+  `nav-stats.jpg`. The retired URL returns the standard application 404.
+- **Home/About activity amendment:** the former locked `SiteStatsBento`
+  “Shipped, counted, public” database counters are superseded by
+  `GitHubActivityBento`, preserving the exact locked outer shells and heights while
+  rendering real hourly GitHub public contribution data, a 53-week green calendar,
+  contribution total, external profile link, and a stable unavailable state.
+- **Home Behind-the-site amendment:** the middle Stats card is replaced by a
+  Credentials card without changing the locked three-column shell, 260px minimum
+  height, motion, radius, ring, spacing, or sibling Buildlog/Community Wall cards.
+  It uses only the locked six-field public credential view and shows the published
+  count plus up to three Admin-ordered issuer previews.
+- **About bento amendment:** the former `StatsBento` is replaced by
+  `CredentialBento`; the lower right `SiteStatsBento` is replaced by the same live
+  GitHub activity surface. Existing 5/7 column stacks, 220/300px heights, gaps,
+  surrounding sections, and CTA remain unchanged.
+- **Navbar/Footer amendment:** Navbar More’s single Stats feature card becomes a
+  single Buildlog feature card using the existing changelog image. Footer removes
+  Stats rather than renaming it, so Buildlog appears exactly once in each surface.
+  No Navbar morph, geometry, motion, card layout, remaining link, or Footer style
+  changed.
+- **Credential data boundary:** no locked Credentials schema/view expansion.
+  Teasers use only `id`, title, issuer, issuer logo, credential ID/link availability;
+  no dates, descriptions, categories, skills, expiration, or private fields leak.
+  Admin certification mutations now invalidate Home, About, Credentials, and the
+  `credentials` cache tag.
+- **Admin Analytics destination:** actionable public Stats features move to the
+  protected `/admin/analytics` route: article views/reactions, reaction breakdown,
+  top viewed/reacted articles, category distribution, approved wall count, article
+  count, and mobile/desktop Lighthouse health. Dashboard adds views/reactions
+  summaries and an Analytics quick action/sidebar link. Decorative coffee/day
+  counters and the inaccurate legacy-changelog-as-Buildlog metric are retired.
+- **GitHub source:** Home/About use the public GitHub profile, repository, and
+  contribution endpoints with hourly Next fetch caching. No token is required;
+  failures return null and preserve card geometry without invented activity.
+
+Do not restore `/stats`, its navigation links, synthetic activity charts, or the
+old public counter card without a new explicit owner request. Home, About, Navbar,
+Footer, Credentials, Buildlog, and Community Wall remain locked with only the
+precise content/data substitutions documented here.

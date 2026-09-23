@@ -60,7 +60,7 @@
 - âœ… TypeScript compile: ZERO errors ðŸš€
 
 ### Still In Phase 0 (Pending â€” User Action Required)
-- [ ] Fill in `.env.local` env keys (at minimum: GITHUB_TOKEN for /stats page)
+- [ ] Fill in optional deployment keys such as `PAGESPEED_API_KEY` for Admin Analytics
 - [ ] Speaking page â€” full content replacement (Braydon's events/bio/photos still there)
 - [ ] Connections page â€” replace 30+ hardcoded connections (all point to Braydon's Twitter)
 - [ ] Upload your resume PDF to `/public/static/haris_resume.pdf`
@@ -86,23 +86,23 @@
 - âœ… Created 14 guide docs in `docs/` folder
 - âœ… Created `.env.local` placeholder
 
-## Session 2 — 2026-08-13 (Deep Audit & Quality Fixes)
+## Session 2 ï¿½ 2026-08-13 (Deep Audit & Quality Fixes)
 
 ### Completed
 - [x] FIX: Settings API completely rewritten to match key-value schema in Supabase
 - [x] FIX: Footer copyright symbol (was garbled 'Ac') fixed to &copy;
 - [x] FIX: Footer em-dash encoding fixed to &mdash;
-- [x] FIX: siteMetadata.ts description had garbled encoding — rewritten clean UTF-8
-- [x] FIX: Mobile nav close button SVG fill was hardcoded (#3C3C3F) — fixed to currentColor
-- [x] FIX: Admin Sidebar rebuilt — removed conflicting dark mode CSS, clean active state
-- [x] FIX: Admin Dashboard fully rebuilt — stats cards, quick actions, recent posts, recent projects tables
+- [x] FIX: siteMetadata.ts description had garbled encoding ï¿½ rewritten clean UTF-8
+- [x] FIX: Mobile nav close button SVG fill was hardcoded (#3C3C3F) ï¿½ fixed to currentColor
+- [x] FIX: Admin Sidebar rebuilt ï¿½ removed conflicting dark mode CSS, clean active state
+- [x] FIX: Admin Dashboard fully rebuilt ï¿½ stats cards, quick actions, recent posts, recent projects tables
 - [x] FIX: /admin/media page CREATED (was missing despite sidebar link)
 - [x] FIX: All Braydon logo references replaced with clean H text logo (Navbar + Footer)
-- [x] FIX: next.config.mjs cleaned — removed all braydoncoyer.dev archive redirects
+- [x] FIX: next.config.mjs cleaned ï¿½ removed all braydoncoyer.dev archive redirects
 - [x] SEO: Added generateMetadata to home page, blog listing, toolbox
 - [x] SEO: Added Person JSON-LD structured data to home page
 - [x] IMG: Replaced <img> with <Image /> across 11 components: FeaturedBlogCard, mdx-content, mdx-components, ToolboxBento, ConnectionsBento, AnimatedMobilePhotos, ScrapbookBento, AboutMeBento, CommunityWallCard, admin toolbox page
-- [x] FIX: useFormState kept (React 18 compatible — NOT React 19 useActionState)
+- [x] FIX: useFormState kept (React 18 compatible ï¿½ NOT React 19 useActionState)
 - [x] LINT: Photo.tsx useEffect missing dependency silenced with eslint-disable comment
 - [x] BLOG: Blog listing page now has metadata
 

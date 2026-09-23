@@ -75,7 +75,7 @@ Handled inside each page's audit (Phase 11), not as a separate project:
 - [ ] `AI_GUIDE.md` "deleted 22 components" list is stale — it names
       `SocialPill`, which is **live in the Footer**. Already annotated, but the
       list itself should be rewritten.
-- [ ] `/stats` PageSpeed API returns 400
+- [ ] Admin Analytics Lighthouse health requires a reachable production URL and valid PageSpeed configuration
 - [ ] GitHub contribution graph shows 0
 - [ ] Admin changelog revalidate is stale
 - [ ] Live Supabase mismatches: prod `site_settings` is one row with named

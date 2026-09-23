@@ -2,10 +2,6 @@ export type ReactionType = "like" | "heart" | "celebrate" | "insightful";
 
 export interface BuildTimeStats {
   totalArticles: number;
-  totalWords: number;
-  combinedReadingMinutes: number;
-  avgWordsPerArticle: number;
-  changelogCount: number;
   categoryBreakdown: CategoryCount[];
 }
 
@@ -30,41 +26,6 @@ export interface ArticleMetric {
   imageName?: string;
 }
 
-export interface GitHubStats {
-  stars: number;
-  forks: number;
-  commits: number;
-  contributions: ContributionData | null;
-}
-
-export interface ContributionDay {
-  date: string;
-  contributionCount: number;
-  contributionLevel: "NONE" | "FIRST_QUARTILE" | "SECOND_QUARTILE" | "THIRD_QUARTILE" | "FOURTH_QUARTILE";
-}
-
-export interface ContributionWeek {
-  contributionDays: ContributionDay[];
-}
-
-export interface ContributionData {
-  totalContributions: number;
-  weeks: ContributionWeek[];
-}
-
-export interface AllStats {
-  buildTime: BuildTimeStats;
-  server: ServerStats;
-  github: GitHubStats;
-  computed: ComputedStats;
-}
-
-export interface ComputedStats {
-  daysSinceRevamp: number;
-  coffeeCups: number;
-  techStackCount: number;
-}
-
 export interface LighthouseScores {
   performance: number;
   accessibility: number;
@@ -76,4 +37,5 @@ export interface LighthouseScores {
 export interface LighthouseStats {
   mobile: LighthouseScores | null;
   desktop: LighthouseScores | null;
+  partialFailure: boolean;
 }

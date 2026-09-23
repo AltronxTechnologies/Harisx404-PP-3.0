@@ -24,6 +24,7 @@ import {
   Map,
   SearchX,
   Mail,
+  List,
 } from "lucide-react";
 import { ThemeToggle } from "../ThemeToggle";
 import { BrandGlyph } from "../BrandGlyph";
@@ -54,6 +55,7 @@ const PAGES: PageItem[] = [
   { name: "Projects", link: "/projects", icon: Folder },
   { name: "Blog", link: "/blog", icon: FileText },
   { name: "Community Wall", link: "/community-wall", icon: BookOpen },
+  { name: "Buildlog", link: "/buildlog", icon: List },
   { name: "Contact", link: "/contact", icon: Phone },
   { name: "Credentials", link: "/credentials", icon: Award },
   { name: "Resume", link: "/resume", icon: ScrollText },
@@ -142,7 +144,7 @@ export function SearchModal({
       "Try 'nextjs' or 'react'…",
       "Looking for a project?",
       "Find a blog post…",
-      "Type 'stats' or 'buildlog'…",
+      "Try 'buildlog' or 'credentials'…",
       "Search 'security' or 'AI'…",
       "Jump to any page…",
       "Try 'let's connect'…",

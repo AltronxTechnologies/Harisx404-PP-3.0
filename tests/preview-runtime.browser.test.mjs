@@ -12,7 +12,6 @@ const routes = [
   "/links",
   "/credentials",
   "/buildlog",
-  "/stats",
   "/community-wall",
   "/resume",
   "/legal/privacy",

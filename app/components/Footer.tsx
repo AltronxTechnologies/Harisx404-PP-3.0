@@ -36,7 +36,6 @@ const footerSections: FooterSection[] = [
   {
     title: "Extra",
     links: [
-      { href: "/stats", label: "Stats" },
       { href: "/buildlog", label: "Buildlog" },
       { href: "/community-wall", label: "Community\nWall" },
     ],

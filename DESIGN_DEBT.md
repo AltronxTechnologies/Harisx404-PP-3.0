@@ -122,7 +122,6 @@ Kicker conflicts: weight `font-medium` vs `font-normal` vs unset; colour
 `text-text-tertiary`; tracking `tracking-widest` vs `tracking-[0.35em]`.
 
 ### Other competing variants
-- `app/components/stats/StatsPageHeader.tsx:16,44` — `tracking-[0.35em]`
 - `app/components/SectionTitlePill.tsx:11` — pill variant, `text-base`
 
 ### ⚠️ OPEN QUESTION FOR THE OWNER
@@ -247,7 +246,8 @@ Changing any of these is a **regression**, not a fix.
 
 - **Resolved 2026-09-22:** the owner permanently removed the throwaway `/test`
   route and its Footer link.
-- `/stats` PageSpeed API returns 400.
+- **Moved 2026-09-22:** public `/stats` was retired; Lighthouse health now lives in
+  protected Admin Analytics and remains dependent on a reachable production URL.
 - GitHub contribution graph shows 0.
 - Admin changelog revalidate is stale.
 - Live Supabase mismatches: prod `site_settings` is one row with named columns

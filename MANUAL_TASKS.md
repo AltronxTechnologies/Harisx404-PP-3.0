@@ -186,8 +186,8 @@ reads these names — keep them exact:
 | `ADMIN_EMAIL` | yes | who may access /admin |
 | `GOOGLE_AI_API_KEY` | for AI | chatbot, ⌘K semantic search, admin assist, embeddings (`GEMINI_API_KEY` kept as alias only) |
 | `CLOUDINARY_CLOUD_NAME` / `_API_KEY` / `_API_SECRET` | for media | /admin/media uploads |
-| `GITHUB_TOKEN` | optional | /stats GitHub cards |
-| `PAGESPEED_API_KEY` | optional | /stats Lighthouse card |
+| `GITHUB_TOKEN` | optional | GitHub API integrations that require authenticated limits; Home/About activity uses the public feed |
+| `PAGESPEED_API_KEY` | optional | Admin Analytics Lighthouse health |
 | `LOOPS_API_KEY` | optional | newsletter signups |
 | `SPOTIFY_CLIENT_ID/SECRET/REFRESH_TOKEN` | optional | currently-playing card |
 | `NEXT_PUBLIC_SITE_URL` | yes | canonical URLs, sitemap, RSS, OG |

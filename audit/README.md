@@ -33,8 +33,9 @@ testimonials) stays Muhammad Haris's own.
 1. **Hero column restructure** — reference desktop puts the launch pill
    ABOVE the headline (left) and the photo strip UNDER the name (right).
    Ours: photos bottom-left, launch pill top-right. Restructure to match?
-2. Keep our extra pages (/stats, /connections, /speaking, /changelog)
-   visible in footer, or trim to reference's exact footer link set?
+2. **Resolved 2026-09-22:** public `/stats` was retired, useful analytics moved to
+   Admin, and Footer discovery was trimmed. Legacy `/changelog` resolves to the
+   locked Buildlog; removed pages must not be restored without owner approval.
 3. Reference blog cards show 3 posts with cover IMAGES from frontmatter;
    ours uses gradient+caption fallback until posts get cover_image_url.
    Want random stock covers seeded onto the top posts?
