@@ -42,9 +42,12 @@ test("public Stats discovery is retired without duplicate Buildlog links", async
 });
 
 test("GitHub activity and credential cards use real bounded data contracts", async () => {
-  const [live, homeBento, credentialData, credentialSummary, preview, adminAnalytics, adminSidebar, adminLayout, adminDashboard, serverStats, lighthouse, buildStats, credentialSeed] = await Promise.all([
+  const [live, githubServer, homeBento, home, about, credentialData, credentialSummary, preview, adminAnalytics, adminSidebar, adminLayout, adminDashboard, serverStats, lighthouse, buildStats, credentialSeed] = await Promise.all([
     readFile(new URL("../app/lib/live-stats.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/github/GitHubActivityBentoServer.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/components/home/HomeBento.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/about/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/credentials/data.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/credentials/summary.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/components/credentials/CredentialBentoPreview.tsx", import.meta.url), "utf8"),
@@ -62,6 +65,13 @@ test("GitHub activity and credential cards use real bounded data contracts", asy
   assert.match(live, /REQUEST_TIMEOUT_MS = 8000/);
   assert.match(live, /AbortSignal\.timeout/);
   assert.match(live, /if \(!totalMatch\) return null/);
+  assert.match(live, /unstable_cache/);
+  assert.match(live, /github-public-activity-v1/);
+  assert.match(githubServer, /await fetchGitHubActivity\(\)/);
+  for (const source of [home, about]) {
+    assert.match(source, /<Suspense fallback={<GitHubActivityBentoSkeleton \/>}>/);
+    assert.doesNotMatch(source, /fetchGitHubActivity\(\)/);
+  }
   assert.match(homeBento, /data-github-contribution-calendar/);
   assert.match(homeBento, /contributionColors/);
   assert.match(credentialData, /public_certifications/);

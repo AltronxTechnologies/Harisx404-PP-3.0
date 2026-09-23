@@ -1,6 +1,7 @@
 /* LOCKED PAGE — audited & production-approved. Do not change layout,
    typography, spacing, or behavior without explicit owner approval. */
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { siteMetadata } from "./data/siteMetadata";
 import {
   fetchProjects,
@@ -17,9 +18,12 @@ import {
   fallbackPosts,
   type HomeProject,
 } from "./data/fallback-home";
-import { fetchGitHubActivity } from "./lib/live-stats";
 import { fetchCredentialCollection } from "./credentials/data";
 import { summarizeCredentials } from "./credentials/summary";
+import {
+  GitHubActivityBentoServer,
+  GitHubActivityBentoSkeleton,
+} from "./components/github/GitHubActivityBentoServer";
 import { HomeHero } from "./components/home/HomeHero";
 import { StatusRow } from "./components/home/StatusRow";
 import { HomeBento } from "./components/home/HomeBento";
@@ -70,12 +74,11 @@ const personJsonLd = {
 };
 
 export default async function Home() {
-  const [dbProjects, dbPosts, dbTestimonials, github, credentials] =
+  const [dbProjects, dbPosts, dbTestimonials, credentials] =
     await Promise.all([
       fetchProjects(),
       fetchBlogIndexPosts().catch((): BlogIndexPost[] => []),
       fetchTestimonials(),
-      fetchGitHubActivity().catch(() => null),
       fetchCredentialCollection().catch(() => []),
     ]);
   const credentialSummary = summarizeCredentials(credentials);
@@ -224,7 +227,14 @@ export default async function Home() {
         <HomeHero latestLaunch={latestLaunch} />
         <StatusRow data={statusData} />
         <div className="mt-16 space-y-28 md:mt-24">
-          <HomeBento github={github} projectTech={projectTech} />
+          <HomeBento
+            projectTech={projectTech}
+            githubCard={
+              <Suspense fallback={<GitHubActivityBentoSkeleton />}>
+                <GitHubActivityBentoServer />
+              </Suspense>
+            }
+          />
           <CaseStudies projects={projects} />
           <Writings posts={posts} formattedDates={formattedDates} />
           <AboutTeaser />

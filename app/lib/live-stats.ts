@@ -2,6 +2,9 @@
    GitHub HTML is cached hourly; failures return null so third-party downtime
    never breaks either public page. */
 
+import "server-only";
+import { unstable_cache } from "next/cache";
+
 const HANDLE = "harisx404";
 const REVALIDATE = { next: { revalidate: 3600 } } as const;
 const REQUEST_TIMEOUT_MS = 8000;
@@ -15,7 +18,7 @@ export type GitHubLive = {
   weeks: number[][];
 };
 
-export async function fetchGitHubActivity(): Promise<GitHubLive | null> {
+async function loadGitHubActivity(): Promise<GitHubLive | null> {
   try {
     const headers = { Accept: "application/vnd.github+json", "User-Agent": HANDLE };
     const signal = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
@@ -75,3 +78,9 @@ export async function fetchGitHubActivity(): Promise<GitHubLive | null> {
     return null;
   }
 }
+
+export const fetchGitHubActivity = unstable_cache(
+  loadGitHubActivity,
+  ["github-public-activity-v1"],
+  { revalidate: 3600, tags: ["github-activity"] },
+);

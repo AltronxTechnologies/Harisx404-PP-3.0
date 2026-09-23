@@ -767,10 +767,10 @@ const bentoCardVariants = {
 } as const;
 
 export function HomeBento({
-  github,
+  githubCard,
   projectTech,
 }: {
-  github?: GitHubLive | null;
+  githubCard: React.ReactNode;
   projectTech?: ProjectTech | null;
 }) {
   return (
@@ -807,7 +807,7 @@ export function HomeBento({
             <TechStackBento linkTo="/about" projectTech={projectTech} />
           </motion.div>
           <motion.div variants={bentoCardVariants} className="flex-1">
-            <GitHubActivityBento github={github ?? null} />
+            {githubCard}
           </motion.div>
         </div>
       </motion.div>

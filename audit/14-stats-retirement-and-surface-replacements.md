@@ -11,6 +11,9 @@
   GitHub activity for `harisx404`: contribution total and a 53-week green calendar.
 - GitHub requests have an 8-second deadline and a geometry-stable unavailable
   state; no token or invented activity is required.
+- GitHub activity is isolated behind a card-level Suspense boundary and an hourly
+  shared server cache, so a cold or unavailable GitHub response cannot delay the
+  Home or About page shell.
 - Home Behind-the-site and About bento Stats cards now render published credential
   summaries from the locked restricted six-field credential view.
 - Credential teasers show count, up to three Admin-ordered issuers, initials, and
@@ -49,6 +52,8 @@
 | Targeted ESLint | Passed |
 | Home/About source contracts | 3/3 passed |
 | Home/About responsive matrix | 12/12 page/theme/viewport combinations passed |
+| Streamed response timing | Home 0.266s TTFB; About 0.338s TTFB |
+| Warm full response timing | Home 1.948s; About 1.694s |
 | Live GitHub data | 827 contributions rendered during verification |
 | Credential public contract | 5 published records, restricted fields only |
 | Credential regression | 5/5 passed |

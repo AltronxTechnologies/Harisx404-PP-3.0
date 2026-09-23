@@ -1,6 +1,7 @@
 /* LOCKED PAGE — audited & production-approved. Do not change layout,
    typography, spacing, or behavior without explicit owner approval. */
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { HorizontalLine } from "@/app/components/HorizontalLine";
 import { ScrapbookBento } from "@/app/components/ScrapbookBento";
 import { ShadowBox } from "@/app/components/ShadowBox";
@@ -12,12 +13,15 @@ import { AboutTrackPattern } from "@/app/components/AboutTrackPattern";
 import { EduReveal, EduCardHover } from "@/app/components/EducationMotion";
 import { SectionHeading } from "@/app/components/home/SectionHeading";
 import { CtaSection } from "@/app/components/home/CtaSection";
-import { AccountsBento, GitHubActivityBento } from "@/app/components/home/HomeBento";
+import { AccountsBento } from "@/app/components/home/HomeBento";
 import { PaperHeroTexture } from "@/app/components/PaperHeroTexture";
 import { fetchExperiences } from "@/app/lib/utils";
-import { fetchGitHubActivity } from "@/app/lib/live-stats";
 import { fetchCredentialCollection } from "@/app/credentials/data";
 import { summarizeCredentials } from "@/app/credentials/summary";
+import {
+  GitHubActivityBentoServer,
+  GitHubActivityBentoSkeleton,
+} from "@/app/components/github/GitHubActivityBentoServer";
 
 export const revalidate = 3600; // Cache for 1 hour, revalidated on demand via admin panel
 
@@ -29,10 +33,9 @@ export const metadata: Metadata = {
 
 
 export default async function AboutPage() {
-  const [dbExperiences, github, credentials] =
+  const [dbExperiences, credentials] =
     await Promise.all([
       fetchExperiences(),
-      fetchGitHubActivity().catch(() => null),
       fetchCredentialCollection().catch(() => []),
     ]);
   const credentialSummary = summarizeCredentials(credentials);
@@ -214,7 +217,9 @@ export default async function AboutPage() {
               {/* Right stack (7) — mirrors homepage: Scrapbook + GitHub activity */}
               <div className="flex flex-col gap-2 lg:col-span-7">
                 <ScrapbookBento />
-                <GitHubActivityBento github={github} />
+                <Suspense fallback={<GitHubActivityBentoSkeleton />}>
+                  <GitHubActivityBentoServer />
+                </Suspense>
               </div>
             </div>
           </GridWrapper>
