@@ -694,11 +694,11 @@ function TechStackBento({
 
 /* ── 4. Live GitHub contribution calendar ────────────────────── */
 const contributionColors = [
-  "bg-neutral-200/80 hover:bg-neutral-300 dark:bg-white/[0.07] dark:hover:bg-white/[0.12]",
-  "bg-emerald-200 hover:bg-emerald-300 dark:bg-emerald-950 dark:hover:bg-emerald-900",
-  "bg-emerald-400 hover:bg-emerald-500 dark:bg-emerald-800 dark:hover:bg-emerald-700",
-  "bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500",
-  "bg-emerald-800 hover:bg-emerald-900 dark:bg-emerald-400 dark:hover:bg-emerald-300",
+  "bg-[#edf1ee] hover:bg-[#dfe6e1] dark:bg-white/[0.055] dark:hover:bg-white/[0.11]",
+  "bg-[#cce8d8] hover:bg-[#b8ddc8] dark:bg-[#123524] dark:hover:bg-[#194b33]",
+  "bg-[#8fc9a8] hover:bg-[#76bb94] dark:bg-[#1f6843] dark:hover:bg-[#287c51]",
+  "bg-[#3b9b69] hover:bg-[#30865a] dark:bg-[#2e9b61] dark:hover:bg-[#38ad70]",
+  "bg-[#17633f] hover:bg-[#105334] dark:bg-[#5ac889] dark:hover:bg-[#72d59b]",
 ] as const;
 
 function formatContributionDate(date: string) {
@@ -716,31 +716,55 @@ function ContributionCalendar({ weeks }: { weeks: GitHubLive["weeks"] }) {
   const days = visibleWeeks.flatMap((week) =>
     Array.from({ length: 7 }, (_, dayIndex) => week[dayIndex] ?? null),
   );
-  const mobileStartIndex = Math.max(0, (visibleWeeks.length - 26) * 7);
+  const desktopStartIndex = Math.max(0, (visibleWeeks.length - 39) * 7);
+  const tabletStartIndex = Math.max(0, (visibleWeeks.length - 26) * 7);
+  const mobileStartIndex = Math.max(0, (visibleWeeks.length - 13) * 7);
   const latestIndex = Math.max(0, days.findLastIndex(Boolean));
   const [selectedIndex, setSelectedIndex] = useState(latestIndex);
-  const selectedDay = days[selectedIndex] ?? days[latestIndex];
+  const [detailIndex, setDetailIndex] = useState<number | null>(null);
+  const detailDay = detailIndex === null ? null : days[detailIndex];
 
   function moveSelection(index: number, offset: number, element: HTMLButtonElement) {
     let next = index + offset;
     while (next >= 0 && next < days.length && !days[next]) next += offset;
     if (next < 0 || next >= days.length) return;
     setSelectedIndex(next);
+    setDetailIndex(next);
     (element.parentElement?.children[next] as HTMLButtonElement | undefined)?.focus();
   }
 
+  function visibilityClass(index: number) {
+    if (index < desktopStartIndex) return "hidden";
+    if (index < tabletStartIndex) return "hidden lg:block";
+    if (index < mobileStartIndex) return "hidden sm:block";
+    return "";
+  }
+
   return (
-    <div className="min-w-0">
+    <div className="relative min-w-0 pt-6">
+      {detailDay && (
+        <motion.div
+          initial={reduced ? false : { opacity: 0, y: 3 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: reduced ? 0 : 0.14 }}
+          data-github-activity-tooltip
+          className="pointer-events-none absolute right-0 top-0 rounded-md border border-border-primary bg-bg-primary px-2 py-1 font-mono text-[9px] tracking-wide text-text-secondary shadow-sm"
+          aria-hidden="true"
+        >
+          <span className="font-semibold text-text-primary">{detailDay.count}</span>{" "}
+          {detailDay.count === 1 ? "contribution" : "contributions"} · {formatContributionDate(detailDay.date)}
+        </motion.div>
+      )}
       <motion.div
         data-github-contribution-calendar
-        className="grid min-h-[70px] w-full grid-flow-col grid-rows-7 gap-1 [grid-template-columns:repeat(26,minmax(3px,1fr))] sm:[grid-template-columns:repeat(53,minmax(1px,1fr))]"
+        className="grid min-h-[96px] w-full grid-flow-col grid-rows-7 gap-1 [grid-template-columns:repeat(13,minmax(7px,1fr))] sm:[grid-template-columns:repeat(26,minmax(5px,1fr))] lg:[grid-template-columns:repeat(39,minmax(5px,1fr))]"
         initial={reduced ? false : { opacity: 0, y: 6 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.6 }}
         transition={{ duration: reduced ? 0 : 0.45, ease: "easeOut" }}
         role="grid"
-        aria-label="GitHub contribution activity for the last year. Use arrow keys to inspect days."
-        onMouseLeave={() => setSelectedIndex(latestIndex)}
+        aria-label="Recent GitHub contribution activity. Use arrow keys to inspect days."
+        onMouseLeave={() => setDetailIndex(null)}
       >
         {days.map((day, index) => {
           const level = day?.level ?? 0;
@@ -757,8 +781,13 @@ function ContributionCalendar({ weeks }: { weeks: GitHubLive["weeks"] }) {
               aria-label={label}
               title={label}
               data-contribution-day={day?.date || ""}
-              onMouseEnter={() => day && setSelectedIndex(index)}
-              onFocus={() => day && setSelectedIndex(index)}
+              onMouseEnter={() => day && setDetailIndex(index)}
+              onFocus={() => {
+                if (!day) return;
+                setSelectedIndex(index);
+                setDetailIndex(index);
+              }}
+              onBlur={() => setDetailIndex(null)}
               onKeyDown={(event) => {
                 if (event.key === "ArrowUp") {
                   event.preventDefault();
@@ -774,25 +803,11 @@ function ContributionCalendar({ weeks }: { weeks: GitHubLive["weeks"] }) {
                   moveSelection(index, 7, event.currentTarget);
                 }
               }}
-              className={`${index < mobileStartIndex ? "hidden sm:block" : ""} min-h-1 rounded-[2px] ring-1 ring-inset ring-black/[0.04] transition-colors duration-150 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 motion-reduce:transition-none disabled:pointer-events-none dark:ring-white/[0.04] ${contributionColors[Math.max(0, Math.min(4, level))]}`}
+              className={`${visibilityClass(index)} min-h-2 rounded-[3px] ring-1 ring-inset ring-black/[0.035] transition-[background-color,box-shadow,filter] duration-150 hover:brightness-105 hover:ring-2 hover:ring-emerald-700/30 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 motion-reduce:transition-none disabled:pointer-events-none dark:ring-white/[0.035] dark:hover:ring-emerald-300/35 ${contributionColors[Math.max(0, Math.min(4, level))]}`}
             />
           );
         })}
       </motion.div>
-      <div className="mt-2 flex min-h-4 items-center justify-between gap-3 font-mono text-[9px] uppercase tracking-[0.12em] text-text-secondary sm:text-[10px]">
-        <span className="truncate" aria-live="polite">
-          {selectedDay
-            ? `${selectedDay.count} ${selectedDay.count === 1 ? "contribution" : "contributions"} · ${formatContributionDate(selectedDay.date)}`
-            : "Activity details unavailable"}
-        </span>
-        <span className="hidden shrink-0 items-center gap-1 sm:flex" aria-label="Contribution intensity from less to more">
-          Less
-          {contributionColors.map((color, index) => (
-            <i key={index} className={`size-2 rounded-[2px] ${color.split(" ")[0]}`} />
-          ))}
-          More
-        </span>
-      </div>
     </div>
   );
 }
@@ -809,21 +824,17 @@ export function GitHubActivityBento({
   return (
     <BentoCard height={height} appearance="home" showHoverGradient={false} className="!p-5">
       <div className="z-20 flex items-center justify-between gap-3">
-        <div>
-          <p className="font-mono text-[9px] font-medium uppercase tracking-[0.18em] text-text-secondary sm:text-[10px]">
-            GitHub · last 365 days
-          </p>
-          <h3 className="mt-0.5 text-base font-medium text-text-primary">
-            <a
-              href="https://github.com/harisx404"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-sm transition-colors hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 motion-reduce:transition-none dark:hover:text-emerald-300"
-            >
-              GitHub activity <span aria-hidden>↗</span>
-            </a>
-          </h3>
-        </div>
+        <h3 className="text-base font-medium text-text-primary">
+          <a
+            href="https://github.com/harisx404"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Open GitHub profile"
+            className="rounded-sm transition-colors hover:text-[#17633f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 motion-reduce:transition-none dark:hover:text-[#72d59b]"
+          >
+            GitHub activity
+          </a>
+        </h3>
         <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2 py-1 font-mono text-[9px] font-semibold uppercase tracking-wider sm:text-[10px] ${hasActivity ? isCached ? "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300" : "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300" : "border-border-primary bg-neutral-100 text-text-secondary dark:bg-white/[0.05]"}`}>
           <span className={`size-1.5 rounded-full ${hasActivity ? isCached ? "bg-amber-500" : "bg-emerald-500" : "bg-neutral-400"}`} />
           {hasActivity ? isCached ? "Cached" : "Live" : "Unavailable"}
@@ -831,24 +842,9 @@ export function GitHubActivityBento({
       </div>
 
       {hasActivity ? (
-        <>
-          <div className="z-20 mt-2 flex items-end justify-between gap-4">
-            <p className="flex items-baseline gap-2 text-text-primary">
-              <span className="[font-family:var(--font-source-serif),Georgia,serif] text-[30px] font-semibold leading-none tracking-tight sm:text-[34px]">
-                {github!.contributions.toLocaleString("en-US")}
-              </span>
-              <span className="text-xs text-text-secondary sm:text-sm">contributions</span>
-            </p>
-            <div className="hidden items-center gap-3 text-right font-mono text-[9px] uppercase tracking-wider text-text-secondary sm:flex">
-              <span><b className="text-text-primary">{github!.repos}</b> repos</span>
-              <span><b className="text-text-primary">{github!.stars}</b> stars</span>
-              <span><b className="text-text-primary">{github!.followers}</b> followers</span>
-            </div>
-          </div>
-          <div className="z-20 mt-2 flex-1">
-            <ContributionCalendar weeks={github!.weeks} />
-          </div>
-        </>
+        <div className="z-20 mt-3 flex flex-1 items-center">
+          <ContributionCalendar weeks={github!.weeks} />
+        </div>
       ) : (
         <div data-github-activity-fallback className="z-20 mt-3 flex flex-1 items-center justify-between gap-5 rounded-xl border border-dashed border-border-primary bg-neutral-50/60 px-4 py-3 dark:bg-white/[0.02]">
           <div>

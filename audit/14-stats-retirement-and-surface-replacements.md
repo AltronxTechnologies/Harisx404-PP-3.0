@@ -8,17 +8,19 @@
 ## Public Replacements
 
 - Home and About `Shipped, counted, public` cards now render real hourly public
-  GitHub activity for `harisx404`: contribution total and a 53-week green calendar.
+  GitHub activity for `harisx404` in a responsive contribution calendar.
 - GitHub requests have a 2.5-second deadline and a geometry-stable unavailable
   state; no token or invented activity is required.
 - GitHub activity is isolated behind a card-level Suspense boundary and an hourly
   shared server cache, so a cold or unavailable GitHub response cannot delay the
   Home or About page shell.
-- The final portfolio-editorial activity card presents the real annual total,
-  repositories, stars, followers, and exact per-day contribution counts. It uses
-  a 53-week desktop grid and a legible recent 26-week mobile view of the same data.
-- Hover, focus, and arrow-key inspection update a live date/count readout; the
-  chart entrance respects reduced-motion preferences.
+- The final portfolio-editorial card intentionally limits persistent copy to its
+  title and status. It shows 13 weeks on phones, 26 on tablets, and 39 on desktop
+  with larger cells and a restrained neutral-to-emerald palette tuned separately
+  for light and dark themes.
+- Hover and keyboard focus reveal the real date/count only while inspecting a day;
+  arrow-key navigation remains available and chart entrance motion respects the
+  reduced-motion preference.
 - A last-known-good in-process snapshot is reused with an explicit `Cached` badge
   when GitHub fails. With no verified snapshot, the card shows a neutral profile
   fallback and never invents zero activity.

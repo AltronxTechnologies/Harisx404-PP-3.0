@@ -26,6 +26,9 @@ test("Home and About live replacement cards remain responsive and aligned", asyn
             githubCards: [...document.querySelectorAll("h3")].filter((heading) => heading.textContent?.startsWith("GitHub activity")).length,
             contributionCalendars: document.querySelectorAll("[data-github-contribution-calendar]").length,
             contributionCells: document.querySelectorAll("[data-github-contribution-calendar] > button").length,
+            visibleContributionCells: [...document.querySelectorAll("[data-github-contribution-calendar] > button")].filter(
+              (cell) => cell.getClientRects().length > 0,
+            ).length,
             contributionTabStops: document.querySelectorAll("[data-github-contribution-calendar] > button[tabindex='0']").length,
             contributionLabels: [...document.querySelectorAll("[data-github-contribution-calendar] > button")].filter(
               (cell) => /contributions? on [A-Z][a-z]{2}/.test(cell.getAttribute("aria-label") || ""),
@@ -55,6 +58,11 @@ test("Home and About live replacement cards remain responsive and aligned", asyn
           assert.equal(result.contributionCalendars + result.contributionFallbacks, 1, `${route} ${theme} ${width}px contribution state`);
           if (result.contributionCalendars) {
             assert.ok(result.contributionCells >= 300, `${route} ${theme} ${width}px live contribution cells`);
+            assert.equal(
+              result.visibleContributionCells,
+              width < 640 ? 91 : width < 1024 ? 182 : 273,
+              `${route} ${theme} ${width}px responsive contribution window`,
+            );
             assert.equal(result.contributionTabStops, 1, `${route} ${theme} ${width}px contribution tab stop`);
             assert.ok(result.contributionLabels >= 300, `${route} ${theme} ${width}px contribution labels`);
           }
@@ -65,6 +73,12 @@ test("Home and About live replacement cards remain responsive and aligned", asyn
           assert.deepEqual(errors, [], `${route} ${theme} ${width}px errors`);
 
           if (route === "/" && width === 1440) {
+            const activeCell = page.locator("[data-github-contribution-calendar] > button[aria-label^='91 contributions']");
+            await activeCell.hover();
+            const tooltip = page.locator("[data-github-activity-tooltip]");
+            await tooltip.waitFor();
+            assert.match((await tooltip.textContent()) || "", /91 contributions/);
+
             const selectedCell = page.locator("[data-github-contribution-calendar] > button[tabindex='0']");
             const selectedLabel = await selectedCell.getAttribute("aria-label");
             await selectedCell.focus();
