@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import createSupabaseServerClient from "@/app/lib/supabase/server";
 import { syncTags } from "@/app/lib/tag-sync";
 
 // Best-effort ISR invalidation — must never fail the mutation itself.
 function revalidateProjectPaths(slug?: string | null) {
   try {
+    revalidateTag("projects");
     revalidatePath("/");
     revalidatePath("/projects");
     if (slug) revalidatePath(`/projects/${slug}`);

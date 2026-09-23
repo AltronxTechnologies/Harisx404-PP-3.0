@@ -9,11 +9,13 @@
 
 - Home and About `Shipped, counted, public` cards now render real hourly public
   GitHub activity for `harisx404`: contribution total and a 53-week green calendar.
-- GitHub requests have an 8-second deadline and a geometry-stable unavailable
+- GitHub requests have a 2.5-second deadline and a geometry-stable unavailable
   state; no token or invented activity is required.
 - GitHub activity is isolated behind a card-level Suspense boundary and an hourly
   shared server cache, so a cold or unavailable GitHub response cannot delay the
   Home or About page shell.
+- Repeated Home/About project, testimonial, and experience reads use tagged
+  server caches that are invalidated by their Admin mutation routes.
 - Home Behind-the-site and About bento Stats cards now render published credential
   summaries from the locked restricted six-field credential view.
 - Credential teasers show count, up to three Admin-ordered issuers, initials, and

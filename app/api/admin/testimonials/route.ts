@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import createSupabaseServerClient, { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 
 // Best-effort ISR invalidation — must never fail the mutation itself.
 function revalidateTestimonialPaths() {
   try {
+    revalidateTag("testimonials");
     revalidatePath("/");
   } catch (e) {
     console.error("Revalidation failed:", e);

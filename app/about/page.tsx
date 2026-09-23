@@ -15,7 +15,7 @@ import { SectionHeading } from "@/app/components/home/SectionHeading";
 import { CtaSection } from "@/app/components/home/CtaSection";
 import { AccountsBento } from "@/app/components/home/HomeBento";
 import { PaperHeroTexture } from "@/app/components/PaperHeroTexture";
-import { fetchExperiences } from "@/app/lib/utils";
+import { fetchCachedExperiences } from "@/app/lib/public-page-data";
 import { fetchCredentialCollection } from "@/app/credentials/data";
 import { summarizeCredentials } from "@/app/credentials/summary";
 import {
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
 export default async function AboutPage() {
   const [dbExperiences, credentials] =
     await Promise.all([
-      fetchExperiences(),
+      fetchCachedExperiences(),
       fetchCredentialCollection().catch(() => []),
     ]);
   const credentialSummary = summarizeCredentials(credentials);

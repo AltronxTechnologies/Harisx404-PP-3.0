@@ -7,7 +7,7 @@ import { unstable_cache } from "next/cache";
 
 const HANDLE = "harisx404";
 const REVALIDATE = { next: { revalidate: 3600 } } as const;
-const REQUEST_TIMEOUT_MS = 8000;
+const REQUEST_TIMEOUT_MS = 2500;
 
 export type GitHubLive = {
   repos: number;

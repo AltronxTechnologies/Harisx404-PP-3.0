@@ -62,7 +62,7 @@ test("GitHub activity and credential cards use real bounded data contracts", asy
   ]);
   assert.match(live, /github\.com\/users\/\$\{HANDLE\}\/contributions/);
   assert.match(live, /revalidate: 3600/);
-  assert.match(live, /REQUEST_TIMEOUT_MS = 8000/);
+  assert.match(live, /REQUEST_TIMEOUT_MS = 2500/);
   assert.match(live, /AbortSignal\.timeout/);
   assert.match(live, /if \(!totalMatch\) return null/);
   assert.match(live, /unstable_cache/);

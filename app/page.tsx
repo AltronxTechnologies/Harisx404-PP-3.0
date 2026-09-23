@@ -4,10 +4,12 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { siteMetadata } from "./data/siteMetadata";
 import {
-  fetchProjects,
-  fetchTestimonials,
   formatDate,
 } from "./lib/utils";
+import {
+  fetchCachedProjects,
+  fetchCachedTestimonials,
+} from "./lib/public-page-data";
 import {
   fetchBlogIndexPosts,
   fetchBlogReactionSummaries,
@@ -76,9 +78,9 @@ const personJsonLd = {
 export default async function Home() {
   const [dbProjects, dbPosts, dbTestimonials, credentials] =
     await Promise.all([
-      fetchProjects(),
+      fetchCachedProjects(),
       fetchBlogIndexPosts().catch((): BlogIndexPost[] => []),
-      fetchTestimonials(),
+      fetchCachedTestimonials(),
       fetchCredentialCollection().catch(() => []),
     ]);
   const credentialSummary = summarizeCredentials(credentials);
