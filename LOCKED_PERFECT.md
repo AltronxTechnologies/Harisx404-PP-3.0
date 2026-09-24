@@ -2039,11 +2039,18 @@ screenshot are superseded by matched, locally owned vector artwork:
   shipped state, milestone rail, version record, and next-release marker in the
   locked Buildlog's slate visual language.
 
-`app/components/Navbar.tsx` changes only the two `Image` source paths. Card order,
-links, alt text, copy, geometry, object-fit, overlays, opacity, hover zoom, motion,
-dropdown morph, themes, focus behavior, and every other Navbar detail remain
-unchanged. Both assets are 1600x900, local, dependency-free, and center-safe under
+`app/components/Navbar.tsx` changes the two `Image` source paths and the limited
+theme-overlay treatment recorded below. Card order, links, alt text, copy, geometry,
+object-fit, hover zoom, motion, dropdown morph, focus behavior, and every other
+Navbar detail remain unchanged. Both assets are 1600x900, local, dependency-free, and center-safe under
 the existing responsive `object-cover` crop. Verified at 1024px and 1440px in
 light/dark and normal/reduced-motion modes: 8/8 combinations passed with both images
 loaded, zero overflow, zero failed requests, and zero browser errors. This limited
 image amendment is re-locked; no other Navbar change is authorized.
+
+The owner-authorized theme-overlay refinement keeps the 242x216px feature boxes and
+242x216px rendered images unchanged. The overlay is bottom-only at 58% (125px high,
+starting 91px from the top): light mode uses a white-to-transparent fade with
+neutral-950/neutral-700 copy, while dark mode uses a black-to-transparent fade with
+white/white-75 copy. The top 42% remains fully uncovered in both themes. Light mode
+uses 75% resting image opacity (90% hover); dark mode retains 60% (80% hover).

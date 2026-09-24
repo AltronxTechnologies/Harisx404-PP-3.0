@@ -550,19 +550,19 @@ export default function Navbar() {
                             href="/community-wall" 
                             aria-current={isRouteActive("/community-wall") ? "page" : undefined}
                             onClick={() => setIsDropdownOpen(false)}
-                            className="group relative flex h-full w-full flex-col justify-end overflow-hidden rounded-2xl bg-neutral-900 p-4 ring-1 ring-black/5 dark:ring-white/10 hover:ring-black/15 dark:hover:ring-white/25 transition-all duration-300 shadow-sm hover:shadow-md"
+                            className="group relative flex h-full w-full flex-col justify-end overflow-hidden rounded-2xl bg-neutral-100 p-4 ring-1 ring-black/5 transition-all duration-300 hover:ring-black/15 hover:shadow-md dark:bg-neutral-900 dark:ring-white/10 dark:hover:ring-white/25 shadow-sm"
                           >
                             <Image 
                               src="/images/nav-community-wall.svg"
                               alt="Community Wall"
                               fill
                               sizes="(max-width: 768px) 92vw, 250px"
-                              className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.08] opacity-60 group-hover:opacity-80 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+                              className="object-cover opacity-75 transition-[transform,opacity] duration-700 ease-out group-hover:scale-[1.08] group-hover:opacity-90 motion-reduce:transition-none motion-reduce:group-hover:scale-100 dark:opacity-60 dark:group-hover:opacity-80"
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                            <div className="absolute inset-x-0 bottom-0 h-[58%] bg-gradient-to-t from-white via-white/85 to-transparent dark:from-black/95 dark:via-black/65" />
                             <div className="relative z-10 flex flex-col items-start">
-                              <span className="font-sans font-bold text-lg text-white mb-0.5 tracking-tight group-hover:translate-x-0.5 transition-transform motion-reduce:transition-none motion-reduce:group-hover:translate-x-0">Community Wall</span>
-                              <p className="text-[13px] text-white/75 font-normal">Leave your mark — say hi!</p>
+                              <span className="mb-0.5 font-sans text-lg font-bold tracking-tight text-neutral-950 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0 dark:text-white">Community Wall</span>
+                              <p className="text-[13px] font-normal text-neutral-700 dark:text-white/75">Leave your mark — say hi!</p>
                             </div>
                           </Link>
                         </motion.div>
@@ -575,19 +575,19 @@ export default function Navbar() {
                             href="/buildlog"
                             aria-current={isRouteActive("/buildlog") ? "page" : undefined}
                             onClick={() => setIsDropdownOpen(false)}
-                            className="group relative flex h-full w-full flex-col justify-end overflow-hidden rounded-2xl bg-neutral-900 p-4 ring-1 ring-black/5 dark:ring-white/10 hover:ring-black/15 dark:hover:ring-white/25 transition-all duration-300 shadow-sm hover:shadow-md"
+                            className="group relative flex h-full w-full flex-col justify-end overflow-hidden rounded-2xl bg-neutral-100 p-4 ring-1 ring-black/5 transition-all duration-300 hover:ring-black/15 hover:shadow-md dark:bg-neutral-900 dark:ring-white/10 dark:hover:ring-white/25 shadow-sm"
                           >
                             <Image 
                               src="/images/nav-buildlog.svg"
                               alt="Buildlog"
                               fill
                               sizes="(max-width: 768px) 92vw, 250px"
-                              className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.08] opacity-60 group-hover:opacity-80 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+                              className="object-cover opacity-75 transition-[transform,opacity] duration-700 ease-out group-hover:scale-[1.08] group-hover:opacity-90 motion-reduce:transition-none motion-reduce:group-hover:scale-100 dark:opacity-60 dark:group-hover:opacity-80"
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                            <div className="absolute inset-x-0 bottom-0 h-[58%] bg-gradient-to-t from-white via-white/85 to-transparent dark:from-black/95 dark:via-black/65" />
                             <div className="relative z-10 flex flex-col items-start">
-                              <span className="font-sans font-bold text-lg text-white mb-0.5 tracking-tight group-hover:translate-x-0.5 transition-transform motion-reduce:transition-none motion-reduce:group-hover:translate-x-0">Buildlog</span>
-                              <p className="text-[13px] text-white/75 font-normal">What shipped and what comes next</p>
+                              <span className="mb-0.5 font-sans text-lg font-bold tracking-tight text-neutral-950 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0 dark:text-white">Buildlog</span>
+                              <p className="text-[13px] font-normal text-neutral-700 dark:text-white/75">What shipped and what comes next</p>
                             </div>
                           </Link>
                         </motion.div>
