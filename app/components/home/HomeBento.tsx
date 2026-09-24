@@ -832,28 +832,30 @@ export function GitHubActivityBento({
   const isCached = github?.freshness === "cached";
   return (
     <BentoCard height={height} appearance="home" showHoverGradient={false} className="!px-5 !py-4">
-      <div className="relative z-20 text-center">
-        <h3 className="text-[15px] font-medium text-text-primary sm:text-base">
-          <a
-            href="https://github.com/harisx404"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Open GitHub profile"
-            className="rounded-sm transition-colors hover:text-[#17633f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 motion-reduce:transition-none dark:hover:text-[#72d59b]"
-          >
-            GitHub activity
-          </a>
-        </h3>
+      <div className="z-20 text-center">
+        <div className="flex items-center justify-center gap-2">
+          <h3 className="text-[15px] font-medium text-text-primary sm:text-base">
+            <a
+              href="https://github.com/harisx404"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Open GitHub profile"
+              className="rounded-sm transition-colors hover:text-[#17633f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 motion-reduce:transition-none dark:hover:text-[#72d59b]"
+            >
+              GitHub activity
+            </a>
+          </h3>
+          <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2 py-1 font-mono text-[9px] font-semibold uppercase tracking-wider sm:text-[10px] ${hasActivity ? isCached ? "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300" : "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300" : "border-border-primary bg-neutral-100 text-text-secondary dark:bg-white/[0.05]"}`}>
+            <span className={`size-1.5 rounded-full ${hasActivity ? isCached ? "bg-amber-500" : "bg-emerald-500" : "bg-neutral-400"}`} />
+            {hasActivity ? isCached ? "Cached" : "Live" : "Unavailable"}
+          </span>
+        </div>
         {hasActivity && (
-          <p className="mt-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-text-secondary sm:text-[10px]">
-            <span className="font-semibold text-text-primary">{github!.contributions.toLocaleString("en-US")}</span>{" "}
-            contributions · last 12 months
+          <p data-github-total className="mt-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-text-secondary sm:text-[10px]">
+            <span className="font-semibold text-text-primary">{github!.totalContributions.toLocaleString("en-US")}</span>{" "}
+            contributions
           </p>
         )}
-        <span className={`absolute right-0 top-0 inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2 py-1 font-mono text-[9px] font-semibold uppercase tracking-wider sm:text-[10px] ${hasActivity ? isCached ? "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300" : "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300" : "border-border-primary bg-neutral-100 text-text-secondary dark:bg-white/[0.05]"}`}>
-          <span className={`size-1.5 rounded-full ${hasActivity ? isCached ? "bg-amber-500" : "bg-emerald-500" : "bg-neutral-400"}`} />
-          {hasActivity ? isCached ? "Cached" : "Live" : "Unavailable"}
-        </span>
       </div>
 
       {hasActivity ? (

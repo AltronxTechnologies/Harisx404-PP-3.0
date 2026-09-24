@@ -20,6 +20,7 @@ export type GitHubLive = {
   stars: number;
   followers: number;
   contributions: number;
+  totalContributions: number;
   /** Calendar week columns containing real daily dates, counts, and levels. */
   weeks: GitHubDay[][];
   freshness: "live" | "cached";
@@ -50,7 +51,11 @@ async function loadGitHubActivity(): Promise<GitHubLive | null> {
     ]);
     if (!userRes.ok || !contributionRes.ok) return cachedOrUnavailable();
 
-    const user = await userRes.json();
+    const user = (await userRes.json()) as {
+      public_repos?: number;
+      followers?: number;
+      created_at?: string;
+    };
     let stars = 0;
     if (reposRes.ok) {
       const repos = (await reposRes.json()) as { stargazers_count?: number }[];
@@ -63,6 +68,30 @@ async function loadGitHubActivity(): Promise<GitHubLive | null> {
     const totalMatch = html.match(/([\d,]+)\s+contributions?/i);
     if (!totalMatch) return cachedOrUnavailable();
     contributions = Number.parseInt(totalMatch[1].replace(/,/g, ""), 10);
+
+    const firstYear = new Date(user.created_at || "").getUTCFullYear();
+    const currentYear = new Date().getUTCFullYear();
+    if (!Number.isFinite(firstYear) || firstYear > currentYear) return cachedOrUnavailable();
+    const years = Array.from(
+      { length: currentYear - firstYear + 1 },
+      (_, index) => firstYear + index,
+    );
+    const annualResponses = await Promise.all(
+      years.map((year) =>
+        fetch(
+          `https://github.com/users/${HANDLE}/contributions?from=${year}-01-01&to=${year}-12-31`,
+          { ...REVALIDATE, signal },
+        ),
+      ),
+    );
+    if (annualResponses.some((response) => !response.ok)) return cachedOrUnavailable();
+    const annualHtml = await Promise.all(annualResponses.map((response) => response.text()));
+    const annualTotals = annualHtml.map((yearHtml) => {
+      const match = yearHtml.match(/([\d,]+)\s+contributions?/i);
+      return match ? Number.parseInt(match[1].replace(/,/g, ""), 10) : Number.NaN;
+    });
+    if (annualTotals.some((total) => !Number.isFinite(total))) return cachedOrUnavailable();
+    const totalContributions = annualTotals.reduce((sum, total) => sum + total, 0);
     const cellPattern = /data-date="(\d{4}-\d{2}-\d{2})"[^>]*data-level="(\d)"|data-level="(\d)"[^>]*data-date="(\d{4}-\d{2}-\d{2})"/g;
     const cells: GitHubDay[] = [];
     let match: RegExpExecArray | null;
@@ -98,6 +127,7 @@ async function loadGitHubActivity(): Promise<GitHubLive | null> {
       stars,
       followers: user.followers ?? 0,
       contributions,
+      totalContributions,
       weeks,
       freshness: "live",
       fetchedAt: new Date().toISOString(),
@@ -111,7 +141,7 @@ async function loadGitHubActivity(): Promise<GitHubLive | null> {
 
 const getCachedGitHubActivity = unstable_cache(
   loadGitHubActivity,
-  ["github-public-activity-v2"],
+  ["github-public-activity-v3"],
   { revalidate: 3600, tags: ["github-activity"] },
 );
 

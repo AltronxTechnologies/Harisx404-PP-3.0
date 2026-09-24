@@ -70,8 +70,10 @@ test("GitHub activity and credential cards use real bounded data contracts", asy
   assert.match(live, /freshness: "cached"/);
   assert.match(live, /tooltipPattern/);
   assert.match(live, /count: number/);
+  assert.match(live, /totalContributions/);
+  assert.match(live, /annualTotals\.reduce/);
   assert.match(live, /unstable_cache/);
-  assert.match(live, /github-public-activity-v2/);
+  assert.match(live, /github-public-activity-v3/);
   assert.match(githubServer, /await fetchGitHubActivity\(\)/);
   for (const source of [home, about]) {
     assert.match(source, /<Suspense fallback={<GitHubActivityBentoSkeleton/);

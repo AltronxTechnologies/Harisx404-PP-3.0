@@ -14,8 +14,8 @@
 - GitHub activity is isolated behind a card-level Suspense boundary and an hourly
   shared server cache, so a cold or unavailable GitHub response cannot delay the
   Home or About page shell.
-- The final portfolio-editorial card centers its title and precise rolling-year
-  total, keeps status unobtrusively pinned, and closes with a compact intensity
+- The final portfolio-editorial card pairs its title with live status, presents a
+  verified all-time total aggregated from every public calendar year, and closes with a compact intensity
   legend. A container-aware layout keeps 12–14px squares and renders
   exactly as many complete recent weeks as each card can hold, with a restrained
   neutral-to-emerald palette tuned separately
@@ -72,7 +72,7 @@
 | GitHub resilient states | Live, Cached, and neutral unavailable contracts verified |
 | Streamed response timing | Home 0.266s TTFB; About 0.338s TTFB |
 | Warm full response timing | Home 1.948s; About 1.694s |
-| Live GitHub data | 827 contributions rendered during verification |
+| Live GitHub data | 828 all-time public contributions rendered during verification |
 | Credential public contract | 5 published records, restricted fields only |
 | Credential regression | 5/5 passed |
 | `/stats` response | HTTP 404 |

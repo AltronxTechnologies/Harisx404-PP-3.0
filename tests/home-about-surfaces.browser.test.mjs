@@ -34,8 +34,14 @@ test("Home and About live replacement cards remain responsive and aligned", asyn
           const result = await page.evaluate(() => ({
             overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
             githubCards: [...document.querySelectorAll("h3")].filter((heading) => heading.textContent?.startsWith("GitHub activity")).length,
-            githubTotals: [...document.querySelectorAll("p")].filter((paragraph) =>
-              /contributions · last 12 months/.test(paragraph.textContent || ""),
+            githubInlineHeaders: [...document.querySelectorAll("h3")].filter(
+              (heading) =>
+                heading.textContent?.startsWith("GitHub activity") &&
+                /Live|Cached|Unavailable/.test(heading.parentElement?.textContent || ""),
+            ).length,
+            githubTotals: document.querySelectorAll("[data-github-total]").length,
+            githubTotalLabels: [...document.querySelectorAll("[data-github-total]")].filter((total) =>
+              /^[\d,]+ contributions$/.test(total.textContent?.trim() || ""),
             ).length,
             githubLegends: document.querySelectorAll("[aria-label='Contribution intensity from less to more']").length,
             contributionCalendars: document.querySelectorAll("[data-github-contribution-calendar]").length,
@@ -102,7 +108,9 @@ test("Home and About live replacement cards remain responsive and aligned", asyn
           }));
           assert.equal(result.overflow, 0, `${route} ${theme} ${width}px overflow`);
           assert.equal(result.githubCards, 1, `${route} ${theme} ${width}px GitHub card`);
+          assert.equal(result.githubInlineHeaders, 1, `${route} ${theme} ${width}px GitHub inline status`);
           assert.equal(result.githubTotals, result.contributionCalendars, `${route} ${theme} ${width}px GitHub total`);
+          assert.equal(result.githubTotalLabels, result.contributionCalendars, `${route} ${theme} ${width}px GitHub total label`);
           assert.equal(result.githubLegends, result.contributionCalendars, `${route} ${theme} ${width}px GitHub legend`);
           assert.equal(result.contributionCalendars + result.contributionFallbacks, 1, `${route} ${theme} ${width}px contribution state`);
           if (result.contributionCalendars) {
