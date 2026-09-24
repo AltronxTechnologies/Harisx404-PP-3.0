@@ -1,55 +1,55 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
   <title id="title">Buildlog release archive</title>
   <desc id="desc">A dark editorial release timeline with shipped versions, notes, and status markers.</desc>
-  <rect width="1600" height="900" fill="#111827"/>
-  <g stroke="#334155" stroke-width="1" opacity="0.55">
+  <rect width="1600" height="900" fill="#526579"/>
+  <g stroke="#d6e0e8" stroke-width="1" opacity="0.34">
     <path d="M0 120H1600M0 240H1600M0 360H1600M0 480H1600M0 600H1600M0 720H1600M0 840H1600"/>
     <path d="M160 0V900M400 0V900M640 0V900M880 0V900M1120 0V900M1360 0V900"/>
   </g>
-  <g fill="none" stroke="#475569" stroke-width="2">
+  <g fill="none" stroke="#dbe4eb" stroke-width="2" opacity="0.75">
     <path d="M86 82h42M86 82v42M1514 82h-42M1514 82v42"/>
     <path d="M86 818h42M86 818v-42M1514 818h-42M1514 818v-42"/>
   </g>
 
-  <text x="118" y="164" fill="#94a3b8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="24" letter-spacing="7">BUILDLOG / RELEASE ARCHIVE</text>
+  <text x="118" y="164" fill="#f1f5f9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="24" font-weight="700" letter-spacing="7">BUILDLOG / RELEASE ARCHIVE</text>
   <g transform="translate(112 238)">
-    <path d="M50 174H1322" stroke="#64748b" stroke-width="4"/>
-    <path d="M50 174H915" stroke="#34d399" stroke-width="4"/>
+    <path d="M50 174H1322" stroke="#dbe4eb" stroke-width="5"/>
+    <path d="M50 174H915" stroke="#34d399" stroke-width="6"/>
 
     <g transform="translate(0 0)">
-      <rect x="0" y="0" width="360" height="128" rx="18" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+      <rect x="0" y="0" width="360" height="128" rx="18" fill="#eef3f6" stroke="#d5dee5" stroke-width="2"/>
       <rect x="24" y="24" width="102" height="30" rx="15" fill="#064e3b"/>
       <text x="75" y="45" text-anchor="middle" fill="#a7f3d0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="15" font-weight="700" letter-spacing="2">SHIPPED</text>
-      <text x="24" y="88" fill="#f8fafc" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">v3.0 Foundation</text>
-      <text x="24" y="112" fill="#94a3b8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" letter-spacing="1">ARCHITECTURE / SYSTEMS</text>
-      <circle cx="50" cy="174" r="15" fill="#111827" stroke="#34d399" stroke-width="5"/>
+      <text x="24" y="88" fill="#172033" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">v3.0 Foundation</text>
+      <text x="24" y="112" fill="#526579" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" font-weight="700" letter-spacing="1">ARCHITECTURE / SYSTEMS</text>
+      <circle cx="50" cy="174" r="15" fill="#526579" stroke="#34d399" stroke-width="5"/>
       <path d="M43 174l5 5 10-12" fill="none" stroke="#a7f3d0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
     </g>
 
     <g transform="translate(452 222)">
-      <rect x="0" y="0" width="390" height="132" rx="18" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+      <rect x="0" y="0" width="390" height="132" rx="18" fill="#eef3f6" stroke="#d5dee5" stroke-width="2"/>
       <rect x="24" y="24" width="102" height="30" rx="15" fill="#064e3b"/>
       <text x="75" y="45" text-anchor="middle" fill="#a7f3d0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="15" font-weight="700" letter-spacing="2">SHIPPED</text>
-      <text x="24" y="89" fill="#f8fafc" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">v3.1 Polish pass</text>
-      <text x="24" y="113" fill="#94a3b8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" letter-spacing="1">UI / ACCESSIBILITY</text>
+      <text x="24" y="89" fill="#172033" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">v3.1 Polish pass</text>
+      <text x="24" y="113" fill="#526579" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" font-weight="700" letter-spacing="1">UI / ACCESSIBILITY</text>
       <path d="M50-48V0" stroke="#34d399" stroke-width="3" stroke-dasharray="7 8"/>
-      <circle cx="50" cy="-48" r="15" fill="#111827" stroke="#34d399" stroke-width="5"/>
+      <circle cx="50" cy="-48" r="15" fill="#526579" stroke="#34d399" stroke-width="5"/>
       <path d="M43-48l5 5 10-12" fill="none" stroke="#a7f3d0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
     </g>
 
     <g transform="translate(930 0)">
-      <rect x="0" y="0" width="360" height="128" rx="18" fill="#1e293b" stroke="#475569" stroke-width="2" stroke-dasharray="8 8"/>
+      <rect x="0" y="0" width="360" height="128" rx="18" fill="#e8edf1" stroke="#d5dee5" stroke-width="2" stroke-dasharray="8 8"/>
       <rect x="24" y="24" width="104" height="30" rx="15" fill="#78350f"/>
       <text x="76" y="45" text-anchor="middle" fill="#fde68a" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="15" font-weight="700" letter-spacing="2">PLANNED</text>
-      <text x="24" y="88" fill="#f8fafc" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">Next release</text>
-      <text x="24" y="112" fill="#94a3b8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" letter-spacing="1">RESEARCH / ITERATION</text>
-      <circle cx="50" cy="174" r="15" fill="#111827" stroke="#f59e0b" stroke-width="5"/>
+      <text x="24" y="88" fill="#172033" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">Next release</text>
+      <text x="24" y="112" fill="#526579" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" font-weight="700" letter-spacing="1">RESEARCH / ITERATION</text>
+      <circle cx="50" cy="174" r="15" fill="#526579" stroke="#f59e0b" stroke-width="5"/>
     </g>
   </g>
 
   <g transform="translate(112 775)">
-    <text x="0" y="0" fill="#64748b" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" letter-spacing="3">01</text>
-    <path d="M48-7h120" stroke="#475569" stroke-width="2"/>
-    <text x="190" y="0" fill="#94a3b8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" letter-spacing="3">BUILD / LEARN / DOCUMENT / REPEAT</text>
+    <text x="0" y="0" fill="#e2e8f0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" letter-spacing="3">01</text>
+    <path d="M48-7h120" stroke="#cbd5e1" stroke-width="2"/>
+    <text x="190" y="0" fill="#f1f5f9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" letter-spacing="3">BUILD / LEARN / DOCUMENT / REPEAT</text>
   </g>
 </svg>

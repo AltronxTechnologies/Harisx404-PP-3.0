@@ -2032,10 +2032,10 @@ The owner temporarily unlocked only the two large feature images in Navbar More.
 The former generic Community Wall reading photo and unrelated third-party changelog
 screenshot are superseded by matched, locally owned vector artwork:
 
-- `public/images/nav-community-wall.svg` uses the locked Community Wall's purple
+- `public/images/nav-community-wall.svg` uses the locked Community Wall's clear mid-purple
   postage-note language, visitor identities, publication state, and human-message
   composition.
-- `public/images/nav-buildlog.svg` uses the locked Buildlog's dark release archive,
+- `public/images/nav-buildlog.svg` uses the locked Buildlog's slate release archive,
   shipped/planned states, version notes, and progress timeline.
 
 `app/components/Navbar.tsx` changes only the two `Image` source paths. Card order,

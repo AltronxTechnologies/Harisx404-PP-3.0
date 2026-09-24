@@ -1,13 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
   <title id="title">Community Wall messages</title>
   <desc id="desc">A rich purple wall of postage-inspired visitor notes, profile marks, and friendly messages.</desc>
-  <rect width="1600" height="900" fill="#2b2140"/>
-  <g fill="#6d5a8b" opacity="0.32">
+  <rect width="1600" height="900" fill="#73598f"/>
+  <g fill="#eadcf5" opacity="0.38">
     <circle cx="74" cy="78" r="3"/><circle cx="154" cy="78" r="3"/><circle cx="234" cy="78" r="3"/><circle cx="314" cy="78" r="3"/><circle cx="394" cy="78" r="3"/><circle cx="474" cy="78" r="3"/><circle cx="554" cy="78" r="3"/><circle cx="634" cy="78" r="3"/><circle cx="714" cy="78" r="3"/><circle cx="794" cy="78" r="3"/><circle cx="874" cy="78" r="3"/><circle cx="954" cy="78" r="3"/><circle cx="1034" cy="78" r="3"/><circle cx="1114" cy="78" r="3"/><circle cx="1194" cy="78" r="3"/><circle cx="1274" cy="78" r="3"/><circle cx="1354" cy="78" r="3"/><circle cx="1434" cy="78" r="3"/><circle cx="1514" cy="78" r="3"/>
     <circle cx="74" cy="822" r="3"/><circle cx="154" cy="822" r="3"/><circle cx="234" cy="822" r="3"/><circle cx="314" cy="822" r="3"/><circle cx="394" cy="822" r="3"/><circle cx="474" cy="822" r="3"/><circle cx="554" cy="822" r="3"/><circle cx="634" cy="822" r="3"/><circle cx="714" cy="822" r="3"/><circle cx="794" cy="822" r="3"/><circle cx="874" cy="822" r="3"/><circle cx="954" cy="822" r="3"/><circle cx="1034" cy="822" r="3"/><circle cx="1114" cy="822" r="3"/><circle cx="1194" cy="822" r="3"/><circle cx="1274" cy="822" r="3"/><circle cx="1354" cy="822" r="3"/><circle cx="1434" cy="822" r="3"/><circle cx="1514" cy="822" r="3"/>
   </g>
 
-  <text x="116" y="154" fill="#c4b5fd" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="24" letter-spacing="7">COMMUNITY WALL / VISITOR NOTES</text>
+  <text x="116" y="154" fill="#faf5ff" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="24" font-weight="700" letter-spacing="7">COMMUNITY WALL / VISITOR NOTES</text>
   <g transform="translate(82 248) rotate(-4 250 170)">
     <rect x="0" y="0" width="500" height="320" rx="26" fill="#f6c6d9"/>
     <g fill="#2b2140" opacity="0.12">
@@ -53,7 +53,7 @@
   </g>
 
   <g transform="translate(118 790)">
-    <path d="M0 0h82" stroke="#8b75ad" stroke-width="2"/>
-    <text x="108" y="6" fill="#a998c4" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="17" letter-spacing="3">A SHARED CORNER OF THE WEB</text>
+    <path d="M0 0h82" stroke="#eadcf5" stroke-width="2"/>
+    <text x="108" y="6" fill="#faf5ff" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="17" letter-spacing="3">A SHARED CORNER OF THE WEB</text>
   </g>
 </svg>
