@@ -2199,7 +2199,7 @@ service-role client.
 `Content-Disposition`; Download therefore uses the uploaded filename. The public
 page is a stable Resume gateway rather than an embedded renderer: it exposes live
 filename, size, upload date, native-browser Open, exact-file Download, and concise
-Current version / Original document / Easy to access context. The decorative PDF
+Current version / Original presentation / Share with your team context. The decorative PDF
 sheet is desktop-only so tablet and mobile users reach metadata and actions without
 an unnecessary standalone illustration. This keeps the page
 responsive and visually consistent regardless of PDF page count, dimensions,
@@ -2213,4 +2213,24 @@ requires that migration to be applied to the connected Supabase project; this is
 tracked in `MANUAL_TASKS.md`. Until then, the public compatibility fallback remains
 available and fully tested. Resume integration now covers 5/5 contracts, including
 unauthenticated GET/POST/DELETE rejection, exact fallback bytes, secure download
-headers, arbitrary-page rendering source contracts, and route states.
+headers, native-viewing gateway contracts, and route states.
+
+### 2026-09-24 Resume reviewer-facing copy and typography re-lock
+
+The owner authorized a final Resume-only polish pass. Hero and card copy now speak
+to a visitor reviewing the document, including recruiters and hiring teams, rather
+than instructing the owner to save a copy for their own applications. The three
+supporting cards are **Current version**, **Original presentation**, and **Share
+with your team**; none refers to Admin controls. Filename metadata labels are
+11px rather than 9px, matching the established compact information scale. The
+locked page frame, paper texture, Instrument Serif hero, token colors, 56px
+hero-to-content gap, 112px CTA handoff, native PDF open/download contract, and
+desktop-only decorative illustration remain unchanged.
+
+Desktop light/dark visual review and responsive measurements at 768px, 390px, and
+360px confirmed no horizontal overflow or card clipping. At 360px the primary
+card spans 31-329px and both actions remain 48px high. TypeScript, targeted ESLint,
+Resume integration (5/5), navigation integration (4/4), preview integration
+(3/3), browser console, and `git diff --check` pass. The public Resume presentation
+is re-locked. Admin-managed Storage activation and a live upload/replace/delete
+cycle remain explicitly pending the migration recorded in `MANUAL_TASKS.md`.

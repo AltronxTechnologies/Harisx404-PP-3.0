@@ -12,11 +12,11 @@
   Admin; it never reconstructs or embeds the document.
 - One, two, or more pages and any PDF dimensions work without a layout or code
   change because Open uses the browser's native document viewer.
-- The hero provides 44px Download and Open actions. `/resume/file` preserves the
+- The document card provides 48px Download and Open actions. `/resume/file` preserves the
   original uploaded bytes and filename and supports inline or attachment delivery.
 - Filename, byte size, and the database-managed upload date update with the active
   document. Delete produces an intentional unavailable state until another upload.
-- Loading preserves hero and PDF-page geometry. Error recovery focuses its heading
+- Loading preserves hero and gateway-card geometry. Error recovery focuses its heading
   and offers retry, direct PDF access, and a safe route home.
 
 ## Corrected Issues
@@ -49,7 +49,7 @@
 | Mobile geometry | Passed at 390x844 and 360x640 |
 | 390px gateway bounds | Passed; no clipping or overflow |
 | Horizontal overflow | 0 at audited widths |
-| Primary PDF actions | 44px high |
+| Primary PDF actions | 48px high |
 | Page headings | One page `h1`; logical gateway card hierarchy |
 | Duplicate IDs | 0 |
 | Application console errors | 0 |
@@ -89,3 +89,22 @@ headers, exact-byte comparison, TypeScript, ESLint, and 5/5 Resume integration
 contracts pass. The connected Supabase environment still requires
 `migrations/2026_resume_document.sql` before live Admin mutation testing and final
 managed-storage sign-off.
+
+## Reviewer-Facing Final Pass
+
+The visitor-facing copy is directed to readers, recruiters, and hiring teams:
+
+- Current version: review the latest published copy and its update date.
+- Original presentation: open the PDF with its own formatting and links intact.
+- Share with your team: download a copy for hiring reviews, referrals, or
+  interview discussions.
+
+The hero and card descriptions no longer tell the Resume owner to save their own
+application copy. Metadata labels have been raised from 9px to 11px. The approved
+site-wide kicker, Instrument Serif heading scale, secondary-copy color, 16px and
+24px card radius tiers, 56px hero-to-card separation, and 112px CTA handoff remain
+unchanged. Light and dark desktop visuals were inspected. Measured page/card
+geometry shows no overflow at 768px, 390px, or 360px; the two file actions remain
+48px high. TypeScript, ESLint, Resume (5/5), navigation (4/4), preview (3/3),
+browser console, and `git diff --check` passed. Presentation is re-locked; the
+live Admin Storage migration remains pending as documented above.

@@ -40,17 +40,17 @@ const benefits = [
   {
     icon: RefreshCw,
     title: "Current version",
-    description: "The latest published Resume is available here whenever you need it.",
+    description: "Review the latest published copy, with its update date clearly noted.",
   },
   {
     icon: ScanText,
-    title: "Original document",
-    description: "Open the PDF with its layout, typography, links, and document structure preserved.",
+    title: "Original presentation",
+    description: "Open the PDF as prepared, with its formatting and links intact.",
   },
   {
     icon: Share2,
-    title: "Easy to access",
-    description: "Save a copy for applications, referrals, interviews, and offline access.",
+    title: "Share with your team",
+    description: "Download a copy for hiring reviews, referrals, or interview discussions.",
   },
 ] as const;
 
@@ -74,8 +74,8 @@ export default async function ResumePage() {
               </span>
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-pretty text-[15px] leading-6 text-text-secondary">
-              Open the current Resume in your browser or download the original PDF
-              for applications, referrals, and offline access.
+              Review the current Resume in its original format, or download a copy
+              to keep on file and share.
             </p>
           </header>
         </div>
@@ -119,7 +119,7 @@ export default async function ResumePage() {
                   </div>
 
                   <div className="flex flex-col justify-center p-5 sm:p-8 lg:p-10">
-                    <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-emerald-700 dark:text-emerald-400">
+                    <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-emerald-700 dark:text-emerald-400">
                       <span aria-hidden className="size-2 rounded-full bg-emerald-500" />
                       Current Resume
                     </div>
@@ -127,8 +127,8 @@ export default async function ResumePage() {
                       Ready when you are.
                     </h2>
                     <p className="mt-4 text-sm leading-6 text-text-secondary">
-                      View the PDF with your browser&apos;s full document controls, or
-                      save the exact published file to your device.
+                      Open the PDF to explore the details, or save the original file
+                      for later review.
                     </p>
 
                     <div className="mt-6 rounded-2xl border border-border-primary bg-neutral-50/80 p-4 dark:bg-white/[0.025]">
@@ -137,7 +137,7 @@ export default async function ResumePage() {
                       </p>
                       <dl className="mt-4 grid gap-4 border-t border-border-primary pt-4 sm:grid-cols-3 sm:gap-3">
                         <div>
-                          <dt className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-text-secondary">
+                          <dt className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-text-secondary">
                             <CalendarDays className="size-3.5" aria-hidden /> Updated
                           </dt>
                           <dd className="mt-1.5 text-sm font-medium text-text-primary">
@@ -145,7 +145,7 @@ export default async function ResumePage() {
                           </dd>
                         </div>
                         <div>
-                          <dt className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-text-secondary">
+                          <dt className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-text-secondary">
                             <HardDrive className="size-3.5" aria-hidden /> File size
                           </dt>
                           <dd className="mt-1.5 text-sm font-medium text-text-primary">
@@ -153,7 +153,7 @@ export default async function ResumePage() {
                           </dd>
                         </div>
                         <div>
-                          <dt className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-text-secondary">
+                          <dt className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-text-secondary">
                             <FileText className="size-3.5" aria-hidden /> Format
                           </dt>
                           <dd className="mt-1.5 text-sm font-medium text-text-primary">PDF document</dd>

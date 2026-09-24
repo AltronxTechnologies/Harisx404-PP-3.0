@@ -10,12 +10,13 @@ test("Resume renders the current-document gateway without embedding the PDF", as
   const html = await response.text();
 
   assert.match(html, /Experience, clearly/);
-  assert.match(html, /Open the current Resume/);
+  assert.match(html, /Review the current Resume/);
   assert.match(html, /href="\/resume\/file\?download=1/);
   assert.match(html, /href="\/resume\/file\?v=/);
   assert.match(html, /Current version/);
-  assert.match(html, /Original document/);
-  assert.match(html, /Easy to access/);
+  assert.match(html, /Original presentation/);
+  assert.match(html, /Share with your team/);
+  assert.match(html, /hiring reviews, referrals, or interview discussions/);
   assert.doesNotMatch(html, /Admin workspace/);
   assert.match(html, /From concept to creation/);
   assert.doesNotMatch(html, />Web resume</);
