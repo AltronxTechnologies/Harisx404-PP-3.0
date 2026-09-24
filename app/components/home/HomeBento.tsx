@@ -759,7 +759,7 @@ function ContributionCalendar({ weeks }: { weeks: GitHubLive["weeks"] }) {
       {activeDay && (
         <div
           data-github-activity-tooltip
-          className="pointer-events-none absolute left-1/2 top-[-30px] z-20 -translate-x-1/2 whitespace-nowrap rounded-md border border-border-primary bg-bg-primary px-2 py-1 font-mono text-[9px] tracking-wide text-text-secondary shadow-sm"
+          className="pointer-events-none absolute right-0 top-[-30px] z-20 whitespace-nowrap rounded-md border border-border-primary bg-bg-primary px-2 py-1 font-mono text-[9px] tracking-wide text-text-secondary shadow-sm"
           aria-hidden="true"
         >
           <span className="font-semibold text-text-primary">{activeDay.count}</span>{" "}
@@ -772,7 +772,9 @@ function ContributionCalendar({ weeks }: { weeks: GitHubLive["weeks"] }) {
         style={{ gridTemplateColumns: `repeat(${visibleWeeks.length}, ${layout.cellSize}px)` }}
         role="grid"
         aria-label="Recent GitHub contribution activity. Use arrow keys to inspect days."
-        onMouseLeave={() => setActiveDay(null)}
+        onPointerLeave={(event) => {
+          if (event.pointerType === "mouse") setActiveDay(null);
+        }}
       >
         {days.map((day, index) => {
           const level = day?.level ?? 0;
@@ -789,7 +791,15 @@ function ContributionCalendar({ weeks }: { weeks: GitHubLive["weeks"] }) {
               aria-label={label}
               title={label}
               data-contribution-day={day?.date || ""}
-              onMouseEnter={() => day && setActiveDay(day)}
+              onPointerEnter={(event) => {
+                if (day && event.pointerType !== "touch") setActiveDay(day);
+              }}
+              onPointerDown={(event) => {
+                if (!day) return;
+                setSelectedDate(day.date);
+                setActiveDay(day);
+                if (event.pointerType === "touch") event.currentTarget.focus();
+              }}
               onFocus={() => {
                 if (!day) return;
                 setSelectedDate(day.date);

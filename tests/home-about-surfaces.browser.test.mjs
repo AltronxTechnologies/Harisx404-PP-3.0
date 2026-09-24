@@ -156,6 +156,9 @@ test("Home and About live replacement cards remain responsive and aligned", asyn
             const tooltip = page.locator("[data-github-activity-tooltip]");
             await tooltip.waitFor();
             assert.match((await tooltip.textContent()) || "", /91 contributions/);
+            const tooltipRect = await tooltip.boundingBox();
+            const calendarRect = await page.locator("[data-github-contribution-calendar]").boundingBox();
+            assert.ok(tooltipRect && calendarRect && Math.abs(tooltipRect.x + tooltipRect.width - (calendarRect.x + calendarRect.width)) < 1.5, "GitHub tooltip top-right alignment");
 
             const selectedCell = page.locator("[data-github-contribution-calendar] > button[tabindex='0']");
             const selectedLabel = await selectedCell.getAttribute("aria-label");
@@ -169,6 +172,21 @@ test("Home and About live replacement cards remain responsive and aligned", asyn
             await panel.waitFor();
             assert.equal(await panel.locator("a[href='/buildlog']").count(), 1);
             assert.equal(await panel.locator("a[href='/stats']").count(), 0);
+          }
+
+          if (route === "/" && width === 320) {
+            const touchCell = page.locator("[data-github-contribution-calendar] > button[aria-label^='91 contributions']");
+            await touchCell.evaluate((cell) =>
+              cell.dispatchEvent(
+                new PointerEvent("pointerdown", {
+                  bubbles: true,
+                  pointerType: "touch",
+                }),
+              ),
+            );
+            const touchTooltip = page.locator("[data-github-activity-tooltip]");
+            await touchTooltip.waitFor();
+            assert.match((await touchTooltip.textContent()) || "", /91 contributions/);
           }
           await page.close();
         }
