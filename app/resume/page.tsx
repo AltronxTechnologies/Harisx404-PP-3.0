@@ -1,73 +1,73 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
+import { ArrowUpRight, Download, FileText } from "lucide-react";
 import { GridWrapper } from "@/app/components/GridWrapper";
-import { HeroTexture } from "@/app/components/HeroTexture";
+import { PaperHeroTexture } from "@/app/components/PaperHeroTexture";
+import { CtaSection } from "@/app/components/home/CtaSection";
+import {
+  RESUME_DOWNLOAD_NAME,
+  RESUME_PDF,
+  RESUME_REVISION,
+  type ResumeEntry,
+  resumeEducation,
+  resumeExperience,
+  resumeProjects,
+  resumeSkills,
+} from "@/app/data/resume";
 
 export const metadata: Metadata = {
   title: "Resume - Muhammad Haris",
   description:
-    "Muhammad Haris's resume — Cybersecurity Professional and Full-Stack Web Developer. Europass-format CV with PDF download.",
+    "Muhammad Haris's accessible web resume and downloadable PDF, covering cybersecurity, full-stack engineering, education, projects, and technical expertise.",
 };
 
-const RESUME_PDF = "/muhammad-haris-resume.pdf";
+const paperLink =
+  "rounded-sm text-[#1756ad] underline decoration-[#1e64c8]/35 underline-offset-2 outline-none transition-colors hover:text-[#103f82] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1e64c8]";
 
-/* ─── Europass-style building blocks ────────────────────────────────
-   The classic Europass layout: a narrow label column on the left and
-   the content on the right, separated by a thin rule, with the
-   signature Europass blue for section labels and headings. The sheet
-   itself stays white in both themes — like a printed document. */
-
-function Section({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+function Section({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <section className="grid grid-cols-1 gap-2 border-t border-neutral-200 py-6 sm:grid-cols-[180px_1fr] sm:gap-6">
-      <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#1e64c8] sm:pt-1">
+    <section className="grid grid-cols-1 gap-3 border-t border-neutral-200 py-5 md:grid-cols-[172px_minmax(0,1fr)] md:gap-8 md:py-6">
+      <h3 className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#1e64c8] md:pt-1">
         {label}
-      </h2>
+      </h3>
       <div className="min-w-0 space-y-5">{children}</div>
     </section>
   );
 }
 
-function Entry({
-  title,
-  meta,
-  org,
-  children,
-}: {
-  title: string;
-  meta: string;
-  org?: string;
-  children?: React.ReactNode;
-}) {
+function Entry({ entry }: { entry: ResumeEntry }) {
   return (
     <div>
-      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5">
-        <h3 className="text-[15px] font-semibold text-neutral-900">{title}</h3>
-        <span className="font-mono text-[11px] uppercase tracking-wider text-neutral-500">
-          {meta}
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-x-5">
+        <h4 className="text-[15px] font-semibold leading-5 text-neutral-900">
+          {entry.title}
+        </h4>
+        <span className="shrink-0 font-mono text-[11px] uppercase tracking-wider text-neutral-600">
+          {entry.period}
         </span>
       </div>
-      {org && <p className="mt-0.5 text-[13px] text-[#1e64c8]">{org}</p>}
-      {children && (
-        <div className="mt-2 space-y-1.5 text-[13.5px] leading-relaxed text-neutral-700">
-          {children}
-        </div>
+      <p className="mt-1 text-[13px] font-medium text-[#1756ad]">
+        {entry.organization}
+      </p>
+      {entry.description && (
+        <p className="mt-2 text-sm leading-[1.65] text-neutral-700">
+          {entry.description}
+        </p>
       )}
+      {entry.bullets && <Bullets items={entry.bullets} />}
     </div>
   );
 }
 
 function Bullets({ items }: { items: string[] }) {
   return (
-    <ul className="space-y-1.5">
+    <ul className="mt-2 space-y-1.5 text-sm leading-[1.65] text-neutral-700">
       {items.map((item) => (
-        <li key={item.slice(0, 32)} className="flex gap-2">
-          <span aria-hidden className="mt-[7px] size-1 shrink-0 rounded-full bg-[#1e64c8]" />
+        <li key={item.slice(0, 40)} className="flex gap-2.5">
+          <span
+            aria-hidden
+            className="mt-[9px] size-1 shrink-0 rounded-full bg-[#1e64c8]"
+          />
           <span>{item}</span>
         </li>
       ))}
@@ -75,320 +75,189 @@ function Bullets({ items }: { items: string[] }) {
   );
 }
 
-function SkillRow({ name, detail }: { name: string; detail: string }) {
-  return (
-    <div className="grid grid-cols-1 gap-0.5 sm:grid-cols-[160px_1fr] sm:gap-4">
-      <span className="text-[13px] font-semibold text-neutral-900">{name}</span>
-      <span className="text-[13.5px] leading-relaxed text-neutral-700">{detail}</span>
-    </div>
-  );
+function EntryList({ entries }: { entries: ResumeEntry[] }) {
+  return entries.map((entry) => <Entry key={entry.title} entry={entry} />);
 }
 
 export default function ResumePage() {
   return (
-    <div className="relative min-w-0">
-      {/* Decorative hatched side rails */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 left-0 hidden w-3 border-r border-border-primary sm:block lg:w-8 [background-image:repeating-linear-gradient(45deg,rgba(0,0,0,0.04)_0px,rgba(0,0,0,0.04)_1px,transparent_1px,transparent_7px)] dark:[background-image:repeating-linear-gradient(45deg,rgba(255,255,255,0.05)_0px,rgba(255,255,255,0.05)_1px,transparent_1px,transparent_7px)]"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 right-0 hidden w-3 border-l border-border-primary sm:block lg:w-8 [background-image:repeating-linear-gradient(45deg,rgba(0,0,0,0.04)_0px,rgba(0,0,0,0.04)_1px,transparent_1px,transparent_7px)] dark:[background-image:repeating-linear-gradient(45deg,rgba(255,255,255,0.05)_0px,rgba(255,255,255,0.05)_1px,transparent_1px,transparent_7px)]"
-      />
-      <HeroTexture />
+    <div className="relative mt-14">
       <GridWrapper>
-        <div className="mx-auto max-w-4xl px-2 pb-24 pt-20 sm:px-4 md:pt-28">
-          {/* Page header — site blueprint hero pattern */}
-          <div className="text-center">
-            <h1 className="relative z-[2] mx-auto max-w-xl text-balance text-center font-medium text-[46px] tracking-tight [text-shadow:rgba(255,255,255,0.05)_0px_4px_8px,rgba(255,255,255,0.2)_0px_8px_30px] max-sm:px-5 md:text-6xl">
-              <p className="mb-4 font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
-                Resume
-              </p>
-              <span className="inline-block text-text-primary [font-family:var(--font-instrument-serif),serif]">
-                The Paper{" "}
-                <span
-                  className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]"
-                  style={{
-                    maskImage: "linear-gradient(to right, black 70%, transparent 100%)",
-                    maskSize: "200% 100%",
-                    maskPosition: "left center",
-                    maskRepeat: "no-repeat",
-                  }}
-                >
-                  Version
-                </span>
+        <div className="relative px-4 xl:px-0">
+          <PaperHeroTexture className="-inset-x-2 bottom-0 top-[-128px] sm:-inset-x-3 sm:top-[-144px] md:top-[-176px] lg:inset-x-0" />
+          <header className="relative mx-auto max-w-3xl text-center">
+            <p className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
+              Resume
+            </p>
+            <h1 className="heading-glow mx-auto mt-4 max-w-xl text-balance [font-family:var(--font-instrument-serif),serif] text-[46px] font-medium leading-none tracking-tight text-text-primary md:text-[56px] md:tracking-[-1.5px]">
+              Experience, clearly{" "}
+              <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none] motion-reduce:animate-none">
+                documented.
               </span>
             </h1>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <p className="mx-auto mt-4 max-w-2xl text-pretty text-[15px] leading-6 text-text-secondary">
+              An accessible web resume with a downloadable PDF for applications,
+              referrals, and a closer look at the work behind the portfolio.
+            </p>
+            <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
               <a
                 href={RESUME_PDF}
-                download="Muhammad-Haris-Resume.pdf"
-                className="inline-flex items-center gap-2 rounded-full bg-neutral-900 px-6 py-3 text-sm font-medium text-white transition hover:bg-neutral-700 dark:bg-white dark:text-neutral-900 dark:hover:bg-white/85"
+                download={RESUME_DOWNLOAD_NAME}
+                className="inline-flex min-h-11 items-center gap-2.5 rounded-full border border-text-primary bg-text-primary px-5 text-sm font-medium text-bg-primary outline-none transition-colors hover:opacity-85 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary"
               >
-                <svg className="size-4" fill="currentColor" viewBox="0 0 256 256" aria-hidden>
-                  <path d="M224,152v56a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V152a8,8,0,0,1,16,0v56H208V152a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,132.69V40a8,8,0,0,0-16,0v92.69L93.66,106.34a8,8,0,0,0-11.32,11.32Z" />
-                </svg>
-                Download resume (PDF)
+                <Download className="size-4" aria-hidden />
+                Download PDF
               </a>
               <a
                 href={RESUME_PDF}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-full border border-border-primary px-6 py-3 text-sm font-medium text-text-secondary transition hover:border-neutral-400/70 active:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25 dark:active:border-white/25"
+                className="inline-flex min-h-11 items-center gap-2.5 rounded-full border border-border-primary px-5 text-sm font-medium text-text-secondary outline-none transition-colors hover:border-neutral-400/70 hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25"
               >
-                Open in new tab
+                Preview PDF
+                <ArrowUpRight className="size-4" aria-hidden />
+                <span className="sr-only">Opens in a new tab</span>
               </a>
             </div>
-          </div>
-
-          {/* ── The Europass sheet — a white printed document in both themes ── */}
-          <div className="mt-14 overflow-hidden rounded-2xl border border-border-primary bg-white shadow-[0_20px_60px_-30px_rgba(0,0,0,0.35)]">
-            {/* Europass-style masthead */}
-            <div className="border-b-4 border-[#1e64c8] px-6 py-6 sm:px-10 sm:py-8">
-              <div className="flex flex-wrap items-end justify-between gap-4">
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#1e64c8]">
-                    Curriculum Vitae
-                  </p>
-                  <h2 className="mt-2 text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
-                    Muhammad Haris
-                  </h2>
-                  <p className="mt-1 text-sm font-medium text-neutral-600">
-                    Cybersecurity Professional&ensp;|&ensp;Full-Stack Web Developer
-                  </p>
-                </div>
-                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-400">
-                  Europass format
-                </p>
-              </div>
-            </div>
-
-            <div className="px-6 pb-8 sm:px-10">
-              {/* Personal information */}
-              <Section label="Personal Information">
-                <div className="grid grid-cols-1 gap-x-8 gap-y-2 text-[13.5px] text-neutral-700 sm:grid-cols-2">
-                  <p>
-                    <span className="font-semibold text-neutral-900">Email:</span>{" "}
-                    <a className="text-[#1e64c8] hover:underline" href="mailto:itsharis.tech@gmail.com">
-                      itsharis.tech@gmail.com
-                    </a>
-                  </p>
-                  <p>
-                    <span className="font-semibold text-neutral-900">Location:</span>{" "}
-                    Islamabad / Malakand, Pakistan
-                  </p>
-                  <p>
-                    <span className="font-semibold text-neutral-900">LinkedIn:</span>{" "}
-                    <a
-                      className="text-[#1e64c8] hover:underline"
-                      href="https://www.linkedin.com/in/harisx404"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      linkedin.com/in/harisx404
-                    </a>
-                  </p>
-                  <p>
-                    <span className="font-semibold text-neutral-900">GitHub:</span>{" "}
-                    <a
-                      className="text-[#1e64c8] hover:underline"
-                      href="https://github.com/harisx404"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      github.com/harisx404
-                    </a>
-                  </p>
-                </div>
-              </Section>
-
-              {/* Professional summary */}
-              <Section label="Professional Summary">
-                <p className="text-[13.5px] leading-relaxed text-neutral-700">
-                  Information Technology Graduate (BSIT 2022–2026) ranked in the{" "}
-                  <strong className="text-neutral-900">Top 15% (84.6th percentile) nationally</strong>{" "}
-                  among 33,000+ graduates in the HEC/MoITT National Skill Competency Test. Achieved a{" "}
-                  <strong className="text-neutral-900">96% academic benchmark in Cybersecurity</strong>.
-                  Experienced in SOC Operations utilizing Wazuh SIEM for threat telemetry, while actively
-                  engaged in offensive security labs (TryHackMe, HackTheBox). Uniquely positioned at the
-                  intersection of security and engineering, building production-grade MERN architectures
-                  with rigorous OWASP Top 10 mitigation strategies — demonstrating application security
-                  expertise at the code level, not just in theory.
-                </p>
-              </Section>
-
-              {/* Work experience */}
-              <Section label="Work Experience">
-                <Entry
-                  title="Cyber Security Intern"
-                  org="CodeAlpha · Remote"
-                  meta="Jun 2026 – Jul 2026"
-                >
-                  <Bullets
-                    items={[
-                      "Configured a Network Intrusion Detection System (NIDS) with Snort/Suricata — traffic monitoring, alert rules, and intrusion response mechanisms.",
-                      "Built a custom Python network sniffer (Scapy/socket) to capture packets, analyze payload structures, and map data flows.",
-                      "Performed manual code reviews and static analysis to identify application vulnerabilities and document remediation steps.",
-                      "Designed security-awareness training modules on social engineering and phishing prevention.",
-                    ]}
-                  />
-                </Entry>
-                <Entry
-                  title="SOC Analyst Intern"
-                  org="Tech Hierarchy · Remote"
-                  meta="Mar 2026 – Apr 2026"
-                >
-                  <Bullets
-                    items={[
-                      "Utilized Wazuh SIEM to aggregate endpoint logs, monitor security events, and correlate anomalies across managed network infrastructure.",
-                      "Designed and simulated network segmentation in Cisco Packet Tracer, applying strict subnetting and isolation to restrict lateral movement.",
-                      "Conducted SOC simulation exercises via TryHackMe — network traffic analysis, incident triage, and response documentation.",
-                      "Applied endpoint protection methodologies and active defense strategies to strengthen threat identification workflows.",
-                    ]}
-                  />
-                </Entry>
-              </Section>
-
-              {/* Flagship projects */}
-              <Section label="Flagship Projects">
-                <Entry
-                  title="IntruShield NIDS"
-                  org="Suricata 7 · FastAPI · WebSockets · Next.js · GeoIP"
-                  meta="Jul 2026 – Present"
-                >
-                  <Bullets
-                    items={[
-                      "Autonomous NIDS and real-time SOC command center performing Layer 7 Deep Packet Inspection with sub-second enriched threat alerts.",
-                      "Async FastAPI backend enriches every alert with MaxMind GeoIP2 intelligence and streams over zero-polling WebSockets.",
-                      "Interactive dashboard with attack timelines, GeoIP threat maps, severity filters, and a hot-reload Suricata rule editor.",
-                    ]}
-                  />
-                </Entry>
-                <Entry
-                  title="MedicaLink HMS"
-                  org="TypeScript · MERN · Turborepo · WebSockets"
-                  meta="Jun 2026 – Present"
-                >
-                  <Bullets
-                    items={[
-                      "Engineered multi-tenant schema-level data isolation for strict healthcare compliance across hospital organizations.",
-                      "Rigorous RBAC across 5 permission tiers (Admin, Doctor, Nurse, Receptionist, Patient) with Zod validation on all API endpoints.",
-                      "Zero-trust production security stack: Helmet headers, strict CORS, and JWT auth via secure HTTP-only cookies.",
-                    ]}
-                  />
-                </Entry>
-                <Entry
-                  title="TourMate Malakand"
-                  org="React.js · Node.js · Express.js · MongoDB · Mapbox GL"
-                  meta="Sep 2025 – Mar 2026"
-                >
-                  <Bullets
-                    items={[
-                      "Comprehensive OWASP Top 10 mitigation stack — NoSQL injection prevention, XSS sanitization, and HPP normalization.",
-                      "bcrypt password hashing and HTTP-only JWTs for zero plaintext credential exposure.",
-                      "Custom node-cache proxy for the OpenWeatherMap API, cutting response latency by over 99% (1,150ms → 7ms).",
-                    ]}
-                  />
-                </Entry>
-              </Section>
-
-              {/* Education & certifications */}
-              <Section label="Education & Training">
-                <Entry
-                  title="Bachelor of Science, Information Technology"
-                  org="University of Malakand"
-                  meta="Sep 2022 – Sep 2026"
-                >
-                  <p>
-                    Grade: A+ (96% in Cybersecurity). Focus: Information Security, Computer Networks,
-                    AI. Enrolled in the KPITB Blockchain Technology Program.
-                  </p>
-                </Entry>
-                <Entry
-                  title="Top 15% Nationwide — National Skill Competency Test"
-                  org="HEC · MoITT · P@SHA · PSEB"
-                  meta="Apr 2026"
-                >
-                  <p>
-                    84.6th percentile out of 33,000+ computing graduates across 10 core technical
-                    domains.
-                  </p>
-                </Entry>
-                <Entry
-                  title="Master Computer Networking"
-                  org="Scaler Topics"
-                  meta="Sep 2025"
-                >
-                  <p>
-                    TCP/IP, DNS, DHCP, OSI Model, Subnetting, Routing protocols, and Network Security
-                    architecture.
-                  </p>
-                </Entry>
-                <Entry
-                  title="Full-Stack Web Development"
-                  org="Apna College (Delta)"
-                  meta="2024"
-                >
-                  <p>
-                    Rigorous training in modern frontend and backend development paradigms utilizing
-                    the MERN stack.
-                  </p>
-                </Entry>
-              </Section>
-
-              {/* Technical expertise */}
-              <Section label="Technical Expertise">
-                <div className="space-y-3">
-                  <SkillRow
-                    name="Security Operations"
-                    detail="Wazuh SIEM, Log Analysis, Endpoint Monitoring, Threat Detection, Network Segmentation, Alert Triage"
-                  />
-                  <SkillRow
-                    name="Application Security"
-                    detail="OWASP Top 10, NoSQLi Prevention, XSS Mitigation, HTTP Parameter Pollution, Rate Limiting, Helmet, CORS"
-                  />
-                  <SkillRow
-                    name="Auth & Access Control"
-                    detail="Stateless JWT (HTTP-only cookies), bcrypt Password Hashing, Role-Based Access Control (RBAC)"
-                  />
-                  <SkillRow
-                    name="Network Defense"
-                    detail="TCP/IP, DNS, DHCP, Subnetting, Routing Protocols, OSI Model, Cisco Packet Tracer, SSL/TLS Hardening"
-                  />
-                  <SkillRow
-                    name="Web Architecture"
-                    detail="MERN Stack (MongoDB, Express.js, React.js, Node.js), TypeScript, REST APIs, WebSockets, Tailwind CSS"
-                  />
-                  <SkillRow
-                    name="AI / ML"
-                    detail="Machine Learning, Deep Learning, Neural Networks, Scikit-learn, Pandas, NumPy, Matplotlib"
-                  />
-                  <SkillRow
-                    name="Infrastructure & Tools"
-                    detail="Git, GitHub, Linux, MongoDB Atlas, Vercel, Cloudinary CDN, Turborepo Monorepos"
-                  />
-                  <SkillRow name="Languages" detail="JavaScript, TypeScript, Python, C++" />
-                </div>
-              </Section>
-            </div>
-          </div>
-
-          {/* Bottom download CTA */}
-          <div className="mt-10 flex justify-center">
-            <a
-              href={RESUME_PDF}
-              download="Muhammad-Haris-Resume.pdf"
-              className="group inline-flex items-center gap-3 font-mono text-xs uppercase tracking-[0.25em] text-text-secondary transition-colors hover:text-text-primary"
-            >
-              Download the PDF
-              <span className="inline-flex size-8 items-center justify-center rounded-full border border-border-primary transition duration-300 group-hover:translate-y-0.5 group-hover:border-neutral-400/70 group-active:border-neutral-400/70 dark:group-hover:border-white/25 dark:group-active:border-white/25">
-                ↓
-              </span>
-            </a>
-          </div>
+          </header>
         </div>
       </GridWrapper>
+
+      <section aria-labelledby="resume-document-heading" className="mt-14 px-2 sm:px-4">
+        <div className="mx-auto max-w-5xl">
+          <div className="mb-6 flex flex-col gap-3 border-y border-border-primary px-2 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-4">
+            <div>
+              <h2
+                id="resume-document-heading"
+                className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary"
+              >
+                Web resume
+              </h2>
+              <p className="mt-1.5 text-sm text-text-secondary">
+                Structured for quick scanning, keyboard access, and readable detail.
+              </p>
+            </div>
+            <p className="font-mono text-[10px] uppercase tracking-widest text-text-secondary">
+              Updated {RESUME_REVISION} · PDF available
+            </p>
+          </div>
+
+          <article
+            aria-labelledby="resume-paper-title"
+            className="overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-[0_24px_70px_-36px_rgba(0,0,0,0.45)] dark:shadow-[0_26px_90px_-38px_rgba(0,0,0,0.9)]"
+          >
+            <header className="border-b-4 border-[#1e64c8] px-5 py-6 sm:px-8 sm:py-8 lg:px-10">
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.26em] text-[#1e64c8]">
+                    Curriculum Vitae
+                  </p>
+                  <h2
+                    id="resume-paper-title"
+                    className="mt-2 text-3xl font-bold tracking-tight text-neutral-950 sm:text-4xl"
+                  >
+                    Muhammad Haris
+                  </h2>
+                  <p className="mt-2 max-w-xl text-sm font-medium leading-5 text-neutral-700">
+                    Full-Stack Engineer · Cybersecurity Professional · AI/ML Practitioner
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 text-neutral-700">
+                  <FileText className="size-4 text-[#1e64c8]" aria-hidden />
+                  <p className="font-mono text-[11px] uppercase tracking-[0.16em]">
+                    Europass-inspired
+                  </p>
+                </div>
+              </div>
+            </header>
+
+            <div className="px-5 pb-7 sm:px-8 lg:px-10">
+              <Section label="Personal Information">
+                <address className="not-italic">
+                  <dl className="grid grid-cols-1 gap-x-8 gap-y-3 text-sm text-neutral-700 sm:grid-cols-2">
+                    <div>
+                      <dt className="font-semibold text-neutral-900">Email</dt>
+                      <dd className="mt-0.5 break-all">
+                        <a className={paperLink} href="mailto:itsharis.tech@gmail.com">
+                          itsharis.tech@gmail.com
+                        </a>
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="font-semibold text-neutral-900">Location</dt>
+                      <dd className="mt-0.5">Pakistan · working worldwide</dd>
+                    </div>
+                    <div>
+                      <dt className="font-semibold text-neutral-900">LinkedIn</dt>
+                      <dd className="mt-0.5 break-all">
+                        <a className={paperLink} href="https://www.linkedin.com/in/harisx404/" target="_blank" rel="noopener noreferrer">
+                          linkedin.com/in/harisx404
+                          <span className="sr-only"> (opens in a new tab)</span>
+                        </a>
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="font-semibold text-neutral-900">GitHub</dt>
+                      <dd className="mt-0.5 break-all">
+                        <a className={paperLink} href="https://github.com/harisx404" target="_blank" rel="noopener noreferrer">
+                          github.com/harisx404
+                          <span className="sr-only"> (opens in a new tab)</span>
+                        </a>
+                      </dd>
+                    </div>
+                  </dl>
+                </address>
+              </Section>
+
+              <Section label="Professional Summary">
+                <p className="text-sm leading-[1.7] text-neutral-700">
+                  BSIT graduate working across full-stack engineering,
+                  cybersecurity, and AI/ML. Ranked in Pakistan&apos;s Top 15% in the
+                  National Skill Competency Test among more than 33,000 graduates,
+                  with a 96% Cybersecurity coursework result and practical SOC
+                  experience using Wazuh SIEM. I build secure applications from the
+                  architecture upward, combining production engineering with OWASP
+                  controls, role-based access, and measurable performance gains.
+                </p>
+              </Section>
+
+              <Section label="Experience">
+                <EntryList entries={resumeExperience} />
+              </Section>
+
+              <Section label="Selected Projects">
+                <EntryList entries={resumeProjects} />
+              </Section>
+
+              <Section label="Education & Training">
+                <EntryList entries={resumeEducation} />
+              </Section>
+
+              <Section label="Technical Expertise">
+                <dl className="space-y-3.5">
+                  {resumeSkills.map(([name, detail]) => (
+                    <div
+                      key={name}
+                      className="grid grid-cols-1 gap-1 md:grid-cols-[154px_minmax(0,1fr)] md:gap-5"
+                    >
+                      <dt className="text-[13px] font-semibold text-neutral-900">
+                        {name}
+                      </dt>
+                      <dd className="text-sm leading-relaxed text-neutral-700">
+                        {detail}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </Section>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <div className="mt-28">
+        <CtaSection />
+      </div>
     </div>
   );
 }

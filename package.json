@@ -21,6 +21,7 @@
     "test:navigation": "node --test tests/navigation-coverage.integration.test.mjs",
     "test:preview": "node --test tests/preview-runtime.integration.test.mjs",
     "test:preview:browser": "node --test tests/preview-runtime.browser.test.mjs",
+    "test:resume": "node --test tests/resume.integration.test.mjs",
     "generate-previews": "npx tsx scripts/generate-link-previews.ts",
     "fix-previews": "npx tsx scripts/fix-failed-previews.ts"
   },

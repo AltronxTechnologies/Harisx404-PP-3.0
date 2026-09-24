@@ -115,7 +115,7 @@ Used **correctly** by: `about/page.tsx:75,128,145,238`, `home/Writings.tsx:104`,
 `app/contact/page.tsx:47-65` ·
 `app/credentials/page.tsx:71-89` · `app/legal/privacy/page.tsx:110-128` ·
 `app/legal/terms/page.tsx:80-98` · `app/links/page.tsx:179-197` ·
-`app/resume/page.tsx:104-122`
+Resume was removed from this list by its 2026-09-24 production redesign.
 
 Kicker conflicts: weight `font-medium` vs `font-normal` vs unset; colour
 `text-text-secondary` vs `text-black/80 dark:text-white/70` vs
@@ -129,7 +129,6 @@ The 10 clones **also have inconsistent top spacing**:
 - 8 use `mt-24 mb-14 md:mt-28`
 - `app/blog/page.tsx:105` uses `mb-16` + Instrument Serif + **dark-only** text-shadow
 - `app/links/page.tsx:179` adds `hidden … md:block`
-- `app/resume/page.tsx:104` drops `mt-24 mb-14` entirely
 
 **Unifying spacing will shift those page titles vertically.** Do not do it
 without an explicit decision. Unifying only font-weight/colour is safe.
@@ -214,12 +213,6 @@ Also `links/page.tsx:59,68` re-declare the mail/globe paths already in
 `ReachOutModal.tsx:194` (Lucide `size-8`) · `blog/BlogFilterBar.tsx:69` (Lucide `size-4`) ·
 `projects/ProjectsIndex.tsx:264` (bespoke `size-4`) · `SearchModal.tsx:356` (lucide `size-7`).
 The Navbar, modal, BlogFilterBar, and ProjectsIndex launchers now share Lucide.
-
-### `DoubleArrow`
-Shared: `app/components/home/DoubleArrow.tsx:6`.
-`app/resume/page.tsx:379` uses `tracking-[0.25em]` and a literal `↓`.
-
----
 
 ## Deliberately NOT to change (verified intentional)
 

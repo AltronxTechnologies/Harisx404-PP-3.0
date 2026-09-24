@@ -2137,3 +2137,44 @@ pass. The coverage contract is enforced by
 Search and Footer route coverage is re-locked. Do not remove a canonical public
 destination, expose drafts/future content, or add non-canonical fallback/admin/API
 routes without a new explicit owner request.
+
+## 39. FINAL OWNER LOCK - Resume Production Sign-off
+
+**Status:** Production-ready and frozen as of 2026-09-24.
+
+The complete `/resume` route is locked after a page-specific production redesign
+and audit. Frozen scope includes `app/resume/page.tsx`, `app/resume/loading.tsx`,
+`app/resume/error.tsx`, `app/data/resume.ts`, the canonical Resume PDF path in
+`app/data/siteMetadata.ts`, and the Resume-facing use of the shared Navbar, Search,
+CTA, and Footer.
+
+The page now uses the established `mt-14` frame, `GridWrapper` hero boundary,
+`PaperHeroTexture`, 46/56px Instrument Serif heading scale, shared color tokens,
+14px/15px content scale, 24px outer radius, 16px inner rhythm, 56px hero-to-content
+gap, and 112px CTA handoff. The document remains intentionally white in both themes
+as a printed-paper surface; its fixed neutral text and `#1e64c8` blue are scoped
+document colors and must not be converted to page-background theme tokens.
+
+The final document has one page `h1`, a labelled article, nested `h2`/`h3`/`h4`
+structure, semantic definition lists, an address block, explicit external-link
+announcements, visible focus treatment, 11px minimum visible document type, and no
+duplicate IDs. The former 2.52:1 metadata text, paragraph-inside-heading markup,
+duplicate page rails, stale HeroTexture, duplicate bottom download action, and
+stale `/static/haris_resume.pdf` metadata path are removed. Canonical facts align
+with the locked About data: 3.5/4.0 CGPA, 96% Cybersecurity coursework, Top 15%
+NSCT placement, and completed KPITB AI/ML training.
+
+The PDF remains `/muhammad-haris-resume.pdf` with a friendly download filename and
+secure new-tab preview. It returns HTTP 200 as `application/pdf`, has a valid PDF
+signature, and is larger than 100KB. Route-matched loading and focused recovery
+states are included. At 360px the paper remains inside the frame at 298px wide,
+page and body scroll widths equal the viewport, minimum visible document text is
+11px, and all primary actions remain 44px high. Audited desktop light/dark and
+mobile/tablet geometry show no clipping or overflow. Application console errors: 0.
+
+TypeScript, targeted ESLint, Resume integration (3/3), navigation integration
+(4/4), preview integration (3/3), and `git diff --check` pass. Audit evidence:
+`audit/19-resume-final-production-lock.md`.
+
+Do not restyle, restructure, reword, change Resume facts, alter the canonical PDF
+contract, or modify its loading/error states without a new explicit owner unlock.
