@@ -17,7 +17,7 @@ export const siteMetadata = {
   twitterHandle: "@harisx404",
   linkedin: "https://www.linkedin.com/in/harisx404/",
   credly: "https://www.credly.com/users/harisx404",
-  resume: "/muhammad-haris-resume.pdf",
+  resume: "/resume/file",
   locale: "en-US",
   analytics: {
     plausibleDataDomain: "harisx404.vercel.app",

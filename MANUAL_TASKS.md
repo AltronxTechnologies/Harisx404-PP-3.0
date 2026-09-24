@@ -260,3 +260,16 @@ To show the embedded scheduling calendar there:
 4. `migrations/2026_certifications_public_view.sql` was applied and verified on
    2026-09-08. Anonymous base-table access is blocked and the six-field public
    view is readable.
+
+## Resume Admin document management
+
+- [ ] Open the Supabase SQL Editor and run the complete
+      `migrations/2026_resume_document.sql` migration.
+- [ ] Confirm that `public.resume_document` contains one singleton row and that
+      the private `resume-documents` Storage bucket exists.
+- [ ] Sign in to `/admin`, open **Resume**, and upload the locally prepared PDF.
+- [ ] Verify `/resume` shows every uploaded page and the upload date, then confirm
+      **Download PDF** preserves the uploaded filename.
+- [ ] Replace the PDF once and confirm the old private object is removed.
+- [ ] Delete the PDF once and confirm `/resume` shows its unavailable state, then
+      upload it again to confirm add-after-delete behavior.

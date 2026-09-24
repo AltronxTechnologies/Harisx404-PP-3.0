@@ -2178,3 +2178,36 @@ TypeScript, targeted ESLint, Resume integration (3/3), navigation integration
 
 Do not restyle, restructure, reword, change Resume facts, alter the canonical PDF
 contract, or modify its loading/error states without a new explicit owner unlock.
+
+### 2026-09-24 owner-authorized Resume Admin document amendment
+
+The owner unlocked the Resume document source and viewer so the page always shows
+the exact PDF managed through Admin rather than a separately maintained HTML copy.
+The locked hero, page frame, theme behavior, CTA, Navbar, Search, and Footer remain
+unchanged. The former `Web resume` label and hard-coded HTML Resume are removed.
+
+The new contract is one active PDF at a time. `/admin/resume` accepts a PDF up to
+10MB, validates its MIME type and `%PDF-` signature, preserves the original bytes
+and filename, stores it in the private `resume-documents` Supabase bucket, and
+updates the database-managed timestamp. Replacement switches to a unique new
+object before deleting the former object. Delete removes the public pointer and
+private object; a later upload restores it. Every API method verifies the Supabase
+user with `getUser()` and fails closed against `ADMIN_EMAIL` before using the
+service-role client.
+
+`/resume/file` streams the exact active bytes with inline or attachment
+`Content-Disposition`; Download therefore uses the uploaded filename. The public
+page reads live metadata and renders all pages reported by PDF.js, with no fixed
+page count. Its responsive `ResizeObserver` viewer, selectable text layer,
+annotation layer, loading state, error fallback, direct-open control, filename,
+size, and upload date work at desktop and mobile widths. Before the first managed
+upload, the former static PDF remains a compatibility fallback; once Admin has
+ever configured Resume state, deletion intentionally shows no document.
+
+The schema and private bucket are defined by
+`migrations/2026_resume_document.sql`. Runtime upload/replace/delete verification
+requires that migration to be applied to the connected Supabase project; this is
+tracked in `MANUAL_TASKS.md`. Until then, the public compatibility fallback remains
+available and fully tested. Resume integration now covers 5/5 contracts, including
+unauthenticated GET/POST/DELETE rejection, exact fallback bytes, secure download
+headers, arbitrary-page rendering source contracts, and route states.

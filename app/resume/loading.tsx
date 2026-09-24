@@ -25,20 +25,8 @@ export default function ResumeLoading() {
 
         <div className="mt-14 px-2 sm:px-4">
           <div className="mx-auto max-w-5xl">
-            <div className={`mb-6 h-[74px] border-y border-border-primary bg-border-primary/10 ${pulse}`} />
-            <div className={`min-h-[1200px] rounded-3xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-8 ${pulse}`}>
-              <div className="h-28 border-b-4 border-[#1e64c8]/30" />
-              {Array.from({ length: 6 }, (_, index) => (
-                <div key={index} className="grid gap-4 border-t border-neutral-200 py-6 md:grid-cols-[172px_1fr] md:gap-8">
-                  <div className="h-3 w-32 rounded bg-neutral-200" />
-                  <div className="space-y-3">
-                    <div className="h-4 w-2/3 rounded bg-neutral-200" />
-                    <div className="h-3 w-full rounded bg-neutral-100" />
-                    <div className="h-3 w-5/6 rounded bg-neutral-100" />
-                  </div>
-                </div>
-              ))}
-            </div>
+            <div className={`mb-6 h-[58px] border-y border-border-primary bg-border-primary/10 ${pulse}`} />
+            <div className={`aspect-[1/1.414] rounded-3xl border border-neutral-200 bg-white shadow-sm ${pulse}`} />
           </div>
         </div>
       </div>

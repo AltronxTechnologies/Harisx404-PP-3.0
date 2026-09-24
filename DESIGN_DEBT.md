@@ -222,7 +222,7 @@ Changing any of these is a **regression**, not a fix.
 |---|---|
 | `app/components/EducationCards.tsx` | Card is **intentionally inverted** (`bg-[#0b0b10] dark:bg-[#f4f5f7]` — dark poster in light mode). The token is light-in-dark-mode, so tokenising makes text vanish. File header documents this. |
 | `app/components/SocialPill.tsx:29` `text-gray-400` | Icons sit on an always-dark `#3C3C3F` chip. |
-| `app/resume/page.tsx` (whole Europass sheet) | `bg-white` with **no dark variant** — a printed document in both themes. Tokenising = `#fafafa` on white. Includes the `text-[#1e64c8]` Europass brand blue. |
+| `app/components/resume/ResumePdfViewer.tsx` | Uploaded PDF pages retain their authored paper colors in both themes. Recoloring a PDF canvas/text layer would corrupt the managed document. |
 | Gradient / image covers | `home/CaseStudies.tsx:484,493,514,640` · `home/Writings.tsx:155,161` · `BlogCard.tsx:61,73` · `Navbar.tsx:505,529` · `guestbook/GuestbookActionCard.tsx:95,118` · `guestbook/GuestbookEntryCard.tsx:75` — white text on coloured/photo panels. |
 | `NewsletterSignUp.tsx:106` | Inside an always-dark `bg-dark-primary` panel. |
 | `CommunityWallCard.tsx:50` | Always-light card, no dark variant. |
