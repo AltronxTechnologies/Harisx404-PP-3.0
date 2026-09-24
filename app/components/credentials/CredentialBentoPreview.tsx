@@ -37,9 +37,9 @@ export function CredentialBentoPreview({ summary }: { summary: CredentialSummary
 
       <div className="relative flex items-center justify-center border-l border-border-primary dark:border-white/15">
         <div className="relative flex size-[48px] items-center justify-center rounded-full border border-neutral-400/60 shadow-[inset_0_0_0_2px_#fafafa,inset_0_0_0_3px_rgba(115,115,115,0.36)] transition-[border-color,box-shadow] duration-200 motion-reduce:transition-none group-hover:border-emerald-700/55 group-hover:shadow-[inset_0_0_0_2px_#ffffff,inset_0_0_0_3px_rgba(21,128,61,0.46)] group-active:border-emerald-700/55 group-active:shadow-[inset_0_0_0_2px_#ffffff,inset_0_0_0_3px_rgba(21,128,61,0.46)] dark:border-white/25 dark:shadow-[inset_0_0_0_2px_#121212,inset_0_0_0_3px_rgba(255,255,255,0.16)] dark:group-hover:border-emerald-300/45 dark:group-hover:shadow-[inset_0_0_0_2px_#151515,inset_0_0_0_3px_rgba(110,231,183,0.34)] dark:group-active:border-emerald-300/45 dark:group-active:shadow-[inset_0_0_0_2px_#151515,inset_0_0_0_3px_rgba(110,231,183,0.34)] sm:size-[52px] lg:size-[78px]">
-          <div className="flex size-8 flex-col items-center justify-center rounded-full border border-dashed border-neutral-400/70 sm:size-9 lg:size-12">
+          <div className="flex size-9 flex-col items-center justify-center rounded-full border border-dashed border-neutral-400/70 sm:size-10 lg:size-[58px]">
             <BadgeCheck className="size-3.5 text-emerald-700 dark:text-emerald-300 sm:size-4 lg:size-5" strokeWidth={1.6} />
-            <span className="mt-0.5 font-mono text-[5px] font-medium uppercase tracking-[0.08em] text-text-secondary sm:text-[6px] lg:mt-1 lg:text-[7px]">
+            <span className="mt-0.5 font-mono text-[5px] font-medium uppercase leading-none tracking-[0.06em] text-text-secondary sm:text-[6px] lg:mt-1 lg:text-[7px]">
               Verified
             </span>
           </div>
