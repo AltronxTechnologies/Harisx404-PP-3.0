@@ -241,7 +241,7 @@ export function MySiteGrid({ credentialSummary }: { credentialSummary: Credentia
                 CREDENTIALS
               </p>
               <h3 className="mt-2 font-display text-xl font-medium leading-snug text-text-primary md:text-lg lg:text-2xl">
-                A growing archive of learning, backed by proof.
+                Learning milestones, backed by proof.
               </h3>
             </div>
           </Link>

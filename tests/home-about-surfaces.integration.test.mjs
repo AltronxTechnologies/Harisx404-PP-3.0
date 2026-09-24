@@ -83,7 +83,7 @@ test("GitHub activity and credential cards use real bounded data contracts", asy
   assert.match(homeBento, /ResizeObserver/);
   assert.match(homeBento, /weekCount/);
   assert.match(mySiteGrid, /data-home-credential-archive/);
-  assert.match(mySiteGrid, /A growing archive of learning, backed by proof/);
+  assert.match(mySiteGrid, /Learning milestones, backed by proof/);
   assert.doesNotMatch(mySiteGrid, /credentialSummary\.items|published milestones/);
   assert.match(credentialData, /public_certifications/);
   assert.match(credentialSummary, /slice\(0, 3\)/);
