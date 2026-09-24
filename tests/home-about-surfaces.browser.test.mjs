@@ -93,9 +93,9 @@ test("Home and About live replacement cards remain responsive and aligned", asyn
             ).length,
             contributionFallbacks: document.querySelectorAll("[data-github-activity-fallback]").length,
             credentialLinks: document.querySelectorAll("a[href='/credentials'] [data-credential-bento-preview]").length,
-            aboutCredentialPassports: document.querySelectorAll("[data-about-credential-passport]").length,
+            aboutCredentialPassports: document.querySelectorAll("[data-about-credential-archive]").length,
             aboutCredentialPassportClipped: (() => {
-              const passport = document.querySelector("[data-about-credential-passport]");
+              const passport = document.querySelector("[data-about-credential-archive]");
               const card = passport?.closest("a")?.querySelector(":scope > div");
               if (!passport || !card) return false;
               const passportRect = passport.getBoundingClientRect();
@@ -108,7 +108,7 @@ test("Home and About live replacement cards remain responsive and aligned", asyn
               );
             })(),
             aboutCredentialLedgerClipped: (() => {
-              const passport = document.querySelector("[data-about-credential-passport]");
+              const passport = document.querySelector("[data-about-credential-archive]");
               if (!passport) return false;
               const passportRect = passport.getBoundingClientRect();
               return [...passport.querySelectorAll("[data-credential-ledger-row]")].some((row) => {
@@ -215,22 +215,6 @@ test("Home and About live replacement cards remain responsive and aligned", asyn
             assert.match((await touchTooltip.textContent()) || "", /91 contributions/);
           }
 
-          if (route === "/about" && width === 1440) {
-            const credentialLink = page.locator("a[href='/credentials']").filter({
-              has: page.locator("[data-about-credential-passport]"),
-            });
-            await credentialLink.focus();
-            await page.waitForFunction(() => {
-              const issuer = [...document.querySelectorAll("span")].find(
-                (element) => element.textContent === "Harvard University",
-              );
-              return issuer && getComputedStyle(issuer).opacity === "1";
-            });
-            const issuerOpacity = await page.getByText("Harvard University", { exact: true }).evaluate(
-              (issuer) => getComputedStyle(issuer).opacity,
-            );
-            assert.equal(issuerOpacity, "1", "About credential issuer reveal on keyboard focus");
-          }
           await page.close();
         }
       }

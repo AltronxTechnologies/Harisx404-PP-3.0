@@ -90,9 +90,11 @@ test("GitHub activity and credential cards use real bounded data contracts", asy
   assert.doesNotMatch(mySiteGrid, /credentialSummary\.items|published milestones/);
   assert.match(credentialData, /public_certifications/);
   assert.match(credentialSummary, /slice\(0, 3\)/);
-  assert.match(preview, /data-about-credential-passport/);
-  assert.match(preview, /Learning passport/);
-  assert.match(preview, /credential\?\.issuer/);
+  assert.match(preview, /data-about-credential-archive/);
+  assert.match(preview, /Certificates/);
+  assert.match(preview, /Badges/);
+  assert.match(preview, /Achievements/);
+  assert.doesNotMatch(preview, /credential\?\.issuer|Learning passport/);
   assert.doesNotMatch(preview, /<img|CredentialImage/);
   assert.match(adminAnalytics, /Top viewed articles/);
   assert.match(adminAnalytics, /Reaction breakdown/);
