@@ -694,11 +694,11 @@ function TechStackBento({
 
 /* ── 4. Live GitHub contribution calendar ────────────────────── */
 const contributionColors = [
-  "bg-[#e8ece9] hover:bg-[#dce3de] dark:bg-white/[0.075] dark:hover:bg-white/[0.13]",
-  "bg-[#b7dfc8] hover:bg-[#a1d4b7] dark:bg-[#17452e] dark:hover:bg-[#1d5839]",
-  "bg-[#6fbd91] hover:bg-[#58ad7d] dark:bg-[#25784d] dark:hover:bg-[#2d8d5b]",
-  "bg-[#2e9460] hover:bg-[#247e50] dark:bg-[#3baa6d] dark:hover:bg-[#48bd7d]",
-  "bg-[#0d5b36] hover:bg-[#08492b] dark:bg-[#70d99d] dark:hover:bg-[#89e3ad]",
+  "bg-[#dfe5e1] hover:bg-[#d2dbd5] dark:bg-white/[0.105] dark:hover:bg-white/[0.16]",
+  "bg-[#a6d8bb] hover:bg-[#91cca9] dark:bg-[#1e5638] dark:hover:bg-[#256b46]",
+  "bg-[#5caf83] hover:bg-[#469d70] dark:bg-[#2e8c59] dark:hover:bg-[#37a067]",
+  "bg-[#248653] hover:bg-[#1b7245] dark:bg-[#46ba78] dark:hover:bg-[#55ca87]",
+  "bg-[#07502e] hover:bg-[#043f24] dark:bg-[#80e3aa] dark:hover:bg-[#98edba]",
 ] as const;
 
 function formatContributionDate(date: string) {
@@ -821,7 +821,7 @@ function ContributionCalendar({ weeks }: { weeks: GitHubLive["weeks"] }) {
                   moveSelection(index, 7, event.currentTarget);
                 }
               }}
-              className={`rounded-[3px] ring-1 ring-inset ring-black/[0.035] transition-[background-color,box-shadow,filter] duration-150 hover:z-10 hover:brightness-110 hover:ring-2 hover:ring-emerald-700/40 hover:shadow-[0_0_0_3px_rgba(23,99,63,0.10),0_0_14px_rgba(23,99,63,0.18)] focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:shadow-[0_0_0_3px_rgba(23,99,63,0.12)] motion-reduce:transition-none disabled:pointer-events-none dark:ring-white/[0.035] dark:hover:ring-[#72d59b]/50 dark:hover:shadow-[0_0_0_3px_rgba(90,200,137,0.10),0_0_14px_rgba(90,200,137,0.18)] ${contributionColors[Math.max(0, Math.min(4, level))]}`}
+              className={`rounded-[3px] ring-1 ring-inset ring-black/[0.06] transition-[background-color,box-shadow,filter] duration-150 hover:z-10 hover:brightness-105 hover:ring-2 hover:ring-emerald-700/45 hover:shadow-[0_0_0_3px_rgba(23,99,63,0.10),0_0_14px_rgba(23,99,63,0.18)] focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:shadow-[0_0_0_3px_rgba(23,99,63,0.12)] motion-reduce:transition-none disabled:pointer-events-none dark:ring-white/[0.07] dark:hover:ring-[#80e3aa]/55 dark:hover:shadow-[0_0_0_3px_rgba(90,200,137,0.10),0_0_14px_rgba(90,200,137,0.18)] ${contributionColors[Math.max(0, Math.min(4, level))]}`}
               style={{ width: layout.cellSize, height: layout.cellSize }}
             />
           );
@@ -855,7 +855,7 @@ export function GitHubActivityBento({
               GitHub activity
             </a>
           </h3>
-          <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2 py-1 font-mono text-[9px] font-semibold uppercase tracking-wider sm:text-[10px] ${hasActivity ? isCached ? "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300" : "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300" : "border-border-primary bg-neutral-100 text-text-secondary dark:bg-white/[0.05]"}`}>
+          <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-wider sm:text-[10px] ${hasActivity ? isCached ? "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300" : "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300" : "border-border-primary bg-neutral-100 text-text-secondary dark:bg-white/[0.05]"}`}>
             <span className={`size-1.5 rounded-full ${hasActivity ? isCached ? "bg-amber-500" : "bg-emerald-500" : "bg-neutral-400"}`} />
             {hasActivity ? isCached ? "Cached" : "Live" : "Unavailable"}
           </span>
@@ -874,7 +874,7 @@ export function GitHubActivityBento({
               <span>Less</span>
               <span className="flex items-center gap-0.5 sm:gap-1" aria-hidden="true">
                 {contributionColors.map((color, index) => (
-                  <i key={index} className={`size-2 rounded-[2px] ring-1 ring-inset ring-black/[0.05] dark:ring-white/[0.05] ${color.split(" ")[0]}`} />
+                  <i key={index} className={`size-2 rounded-[2px] ring-1 ring-inset ring-black/[0.07] dark:ring-white/[0.08] ${color.split(" ")[0]}`} />
                 ))}
               </span>
               <span>High</span>

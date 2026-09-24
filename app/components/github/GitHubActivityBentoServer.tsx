@@ -22,7 +22,7 @@ export function GitHubActivityBentoSkeleton({
         <div className="relative text-center">
           <div className="mx-auto flex w-fit items-center gap-2">
             <div className="h-5 w-32 rounded bg-border-primary/40" />
-            <div className="h-5 w-14 rounded-full bg-border-primary/30" />
+            <div className="h-4 w-14 rounded-full bg-border-primary/30" />
           </div>
         </div>
         <div className="mt-3 min-h-[104px] flex-1 rounded-xl bg-border-primary/20" />
