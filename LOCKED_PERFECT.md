@@ -2025,3 +2025,24 @@ Do not modify, refactor, restyle, reorder, rename, move, or indirectly alter Abo
 or its frozen presentation/data-state contracts without a new explicit owner
 unlock. Work may now move to Navbar, which remains independently locked until the
 owner explicitly authorizes a specific Navbar change.
+
+### 2026-09-24 owner-authorized Navbar More feature-image amendment
+
+The owner temporarily unlocked only the two large feature images in Navbar More.
+The former generic Community Wall reading photo and unrelated third-party changelog
+screenshot are superseded by matched, locally owned vector artwork:
+
+- `public/images/nav-community-wall.svg` uses the locked Community Wall's purple
+  postage-note language, visitor identities, publication state, and human-message
+  composition.
+- `public/images/nav-buildlog.svg` uses the locked Buildlog's dark release archive,
+  shipped/planned states, version notes, and progress timeline.
+
+`app/components/Navbar.tsx` changes only the two `Image` source paths. Card order,
+links, alt text, copy, geometry, object-fit, overlays, opacity, hover zoom, motion,
+dropdown morph, themes, focus behavior, and every other Navbar detail remain
+unchanged. Both assets are 1600x900, local, dependency-free, and center-safe under
+the existing responsive `object-cover` crop. Verified at 1024px and 1440px in
+light/dark and normal/reduced-motion modes: 8/8 combinations passed with both images
+loaded, zero overflow, zero failed requests, and zero browser errors. This limited
+image amendment is re-locked; no other Navbar change is authorized.

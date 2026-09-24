@@ -553,7 +553,7 @@ export default function Navbar() {
                             className="group relative flex h-full w-full flex-col justify-end overflow-hidden rounded-2xl bg-neutral-900 p-4 ring-1 ring-black/5 dark:ring-white/10 hover:ring-black/15 dark:hover:ring-white/25 transition-all duration-300 shadow-sm hover:shadow-md"
                           >
                             <Image 
-                              src="/images/nav-community-wall.jpg"
+                              src="/images/nav-community-wall.svg"
                               alt="Community Wall"
                               fill
                               sizes="(max-width: 768px) 92vw, 250px"
@@ -578,7 +578,7 @@ export default function Navbar() {
                             className="group relative flex h-full w-full flex-col justify-end overflow-hidden rounded-2xl bg-neutral-900 p-4 ring-1 ring-black/5 dark:ring-white/10 hover:ring-black/15 dark:hover:ring-white/25 transition-all duration-300 shadow-sm hover:shadow-md"
                           >
                             <Image 
-                              src="/blog/introducing_blogfolio_v5_changelog_page.jpg"
+                              src="/images/nav-buildlog.svg"
                               alt="Buildlog"
                               fill
                               sizes="(max-width: 768px) 92vw, 250px"
