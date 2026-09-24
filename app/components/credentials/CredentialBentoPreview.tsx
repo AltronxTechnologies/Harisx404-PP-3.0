@@ -19,11 +19,11 @@ export function CredentialBentoPreview({ summary }: { summary: CredentialSummary
         </span>
 
         <div className="mt-1.5 flex items-end gap-2 sm:gap-2.5 lg:mt-2 lg:gap-3">
-          <span className="font-display text-[36px] font-medium leading-[0.8] tracking-[-0.05em] text-text-primary sm:text-[40px] lg:text-[58px]">
+          <span className="font-display text-[36px] font-medium leading-[0.8] tracking-[-0.05em] text-neutral-600 dark:text-neutral-300 sm:text-[40px] lg:text-[58px]">
             {String(summary.count).padStart(2, "0")}
           </span>
           <div className="mb-0.5 min-w-0 border-l border-border-primary pl-2 dark:border-white/15 lg:mb-1 lg:pl-3">
-            <span className="block text-[9px] font-medium leading-tight text-text-primary sm:text-[10px] lg:text-xs">
+            <span className="block text-[9px] font-medium leading-tight text-neutral-600 dark:text-neutral-300 sm:text-[10px] lg:text-xs">
               Documented
             </span>
             <span className="mt-0.5 block font-mono text-[7px] font-medium uppercase tracking-[0.1em] text-text-secondary sm:text-[8px] lg:text-[9px]">
