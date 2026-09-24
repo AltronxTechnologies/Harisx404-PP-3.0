@@ -13,9 +13,10 @@ test("Resume renders the current-document gateway without embedding the PDF", as
   assert.match(html, /Open the current Resume/);
   assert.match(html, /href="\/resume\/file\?download=1/);
   assert.match(html, /href="\/resume\/file\?v=/);
-  assert.match(html, /Always current/);
-  assert.match(html, /Original formatting/);
-  assert.match(html, /Ready to share/);
+  assert.match(html, /Current version/);
+  assert.match(html, /Original document/);
+  assert.match(html, /Easy to access/);
+  assert.doesNotMatch(html, /Admin workspace/);
   assert.match(html, /From concept to creation/);
   assert.doesNotMatch(html, />Web resume</);
   assert.doesNotMatch(html, /Professional Summary|Technical Expertise/);

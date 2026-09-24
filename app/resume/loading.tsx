@@ -27,7 +27,7 @@ export default function ResumeLoading() {
           <div className="mx-auto max-w-5xl">
             <div className="overflow-hidden rounded-3xl border border-border-primary bg-white dark:bg-white/[0.02]">
               <div className="grid lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)]">
-                <div className={`min-h-[300px] border-b border-border-primary bg-border-primary/10 lg:border-b-0 lg:border-r ${pulse}`} />
+                <div className={`hidden min-h-[340px] border-r border-border-primary bg-border-primary/10 lg:block ${pulse}`} />
                 <div className="space-y-5 p-5 sm:p-8 lg:p-10">
                   <div className={`h-3 w-28 rounded bg-border-primary/40 ${pulse}`} />
                   <div className={`h-10 w-64 max-w-full rounded bg-border-primary/35 ${pulse}`} />

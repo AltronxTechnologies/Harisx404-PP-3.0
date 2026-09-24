@@ -2199,7 +2199,9 @@ service-role client.
 `Content-Disposition`; Download therefore uses the uploaded filename. The public
 page is a stable Resume gateway rather than an embedded renderer: it exposes live
 filename, size, upload date, native-browser Open, exact-file Download, and concise
-Always current / Original formatting / Ready to share context. This keeps the page
+Current version / Original document / Easy to access context. The decorative PDF
+sheet is desktop-only so tablet and mobile users reach metadata and actions without
+an unnecessary standalone illustration. This keeps the page
 responsive and visually consistent regardless of PDF page count, dimensions,
 orientation, fonts, or future design changes. Before the first managed upload, the
 former static PDF remains a compatibility fallback; once Admin has ever configured

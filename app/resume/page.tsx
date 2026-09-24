@@ -39,18 +39,18 @@ function formatDate(value: string) {
 const benefits = [
   {
     icon: RefreshCw,
-    title: "Always current",
-    description: "This page points to the latest Resume published through the Admin workspace.",
+    title: "Current version",
+    description: "The latest published Resume is available here whenever you need it.",
   },
   {
     icon: ScanText,
-    title: "Original formatting",
-    description: "Open the exact PDF as designed, with native zoom, search, links, and printing.",
+    title: "Original document",
+    description: "Open the PDF with its layout, typography, links, and document structure preserved.",
   },
   {
     icon: Share2,
-    title: "Ready to share",
-    description: "Download the original file for applications, referrals, and offline access.",
+    title: "Easy to access",
+    description: "Save a copy for applications, referrals, interviews, and offline access.",
   },
 ] as const;
 
@@ -87,7 +87,7 @@ export default async function ResumePage() {
             <>
               <article className="overflow-hidden rounded-3xl border border-border-primary bg-white shadow-sm dark:bg-white/[0.02]">
                 <div className="grid lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)]">
-                  <div className="flex min-h-[280px] items-center justify-center border-b border-border-primary bg-neutral-50 p-5 dark:bg-white/[0.025] sm:min-h-[340px] sm:p-10 lg:border-b-0 lg:border-r">
+                  <div className="hidden min-h-[340px] items-center justify-center border-r border-border-primary bg-neutral-50 p-10 dark:bg-white/[0.025] lg:flex">
                     <div aria-hidden="true" className="w-full max-w-[236px] rounded-2xl border border-neutral-200 bg-white p-4 shadow-[0_20px_50px_-28px_rgba(15,23,42,0.45)] sm:max-w-[286px] sm:p-6">
                       <div className="flex items-center justify-between border-b-2 border-[#1e64c8] pb-4">
                         <span className="flex size-11 items-center justify-center rounded-xl bg-[#1e64c8]/10 text-[#1e64c8]">
