@@ -834,7 +834,7 @@ export function GitHubActivityBento({
     <BentoCard height={height} appearance="home" showHoverGradient={false} className="!px-5 !py-4">
       <div className="z-20 text-center">
         <div className="flex items-center justify-center gap-2">
-          <h3 className="text-[15px] font-medium text-text-primary sm:text-base">
+          <h3 className="text-base font-medium text-text-primary">
             <a
               href="https://github.com/harisx404"
               target="_blank"
@@ -851,17 +851,16 @@ export function GitHubActivityBento({
           </span>
         </div>
         {hasActivity && (
-          <p data-github-total className="mt-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-text-secondary sm:text-[10px]">
-            <span className="font-semibold text-text-primary">{github!.totalContributions.toLocaleString("en-US")}</span>{" "}
-            contributions
+          <p data-github-total className="mt-1 text-sm text-text-secondary md:text-base">
+            {github!.totalContributions.toLocaleString("en-US")} contributions
           </p>
         )}
       </div>
 
       {hasActivity ? (
-        <div className="z-20 mt-2 flex flex-1 flex-col items-center justify-center">
+        <div className="z-20 flex flex-1 flex-col items-center justify-center">
           <ContributionCalendar weeks={github!.weeks} />
-          <div className="mt-2 flex items-center justify-center gap-1.5 font-mono text-[8px] uppercase tracking-[0.12em] text-text-secondary sm:text-[9px]" aria-label="Contribution intensity from less to more">
+          <div className="mt-1 flex items-center justify-center gap-1.5 font-mono text-[8px] uppercase tracking-[0.12em] text-text-secondary sm:text-[9px]" aria-label="Contribution intensity from less to more">
             <span>Less</span>
             <span className="flex items-center gap-1" aria-hidden="true">
               {contributionColors.map((color, index) => (

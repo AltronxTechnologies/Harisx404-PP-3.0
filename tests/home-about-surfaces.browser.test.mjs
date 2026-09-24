@@ -43,6 +43,29 @@ test("Home and About live replacement cards remain responsive and aligned", asyn
             githubTotalLabels: [...document.querySelectorAll("[data-github-total]")].filter((total) =>
               /^[\d,]+ contributions$/.test(total.textContent?.trim() || ""),
             ).length,
+            githubTypographyMatches: (() => {
+              const githubHeading = [...document.querySelectorAll("h3")].find((heading) =>
+                heading.textContent?.startsWith("GitHub activity"),
+              );
+              const siblingHeading = [...document.querySelectorAll("h3")].find(
+                (heading) => heading.textContent === "Learn more about me",
+              );
+              const githubText = document.querySelector("[data-github-total]");
+              const siblingText = siblingHeading?.nextElementSibling;
+              if (!githubHeading || !siblingHeading || !githubText || !siblingText) return false;
+              const headingA = getComputedStyle(githubHeading);
+              const headingB = getComputedStyle(siblingHeading);
+              const textA = getComputedStyle(githubText);
+              const textB = getComputedStyle(siblingText);
+              return (
+                headingA.fontSize === headingB.fontSize &&
+                headingA.fontWeight === headingB.fontWeight &&
+                headingA.lineHeight === headingB.lineHeight &&
+                textA.fontSize === textB.fontSize &&
+                textA.lineHeight === textB.lineHeight &&
+                textA.marginTop === textB.marginTop
+              );
+            })(),
             githubLegends: document.querySelectorAll("[aria-label='Contribution intensity from less to more']").length,
             contributionCalendars: document.querySelectorAll("[data-github-contribution-calendar]").length,
             contributionCells: document.querySelectorAll("[data-github-contribution-calendar] > button").length,
@@ -111,6 +134,7 @@ test("Home and About live replacement cards remain responsive and aligned", asyn
           assert.equal(result.githubInlineHeaders, 1, `${route} ${theme} ${width}px GitHub inline status`);
           assert.equal(result.githubTotals, result.contributionCalendars, `${route} ${theme} ${width}px GitHub total`);
           assert.equal(result.githubTotalLabels, result.contributionCalendars, `${route} ${theme} ${width}px GitHub total label`);
+          assert.equal(result.githubTypographyMatches, true, `${route} ${theme} ${width}px GitHub typography parity`);
           assert.equal(result.githubLegends, result.contributionCalendars, `${route} ${theme} ${width}px GitHub legend`);
           assert.equal(result.contributionCalendars + result.contributionFallbacks, 1, `${route} ${theme} ${width}px contribution state`);
           if (result.contributionCalendars) {
