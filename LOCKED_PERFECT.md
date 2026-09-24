@@ -2061,6 +2061,15 @@ The final owner-authorized compact pass changes only static dimensions: panel wi
 minimum/mobile height `160px` -> `155px`, and links-column width `220px` ->
 `212px`. At 1440px the rendered panel is 720x287px, both feature cards are equal at
 236x211px, and the links column is 212px. The measured pill clip, dynamic `pillClip`
-calculation, `top center` transform origin, 24px final radius, 0.9s open easing,
+algorithm, `top center` transform origin, 24px final radius, 0.9s open easing,
 0.65s close easing, close content fade, reduced-motion branches, and all open/close
-state logic are byte-for-byte unchanged.
+state logic remain unchanged. Both panel-width constants inside the initial and
+resize-time `pillClip` measurements were synchronized from `740` to `720`; without
+that correction the compact panel started 20px narrower than the Navbar pill.
+
+The final morph was measured frame-by-frame. Opening begins at the exact 44px-high
+pill clip with 108.5px symmetric side insets, reaches within 0.5px of the full panel
+by 620ms, and settles at `inset(0 round 24px)` by 980ms. Closing reverses the same
+geometry, returns within 0.2px of the pill by 620ms, and removes the exiting panel
+cleanly by 760ms. Panel width/height remain 720x287px and transform origin remains
+`360px 0px` through every sampled frame; there is no positional or size jump.

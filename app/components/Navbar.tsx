@@ -47,7 +47,7 @@ export default function Navbar() {
     const pill = pillRef.current;
     if (!pill) return;
     const r = pill.getBoundingClientRect();
-    const panelW = Math.min(740, window.innerWidth * 0.92);
+    const panelW = Math.min(720, window.innerWidth * 0.92);
     const hx = Math.max((panelW - r.width) / 2, 0);
     setPillClip(
       `inset(0px ${hx.toFixed(1)}px calc(100% - ${r.height.toFixed(1)}px) ${hx.toFixed(1)}px round 22px)`
@@ -177,7 +177,7 @@ export default function Navbar() {
       const pill = pillRef.current;
       if (!pill) return;
       const r = pill.getBoundingClientRect();
-      const panelW = Math.min(740, window.innerWidth * 0.92);
+      const panelW = Math.min(720, window.innerWidth * 0.92);
       const hx = Math.max((panelW - r.width) / 2, 0);
       setPillClip(
         `inset(0px ${hx.toFixed(1)}px calc(100% - ${r.height.toFixed(1)}px) ${hx.toFixed(1)}px round 22px)`
