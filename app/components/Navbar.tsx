@@ -557,7 +557,7 @@ export default function Navbar() {
                               alt="Community Wall"
                               fill
                               sizes="(max-width: 768px) 92vw, 250px"
-                              className="object-cover opacity-75 transition-[transform,opacity] duration-700 ease-out group-hover:scale-[1.08] group-hover:opacity-90 motion-reduce:transition-none motion-reduce:group-hover:scale-100 dark:opacity-60 dark:group-hover:opacity-80"
+                              className="object-cover opacity-60 transition-[transform,opacity] duration-700 ease-out group-hover:scale-[1.08] group-hover:opacity-80 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                             />
                             <div className="absolute inset-x-0 bottom-0 h-[58%] bg-gradient-to-t from-white via-white/85 to-transparent dark:from-black/95 dark:via-black/65" />
                             <div className="relative z-10 flex flex-col items-start">
@@ -582,7 +582,7 @@ export default function Navbar() {
                               alt="Buildlog"
                               fill
                               sizes="(max-width: 768px) 92vw, 250px"
-                              className="object-cover opacity-75 transition-[transform,opacity] duration-700 ease-out group-hover:scale-[1.08] group-hover:opacity-90 motion-reduce:transition-none motion-reduce:group-hover:scale-100 dark:opacity-60 dark:group-hover:opacity-80"
+                              className="object-cover opacity-60 transition-[transform,opacity] duration-700 ease-out group-hover:scale-[1.08] group-hover:opacity-80 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                             />
                             <div className="absolute inset-x-0 bottom-0 h-[58%] bg-gradient-to-t from-white via-white/85 to-transparent dark:from-black/95 dark:via-black/65" />
                             <div className="relative z-10 flex flex-col items-start">

@@ -1,7 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1073" viewBox="0 0 1200 1073" role="img" aria-labelledby="title desc">
   <title id="title">Community Wall message stamp</title>
   <desc id="desc">A large postage-inspired visitor message surrounded by community identities.</desc>
-  <rect width="1600" height="900" fill="#755a92"/>
+  <rect width="1200" height="1073" fill="#755a92"/>
+  <g transform="translate(0 199) scale(0.75)">
 
   <g fill="#eadff4" opacity="0.34">
     <circle cx="80" cy="82" r="4"/><circle cx="168" cy="82" r="4"/><circle cx="256" cy="82" r="4"/><circle cx="344" cy="82" r="4"/><circle cx="432" cy="82" r="4"/><circle cx="520" cy="82" r="4"/><circle cx="608" cy="82" r="4"/><circle cx="696" cy="82" r="4"/><circle cx="784" cy="82" r="4"/><circle cx="872" cy="82" r="4"/><circle cx="960" cy="82" r="4"/><circle cx="1048" cy="82" r="4"/><circle cx="1136" cy="82" r="4"/><circle cx="1224" cy="82" r="4"/><circle cx="1312" cy="82" r="4"/><circle cx="1400" cy="82" r="4"/><circle cx="1488" cy="82" r="4"/>
@@ -53,5 +54,6 @@
     <circle cx="101" cy="82" r="42" fill="#047857"/>
     <path d="M81 82l14 14 29-37" fill="none" stroke="#ecfdf5" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
     <text x="101" y="156" text-anchor="middle" fill="#176052" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="15" font-weight="700" letter-spacing="3">LIVE</text>
+  </g>
   </g>
 </svg>

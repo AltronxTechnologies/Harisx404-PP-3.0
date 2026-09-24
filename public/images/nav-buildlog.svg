@@ -1,7 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1073" viewBox="0 0 1200 1073" role="img" aria-labelledby="title desc">
   <title id="title">Buildlog release dossier</title>
   <desc id="desc">A layered editorial release dossier with shipped milestones and version records.</desc>
-  <rect width="1600" height="900" fill="#43586c"/>
+  <rect width="1200" height="1073" fill="#43586c"/>
+  <g transform="translate(0 199) scale(0.75)">
 
   <g stroke="#dbe5ec" stroke-width="1" opacity="0.2">
     <path d="M0 112H1600M0 224H1600M0 336H1600M0 448H1600M0 560H1600M0 672H1600M0 784H1600"/>
@@ -52,5 +53,6 @@
     <rect width="186" height="186" rx="32" fill="#f59e0b"/>
     <text x="93" y="80" text-anchor="middle" fill="#422006" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700">v3.2</text>
     <text x="93" y="121" text-anchor="middle" fill="#78350f" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="15" font-weight="700" letter-spacing="3">LATEST</text>
+  </g>
   </g>
 </svg>

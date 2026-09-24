@@ -2042,9 +2042,8 @@ screenshot are superseded by matched, locally owned vector artwork:
 `app/components/Navbar.tsx` changes the two `Image` source paths and the limited
 theme-overlay and compact-geometry treatments recorded below. Card order, links,
 alt text, copy, object-fit, hover zoom, motion, dropdown morph, focus behavior, and
-every other Navbar detail remain unchanged. Both assets are 1600x900, local,
-dependency-free, and center-safe under
-the existing responsive `object-cover` crop. Verified at 1024px and 1440px in
+every other Navbar detail remain unchanged. Both assets are 1200x1073, local,
+dependency-free, and ratio-matched to the responsive `object-cover` frame. Verified at 1024px and 1440px in
 light/dark and normal/reduced-motion modes: 8/8 combinations passed with both images
 loaded, zero overflow, zero failed requests, and zero browser errors. This limited
 image amendment is re-locked; no other Navbar change is authorized.
@@ -2054,8 +2053,14 @@ compact pass it measures 122px high and starts 89px from the top. Light mode use
 white-to-transparent fade, while dark mode uses a black-to-transparent fade. Both
 feature cards match the adjacent button hierarchy exactly: neutral-900/white-90
 titles and shared `text-text-secondary` subtitles. The top 42% remains fully
-uncovered in both themes. Light mode uses 75% resting image opacity (90% hover);
-dark mode retains 60% (80% hover).
+uncovered in both themes. Both themes use identical 60% resting image opacity and
+80% hover opacity.
+
+The source canvases match the rendered feature-card ratio to expose the complete
+artwork without bars or meaningful crop: 236/211 = 1.11848 for the box and
+1200/1073 = 1.11836 for each SVG. The former 1600x900 compositions are scaled to
+75% and centered inside full-bleed, page-colored canvases; `object-cover` therefore
+fills every pixel while preserving the complete illustration.
 
 Feature subtitles are locked to one line. Community Wall remains `Leave your mark
 — say hi!`; Buildlog uses the shorter `Shipped & next steps` so it does not wrap at
