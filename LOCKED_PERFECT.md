@@ -1932,3 +1932,48 @@ The owner temporarily unlocked only the Footer group assignment for the existing
 `Extra`, directly above `Buildlog`. Its route, label, typography, interaction,
 responsive behavior, and every other Footer destination/order remain unchanged.
 The Footer is re-locked after source and browser verification.
+
+## 37. FINAL OWNER RE-LOCK - Home Production Sign-off
+
+- **Date locked:** 2026-09-24
+- **Locked at commit:** this lock commit (base `fdbb8b2`)
+- **Owner instruction:** test the complete Home page, fix every discovered issue,
+  and lock it when production-ready.
+- **Scope:** `/`, `app/page.tsx`, `app/loading.tsx`, all of
+  `app/components/home/**`, `app/components/github/GitHubActivityBentoServer.tsx`,
+  Home-facing credential summary/preview contracts, `app/lib/live-stats.ts`, and
+  `app/lib/public-page-data.ts`.
+- **Whole-page freeze:** hero, status row, social/technology bento, case studies,
+  writing cards, About teaser, testimonials, Behind-the-site cards, FAQ, CTA, and
+  every Home responsive/theme branch are frozen in their current approved state.
+- **GitHub activity freeze:** title/status row; fluid 12-14px recent-activity
+  squares; prominent light/dark five-level palette; top-right transient day detail;
+  mouse, pen, touch, and keyboard behavior; split footer with verified all-time
+  public contributions and `Less`-to-`High` key; hourly cache; 2.5-second deadline;
+  Suspense skeleton; cached fallback; and unavailable state are frozen. Public
+  yearly totals and chart data remain intentionally dynamic.
+- **Credentials gateway freeze:** the Home Behind-the-site middle card uses three
+  neutral rectangular proof/archive tiles, an automatically updating center count,
+  restrained emerald verification feedback, and `Learning milestones, backed by
+  proof.` No specific issuer/logo/credential may be added to this Home card without
+  an explicit unlock.
+- **Authorized Navbar correction:** only the side-control Framer `initial` props at
+  `app/components/Navbar.tsx:669,685` were stabilized to remove a reduced-motion
+  server/client hydration mismatch. Navbar appearance, timing, geometry, controls,
+  and all other previously locked behavior remain unchanged and re-locked.
+- **Verification:** TypeScript and targeted ESLint clean; Home/About contracts 3/3;
+  responsive light/dark matrices 24/24 across standard and protocol viewports;
+  full 13-route preview sweep; Blog 3/3; Contact 2/2; Links 2/2; Credentials 5/5;
+  Buildlog 10/10; Community Wall 4/4; Preview 3/3; all 23 Home internal links HTTP
+  200; zero browser errors, failed requests, broken images, overflow, duplicate IDs,
+  chart clipping, or Behind-the-site height spread; reduced-motion hydration clean;
+  CLS 0.00009; warm TTFB 0.257-0.283s; warm completion 0.568-1.028s.
+- **Intentional dense-chart exception:** contribution cells remain 12-14px because
+  the dense calendar presentation is essential. Accessibility is provided through
+  one roving tab stop, arrow navigation, full labels, touch selection, pointer
+  hover, and a chart-level interaction region.
+- **Audit evidence:** `audit/15-home-final-production-lock.md`.
+
+Do not modify, refactor, restyle, reorder, rename, move, or indirectly alter Home
+or its frozen presentation/data-state contracts without a new explicit owner
+unlock. Dynamic GitHub and credential data updates do not constitute an unlock.
