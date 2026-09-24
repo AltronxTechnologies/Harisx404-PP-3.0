@@ -18,6 +18,7 @@
     "test:community-wall:browser": "node --test tests/community-wall.browser.test.mjs",
     "test:home-about-surfaces": "node --test tests/home-about-surfaces.integration.test.mjs",
     "test:home-about-surfaces:browser": "node --test tests/home-about-surfaces.browser.test.mjs",
+    "test:navigation": "node --test tests/navigation-coverage.integration.test.mjs",
     "test:preview": "node --test tests/preview-runtime.integration.test.mjs",
     "test:preview:browser": "node --test tests/preview-runtime.browser.test.mjs",
     "generate-previews": "npx tsx scripts/generate-link-previews.ts",

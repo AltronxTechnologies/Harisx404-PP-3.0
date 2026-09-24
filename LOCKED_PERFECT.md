@@ -2106,3 +2106,34 @@ clip duration, greeting/cycle delay, card zoom, and decorative movement. TypeScr
 targeted ESLint, link integration (2/2), preview integration (3/3), Home/About
 surface integration (3/3), both local SVG responses, and `git diff --check` pass.
 Audit evidence: `audit/17-navbar-final-production-lock.md`.
+
+### 2026-09-24 Search and Footer complete-route coverage amendment
+
+The owner temporarily unlocked Search and Footer route coverage for a complete
+public-page audit. All 12 canonical static pages are present in both surfaces:
+Home, About, Projects, Blog, Community Wall, Buildlog, Contact, Credentials,
+Resume, Links, Privacy, and Terms. RSS and Sitemap are also present in both.
+Footer correctly links the Blog and Projects collection roots rather than placing
+every dynamic child in the global footer; published Blog and Project detail pages
+remain discoverable through dynamic Search and the sitemap.
+
+The static SearchModal and Footer lists required no presentation or destination
+changes. The measured defect was in dynamic Search visibility: it could expose
+locally retired draft posts or future publications and could not match remembered
+URL slugs. `app/api/ai/search/route.ts` now applies the same publication-time and
+local-draft rules as the public Blog routes and searches Blog and Project slugs in
+addition to titles and summaries. `app/sitemap.ts` now includes the previously
+omitted canonical Contact and Resume pages.
+
+All 14 Search/Footer destinations return HTTP 200. Live slug search returns the
+correct published article, the audited retired draft slug returns no result, and
+the Search dialog and Footer render without application console errors. TypeScript,
+targeted ESLint, navigation coverage (4/4), preview integration (3/3), Links
+integration (2/2), Home/About surface integration (3/3), and `git diff --check`
+pass. The coverage contract is enforced by
+`tests/navigation-coverage.integration.test.mjs`. Audit evidence:
+`audit/18-search-footer-route-coverage.md`.
+
+Search and Footer route coverage is re-locked. Do not remove a canonical public
+destination, expose drafts/future content, or add non-canonical fallback/admin/API
+routes without a new explicit owner request.

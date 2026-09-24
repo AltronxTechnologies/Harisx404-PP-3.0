@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getPublicSupabase } from "@/app/lib/supabase/safe";
 import { checkRateLimit } from "@/app/lib/rate-limit";
+import { isLocalBlogDraft } from "@/app/blog/data";
 
 interface SearchResult {
   title: string;
@@ -26,19 +27,29 @@ async function keywordSearch(query: string): Promise<SearchResult[]> {
   if (!supabase) throw new Error("Search database is unavailable");
 
   const pattern = `%${escapeLikePattern(query)}%`;
-  const [postTitles, postSummaries, projectTitles, projectDescriptions] =
+  const now = new Date().toISOString();
+  const [postTitles, postSummaries, postSlugs, projectTitles, projectDescriptions, projectSlugs] =
     await Promise.all([
       supabase
         .from("blog_posts")
         .select("title, slug, summary")
         .eq("status", "published")
+        .lte("published_at", now)
         .ilike("title", pattern)
         .limit(RESULTS_PER_TYPE),
       supabase
         .from("blog_posts")
         .select("title, slug, summary")
         .eq("status", "published")
+        .lte("published_at", now)
         .ilike("summary", pattern)
+        .limit(RESULTS_PER_TYPE),
+      supabase
+        .from("blog_posts")
+        .select("title, slug, summary")
+        .eq("status", "published")
+        .lte("published_at", now)
+        .ilike("slug", pattern)
         .limit(RESULTS_PER_TYPE),
       supabase
         .from("projects")
@@ -52,18 +63,24 @@ async function keywordSearch(query: string): Promise<SearchResult[]> {
         .eq("status", "published")
         .ilike("description", pattern)
         .limit(RESULTS_PER_TYPE),
+      supabase
+        .from("projects")
+        .select("title, slug, description")
+        .eq("status", "published")
+        .ilike("slug", pattern)
+        .limit(RESULTS_PER_TYPE),
     ]);
 
-  if (postTitles.error && postSummaries.error) {
+  if (postTitles.error && postSummaries.error && postSlugs.error) {
     throw new Error("Blog search failed");
   }
-  if (projectTitles.error && projectDescriptions.error) {
+  if (projectTitles.error && projectDescriptions.error && projectSlugs.error) {
     throw new Error("Project search failed");
   }
 
   const posts = uniqueByLink(
-    [...(postTitles.data ?? []), ...(postSummaries.data ?? [])]
-      .filter((post) => post?.slug)
+    [...(postTitles.data ?? []), ...(postSummaries.data ?? []), ...(postSlugs.data ?? [])]
+      .filter((post) => post?.slug && !isLocalBlogDraft(post.slug))
       .map((post) => ({
         title: post.title ?? "Untitled post",
         type: "blog" as const,
@@ -73,7 +90,7 @@ async function keywordSearch(query: string): Promise<SearchResult[]> {
   ).slice(0, RESULTS_PER_TYPE);
 
   const projects = uniqueByLink(
-    [...(projectTitles.data ?? []), ...(projectDescriptions.data ?? [])]
+    [...(projectTitles.data ?? []), ...(projectDescriptions.data ?? []), ...(projectSlugs.data ?? [])]
       .filter((project) => project?.slug)
       .map((project) => ({
         title: project.title ?? "Untitled project",
