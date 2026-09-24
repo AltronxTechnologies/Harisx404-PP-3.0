@@ -554,12 +554,12 @@ export default function Navbar() {
                           >
                             <Image 
                               src="/images/nav-community-wall.svg"
-                              alt="Community Wall"
+                              alt=""
                               fill
                               sizes="(max-width: 768px) 92vw, 250px"
                               className="object-cover opacity-60 transition-[transform,opacity] duration-700 ease-out group-hover:scale-[1.08] group-hover:opacity-80 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                             />
-                            <div className="absolute inset-x-0 bottom-0 h-[58%] bg-gradient-to-t from-white via-white/85 to-transparent dark:from-black/95 dark:via-black/65" />
+                            <div className="absolute inset-x-0 bottom-0 h-[58%] bg-gradient-to-t from-white via-white/85 to-transparent dark:from-[#1c1c1c] dark:via-[#1c1c1c]/75" />
                             <div className="relative z-10 flex flex-col items-start">
                               <span className="mb-0.5 font-sans text-lg font-bold tracking-tight text-neutral-900 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0 dark:text-white/90">Community Wall</span>
                               <p className="whitespace-nowrap text-[13px] font-normal text-text-secondary">Leave your mark — say hi!</p>
@@ -579,12 +579,12 @@ export default function Navbar() {
                           >
                             <Image 
                               src="/images/nav-buildlog.svg"
-                              alt="Buildlog"
+                              alt=""
                               fill
                               sizes="(max-width: 768px) 92vw, 250px"
                               className="object-cover opacity-60 transition-[transform,opacity] duration-700 ease-out group-hover:scale-[1.08] group-hover:opacity-80 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                             />
-                            <div className="absolute inset-x-0 bottom-0 h-[58%] bg-gradient-to-t from-white via-white/85 to-transparent dark:from-black/95 dark:via-black/65" />
+                            <div className="absolute inset-x-0 bottom-0 h-[58%] bg-gradient-to-t from-white via-white/85 to-transparent dark:from-[#1c1c1c] dark:via-[#1c1c1c]/75" />
                             <div className="relative z-10 flex flex-col items-start">
                               <span className="mb-0.5 font-sans text-lg font-bold tracking-tight text-neutral-900 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0 dark:text-white/90">Buildlog</span>
                               <p className="whitespace-nowrap text-[13px] font-normal text-text-secondary">Shipped &amp; next steps</p>

@@ -2041,8 +2041,10 @@ screenshot are superseded by matched, locally owned vector artwork:
 
 `app/components/Navbar.tsx` changes the two `Image` source paths and the limited
 theme-overlay and compact-geometry treatments recorded below. Card order, links,
-alt text, copy, object-fit, hover zoom, motion, dropdown morph, focus behavior, and
-every other Navbar detail remain unchanged. Both assets are 1200x1073, local,
+copy, object-fit, hover zoom, motion, dropdown morph, focus behavior, and every
+other Navbar detail remain unchanged. Both images use empty alt text because the
+adjacent visible link text already supplies each card's accessible name. Both
+assets are 1200x1073, local,
 dependency-free, and ratio-matched to the responsive `object-cover` frame. Verified at 1024px and 1440px in
 light/dark and normal/reduced-motion modes: 8/8 combinations passed with both images
 loaded, zero overflow, zero failed requests, and zero browser errors. This limited
@@ -2050,8 +2052,9 @@ image amendment is re-locked; no other Navbar change is authorized.
 
 The owner-authorized theme-overlay refinement is bottom-only at 58%; after the final
 compact pass it measures 122px high and starts 89px from the top. Light mode uses a
-white-to-transparent fade, while dark mode uses a black-to-transparent fade. Both
-feature cards match the adjacent button hierarchy exactly: neutral-900/white-90
+white-to-transparent fade, while dark mode fades from the panel-matched `#1c1c1c`
+surface through `#1c1c1c` at 75% opacity to transparent. Both feature cards match
+the adjacent button hierarchy exactly: neutral-900/white-90
 titles and shared `text-text-secondary` subtitles. The top 42% remains fully
 uncovered in both themes. Both themes use identical 60% resting image opacity and
 80% hover opacity.
@@ -2083,3 +2086,23 @@ by 620ms, and settles at `inset(0 round 24px)` by 980ms. Closing reverses the sa
 geometry, returns within 0.2px of the pill by 620ms, and removes the exiting panel
 cleanly by 760ms. Panel width/height remain 720x287px and transform origin remains
 `360px 0px` through every sampled frame; there is no positional or size jump.
+
+### 2026-09-24 Navbar final production re-lock
+
+The complete Navbar system is re-locked after the owner-authorized More amendment
+and final production audit. Scope includes `app/components/Navbar.tsx`, its use of
+`app/components/ThemeToggle.tsx`, the Search and Reach Out launch controls, and the
+two local More feature images. The approved desktop navigation, mobile compact
+pill, centered side-control rail, More morph, feature-card geometry, active-route
+states, theme behavior, keyboard behavior, dialog handoffs, and responsive
+breakpoint behavior must not be changed without a new explicit owner unlock.
+
+Final runtime checks confirmed desktop and mobile Search focus placement and focus
+restoration, Reach Out focus placement and restoration, theme toggling in both
+directions, More keyboard opening and Escape restoration, outside-pointer close,
+route semantics, and the absence of horizontal overflow or application console
+errors. Reduced motion keeps the approved static geometry while removing the More
+clip duration, greeting/cycle delay, card zoom, and decorative movement. TypeScript,
+targeted ESLint, link integration (2/2), preview integration (3/3), Home/About
+surface integration (3/3), both local SVG responses, and `git diff --check` pass.
+Audit evidence: `audit/17-navbar-final-production-lock.md`.
