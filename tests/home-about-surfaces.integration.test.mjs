@@ -42,10 +42,11 @@ test("public Stats discovery is retired without duplicate Buildlog links", async
 });
 
 test("GitHub activity and credential cards use real bounded data contracts", async () => {
-  const [live, githubServer, homeBento, home, about, credentialData, credentialSummary, preview, adminAnalytics, adminSidebar, adminLayout, adminDashboard, serverStats, lighthouse, buildStats, credentialSeed] = await Promise.all([
+  const [live, githubServer, homeBento, mySiteGrid, home, about, credentialData, credentialSummary, preview, adminAnalytics, adminSidebar, adminLayout, adminDashboard, serverStats, lighthouse, buildStats, credentialSeed] = await Promise.all([
     readFile(new URL("../app/lib/live-stats.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/components/github/GitHubActivityBentoServer.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/components/home/HomeBento.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/home/MySiteGrid.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/about/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/credentials/data.ts", import.meta.url), "utf8"),
@@ -81,6 +82,9 @@ test("GitHub activity and credential cards use real bounded data contracts", asy
   assert.match(homeBento, /Use arrow keys to inspect days/);
   assert.match(homeBento, /ResizeObserver/);
   assert.match(homeBento, /weekCount/);
+  assert.match(mySiteGrid, /data-home-credential-archive/);
+  assert.match(mySiteGrid, /A growing archive of learning, backed by proof/);
+  assert.doesNotMatch(mySiteGrid, /credentialSummary\.items|published milestones/);
   assert.match(credentialData, /public_certifications/);
   assert.match(credentialSummary, /slice\(0, 3\)/);
   assert.match(preview, /credential\.issuer\.trim\(\)\.charAt\(0\)/);

@@ -30,8 +30,10 @@
   server caches that are invalidated by their Admin mutation routes.
 - Home Behind-the-site and About bento Stats cards now render published credential
   summaries from the locked restricted six-field credential view.
-- Credential teasers show count, up to three Admin-ordered issuers, initials, and
-  verification marks without loading third-party media or exposing private fields.
+- The Home credential gateway uses a timeless proof-archive illustration and an
+  automatically updating published count, without coupling the card to specific
+  issuers. About retains up to three Admin-ordered issuer previews without loading
+  third-party media or exposing private fields.
 - Navbar More contains exactly one Buildlog feature card; mobile Search includes
   Buildlog. Footer contains one Buildlog link and no Stats link.
 

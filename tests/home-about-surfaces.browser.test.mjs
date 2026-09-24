@@ -71,6 +71,17 @@ test("Home and About live replacement cards remain responsive and aligned", asyn
             ).length,
             contributionFallbacks: document.querySelectorAll("[data-github-activity-fallback]").length,
             credentialLinks: document.querySelectorAll("a[href='/credentials'] [data-credential-bento-preview]").length,
+            homeCredentialArchives: document.querySelectorAll("[data-home-credential-archive]").length,
+            homeCredentialArchiveText: document.querySelector("[data-home-credential-archive]")?.textContent || "",
+            siteCardHeightSpread: (() => {
+              const archive = document.querySelector("[data-home-credential-archive]");
+              const grid = archive?.closest("a")?.parentElement?.parentElement;
+              const cards = [...(grid?.children || [])]
+                .map((column) => column.querySelector(":scope > a"))
+                .filter(Boolean)
+                .map((card) => card.getBoundingClientRect().height);
+              return cards.length === 3 ? Math.max(...cards) - Math.min(...cards) : 0;
+            })(),
             statsLinks: document.querySelectorAll("a[href='/stats']").length,
             shortCards: [...document.querySelectorAll("[data-github-contribution-calendar]")].filter(
               (calendar) => calendar.getBoundingClientRect().height < 68,
@@ -104,6 +115,11 @@ test("Home and About live replacement cards remain responsive and aligned", asyn
             assert.equal(result.contributionLabels, result.datedContributionCells, `${route} ${theme} ${width}px contribution labels`);
           }
           assert.equal(result.credentialLinks, 1, `${route} ${theme} ${width}px credential card`);
+          assert.equal(result.homeCredentialArchives, route === "/" ? 1 : 0, `${route} ${theme} ${width}px generic credential archive`);
+          if (route === "/") {
+            assert.doesNotMatch(result.homeCredentialArchiveText, /Harvard|Cisco|Microsoft/);
+            assert.ok(result.siteCardHeightSpread < 1, `${route} ${theme} ${width}px Behind-the-site card alignment`);
+          }
           assert.equal(result.statsLinks, 0, `${route} ${theme} ${width}px retired Stats links`);
           assert.equal(result.shortCards, 0, `${route} ${theme} ${width}px chart geometry`);
           assert.equal(result.scrapbookOverlap, false, `${route} ${theme} ${width}px scrapbook overlap`);

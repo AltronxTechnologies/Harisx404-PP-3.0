@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import { BadgeCheck } from "lucide-react";
 import { SectionHeading } from "./SectionHeading";
-import { CredentialBentoPreview } from "@/app/components/credentials/CredentialBentoPreview";
 import type { CredentialSummary } from "@/app/credentials/summary";
 
 const cardBase =
@@ -74,6 +74,50 @@ function Ambient() {
         className="pointer-events-none absolute inset-0 z-10 rounded-[inherit] bg-gradient-to-br from-transparent via-transparent to-black/5 opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100 dark:to-white/5"
       />
     </>
+  );
+}
+
+function CredentialArchivePreview({ count, pulse }: { count: number; pulse: boolean }) {
+  const documentClass = `flex h-[82px] w-[68px] flex-col justify-between rounded-xl border bg-neutral-50/80 p-2.5 shadow-sm transition-[border-color,background-color,box-shadow] duration-300 motion-reduce:transition-none sm:w-[76px] md:w-12 md:p-2 lg:w-[76px] lg:p-2.5 dark:bg-white/[0.035] ${
+    pulse
+      ? "border-emerald-500/35 bg-emerald-50/50 shadow-md dark:border-emerald-400/25 dark:bg-emerald-400/[0.04]"
+      : "border-border-primary group-hover:border-emerald-600/25 group-hover:bg-emerald-50/40 group-hover:shadow-md dark:group-hover:border-emerald-300/20 dark:group-hover:bg-emerald-300/[0.035]"
+  }`;
+
+  const document = (index: number) => (
+    <div className={documentClass}>
+      <div className="flex items-center justify-between">
+        <span className="size-2 rounded-full border border-emerald-700/30 bg-emerald-500/15 dark:border-emerald-300/30 dark:bg-emerald-300/15" />
+        <span className="font-mono text-[7px] uppercase tracking-widest text-text-secondary">Proof</span>
+      </div>
+      <div className="space-y-1.5">
+        <span className={`block h-1 rounded-full bg-neutral-300/80 transition-[width,background-color] duration-500 dark:bg-white/15 ${index === 0 ? "w-full group-hover:w-4/5" : "w-4/5 group-hover:w-full"}`} />
+        <span className={`block h-1 rounded-full bg-neutral-200 transition-[width,background-color] duration-500 dark:bg-white/10 ${index === 0 ? "w-2/3 group-hover:w-1/2" : "w-1/2 group-hover:w-2/3"}`} />
+      </div>
+      <span className="h-px w-full bg-border-primary" />
+    </div>
+  );
+
+  return (
+    <div
+      data-credential-bento-preview
+      data-home-credential-archive
+      className="relative flex h-28 items-center justify-center gap-2.5 sm:gap-3 md:gap-1.5 lg:gap-3"
+      aria-hidden="true"
+    >
+      {document(0)}
+
+      <div className="relative flex size-[82px] shrink-0 flex-col items-center justify-center rounded-full border border-emerald-700/25 bg-emerald-50 text-center shadow-[inset_0_0_0_5px_rgba(255,255,255,0.7)] transition-[border-color,background-color,box-shadow] duration-300 motion-reduce:transition-none group-hover:border-emerald-700/40 group-hover:bg-emerald-100/70 group-hover:shadow-[inset_0_0_0_5px_rgba(255,255,255,0.75),0_8px_24px_rgba(23,99,63,0.12)] dark:border-emerald-300/20 dark:bg-emerald-400/[0.07] dark:shadow-[inset_0_0_0_5px_rgba(255,255,255,0.025)] dark:group-hover:border-emerald-300/35 dark:group-hover:bg-emerald-400/[0.1] dark:group-hover:shadow-[inset_0_0_0_5px_rgba(255,255,255,0.035),0_8px_24px_rgba(90,200,137,0.08)] md:size-16 lg:size-[82px]">
+        <BadgeCheck className="absolute right-1 top-1 size-4 text-emerald-700 dark:text-emerald-300" strokeWidth={1.75} />
+        <span className="font-display text-[26px] font-semibold leading-none text-text-primary">
+          {count > 0 ? String(count).padStart(2, "0") : "—"}
+        </span>
+        <span className="mt-1 font-mono text-[7px] uppercase tracking-[0.16em] text-text-secondary">
+          Published
+        </span>
+      </div>
+      {document(1)}
+    </div>
   );
 }
 
@@ -180,15 +224,13 @@ export function MySiteGrid({ credentialSummary }: { credentialSummary: Credentia
         <motion.div {...cardMotion}>
           <Link href="/credentials" className={`${cardBase} hover:ring-neutral-400/70 active:ring-neutral-400/70 dark:hover:ring-white/25 dark:active:ring-white/25`}>
             <Ambient />
-            <CredentialBentoPreview summary={credentialSummary} />
+            <CredentialArchivePreview count={credentialSummary.count} pulse={pulse} />
             <div>
               <p className="font-mono text-xs uppercase tracking-widest text-text-secondary">
                 CREDENTIALS
               </p>
               <h3 className="mt-2 font-display text-xl font-medium leading-snug text-text-primary md:text-lg lg:text-2xl">
-                {credentialSummary.count > 0
-                  ? `${String(credentialSummary.count).padStart(2, "0")} published milestones, backed by proof.`
-                  : "Verified learning milestones, collected in one place."}
+                A growing archive of learning, backed by proof.
               </h3>
             </div>
           </Link>
