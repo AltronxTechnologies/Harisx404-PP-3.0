@@ -88,7 +88,7 @@ function CredentialArchivePreview({ count, pulse }: { count: number; pulse: bool
     <div className={documentClass}>
       <div className="flex items-center justify-between">
         <span className="size-2 rounded-full border border-emerald-700/30 bg-emerald-500/15 dark:border-emerald-300/30 dark:bg-emerald-300/15" />
-        <span className="font-mono text-[7px] uppercase tracking-widest text-text-secondary">Proof</span>
+        <span className="font-mono text-[7px] uppercase tracking-widest text-text-secondary md:hidden lg:inline">Proof</span>
       </div>
       <div className="space-y-1.5">
         <span className={`block h-1 rounded-full bg-neutral-300/80 transition-[width,background-color] duration-500 dark:bg-white/15 ${index === 0 ? "w-full group-hover:w-4/5" : "w-4/5 group-hover:w-full"}`} />
