@@ -4,18 +4,22 @@ import test from "node:test";
 
 const baseUrl = process.env.RESUME_BASE_URL || "http://localhost:3000";
 
-test("Resume renders the published PDF experience without the old web document", async () => {
+test("Resume renders the current-document gateway without embedding the PDF", async () => {
   const response = await fetch(`${baseUrl}/resume`);
   assert.equal(response.status, 200);
   const html = await response.text();
 
   assert.match(html, /Experience, clearly/);
-  assert.match(html, /The current Resume/);
+  assert.match(html, /Open the current Resume/);
   assert.match(html, /href="\/resume\/file\?download=1/);
   assert.match(html, /href="\/resume\/file\?v=/);
+  assert.match(html, /Always current/);
+  assert.match(html, /Original formatting/);
+  assert.match(html, /Ready to share/);
   assert.match(html, /From concept to creation/);
   assert.doesNotMatch(html, />Web resume</);
   assert.doesNotMatch(html, /Professional Summary|Technical Expertise/);
+  assert.doesNotMatch(html, /react-pdf|data-resume-pdf-viewer|<iframe|<embed|<object/);
   assert.equal((html.match(/<h1/g) || []).length, 1);
 });
 
@@ -44,11 +48,11 @@ test("Resume Admin API fails closed without an authenticated administrator", asy
   }
 });
 
-test("Resume management and arbitrary-page rendering contracts are enforced", async () => {
-  const [api, migration, viewer, manager, publicData] = await Promise.all([
+test("Resume management and document gateway contracts are enforced", async () => {
+  const [api, migration, page, manager, publicData] = await Promise.all([
     readFile(new URL("../app/api/admin/resume/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../migrations/2026_resume_document.sql", import.meta.url), "utf8"),
-    readFile(new URL("../app/components/resume/ResumePdfViewer.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/resume/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/components/admin/ResumeManager.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/resume/data.ts", import.meta.url), "utf8"),
   ]);
@@ -64,9 +68,9 @@ test("Resume management and arbitrary-page rendering contracts are enforced", as
   assert.match(migration, /public = FALSE/);
   assert.match(migration, /allowed_mime_types/);
   assert.match(migration, /REVOKE ALL ON TABLE public\.resume_document FROM anon, authenticated/);
-  assert.match(viewer, /Array\.from\(\{ length: pages \}/);
-  assert.match(viewer, /onLoadSuccess=\{\(\{ numPages \}\)/);
-  assert.match(viewer, /ResizeObserver/);
+  assert.match(page, /target="_blank"/);
+  assert.match(page, /RESUME_DOWNLOAD_ROUTE/);
+  assert.doesNotMatch(page, /ResumePdfViewer|react-pdf/);
   assert.match(manager, /Choose replacement PDF/);
   assert.match(manager, /method: "DELETE"/);
   assert.match(publicData, /updatedAt: data\.updated_at/);

@@ -8,10 +8,10 @@
 
 - The Resume uses the same frame, hero texture, typography, spacing, colors,
   radius tiers, CTA rhythm, Navbar, Search, and Footer as the locked public pages.
-- The public document is the exact PDF selected through Admin, rendered as
-  responsive PDF.js pages in both themes with selectable text and live links.
-- Page count comes from the uploaded file, so one, two, or more pages render without
-  a layout or code change.
+- The public page is a responsive Resume gateway for the exact PDF selected through
+  Admin; it never reconstructs or embeds the document.
+- One, two, or more pages and any PDF dimensions work without a layout or code
+  change because Open uses the browser's native document viewer.
 - The hero provides 44px Download and Open actions. `/resume/file` preserves the
   original uploaded bytes and filename and supports inline or attachment delivery.
 - Filename, byte size, and the database-managed upload date update with the active
@@ -47,20 +47,20 @@
 | Desktop light/dark visual pass | Passed at 1440x900 |
 | Tablet geometry | Passed at 1024x768 and 768x1024 |
 | Mobile geometry | Passed at 390x844 and 360x640 |
-| 390px PDF page bounds | 31px to 359px; no clipping |
+| 390px gateway bounds | Passed; no clipping or overflow |
 | Horizontal overflow | 0 at audited widths |
 | Primary PDF actions | 44px high |
-| Page headings | One page `h1`; PDF text layer remains selectable |
+| Page headings | One page `h1`; logical gateway card hierarchy |
 | Duplicate IDs | 0 |
 | Application console errors | 0 |
 | `git diff --check` | Passed |
 
 ## Intentional Variations
 
-- Uploaded PDF pages retain their authored document colors in both themes. The page
-  shell changes theme; PDF contents are never recolored or rewritten.
-- The inline preview scales whole pages to the available width. Mobile users can
-  use Open PDF for native zoom while the site preview remains overflow-free.
+- Uploaded PDFs retain their authored document colors, dimensions, and typography
+  because the site never recolors, scales, or reconstructs their contents.
+- Open Resume delegates zoom, search, print, and link handling to the browser's
+  native PDF viewer; Download returns the exact uploaded bytes.
 
 ## Lock Decision
 
@@ -78,13 +78,13 @@ single active Admin-managed PDF contract:
 - The upload API uses verified Admin identity, PDF signature and 10MB validation,
   unique private object paths, safe replacement, and cache invalidation.
 - `/resume/file` preserves the exact bytes and original uploaded filename.
-- The public page displays the stored filename, database upload date, byte size,
-  and every page reported by PDF.js; page count is never hard-coded.
+- The public page displays the stored filename, database upload date, and byte size,
+  then offers native Open and exact-file Download actions without embedding pages.
 - The old `Web resume` label and separately maintained HTML Resume are removed.
 - The existing static PDF remains only as a compatibility fallback until the first
   Admin-managed upload.
 
-Code, fallback rendering, two-page detection, desktop/mobile geometry, secure file
+Code, compatibility fallback delivery, desktop/mobile geometry, secure file
 headers, exact-byte comparison, TypeScript, ESLint, and 5/5 Resume integration
 contracts pass. The connected Supabase environment still requires
 `migrations/2026_resume_document.sql` before live Admin mutation testing and final

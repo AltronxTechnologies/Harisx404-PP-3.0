@@ -2197,12 +2197,13 @@ service-role client.
 
 `/resume/file` streams the exact active bytes with inline or attachment
 `Content-Disposition`; Download therefore uses the uploaded filename. The public
-page reads live metadata and renders all pages reported by PDF.js, with no fixed
-page count. Its responsive `ResizeObserver` viewer, selectable text layer,
-annotation layer, loading state, error fallback, direct-open control, filename,
-size, and upload date work at desktop and mobile widths. Before the first managed
-upload, the former static PDF remains a compatibility fallback; once Admin has
-ever configured Resume state, deletion intentionally shows no document.
+page is a stable Resume gateway rather than an embedded renderer: it exposes live
+filename, size, upload date, native-browser Open, exact-file Download, and concise
+Always current / Original formatting / Ready to share context. This keeps the page
+responsive and visually consistent regardless of PDF page count, dimensions,
+orientation, fonts, or future design changes. Before the first managed upload, the
+former static PDF remains a compatibility fallback; once Admin has ever configured
+Resume state, deletion intentionally shows no document.
 
 The schema and private bucket are defined by
 `migrations/2026_resume_document.sql`. Runtime upload/replace/delete verification
