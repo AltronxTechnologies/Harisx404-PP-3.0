@@ -2051,10 +2051,15 @@ image amendment is re-locked; no other Navbar change is authorized.
 
 The owner-authorized theme-overlay refinement is bottom-only at 58%; after the final
 compact pass it measures 122px high and starts 89px from the top. Light mode uses a
-white-to-transparent fade with neutral-950/neutral-700 copy, while dark mode uses a
-black-to-transparent fade with white/white-75 copy. The top 42% remains fully
+white-to-transparent fade, while dark mode uses a black-to-transparent fade. Both
+feature cards match the adjacent button hierarchy exactly: neutral-900/white-90
+titles and shared `text-text-secondary` subtitles. The top 42% remains fully
 uncovered in both themes. Light mode uses 75% resting image opacity (90% hover);
 dark mode retains 60% (80% hover).
+
+Feature subtitles are locked to one line. Community Wall remains `Leave your mark
+— say hi!`; Buildlog uses the shorter `Shipped & next steps` so it does not wrap at
+the 236px feature-card width.
 
 The final owner-authorized compact pass changes only static dimensions: panel width
 `740px` -> `720px`, content minimum height `240px` -> `228px`, feature-card

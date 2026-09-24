@@ -561,8 +561,8 @@ export default function Navbar() {
                             />
                             <div className="absolute inset-x-0 bottom-0 h-[58%] bg-gradient-to-t from-white via-white/85 to-transparent dark:from-black/95 dark:via-black/65" />
                             <div className="relative z-10 flex flex-col items-start">
-                              <span className="mb-0.5 font-sans text-lg font-bold tracking-tight text-neutral-950 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0 dark:text-white">Community Wall</span>
-                              <p className="text-[13px] font-normal text-neutral-700 dark:text-white/75">Leave your mark — say hi!</p>
+                              <span className="mb-0.5 font-sans text-lg font-bold tracking-tight text-neutral-900 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0 dark:text-white/90">Community Wall</span>
+                              <p className="whitespace-nowrap text-[13px] font-normal text-text-secondary">Leave your mark — say hi!</p>
                             </div>
                           </Link>
                         </motion.div>
@@ -586,8 +586,8 @@ export default function Navbar() {
                             />
                             <div className="absolute inset-x-0 bottom-0 h-[58%] bg-gradient-to-t from-white via-white/85 to-transparent dark:from-black/95 dark:via-black/65" />
                             <div className="relative z-10 flex flex-col items-start">
-                              <span className="mb-0.5 font-sans text-lg font-bold tracking-tight text-neutral-950 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0 dark:text-white">Buildlog</span>
-                              <p className="text-[13px] font-normal text-neutral-700 dark:text-white/75">What shipped and what comes next</p>
+                              <span className="mb-0.5 font-sans text-lg font-bold tracking-tight text-neutral-900 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0 dark:text-white/90">Buildlog</span>
+                              <p className="whitespace-nowrap text-[13px] font-normal text-text-secondary">Shipped &amp; next steps</p>
                             </div>
                           </Link>
                         </motion.div>
