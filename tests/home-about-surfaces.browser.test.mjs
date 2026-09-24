@@ -93,6 +93,29 @@ test("Home and About live replacement cards remain responsive and aligned", asyn
             ).length,
             contributionFallbacks: document.querySelectorAll("[data-github-activity-fallback]").length,
             credentialLinks: document.querySelectorAll("a[href='/credentials'] [data-credential-bento-preview]").length,
+            aboutCredentialPassports: document.querySelectorAll("[data-about-credential-passport]").length,
+            aboutCredentialPassportClipped: (() => {
+              const passport = document.querySelector("[data-about-credential-passport]");
+              const card = passport?.closest("a")?.querySelector(":scope > div");
+              if (!passport || !card) return false;
+              const passportRect = passport.getBoundingClientRect();
+              const cardRect = card.getBoundingClientRect();
+              return (
+                passportRect.left < cardRect.left ||
+                passportRect.right > cardRect.right ||
+                passportRect.top < cardRect.top ||
+                passportRect.bottom > cardRect.bottom
+              );
+            })(),
+            aboutCredentialLedgerClipped: (() => {
+              const passport = document.querySelector("[data-about-credential-passport]");
+              if (!passport) return false;
+              const passportRect = passport.getBoundingClientRect();
+              return [...passport.querySelectorAll("[data-credential-ledger-row]")].some((row) => {
+                const rowRect = row.getBoundingClientRect();
+                return rowRect.top < passportRect.top || rowRect.bottom > passportRect.bottom;
+              });
+            })(),
             homeCredentialArchives: document.querySelectorAll("[data-home-credential-archive]").length,
             homeCredentialArchiveText: document.querySelector("[data-home-credential-archive]")?.textContent || "",
             siteCardHeightSpread: (() => {
@@ -140,6 +163,9 @@ test("Home and About live replacement cards remain responsive and aligned", asyn
             assert.equal(result.contributionLabels, result.datedContributionCells, `${route} ${theme} ${width}px contribution labels`);
           }
           assert.equal(result.credentialLinks, 1, `${route} ${theme} ${width}px credential card`);
+          assert.equal(result.aboutCredentialPassports, route === "/about" ? 1 : 0, `${route} ${theme} ${width}px About credential passport`);
+          assert.equal(result.aboutCredentialPassportClipped, false, `${route} ${theme} ${width}px About credential passport clipping`);
+          assert.equal(result.aboutCredentialLedgerClipped, false, `${route} ${theme} ${width}px About credential ledger clipping`);
           assert.equal(result.homeCredentialArchives, route === "/" ? 1 : 0, `${route} ${theme} ${width}px generic credential archive`);
           if (route === "/") {
             assert.doesNotMatch(result.homeCredentialArchiveText, /Harvard|Cisco|Microsoft/);
@@ -187,6 +213,23 @@ test("Home and About live replacement cards remain responsive and aligned", asyn
             const touchTooltip = page.locator("[data-github-activity-tooltip]");
             await touchTooltip.waitFor();
             assert.match((await touchTooltip.textContent()) || "", /91 contributions/);
+          }
+
+          if (route === "/about" && width === 1440) {
+            const credentialLink = page.locator("a[href='/credentials']").filter({
+              has: page.locator("[data-about-credential-passport]"),
+            });
+            await credentialLink.focus();
+            await page.waitForFunction(() => {
+              const issuer = [...document.querySelectorAll("span")].find(
+                (element) => element.textContent === "Harvard University",
+              );
+              return issuer && getComputedStyle(issuer).opacity === "1";
+            });
+            const issuerOpacity = await page.getByText("Harvard University", { exact: true }).evaluate(
+              (issuer) => getComputedStyle(issuer).opacity,
+            );
+            assert.equal(issuerOpacity, "1", "About credential issuer reveal on keyboard focus");
           }
           await page.close();
         }
