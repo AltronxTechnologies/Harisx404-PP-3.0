@@ -1,59 +1,57 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
-  <title id="title">Community Wall messages</title>
-  <desc id="desc">A rich purple wall of postage-inspired visitor notes, profile marks, and friendly messages.</desc>
-  <rect width="1600" height="900" fill="#73598f"/>
-  <g fill="#eadcf5" opacity="0.38">
-    <circle cx="74" cy="78" r="3"/><circle cx="154" cy="78" r="3"/><circle cx="234" cy="78" r="3"/><circle cx="314" cy="78" r="3"/><circle cx="394" cy="78" r="3"/><circle cx="474" cy="78" r="3"/><circle cx="554" cy="78" r="3"/><circle cx="634" cy="78" r="3"/><circle cx="714" cy="78" r="3"/><circle cx="794" cy="78" r="3"/><circle cx="874" cy="78" r="3"/><circle cx="954" cy="78" r="3"/><circle cx="1034" cy="78" r="3"/><circle cx="1114" cy="78" r="3"/><circle cx="1194" cy="78" r="3"/><circle cx="1274" cy="78" r="3"/><circle cx="1354" cy="78" r="3"/><circle cx="1434" cy="78" r="3"/><circle cx="1514" cy="78" r="3"/>
-    <circle cx="74" cy="822" r="3"/><circle cx="154" cy="822" r="3"/><circle cx="234" cy="822" r="3"/><circle cx="314" cy="822" r="3"/><circle cx="394" cy="822" r="3"/><circle cx="474" cy="822" r="3"/><circle cx="554" cy="822" r="3"/><circle cx="634" cy="822" r="3"/><circle cx="714" cy="822" r="3"/><circle cx="794" cy="822" r="3"/><circle cx="874" cy="822" r="3"/><circle cx="954" cy="822" r="3"/><circle cx="1034" cy="822" r="3"/><circle cx="1114" cy="822" r="3"/><circle cx="1194" cy="822" r="3"/><circle cx="1274" cy="822" r="3"/><circle cx="1354" cy="822" r="3"/><circle cx="1434" cy="822" r="3"/><circle cx="1514" cy="822" r="3"/>
+  <title id="title">Community Wall message stamp</title>
+  <desc id="desc">A large postage-inspired visitor message surrounded by community identities.</desc>
+  <rect width="1600" height="900" fill="#755a92"/>
+
+  <g fill="#eadff4" opacity="0.34">
+    <circle cx="80" cy="82" r="4"/><circle cx="168" cy="82" r="4"/><circle cx="256" cy="82" r="4"/><circle cx="344" cy="82" r="4"/><circle cx="432" cy="82" r="4"/><circle cx="520" cy="82" r="4"/><circle cx="608" cy="82" r="4"/><circle cx="696" cy="82" r="4"/><circle cx="784" cy="82" r="4"/><circle cx="872" cy="82" r="4"/><circle cx="960" cy="82" r="4"/><circle cx="1048" cy="82" r="4"/><circle cx="1136" cy="82" r="4"/><circle cx="1224" cy="82" r="4"/><circle cx="1312" cy="82" r="4"/><circle cx="1400" cy="82" r="4"/><circle cx="1488" cy="82" r="4"/>
+  </g>
+  <g fill="none" stroke="#f3e8ff" stroke-width="3" opacity="0.72">
+    <path d="M84 82h50M84 82v50M1516 82h-50M1516 82v50"/>
+  </g>
+  <text x="112" y="156" fill="#faf5ff" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="23" font-weight="700" letter-spacing="7">VISITOR POST / COMMUNITY 404</text>
+
+  <g transform="translate(238 196) rotate(-5 260 230)">
+    <rect width="530" height="470" rx="38" fill="#f2bfd6" stroke="#ffe4ef" stroke-width="4"/>
+    <circle cx="70" cy="78" r="34" fill="#be185d"/>
+    <text x="70" y="89" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">H</text>
+    <rect x="126" y="56" width="254" height="17" rx="8.5" fill="#78435f" opacity="0.75"/>
+    <rect x="126" y="88" width="176" height="13" rx="6.5" fill="#9f6a83" opacity="0.58"/>
+    <path d="M58 166h414" stroke="#b77e99" stroke-width="3" stroke-dasharray="8 10"/>
+    <path d="M62 230h344M62 278h390M62 326h280" stroke="#7c405e" stroke-width="19" stroke-linecap="round" opacity="0.74"/>
+    <text x="62" y="405" fill="#78435f" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16" font-weight="700" letter-spacing="3">SIGNED / PUBLISHED</text>
   </g>
 
-  <text x="116" y="154" fill="#faf5ff" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="24" font-weight="700" letter-spacing="7">COMMUNITY WALL / VISITOR NOTES</text>
-  <g transform="translate(82 248) rotate(-4 250 170)">
-    <rect x="0" y="0" width="500" height="320" rx="26" fill="#f6c6d9"/>
-    <g fill="#2b2140" opacity="0.12">
-      <circle cx="0" cy="28" r="12"/><circle cx="0" cy="66" r="12"/><circle cx="0" cy="104" r="12"/><circle cx="0" cy="142" r="12"/><circle cx="0" cy="180" r="12"/><circle cx="0" cy="218" r="12"/><circle cx="0" cy="256" r="12"/><circle cx="0" cy="294" r="12"/>
+  <g transform="translate(520 170)">
+    <rect width="760" height="520" rx="42" fill="#e6defd" stroke="#faf5ff" stroke-width="5"/>
+    <g fill="#755a92">
+      <circle cx="0" cy="32" r="15"/><circle cx="0" cy="78" r="15"/><circle cx="0" cy="124" r="15"/><circle cx="0" cy="170" r="15"/><circle cx="0" cy="216" r="15"/><circle cx="0" cy="262" r="15"/><circle cx="0" cy="308" r="15"/><circle cx="0" cy="354" r="15"/><circle cx="0" cy="400" r="15"/><circle cx="0" cy="446" r="15"/><circle cx="0" cy="492" r="15"/>
+      <circle cx="760" cy="32" r="15"/><circle cx="760" cy="78" r="15"/><circle cx="760" cy="124" r="15"/><circle cx="760" cy="170" r="15"/><circle cx="760" cy="216" r="15"/><circle cx="760" cy="262" r="15"/><circle cx="760" cy="308" r="15"/><circle cx="760" cy="354" r="15"/><circle cx="760" cy="400" r="15"/><circle cx="760" cy="446" r="15"/><circle cx="760" cy="492" r="15"/>
     </g>
-    <circle cx="66" cy="68" r="28" fill="#6d28d9"/>
-    <text x="66" y="76" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700">A</text>
-    <text x="112" y="60" fill="#3b2140" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700">A visitor wrote</text>
-    <text x="112" y="86" fill="#76546b" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" letter-spacing="2">FROM SOMEWHERE ONLINE</text>
-    <text x="54" y="158" fill="#3b2140" font-family="Georgia, Times, serif" font-size="36" font-style="italic">"Keep building things</text>
-    <text x="54" y="202" fill="#3b2140" font-family="Georgia, Times, serif" font-size="36" font-style="italic">that feel like you."</text>
-    <path d="M54 250h250" stroke="#a06f88" stroke-width="2"/>
-    <text x="54" y="282" fill="#76546b" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="15" letter-spacing="2">SIGNED / PUBLISHED</text>
-  </g>
+    <rect x="54" y="52" width="652" height="416" rx="28" fill="#f8f6ff" stroke="#b9a8dc" stroke-width="3" stroke-dasharray="11 11"/>
 
-  <g transform="translate(560 212) rotate(3 250 170)">
-    <rect x="0" y="0" width="500" height="350" rx="26" fill="#d9d0ff"/>
-    <g fill="#2b2140" opacity="0.12">
-      <circle cx="500" cy="28" r="12"/><circle cx="500" cy="66" r="12"/><circle cx="500" cy="104" r="12"/><circle cx="500" cy="142" r="12"/><circle cx="500" cy="180" r="12"/><circle cx="500" cy="218" r="12"/><circle cx="500" cy="256" r="12"/><circle cx="500" cy="294" r="12"/><circle cx="500" cy="332" r="12"/>
+    <g transform="translate(92 86)">
+      <circle cx="38" cy="38" r="38" fill="#6d28d9"/>
+      <circle cx="94" cy="38" r="38" fill="#db2777"/>
+      <circle cx="150" cy="38" r="38" fill="#4f46e5"/>
+      <circle cx="206" cy="38" r="38" fill="#059669"/>
+      <path d="M284 38h264" stroke="#8876ad" stroke-width="16" stroke-linecap="round" opacity="0.7"/>
+      <path d="M284 70h174" stroke="#aa9ac8" stroke-width="12" stroke-linecap="round" opacity="0.64"/>
     </g>
-    <rect x="42" y="42" width="94" height="94" rx="18" fill="#5b21b6"/>
-    <path d="M64 76h50M64 94h36M64 112h42" stroke="#ede9fe" stroke-width="7" stroke-linecap="round"/>
-    <text x="166" y="74" fill="#31234b" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700">Say hello</text>
-    <text x="166" y="106" fill="#6b5a85" font-family="Arial, Helvetica, sans-serif" font-size="20">A small note can make</text>
-    <text x="166" y="132" fill="#6b5a85" font-family="Arial, Helvetica, sans-serif" font-size="20">the internet feel human.</text>
-    <path d="M44 182h408" stroke="#a99ccc" stroke-width="2" stroke-dasharray="8 9"/>
-    <circle cx="78" cy="236" r="24" fill="#db2777"/>
-    <circle cx="130" cy="236" r="24" fill="#7c3aed"/>
-    <circle cx="182" cy="236" r="24" fill="#4f46e5"/>
-    <circle cx="234" cy="236" r="24" fill="#9333ea"/>
-    <circle cx="286" cy="236" r="24" fill="#be185d"/>
-    <text x="44" y="312" fill="#6b5a85" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16" letter-spacing="3">REAL PEOPLE / REAL NOTES</text>
+
+    <g transform="translate(92 224)">
+      <path d="M0 0h518M0 58h442M0 116h480" stroke="#604c7e" stroke-width="22" stroke-linecap="round" opacity="0.72"/>
+      <circle cx="558" cy="58" r="48" fill="#d1fae5"/>
+      <path d="M536 58l15 15 31-39" fill="none" stroke="#047857" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+
+    <text x="92" y="432" fill="#725d91" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="17" font-weight="700" letter-spacing="4">ONE PERSON / ONE NOTE / ONE WALL</text>
   </g>
 
-  <g transform="translate(1050 264) rotate(-2 230 150)">
-    <rect x="0" y="0" width="470" height="300" rx="26" fill="#c7e8de"/>
-    <circle cx="62" cy="66" r="26" fill="#047857"/>
-    <path d="M50 66l8 8 16-19" fill="none" stroke="#ecfdf5" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-    <text x="106" y="60" fill="#173d35" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700">Published instantly</text>
-    <text x="106" y="87" fill="#52736c" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" letter-spacing="2">ONE NOTE PER PERSON</text>
-    <path d="M48 138h374M48 180h300M48 222h338" stroke="#6fa096" stroke-width="12" stroke-linecap="round" opacity="0.62"/>
-    <path d="M356 242l18 18 42-54" fill="none" stroke="#047857" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
-  </g>
-
-  <g transform="translate(118 790)">
-    <path d="M0 0h82" stroke="#eadcf5" stroke-width="2"/>
-    <text x="108" y="6" fill="#faf5ff" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="17" letter-spacing="3">A SHARED CORNER OF THE WEB</text>
+  <g transform="translate(1320 250) rotate(6 100 100)">
+    <rect width="202" height="202" rx="32" fill="#c7eadf"/>
+    <circle cx="101" cy="82" r="42" fill="#047857"/>
+    <path d="M81 82l14 14 29-37" fill="none" stroke="#ecfdf5" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="101" y="156" text-anchor="middle" fill="#176052" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="15" font-weight="700" letter-spacing="3">LIVE</text>
   </g>
 </svg>
