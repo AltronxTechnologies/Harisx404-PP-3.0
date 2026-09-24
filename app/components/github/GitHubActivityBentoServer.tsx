@@ -24,10 +24,12 @@ export function GitHubActivityBentoSkeleton({
             <div className="h-5 w-32 rounded bg-border-primary/40" />
             <div className="h-5 w-14 rounded-full bg-border-primary/30" />
           </div>
-          <div className="mx-auto mt-1 h-4 w-28 rounded bg-border-primary/25" />
         </div>
-        <div className="mt-2 min-h-[104px] flex-1 rounded-xl bg-border-primary/20" />
-        <div className="mx-auto mt-1 h-2.5 w-24 rounded bg-border-primary/25" />
+        <div className="mt-3 min-h-[104px] flex-1 rounded-xl bg-border-primary/20" />
+        <div className="mt-2 flex items-center justify-between">
+          <div className="h-2.5 w-24 rounded bg-border-primary/25" />
+          <div className="h-2.5 w-20 rounded bg-border-primary/25" />
+        </div>
       </div>
       <span className="sr-only" role="status">Loading GitHub activity</span>
     </BentoCard>

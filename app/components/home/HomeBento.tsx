@@ -694,11 +694,11 @@ function TechStackBento({
 
 /* ── 4. Live GitHub contribution calendar ────────────────────── */
 const contributionColors = [
-  "bg-[#edf1ee] hover:bg-[#dfe6e1] dark:bg-white/[0.055] dark:hover:bg-white/[0.11]",
-  "bg-[#cce8d8] hover:bg-[#b8ddc8] dark:bg-[#123524] dark:hover:bg-[#194b33]",
-  "bg-[#8fc9a8] hover:bg-[#76bb94] dark:bg-[#1f6843] dark:hover:bg-[#287c51]",
-  "bg-[#3b9b69] hover:bg-[#30865a] dark:bg-[#2e9b61] dark:hover:bg-[#38ad70]",
-  "bg-[#17633f] hover:bg-[#105334] dark:bg-[#5ac889] dark:hover:bg-[#72d59b]",
+  "bg-[#e8ece9] hover:bg-[#dce3de] dark:bg-white/[0.075] dark:hover:bg-white/[0.13]",
+  "bg-[#b7dfc8] hover:bg-[#a1d4b7] dark:bg-[#17452e] dark:hover:bg-[#1d5839]",
+  "bg-[#6fbd91] hover:bg-[#58ad7d] dark:bg-[#25784d] dark:hover:bg-[#2d8d5b]",
+  "bg-[#2e9460] hover:bg-[#247e50] dark:bg-[#3baa6d] dark:hover:bg-[#48bd7d]",
+  "bg-[#0d5b36] hover:bg-[#08492b] dark:bg-[#70d99d] dark:hover:bg-[#89e3ad]",
 ] as const;
 
 function formatContributionDate(date: string) {
@@ -850,24 +850,25 @@ export function GitHubActivityBento({
             {hasActivity ? isCached ? "Cached" : "Live" : "Unavailable"}
           </span>
         </div>
-        {hasActivity && (
-          <p data-github-total className="mt-1 text-sm text-text-secondary md:text-base">
-            {github!.totalContributions.toLocaleString("en-US")} contributions
-          </p>
-        )}
       </div>
 
       {hasActivity ? (
-        <div className="z-20 flex flex-1 flex-col items-center justify-center">
+        <div className="z-20 mt-3 flex flex-1 flex-col justify-center">
           <ContributionCalendar weeks={github!.weeks} />
-          <div className="mt-1 flex items-center justify-center gap-1.5 font-mono text-[8px] uppercase tracking-[0.12em] text-text-secondary sm:text-[9px]" aria-label="Contribution intensity from less to more">
-            <span>Less</span>
-            <span className="flex items-center gap-1" aria-hidden="true">
-              {contributionColors.map((color, index) => (
-                <i key={index} className={`size-2 rounded-[2px] ring-1 ring-inset ring-black/[0.04] dark:ring-white/[0.04] ${color.split(" ")[0]}`} />
-              ))}
+          <div className="mt-2 flex min-h-4 items-center justify-between gap-3 font-mono text-[8px] uppercase tracking-[0.1em] text-text-secondary sm:text-[9px]">
+            <span data-github-total className="shrink-0 tabular-nums">
+              <strong className="font-semibold text-text-primary">{github!.totalContributions.toLocaleString("en-US")}</strong>{" "}
+              contributions
             </span>
-            <span>More</span>
+            <span className="flex shrink-0 items-center gap-1 sm:gap-1.5" aria-label="Contribution intensity from less to high">
+              <span>Less</span>
+              <span className="flex items-center gap-0.5 sm:gap-1" aria-hidden="true">
+                {contributionColors.map((color, index) => (
+                  <i key={index} className={`size-2 rounded-[2px] ring-1 ring-inset ring-black/[0.05] dark:ring-white/[0.05] ${color.split(" ")[0]}`} />
+                ))}
+              </span>
+              <span>High</span>
+            </span>
           </div>
         </div>
       ) : (

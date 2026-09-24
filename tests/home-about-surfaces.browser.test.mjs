@@ -50,23 +50,16 @@ test("Home and About live replacement cards remain responsive and aligned", asyn
               const siblingHeading = [...document.querySelectorAll("h3")].find(
                 (heading) => heading.textContent === "Learn more about me",
               );
-              const githubText = document.querySelector("[data-github-total]");
-              const siblingText = siblingHeading?.nextElementSibling;
-              if (!githubHeading || !siblingHeading || !githubText || !siblingText) return false;
+              if (!githubHeading || !siblingHeading) return false;
               const headingA = getComputedStyle(githubHeading);
               const headingB = getComputedStyle(siblingHeading);
-              const textA = getComputedStyle(githubText);
-              const textB = getComputedStyle(siblingText);
               return (
                 headingA.fontSize === headingB.fontSize &&
                 headingA.fontWeight === headingB.fontWeight &&
-                headingA.lineHeight === headingB.lineHeight &&
-                textA.fontSize === textB.fontSize &&
-                textA.lineHeight === textB.lineHeight &&
-                textA.marginTop === textB.marginTop
+                headingA.lineHeight === headingB.lineHeight
               );
             })(),
-            githubLegends: document.querySelectorAll("[aria-label='Contribution intensity from less to more']").length,
+            githubLegends: document.querySelectorAll("[aria-label='Contribution intensity from less to high']").length,
             contributionCalendars: document.querySelectorAll("[data-github-contribution-calendar]").length,
             contributionCells: document.querySelectorAll("[data-github-contribution-calendar] > button").length,
             visibleContributionCells: [...document.querySelectorAll("[data-github-contribution-calendar] > button")].filter(

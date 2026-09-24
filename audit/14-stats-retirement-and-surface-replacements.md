@@ -14,9 +14,9 @@
 - GitHub activity is isolated behind a card-level Suspense boundary and an hourly
   shared server cache, so a cold or unavailable GitHub response cannot delay the
   Home or About page shell.
-- The final portfolio-editorial card pairs its title with live status, presents a
-  verified all-time total aggregated from every public calendar year, and closes with a compact intensity
-  legend. A container-aware layout keeps 12–14px squares and renders
+- The final portfolio-editorial card pairs its title with live status, keeps the
+  chart central, and closes with a split footer containing the verified all-time
+  total and compact `Less`-to-`High` intensity legend. A container-aware layout keeps 12–14px squares and renders
   exactly as many complete recent weeks as each card can hold, with a restrained
   neutral-to-emerald palette tuned separately
   for light and dark themes.
