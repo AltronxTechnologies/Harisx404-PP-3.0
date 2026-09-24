@@ -850,7 +850,7 @@ export function GitHubActivityBento({
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Open GitHub profile"
-              className="rounded-sm transition-colors hover:text-[#17633f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 motion-reduce:transition-none dark:hover:text-[#72d59b]"
+              className="inline-flex min-h-6 items-center rounded-sm transition-colors hover:text-[#17633f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 motion-reduce:transition-none dark:hover:text-[#72d59b]"
             >
               GitHub activity
             </a>

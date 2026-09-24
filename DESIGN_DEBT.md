@@ -248,7 +248,9 @@ Changing any of these is a **regression**, not a fix.
   route and its Footer link.
 - **Moved 2026-09-22:** public `/stats` was retired; Lighthouse health now lives in
   protected Admin Analytics and remains dependent on a reachable production URL.
-- GitHub contribution graph shows 0.
+- **Resolved 2026-09-24:** Home/About GitHub activity now uses verified public
+  yearly totals, a live recent-activity graph, hourly caching, and cached/unavailable
+  fallbacks instead of the former zero-value state.
 - Admin changelog revalidate is stale.
 - Live Supabase mismatches: prod `site_settings` is one row with named columns
   (breaks `/admin/settings`); `community_wall_messages` and
