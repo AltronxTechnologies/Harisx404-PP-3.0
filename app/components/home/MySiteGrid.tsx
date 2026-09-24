@@ -78,23 +78,43 @@ function Ambient() {
 }
 
 function CredentialArchivePreview({ count, pulse }: { count: number; pulse: boolean }) {
-  const documentClass = `flex h-[82px] w-[68px] flex-col justify-between rounded-xl border bg-neutral-50/80 p-2.5 shadow-sm transition-[border-color,background-color,box-shadow] duration-300 motion-reduce:transition-none sm:w-[76px] md:w-12 md:p-2 lg:w-[76px] lg:p-2.5 dark:bg-white/[0.035] ${
+  const documentClass = `relative flex h-[82px] min-w-0 flex-col justify-between rounded-xl border bg-neutral-50/70 p-2.5 transition-[border-color,background-color,box-shadow] duration-300 motion-reduce:transition-none md:p-2 lg:p-2.5 dark:bg-white/[0.035] ${
     pulse
-      ? "border-emerald-500/35 bg-emerald-50/50 shadow-md dark:border-emerald-400/25 dark:bg-emerald-400/[0.04]"
-      : "border-border-primary group-hover:border-emerald-600/25 group-hover:bg-emerald-50/40 group-hover:shadow-md dark:group-hover:border-emerald-300/20 dark:group-hover:bg-emerald-300/[0.035]"
+      ? "border-neutral-400/60 bg-neutral-100/80 shadow-sm dark:border-white/25 dark:bg-white/[0.055]"
+      : "border-border-primary group-hover:border-neutral-400/60 group-hover:bg-neutral-100/80 group-hover:shadow-sm dark:group-hover:border-white/25 dark:group-hover:bg-white/[0.055]"
   }`;
 
   const document = (index: number) => (
     <div className={documentClass}>
       <div className="flex items-center justify-between">
-        <span className="size-2 rounded-full border border-emerald-700/30 bg-emerald-500/15 dark:border-emerald-300/30 dark:bg-emerald-300/15" />
-        <span className="font-mono text-[7px] uppercase tracking-widest text-text-secondary md:hidden lg:inline">Proof</span>
+        <span className="font-mono text-[7px] uppercase tracking-[0.14em] text-text-secondary md:hidden lg:inline">
+          {index === 1 ? "Archive" : "Proof"}
+        </span>
+        <BadgeCheck
+          className={`size-3 transition-colors duration-300 motion-reduce:transition-none ${
+            pulse
+              ? "text-emerald-600 dark:text-emerald-300"
+              : "text-neutral-400 group-hover:text-emerald-600 dark:text-white/30 dark:group-hover:text-emerald-300"
+          }`}
+          strokeWidth={1.8}
+        />
       </div>
-      <div className="space-y-1.5">
-        <span className={`block h-1 rounded-full bg-neutral-300/80 transition-[width,background-color] duration-500 dark:bg-white/15 ${index === 0 ? "w-full group-hover:w-4/5" : "w-4/5 group-hover:w-full"}`} />
-        <span className={`block h-1 rounded-full bg-neutral-200 transition-[width,background-color] duration-500 dark:bg-white/10 ${index === 0 ? "w-2/3 group-hover:w-1/2" : "w-1/2 group-hover:w-2/3"}`} />
-      </div>
-      <span className="h-px w-full bg-border-primary" />
+      {index === 1 ? (
+        <div className="text-center">
+          <span className="font-display text-[24px] font-semibold leading-none text-text-primary md:text-xl lg:text-[24px]">
+            {count > 0 ? String(count).padStart(2, "0") : "—"}
+          </span>
+          <span className="mt-1 block font-mono text-[6px] uppercase tracking-[0.14em] text-text-secondary">
+            Published
+          </span>
+        </div>
+      ) : (
+        <div className="space-y-1.5">
+          <span className={`block h-1 rounded-full bg-neutral-300/80 transition-[width,background-color] duration-500 dark:bg-white/15 ${index === 0 ? "w-full group-hover:w-4/5" : "w-4/5 group-hover:w-full"}`} />
+          <span className={`block h-1 rounded-full bg-neutral-200 transition-[width,background-color] duration-500 dark:bg-white/10 ${index === 0 ? "w-2/3 group-hover:w-1/2" : "w-1/2 group-hover:w-2/3"}`} />
+        </div>
+      )}
+      <span className={`h-px bg-border-primary transition-[width] duration-500 ${index === 1 ? "mx-auto w-2/3 group-hover:w-full" : "w-full group-hover:w-2/3"}`} />
     </div>
   );
 
@@ -102,21 +122,12 @@ function CredentialArchivePreview({ count, pulse }: { count: number; pulse: bool
     <div
       data-credential-bento-preview
       data-home-credential-archive
-      className="relative flex h-28 items-center justify-center gap-2.5 sm:gap-3 md:gap-1.5 lg:gap-3"
+      className="grid h-28 grid-cols-3 content-center gap-2 md:gap-1.5 lg:gap-2"
       aria-hidden="true"
     >
       {document(0)}
-
-      <div className="relative flex size-[82px] shrink-0 flex-col items-center justify-center rounded-full border border-emerald-700/25 bg-emerald-50 text-center shadow-[inset_0_0_0_5px_rgba(255,255,255,0.7)] transition-[border-color,background-color,box-shadow] duration-300 motion-reduce:transition-none group-hover:border-emerald-700/40 group-hover:bg-emerald-100/70 group-hover:shadow-[inset_0_0_0_5px_rgba(255,255,255,0.75),0_8px_24px_rgba(23,99,63,0.12)] dark:border-emerald-300/20 dark:bg-emerald-400/[0.07] dark:shadow-[inset_0_0_0_5px_rgba(255,255,255,0.025)] dark:group-hover:border-emerald-300/35 dark:group-hover:bg-emerald-400/[0.1] dark:group-hover:shadow-[inset_0_0_0_5px_rgba(255,255,255,0.035),0_8px_24px_rgba(90,200,137,0.08)] md:size-16 lg:size-[82px]">
-        <BadgeCheck className="absolute right-1 top-1 size-4 text-emerald-700 dark:text-emerald-300" strokeWidth={1.75} />
-        <span className="font-display text-[26px] font-semibold leading-none text-text-primary">
-          {count > 0 ? String(count).padStart(2, "0") : "—"}
-        </span>
-        <span className="mt-1 font-mono text-[7px] uppercase tracking-[0.16em] text-text-secondary">
-          Published
-        </span>
-      </div>
       {document(1)}
+      {document(2)}
     </div>
   );
 }
