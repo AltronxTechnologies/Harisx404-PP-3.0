@@ -491,7 +491,7 @@ export default function Navbar() {
                      initial={{ x: "-50%" }}
                     animate={{ x: "-50%" }}
                     exit={{ x: "-50%" }}
-                    className="absolute top-0 left-1/2 z-0 w-[740px] max-w-[92vw] [filter:drop-shadow(0_10px_15px_rgba(0,0,0,0.13))_drop-shadow(0_3px_4px_rgba(0,0,0,0.05))] dark:[filter:none]"
+                    className="absolute top-0 left-1/2 z-0 w-[720px] max-w-[92vw] [filter:drop-shadow(0_10px_15px_rgba(0,0,0,0.13))_drop-shadow(0_3px_4px_rgba(0,0,0,0.05))] dark:[filter:none]"
                   >
                   <motion.div
                     /* Pure geometry morph: the panel starts clipped to the
@@ -538,12 +538,12 @@ export default function Navbar() {
                            fade on close so images are never sliced while the
                            clip folds shut. */
                         exit={{ opacity: 0, transition: { duration: 0.16, ease: "easeOut" } }}
-                        className="flex flex-col md:flex-row gap-2.5 p-2 pt-4 min-h-[240px]"
+                        className="flex min-h-[228px] flex-col gap-2.5 p-2 pt-4 md:flex-row"
                       >
                         
                         {/* Community Wall Card */}
                         <motion.div
-                          className="flex-1 min-h-[160px] max-md:flex-none max-md:h-40"
+                          className="min-h-[155px] flex-1 max-md:h-[155px] max-md:flex-none"
                         >
                           <Link 
                             ref={firstDropdownLinkRef}
@@ -569,7 +569,7 @@ export default function Navbar() {
 
                         {/* Buildlog Card */}
                         <motion.div
-                          className="flex-1 min-h-[160px] max-md:flex-none max-md:h-40"
+                          className="min-h-[155px] flex-1 max-md:h-[155px] max-md:flex-none"
                         >
                           <Link 
                             href="/buildlog"
@@ -594,7 +594,7 @@ export default function Navbar() {
 
                         {/* Links Column */}
                         <motion.div 
-                          className="flex flex-col gap-2 w-full md:w-[220px]"
+                          className="flex w-full flex-col gap-2 md:w-[212px]"
                         >
                           <Link 
                             href="/credentials" 

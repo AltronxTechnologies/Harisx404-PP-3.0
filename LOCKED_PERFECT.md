@@ -2040,17 +2040,27 @@ screenshot are superseded by matched, locally owned vector artwork:
   locked Buildlog's slate visual language.
 
 `app/components/Navbar.tsx` changes the two `Image` source paths and the limited
-theme-overlay treatment recorded below. Card order, links, alt text, copy, geometry,
-object-fit, hover zoom, motion, dropdown morph, focus behavior, and every other
-Navbar detail remain unchanged. Both assets are 1600x900, local, dependency-free, and center-safe under
+theme-overlay and compact-geometry treatments recorded below. Card order, links,
+alt text, copy, object-fit, hover zoom, motion, dropdown morph, focus behavior, and
+every other Navbar detail remain unchanged. Both assets are 1600x900, local,
+dependency-free, and center-safe under
 the existing responsive `object-cover` crop. Verified at 1024px and 1440px in
 light/dark and normal/reduced-motion modes: 8/8 combinations passed with both images
 loaded, zero overflow, zero failed requests, and zero browser errors. This limited
 image amendment is re-locked; no other Navbar change is authorized.
 
-The owner-authorized theme-overlay refinement keeps the 242x216px feature boxes and
-242x216px rendered images unchanged. The overlay is bottom-only at 58% (125px high,
-starting 91px from the top): light mode uses a white-to-transparent fade with
-neutral-950/neutral-700 copy, while dark mode uses a black-to-transparent fade with
-white/white-75 copy. The top 42% remains fully uncovered in both themes. Light mode
-uses 75% resting image opacity (90% hover); dark mode retains 60% (80% hover).
+The owner-authorized theme-overlay refinement is bottom-only at 58%; after the final
+compact pass it measures 122px high and starts 89px from the top. Light mode uses a
+white-to-transparent fade with neutral-950/neutral-700 copy, while dark mode uses a
+black-to-transparent fade with white/white-75 copy. The top 42% remains fully
+uncovered in both themes. Light mode uses 75% resting image opacity (90% hover);
+dark mode retains 60% (80% hover).
+
+The final owner-authorized compact pass changes only static dimensions: panel width
+`740px` -> `720px`, content minimum height `240px` -> `228px`, feature-card
+minimum/mobile height `160px` -> `155px`, and links-column width `220px` ->
+`212px`. At 1440px the rendered panel is 720x287px, both feature cards are equal at
+236x211px, and the links column is 212px. The measured pill clip, dynamic `pillClip`
+calculation, `top center` transform origin, 24px final radius, 0.9s open easing,
+0.65s close easing, close content fade, reduced-motion branches, and all open/close
+state logic are byte-for-byte unchanged.
