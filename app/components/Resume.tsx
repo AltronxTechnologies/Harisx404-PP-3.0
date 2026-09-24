@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useId, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";import { Briefcase, ChevronDown, MapPin } from "lucide-react";
 import { Experience, formatPeriod, ResumeData } from "../lib/resume/types";
@@ -229,85 +229,61 @@ function renderRich(text: ReactNode): ReactNode {
  *  and is keyboard- and screen-reader-accessible. */
 function Highlights({
   highlights,
-  open,
-  onToggle,
 }: {
   highlights: Experience["highlights"];
-  open: boolean;
-  onToggle: () => void;
 }) {
-  const prefersReducedMotion = useReducedMotion();
-  const panelId = useId();
   const count = highlights.length;
   return (
-    <div className="mt-4">
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-expanded={open}
-        aria-controls={panelId}
-        className="flex items-center gap-2 rounded-full border border-border-primary px-3.5 py-1.5 font-mono text-xs font-medium uppercase tracking-[0.2em] text-text-secondary transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:border-white/20 dark:hover:border-white/25 dark:active:border-white/25"
+    <details className="group/highlights mt-4">
+      <summary
+        className="flex w-fit cursor-pointer list-none items-center gap-2 rounded-full border border-border-primary px-3.5 py-1.5 font-mono text-xs font-medium uppercase tracking-[0.2em] text-text-secondary transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary motion-reduce:transition-none dark:border-white/20 dark:hover:border-white/25 dark:active:border-white/25 [&::-webkit-details-marker]:hidden"
       >
         <span aria-hidden className="text-text-secondary">
           ✦
         </span>
-        {open ? "Hide highlights" : `Show highlights (${count})`}
+        <span className="group-open/highlights:hidden">Show highlights ({count})</span>
+        <span className="hidden group-open/highlights:inline">Hide highlights</span>
         <ChevronDown
           aria-hidden
-          className={`h-3.5 w-3.5 shrink-0 transition-transform duration-200 ${
-            open ? "rotate-180" : ""
-          }`}
+          className="h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-open/highlights:rotate-180 motion-reduce:transition-none"
         />
-      </button>
+      </summary>
       {/* Bullets stay mounted in the HTML even when collapsed — search
-          engines and find-in-page still see every keyword; only the visual
-          height animates. */}
-      <motion.div
-        id={panelId}
-        initial={false}
-        animate={{ height: open ? "auto" : 0, opacity: open ? 1 : 0 }}
-        transition={
-          prefersReducedMotion
-            ? { duration: 0 }
-            : { duration: 0.25, ease: "easeOut" }
-        }
-        className="overflow-hidden"
-        aria-hidden={!open}
-        {...(!open ? { inert: true } : {})}
-      >
-        <ul className="mt-4 space-y-4">
-          {highlights.map((highlight, i) => (
-            <li
-              key={i}
-              className="flex text-sm leading-6 text-text-secondary sm:text-[15px]"
+          engines and find-in-page still see every keyword. */}
+      <ul className="mt-4 space-y-4">
+        {highlights.map((highlight, i) => (
+          <li
+            key={i}
+            className="flex text-sm leading-6 text-text-secondary sm:text-[15px]"
+          >
+            <span
+              aria-hidden
+              className="mr-2 shrink-0 font-mono text-text-secondary"
             >
-              <span
-                aria-hidden
-                className="mr-2 shrink-0 font-mono text-text-secondary"
-              >
-                ✦
-              </span>
-              <p className="min-w-0 break-words">
-                {highlight.lead ? (
-                  <>
-                    <strong className="font-medium text-text-primary">
-                      {highlight.lead}
-                    </strong>{" "}
-                  </>
-                ) : null}
-                {renderRich(highlight.text)}
-              </p>
-            </li>
-          ))}
-        </ul>
-      </motion.div>
-    </div>
+              ✦
+            </span>
+            <p className="min-w-0 break-words">
+              {highlight.lead ? (
+                <>
+                  <strong className="font-medium text-text-primary">
+                    {highlight.lead}
+                  </strong>{" "}
+                </>
+              ) : null}
+              {renderRich(highlight.text)}
+            </p>
+          </li>
+        ))}
+      </ul>
+    </details>
   );
 }
 
 export function Resume({ experiences }: { experiences?: Experience[] }) {
   const prefersReducedMotion = useReducedMotion();
-  const [openHighlightsId, setOpenHighlightsId] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const shouldReduce = mounted && prefersReducedMotion;
   const entries =
     experiences && experiences.length > 0
       ? experiences
@@ -346,10 +322,10 @@ export function Resume({ experiences }: { experiences?: Experience[] }) {
             <motion.div
               key={experienceKey}
               className="py-12"
-              initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
+              initial={shouldReduce ? false : { opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
+              transition={{ duration: shouldReduce ? 0 : 0.5, ease: "easeOut" }}
             >
               <div className="mx-auto max-w-6xl px-4 xl:px-0">
                 <div className="relative grid grid-cols-[1fr,5fr] gap-6 md:grid-cols-[minmax(0,2fr),96px,minmax(0,4fr)] xl:grid-cols-[280px,96px,minmax(0,1fr)]">
@@ -425,12 +401,6 @@ export function Resume({ experiences }: { experiences?: Experience[] }) {
                     {experience.highlights.length > 0 ? (
                       <Highlights
                         highlights={experience.highlights}
-                        open={openHighlightsId === experienceKey}
-                        onToggle={() =>
-                          setOpenHighlightsId((current) =>
-                            current === experienceKey ? null : experienceKey,
-                          )
-                        }
                       />
                     ) : null}
                   </div>

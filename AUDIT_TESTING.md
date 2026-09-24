@@ -372,6 +372,7 @@ Date: · Commit: · Routes:
 | 1 | **About page** | 2026-09-04 | Passed 12-phase audit and received final owner approval | entry 24 |
 | 2 | **Projects index** | 2026-09-04 | Passed production audit and received final owner approval | entry 24 |
 | 3 | **Blog index** | 2026-09-04 | UI/behavior audit passed; awaiting owner review and content-ownership decision | pending |
+| 4 | **About final production re-lock** | 2026-09-24 | Passed full page, responsive, interaction, and reduced-motion audit | entry 38 |
 
 ---
 
@@ -409,6 +410,7 @@ Track where each reference value came from, so its authority is traceable.
 | About content prose: 15px/400; card subtitles remain 14px mobile → 16px md | About hero, Experience, Education, bento baseline | 2026-09-02 |
 | Theme-aware paper hero: local image, multiply light / inverted screen dark | `PaperHeroTexture.tsx` | 2026-09-02 |
 | Rendered-DOM checks for draggable tabindex and duplicate SVG IDs | About scrapbook + Education posters | 2026-09-02 |
+| About credential archive: 220/300px shell, 104/164px editorial plate, token-aligned light surface, generic dynamic count | `CredentialBentoPreview.tsx` | 2026-09-24 (entry 38) |
 
 ### Still thin — strengthen as data arrives
 Honest gaps in the current baseline. Fill these from real locked pages rather

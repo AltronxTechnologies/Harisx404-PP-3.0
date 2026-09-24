@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useClickAnyWhere, useMediaQuery } from "usehooks-ts";
 
@@ -58,7 +58,10 @@ function Sticker({
   caption?: string;
   className?: string;
 }) {
-  const reduced = useReducedMotion();
+  const prefersReducedMotion = useReducedMotion();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const reduced = mounted && prefersReducedMotion;
   // Refs + live measurement of the sticker's on-screen position
   const itemRef = useRef<HTMLDivElement | null>(null);
 
@@ -280,7 +283,10 @@ function Sticker({
 }
 
 export function ScrapbookBento({ className }: { className?: string }) {
-  const reduced = useReducedMotion();
+  const prefersReducedMotion = useReducedMotion();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const reduced = mounted && prefersReducedMotion;
   const container = {
     hidden: { opacity: 0 },
     shown: {

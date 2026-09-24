@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { BentoCard } from "./BentoCard";
 import { CredentialBentoPreview } from "./credentials/CredentialBentoPreview";
@@ -13,14 +14,17 @@ export function CredentialBento({
   height?: string;
 }) {
   const reduced = useReducedMotion();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const shouldReduce = mounted && reduced;
   return (
     <div>
       <BentoCard height={height} className="group" linkTo="/credentials">
         <div className="relative z-20 text-center">
-          <motion.h3 className="text-base font-medium text-text-primary" initial={reduced ? false : { opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+          <motion.h3 className="text-base font-medium text-text-primary" initial={shouldReduce ? false : { opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: shouldReduce ? 0 : 0.4 }}>
             Credentials
           </motion.h3>
-          <motion.p className="mt-1 text-sm text-text-secondary md:text-base" initial={reduced ? false : { opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }}>
+          <motion.p className="mt-1 text-sm text-text-secondary md:text-base" initial={shouldReduce ? false : { opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: shouldReduce ? 0 : 0.4, delay: shouldReduce ? 0 : 0.1 }}>
             Certificates, badges, and achievements.
           </motion.p>
         </div>

@@ -1977,3 +1977,51 @@ The Footer is re-locked after source and browser verification.
 Do not modify, refactor, restyle, reorder, rename, move, or indirectly alter Home
 or its frozen presentation/data-state contracts without a new explicit owner
 unlock. Dynamic GitHub and credential data updates do not constitute an unlock.
+
+## 38. FINAL OWNER RE-LOCK - About Production Sign-off
+
+- **Date locked:** 2026-09-24
+- **Locked at commit:** this lock change (base `a90ed5c`)
+- **Owner instruction:** run one final whole-page check, lock About when every gate
+  passes, then move work to the Navbar.
+- **Scope:** `/about`, `app/about/**`, `app/components/Resume.tsx`,
+  `app/components/Timeline.tsx`, `app/components/EducationCards.tsx`,
+  `app/components/EducationMotion.tsx`, `app/components/AboutTrackPattern.tsx`,
+  `app/components/ScrapbookBento.tsx`, `app/components/CredentialBento.tsx`, and
+  `app/components/credentials/CredentialBentoPreview.tsx`, plus About-facing data
+  contracts and use of shared locked Accounts, GitHub, CTA, Navbar, and Footer.
+- **Whole-page freeze:** hero, Experience, Education, Beyond the resume grid, CTA
+  handoff, copy, responsive ordering, theme branches, section rhythm, typography,
+  borders, motion, interactions, and accessibility are frozen in their current
+  approved state.
+- **Credential archive freeze:** outer height remains `220px` mobile and `300px`
+  desktop; the premium editorial inner plate remains `104px`/`164px`, uses the
+  shared cool-neutral light surface and approved dark archival surface, shows the
+  automatic published count, `Documented records`, verified seal, and only the
+  generic categories `Certificates`, `Badges`, and `Achievements`. Count and
+  `Documented` match the Accounts icon foreground pair (`neutral-600` light,
+  `neutral-300` dark). Do not add issuers, logos, course names, or in-progress
+  states without an explicit unlock.
+- **Experience disclosure freeze:** highlight pills use native
+  `details`/`summary`, retain mounted searchable content and the approved visual,
+  and support mouse, touch, Enter, and Space without hydration-dependent state.
+- **Reduced-motion correction:** Experience, Timeline, Education, Credentials, and
+  Scrapbook now defer reduced-motion branches until after mount so server and
+  client markup match. Reduced mode has zero hydration warnings and removes motion
+  without changing final geometry. This correction is frozen.
+- **Verification:** TypeScript and targeted ESLint clean; About HTTP 200;
+  Home/About contracts 3/3; Credentials 5/5; Preview 3/3; full public preview
+  browser sweep passed; protocol responsive matrix 12/12 across six viewports and
+  both themes; normal/reduced-motion theme matrix 4/4; all 14 internal destinations
+  HTTP 200; zero browser errors, failed requests, broken images, overflow,
+  duplicate IDs, credential clipping, or undersized visible non-chart controls.
+- **Intentional variations:** compact credential labels remain approved archival
+  metadata; Education posters remain intentionally inverted; dense GitHub chart
+  cells retain their existing accessible exception; dynamic public data does not
+  unlock presentation; shared Navbar/Footer/CTA variations retain their own locks.
+- **Audit evidence:** `audit/16-about-final-production-lock.md`.
+
+Do not modify, refactor, restyle, reorder, rename, move, or indirectly alter About
+or its frozen presentation/data-state contracts without a new explicit owner
+unlock. Work may now move to Navbar, which remains independently locked until the
+owner explicitly authorizes a specific Navbar change.

@@ -9,7 +9,7 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface TimelineProps {
   avatarUrl: string;
@@ -18,6 +18,8 @@ interface TimelineProps {
 export function Timeline({ avatarUrl }: TimelineProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["end 50%", "start 50%"],
@@ -33,7 +35,7 @@ export function Timeline({ avatarUrl }: TimelineProps) {
     restDelta: 0.001,
   });
   const staticProgress = useMotionValue(1);
-  const progress = prefersReducedMotion ? staticProgress : smooth;
+  const progress = mounted && prefersReducedMotion ? staticProgress : smooth;
 
   // Avatar rides from the top of the line to its very end (36px = avatar
   // height) so it never slips past the bottom divider.

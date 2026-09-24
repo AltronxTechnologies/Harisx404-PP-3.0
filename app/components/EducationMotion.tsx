@@ -7,12 +7,15 @@ import React from "react";
  *  fade + 10px rise (once) the Experience entries use. */
 export function EduReveal({ children }: { children: React.ReactNode }) {
   const reduced = useReducedMotion();
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => setMounted(true), []);
+  const shouldReduce = mounted && reduced;
   return (
     <motion.div
-      initial={reduced ? undefined : { opacity: 0, y: 10 }}
-      whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
+      initial={shouldReduce ? false : { opacity: 0, y: 10 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
+      transition={{ duration: shouldReduce ? 0 : 0.5, ease: "easeOut" }}
     >
       {children}
     </motion.div>
@@ -25,9 +28,11 @@ export function EduReveal({ children }: { children: React.ReactNode }) {
  *  stay perfectly still, so taps never leave them "stuck" mid-hover. */
 export function EduCardHover({ children }: { children: React.ReactNode }) {
   const reduced = useReducedMotion();
+  const [mounted, setMounted] = React.useState(false);
   const [canHover, setCanHover] = React.useState(false);
 
   React.useEffect(() => {
+    setMounted(true);
     const mq = window.matchMedia("(hover: hover) and (pointer: fine)");
     const update = () => setCanHover(mq.matches);
     update();
@@ -38,8 +43,8 @@ export function EduCardHover({ children }: { children: React.ReactNode }) {
   return (
     <motion.div
       className="relative mx-auto w-fit"
-      whileHover={reduced || !canHover ? undefined : { y: -6 }}
-      transition={{ duration: 0.2, ease: "easeOut" }}
+      whileHover={(mounted && reduced) || !canHover ? undefined : { y: -6 }}
+      transition={{ duration: mounted && reduced ? 0 : 0.2, ease: "easeOut" }}
     >
       {children}
     </motion.div>
