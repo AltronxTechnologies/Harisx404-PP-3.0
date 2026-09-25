@@ -69,10 +69,10 @@ export default function TermsOfUsePage() {
         <div className="relative px-4 xl:px-0">
           <PaperHeroTexture className="-inset-x-2 bottom-0 top-[-128px] sm:-inset-x-3 sm:top-[-144px] md:top-[-176px] lg:inset-x-0" />
           <header className="relative mx-auto max-w-3xl text-center">
-            <p className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">Legal &amp; Policy</p>
+            <p className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">Legal</p>
             <h1 className="heading-glow mx-auto mt-4 max-w-xl text-balance [font-family:var(--font-instrument-serif),serif] text-[46px] font-medium leading-none tracking-tight text-text-primary md:text-[56px] md:tracking-[-1.5px]">
-              Terms,{" "}
-              <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none] motion-reduce:animate-none">plainly stated.</span>
+              Terms{" "}
+              <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none] motion-reduce:animate-none">of Use.</span>
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-pretty text-[15px] leading-6 text-text-secondary">
               The terms that apply when you visit, read, and contribute to this site.
@@ -121,24 +121,6 @@ export default function TermsOfUsePage() {
               The site combines portfolio material, credited third-party work,
               and contributions from visitors. Please respect each creator&apos;s rights.
             </p>
-            <div id="design-inspiration" className="rounded-2xl border border-border-primary bg-neutral-50/50 p-5 dark:bg-neutral-900/20">
-              <p className="font-mono text-xs font-bold uppercase tracking-wider text-neutral-900 dark:text-white">
-                Design inspiration
-              </p>
-              <p className="mt-2 text-sm leading-relaxed text-text-secondary">
-                Selected interface patterns were inspired by the portfolio work of{" "}
-                <a
-                  href="https://aayushbharti.in"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="rounded-sm font-medium text-text-primary underline decoration-dotted underline-offset-4 hover:text-text-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary"
-                >
-                  Aayush Bharti
-                </a>
-                . This credit concerns design inspiration; other third-party
-                materials and visitor contributions remain with their respective owners.
-              </p>
-            </div>
             <div className="grid gap-6 md:grid-cols-2">
               {/* Restriction card (red) */}
               <div className="rounded-2xl border border-red-200 bg-red-50/50 p-6 dark:border-red-900/30 dark:bg-red-950/10">
@@ -169,6 +151,14 @@ export default function TermsOfUsePage() {
                 </p>
               </div>
             </div>
+            <p className="text-sm leading-relaxed text-text-secondary">
+              Selected interface patterns reference work by{" "}
+              <a href="https://aayushbharti.in" target="_blank" rel="noopener noreferrer" className="rounded-sm font-medium text-text-primary underline decoration-dotted underline-offset-4 hover:text-text-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary">
+                Aayush Bharti
+              </a>
+              . Other third-party materials and visitor contributions remain with
+              their respective owners.
+            </p>
           </div>
         </section>
 

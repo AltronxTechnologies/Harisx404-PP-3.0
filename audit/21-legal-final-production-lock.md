@@ -64,3 +64,30 @@ compliance in any particular jurisdiction. Before deployment the owner should
 confirm actual provider practices, data-request handling, rights to third-party
 assets, and any jurisdiction-specific disclosures. Material changes to those facts
 require an accurate policy update; no policy can be guaranteed correct forever.
+
+## Owner-Authorized Clarity Amendment
+
+On 2026-09-25 the owner requested generic, durable legal page headings and less
+provider-specific policy copy. Both heroes now use the kicker `Legal`, with
+`Privacy Policy.` and `Terms of Use.` as their respective `h1` labels.
+
+- Privacy's standalone Newsletter Email card was replaced by a Testimonials
+  disclosure. A conditional email-updates sentence remains under Email services:
+  the newsletter form is still rendered on blog articles and sends subscriber
+  addresses to an external mailing provider. Removing that sentence while the
+  signup exists would make the notice inaccurate.
+- AI chat is now described as sending relevant messages and chat history to an
+  external AI provider, rather than hard-coding Gemini into the legal notice.
+  Changing providers in the future still requires checking the new provider's
+  data handling and applicable disclosure requirements.
+- Wall sign-in, database/authentication, email, and media providers are described
+  by function. Cookie, request-signal, contact-field, testimonial, and public
+  contribution disclosures remain explicit.
+- The separate Design inspiration card was removed from Terms. A small visible
+  Aayush Bharti link remains in the Rights section to retain the existing
+  reference-site attribution obligation documented in `audit/README.md`.
+
+The new titles, card and service copy, and credit treatment are covered by the
+legal integration tests. The amendment changes no shared locked components and
+preserves the established responsive/theme visual system. It supersedes the
+older title and provider-specific wording above.

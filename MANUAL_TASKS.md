@@ -98,9 +98,12 @@ Same for the About page photo stack and the Know-About-Me visual.
 
 - The hero status row and CTA button already use the real address
   (`itsharis.tech@gmail.com`) — done 2026-08-15.
-- Read `/legal/privacy` and `/legal/terms` — they are clearly-marked templates.
-  Adjust wording to match reality (analytics you actually use, newsletter, etc.).
-- Review the design-inspiration credit in `/legal/terms`.
+- Review `/legal/privacy` and `/legal/terms` against deployed integrations and
+  local legal requirements. The code-level audit is in
+  `audit/21-legal-final-production-lock.md`.
+- The large Design inspiration card has been removed from `/legal/terms`.
+  A small visible credit link remains for the reference site's documented
+  attribution constraint; confirm the reference license before removing it.
 
 ## STEP 6 — Enable AI extras (optional, 5 min)
 

@@ -5,8 +5,8 @@ import test from "node:test";
 const baseUrl = process.env.PREVIEW_BASE_URL || "http://localhost:3000";
 
 for (const [route, sourcePath, title] of [
-  ["/legal/privacy", "../app/legal/privacy/page.tsx", "Your Data,"],
-  ["/legal/terms", "../app/legal/terms/page.tsx", "plainly stated."],
+  ["/legal/privacy", "../app/legal/privacy/page.tsx", "Privacy Policy."],
+  ["/legal/terms", "../app/legal/terms/page.tsx", "Terms of Use."],
 ]) {
   test(`${route} uses the public-page frame and valid hero semantics`, async () => {
     const [response, source] = await Promise.all([
@@ -15,11 +15,12 @@ for (const [route, sourcePath, title] of [
     ]);
     assert.equal(response.status, 200);
     const html = await response.text();
-    assert.match(html, new RegExp(title));
     assert.equal((html.match(/<h1\b/g) || []).length, 1);
     const heading = html.match(/<h1[^>]*>[\s\S]*?<\/h1>/)?.[0] || "";
     assert.ok(heading);
     assert.doesNotMatch(heading, /<p\b/);
+    assert.equal(heading.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim(), title);
+    assert.match(html, />Legal<\/p>/);
     assert.match(html, /From concept to creation/);
     assert.match(source, /<GridWrapper>/);
     assert.match(source, /<PaperHeroTexture/);
@@ -28,10 +29,10 @@ for (const [route, sourcePath, title] of [
   });
 }
 
-test("Terms keeps the owner-approved design attribution", async () => {
+test("Terms omits the design-inspiration card while retaining the required credit", async () => {
   const response = await fetch(`${baseUrl}/legal/terms`);
   const html = await response.text();
-  assert.match(html, /id="design-inspiration"/);
+  assert.doesNotMatch(html, /id="design-inspiration"|>Design inspiration</);
   assert.match(html, /href="https:\/\/aayushbharti\.in"/);
   assert.match(html, /rel="noopener noreferrer"/);
   assert.match(html, /Aayush Bharti/);
@@ -41,18 +42,20 @@ test("Privacy describes the implemented visitor data flows without absolute trac
   const response = await fetch(`${baseUrl}/legal/privacy`);
   const html = await response.text();
   for (const value of [
-    "GitHub or Google",
+    "offered provider",
     "subject, inquiry type",
-    "Loops",
+    "Testimonials",
+    "email updates on a blog article",
     "identifier cookie",
-    "Google Gemini",
-    "Gravatar",
+    "external AI provider",
+    "email-derived hash",
     "Abuse prevention",
     "Access &amp; Deletion Requests",
   ]) {
     assert.ok(html.includes(value), `${value} should appear in Privacy`);
   }
   assert.doesNotMatch(html, /No cookies, no IP logs|no selling or sharing of personal data|permanent deletion of anything/);
+  assert.doesNotMatch(html, /Newsletter Email|Google Gemini|>Loops</);
 });
 
 test("Terms distinguishes credited material and visitor submissions", async () => {

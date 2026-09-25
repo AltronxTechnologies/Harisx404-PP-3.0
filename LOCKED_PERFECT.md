@@ -2319,3 +2319,25 @@ for reviewing deployed provider practices, third-party asset rights,
 deletion requests, and jurisdictional requirements. If site behavior or law
 materially changes, update the notices accurately rather than preserving a
 stale lock.
+
+### 2026-09-25 owner-authorized legal-page clarity amendment
+
+The owner unlocked the Privacy and Terms copy, hero labels, and the Terms
+Design inspiration card. Both kickers
+now read **Legal**, and the page titles are **Privacy Policy.** and **Terms of
+Use.** Privacy's separate Newsletter Email card is replaced by Testimonials;
+the still-active optional blog-article email signup remains disclosed within the
+general Email services description. The AI assistant is disclosed as using an
+external AI provider rather than naming a specific provider that could change.
+Wall sign-in, data/authentication, email, and media provider categories are also
+worded by function, while actual cookies, submitted fields, and public content
+remain accurately described.
+
+Terms no longer has a Design inspiration card. Its compact visible attribution
+link to Aayush Bharti remains in the Rights section because `audit/README.md`
+records a reference-site backlink constraint; the owner has removed the separate
+card, not the documented credit obligation. No other shared locked design or
+legal behavior changed. The adjusted page copy and hero hierarchy are protected
+by `tests/legal-pages.integration.test.mjs` and documented in
+`audit/21-legal-final-production-lock.md`. This amendment is frozen subject to
+the same material-practices-change exception as entry 40.
