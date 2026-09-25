@@ -4,7 +4,7 @@ import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
-import { ArrowUpRight, ChevronDown, Copy, ExternalLink, FileText, Mail, MessageCircle, Sparkles } from "lucide-react";
+import { ArrowUpRight, ChevronDown, Copy, ExternalLink, MessageCircle, Sparkles } from "lucide-react";
 import { GridWrapper } from "@/app/components/GridWrapper";
 import { PaperHeroTexture } from "@/app/components/PaperHeroTexture";
 import { CtaSection } from "@/app/components/home/CtaSection";
@@ -275,13 +275,10 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
                   {shareOpen && (
                     <div id="project-share-options" role="group" aria-label="Share project" className={`relative z-30 mt-1 max-h-[min(70dvh,380px)] w-[min(224px,calc(100vw-6.5rem))] overflow-y-auto rounded-xl border border-border-primary bg-bg-primary p-1.5 text-left shadow-lg dark:shadow-black/40 sm:absolute sm:right-0 ${shareAbove ? "sm:bottom-full sm:mb-1 sm:mt-0" : "sm:top-full sm:mt-1"}`}>
                       <button ref={firstShareItemRef} type="button" onClick={() => copyText(projectUrl(), "URL copied")} className={`flex min-h-11 w-full items-center gap-2.5 rounded-md px-2.5 text-[13px] text-text-primary hover:bg-text-primary/5 sm:min-h-10 ${focusStyle}`}><Copy className="size-3.5 text-text-secondary" aria-hidden /> Copy URL</button>
-                      <button type="button" onClick={() => copyText(markdown(), "Markdown copied")} className={`flex min-h-11 w-full items-center gap-2.5 rounded-md px-2.5 text-[13px] text-text-primary hover:bg-text-primary/5 sm:min-h-10 ${focusStyle}`}><FileText className="size-3.5 text-text-secondary" aria-hidden /> Copy as Markdown</button>
                       <button type="button" onClick={viewMarkdown} className={`flex min-h-11 w-full items-center gap-2.5 rounded-md px-2.5 text-[13px] text-text-primary hover:bg-text-primary/5 sm:min-h-10 ${focusStyle}`}><ExternalLink className="size-3.5 text-text-secondary" aria-hidden /> View as Markdown <span className="sr-only">(opens in a new tab)</span></button>
                       <div aria-hidden className="mx-2 my-1 border-t border-border-primary" />
                       <a href={`https://chatgpt.com/?q=${encodeURIComponent(`Review this project case study: ${projectUrl()}`)}`} target="_blank" rel="noopener noreferrer" className={`flex min-h-11 w-full items-center gap-2.5 rounded-md px-2.5 text-[13px] text-text-primary hover:bg-text-primary/5 sm:min-h-10 ${focusStyle}`}><MessageCircle className="size-3.5 text-text-secondary" aria-hidden /> Open in ChatGPT <span className="sr-only">(opens in a new tab)</span></a>
                       <button type="button" onClick={openClaude} className={`flex min-h-11 w-full items-center gap-2.5 rounded-md px-2.5 text-[13px] text-text-primary hover:bg-text-primary/5 sm:min-h-10 ${focusStyle}`}><Sparkles className="size-3.5 text-text-secondary" aria-hidden /> Open in Claude <span className="sr-only">(opens in a new tab; prompt copied to clipboard)</span></button>
-                      <div aria-hidden className="mx-2 my-1 border-t border-border-primary" />
-                      <a href={`mailto:?subject=${encodeURIComponent(project.title)}&body=${encodeURIComponent(`${summary}\n\n${projectUrl()}`)}`} className={`flex min-h-11 w-full items-center gap-2.5 rounded-md px-2.5 text-[13px] text-text-primary hover:bg-text-primary/5 sm:min-h-10 ${focusStyle}`}><Mail className="size-3.5 text-text-secondary" aria-hidden /> Share by email</a>
                     </div>
                   )}
                 </div>

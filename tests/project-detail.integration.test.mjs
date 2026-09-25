@@ -99,9 +99,10 @@ test("project type, timeline and optional sections remain owner-managed", async 
   assert.match(detail, /sections\.map/);
   assert.match(detail, /Related projects/);
   assert.match(detail, /Browse all projects/);
-  for (const action of ["Copy URL", "Copy as Markdown", "View as Markdown", "Open in ChatGPT", "Open in Claude", "Share by email"]) {
+  for (const action of ["Copy URL", "View as Markdown", "Open in ChatGPT", "Open in Claude"]) {
     assert.ok(detail.includes(action), `share menu should include ${action}`);
   }
+  assert.doesNotMatch(detail, /Copy as Markdown|Share by email/);
   assert.match(page, /fetchProjects\(\)\.catch\(\(\) => \[\]\)/);
 });
 
