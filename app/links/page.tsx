@@ -50,7 +50,7 @@ const linkGroups: Array<{ label: string; description: string; links: SocialLink[
     description: "Professional profiles and direct ways to start a conversation.",
     links: [
       { title: "LinkedIn", detail: "Professional updates and connections", href: siteMetadata.linkedin, external: true, icon: <BrandGlyph name="linkedin" className="size-5" /> },
-      { title: "X / Twitter", detail: "Profile link coming soon", unavailable: true, icon: <BrandGlyph name="x" className="size-5" /> },
+      { title: "X / Twitter", detail: "Follow @harisx404 on X", href: siteMetadata.twitter, external: true, icon: <BrandGlyph name="x" className="size-5" /> },
       { title: "Email", detail: "itsharis.tech@gmail.com", href: siteMetadata.email, icon: <Mail className="size-5" aria-hidden /> },
       { title: "Website", detail: "Projects, writing, and everything else", href: "/", icon: <Globe2 className="size-5" aria-hidden /> },
     ],

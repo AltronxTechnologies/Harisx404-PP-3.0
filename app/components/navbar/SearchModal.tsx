@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { ThemeToggle } from "../ThemeToggle";
 import { BrandGlyph } from "../BrandGlyph";
+import { siteMetadata } from "@/app/data/siteMetadata";
 import {
   circleBtn,
   pillSurface,
@@ -70,7 +71,7 @@ function BrandIcon({ name }: { name: string }) {
 const CONNECT = [
   { name: "GitHub", link: "https://github.com/harisx404" },
   { name: "LinkedIn", link: "https://www.linkedin.com/in/harisx404/" },
-  { name: "X (Twitter)", link: "https://twitter.com/harisx404" },
+  { name: "X (Twitter)", link: siteMetadata.twitter },
 ];
 
 const LEGAL = [

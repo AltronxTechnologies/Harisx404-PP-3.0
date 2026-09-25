@@ -290,3 +290,12 @@ To show the embedded scheduling calendar there:
       The current compatibility PDF still mentions KPITB Blockchain enrollment and
       an A+ degree grade instead of the documented 3.5/4.0 CGPA and completed
       KPITB AI/ML training; its binary content is not changed by the web page.
+
+## X profile
+
+- [x] Active public X profile links and the connected `twitter_url` value use
+      `https://x.com/harisx404` (2026-09-25).
+- [ ] If social URLs need to be edited through Admin later, align the Admin
+      Settings API with the connected `site_settings` column-based schema. The
+      current Admin API expects key/value rows; public links use site metadata
+      and are not blocked by that Admin form.

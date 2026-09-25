@@ -1,3 +1,5 @@
+import { siteMetadata } from "./siteMetadata";
+
 // =====================================================================
 // 📝 SITE CONTENT — the single place to edit the homepage's static text
 // =====================================================================
@@ -189,7 +191,7 @@ export const siteContent = {
       { label: "Email", href: "mailto:itsharis.tech@gmail.com" },
       { label: "LinkedIn", href: "https://www.linkedin.com/in/harisx404/" },
       { label: "GitHub", href: "https://github.com/harisx404" },
-      { label: "Twitter", href: "#" },
+      { label: "X / Twitter", href: siteMetadata.twitter },
     ],
   },
 

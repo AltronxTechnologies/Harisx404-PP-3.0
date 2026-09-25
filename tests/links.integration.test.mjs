@@ -11,12 +11,12 @@ test("Links renders the approved profile and destination groups", async () => {
   assert.match(html, /One handle,/);
   assert.match(html, /Code &amp; craft/i);
   assert.match(html, /Send a message/);
-  assert.match(html, /Profile link coming soon/);
+  assert.match(html, /Follow @harisx404 on X/);
   assert.match(html, /From concept to creation/);
   assert.doesNotMatch(html, /Book a Call/);
 });
 
-test("Links separates external, internal, email, and unavailable behavior", async () => {
+test("Links separates external, internal, and email destinations", async () => {
   const response = await fetch(`${baseUrl}/links`);
   const html = await response.text();
 
@@ -33,6 +33,7 @@ test("Links separates external, internal, email, and unavailable behavior", asyn
     "https://tryhackme.com/p/harisx404",
     "https://www.credly.com/users/harisx404",
     "https://www.linkedin.com/in/harisx404/",
+    "https://x.com/harisx404",
   ].forEach((href) => {
     const tag = openingTag(href);
     assert.match(tag, /target="_blank"/);
@@ -46,5 +47,5 @@ test("Links separates external, internal, email, and unavailable behavior", asyn
   });
   assert.match(html, /href="\/contact"/);
   assert.doesNotMatch(nav, /href="#"/);
-  assert.doesNotMatch(nav, /href="https:\/\/twitter\.com/);
+  assert.doesNotMatch(nav, /Profile link coming soon|>Soon</);
 });

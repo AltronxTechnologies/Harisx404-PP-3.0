@@ -13,7 +13,7 @@ export const siteMetadata = {
     "https://res.cloudinary.com/i22q5puf/image/upload/v1786526260/portfolio/haris_primary_photo.png",
   email: "mailto:itsharis.tech@gmail.com",
   github: "https://github.com/harisx404",
-  twitter: "https://twitter.com/harisx404",
+  twitter: "https://x.com/harisx404",
   twitterHandle: "@harisx404",
   linkedin: "https://www.linkedin.com/in/harisx404/",
   credly: "https://www.credly.com/users/harisx404",

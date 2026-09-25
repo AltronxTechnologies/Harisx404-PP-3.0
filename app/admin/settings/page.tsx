@@ -118,7 +118,7 @@ export default function AdminSettingsPage() {
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-medium">Twitter URL</label>
+                <label className="mb-2 block text-sm font-medium">X / Twitter URL</label>
                 <input
                   {...register("twitter_url")}
                   className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"

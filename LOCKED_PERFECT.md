@@ -2320,6 +2320,25 @@ deletion requests, and jurisdictional requirements. If site behavior or law
 materially changes, update the notices accurately rather than preserving a
 stale lock.
 
+### 2026-09-25 owner-authorized X profile activation and re-lock
+
+The owner supplied the verified intended X destination,
+`https://x.com/harisx404`, superseding the earlier temporary "Soon" state and
+`twitter.com/harisx404` references to Haris's profile. The shared metadata now
+drives Footer, Reach Out, and person structured data; Search uses the same value.
+Links' X card becomes an external link, and Contact's former `href="#"` icon
+becomes a working external link. The already-correct Home X tile, other social
+destinations, button geometry, focus behavior, copy outside this X card, layout,
+and shared visual design remain frozen. Future seeds and the connected Supabase
+`twitter_url` field were updated to the same address.
+
+Do not alter the X share-intent endpoint or third-party article links as though
+they were profile URLs. TypeScript, targeted ESLint, Links (2/2), Contact (2/2),
+navigation (4/4), Home/About (3/3), preview (3/3), browser accessibility
+snapshots, and `git diff --check` pass. Evidence:
+`audit/22-x-profile-activation.md`. This narrow profile-destination amendment is
+re-locked; prior page and component locks remain in force.
+
 ### 2026-09-25 owner-authorized legal-page clarity amendment
 
 The owner unlocked the Privacy and Terms copy, hero labels, and the Terms

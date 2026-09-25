@@ -16,6 +16,8 @@ test("Contact renders the approved single-message experience", async () => {
   assert.match(html, /From concept to creation/);
   assert.doesNotMatch(html, /Book a Call/);
   assert.doesNotMatch(html, /role="tablist"/);
+  assert.match(html, /href="https:\/\/x\.com\/harisx404"/);
+  assert.doesNotMatch(html, /href="#"[^>]*aria-label="X \/ Twitter/);
 });
 
 test("Contact inquiry migration covers every server-approved intent", async () => {

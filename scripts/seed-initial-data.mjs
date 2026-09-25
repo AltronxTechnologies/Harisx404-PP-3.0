@@ -18,7 +18,7 @@ const SETTINGS = [
   { key: 'author_email', value: 'harisx404@gmail.com' },
   { key: 'github_url', value: 'https://github.com/harisx404' },
   { key: 'linkedin_url', value: 'https://www.linkedin.com/in/harisx404/' },
-  { key: 'twitter_url', value: 'https://twitter.com/harisx404' },
+  { key: 'twitter_url', value: 'https://x.com/harisx404' },
 ];
 
 const ABOUT_SECTIONS = [

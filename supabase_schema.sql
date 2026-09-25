@@ -169,7 +169,7 @@ INSERT INTO site_settings (key, value) VALUES
   ('author_email', 'your@email.com'),
   ('github_url', 'https://github.com/harisx404'),
   ('linkedin_url', ''),
-  ('twitter_url', '');
+  ('twitter_url', 'https://x.com/harisx404');
 
 -- Enable RLS on all tables
 ALTER TABLE blog_posts ENABLE ROW LEVEL SECURITY;
