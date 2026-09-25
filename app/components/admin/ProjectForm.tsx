@@ -27,7 +27,7 @@ const projectSchema = z.object({
   slug: z.string().min(1, "Slug is required"),
   description: z.string().optional(),
   tagline: z.string().max(160, "Keep the short description within 160 characters").optional(),
-  category: z.string().trim().min(1, "Project type is required").max(60),
+  category: z.string().trim().min(1, "At least one category is required").max(60),
   year: z.string().optional().or(z.literal("")),
   latest_update_label: z.string().max(32).optional(),
   source_note: z.string().max(80).optional(),
@@ -249,13 +249,14 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
 
       <div className="grid gap-6 md:grid-cols-3">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Project type</label>
+          <label className="text-sm font-medium">Categories</label>
           <input
             {...register("category")}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
             maxLength={60}
-            placeholder="Cybersecurity, AI/ML, Web App, Networking..."
+            placeholder="Cybersecurity / Networking, AI/ML..."
           />
+          <p className="text-xs text-ink-secondary">Separate categories with commas or spaced slashes; AI/ML stays one category.</p>
           {errors.category && <p className="text-xs text-red-500">{errors.category.message}</p>}
         </div>
 

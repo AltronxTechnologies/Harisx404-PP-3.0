@@ -120,6 +120,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
   const firstShareItemRef = useRef<HTMLButtonElement>(null);
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const galleryImages = project.gallery.filter((image) => image.src && image.src !== project.image_url);
+  const categories = [...new Set(project.category.split(/\s+\/\s+|,/).map((category) => category.trim()).filter(Boolean))];
   const domainTags = [...new Set(project.tags.map((tag) => tag.trim()).filter(Boolean))];
   const sourceUrl = /^https?:\/\/(?:www\.)?github\.com\/[^/?#]+\/?(?:\?.*)?$/i.test(project.github_url) ? "" : project.github_url;
   const summary = project.tagline || project.description;
@@ -253,7 +254,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
           <div className="grid lg:grid-cols-2">
             <div className="px-5 pb-5 pt-4 sm:px-7 sm:pb-7 sm:pt-5 lg:px-8 lg:pb-8">
               <div className="flex flex-wrap items-start justify-between gap-3">
-                <h2 id="project-facts-heading" className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">At a glance</h2>
+                <h2 id="project-facts-heading" className="font-mono text-xs font-semibold uppercase tracking-widest text-text-secondary">At a glance</h2>
                 <div ref={shareRef} className="relative ml-auto inline-flex flex-col items-end">
                   <button
                     ref={shareTriggerRef}
@@ -268,7 +269,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
                       setShareOpen((open) => !open);
                       if (!shareOpen && event.detail === 0) requestAnimationFrame(() => firstShareItemRef.current?.focus());
                     }}
-                    className={`inline-flex min-h-11 items-start rounded-sm px-1 font-mono text-xs font-medium uppercase tracking-widest text-blue-600 transition-colors hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-500 ${focusStyle}`}
+                    className={`inline-flex min-h-11 items-start rounded-sm px-1 font-mono text-xs font-semibold uppercase tracking-widest text-blue-600 transition-colors hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-500 ${focusStyle}`}
                   >
                     <span className="inline-flex items-center gap-1.5 leading-4">Share project <ChevronDown className={`size-3.5 transition-transform motion-reduce:transition-none ${shareOpen ? "rotate-180" : ""}`} aria-hidden /></span>
                   </button>
@@ -292,9 +293,9 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
               </dl>
             </div>
             <div className="border-t border-border-primary px-5 pb-5 pt-4 sm:px-7 sm:pb-7 sm:pt-5 lg:border-l lg:border-t-0 lg:px-8 lg:pb-8">
-              <h2 className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">Category &amp; tags</h2>
+              <h2 className="font-mono text-xs font-semibold uppercase tracking-widest text-text-secondary">Category &amp; tags</h2>
               <dl className="mt-6 space-y-5">
-                <Fact label="Category"><span className="inline-flex max-w-full rounded-full border border-border-primary bg-neutral-50 px-3 py-1.5 font-mono text-[11px] font-normal text-text-secondary dark:bg-white/[0.04]">{project.category}</span></Fact>
+                <Fact label="Category"><span className="flex flex-wrap gap-2">{categories.map((category) => <span key={category} className="inline-flex max-w-full rounded-full border border-border-primary bg-neutral-50 px-3 py-1.5 font-mono text-[11px] font-normal text-text-secondary dark:bg-white/[0.04]">{category}</span>)}</span></Fact>
                 <div>
                   <dt className="font-mono text-[11px] uppercase tracking-widest text-text-secondary">Tags</dt>
                   <dd className="mt-2">
@@ -308,7 +309,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
           </div>
           {project.tech.length > 0 && (
             <div className="border-t border-border-primary px-5 pb-5 pt-4 sm:px-7 sm:pb-7 sm:pt-5 lg:px-8 lg:pb-8">
-              <h2 className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">Tech stack</h2>
+              <h2 className="font-mono text-xs font-semibold uppercase tracking-widest text-text-secondary">Tech stack</h2>
               <ul className="mt-6 flex flex-wrap gap-2">
                 {project.tech.map((tech, index) => {
                   const icon = techIcons[tech.toLowerCase().replace(/[^a-z0-9]/g, "")];

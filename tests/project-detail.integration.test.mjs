@@ -25,7 +25,7 @@ test("published project cards resolve to authored detail pages", async () => {
     assert.doesNotMatch(html, /Preview-only case study\.|Case study \/ /, slug);
     const facts = [...html.matchAll(/<dt[^>]*>(Built|Stage|Visit|Latest update|Source|Type)<\/dt>/g)].map((match) => match[1]);
     assert.deepEqual(facts, ["Built", "Latest update", "Visit", "Source"], slug);
-    assert.match(html, /<dt[^>]*>Category<\/dt><dd[^>]*><span[^>]*rounded-full/, slug);
+    assert.match(html, /<dt[^>]*>Category<\/dt><dd[^>]*><span[^>]*><span[^>]*rounded-full/, slug);
     assert.match(html, /<dt[^>]*>Tags<\/dt>/, slug);
     assert.ok(html.includes("<h1"), `${slug} should render a heading`);
     assert.doesNotMatch(html, /Why I Built This|Key Decisions|Performance-first build: optimized images/, slug);
@@ -101,6 +101,8 @@ test("project category, timeline, source name and optional sections remain owner
   assert.match(page, /item\.tags\.filter/);
   assert.doesNotMatch(detail, /<Fact label="Stage">|<Fact label="Type">/);
   assert.match(detail, /<Fact label="Category">/);
+  assert.match(detail, /project\.category\.split\(\/\\s\+\\\/\\s\+\|,\//);
+  assert.ok((detail.match(/font-mono text-xs font-semibold uppercase tracking-widest/g) || []).length >= 4);
   assert.match(detail, /domainTags\.map/);
   assert.match(api, /tags: z\.array\(z\.string\(\)\.trim\(\)\.min\(1\)\.max\(100\)\)\.optional/);
   assert.match(index, /tags: Array\.isArray\(p\.tags\) \? p\.tags : \[\]/);
@@ -150,11 +152,13 @@ test("Alloy preview gives every published project a distinct, complete example w
     assert.doesNotMatch(html, /<dt[^>]*>Stage<\/dt>/, slug);
     assert.ok(html.includes("preview stock image, not a project screenshot"), slug);
     assert.ok((html.match(/<figcaption/g) || []).length >= 2, `${slug} needs at least two captioned preview images`);
-    const category = html.match(/<dt[^>]*>Category<\/dt><dd[^>]*><span[^>]*>([^<]+)<\/span><\/dd>/)?.[1];
+    const categoryHtml = html.match(/<dt[^>]*>Category<\/dt><dd[^>]*>(.*?)<\/dd>/s)?.[1];
+    const categoryPills = [...(categoryHtml || "").matchAll(/<span[^>]*rounded-full[^>]*>([^<]+)<\/span>/g)].map((match) => match[1]);
     const summary = html.match(/<h1[^>]*>[^<]+<\/h1><p[^>]*>([^<]+)<\/p>/)?.[1];
-    assert.ok(category, `${slug} needs a category`);
+    assert.ok(categoryPills.length > 0, `${slug} needs category pills`);
+    if (slug === "demo-sentimentscope-nlp") assert.deepEqual(categoryPills, ["AI/ML", "Language Processing"]);
     assert.ok(summary, `${slug} needs a summary`);
-    categories.add(category);
+    categories.add(categoryPills.join(" / "));
     summaries.add(summary);
     const structuredData = [...html.matchAll(/<script type="application\/ld\+json"[^>]*>(.*?)<\/script>/gs)]
       .map((match) => match[1]).find((value) => value.includes("CreativeWork"));

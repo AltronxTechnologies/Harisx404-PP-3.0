@@ -152,7 +152,7 @@ export const projectPreviewFixtures: Record<string, PreviewSeed> = {
     ],
   },
   "demo-sentimentscope-nlp": {
-    category: "AI / Language Processing",
+    category: "AI/ML / Language Processing",
     tagline: "An NLP-service concept for reviewing support-ticket sentiment and routing uncertain classifications to people.",
     latest_update_label: "Q3 2024",
     content: "**Preview overview.** The example describes a ticket moving through language detection, classification, and human review. Confidence is displayed as a decision aid rather than treated as a guarantee.",

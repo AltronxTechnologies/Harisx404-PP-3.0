@@ -19,7 +19,7 @@ The checked-in Alloy Compose file enables the flag by default. Example links, st
 | `visionforge-ml-studio` | AI / Computer Vision | Example live link | Not published |
 | `taskflow-workspace` | Productivity / Collaboration | Example live link | Example project repo |
 | `demo-shopstream-commerce` | E-commerce / Web | Example live link | Private |
-| `demo-sentimentscope-nlp` | AI / Language Processing | None | Example NLP repository |
+| `demo-sentimentscope-nlp` | AI/ML / Language Processing | None | Example NLP repository |
 | `demo-vaultaudit-scanner` | Cloud Security / Automation | None | Private |
 | `demo-pulseboard-analytics` | Web Analytics / Privacy | Example live link | Example analytics repo |
 
