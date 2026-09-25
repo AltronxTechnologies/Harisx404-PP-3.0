@@ -292,7 +292,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
             </div>
             {project.tech.length > 0 && (
               <div className="border-t border-border-primary px-5 pb-5 pt-4 sm:px-7 sm:pb-7 sm:pt-5 lg:border-l lg:border-t-0 lg:px-8 lg:pb-8">
-                <h2 className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">Tech stack</h2>
+                <h2 className="flex min-h-11 items-center font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">Tech stack</h2>
                 <ul className="mt-6 flex flex-wrap gap-2">
                   {project.tech.map((tech, index) => {
                     const icon = techIcons[tech.toLowerCase().replace(/[^a-z0-9]/g, "")];
