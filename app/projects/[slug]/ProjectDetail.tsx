@@ -18,6 +18,7 @@ export type DetailProject = {
   content: string;
   tech: string[];
   year: string;
+  stage: "" | "in_progress" | "completed";
   latestUpdate: string;
   isPreview: boolean;
   sections: Partial<Record<"why_built" | "key_decisions" | "results" | "lessons_learned", string>>;
@@ -25,7 +26,6 @@ export type DetailProject = {
   image_url: string;
   live_url: string;
   github_url: string;
-  liveNote: string;
   sourceNote: string;
   features: string[];
   tags: string[];
@@ -285,11 +285,11 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
                 <p role="status" aria-live="polite" className={copyStatus ? "w-full text-right text-xs leading-5 text-text-secondary" : "sr-only"}>{copyStatus}</p>
               </div>
               <dl className="mt-6 grid grid-cols-2 gap-x-5 gap-y-6 sm:grid-cols-3">
-                <Fact label="Type">{project.category}</Fact>
-                {project.year && <Fact label="Built">{project.year}</Fact>}
-                {project.latestUpdate && <Fact label="Latest update">{project.latestUpdate}</Fact>}
-                <Fact label="Visit">{project.live_url ? <a href={project.live_url} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1.5 rounded-sm text-text-primary underline underline-offset-4 ${focusStyle}`}>{project.isPreview ? "Example live link" : "View live project"} <ExternalLink className="size-3.5" aria-hidden /><span className="sr-only">opens in a new tab</span></a> : <span className="text-text-secondary">{project.liveNote || "No public demo"}</span>}</Fact>
-                <Fact label="Source">{sourceUrl ? <a href={sourceUrl} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1.5 rounded-sm text-text-primary underline underline-offset-4 ${focusStyle}`}>{project.isPreview ? "Example source link" : "View source"} <ExternalLink className="size-3.5" aria-hidden /><span className="sr-only">opens in a new tab</span></a> : <span className="text-text-secondary">{project.sourceNote || "Source not published"}</span>}</Fact>
+                <Fact label="Built">{project.year || "None"}</Fact>
+                <Fact label="Stage">{project.stage === "in_progress" ? "In progress" : project.stage === "completed" ? "Completed" : "None"}</Fact>
+                <Fact label="Visit">{project.live_url ? <a href={project.live_url} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1.5 rounded-sm text-blue-600 underline underline-offset-4 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 ${focusStyle}`}>{project.isPreview ? "Example live link" : "Live project"} <ExternalLink className="size-3.5" aria-hidden /><span className="sr-only">opens in a new tab</span></a> : <span className="text-text-secondary">None</span>}</Fact>
+                <Fact label="Latest update">{project.latestUpdate || "None"}</Fact>
+                <Fact label="Source">{sourceUrl ? <a href={sourceUrl} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1.5 rounded-sm text-blue-600 underline underline-offset-4 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 ${focusStyle}`}>{project.sourceNote || (project.isPreview ? "Example source link" : "View source")} <ExternalLink className="size-3.5" aria-hidden /><span className="sr-only">opens in a new tab</span></a> : <span className="text-text-secondary">{project.sourceNote || "None"}</span>}</Fact>
               </dl>
             </div>
             {project.tech.length > 0 && (

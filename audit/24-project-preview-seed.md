@@ -10,20 +10,20 @@ The checked-in Alloy Compose file enables the flag by default. Example links, st
 
 ## Coverage
 
-| Project slug | Preview type | Visit | Source |
-| --- | --- | --- | --- |
-| `intrushield-nids` | Cybersecurity / Network Defense | SOC/no public demo | Private |
-| `packetvision-network-sniffer` | Networking / CLI Tool | Local CLI | Example repository link |
-| `medicalink-hms` | Health Tech / SaaS | Example live link | Private |
-| `neurodoc-ai-assistant` | AI / Knowledge Systems | Research/no hosted demo | Example repository link |
-| `visionforge-ml-studio` | AI / Computer Vision | Example live link | Not published |
-| `taskflow-workspace` | Productivity / Collaboration | Example live link | Example repository link |
-| `demo-shopstream-commerce` | E-commerce / Web | Example live link | Private |
-| `demo-sentimentscope-nlp` | AI / Language Processing | API/no public endpoint | Example repository link |
-| `demo-vaultaudit-scanner` | Cloud Security / Automation | Local scanner | Private |
-| `demo-pulseboard-analytics` | Web Analytics / Privacy | Example live link | Example repository link |
+| Project slug | Preview type (cards/related) | Stage | Visit | Source |
+| --- | --- | --- | --- | --- |
+| `intrushield-nids` | Cybersecurity / Network Defense | In progress | None | Private |
+| `packetvision-network-sniffer` | Networking / CLI Tool | Completed | None | Example GitHub repo |
+| `medicalink-hms` | Health Tech / SaaS | In progress | Example live link | Private |
+| `neurodoc-ai-assistant` | AI / Knowledge Systems | In progress | None | Example source code |
+| `visionforge-ml-studio` | AI / Computer Vision | Completed | Example live link | Not published |
+| `taskflow-workspace` | Productivity / Collaboration | Completed | Example live link | Example project repo |
+| `demo-shopstream-commerce` | E-commerce / Web | Completed | Example live link | Private |
+| `demo-sentimentscope-nlp` | AI / Language Processing | In progress | None | Example NLP repository |
+| `demo-vaultaudit-scanner` | Cloud Security / Automation | Completed | None | Private |
+| `demo-pulseboard-analytics` | Web Analytics / Privacy | In progress | Example live link | Example analytics repo |
 
-Every fixture includes a unique short summary, overview, Why I built this, Key decisions, Results, What I learned, update label, and two or three captioned stock reference images. Highlights and Built labels use the existing project record. External example links use `example.com` and GitHub's `octocat/Hello-World` sample repository, not an owner's deployment or source.
+Every fixture includes a unique short summary, overview, Why I built this, Key decisions, Results, What I learned, stage, update label, and two or three captioned stock reference images. Highlights and Built labels use the existing project record. External example links use `example.com` and GitHub's `octocat/Hello-World` sample repository, not an owner's deployment or source. Visit shows None without a URL; a named Source link appears in blue when present.
 
 ## Disable And Remove
 

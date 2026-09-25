@@ -23,8 +23,8 @@ const projectFieldsSchema = z.object({
   tagline: z.string().max(160).optional().default(""),
   category: z.string().trim().min(1).max(60),
   year: z.string().max(20).optional().default(""),
+  project_stage: z.enum(["", "in_progress", "completed"]).optional().default(""),
   latest_update_label: z.string().max(32).optional().default(""),
-  live_note: z.string().max(80).optional().default(""),
   source_note: z.string().max(80).optional().default(""),
   case_study_sections: z.object({
     why_built: z.string().max(10000).optional().default(""),
@@ -92,8 +92,8 @@ function projectFields(data: z.infer<typeof projectSchema>) {
     tagline: data.tagline || null,
     category: data.category,
     year: data.year || null,
+    project_stage: data.project_stage || null,
     latest_update_label: data.latest_update_label || null,
-    live_note: data.live_note || null,
     source_note: data.source_note || null,
     case_study_sections: data.case_study_sections,
     tech_stack: data.tech_stack,
@@ -133,6 +133,9 @@ function fail(error: unknown) {
 }
 
 function projectWriteError(error: { message: string; code?: string }) {
+  if (["42703", "PGRST204"].includes(error.code || "") && /project_stage/.test(error.message)) {
+    return NextResponse.json({ error: "Project editor needs migration 2026_project_stage.sql before changes can be saved." }, { status: 503 });
+  }
   if (["42703", "PGRST204"].includes(error.code || "") && /latest_update_label|case_study_sections|live_note|source_note/.test(error.message)) {
     return NextResponse.json({ error: "Project editor needs migration 2026_project_case_studies.sql before changes can be saved." }, { status: 503 });
   }

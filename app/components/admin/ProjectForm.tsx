@@ -29,8 +29,8 @@ const projectSchema = z.object({
   tagline: z.string().max(160, "Keep the short description within 160 characters").optional(),
   category: z.string().trim().min(1, "Project type is required").max(60),
   year: z.string().optional().or(z.literal("")),
+  project_stage: z.enum(["", "in_progress", "completed"]),
   latest_update_label: z.string().max(32).optional(),
-  live_note: z.string().max(80).optional(),
   source_note: z.string().max(80).optional(),
   case_study_sections: z.object({
     why_built: z.string().max(10000),
@@ -61,7 +61,6 @@ interface ProjectFormProps {
     tags?: string[] | string | null;
     galleryImages?: GalleryImage[];
     latest_update_label?: string | null;
-    live_note?: string | null;
     source_note?: string | null;
     case_study_sections?: Partial<CaseStudySections> | null;
   };
@@ -93,8 +92,8 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
       tagline: initialData?.tagline ?? "",
       category: initialData?.category ?? "Web App",
       year: initialData?.year ?? "",
+      project_stage: initialData?.project_stage ?? "",
       latest_update_label: initialData?.latest_update_label ?? "",
-      live_note: initialData?.live_note ?? "",
       source_note: initialData?.source_note ?? "",
       case_study_sections: { ...emptySections, ...initialData?.case_study_sections },
       tech_stack: Array.isArray(initialData?.tech_stack)
@@ -250,7 +249,7 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
           {errors.tagline && <p className="text-xs text-red-500">{errors.tagline.message}</p>}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-2">
           <label className="text-sm font-medium">Project type</label>
           <input
@@ -270,6 +269,16 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
             placeholder="Q2 2026 or 2025"
           />
+        </div>
+
+        <div className="space-y-2">
+          <label htmlFor="project-stage" className="text-sm font-medium">Project stage</label>
+          <select id="project-stage" {...register("project_stage")} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal">
+            <option value="">Not specified</option>
+            <option value="in_progress">In progress</option>
+            <option value="completed">Completed</option>
+          </select>
+          <p className="text-xs text-ink-secondary">Shown on the project page. Separate from publication status below.</p>
         </div>
 
         <div className="space-y-2">
@@ -313,7 +322,7 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
 
       <div className="grid gap-6 md:grid-cols-3">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Status</label>
+          <label className="text-sm font-medium">Publication status</label>
           <select
             {...register("status")}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
@@ -338,21 +347,23 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
 
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Visit / live project URL (Optional)</label>
+          <label htmlFor="project-live-url" className="text-sm font-medium">Visit / live project URL (Optional)</label>
           <input
+            id="project-live-url"
             {...register("live_url")}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
             placeholder="https://..."
           />
           {errors.live_url && <p className="text-xs text-red-500">{errors.live_url.message}</p>}
-          <label htmlFor="project-live-note" className="block text-xs text-ink-secondary">If not hosted, what should Visit say?</label>
-          <input id="project-live-note" {...register("live_note")} maxLength={80} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="CLI only, runs locally, no public demo..." />
-          <p className="text-xs text-ink-secondary">Displayed only when no live URL is provided. Defaults to “No public demo.”</p>
+          <p className="text-xs text-ink-secondary">Leave blank for a local or CLI project; Visit will show None.</p>
         </div>
 
         <div className="space-y-2">
+          <label htmlFor="project-source-name" className="block text-sm font-medium">Source name (Optional)</label>
+          <input id="project-source-name" {...register("source_note")} maxLength={80} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="GitHub repository, Source code, Private repository..." />
+          <p className="text-xs text-ink-secondary">With a URL, this becomes blue link text. Without a URL, it describes unavailable source; leave blank to show None.</p>
           <div className="flex items-center justify-between">
-            <label className="text-sm font-medium">GitHub URL (Optional)</label>
+            <label htmlFor="project-source-url" className="text-sm font-medium">Source URL (Optional)</label>
             <button
               type="button"
               onClick={handleGenerateFromGithub}
@@ -364,15 +375,13 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
             </button>
           </div>
           <input
+            id="project-source-url"
             {...register("github_url")}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
             placeholder="https://github.com/your-name/project-repo"
           />
           <p className="text-xs text-ink-secondary">Link to this project&apos;s public repository, not your profile. Leave blank when the source is private.</p>
           {errors.github_url && <p className="text-xs text-red-500">{errors.github_url.message}</p>}
-          <label htmlFor="project-source-note" className="block text-xs text-ink-secondary">If source is not public, what should Source say?</label>
-          <input id="project-source-note" {...register("source_note")} maxLength={80} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="Private repository, not applicable..." />
-          <p className="text-xs text-ink-secondary">Displayed only when no public repository URL is provided. Defaults to “Source not published.”</p>
         </div>
       </div>
       
