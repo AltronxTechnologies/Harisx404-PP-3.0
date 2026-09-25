@@ -29,12 +29,14 @@ function mapDbProject(p: any): DetailProject {
   return {
     title: p.title,
     slug: p.slug,
-    tagline: p.tagline || p.description || "",
+    tagline: p.tagline || p.short_description || p.description || "",
     description: p.description || "",
     content: p.content || "",
     tech: Array.isArray(p.tech_stack) ? p.tech_stack : [],
     year: p.year || "",
-    category: (p as any).category ?? "Web App",
+    latestUpdate: p.latest_update_label || "",
+    sections: p.case_study_sections || {},
+    category: p.category || "Project",
     image_url: p.cover_image_url || (p as any).image_url || "",
     live_url: (p as any).live_url ?? "",
     github_url: (p as any).github_url ?? "",
@@ -58,8 +60,10 @@ async function resolveProject(slug: string): Promise<{
       (p: any) => ({
         title: p.title,
         slug: p.slug,
-        category: (p as any).category ?? "Web App",
-        tagline: p.tagline || p.description || "",
+        category: p.category || "Project",
+        tagline: p.tagline || p.short_description || p.description || "",
+        tags: Array.isArray(p.tags) ? p.tags : [],
+        tech: Array.isArray(p.tech_stack) ? p.tech_stack : [],
       }),
     );
     return { project: mapDbProject(dbProject), list };
@@ -78,6 +82,8 @@ async function resolveProject(slug: string): Promise<{
       content: "",
       tech: fb.tech,
       year: fb.year,
+      latestUpdate: "",
+      sections: {},
       category: fb.category,
       image_url: fb.image_url,
       live_url: "",
@@ -91,6 +97,8 @@ async function resolveProject(slug: string): Promise<{
       slug: p.slug,
       category: p.category,
       tagline: p.tagline,
+      tags: p.tags || [],
+      tech: p.tech,
     })),
   };
 }
@@ -101,9 +109,15 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
   if (!resolved) notFound();
 
   const { project, list } = resolved;
-  const idx = list.findIndex((p) => p.slug === project.slug);
-  const prev = idx > 0 ? list[idx - 1] : null;
-  const next = idx >= 0 && idx < list.length - 1 ? list[idx + 1] : null;
+  const tokens = (values: string[]) => new Set(values.map((value) => value.toLowerCase().trim()));
+  const tags = tokens(project.tags);
+  const tech = tokens(project.tech);
+  const related = list.filter((item) => item.slug !== project.slug).map((item) => ({
+    item,
+    score: item.tags.filter((tag) => tags.has(tag.toLowerCase().trim())).length * 4
+      + item.tech.filter((name) => tech.has(name.toLowerCase().trim())).length
+      + Number(item.category.toLowerCase() === project.category.toLowerCase()),
+  })).filter(({ score }) => score > 0).sort((a, b) => b.score - a.score || a.item.slug.localeCompare(b.item.slug)).slice(0, 2).map(({ item }) => item);
 
   return (
     <>
@@ -123,7 +137,7 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
           }).replace(/</g, "\\u003c"),
         }}
       />
-      <ProjectDetail project={project} prev={prev} next={next} />
+      <ProjectDetail project={project} related={related} />
     </>
   );
 }

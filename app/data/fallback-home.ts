@@ -5,7 +5,7 @@ export type HomeProject = {
   description: string;
   tech: string[];
   year: string;
-  category: "Web App" | "Mobile App";
+  category: string;
   image_url: string;
   features?: string[];
   /** all screenshots: cover first, then gallery (hover deck uses [1]) */

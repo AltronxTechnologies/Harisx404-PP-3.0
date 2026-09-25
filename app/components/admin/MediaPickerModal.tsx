@@ -20,7 +20,9 @@ interface MediaPickerModalProps {
 
 export function MediaPickerModal({ isOpen, onClose, onSelect }: MediaPickerModalProps) {
   const [media, setMedia] = useState<MediaItem[]>([]);
+  const [totalMedia, setTotalMedia] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"library" | "upload">("library");
@@ -29,22 +31,26 @@ export function MediaPickerModal({ isOpen, onClose, onSelect }: MediaPickerModal
 
   useEffect(() => {
     if (isOpen) {
-      fetchMedia();
+      setSelectedId(null);
+      fetchMedia(0);
     }
   }, [isOpen]);
 
-  const fetchMedia = async () => {
-    setIsLoading(true);
+  const fetchMedia = async (offset: number) => {
+    if (offset) setIsLoadingMore(true);
+    else setIsLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/admin/media?limit=50");
+      const res = await fetch(`/api/admin/media?limit=50&offset=${offset}`);
       if (!res.ok) throw new Error("Failed to fetch media");
-      const { data } = await res.json();
-      setMedia(data || []);
+      const { data, count } = await res.json();
+      setMedia((current) => offset ? [...current, ...(data || [])] : data || []);
+      setTotalMedia(count ?? 0);
     } catch (err: any) {
       setError(err.message);
     } finally {
       setIsLoading(false);
+      setIsLoadingMore(false);
     }
   };
 
@@ -80,7 +86,8 @@ export function MediaPickerModal({ isOpen, onClose, onSelect }: MediaPickerModal
       const { data } = await res.json();
       
       // Add the new image to the library and select it
-      setMedia([data, ...media]);
+      setMedia((current) => [data, ...current]);
+      setTotalMedia((count) => count + 1);
       setSelectedId(data.id);
       setActiveTab("library");
     } catch (err: any) {
@@ -138,8 +145,9 @@ export function MediaPickerModal({ isOpen, onClose, onSelect }: MediaPickerModal
                 <p className="text-sm opacity-70">Upload an image to get started.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                {media.map((item) => (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                  {media.map((item) => (
                   <button
                     key={item.id}
                     type="button"
@@ -163,7 +171,9 @@ export function MediaPickerModal({ isOpen, onClose, onSelect }: MediaPickerModal
                       </div>
                     )}
                   </button>
-                ))}
+                  ))}
+                </div>
+                {media.length < totalMedia && <button type="button" disabled={isLoadingMore} onClick={() => fetchMedia(media.length)} className="mx-auto block min-h-11 rounded-xl border border-border-hairline px-4 text-sm text-text-primary hover:bg-surface-raised disabled:opacity-50">{isLoadingMore ? "Loading images..." : "Load more images"}</button>}
               </div>
             )
           ) : (

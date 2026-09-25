@@ -12,13 +12,30 @@ import { Image as ImageIcon, Loader2, Sparkles, ArrowUp, ArrowDown, Trash2 } fro
 
 type GalleryImage = { mediaId: string; url: string; caption: string; altText: string };
 
+const sectionFields = [
+  { key: "why_built", label: "Why I built this", hint: "The problem and your motivation." },
+  { key: "key_decisions", label: "Key decisions", hint: "Important technical or design tradeoffs." },
+  { key: "results", label: "Results", hint: "Measured outcomes or what shipped. Leave blank if not known." },
+  { key: "lessons_learned", label: "What I learned", hint: "What you would carry into the next project." },
+] as const;
+
+type CaseStudySections = Record<(typeof sectionFields)[number]["key"], string>;
+const emptySections: CaseStudySections = { why_built: "", key_decisions: "", results: "", lessons_learned: "" };
+
 const projectSchema = z.object({
   title: z.string().min(1, "Title is required"),
   slug: z.string().min(1, "Slug is required"),
   description: z.string().optional(),
-  tagline: z.string().optional().or(z.literal("")),
-  category: z.enum(["Web App", "Mobile App", "Other"]).optional(),
+  tagline: z.string().max(160, "Keep the short description within 160 characters").optional(),
+  category: z.string().trim().min(1, "Project type is required").max(60),
   year: z.string().optional().or(z.literal("")),
+  latest_update_label: z.string().max(32).optional(),
+  case_study_sections: z.object({
+    why_built: z.string().max(10000),
+    key_decisions: z.string().max(10000),
+    results: z.string().max(10000),
+    lessons_learned: z.string().max(10000),
+  }),
   tech_stack: z.string().optional().or(z.literal("")),
   tags: z.string().optional().or(z.literal("")),
   features: z.string().optional().or(z.literal("")),
@@ -41,6 +58,8 @@ interface ProjectFormProps {
     features?: string[] | string | null;
     tags?: string[] | string | null;
     galleryImages?: GalleryImage[];
+    latest_update_label?: string | null;
+    case_study_sections?: Partial<CaseStudySections> | null;
   };
 }
 
@@ -59,6 +78,7 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
     control,
     setValue,
     getValues,
+    watch,
     formState: { errors },
   } = useForm<ProjectFormValues>({
     resolver: zodResolver(projectSchema),
@@ -67,10 +87,12 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
       slug: initialData?.slug ?? "",
       description: initialData?.description ?? "",
       tagline: initialData?.tagline ?? "",
-      category: (initialData?.category as ProjectFormValues["category"]) ?? "Web App",
+      category: initialData?.category ?? "Web App",
       year: initialData?.year ?? "",
+      latest_update_label: initialData?.latest_update_label ?? "",
+      case_study_sections: { ...emptySections, ...initialData?.case_study_sections },
       tech_stack: Array.isArray(initialData?.tech_stack)
-        ? initialData.tech_stack.join(", ")
+        ? initialData.tech_stack.join("\n")
         : initialData?.tech_stack ?? "",
       tags: Array.isArray(initialData?.tags)
         ? initialData.tags.join(", ")
@@ -96,7 +118,7 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
       const payload = {
         ...data,
         tech_stack: (data.tech_stack || "")
-          .split(",")
+          .split(/\r?\n/)
           .map((t) => t.trim())
           .filter(Boolean),
         tags: (data.tags || "")
@@ -211,45 +233,54 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
         />
       </div>
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Tagline (Optional)</label>
-        <input
-          {...register("tagline")}
-          className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
-          placeholder="A one-line hook for the project card..."
-        />
+        <div className="space-y-2">
+          <div className="flex justify-between gap-3"><label className="text-sm font-medium">Card / page summary (Optional)</label><span className="text-xs text-ink-secondary">{watch("tagline")?.length ?? 0}/160</span></div>
+          <input
+            {...register("tagline")}
+            maxLength={160}
+            className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
+            placeholder="A concise description for the homepage and case study..."
+          />
+          {errors.tagline && <p className="text-xs text-red-500">{errors.tagline.message}</p>}
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Category</label>
-          <select
+          <label className="text-sm font-medium">Project type</label>
+          <input
             {...register("category")}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
-          >
-            <option value="Web App">Web App</option>
-            <option value="Mobile App">Mobile App</option>
-            <option value="Other">Other</option>
-          </select>
+            maxLength={60}
+            placeholder="Cybersecurity, AI/ML, Web App, Networking..."
+          />
+          {errors.category && <p className="text-xs text-red-500">{errors.category.message}</p>}
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">Year (Optional)</label>
+          <label className="text-sm font-medium">Built (Optional)</label>
           <input
             {...register("year")}
+            maxLength={20}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
-            placeholder="2025"
+            placeholder="Q2 2026 or 2025"
           />
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">Tech Stack (comma-separated)</label>
-          <input
+          <label className="text-sm font-medium">Tech stack (one per line)</label>
+          <textarea
             {...register("tech_stack")}
+            rows={3}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
-            placeholder="Next.js, TypeScript, Supabase"
+            placeholder={"Next.js\nTypeScript\nSupabase"}
           />
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Latest project update (Optional)</label>
+        <input {...register("latest_update_label")} maxLength={32} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="Q3 2026" />
+        <p className="text-xs text-ink-secondary">Set this when you update the project itself, not when you edit this page.</p>
       </div>
 
       <div className="space-y-2">
@@ -265,7 +296,7 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Features (one per line)</label>
+        <label className="text-sm font-medium">Key features / highlights (one per line)</label>
         <textarea
           {...register("features")}
           rows={4}
@@ -326,8 +357,9 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
           <input
             {...register("github_url")}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
-            placeholder="https://github.com/..."
+            placeholder="https://github.com/your-name/project-repo"
           />
+          <p className="text-xs text-ink-secondary">Link to this project&apos;s public repository, not your profile. Leave blank when the source is private.</p>
           {errors.github_url && <p className="text-xs text-red-500">{errors.github_url.message}</p>}
         </div>
       </div>
@@ -424,7 +456,7 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
 
       <div className="space-y-2">
         <label className="text-sm font-medium">Content / Case Study (Markdown)</label>
-        <p className="text-xs text-ink-secondary">Author the project narrative from real work and outcomes; do not fabricate details.</p>
+        <p className="text-xs text-ink-secondary">Optional overview. The focused sections below appear only when filled in; do not fabricate details.</p>
         <Controller
           name="content"
           control={control}
@@ -437,6 +469,16 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
             </div>
           )}
         />
+      </div>
+
+      <div className="space-y-5 border-t border-border-hairline pt-6">
+        <div><h2 className="text-lg font-medium">Case study sections</h2><p className="text-xs text-ink-secondary">Write only what applies to this project. Markdown is supported.</p></div>
+        {sectionFields.map(({ key, label, hint }) => (
+          <div key={key} className="space-y-2">
+            <label htmlFor={`case-study-${key}`} className="text-sm font-medium">{label} (Optional)</label>
+            <textarea id={`case-study-${key}`} {...register(`case_study_sections.${key}`)} rows={4} maxLength={10000} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder={hint} />
+          </div>
+        ))}
       </div>
 
       <div className="flex justify-end gap-4">

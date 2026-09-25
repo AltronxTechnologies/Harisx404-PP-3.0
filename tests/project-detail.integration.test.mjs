@@ -56,11 +56,36 @@ test("project gallery and narrative are sourced from Admin-authored data", async
   assert.match(page, /Array\.isArray\(p\.galleryDetails\)/);
   assert.doesNotMatch(page, /genericFeatures|formatQuarter/);
   assert.match(detail, /<ReactMarkdown/);
-  assert.match(detail, /image\.caption \|\| image\.alt/);
+  assert.match(detail, /image\.alt \|\| image\.caption/);
   assert.doesNotMatch(detail, /dangerouslySetInnerHTML/);
   assert.match(publicData, /project_images \( display_order, caption, media \( secure_url, url, alt_text \) \)/);
   assert.match(api, /auth\.getUser\(\)/);
   assert.match(api, /ADMIN_EMAIL/);
   assert.match(api, /await validateGalleryMedia/);
   assert.match(form, /galleryImages\.map\(\(\{ mediaId, caption \}\)/);
+});
+
+test("project type, timeline and optional sections remain owner-managed", async () => {
+  const [migration, page, detail, api, form] = await Promise.all([
+    readFile(new URL("../migrations/2026_project_case_studies.sql", import.meta.url), "utf8"),
+    readFile(new URL("../app/projects/[slug]/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/projects/[slug]/ProjectDetail.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/admin/projects/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/admin/ProjectForm.tsx", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(migration, /ADD COLUMN IF NOT EXISTS latest_update_label text/);
+  assert.match(migration, /case_study_sections jsonb/);
+  assert.match(api, /category: z\.string\(\)\.trim\(\)\.min\(1\)\.max\(60\)/);
+  assert.match(api, /tagline: z\.string\(\)\.max\(160\)/);
+  assert.match(api, /latest_update_label: data\.latest_update_label/);
+  assert.match(api, /case_study_sections: data\.case_study_sections/);
+  assert.match(form, /register\("latest_update_label"\)/);
+  assert.match(form, /register\(`case_study_sections\.\$\{key\}`\)/);
+  assert.match(page, /item\.tags\.filter/);
+  assert.match(detail, /project\.latestUpdate &&/);
+  assert.match(detail, /project\.live_url &&/);
+  assert.match(detail, /sourceUrl &&/);
+  assert.match(detail, /sections\.map/);
+  assert.match(detail, /Related projects/);
 });
