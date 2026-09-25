@@ -2,12 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { TiptapEditor } from "./TiptapEditor";
 import { MediaPickerModal } from "./MediaPickerModal";
-import { Image as ImageIcon, Loader2, Sparkles, Code } from "lucide-react";
+import { Image as ImageIcon, Loader2, Sparkles, ArrowUp, ArrowDown, Trash2 } from "lucide-react";
+
+type GalleryImage = { mediaId: string; url: string; caption: string; altText: string };
 
 const projectSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -37,6 +40,7 @@ interface ProjectFormProps {
     tech_stack?: string[] | string | null;
     features?: string[] | string | null;
     tags?: string[] | string | null;
+    galleryImages?: GalleryImage[];
   };
 }
 
@@ -45,6 +49,8 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
+  const [mediaPickerTarget, setMediaPickerTarget] = useState<"cover" | "gallery">("cover");
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>(initialData?.galleryImages ?? []);
   const [isGenerating, setIsGenerating] = useState(false);
 
   const {
@@ -101,6 +107,7 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
           .split("\n")
           .map((f) => f.trim())
           .filter(Boolean),
+        gallery: galleryImages.map(({ mediaId, caption }) => ({ mediaId, caption })),
       };
       const res = await fetch("/api/admin/projects", {
         method: initialData?.id ? "PUT" : "POST",
@@ -355,7 +362,7 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
           />
           <button
             type="button"
-            onClick={() => setIsMediaPickerOpen(true)}
+            onClick={() => { setMediaPickerTarget("cover"); setIsMediaPickerOpen(true); }}
             className="rounded-xl border border-border-hairline bg-surface-base p-2 text-ink-secondary hover:text-accent-signal hover:bg-surface-raised transition-colors"
             title="Choose from Media Library"
           >
@@ -364,16 +371,60 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
         </div>
       </div>
 
+      <div className="space-y-3">
+        <div className="flex items-center justify-between gap-4">
+          <label className="text-sm font-medium">Gallery Images</label>
+          <button
+            type="button"
+            onClick={() => { setMediaPickerTarget("gallery"); setIsMediaPickerOpen(true); }}
+            className="inline-flex items-center gap-2 rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm hover:bg-surface-raised"
+          >
+            <ImageIcon className="h-4 w-4" /> Add from Media Library
+          </button>
+        </div>
+        {galleryImages.length === 0 && <p className="text-sm text-ink-secondary">No gallery images yet.</p>}
+        <div className="space-y-3">
+          {galleryImages.map((image, index) => (
+            <div key={image.mediaId} className="flex flex-col gap-3 rounded-xl border border-border-hairline bg-surface-base p-3 sm:flex-row sm:items-center">
+              <Image src={image.url} alt={image.altText || image.caption || "Project gallery image"} width={128} height={96} className="h-24 w-full rounded-lg object-cover sm:w-32" />
+              <div className="min-w-0 flex-1 space-y-1">
+                <label htmlFor={`gallery-caption-${image.mediaId}`} className="text-xs text-ink-secondary">Caption</label>
+                <input
+                  id={`gallery-caption-${image.mediaId}`}
+                  value={image.caption}
+                  onChange={(event) => setGalleryImages((images) => images.map((item) => item.mediaId === image.mediaId ? { ...item, caption: event.target.value } : item))}
+                  className="w-full rounded-lg border border-border-hairline bg-surface-raised px-3 py-2 text-sm"
+                  placeholder="Optional caption"
+                />
+                {image.altText && <p className="text-xs text-ink-secondary">Alt text: {image.altText}</p>}
+              </div>
+              <div className="flex gap-1">
+                <button type="button" aria-label={`Move image ${index + 1} up`} disabled={index === 0} onClick={() => setGalleryImages((images) => { const next = [...images]; [next[index - 1], next[index]] = [next[index], next[index - 1]]; return next; })} className="rounded-lg p-2 hover:bg-surface-raised disabled:opacity-40"><ArrowUp className="h-4 w-4" /></button>
+                <button type="button" aria-label={`Move image ${index + 1} down`} disabled={index === galleryImages.length - 1} onClick={() => setGalleryImages((images) => { const next = [...images]; [next[index], next[index + 1]] = [next[index + 1], next[index]]; return next; })} className="rounded-lg p-2 hover:bg-surface-raised disabled:opacity-40"><ArrowDown className="h-4 w-4" /></button>
+                <button type="button" aria-label={`Remove image ${index + 1}`} onClick={() => setGalleryImages((images) => images.filter((item) => item.mediaId !== image.mediaId))} className="rounded-lg p-2 text-red-500 hover:bg-surface-raised"><Trash2 className="h-4 w-4" /></button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <MediaPickerModal
         isOpen={isMediaPickerOpen}
         onClose={() => setIsMediaPickerOpen(false)}
         onSelect={(media) => {
-          setValue("cover_image_url", media.secure_url || media.url, { shouldValidate: true });
+          if (mediaPickerTarget === "cover") {
+            setValue("cover_image_url", media.secure_url || media.url, { shouldValidate: true });
+          } else {
+            setGalleryImages((images) => images.some((image) => image.mediaId === media.id)
+              ? images
+              : [...images, { mediaId: media.id, url: media.secure_url || media.url, caption: "", altText: media.alt_text || "" }]);
+          }
         }}
       />
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Content / Case Study (HTML)</label>
+        <label className="text-sm font-medium">Content / Case Study (Markdown)</label>
+        <p className="text-xs text-ink-secondary">Author the project narrative from real work and outcomes; do not fabricate details.</p>
         <Controller
           name="content"
           control={control}
@@ -381,7 +432,7 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
             <div className="rounded-xl overflow-hidden border border-border-hairline bg-surface-base">
               <TiptapEditor
                 value={field.value || ""}
-                onChange={(html) => field.onChange(html)}
+                onChange={(markdown) => field.onChange(markdown)}
               />
             </div>
           )}

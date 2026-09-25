@@ -1,170 +1,195 @@
 import { NextResponse } from "next/server";
 import { revalidatePath, revalidateTag } from "next/cache";
-import createSupabaseServerClient from "@/app/lib/supabase/server";
+import * as z from "zod";
+import createSupabaseServerClient, { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 import { syncTags } from "@/app/lib/tag-sync";
 
-// Best-effort ISR invalidation — must never fail the mutation itself.
-function revalidateProjectPaths(slug?: string | null) {
+const idSchema = z.string().uuid();
+const optionalText = z.string().max(10000).optional().default("");
+const optionalUrl = z.union([z.literal(""), z.string().url().refine((url) => /^https?:\/\//i.test(url))]).optional().default("");
+const optionalDate = z.union([z.literal(""), z.string().regex(/^\d{4}-\d{2}-\d{2}$/)]).optional().default("");
+const projectFieldsSchema = z.object({
+  title: z.string().trim().min(1).max(200),
+  slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(200),
+  description: optionalText,
+  content: z.string().max(200000).optional().default(""),
+  status: z.enum(["draft", "published", "archived"]),
+  cover_image_url: optionalUrl,
+  live_url: optionalUrl,
+  github_url: optionalUrl,
+  start_date: optionalDate,
+  end_date: optionalDate,
+  featured: z.boolean().optional().default(false),
+  tagline: optionalText,
+  category: z.enum(["Web App", "Mobile App", "Other"]),
+  year: z.string().max(20).optional().default(""),
+  tech_stack: z.array(z.string().trim().min(1).max(100)).max(100).optional().default([]),
+  features: z.array(z.string().trim().min(1).max(500)).max(100).optional().default([]),
+  tags: z.array(z.string().trim().min(1).max(100)).max(100).optional().default([]),
+  gallery: z.array(z.object({ mediaId: idSchema, caption: z.string().max(1000) }).strict()).max(100).optional().default([]),
+}).strict();
+const uniqueGallery = (data: z.infer<typeof projectFieldsSchema>) => new Set(data.gallery.map((image) => image.mediaId)).size === data.gallery.length;
+const projectSchema = projectFieldsSchema.refine(uniqueGallery, {
+  message: "Gallery images must be unique",
+  path: ["gallery"],
+});
+const updateSchema = projectFieldsSchema.extend({ id: idSchema }).refine(uniqueGallery, {
+  message: "Gallery images must be unique",
+  path: ["gallery"],
+});
+
+async function authorizeAdmin() {
+  const auth = await createSupabaseServerClient();
+  const { data: { user }, error } = await auth.auth.getUser();
+  if (error || !user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+  if (!adminEmail) {
+    console.error("Project admin API is disabled because ADMIN_EMAIL is not configured");
+    return NextResponse.json({ error: "Admin access is not configured" }, { status: 500 });
+  }
+  if (user.email?.trim().toLowerCase() !== adminEmail) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+  return null;
+}
+
+function revalidateProjectPaths(...slugs: Array<string | null | undefined>) {
   try {
     revalidateTag("projects");
     revalidatePath("/");
     revalidatePath("/projects");
-    if (slug) revalidatePath(`/projects/${slug}`);
-  } catch (e) {
-    console.error("Revalidation failed:", e);
+    for (const slug of new Set(slugs)) {
+      if (slug) revalidatePath(`/projects/${slug}`);
+    }
+  } catch (error) {
+    console.error("Revalidation failed:", error);
   }
+}
+
+function projectFields(data: z.infer<typeof projectSchema>) {
+  return {
+    title: data.title,
+    slug: data.slug,
+    description: data.description,
+    content: data.content,
+    status: data.status,
+    cover_image_url: data.cover_image_url || null,
+    live_url: data.live_url || null,
+    github_url: data.github_url || null,
+    start_date: data.start_date || null,
+    end_date: data.end_date || null,
+    featured: data.featured,
+    tagline: data.tagline || null,
+    category: data.category,
+    year: data.year || null,
+    tech_stack: data.tech_stack,
+    features: data.features,
+  };
+}
+
+async function validateGalleryMedia(db: Awaited<ReturnType<typeof createSupabaseAdminClient>>, gallery: z.infer<typeof projectSchema>["gallery"]) {
+  if (gallery.length) {
+    const { data: media, error: mediaError } = await db.from("media").select("id").in("id", gallery.map((image) => image.mediaId));
+    if (mediaError) throw mediaError;
+    if (media?.length !== gallery.length) throw new Error("Gallery contains an unknown media ID");
+  }
+}
+
+async function saveGallery(db: Awaited<ReturnType<typeof createSupabaseAdminClient>>, projectId: string, gallery: z.infer<typeof projectSchema>["gallery"]) {
+  const { error: deleteError } = await db.from("project_images").delete().eq("project_id", projectId);
+  if (deleteError) throw deleteError;
+  if (gallery.length) {
+    const { error: insertError } = await db.from("project_images").insert(gallery.map((image, index) => ({
+      project_id: projectId,
+      media_id: image.mediaId,
+      caption: image.caption,
+      display_order: index,
+    })));
+    if (insertError) throw insertError;
+  }
+}
+
+function fail(error: unknown) {
+  if (error instanceof SyntaxError) return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  if (error instanceof Error && error.message === "Gallery contains an unknown media ID") {
+    return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+  console.error("Project admin request failed:", error);
+  return NextResponse.json({ error: error instanceof Error ? error.message : "Project request failed" }, { status: 500 });
 }
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createSupabaseServerClient();
-    
-    // Check auth
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const denied = await authorizeAdmin();
+    if (denied) return denied;
+    const parsed = projectSchema.safeParse(await request.json());
+    if (!parsed.success) return NextResponse.json({ error: "Invalid project data", issues: parsed.error.flatten() }, { status: 400 });
+
+    const data = parsed.data;
+    const db = await createSupabaseAdminClient();
+    await validateGalleryMedia(db, data.gallery);
+    const { data: project, error } = await db.from("projects").insert(projectFields(data)).select().single();
+    if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+    try {
+      await saveGallery(db, project.id, data.gallery);
+      await syncTags({ joinTable: "project_tags", entityColumn: "project_id", entityId: project.id, tags: data.tags });
+    } finally {
+      revalidateProjectPaths(project.slug);
     }
-
-    const data = await request.json();
-
-    const projectData = {
-      title: data.title,
-      slug: data.slug,
-      description: data.description,
-      content: data.content,
-      status: data.status,
-      cover_image_url: data.cover_image_url || null,
-      live_url: data.live_url || null,
-      github_url: data.github_url || null,
-      start_date: data.start_date || null,
-      end_date: data.end_date || null,
-      featured: data.featured,
-      tagline: data.tagline || null,
-      category: data.category || null,
-      year: data.year || null,
-      tech_stack: Array.isArray(data.tech_stack) ? data.tech_stack : null,
-      features: Array.isArray(data.features) ? data.features : null,
-    };
-
-    const { data: insertedData, error } = await supabase
-      .from("projects")
-      .insert(projectData)
-      .select()
-      .single();
-
-    if (error) {
-      console.error("Insert error:", error);
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    }
-
-    await syncTags({
-      joinTable: "project_tags",
-      entityColumn: "project_id",
-      entityId: insertedData.id,
-      tags: data.tags,
-    });
-
-    revalidateProjectPaths(insertedData?.slug);
-
-    return NextResponse.json(insertedData);
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json(project);
+  } catch (error) {
+    return fail(error);
   }
 }
 
 export async function PUT(request: Request) {
   try {
-    const supabase = await createSupabaseServerClient();
-    
-    // Check auth
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const denied = await authorizeAdmin();
+    if (denied) return denied;
+    const parsed = updateSchema.safeParse(await request.json());
+    if (!parsed.success) return NextResponse.json({ error: "Invalid project data", issues: parsed.error.flatten() }, { status: 400 });
+
+    const { id, ...data } = parsed.data;
+    const db = await createSupabaseAdminClient();
+    await validateGalleryMedia(db, data.gallery);
+    const { data: previous, error: lookupError } = await db.from("projects").select("slug").eq("id", id).maybeSingle();
+    if (lookupError) throw lookupError;
+    if (!previous) return NextResponse.json({ error: "Project not found" }, { status: 404 });
+
+    const { data: project, error } = await db.from("projects")
+      .update({ ...projectFields(data), updated_at: new Date().toISOString() })
+      .eq("id", id).select().maybeSingle();
+    if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+    if (!project) return NextResponse.json({ error: "Project not found" }, { status: 404 });
+
+    try {
+      await saveGallery(db, id, data.gallery);
+      await syncTags({ joinTable: "project_tags", entityColumn: "project_id", entityId: id, tags: data.tags });
+    } finally {
+      revalidateProjectPaths(previous.slug, project.slug);
     }
-
-    const data = await request.json();
-    const { id, ...updateData } = data;
-
-    if (!id) {
-      return NextResponse.json({ error: "Missing project ID" }, { status: 400 });
-    }
-
-    const projectData = {
-      title: updateData.title,
-      slug: updateData.slug,
-      description: updateData.description,
-      content: updateData.content,
-      status: updateData.status,
-      cover_image_url: updateData.cover_image_url || null,
-      live_url: updateData.live_url || null,
-      github_url: updateData.github_url || null,
-      start_date: updateData.start_date || null,
-      end_date: updateData.end_date || null,
-      featured: updateData.featured,
-      tagline: updateData.tagline || null,
-      category: updateData.category || null,
-      year: updateData.year || null,
-      tech_stack: Array.isArray(updateData.tech_stack) ? updateData.tech_stack : null,
-      features: Array.isArray(updateData.features) ? updateData.features : null,
-    };
-
-    const { data: updatedData, error } = await supabase
-      .from("projects")
-      .update(projectData)
-      .eq("id", id)
-      .select()
-      .single();
-
-    if (error) {
-      console.error("Update error:", error);
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    }
-
-    await syncTags({
-      joinTable: "project_tags",
-      entityColumn: "project_id",
-      entityId: id,
-      tags: updateData.tags,
-    });
-
-    revalidateProjectPaths(updatedData?.slug);
-
-    return NextResponse.json(updatedData);
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json(project);
+  } catch (error) {
+    return fail(error);
   }
 }
 
 export async function DELETE(request: Request) {
   try {
-    const supabase = await createSupabaseServerClient();
-    
-    // Check auth
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const denied = await authorizeAdmin();
+    if (denied) return denied;
+    const id = new URL(request.url).searchParams.get("id");
+    if (!idSchema.safeParse(id).success) return NextResponse.json({ error: "Invalid project ID" }, { status: 400 });
 
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get("id");
-
-    if (!id) {
-      return NextResponse.json({ error: "Missing project ID" }, { status: 400 });
-    }
-
-    const { error } = await supabase
-      .from("projects")
-      .delete()
-      .eq("id", id);
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    }
-
-    revalidateProjectPaths();
-
+    const db = await createSupabaseAdminClient();
+    const { data: project, error } = await db.from("projects").delete().eq("id", id!).select("slug").maybeSingle();
+    if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+    if (!project) return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    revalidateProjectPaths(project.slug);
     return NextResponse.json({ success: true });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (error) {
+    return fail(error);
   }
 }

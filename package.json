@@ -23,6 +23,7 @@
     "test:preview": "node --test tests/preview-runtime.integration.test.mjs",
     "test:preview:browser": "node --test tests/preview-runtime.browser.test.mjs",
     "test:resume": "node --test tests/resume.integration.test.mjs",
+    "test:projects": "node --test tests/project-detail.integration.test.mjs",
     "generate-previews": "npx tsx scripts/generate-link-previews.ts",
     "fix-previews": "npx tsx scripts/fix-failed-previews.ts"
   },
@@ -52,6 +53,7 @@
     "react": "^18",
     "react-dom": "^18",
     "react-hook-form": "^7.85.0",
+    "react-markdown": "^9.1.0",
     "reading-duration": "^1.1.2",
     "rehype-raw": "^7.0.0",
     "sugar-high": "^0.6.0",

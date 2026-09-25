@@ -25,44 +25,24 @@ interface ProjectPageProps {
   params: Promise<{ slug: string }>;
 }
 
-function genericFeatures(title: string): string[] {
-  return [
-    `Thoughtful, accessible UI with full dark and light theme support across every screen of ${title}.`,
-    "Type-safe end-to-end architecture with defensive data handling and graceful fallbacks.",
-    "Performance-first build: optimized images, minimal client JavaScript, and fast route transitions.",
-  ];
-}
-
-function formatQuarter(value: unknown): string {
-  if (!value) return "";
-  const date = new Date(String(value));
-  if (Number.isNaN(date.getTime())) return String(value);
-  return `Q${Math.floor(date.getMonth() / 3) + 1} ${date.getFullYear()}`;
-}
-
 function mapDbProject(p: any): DetailProject {
   return {
     title: p.title,
     slug: p.slug,
-    tagline: p.short_description || p.tagline || "",
+    tagline: p.tagline || p.description || "",
     description: p.description || "",
     content: p.content || "",
-    tech: Array.isArray((p as any).tech_stack) ? (p as any).tech_stack : [],
-    year: (p as any).year ?? formatQuarter(p.start_date || p.created_at),
-    updated: formatQuarter(p.updated_at),
-    role: (p as any).role || "Full-stack Developer",
+    tech: Array.isArray(p.tech_stack) ? p.tech_stack : [],
+    year: p.year || "",
     category: (p as any).category ?? "Web App",
     image_url: p.cover_image_url || (p as any).image_url || "",
     live_url: (p as any).live_url ?? "",
     github_url: (p as any).github_url ?? "",
-    features:
-      Array.isArray((p as any).features) && (p as any).features.length > 0
-        ? (p as any).features
-        : genericFeatures(p.title),
+    features: Array.isArray(p.features) ? p.features.filter(Boolean) : [],
     tags: Array.isArray((p as any).tags) ? (p as any).tags : [],
     /* Extra screenshots (sorted); the cover is filtered out client-side so
        the gallery never repeats the hero image. */
-    gallery: Array.isArray((p as any).gallery) ? (p as any).gallery : [],
+    gallery: Array.isArray(p.galleryDetails) ? p.galleryDetails : [],
   };
 }
 
@@ -79,12 +59,13 @@ async function resolveProject(slug: string): Promise<{
         title: p.title,
         slug: p.slug,
         category: (p as any).category ?? "Web App",
-        tagline: p.short_description || p.tagline || p.description || "",
+        tagline: p.tagline || p.description || "",
       }),
     );
     return { project: mapDbProject(dbProject), list };
   }
 
+  if (process.env.NODE_ENV === "production" || dbProjects.length > 0) return null;
   const fb = fallbackProjects.find((p) => p.slug === slug);
   if (!fb) return null;
 
@@ -94,16 +75,14 @@ async function resolveProject(slug: string): Promise<{
       slug: fb.slug,
       tagline: fb.tagline,
       description: fb.description,
-      content: fb.description,
+      content: "",
       tech: fb.tech,
       year: fb.year,
-      updated: fb.year,
-      role: "Full-stack Developer",
       category: fb.category,
       image_url: fb.image_url,
       live_url: "",
       github_url: "",
-      features: genericFeatures(fb.title),
+      features: fb.features || [],
       tags: (fb as any).tags ?? [],
       gallery: [],
     },
@@ -141,7 +120,7 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
                sameAs instead of overloading `url`. */
             url: `${siteMetadata.siteUrl}/projects/${project.slug}`,
             ...(project.live_url ? { sameAs: [project.live_url] } : {}),
-          }),
+          }).replace(/</g, "\\u003c"),
         }}
       />
       <ProjectDetail project={project} prev={prev} next={next} />

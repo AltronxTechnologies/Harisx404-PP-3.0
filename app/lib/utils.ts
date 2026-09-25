@@ -326,7 +326,7 @@ export async function fetchProjects() {
       : supabase;
   const { data, error } = await db
     .from('projects')
-    .select('*, project_tags ( tags ( name, slug ) ), project_images ( display_order, media ( secure_url ) )')
+    .select('*, project_tags ( tags ( name, slug ) ), project_images ( display_order, caption, media ( secure_url, url, alt_text ) )')
       .eq('status', 'published')
       .order('display_order', { ascending: true })
       .order('created_at', { ascending: true });
@@ -341,13 +341,13 @@ export async function fetchProjects() {
   // string[] of extra screenshot URLs (cover image not included).
   return data.map((p: any) => {
     const tags = p.project_tags?.map((pt: any) => pt.tags?.name).filter(Boolean) || [];
-    const gallery = (p.project_images || [])
+    const galleryDetails = (p.project_images || [])
       .slice()
       .sort((a: any, b: any) => (a.display_order ?? 0) - (b.display_order ?? 0))
-      .map((pi: any) => pi.media?.secure_url)
-      .filter(Boolean);
+      .map((pi: any) => ({ src: pi.media?.secure_url || pi.media?.url, caption: pi.caption || "", alt: pi.media?.alt_text || "" }))
+      .filter((image: { src?: string }) => Boolean(image.src));
     const { project_tags: _ignored, project_images: _ignored2, ...rest } = p;
-    return { ...rest, tags, gallery };
+    return { ...rest, tags, gallery: galleryDetails.map((image: { src: string }) => image.src), galleryDetails };
   });
 }
 
@@ -364,7 +364,7 @@ export async function getProjectBySlug(slug: string) {
       : supabase;
   const { data, error } = await db
     .from('projects')
-    .select('*, project_tags ( tags ( name, slug ) ), project_images ( display_order, media ( secure_url ) )')
+    .select('*, project_tags ( tags ( name, slug ) ), project_images ( display_order, caption, media ( secure_url, url, alt_text ) )')
     .eq('slug', slug)
     .eq('status', 'published')
     .single();
@@ -376,13 +376,13 @@ export async function getProjectBySlug(slug: string) {
   // gallery -> sorted string[] of screenshot URLs.
   const p: any = data;
   const tags = p.project_tags?.map((pt: any) => pt.tags?.name).filter(Boolean) || [];
-  const gallery = (p.project_images || [])
+  const galleryDetails = (p.project_images || [])
     .slice()
     .sort((a: any, b: any) => (a.display_order ?? 0) - (b.display_order ?? 0))
-    .map((pi: any) => pi.media?.secure_url)
-    .filter(Boolean);
+    .map((pi: any) => ({ src: pi.media?.secure_url || pi.media?.url, caption: pi.caption || "", alt: pi.media?.alt_text || "" }))
+    .filter((image: { src?: string }) => Boolean(image.src));
   const { project_tags: _ignored, project_images: _ignored2, ...rest } = p;
-  return { ...rest, tags, gallery };
+  return { ...rest, tags, gallery: galleryDetails.map((image: { src: string }) => image.src), galleryDetails };
 }
 
 export async function fetchTestimonials(): Promise<import("@/app/data/fallback-home").Testimonial[]> {

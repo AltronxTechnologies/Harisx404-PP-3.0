@@ -93,11 +93,12 @@ export function MediaPickerModal({ isOpen, onClose, onSelect }: MediaPickerModal
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[7000] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+    <div role="dialog" aria-modal="true" aria-label="Choose an image" className="fixed inset-0 z-[7000] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="w-full max-w-4xl bg-surface-raised rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[85vh]">
         <div className="flex items-center justify-between p-4 border-b border-border-hairline">
           <div className="flex gap-4">
             <button
+              type="button"
               onClick={() => setActiveTab("library")}
               className={`text-lg font-semibold flex items-center gap-2 transition-colors ${
                 activeTab === "library" ? "text-text-primary" : "text-text-secondary hover:text-text-primary"
@@ -106,6 +107,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect }: MediaPickerModal
               <ImageIcon className="h-5 w-5" /> Library
             </button>
             <button
+              type="button"
               onClick={() => setActiveTab("upload")}
               className={`text-lg font-semibold flex items-center gap-2 transition-colors ${
                 activeTab === "upload" ? "text-text-primary" : "text-text-secondary hover:text-text-primary"
@@ -114,7 +116,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect }: MediaPickerModal
               <UploadCloud className="h-5 w-5" /> Upload
             </button>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-surface-base rounded-lg transition-colors">
+          <button type="button" onClick={onClose} className="p-2 hover:bg-surface-base rounded-lg transition-colors">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -138,10 +140,13 @@ export function MediaPickerModal({ isOpen, onClose, onSelect }: MediaPickerModal
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                 {media.map((item) => (
-                  <div
+                  <button
                     key={item.id}
+                    type="button"
+                    aria-label={item.alt_text || "Select media image"}
+                    aria-pressed={selectedId === item.id}
                     onClick={() => setSelectedId(item.id)}
-                    className={`relative aspect-square rounded-xl overflow-hidden border-2 cursor-pointer transition-all ${
+                    className={`relative aspect-square rounded-xl overflow-hidden border-2 cursor-pointer transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-signal ${
                       selectedId === item.id ? "border-accent-signal" : "border-transparent hover:border-border-hairline"
                     }`}
                   >
@@ -150,13 +155,14 @@ export function MediaPickerModal({ isOpen, onClose, onSelect }: MediaPickerModal
                       alt={item.alt_text || "Media item"}
                       className="w-full h-full object-cover"
                       fill
+                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 20vw"
                     />
                     {selectedId === item.id && (
                       <div className="absolute top-2 right-2 bg-accent-signal text-white p-1 rounded-full shadow-sm">
                         <Check className="h-3 w-3" />
                       </div>
                     )}
-                  </div>
+                  </button>
                 ))}
               </div>
             )
@@ -191,12 +197,14 @@ export function MediaPickerModal({ isOpen, onClose, onSelect }: MediaPickerModal
 
         <div className="p-4 border-t border-border-hairline bg-surface-raised flex justify-end gap-3">
           <button
+            type="button"
             onClick={onClose}
             className="px-4 py-2 rounded-xl text-sm font-medium hover:bg-surface-base transition-colors"
           >
             Cancel
           </button>
           <button
+            type="button"
             onClick={handleSelect}
             disabled={!selectedId}
             className="px-6 py-2 bg-accent-signal text-white rounded-xl text-sm font-medium shadow-sm hover:bg-accent-signal/90 disabled:opacity-50 transition-colors"
