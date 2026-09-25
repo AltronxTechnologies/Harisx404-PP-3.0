@@ -262,9 +262,9 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
                       setShareOpen((open) => !open);
                       if (!shareOpen && event.detail === 0) requestAnimationFrame(() => firstShareItemRef.current?.focus());
                     }}
-                    className={`inline-flex min-h-11 items-start gap-1.5 rounded-sm px-1 text-sm font-medium leading-4 text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 ${focusStyle}`}
+                    className={`inline-flex min-h-11 items-start rounded-sm px-1 font-mono text-xs font-medium uppercase tracking-widest text-blue-600 transition-colors hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-500 ${focusStyle}`}
                   >
-                    Share project <ChevronDown className={`size-3.5 transition-transform motion-reduce:transition-none ${shareOpen ? "rotate-180" : ""}`} aria-hidden />
+                    <span className="inline-flex items-center gap-1.5 leading-4">Share project <ChevronDown className={`size-3.5 transition-transform motion-reduce:transition-none ${shareOpen ? "rotate-180" : ""}`} aria-hidden /></span>
                   </button>
                   {shareOpen && (
                     <div id="project-share-options" role="group" aria-label="Share project" className={`relative z-30 mt-1 max-h-[min(70dvh,400px)] w-[min(240px,calc(100vw-6rem))] overflow-y-auto rounded-xl border border-border-primary bg-bg-primary p-1.5 text-left shadow-lg dark:shadow-black/40 sm:absolute sm:right-0 ${shareAbove ? "sm:bottom-full sm:mb-1 sm:mt-0" : "sm:top-full sm:mt-1"}`}>
