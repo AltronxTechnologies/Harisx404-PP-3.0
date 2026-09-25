@@ -47,6 +47,38 @@ test("project mutations reject unauthenticated requests", async () => {
   }
 });
 
+test("cover upload, replacement and removal keep shared media intact", async () => {
+  const [form, picker, upload, api, detail, fixture, compose] = await Promise.all([
+    readFile(new URL("../app/components/admin/ProjectForm.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/admin/MediaPickerModal.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/admin/media/upload/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/admin/projects/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/projects/[slug]/ProjectDetail.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/data/project-preview-fixtures.ts", import.meta.url), "utf8"),
+    readFile(new URL("../docker-compose.alloy.yaml", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(form, /Upload replacement/);
+  assert.match(form, /setMediaPickerTab\("upload"\)/);
+  assert.match(form, /Choose from library/);
+  assert.match(form, /setValue\("cover_image_url", ""/);
+  assert.match(form, /setValue\("cover_image_id", ""/);
+  assert.match(form, /does not delete a shared media-library image/);
+  assert.match(form, /setValue\("cover_image_id", media\.id/);
+  assert.match(picker, /setActiveTab\(initialTab\)/);
+  assert.match(api, /cover_image_id: data\.cover_image_id \|\| null/);
+  assert.match(upload, /auth\.getUser\(\)/);
+  assert.match(upload, /ADMIN_EMAIL/);
+  assert.match(upload, /createSupabaseAdminClient\(\)/);
+  assert.match(detail, /object-cover opacity-25 blur-xl/);
+  assert.match(detail, /z-10 object-contain/);
+  assert.match(fixture, /portraitPhoto\(cover_photo\)/);
+  assert.match(compose, /CLOUDINARY_API_SECRET: \$\{CLOUDINARY_API_SECRET:-\}/);
+
+  const response = await fetch(`${baseUrl}/api/admin/media/upload`, { method: "POST" });
+  assert.equal(response.status, 401);
+});
+
 test("project gallery and narrative are sourced from Admin-authored data", async () => {
   const [page, detail, publicData, api, form] = await Promise.all([
     readFile(new URL("../app/projects/[slug]/page.tsx", import.meta.url), "utf8"),

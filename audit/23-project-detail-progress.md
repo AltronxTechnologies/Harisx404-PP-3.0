@@ -17,6 +17,8 @@ The detail template now reads published project fields and ordered gallery media
 - The Share menu now offers Copy URL, View as Markdown, Open in ChatGPT, and Open in Claude. Opening Claude copies a prompt for pasting; ChatGPT receives a URL-based prompt. On small screens the menu expands inline below the button so it cannot cover the project title.
 - **Database status update:** a subsequent read-only check found all columns from `migrations/2026_project_case_studies.sql` available in the connected Supabase project. The earlier missing-column (`42703`) observation is superseded. Authenticated Admin saves and gallery round trips are still untested; the Alloy-only preview seed in `audit/24-project-preview-seed.md` does not write to the database.
 - Admin tags no longer have a project-level count cap. The Projects index receives all tags for search and filtering while its shared cards still display only three chips.
+- Admin project covers now have Upload, Choose from library, Upload replacement, and Remove actions plus a direct-URL option and live preview. Selecting media saves both its HTTPS URL and media ID; removing a cover clears both on project save without deleting the shared media item. The public image frame uses a full-image foreground with a soft filled backdrop so portrait and landscape covers are visible without subject cropping.
+- The media upload route now requires a verified Admin user, validates raster image type/size, and writes media through the service-role client (the authenticated client had no media INSERT policy). Alloy Compose passes the available Cloudinary credentials through to the container. An authenticated Admin upload and project save remain to be exercised before write-path sign-off.
 
 ## Not Locked
 

@@ -326,8 +326,9 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
 
       <article className="mx-auto mt-14 max-w-6xl px-2 sm:px-4">
         {project.image_url && (
-          <figure className="relative aspect-[16/10] overflow-hidden rounded-3xl border border-border-primary bg-neutral-100 dark:bg-white/[0.04] sm:aspect-video">
-            <Image src={optimizeImageUrl(project.image_url, 1600)} alt="" fill priority sizes="(max-width: 1280px) 100vw, 1152px" className="object-cover" />
+          <figure className="relative isolate aspect-[4/3] overflow-hidden rounded-3xl border border-border-primary bg-neutral-100 dark:bg-white/[0.04] sm:aspect-video">
+            <Image src={optimizeImageUrl(project.image_url, 1600)} alt="" aria-hidden fill sizes="(max-width: 1280px) 100vw, 1152px" className="object-cover opacity-25 blur-xl" />
+            <Image src={optimizeImageUrl(project.image_url, 1600)} alt={`${project.title} cover image`} fill priority sizes="(max-width: 1280px) 100vw, 1152px" className="z-10 object-contain" />
           </figure>
         )}
         {story.length > 0 && <div className="mt-10 border-t border-border-primary" />}

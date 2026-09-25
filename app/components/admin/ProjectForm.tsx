@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { TiptapEditor } from "./TiptapEditor";
 import { MediaPickerModal } from "./MediaPickerModal";
-import { Image as ImageIcon, Loader2, Sparkles, ArrowUp, ArrowDown, Trash2 } from "lucide-react";
+import { Image as ImageIcon, Loader2, Sparkles, ArrowUp, ArrowDown, Trash2, UploadCloud } from "lucide-react";
 
 type GalleryImage = { mediaId: string; url: string; caption: string; altText: string };
 
@@ -43,6 +43,7 @@ const projectSchema = z.object({
   content: z.string().optional(),
   status: z.enum(["draft", "published", "archived"]),
   cover_image_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  cover_image_id: z.string().uuid().optional().or(z.literal("")),
   live_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   github_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   start_date: z.string().optional().or(z.literal("")),
@@ -71,6 +72,7 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
   const [errorMsg, setErrorMsg] = useState("");
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
   const [mediaPickerTarget, setMediaPickerTarget] = useState<"cover" | "gallery">("cover");
+  const [mediaPickerTab, setMediaPickerTab] = useState<"library" | "upload">("library");
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>(initialData?.galleryImages ?? []);
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -106,6 +108,7 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
       content: initialData?.content ?? "",
       status: (initialData?.status as ProjectFormValues["status"]) ?? "draft",
       cover_image_url: initialData?.cover_image_url ?? "",
+      cover_image_id: initialData?.cover_image_id ?? "",
       live_url: initialData?.live_url ?? "",
       github_url: initialData?.github_url ?? "",
       start_date: initialData?.start_date ?? "",
@@ -113,6 +116,8 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
       featured: initialData?.featured ?? false,
     },
   });
+  const coverUrl = watch("cover_image_url") || "";
+  const coverField = register("cover_image_url");
 
   const onSubmit = async (data: ProjectFormValues) => {
     setIsSubmitting(true);
@@ -395,23 +400,27 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
         </div>
       </div>
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Cover Image URL (Optional)</label>
-        <div className="flex gap-2">
-          <input
-            {...register("cover_image_url")}
-            className="flex-1 rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
-            placeholder="https://..."
-          />
-          <button
-            type="button"
-            onClick={() => { setMediaPickerTarget("cover"); setIsMediaPickerOpen(true); }}
-            className="rounded-xl border border-border-hairline bg-surface-base p-2 text-ink-secondary hover:text-accent-signal hover:bg-surface-raised transition-colors"
-            title="Choose from Media Library"
-          >
-            <ImageIcon className="h-5 w-5" />
-          </button>
+      <div className="space-y-3">
+        <h2 className="text-sm font-medium">Project cover</h2>
+        {coverUrl && z.string().url().safeParse(coverUrl).success ? (
+          <div className="relative isolate flex h-48 items-center justify-center overflow-hidden rounded-xl border border-border-hairline bg-neutral-100 dark:bg-white/[0.04]">
+            {/* A direct preview supports manually entered image hosts outside Next's remote allowlist. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={coverUrl} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover opacity-25 blur-xl" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={coverUrl} alt="Current project cover preview" className="relative z-10 h-full w-full object-contain" />
+          </div>
+        ) : <p className="rounded-xl border border-dashed border-border-hairline px-4 py-6 text-sm text-ink-secondary">No cover selected.</p>}
+        <div className="flex flex-wrap gap-2">
+          <button type="button" onClick={() => { setMediaPickerTarget("cover"); setMediaPickerTab("upload"); setIsMediaPickerOpen(true); }} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border-hairline px-3 text-sm text-text-primary hover:bg-surface-base"><UploadCloud className="size-4" aria-hidden />{coverUrl ? "Upload replacement" : "Upload cover"}</button>
+          <button type="button" onClick={() => { setMediaPickerTarget("cover"); setMediaPickerTab("library"); setIsMediaPickerOpen(true); }} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border-hairline px-3 text-sm text-text-primary hover:bg-surface-base"><ImageIcon className="size-4" aria-hidden />Choose from library</button>
+          {coverUrl && <button type="button" onClick={() => { setValue("cover_image_url", "", { shouldDirty: true, shouldValidate: true }); setValue("cover_image_id", "", { shouldDirty: true }); }} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border-hairline px-3 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"><Trash2 className="size-4" aria-hidden />Remove cover</button>}
         </div>
+        <p className="text-xs text-ink-secondary">Replacing or removing the cover takes effect when you save. Removing it does not delete a shared media-library image.</p>
+        <label htmlFor="project-cover-url" className="block text-xs text-ink-secondary">Or enter a cover image URL</label>
+        <input id="project-cover-url" {...coverField} onChange={(event) => { coverField.onChange(event); setValue("cover_image_id", "", { shouldDirty: true }); }} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="https://..." />
+        <input type="hidden" {...register("cover_image_id")} />
+        {errors.cover_image_url && <p className="text-xs text-red-500">{errors.cover_image_url.message}</p>}
       </div>
 
       <div className="space-y-3">
@@ -419,7 +428,7 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
           <label className="text-sm font-medium">Gallery Images</label>
           <button
             type="button"
-            onClick={() => { setMediaPickerTarget("gallery"); setIsMediaPickerOpen(true); }}
+            onClick={() => { setMediaPickerTarget("gallery"); setMediaPickerTab("library"); setIsMediaPickerOpen(true); }}
             className="inline-flex items-center gap-2 rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm hover:bg-surface-raised"
           >
             <ImageIcon className="h-4 w-4" /> Add from Media Library
@@ -453,10 +462,12 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
 
       <MediaPickerModal
         isOpen={isMediaPickerOpen}
+        initialTab={mediaPickerTab}
         onClose={() => setIsMediaPickerOpen(false)}
         onSelect={(media) => {
           if (mediaPickerTarget === "cover") {
-            setValue("cover_image_url", media.secure_url || media.url, { shouldValidate: true });
+            setValue("cover_image_url", media.secure_url || media.url, { shouldDirty: true, shouldValidate: true });
+            setValue("cover_image_id", media.id, { shouldDirty: true });
           } else {
             setGalleryImages((images) => images.some((image) => image.mediaId === media.id)
               ? images

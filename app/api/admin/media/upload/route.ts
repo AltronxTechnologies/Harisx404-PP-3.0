@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
-import createSupabaseServerClient from "@/app/lib/supabase/server";
+import createSupabaseServerClient, { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -12,10 +12,17 @@ export async function POST(request: Request) {
   try {
     const supabase = await createSupabaseServerClient();
     
-    // Check auth
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+    if (!adminEmail) return NextResponse.json({ error: "Admin access is not configured" }, { status: 500 });
+    if (user.email?.trim().toLowerCase() !== adminEmail) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+      return NextResponse.json({ error: "Image uploads are not configured" }, { status: 503 });
     }
 
     const formData = await request.formData();
@@ -23,6 +30,12 @@ export async function POST(request: Request) {
     
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
+    }
+    if (!["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"].includes(file.type)) {
+      return NextResponse.json({ error: "Choose a JPEG, PNG, WebP, GIF, or AVIF image" }, { status: 415 });
+    }
+    if (!file.size || file.size > 10_000_000) {
+      return NextResponse.json({ error: "Image must be smaller than 10 MB" }, { status: 413 });
     }
 
     // Convert the file to a buffer
@@ -32,7 +45,7 @@ export async function POST(request: Request) {
     // Upload to Cloudinary using a stream
     const uploadResult = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
-        { folder: "portfolio", resource_type: "auto" },
+        { folder: "portfolio", resource_type: "image" },
         (error, result) => {
           if (error) return reject(error);
           resolve(result);
@@ -42,12 +55,13 @@ export async function POST(request: Request) {
     }) as any;
 
     // Insert into Supabase `media` table
-    const { data, error } = await supabase
+    const admin = await createSupabaseAdminClient();
+    const { data, error } = await admin
       .from("media")
       .insert([
         {
           public_id: uploadResult.public_id,
-          url: uploadResult.url,
+          url: uploadResult.secure_url,
           secure_url: uploadResult.secure_url,
           width: uploadResult.width,
           height: uploadResult.height,
@@ -61,7 +75,7 @@ export async function POST(request: Request) {
       .single();
 
     if (error) {
-      // If saving to Supabase fails, we should ideally delete the image from Cloudinary to keep it clean, but for now we just return error
+      await cloudinary.uploader.destroy(uploadResult.public_id).catch(() => {});
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 

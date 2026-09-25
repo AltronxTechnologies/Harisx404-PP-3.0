@@ -39,7 +39,7 @@ function mapDbProject(p: any): DetailProject {
     isPreview: p.isPreview || false,
     sections: p.case_study_sections || {},
     category: p.category || "Project",
-    image_url: p.cover_image_url || (p as any).image_url || "",
+    image_url: p.cover_image_url || "",
     live_url: (p as any).live_url ?? "",
     github_url: (p as any).github_url ?? "",
     sourceNote: p.source_note || "",

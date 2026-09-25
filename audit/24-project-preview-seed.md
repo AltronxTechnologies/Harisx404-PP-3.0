@@ -23,7 +23,7 @@ The checked-in Alloy Compose file enables the flag by default. Example links, st
 | `demo-vaultaudit-scanner` | Cloud Security / Automation | None | Private |
 | `demo-pulseboard-analytics` | Web Analytics / Privacy | Example live link | Example analytics repo |
 
-Every fixture includes a unique short summary, overview, Why I built this, Key decisions, Results, What I learned, update label, and two or three captioned stock reference images. TaskFlow also previews five tags, including tags beyond the three shown on cards, to exercise full filtering. Highlights and Built labels use the existing project record. External example links use `example.com` and GitHub's `octocat/Hello-World` sample repository, not an owner's deployment or source. Visit shows None without a URL; a named Source link appears in blue when present.
+Every fixture includes a unique short summary, overview, Why I built this, Key decisions, Results, What I learned, update label, and two or three captioned stock reference images. TaskFlow also previews five tags, including tags beyond the three shown on cards, to exercise full filtering. SentimentScope uses a portrait-only cover override to exercise cover orientation without changing its database record. Highlights and Built labels use the existing project record. External example links use `example.com` and GitHub's `octocat/Hello-World` sample repository, not an owner's deployment or source. Visit shows None without a URL; a named Source link appears in blue when present.
 
 ## Disable And Remove
 

@@ -16,9 +16,10 @@ interface MediaPickerModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSelect: (media: MediaItem) => void;
+  initialTab?: "library" | "upload";
 }
 
-export function MediaPickerModal({ isOpen, onClose, onSelect }: MediaPickerModalProps) {
+export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "library" }: MediaPickerModalProps) {
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [totalMedia, setTotalMedia] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -32,9 +33,11 @@ export function MediaPickerModal({ isOpen, onClose, onSelect }: MediaPickerModal
   useEffect(() => {
     if (isOpen) {
       setSelectedId(null);
+      setActiveTab(initialTab);
+      setUploadError("");
       fetchMedia(0);
     }
-  }, [isOpen]);
+  }, [isOpen, initialTab]);
 
   const fetchMedia = async (offset: number) => {
     if (offset) setIsLoadingMore(true);
@@ -181,7 +184,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect }: MediaPickerModal
               {isUploading ? (
                 <div className="flex flex-col items-center gap-4 text-accent-signal">
                   <Loader2 className="h-10 w-10 animate-spin" />
-                  <p className="font-medium">Uploading to Cloudinary...</p>
+                  <p className="font-medium">Uploading image...</p>
                 </div>
               ) : (
                 <div className="flex flex-col items-center max-w-sm text-center">
@@ -197,7 +200,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect }: MediaPickerModal
 
                   <label className="cursor-pointer px-6 py-3 bg-accent-signal text-white rounded-xl text-sm font-medium shadow-sm hover:bg-accent-signal/90 transition-colors">
                     Choose File
-                    <input type="file" className="hidden" accept="image/*" onChange={handleUpload} />
+                    <input type="file" className="hidden" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" onChange={handleUpload} />
                   </label>
                 </div>
               )}

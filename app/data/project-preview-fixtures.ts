@@ -14,12 +14,14 @@ type PreviewSeed = {
   live_url?: string;
   github_url?: string;
   source_note?: string;
+  cover_photo?: string;
   gallery: Array<{ photo: string; caption: string }>;
 };
 
 const exampleLiveUrl = "https://example.com/";
 const exampleRepoUrl = "https://github.com/octocat/Hello-World";
 const photo = (id: string) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=1600&q=80`;
+const portraitPhoto = (id: string) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=900&h=1500&q=80`;
 
 export const projectPreviewFixtures: Record<string, PreviewSeed> = {
   "intrushield-nids": {
@@ -154,6 +156,7 @@ export const projectPreviewFixtures: Record<string, PreviewSeed> = {
   "demo-sentimentscope-nlp": {
     category: "AI/ML / Language Processing",
     tagline: "An NLP-service concept for reviewing support-ticket sentiment and routing uncertain classifications to people.",
+    cover_photo: "photo-1555949963-aa79dcee981c",
     latest_update_label: "Q3 2024",
     content: "**Preview overview.** The example describes a ticket moving through language detection, classification, and human review. Confidence is displayed as a decision aid rather than treated as a guarantee.",
     case_study_sections: {
@@ -166,7 +169,7 @@ export const projectPreviewFixtures: Record<string, PreviewSeed> = {
     source_note: "Example NLP repository",
     gallery: [
       { photo: "photo-1518186285589-2f7649de83e0", caption: "Language pipeline reference" },
-      { photo: "photo-1555949963-aa79dcee981c", caption: "Model review reference" },
+      { photo: "photo-1526628953301-3e589a6a8b74", caption: "Model review reference" },
       { photo: "photo-1460925895917-afdab827c52f", caption: "Classification reporting reference" },
     ],
   },
@@ -214,7 +217,7 @@ export function withProjectPreview<T extends { slug: string; title?: string; cov
   const seed = projectPreviewFixtures[project.slug];
   if (!seed) return project;
 
-  const { gallery, ...fields } = seed;
+  const { gallery, cover_photo, ...fields } = seed;
   const galleryDetails = gallery
     .map(({ photo: id, caption }) => ({ src: photo(id), alt: `Preview stock reference for ${project.title}`, caption: `${caption} - preview stock image, not a project screenshot` }))
     .filter((image) => image.src !== project.cover_image_url);
@@ -222,6 +225,7 @@ export function withProjectPreview<T extends { slug: string; title?: string; cov
   return {
     ...project,
     ...fields,
+    cover_image_url: cover_photo ? portraitPhoto(cover_photo) : project.cover_image_url,
     description: seed.tagline,
     live_url: seed.live_url || "",
     github_url: seed.github_url || "",
