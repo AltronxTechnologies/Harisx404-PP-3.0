@@ -6,7 +6,7 @@ const baseUrl = process.env.PREVIEW_BASE_URL || "http://localhost:3000";
 
 for (const [route, sourcePath, title] of [
   ["/legal/privacy", "../app/legal/privacy/page.tsx", "Your Data,"],
-  ["/legal/terms", "../app/legal/terms/page.tsx", "Simple Terms,"],
+  ["/legal/terms", "../app/legal/terms/page.tsx", "plainly stated."],
 ]) {
   test(`${route} uses the public-page frame and valid hero semantics`, async () => {
     const [response, source] = await Promise.all([
@@ -35,4 +35,32 @@ test("Terms keeps the owner-approved design attribution", async () => {
   assert.match(html, /href="https:\/\/aayushbharti\.in"/);
   assert.match(html, /rel="noopener noreferrer"/);
   assert.match(html, /Aayush Bharti/);
+});
+
+test("Privacy describes the implemented visitor data flows without absolute tracking claims", async () => {
+  const response = await fetch(`${baseUrl}/legal/privacy`);
+  const html = await response.text();
+  for (const value of [
+    "GitHub or Google",
+    "subject, inquiry type",
+    "Loops",
+    "identifier cookie",
+    "Google Gemini",
+    "Gravatar",
+    "Abuse prevention",
+    "Access &amp; Deletion Requests",
+  ]) {
+    assert.ok(html.includes(value), `${value} should appear in Privacy`);
+  }
+  assert.doesNotMatch(html, /No cookies, no IP logs|no selling or sharing of personal data|permanent deletion of anything/);
+});
+
+test("Terms distinguishes credited material and visitor submissions", async () => {
+  const response = await fetch(`${baseUrl}/legal/terms`);
+  const html = await response.text();
+  assert.match(html, /credited third-party work/);
+  assert.match(html, /testimonials are reviewed before publication/);
+  assert.match(html, /To the extent permitted by applicable law/);
+  assert.match(html, /dateTime="2026-09-25"/);
+  assert.doesNotMatch(html, /All writing, photographs, projects, and personal content remain original/);
 });

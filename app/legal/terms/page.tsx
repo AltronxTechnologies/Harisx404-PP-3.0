@@ -71,8 +71,8 @@ export default function TermsOfUsePage() {
           <header className="relative mx-auto max-w-3xl text-center">
             <p className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">Legal &amp; Policy</p>
             <h1 className="heading-glow mx-auto mt-4 max-w-xl text-balance [font-family:var(--font-instrument-serif),serif] text-[46px] font-medium leading-none tracking-tight text-text-primary md:text-[56px] md:tracking-[-1.5px]">
-              Simple Terms,{" "}
-              <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none] motion-reduce:animate-none">Fairly</span>
+              Terms,{" "}
+              <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none] motion-reduce:animate-none">plainly stated.</span>
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-pretty text-[15px] leading-6 text-text-secondary">
               The terms that apply when you visit, read, and contribute to this site.
@@ -84,12 +84,13 @@ export default function TermsOfUsePage() {
       <div className="relative mx-auto mt-14 w-full max-w-6xl space-y-10 px-2 sm:px-4 lg:px-8">
         {/* 01 — Terms */}
         <section className="grid grid-cols-1 lg:grid-cols-12">
-          <SectionHeader index="01" title="Terms." subtitle="The Agreement" />
+          <SectionHeader index="01" title="Terms." subtitle="Using This Site" />
           <Spacer />
           <div className="space-y-8 p-4 lg:col-span-8 lg:p-6">
             <p className="text-lg leading-relaxed text-text-secondary">
-              By browsing this site you agree to these terms. They exist to keep things fair for
-              both of us — written in plain language, no legalese required.
+              This personal site shares projects, writing, and ways to get in
+              touch. These terms explain what to expect when you browse or use
+              its interactive features.
             </p>
             <div className="flex items-center gap-4 rounded-2xl border border-border-primary bg-neutral-50/50 p-4 dark:bg-neutral-900/20">
               <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white text-neutral-600 shadow-sm dark:bg-neutral-800 dark:text-neutral-300">
@@ -98,14 +99,13 @@ export default function TermsOfUsePage() {
               <div>
                 <p className="text-sm font-semibold text-neutral-900 dark:text-white">Effective Date</p>
                 <p className="font-mono text-xs text-text-secondary">
-                  <time dateTime="2026-08-01">AUG 01, 2026</time> — applies to every page on this site
+                  <time dateTime="2026-09-25">SEP 25, 2026</time> — applies to this site
                 </p>
               </div>
             </div>
             <p className="text-sm leading-relaxed text-text-secondary">
-              These terms may be updated as the site evolves. Meaningful changes will be reflected
-              in the effective date above; continued use of the site means you accept the current
-              version.
+              If the site or these terms change materially, this page may be
+              updated. Please review it when returning.
             </p>
           </div>
         </section>
@@ -118,8 +118,8 @@ export default function TermsOfUsePage() {
           <Spacer />
           <div className="space-y-8 p-4 lg:col-span-8 lg:p-6">
             <p className="text-lg leading-relaxed text-text-secondary">
-              Content and code on this site are my original work unless credited otherwise.
-              Here&apos;s exactly what you can and can&apos;t do with them.
+              The site combines portfolio material, credited third-party work,
+              and contributions from visitors. Please respect each creator&apos;s rights.
             </p>
             <div id="design-inspiration" className="rounded-2xl border border-border-primary bg-neutral-50/50 p-5 dark:bg-neutral-900/20">
               <p className="font-mono text-xs font-bold uppercase tracking-wider text-neutral-900 dark:text-white">
@@ -135,12 +135,13 @@ export default function TermsOfUsePage() {
                 >
                   Aayush Bharti
                 </a>
-                . All writing, photographs, projects, and personal content remain original to Muhammad Haris.
+                . This credit concerns design inspiration; other third-party
+                materials and visitor contributions remain with their respective owners.
               </p>
             </div>
             <div className="grid gap-6 md:grid-cols-2">
               {/* Restriction card (red) */}
-                <div className="rounded-2xl border border-red-200 bg-red-50/50 p-6 dark:border-red-900/30 dark:bg-red-950/10">
+              <div className="rounded-2xl border border-red-200 bg-red-50/50 p-6 dark:border-red-900/30 dark:bg-red-950/10">
                 <span className="flex size-10 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400">
                   {icons.ban}
                 </span>
@@ -148,13 +149,13 @@ export default function TermsOfUsePage() {
                   Restrictions on Use
                 </p>
                 <p className="text-sm leading-relaxed text-text-secondary">
-                  The site&apos;s codebase, design, and written content are proprietary. Don&apos;t
-                  republish articles wholesale, clone the design as your own, or use my name,
-                  photos, or projects to imply endorsement.
+                  Do not present this site, its projects, or someone else&apos;s
+                  contribution as your own. Do not use names, images, or projects
+                  here to imply endorsement. Respect any third-party rights.
                 </p>
               </div>
               {/* Permission card (green) */}
-                <div className="rounded-2xl border border-green-200 bg-green-50/50 p-6 dark:border-green-900/30 dark:bg-green-950/10">
+              <div className="rounded-2xl border border-green-200 bg-green-50/50 p-6 dark:border-green-900/30 dark:bg-green-950/10">
                 <span className="flex size-10 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400">
                   {icons.check}
                 </span>
@@ -162,9 +163,9 @@ export default function TermsOfUsePage() {
                   Limited Use
                 </p>
                 <p className="text-sm leading-relaxed text-text-secondary">
-                  You may quote short excerpts, share links, and reference code snippets from
-                  articles in your own work — with a visible link back to the original page as
-                  attribution.
+                  You may share links and quote short excerpts with a visible
+                  link to the source. For substantial reuse of text, code,
+                  images, or design work, request permission from the relevant owner.
                 </p>
               </div>
             </div>
@@ -175,11 +176,12 @@ export default function TermsOfUsePage() {
 
         {/* 03 — Limits */}
         <section className="grid grid-cols-1 lg:grid-cols-12">
-          <SectionHeader index="03" title="Limits." subtitle="Of Liability" />
+          <SectionHeader index="03" title="Community." subtitle="Use & Responsibility" />
           <Spacer />
           <div className="space-y-8 p-4 lg:col-span-8 lg:p-6">
             <p className="text-lg leading-relaxed text-text-secondary">
-              This is a personal site, shared in good faith. A few sensible limits apply.
+              Shared content is for general information and learning. Please use
+              interactive features respectfully and check examples before relying on them.
             </p>
 
             {/* UGC card */}
@@ -189,9 +191,10 @@ export default function TermsOfUsePage() {
                 <h3 className="text-base font-semibold text-neutral-900 dark:text-white">User-Generated Content</h3>
               </div>
               <p className="mt-3 text-sm leading-relaxed text-text-secondary">
-                Notes on the community wall and testimonial submissions remain your words, but by
-                posting you grant permission to display them here. Spam, abuse, or anything illegal
-                will be removed without notice — moderation decisions are final.
+                Community Wall notes may appear publicly after submission;
+                testimonials are reviewed before publication. You retain rights
+                to your contribution and allow it to be displayed on this site.
+                Inappropriate or unlawful submissions may be removed.
               </p>
               <div className="my-8 border-t border-dashed border-neutral-200 dark:border-neutral-800" />
               <div className="grid gap-6 text-sm md:grid-cols-2">
@@ -201,8 +204,9 @@ export default function TermsOfUsePage() {
                     No Warranty
                   </p>
                   <p className="leading-relaxed text-text-secondary">
-                    Everything here — articles, code snippets, tools — is provided &quot;as is&quot;
-                    without warranties of any kind. Test before you ship.
+                    Articles, code samples, and tools are provided &quot;as is&quot;
+                    for information and learning, without a guarantee that they
+                    will fit your project. Test them before use.
                   </p>
                 </div>
                 <div>
@@ -211,8 +215,8 @@ export default function TermsOfUsePage() {
                     Limitation of Liability
                   </p>
                   <p className="leading-relaxed text-text-secondary">
-                    I&apos;m not liable for damages arising from your use of this site or anything
-                    you build with what you learn here.
+                    To the extent permitted by applicable law, I&apos;m not responsible
+                    for losses resulting from your use of this site or its examples.
                   </p>
                 </div>
               </div>

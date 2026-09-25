@@ -65,3 +65,7 @@ services and intended commitments:
 The presentation-only changes are verified. **Neither legal document is
 production content-locked yet.** Obtain owner-approved policy wording and verify
 the relevant third-party/deployment behavior before final legal sign-off.
+
+The later owner-directed content and production pass is documented in
+`audit/21-legal-final-production-lock.md`. Its technical corrections supersede
+the open copy issues listed above; this document remains the pre-rewrite audit.

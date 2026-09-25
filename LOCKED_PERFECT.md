@@ -2281,3 +2281,41 @@ content have a deployment acceptance gate, not an asserted live sign-off. TypeSc
 targeted ESLint, Resume (5/5), navigation (4/4), preview (3/3), desktop/mobile
 light/dark rendering, PDF response headers and bytes, browser console, and
 `git diff --check` passed. Evidence: `audit/19-resume-final-production-lock.md`.
+
+## 40. FINAL OWNER LOCK - Privacy And Terms Production Engineering
+
+**Date:** 2026-09-25. **Scope:** `app/legal/privacy/page.tsx`,
+`app/legal/terms/page.tsx`, their route-specific presentation and visitor-facing
+copy, and `tests/legal-pages.integration.test.mjs`. Shared Navbar, Search, CTA,
+Footer, typography tokens, and layout remain independently frozen.
+
+The two legal pages now match the locked `mt-14` page frame, `GridWrapper` hero,
+`PaperHeroTexture`, 12px mono kicker, 46/56px Instrument Serif heading,
+15/24px supporting text, theme-safe secondary copy, 16px inner-card radius,
+56px hero-to-content gap, and 112px CTA handoff. Their headings are valid and
+their section subtitles exceed WCAG AA contrast in both themes. The former
+duplicate rails, obsolete hero texture, invalid paragraph-in-heading, and
+low-contrast subtitle treatment are retired.
+
+Privacy describes the currently implemented data and service flows: Contact,
+Community Wall GitHub/Google sign-in, newsletter signup through Loops, reaction
+cookies, Gemini chat, Cloudinary images, optional Gravatar lookup, and request-
+derived abuse prevention. Absolute claims about no cookies, no sharing of any
+data, only manually provided fields, and guaranteed permanent deletion were
+removed. Terms distinguishes original, credited, and visitor-contributed work,
+explains public wall and moderated testimonial behavior, and retains the visible
+dofollow Aayush Bharti design-inspiration credit. Its effective date is
+September 25, 2026; the Privacy review marker is September 2026.
+
+TypeScript, targeted ESLint, legal integration (5/5), navigation integration
+(4/4), preview integration (3/3), responsive checks at 1440/1024/768/390/375/
+360px, desktop light/dark rendering, measured subtitle contrast (5.88:1 light,
+7.51:1 dark), and `git diff --check` pass. Full evidence:
+`audit/21-legal-final-production-lock.md`.
+
+The **engineering presentation and wording are frozen**. This is not a legal
+opinion or a guarantee of perpetual compliance. The owner remains responsible
+for reviewing deployed provider practices, third-party asset rights,
+deletion requests, and jurisdictional requirements. If site behavior or law
+materially changes, update the notices accurately rather than preserving a
+stale lock.
