@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import {
   ArrowUpRight,
-  CalendarDays,
   CheckCircle2,
   Download,
   FileText,
@@ -28,19 +27,11 @@ function formatBytes(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date(value));
-}
-
 const benefits = [
   {
     icon: RefreshCw,
     title: "Current version",
-    description: "Review the latest published copy, with its update date clearly noted.",
+    description: "Open or download the currently available document from one reliable place.",
   },
   {
     icon: ScanText,
@@ -56,7 +47,6 @@ const benefits = [
 
 export default async function ResumePage() {
   const resume = await fetchResumeDocument();
-  const version = resume ? encodeURIComponent(resume.updatedAt) : "";
 
   return (
     <div className="relative mt-14">
@@ -135,15 +125,7 @@ export default async function ResumePage() {
                       <p className="break-words text-sm font-medium text-text-primary">
                         {resume.filename}
                       </p>
-                      <dl className="mt-4 grid gap-4 border-t border-border-primary pt-4 sm:grid-cols-3 sm:gap-3">
-                        <div>
-                          <dt className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-text-secondary">
-                            <CalendarDays className="size-3.5" aria-hidden /> Updated
-                          </dt>
-                          <dd className="mt-1.5 text-sm font-medium text-text-primary">
-                            {formatDate(resume.updatedAt)}
-                          </dd>
-                        </div>
+                      <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-border-primary pt-4">
                         <div>
                           <dt className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-text-secondary">
                             <HardDrive className="size-3.5" aria-hidden /> File size
@@ -172,7 +154,7 @@ export default async function ResumePage() {
                         <span className="sr-only">in a new tab</span>
                       </a>
                       <a
-                        href={`${RESUME_DOWNLOAD_ROUTE}&v=${version}`}
+                        href={RESUME_DOWNLOAD_ROUTE}
                         className="inline-flex min-h-12 items-center justify-center gap-2.5 rounded-full border border-border-primary px-5 text-sm font-medium text-text-secondary outline-none transition-colors hover:border-neutral-400/70 hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25"
                       >
                         <Download className="size-4" aria-hidden /> Download PDF

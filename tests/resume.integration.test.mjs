@@ -11,13 +11,17 @@ test("Resume renders the current-document gateway without embedding the PDF", as
 
   assert.match(html, /Experience, clearly/);
   assert.match(html, /Review the current Resume/);
-  assert.match(html, /href="\/resume\/file\?download=1/);
-  assert.match(html, /href="\/resume\/file\?v=/);
+  assert.match(html, /href="\/resume\/file\?download=1"/);
+  assert.match(html, /href="\/resume\/file"/);
   assert.match(html, /Current version/);
+  assert.match(html, /File size/);
+  assert.match(html, /PDF document/);
   assert.match(html, /Original presentation/);
   assert.match(html, /Share with your team/);
   assert.match(html, /hiring reviews, referrals, or interview discussions/);
   assert.doesNotMatch(html, /Admin workspace/);
+  assert.doesNotMatch(html, /update date clearly noted/);
+  assert.doesNotMatch(html, /\/resume\/file\?v=/);
   assert.match(html, /From concept to creation/);
   assert.doesNotMatch(html, />Web resume</);
   assert.doesNotMatch(html, /Professional Summary|Technical Expertise/);
@@ -26,14 +30,12 @@ test("Resume renders the current-document gateway without embedding the PDF", as
 });
 
 test("Resume file endpoint preserves PDF bytes and download metadata", async () => {
-  const [pageResponse, fileResponse, inlineResponse, legacyResponse, metadata] = await Promise.all([
-    fetch(`${baseUrl}/resume`),
+  const [fileResponse, inlineResponse, legacyResponse, metadata] = await Promise.all([
     fetch(`${baseUrl}/resume/file?download=1`),
     fetch(`${baseUrl}/resume/file`),
     fetch(`${baseUrl}/muhammad-haris-resume.pdf`, { redirect: "manual" }),
     readFile(new URL("../app/data/siteMetadata.ts", import.meta.url), "utf8"),
   ]);
-  const page = await pageResponse.text();
   const responseBytes = Buffer.from(await fileResponse.arrayBuffer());
 
   assert.equal(fileResponse.status, 200);
@@ -45,11 +47,6 @@ test("Resume file endpoint preserves PDF bytes and download metadata", async () 
   assert.deepEqual(responseBytes, Buffer.from(await inlineResponse.arrayBuffer()));
   assert.equal(legacyResponse.status, 307);
   assert.equal(new URL(legacyResponse.headers.get("location"), baseUrl).pathname, "/resume/file");
-  if (page.includes("/resume/file?v=fallback")) {
-    const fallbackBytes = await readFile(new URL("../public/muhammad-haris-resume.pdf", import.meta.url));
-    assert.deepEqual(responseBytes, fallbackBytes);
-    assert.match(fileResponse.headers.get("content-disposition") || "", /Muhammad-Haris-Resume\.pdf/);
-  }
   assert.match(metadata, /resume: "\/resume\/file"/);
   assert.doesNotMatch(metadata, /haris_resume\.pdf/);
 });
@@ -90,6 +87,8 @@ test("Resume management and document gateway contracts are enforced", async () =
   assert.match(hardening, /size_bytes IS NOT NULL/);
   assert.match(page, /target="_blank"/);
   assert.match(page, /RESUME_DOWNLOAD_ROUTE/);
+  assert.doesNotMatch(page, /formatDate|CalendarDays|Updated<\/dt>|encodeURIComponent\(resume\.updatedAt\)/);
+  assert.match(publicData, /fileUrl: RESUME_FILE_ROUTE/);
   assert.doesNotMatch(page, /ResumePdfViewer|react-pdf/);
   assert.match(manager, /Choose replacement PDF/);
   assert.match(manager, /method: "DELETE"/);

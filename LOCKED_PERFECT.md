@@ -2260,3 +2260,24 @@ fact-checked PDF before approving document content itself. See `MANUAL_TASKS.md`
 and `audit/19-resume-final-production-lock.md`. Until those checks pass, only the
 public presentation and fallback delivery are re-locked, not the full managed
 Resume lifecycle.
+
+### 2026-09-24 final public Resume gateway lock: no visible update date
+
+The owner approved removing public update dates so a useful Resume is not judged
+solely by the age of its last upload. The visitor-facing gateway now shows only
+the active filename, file size, PDF format, and Open/Download actions; its Current
+version supporting card no longer promises a visible update date. The timestamp
+remains stored and visible to Admin; Open and Download use stable, no-store URLs,
+while Admin mutations invalidate the cached page. No timestamp appears in the
+public link destinations. The rest of the page's locked hero, illustration behavior,
+reviewer-facing copy, spacing, theme treatment, and CTA/Footer handoff is unchanged.
+
+The connected database contains an unconfigured singleton and private bucket.
+The owner reports running the Resume SQL queries, including hardening, but a live
+authenticated Admin upload/replace/delete/restore cycle and the owner-provided
+PDF cannot be tested until deployment. Public presentation and the read-only file
+gateway are **locked in their final state**; the Admin workflow and uploaded PDF
+content have a deployment acceptance gate, not an asserted live sign-off. TypeScript,
+targeted ESLint, Resume (5/5), navigation (4/4), preview (3/3), desktop/mobile
+light/dark rendering, PDF response headers and bytes, browser console, and
+`git diff --check` passed. Evidence: `audit/19-resume-final-production-lock.md`.

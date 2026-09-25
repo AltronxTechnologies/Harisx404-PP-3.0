@@ -19,7 +19,7 @@ const loadResumeDocument = async (): Promise<PublicResumeDocument | null> => {
       filename: FALLBACK_RESUME.filename,
       sizeBytes: FALLBACK_RESUME.sizeBytes,
       updatedAt: FALLBACK_RESUME.updatedAt,
-      fileUrl: `${RESUME_FILE_ROUTE}?v=fallback`,
+      fileUrl: RESUME_FILE_ROUTE,
       isFallback: true,
     };
   }
@@ -34,7 +34,7 @@ const loadResumeDocument = async (): Promise<PublicResumeDocument | null> => {
       filename: FALLBACK_RESUME.filename,
       sizeBytes: FALLBACK_RESUME.sizeBytes,
       updatedAt: FALLBACK_RESUME.updatedAt,
-      fileUrl: `${RESUME_FILE_ROUTE}?v=fallback`,
+      fileUrl: RESUME_FILE_ROUTE,
       isFallback: true,
     };
   }
@@ -44,7 +44,7 @@ const loadResumeDocument = async (): Promise<PublicResumeDocument | null> => {
       filename: FALLBACK_RESUME.filename,
       sizeBytes: FALLBACK_RESUME.sizeBytes,
       updatedAt: FALLBACK_RESUME.updatedAt,
-      fileUrl: `${RESUME_FILE_ROUTE}?v=fallback`,
+      fileUrl: RESUME_FILE_ROUTE,
       isFallback: true,
     };
   }
@@ -54,7 +54,7 @@ const loadResumeDocument = async (): Promise<PublicResumeDocument | null> => {
     filename: data.original_filename,
     sizeBytes: Number(data.size_bytes),
     updatedAt: data.updated_at,
-    fileUrl: `${RESUME_FILE_ROUTE}?v=${encodeURIComponent(data.updated_at)}`,
+    fileUrl: RESUME_FILE_ROUTE,
     isFallback: false,
   };
 };

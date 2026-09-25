@@ -131,3 +131,21 @@ The compatibility PDF still contains education claims inconsistent with the
 locked About page. The owner's locally prepared PDF should be fact-checked before
 upload. The **public page presentation remains locked**; final managed-lifecycle
 and content sign-off must wait for the remaining Admin and migration checks.
+
+## Final Public Gateway Decision
+
+The public update date was removed at the owner's request. File size and format
+remain visible; the database-managed timestamp stays available to Admin. The
+PDF route sends `no-store` responses and Admin mutations invalidate the page, so
+Open and Download use stable URLs with no timestamp query string. The Current version card
+no longer refers to a visible date. Both desktop themes and the 390px mobile
+layout were checked after this change: no overflow, 48px Open/Download targets,
+and no application console errors. TypeScript, targeted ESLint, Resume (5/5),
+navigation (4/4), preview (3/3), PDF delivery, and `git diff --check` pass.
+
+**Lock:** the public page design and read-only file gateway are final and frozen.
+The owner reports running the SQL migrations, and the connected singleton row and
+private bucket are confirmed. The live constraint definition is not introspectable
+through the app's Supabase API. Authenticated Admin upload/replacement/deletion and
+the owner's new PDF are deferred until deployment; their acceptance must be
+recorded separately rather than assumed from this public-page audit.

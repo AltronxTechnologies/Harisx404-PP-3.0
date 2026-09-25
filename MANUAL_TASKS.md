@@ -266,11 +266,13 @@ To show the embedded scheduling calendar there:
 - [x] The initial `migrations/2026_resume_document.sql` schema is present in the
       connected Supabase project; its singleton row is unconfigured and its
       `resume-documents` Storage bucket is private (verified 2026-09-24).
-- [ ] Run `migrations/2026_resume_document_hardening.sql` in the Supabase SQL
-      Editor to enforce non-null active-file fields on the already-created table.
+- [x] Owner reports running the Resume SQL queries, including the hardening SQL.
+      The singleton row and private bucket are confirmed; the live constraint
+      definition cannot be read through the application's Supabase API.
 - [ ] Sign in to `/admin`, open **Resume**, and upload the locally prepared PDF.
-- [ ] Verify `/resume` shows the uploaded filename, date, and size; **Open
-      Resume** opens all pages in the browser's native PDF viewer and **Download
+- [ ] Verify `/resume` shows the uploaded filename, size, and format (the update
+      date is intentionally Admin-only); **Open Resume** opens all pages in the
+      browser's native PDF viewer and **Download
       PDF** preserves the original filename and exact file bytes.
 - [ ] Replace the PDF once and confirm the old private object is removed.
 - [ ] Delete the PDF once and confirm `/resume` shows its unavailable state, then
