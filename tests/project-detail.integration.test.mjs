@@ -24,8 +24,8 @@ test("published project cards resolve to authored detail pages", async () => {
     assert.ok(html.includes("At a glance"), `${slug} should render its facts`);
     assert.doesNotMatch(html, /Preview-only case study\.|Case study \/ /, slug);
     const facts = [...html.matchAll(/<dt[^>]*>(Built|Stage|Visit|Latest update|Source|Type)<\/dt>/g)].map((match) => match[1]);
-    assert.deepEqual(facts, ["Built", "Visit", "Latest update", "Source"], slug);
-    assert.match(html, /<dt[^>]*>Category<\/dt>/, slug);
+    assert.deepEqual(facts, ["Built", "Latest update", "Visit", "Source"], slug);
+    assert.match(html, /<dt[^>]*>Category<\/dt><dd[^>]*><span[^>]*rounded-full/, slug);
     assert.match(html, /<dt[^>]*>Tags<\/dt>/, slug);
     assert.ok(html.includes("<h1"), `${slug} should render a heading`);
     assert.doesNotMatch(html, /Why I Built This|Key Decisions|Performance-first build: optimized images/, slug);
@@ -150,7 +150,7 @@ test("Alloy preview gives every published project a distinct, complete example w
     assert.doesNotMatch(html, /<dt[^>]*>Stage<\/dt>/, slug);
     assert.ok(html.includes("preview stock image, not a project screenshot"), slug);
     assert.ok((html.match(/<figcaption/g) || []).length >= 2, `${slug} needs at least two captioned preview images`);
-    const category = html.match(/<dt[^>]*>Category<\/dt><dd[^>]*>([^<]+)<\/dd>/)?.[1];
+    const category = html.match(/<dt[^>]*>Category<\/dt><dd[^>]*><span[^>]*>([^<]+)<\/span><\/dd>/)?.[1];
     const summary = html.match(/<h1[^>]*>[^<]+<\/h1><p[^>]*>([^<]+)<\/p>/)?.[1];
     assert.ok(category, `${slug} needs a category`);
     assert.ok(summary, `${slug} needs a summary`);

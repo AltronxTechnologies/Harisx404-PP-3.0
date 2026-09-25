@@ -286,15 +286,15 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
               </div>
               <dl className="mt-2 grid grid-cols-2 gap-x-5 gap-y-6 sm:-mt-1">
                 <Fact label="Built">{project.year || "None"}</Fact>
-                <Fact label="Visit">{project.live_url ? <a href={project.live_url} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1.5 rounded-sm text-blue-600 underline underline-offset-4 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 ${focusStyle}`}>{project.isPreview ? "Example live link" : "Live project"} <ExternalLink className="size-3.5" aria-hidden /><span className="sr-only">opens in a new tab</span></a> : <span className="text-text-secondary">None</span>}</Fact>
                 <Fact label="Latest update">{project.latestUpdate || "None"}</Fact>
+                <Fact label="Visit">{project.live_url ? <a href={project.live_url} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1.5 rounded-sm text-blue-600 underline underline-offset-4 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 ${focusStyle}`}>{project.isPreview ? "Example live link" : "Live project"} <ExternalLink className="size-3.5" aria-hidden /><span className="sr-only">opens in a new tab</span></a> : <span className="text-text-secondary">None</span>}</Fact>
                 <Fact label="Source">{sourceUrl ? <a href={sourceUrl} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1.5 rounded-sm text-blue-600 underline underline-offset-4 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 ${focusStyle}`}>{project.sourceNote || (project.isPreview ? "Example source link" : "View source")} <ExternalLink className="size-3.5" aria-hidden /><span className="sr-only">opens in a new tab</span></a> : <span className="text-text-secondary">{project.sourceNote || "None"}</span>}</Fact>
               </dl>
             </div>
             <div className="border-t border-border-primary px-5 pb-5 pt-4 sm:px-7 sm:pb-7 sm:pt-5 lg:border-l lg:border-t-0 lg:px-8 lg:pb-8">
               <h2 className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">Category &amp; tags</h2>
               <dl className="mt-6 space-y-5">
-                <Fact label="Category">{project.category}</Fact>
+                <Fact label="Category"><span className="inline-flex max-w-full rounded-full border border-border-primary bg-neutral-50 px-3 py-1.5 font-mono text-[11px] font-normal text-text-secondary dark:bg-white/[0.04]">{project.category}</span></Fact>
                 <div>
                   <dt className="font-mono text-[11px] uppercase tracking-widest text-text-secondary">Tags</dt>
                   <dd className="mt-2">
