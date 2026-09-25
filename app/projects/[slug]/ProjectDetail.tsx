@@ -234,7 +234,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
           <PaperHeroTexture className="-inset-x-2 bottom-0 top-[-128px] sm:-inset-x-3 sm:top-[-144px] md:top-[-176px] lg:inset-x-0" />
           <header className="relative mx-auto max-w-4xl text-center">
             <nav aria-label="Breadcrumb" className="mb-5">
-              <ol className="flex flex-wrap items-center justify-center gap-2 font-mono text-[11px] text-text-secondary">
+              <ol className="flex flex-wrap items-center justify-center gap-2 font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
                 <li><Link href="/" className={`rounded-sm hover:text-text-primary ${focusStyle}`}>Home</Link></li>
                 <li aria-hidden>/</li>
                 <li><Link href="/projects" className={`rounded-sm hover:text-text-primary ${focusStyle}`}>Projects</Link></li>
