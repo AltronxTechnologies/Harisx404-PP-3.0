@@ -6,7 +6,7 @@
 - `IS_ALLOY=true`
 - `PROJECT_DETAIL_PREVIEW_SEED` is not `false`
 
-The checked-in Alloy Compose file enables the flag by default. A preview-only notice on each detail page identifies the case-study text, example links, and stock gallery media as unverified. Preview detail pages also declare `noindex,nofollow`; their CreativeWork structured data and generated metadata still use the actual database record rather than example links or claims.
+The checked-in Alloy Compose file enables the flag by default. Example links, stock gallery captions, and preview narrative copy identify illustrative content without a separate page notice. Preview detail pages also declare `noindex,nofollow`; their CreativeWork structured data and generated metadata still use the actual database record rather than example links or claims.
 
 ## Coverage
 
@@ -27,6 +27,6 @@ Every fixture includes a unique short summary, overview, Why I built this, Key d
 
 ## Disable And Remove
 
-Set `PROJECT_DETAIL_PREVIEW_SEED=false` in the environment used by the Alloy Compose stack and recreate the web container to preview the real Admin content. A production build always disables the fixture even if `IS_ALLOY` remains true. Before removing the temporary code entirely, delete `app/data/project-preview-fixtures.ts`, the `withProjectPreview` imports/calls in `app/page.tsx`, `app/projects/page.tsx`, and `app/projects/[slug]/page.tsx`, the `isPreview` banner/link-label branches in `ProjectDetail.tsx`, and the Compose flag. Do not just delete the fixture file while its imports remain.
+Set `PROJECT_DETAIL_PREVIEW_SEED=false` in the environment used by the Alloy Compose stack and recreate the web container to preview the real Admin content. A production build always disables the fixture even if `IS_ALLOY` remains true. Before removing the temporary code entirely, delete `app/data/project-preview-fixtures.ts`, the `withProjectPreview` imports/calls in `app/page.tsx`, `app/projects/page.tsx`, and `app/projects/[slug]/page.tsx`, the `isPreview` link-label branches in `ProjectDetail.tsx`, and the Compose flag. Do not just delete the fixture file while its imports remain.
 
 The four older `demo-*` projects were already persisted by `scripts/seed-demo-projects.mjs` before this fixture was added. Turning off the preview does **not** remove those database rows. Review that script's `--cleanup` behavior before using it on shared data. The case-study migration columns were present at the last read-only check; an authenticated Admin save/round-trip remains to be verified separately.

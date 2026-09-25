@@ -227,7 +227,6 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
         <div className="relative px-4 xl:px-0">
           <PaperHeroTexture className="-inset-x-2 bottom-0 top-[-128px] sm:-inset-x-3 sm:top-[-144px] md:top-[-176px] lg:inset-x-0" />
           <header className="relative mx-auto max-w-4xl text-center">
-            {project.isPreview && <p role="note" className="mx-auto mb-5 max-w-2xl rounded-xl border border-border-primary bg-bg-primary/90 px-4 py-2 text-xs leading-5 text-text-secondary">Preview-only case study. The copy, link examples, and extra stock gallery images are not verified project facts. Production uses your Admin content.</p>}
             <nav aria-label="Breadcrumb" className="mb-5">
               <ol className="flex flex-wrap items-center justify-center gap-2 font-mono text-[11px] text-text-secondary">
                 <li><Link href="/" className={`rounded-sm hover:text-text-primary ${focusStyle}`}>Home</Link></li>
@@ -237,52 +236,52 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
                 <li aria-current="page" className="max-w-48 truncate text-text-primary" title={project.title}>{project.title}</li>
               </ol>
             </nav>
-            <p className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">Case study / {project.category}</p>
             <h1 className="heading-glow mx-auto mt-4 max-w-3xl break-words text-balance [font-family:var(--font-instrument-serif),serif] text-[46px] font-medium leading-none tracking-tight text-text-primary md:text-[56px] md:tracking-[-1.5px]">{project.title}</h1>
             {summary && <p className="mx-auto mt-4 max-w-2xl text-pretty text-[15px] leading-6 text-text-secondary">{summary}</p>}
-
-            <div ref={shareRef} className="relative mt-5 inline-flex flex-col items-center">
-              <button
-                ref={shareTriggerRef}
-                type="button"
-                aria-expanded={shareOpen}
-                aria-controls="project-share-options"
-                onClick={(event) => {
-                  if (!shareOpen) {
-                    const bounds = shareTriggerRef.current?.getBoundingClientRect();
-                    if (bounds) setShareAbove(window.innerHeight - bounds.bottom < 390 && bounds.top > window.innerHeight - bounds.bottom);
-                  }
-                  setShareOpen((open) => !open);
-                  if (!shareOpen && event.detail === 0) requestAnimationFrame(() => firstShareItemRef.current?.focus());
-                }}
-                className={`inline-flex min-h-10 items-center gap-2 rounded-full border border-border-primary bg-bg-primary px-4 text-xs font-medium text-text-primary transition-colors hover:border-neutral-400/70 dark:hover:border-white/25 ${focusStyle}`}
-              >
-                <Share2 className="size-3.5" aria-hidden /> Share project <ChevronDown className={`size-3.5 transition-transform motion-reduce:transition-none ${shareOpen ? "rotate-180" : ""}`} aria-hidden />
-              </button>
-              {shareOpen && (
-                <div id="project-share-options" role="group" aria-label="Share project" className={`relative z-30 mt-2 max-h-[min(70dvh,420px)] w-[min(280px,calc(100vw-2.5rem))] overflow-y-auto rounded-2xl border border-border-primary bg-bg-primary p-2 text-left shadow-[0_16px_48px_rgba(0,0,0,0.16)] dark:shadow-[0_16px_48px_rgba(0,0,0,0.5)] sm:absolute sm:left-1/2 sm:-translate-x-1/2 ${shareAbove ? "sm:bottom-full sm:mb-2 sm:mt-0" : "sm:top-full sm:mt-2"}`}>
-                  <p className="px-3 pb-2 pt-1 font-mono text-[10px] uppercase tracking-widest text-text-secondary">Share this case study</p>
-                  <button ref={firstShareItemRef} type="button" onClick={() => copyText(projectUrl(), "URL copied")} className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm text-text-primary hover:bg-text-primary/5 ${focusStyle}`}><Copy className="size-4 text-text-secondary" aria-hidden /> Copy URL</button>
-                  <button type="button" onClick={() => copyText(markdown(), "Markdown copied")} className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm text-text-primary hover:bg-text-primary/5 ${focusStyle}`}><FileText className="size-4 text-text-secondary" aria-hidden /> Copy as Markdown</button>
-                  <button type="button" onClick={viewMarkdown} className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm text-text-primary hover:bg-text-primary/5 ${focusStyle}`}><ExternalLink className="size-4 text-text-secondary" aria-hidden /> View as Markdown <span className="sr-only">(opens in a new tab)</span></button>
-                  <div aria-hidden className="my-1 border-t border-border-primary" />
-                  <a href={`https://chatgpt.com/?q=${encodeURIComponent(`Review this project case study: ${projectUrl()}`)}`} target="_blank" rel="noopener noreferrer" className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm text-text-primary hover:bg-text-primary/5 ${focusStyle}`}><MessageCircle className="size-4 text-text-secondary" aria-hidden /> Open in ChatGPT <span className="sr-only">(opens in a new tab)</span></a>
-                  <button type="button" onClick={openClaude} className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm text-text-primary hover:bg-text-primary/5 ${focusStyle}`}><Sparkles className="size-4 text-text-secondary" aria-hidden /> Open in Claude <span className="sr-only">(opens in a new tab; prompt copied to clipboard)</span></button>
-                  <div aria-hidden className="my-1 border-t border-border-primary" />
-                  <a href={`mailto:?subject=${encodeURIComponent(project.title)}&body=${encodeURIComponent(`${summary}\n\n${projectUrl()}`)}`} className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm text-text-primary hover:bg-text-primary/5 ${focusStyle}`}><Mail className="size-4 text-text-secondary" aria-hidden /> Share by email</a>
-                </div>
-              )}
-            </div>
-            <p role="status" aria-live="polite" className={copyStatus ? "mx-auto mt-3 max-w-sm text-xs leading-5 text-text-secondary" : "sr-only"}>{copyStatus}</p>
           </header>
         </div>
       </GridWrapper>
 
       <section aria-labelledby="project-facts-heading" className="mt-14 px-2 sm:px-4">
-        <div className="mx-auto max-w-6xl overflow-hidden rounded-3xl border border-border-primary bg-white dark:bg-white/[0.02]">
+        <div className="mx-auto max-w-6xl rounded-3xl border border-border-primary bg-white dark:bg-white/[0.02]">
           <div className={`grid ${project.tech.length ? "lg:grid-cols-[1.1fr_0.9fr]" : ""}`}>
             <div className="p-5 sm:p-7 lg:p-8">
-              <h2 id="project-facts-heading" className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">At a glance</h2>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2 id="project-facts-heading" className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">At a glance</h2>
+                <div ref={shareRef} className="relative ml-auto inline-flex flex-col items-end">
+                  <button
+                    ref={shareTriggerRef}
+                    type="button"
+                    aria-expanded={shareOpen}
+                    aria-controls="project-share-options"
+                    onClick={(event) => {
+                      if (!shareOpen) {
+                        const bounds = shareTriggerRef.current?.getBoundingClientRect();
+                        if (bounds) setShareAbove(window.innerHeight - bounds.bottom < 390 && bounds.top > window.innerHeight - bounds.bottom);
+                      }
+                      setShareOpen((open) => !open);
+                      if (!shareOpen && event.detail === 0) requestAnimationFrame(() => firstShareItemRef.current?.focus());
+                    }}
+                    className={`inline-flex min-h-10 items-center gap-2 rounded-full border border-border-primary bg-bg-primary px-4 text-xs font-medium text-text-primary transition-colors hover:border-neutral-400/70 dark:hover:border-white/25 ${focusStyle}`}
+                  >
+                    <Share2 className="size-3.5" aria-hidden /> Share project <ChevronDown className={`size-3.5 transition-transform motion-reduce:transition-none ${shareOpen ? "rotate-180" : ""}`} aria-hidden />
+                  </button>
+                  {shareOpen && (
+                    <div id="project-share-options" role="group" aria-label="Share project" className={`relative z-30 mt-2 max-h-[min(70dvh,420px)] w-[min(280px,calc(100vw-6rem))] overflow-y-auto rounded-2xl border border-border-primary bg-bg-primary p-2 text-left shadow-[0_16px_48px_rgba(0,0,0,0.16)] dark:shadow-[0_16px_48px_rgba(0,0,0,0.5)] sm:absolute sm:right-0 ${shareAbove ? "sm:bottom-full sm:mb-2 sm:mt-0" : "sm:top-full sm:mt-2"}`}>
+                      <p className="px-3 pb-2 pt-1 font-mono text-[10px] uppercase tracking-widest text-text-secondary">Share this case study</p>
+                      <button ref={firstShareItemRef} type="button" onClick={() => copyText(projectUrl(), "URL copied")} className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm text-text-primary hover:bg-text-primary/5 ${focusStyle}`}><Copy className="size-4 text-text-secondary" aria-hidden /> Copy URL</button>
+                      <button type="button" onClick={() => copyText(markdown(), "Markdown copied")} className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm text-text-primary hover:bg-text-primary/5 ${focusStyle}`}><FileText className="size-4 text-text-secondary" aria-hidden /> Copy as Markdown</button>
+                      <button type="button" onClick={viewMarkdown} className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm text-text-primary hover:bg-text-primary/5 ${focusStyle}`}><ExternalLink className="size-4 text-text-secondary" aria-hidden /> View as Markdown <span className="sr-only">(opens in a new tab)</span></button>
+                      <div aria-hidden className="my-1 border-t border-border-primary" />
+                      <a href={`https://chatgpt.com/?q=${encodeURIComponent(`Review this project case study: ${projectUrl()}`)}`} target="_blank" rel="noopener noreferrer" className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm text-text-primary hover:bg-text-primary/5 ${focusStyle}`}><MessageCircle className="size-4 text-text-secondary" aria-hidden /> Open in ChatGPT <span className="sr-only">(opens in a new tab)</span></a>
+                      <button type="button" onClick={openClaude} className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm text-text-primary hover:bg-text-primary/5 ${focusStyle}`}><Sparkles className="size-4 text-text-secondary" aria-hidden /> Open in Claude <span className="sr-only">(opens in a new tab; prompt copied to clipboard)</span></button>
+                      <div aria-hidden className="my-1 border-t border-border-primary" />
+                      <a href={`mailto:?subject=${encodeURIComponent(project.title)}&body=${encodeURIComponent(`${summary}\n\n${projectUrl()}`)}`} className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm text-text-primary hover:bg-text-primary/5 ${focusStyle}`}><Mail className="size-4 text-text-secondary" aria-hidden /> Share by email</a>
+                    </div>
+                  )}
+                </div>
+                <p role="status" aria-live="polite" className={copyStatus ? "w-full text-right text-xs leading-5 text-text-secondary" : "sr-only"}>{copyStatus}</p>
+              </div>
               <dl className="mt-6 grid grid-cols-2 gap-x-5 gap-y-6 sm:grid-cols-3">
                 <Fact label="Type">{project.category}</Fact>
                 {project.year && <Fact label="Built">{project.year}</Fact>}

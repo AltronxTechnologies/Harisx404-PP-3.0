@@ -16,13 +16,13 @@ test("published project cards resolve to authored detail pages", async () => {
     const response = await fetch(`${baseUrl}/projects/${slug}`);
     assert.equal(response.status, 200, slug);
     let html = await response.text();
-    if (!html.includes("Case study / ")) {
+    if (!html.includes("At a glance")) {
       // The dev server can stream a loading shell while another route sweep is compiling.
       html = await (await fetch(`${baseUrl}/projects/${slug}`)).text();
     }
-    assert.ok(html.includes("Case study / "), `${slug} should render its case study`);
     assert.ok(html.includes("Share project"), `${slug} should render sharing`);
     assert.ok(html.includes("At a glance"), `${slug} should render its facts`);
+    assert.doesNotMatch(html, /Preview-only case study\.|Case study \/ /, slug);
     assert.ok(html.includes("Visit"), `${slug} should explain live availability`);
     assert.ok(html.includes("Source"), `${slug} should explain source availability`);
     assert.ok(html.includes("<h1"), `${slug} should render a heading`);
@@ -122,11 +122,11 @@ test("Alloy preview gives every published project a distinct, complete example w
     const response = await fetch(`${baseUrl}/projects/${slug}`);
     assert.equal(response.status, 200, slug);
     let html = await response.text();
-    if (!html.includes("Preview-only case study")) {
+    if (!html.includes("Why I built this")) {
       // ISR/dev compilation can stream a loading shell on the first response.
       html = await (await fetch(`${baseUrl}/projects/${slug}`)).text();
     }
-    assert.ok(html.includes("Preview-only case study"), slug);
+    assert.doesNotMatch(html, /Preview-only case study\.|Case study \/ /, slug);
     assert.ok(html.includes("noindex,nofollow"), slug);
     for (const heading of ["Overview", "Why I built this", "Highlights", "Key decisions", "Results", "What I learned", "Gallery"]) {
       assert.ok(html.includes(`>${heading}</h2>`), `${slug} should have ${heading}`);
@@ -134,7 +134,7 @@ test("Alloy preview gives every published project a distinct, complete example w
     assert.ok(html.includes("Latest update"), slug);
     assert.ok(html.includes("preview stock image, not a project screenshot"), slug);
     assert.ok((html.match(/<figcaption/g) || []).length >= 2, `${slug} needs at least two captioned preview images`);
-    const category = html.match(/Case study \/ (?:<!-- -->)?([^<]+)<\/p>/)?.[1];
+    const category = html.match(/<dt[^>]*>Type<\/dt><dd[^>]*>([^<]+)<\/dd>/)?.[1];
     const summary = html.match(/<h1[^>]*>[^<]+<\/h1><p[^>]*>([^<]+)<\/p>/)?.[1];
     assert.ok(category, `${slug} needs a project type`);
     assert.ok(summary, `${slug} needs a summary`);
