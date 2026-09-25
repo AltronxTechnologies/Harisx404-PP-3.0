@@ -25,9 +25,9 @@ function safeFilename(value: string) {
   const cleaned = value
     .replace(/[\r\n"\\/]/g, "-")
     .replace(/[\u0000-\u001f\u007f]/g, "")
-    .trim()
-    .slice(0, 180);
-  return cleaned.toLowerCase().endsWith(".pdf") ? cleaned : `${cleaned || "resume"}.pdf`;
+    .trim();
+  const stem = cleaned.replace(/\.pdf$/i, "").slice(0, 176).trim() || "resume";
+  return `${stem}.pdf`;
 }
 
 function invalidateResume() {
@@ -114,7 +114,7 @@ export async function POST(request: Request) {
       });
     if (uploadError) throw uploadError;
 
-    const { data, error: updateError } = await db
+    let mutation = db
       .from("resume_document")
       .update({
         is_configured: true,
@@ -123,13 +123,18 @@ export async function POST(request: Request) {
         mime_type: "application/pdf",
         size_bytes: bytes.byteLength,
       })
-      .eq("id", true)
+      .eq("id", true);
+    mutation = current.storage_path
+      ? mutation.eq("storage_path", current.storage_path)
+      : mutation.is("storage_path", null);
+    const { data, error: updateError } = await mutation
       .select("original_filename, size_bytes, updated_at")
-      .single();
+      .maybeSingle();
 
-    if (updateError) {
+    if (updateError || !data) {
       await db.storage.from(RESUME_STORAGE_BUCKET).remove([storagePath]);
-      throw updateError;
+      if (updateError) throw updateError;
+      return NextResponse.json({ error: "Resume changed during upload. Please retry." }, { status: 409 });
     }
 
     if (current.storage_path && current.storage_path !== storagePath) {
@@ -167,7 +172,7 @@ export async function DELETE() {
       .single();
     if (currentError) throw currentError;
 
-    const { data, error: updateError } = await db
+    let mutation = db
       .from("resume_document")
       .update({
         is_configured: true,
@@ -176,10 +181,17 @@ export async function DELETE() {
         mime_type: null,
         size_bytes: null,
       })
-      .eq("id", true)
+      .eq("id", true);
+    mutation = current.storage_path
+      ? mutation.eq("storage_path", current.storage_path)
+      : mutation.is("storage_path", null);
+    const { data, error: updateError } = await mutation
       .select("updated_at")
-      .single();
+      .maybeSingle();
     if (updateError) throw updateError;
+    if (!data) {
+      return NextResponse.json({ error: "Resume changed during deletion. Please retry." }, { status: 409 });
+    }
 
     if (current.storage_path) {
       const { error: storageError } = await db.storage

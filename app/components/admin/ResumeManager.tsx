@@ -120,7 +120,9 @@ export function ResumeManager() {
               <h2 id="current-resume-heading" className="font-medium text-text-primary">Current Resume</h2>
               {loading ? (
                 <p className="mt-1 text-sm text-text-secondary">Loading document status…</p>
-              ) : status?.isActive ? (
+              ) : !status ? (
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">Document status is unavailable. Refresh the page to try again.</p>
+              ) : status.isActive ? (
                 <>
                   <p className="mt-1 break-all text-sm font-medium text-text-primary">{status.filename}</p>
                   <p className="mt-1 text-xs text-text-secondary">
@@ -154,8 +156,8 @@ export function ResumeManager() {
         <p className="mt-1 text-sm leading-5 text-text-secondary">
           PDF only, up to 10 MB. Any page count is supported. The original filename and document bytes are preserved for downloads.
         </p>
-        <input ref={inputRef} id="resume-upload" type="file" accept="application/pdf,.pdf" onChange={upload} disabled={loading || uploading || deleting} className="peer sr-only" />
-        <label htmlFor="resume-upload" className={`mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl bg-indigo-600 px-4 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-indigo-500 ${loading || uploading || deleting ? "pointer-events-none opacity-50" : "cursor-pointer"}`}>
+        <input ref={inputRef} id="resume-upload" type="file" accept="application/pdf,.pdf" onChange={upload} disabled={!status || loading || uploading || deleting} className="peer sr-only" />
+        <label htmlFor="resume-upload" className={`mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl bg-indigo-600 px-4 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-indigo-500 ${!status || loading || uploading || deleting ? "pointer-events-none opacity-50" : "cursor-pointer"}`}>
           {uploading ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
           {uploading ? "Uploading…" : status?.isActive ? "Choose replacement PDF" : "Choose PDF"}
         </label>

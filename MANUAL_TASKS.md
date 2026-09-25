@@ -263,13 +263,20 @@ To show the embedded scheduling calendar there:
 
 ## Resume Admin document management
 
-- [ ] Open the Supabase SQL Editor and run the complete
-      `migrations/2026_resume_document.sql` migration.
-- [ ] Confirm that `public.resume_document` contains one singleton row and that
-      the private `resume-documents` Storage bucket exists.
+- [x] The initial `migrations/2026_resume_document.sql` schema is present in the
+      connected Supabase project; its singleton row is unconfigured and its
+      `resume-documents` Storage bucket is private (verified 2026-09-24).
+- [ ] Run `migrations/2026_resume_document_hardening.sql` in the Supabase SQL
+      Editor to enforce non-null active-file fields on the already-created table.
 - [ ] Sign in to `/admin`, open **Resume**, and upload the locally prepared PDF.
-- [ ] Verify `/resume` shows every uploaded page and the upload date, then confirm
-      **Download PDF** preserves the uploaded filename.
+- [ ] Verify `/resume` shows the uploaded filename, date, and size; **Open
+      Resume** opens all pages in the browser's native PDF viewer and **Download
+      PDF** preserves the original filename and exact file bytes.
 - [ ] Replace the PDF once and confirm the old private object is removed.
 - [ ] Delete the PDF once and confirm `/resume` shows its unavailable state, then
-      upload it again to confirm add-after-delete behavior.
+      check that both `/resume/file` and the old static PDF URL cannot serve the
+      deleted document. Upload again to confirm add-after-delete behavior.
+- [ ] Review the uploaded PDF's claims against About before approving publication.
+      The current compatibility PDF still mentions KPITB Blockchain enrollment and
+      an A+ degree grade instead of the documented 3.5/4.0 CGPA and completed
+      KPITB AI/ML training; its binary content is not changed by the web page.

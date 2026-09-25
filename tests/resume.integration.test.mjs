@@ -26,19 +26,30 @@ test("Resume renders the current-document gateway without embedding the PDF", as
 });
 
 test("Resume file endpoint preserves PDF bytes and download metadata", async () => {
-  const [fileResponse, fallbackBytes, metadata] = await Promise.all([
+  const [pageResponse, fileResponse, inlineResponse, legacyResponse, metadata] = await Promise.all([
+    fetch(`${baseUrl}/resume`),
     fetch(`${baseUrl}/resume/file?download=1`),
-    readFile(new URL("../public/muhammad-haris-resume.pdf", import.meta.url)),
+    fetch(`${baseUrl}/resume/file`),
+    fetch(`${baseUrl}/muhammad-haris-resume.pdf`, { redirect: "manual" }),
     readFile(new URL("../app/data/siteMetadata.ts", import.meta.url), "utf8"),
   ]);
+  const page = await pageResponse.text();
   const responseBytes = Buffer.from(await fileResponse.arrayBuffer());
 
   assert.equal(fileResponse.status, 200);
+  assert.equal(inlineResponse.status, 200);
   assert.match(fileResponse.headers.get("content-type") || "", /application\/pdf/);
   assert.match(fileResponse.headers.get("content-disposition") || "", /^attachment;/);
-  assert.match(fileResponse.headers.get("content-disposition") || "", /Muhammad-Haris-Resume\.pdf/);
+  assert.match(inlineResponse.headers.get("content-disposition") || "", /^inline;/);
   assert.equal(responseBytes.subarray(0, 5).toString(), "%PDF-");
-  assert.deepEqual(responseBytes, fallbackBytes);
+  assert.deepEqual(responseBytes, Buffer.from(await inlineResponse.arrayBuffer()));
+  assert.equal(legacyResponse.status, 307);
+  assert.equal(new URL(legacyResponse.headers.get("location"), baseUrl).pathname, "/resume/file");
+  if (page.includes("/resume/file?v=fallback")) {
+    const fallbackBytes = await readFile(new URL("../public/muhammad-haris-resume.pdf", import.meta.url));
+    assert.deepEqual(responseBytes, fallbackBytes);
+    assert.match(fileResponse.headers.get("content-disposition") || "", /Muhammad-Haris-Resume\.pdf/);
+  }
   assert.match(metadata, /resume: "\/resume\/file"/);
   assert.doesNotMatch(metadata, /haris_resume\.pdf/);
 });
@@ -51,9 +62,10 @@ test("Resume Admin API fails closed without an authenticated administrator", asy
 });
 
 test("Resume management and document gateway contracts are enforced", async () => {
-  const [api, migration, page, manager, publicData] = await Promise.all([
+  const [api, migration, hardening, page, manager, publicData] = await Promise.all([
     readFile(new URL("../app/api/admin/resume/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../migrations/2026_resume_document.sql", import.meta.url), "utf8"),
+    readFile(new URL("../migrations/2026_resume_document_hardening.sql", import.meta.url), "utf8"),
     readFile(new URL("../app/resume/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/components/admin/ResumeManager.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/resume/data.ts", import.meta.url), "utf8"),
@@ -63,6 +75,9 @@ test("Resume management and document gateway contracts are enforced", async () =
   assert.match(api, /ADMIN_EMAIL/);
   assert.match(api, /TextDecoder\("ascii"\)/);
   assert.match(api, /crypto\.randomUUID\(\)/);
+  assert.match(api, /\.slice\(0, 176\)/);
+  assert.match(api, /mutation\.eq\("storage_path", current\.storage_path\)/);
+  assert.match(api, /mutation\.is\("storage_path", null\)/);
   assert.match(api, /\.remove\(\[current\.storage_path\]\)/);
   assert.match(api, /revalidateTag\("resume"\)/);
   assert.match(api, /export async function DELETE/);
@@ -70,6 +85,9 @@ test("Resume management and document gateway contracts are enforced", async () =
   assert.match(migration, /public = FALSE/);
   assert.match(migration, /allowed_mime_types/);
   assert.match(migration, /REVOKE ALL ON TABLE public\.resume_document FROM anon, authenticated/);
+  assert.match(hardening, /original_filename IS NOT NULL/);
+  assert.match(hardening, /mime_type IS NOT NULL/);
+  assert.match(hardening, /size_bytes IS NOT NULL/);
   assert.match(page, /target="_blank"/);
   assert.match(page, /RESUME_DOWNLOAD_ROUTE/);
   assert.doesNotMatch(page, /ResumePdfViewer|react-pdf/);

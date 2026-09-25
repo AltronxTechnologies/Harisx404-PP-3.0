@@ -3,6 +3,7 @@ import path from "node:path";
 import { NextResponse } from "next/server";
 import { FALLBACK_RESUME, RESUME_STORAGE_BUCKET } from "@/app/data/resume";
 import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
+import { getSupabaseEnv } from "@/app/lib/supabase/safe";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -48,6 +49,7 @@ export async function GET(request: Request) {
   const download = new URL(request.url).searchParams.get("download") === "1";
 
   try {
+    if (!getSupabaseEnv()) return fallbackResponse(download);
     const db = await createSupabaseAdminClient();
     const { data, error } = await db
       .from("resume_document")

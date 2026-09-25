@@ -17,8 +17,8 @@ export default function ResumeError({ error, reset }: { error: Error; reset: () 
     <div role="alert" aria-live="assertive" className="relative mt-14 px-2 pb-24 sm:px-4">
       <BlogStatePanel
         kicker="Resume unavailable"
-        title={<>The web resume could not <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none] motion-reduce:animate-none">be loaded.</span></>}
-        description="Try the page again, or open the PDF directly while the web version recovers."
+        title={<>The Resume page could not <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none] motion-reduce:animate-none">be loaded.</span></>}
+        description="Try the page again, or open the PDF directly if a document is available."
         headingLevel="h1"
         headingRef={headingRef}
         headingTabIndex={-1}

@@ -108,3 +108,26 @@ geometry shows no overflow at 768px, 390px, or 360px; the two file actions remai
 48px high. TypeScript, ESLint, Resume (5/5), navigation (4/4), preview (3/3),
 browser console, and `git diff --check` passed. Presentation is re-locked; the
 live Admin Storage migration remains pending as documented above.
+
+## Full-System Audit Follow-Up
+
+The connected Supabase project now contains the singleton Resume row
+(`is_configured = false`) and the private `resume-documents` bucket. The first
+migration is therefore present, but authenticated upload/replace/delete/restore
+and a fact-checked owner-provided PDF remain unverified. The additional
+`migrations/2026_resume_document_hardening.sql` is needed for the already-created
+table's active-field constraint.
+
+This audit corrected direct access to the old static PDF path by redirecting it
+to the state-aware `/resume/file` endpoint, prevented stale concurrent record
+updates from silently overwriting one another, bounded sanitized filenames to the
+180-character database limit, supported the no-Supabase file fallback, and kept
+Admin status failures distinct from an inactive Resume. The integration test now
+checks fallback bytes only if fallback metadata is actually in use, so a valid
+managed upload will not fail the regression gate. The file endpoint buffers and
+returns the original bytes; it does not stream from Storage to the client.
+
+The compatibility PDF still contains education claims inconsistent with the
+locked About page. The owner's locally prepared PDF should be fact-checked before
+upload. The **public page presentation remains locked**; final managed-lifecycle
+and content sign-off must wait for the remaining Admin and migration checks.

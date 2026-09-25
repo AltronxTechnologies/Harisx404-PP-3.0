@@ -2234,3 +2234,29 @@ Resume integration (5/5), navigation integration (4/4), preview integration
 (3/3), browser console, and `git diff --check` pass. The public Resume presentation
 is re-locked. Admin-managed Storage activation and a live upload/replace/delete
 cycle remain explicitly pending the migration recorded in `MANUAL_TASKS.md`.
+
+### 2026-09-24 Resume full-system audit status
+
+The public gateway remains visually locked, but **a final managed-content/CRUD
+lock is not granted**. The initial `resume_document` table and private bucket are
+now present in the connected Supabase project with an unconfigured singleton row.
+The additional `migrations/2026_resume_document_hardening.sql` constraint upgrade
+is still required for the already-created table, and no authenticated upload,
+replacement, deletion, or restore has been exercised on that project.
+
+Code-level corrections: the legacy static PDF URL now redirects through
+`/resume/file`, so a managed deletion cannot be bypassed through that URL;
+POST/DELETE compare the previously read storage path and return a conflict instead
+of overwriting a concurrent change; filename trimming reserves room for `.pdf`;
+the public file endpoint supports the no-Supabase fallback; and a failed Admin
+status request no longer masquerades as an empty Resume. Tests allow either an
+unconfigured fallback or a managed upload. Both SQL migrations now require
+non-null metadata for an active file. The endpoint **returns** exact PDF bytes in
+memory; it does not stream from Storage to the client.
+
+The checked-in compatibility PDF contains education claims that conflict with
+locked About facts (degree CGPA and KPITB program). The owner must upload a
+fact-checked PDF before approving document content itself. See `MANUAL_TASKS.md`
+and `audit/19-resume-final-production-lock.md`. Until those checks pass, only the
+public presentation and fallback delivery are re-locked, not the full managed
+Resume lifecycle.

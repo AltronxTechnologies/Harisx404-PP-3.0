@@ -19,6 +19,11 @@ export async function middleware(request: NextRequest) {
     return new NextResponse("Gone", { status: 410 });
   }
 
+  // The legacy public PDF must obey the managed Resume's deletion state too.
+  if (pathname === "/muhammad-haris-resume.pdf") {
+    return NextResponse.redirect(new URL("/resume/file", request.url));
+  }
+
   let response = NextResponse.next({
     request: {
       headers: request.headers,
