@@ -246,7 +246,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
         <div className="mx-auto max-w-6xl rounded-3xl border border-border-primary bg-white dark:bg-white/[0.02]">
           <div className={`grid ${project.tech.length ? "lg:grid-cols-[1.1fr_0.9fr]" : ""}`}>
             <div className="px-5 pb-5 pt-4 sm:px-7 sm:pb-7 sm:pt-5 lg:px-8 lg:pb-8">
-              <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-start justify-between gap-3">
                 <h2 id="project-facts-heading" className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">At a glance</h2>
                 <div ref={shareRef} className="relative ml-auto inline-flex flex-col items-end">
                   <button
@@ -262,7 +262,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
                       setShareOpen((open) => !open);
                       if (!shareOpen && event.detail === 0) requestAnimationFrame(() => firstShareItemRef.current?.focus());
                     }}
-                    className={`inline-flex min-h-11 items-center gap-1.5 rounded-sm px-1 text-sm font-medium text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 ${focusStyle}`}
+                    className={`inline-flex min-h-11 items-start gap-1.5 rounded-sm px-1 text-sm font-medium leading-4 text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 ${focusStyle}`}
                   >
                     Share project <ChevronDown className={`size-3.5 transition-transform motion-reduce:transition-none ${shareOpen ? "rotate-180" : ""}`} aria-hidden />
                   </button>
@@ -292,7 +292,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
             </div>
             {project.tech.length > 0 && (
               <div className="border-t border-border-primary px-5 pb-5 pt-4 sm:px-7 sm:pb-7 sm:pt-5 lg:border-l lg:border-t-0 lg:px-8 lg:pb-8">
-                <h2 className="flex min-h-11 items-center font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">Tech stack</h2>
+                <h2 className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">Tech stack</h2>
                 <ul className="mt-6 flex flex-wrap gap-2">
                   {project.tech.map((tech, index) => {
                     const icon = techIcons[tech.toLowerCase().replace(/[^a-z0-9]/g, "")];
