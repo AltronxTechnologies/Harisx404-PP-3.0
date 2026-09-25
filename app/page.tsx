@@ -20,6 +20,7 @@ import {
   fallbackPosts,
   type HomeProject,
 } from "./data/fallback-home";
+import { withProjectPreview } from "./data/project-preview-fixtures";
 import { fetchCredentialCollection } from "./credentials/data";
 import { summarizeCredentials } from "./credentials/summary";
 import {
@@ -93,7 +94,7 @@ export default async function Home() {
   const homeDb = (featuredDb.length > 0 ? featuredDb : dbProjects).slice(
     0,
     featuredDb.length > 0 ? 6 : 3
-  );
+  ).map((project: any) => withProjectPreview(project));
   const projects: HomeProject[] = (
     dbProjects.length > 0
       ? homeDb.map((p: any) => ({

@@ -19,6 +19,7 @@ export type DetailProject = {
   tech: string[];
   year: string;
   latestUpdate: string;
+  isPreview: boolean;
   sections: Partial<Record<"why_built" | "key_decisions" | "results" | "lessons_learned", string>>;
   category: string;
   image_url: string;
@@ -226,6 +227,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
         <div className="relative px-4 xl:px-0">
           <PaperHeroTexture className="-inset-x-2 bottom-0 top-[-128px] sm:-inset-x-3 sm:top-[-144px] md:top-[-176px] lg:inset-x-0" />
           <header className="relative mx-auto max-w-4xl text-center">
+            {project.isPreview && <p role="note" className="mx-auto mb-5 max-w-2xl rounded-xl border border-border-primary bg-bg-primary/90 px-4 py-2 text-xs leading-5 text-text-secondary">Preview-only case study. The copy, link examples, and extra stock gallery images are not verified project facts. Production uses your Admin content.</p>}
             <nav aria-label="Breadcrumb" className="mb-5">
               <ol className="flex flex-wrap items-center justify-center gap-2 font-mono text-[11px] text-text-secondary">
                 <li><Link href="/" className={`rounded-sm hover:text-text-primary ${focusStyle}`}>Home</Link></li>
@@ -285,8 +287,8 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
                 <Fact label="Type">{project.category}</Fact>
                 {project.year && <Fact label="Built">{project.year}</Fact>}
                 {project.latestUpdate && <Fact label="Latest update">{project.latestUpdate}</Fact>}
-                <Fact label="Visit">{project.live_url ? <a href={project.live_url} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1.5 rounded-sm text-text-primary underline underline-offset-4 ${focusStyle}`}>View live project <ExternalLink className="size-3.5" aria-hidden /><span className="sr-only">opens in a new tab</span></a> : <span className="text-text-secondary">{project.liveNote || "No public demo"}</span>}</Fact>
-                <Fact label="Source">{sourceUrl ? <a href={sourceUrl} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1.5 rounded-sm text-text-primary underline underline-offset-4 ${focusStyle}`}>View source <ExternalLink className="size-3.5" aria-hidden /><span className="sr-only">opens in a new tab</span></a> : <span className="text-text-secondary">{project.sourceNote || "Source not published"}</span>}</Fact>
+                <Fact label="Visit">{project.live_url ? <a href={project.live_url} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1.5 rounded-sm text-text-primary underline underline-offset-4 ${focusStyle}`}>{project.isPreview ? "Example live link" : "View live project"} <ExternalLink className="size-3.5" aria-hidden /><span className="sr-only">opens in a new tab</span></a> : <span className="text-text-secondary">{project.liveNote || "No public demo"}</span>}</Fact>
+                <Fact label="Source">{sourceUrl ? <a href={sourceUrl} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1.5 rounded-sm text-text-primary underline underline-offset-4 ${focusStyle}`}>{project.isPreview ? "Example source link" : "View source"} <ExternalLink className="size-3.5" aria-hidden /><span className="sr-only">opens in a new tab</span></a> : <span className="text-text-secondary">{project.sourceNote || "Source not published"}</span>}</Fact>
               </dl>
             </div>
             {project.tech.length > 0 && (

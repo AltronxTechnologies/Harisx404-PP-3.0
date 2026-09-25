@@ -6,6 +6,7 @@ import {
   fallbackProjects,
   type HomeProject,
 } from "@/app/data/fallback-home";
+import { withProjectPreview } from "@/app/data/project-preview-fixtures";
 import { ProjectsIndex } from "./ProjectsIndex";
 import { CtaSection } from "@/app/components/home/CtaSection";
 import { siteMetadata } from "app/data/siteMetadata";
@@ -27,7 +28,7 @@ export default async function ProjectsPage() {
     const ta = new Date(a.start_date || a.created_at || 0).getTime();
     const tb = new Date(b.start_date || b.created_at || 0).getTime();
     return tb - ta;
-  });
+  }).map((project: any) => withProjectPreview(project));
 
   const projects: HomeProject[] =
     sorted.length > 0

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { fetchProjects, getProjectBySlug } from "@/app/lib/utils";
 import { fallbackProjects } from "@/app/data/fallback-home";
+import { withProjectPreview } from "@/app/data/project-preview-fixtures";
 import { siteMetadata } from "@/app/data/siteMetadata";
 import {
   ProjectDetail,
@@ -35,6 +36,7 @@ function mapDbProject(p: any): DetailProject {
     tech: Array.isArray(p.tech_stack) ? p.tech_stack : [],
     year: p.year || "",
     latestUpdate: p.latest_update_label || "",
+    isPreview: p.isPreview || false,
     sections: p.case_study_sections || {},
     category: p.category || "Project",
     image_url: p.cover_image_url || (p as any).image_url || "",
@@ -52,6 +54,7 @@ function mapDbProject(p: any): DetailProject {
 
 async function resolveProject(slug: string): Promise<{
   project: DetailProject;
+  canonicalProject: DetailProject;
   list: NeighborProject[];
 } | null> {
   const dbProject = await getProjectBySlug(slug);
@@ -59,24 +62,26 @@ async function resolveProject(slug: string): Promise<{
 
   if (dbProject) {
     const list = (dbProjects.length > 0 ? dbProjects : [dbProject]).map(
-      (p: any) => ({
-        title: p.title,
-        slug: p.slug,
-        category: p.category || "Project",
-        tagline: (p.tagline || p.short_description || p.description || "").slice(0, 160),
-        tags: Array.isArray(p.tags) ? p.tags : [],
-        tech: Array.isArray(p.tech_stack) ? p.tech_stack : [],
-      }),
+      (raw: any) => {
+        const p = withProjectPreview(raw);
+        return {
+          title: p.title,
+          slug: p.slug,
+          category: p.category || "Project",
+          tagline: (p.tagline || p.short_description || p.description || "").slice(0, 160),
+          tags: Array.isArray(p.tags) ? p.tags : [],
+          tech: Array.isArray(p.tech_stack) ? p.tech_stack : [],
+        };
+      },
     );
-    return { project: mapDbProject(dbProject), list };
+    return { project: mapDbProject(withProjectPreview(dbProject)), canonicalProject: mapDbProject(dbProject), list };
   }
 
   if (process.env.NODE_ENV === "production" || dbProjects.length > 0) return null;
   const fb = fallbackProjects.find((p) => p.slug === slug);
   if (!fb) return null;
 
-  return {
-    project: {
+  const fallbackProject: DetailProject = {
       title: fb.title,
       slug: fb.slug,
       tagline: fb.tagline,
@@ -85,6 +90,7 @@ async function resolveProject(slug: string): Promise<{
       tech: fb.tech,
       year: fb.year,
       latestUpdate: "",
+      isPreview: false,
       sections: {},
       category: fb.category,
       image_url: fb.image_url,
@@ -95,7 +101,10 @@ async function resolveProject(slug: string): Promise<{
       features: fb.features || [],
       tags: (fb as any).tags ?? [],
       gallery: [],
-    },
+  };
+  return {
+    project: fallbackProject,
+    canonicalProject: fallbackProject,
     list: fallbackProjects.map((p) => ({
       title: p.title,
       slug: p.slug,
@@ -112,7 +121,7 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
   const resolved = await resolveProject(slug);
   if (!resolved) notFound();
 
-  const { project, list } = resolved;
+  const { project, canonicalProject, list } = resolved;
   const tokens = (values: string[]) => new Set(values.map((value) => value.toLowerCase().trim()));
   const tags = tokens(project.tags);
   const tech = tokens(project.tech);
@@ -128,19 +137,20 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
 
   return (
     <>
+      {project.isPreview && <meta name="robots" content="noindex,nofollow" />}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "CreativeWork",
-            name: project.title,
-            ...(project.image_url ? { image: project.image_url } : {}),
-            description: project.tagline || project.description,
+            name: canonicalProject.title,
+            ...(canonicalProject.image_url ? { image: canonicalProject.image_url } : {}),
+            description: canonicalProject.tagline || canonicalProject.description,
             /* Canonical page URL — the live demo URL (when present) goes in
                sameAs instead of overloading `url`. */
-            url: `${siteMetadata.siteUrl}/projects/${project.slug}`,
-            ...(project.live_url ? { sameAs: [project.live_url] } : {}),
+            url: `${siteMetadata.siteUrl}/projects/${canonicalProject.slug}`,
+            ...(canonicalProject.live_url ? { sameAs: [canonicalProject.live_url] } : {}),
           }).replace(/</g, "\\u003c"),
         }}
       />
@@ -159,7 +169,7 @@ export async function generateMetadata({
     return { title: "Project Not Found" };
   }
 
-  const { project } = resolved;
+  const { canonicalProject: project } = resolved;
   const description = project.tagline || project.description;
   const ogImage =
     project.image_url ||

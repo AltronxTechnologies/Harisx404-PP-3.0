@@ -104,3 +104,47 @@ test("project type, timeline and optional sections remain owner-managed", async 
   }
   assert.match(page, /fetchProjects\(\)\.catch\(\(\) => \[\]\)/);
 });
+
+test("Alloy preview gives every published project a distinct, complete example without changing structured data", {
+  skip: process.env.PROJECTS_EXPECT_PREVIEW !== "1",
+}, async () => {
+  const fixtureSource = await readFile(new URL("../app/data/project-preview-fixtures.ts", import.meta.url), "utf8");
+  const slugs = [...fixtureSource.matchAll(/^  "([a-z0-9-]+)": \{/gm)].map((match) => match[1]);
+  assert.equal(slugs.length, 10);
+  assert.equal(new Set(slugs).size, slugs.length);
+  assert.match(fixtureSource, /process\.env\.NODE_ENV !== "development"/);
+  assert.match(fixtureSource, /process\.env\.IS_ALLOY !== "true"/);
+  assert.match(fixtureSource, /process\.env\.PROJECT_DETAIL_PREVIEW_SEED === "false"/);
+
+  const categories = new Set();
+  const summaries = new Set();
+  for (const slug of slugs) {
+    const response = await fetch(`${baseUrl}/projects/${slug}`);
+    assert.equal(response.status, 200, slug);
+    let html = await response.text();
+    if (!html.includes("Preview-only case study")) {
+      // ISR/dev compilation can stream a loading shell on the first response.
+      html = await (await fetch(`${baseUrl}/projects/${slug}`)).text();
+    }
+    assert.ok(html.includes("Preview-only case study"), slug);
+    assert.ok(html.includes("noindex,nofollow"), slug);
+    for (const heading of ["Overview", "Why I built this", "Highlights", "Key decisions", "Results", "What I learned", "Gallery"]) {
+      assert.ok(html.includes(`>${heading}</h2>`), `${slug} should have ${heading}`);
+    }
+    assert.ok(html.includes("Latest update"), slug);
+    assert.ok(html.includes("preview stock image, not a project screenshot"), slug);
+    assert.ok((html.match(/<figcaption/g) || []).length >= 2, `${slug} needs at least two captioned preview images`);
+    const category = html.match(/Case study \/ (?:<!-- -->)?([^<]+)<\/p>/)?.[1];
+    const summary = html.match(/<h1[^>]*>[^<]+<\/h1><p[^>]*>([^<]+)<\/p>/)?.[1];
+    assert.ok(category, `${slug} needs a project type`);
+    assert.ok(summary, `${slug} needs a summary`);
+    categories.add(category);
+    summaries.add(summary);
+    const structuredData = [...html.matchAll(/<script type="application\/ld\+json"[^>]*>(.*?)<\/script>/gs)]
+      .map((match) => match[1]).find((value) => value.includes("CreativeWork"));
+    assert.ok(structuredData, `${slug} needs structured data`);
+    assert.doesNotMatch(structuredData, /example\.com|octocat/);
+  }
+  assert.equal(categories.size, slugs.length);
+  assert.equal(summaries.size, slugs.length);
+});

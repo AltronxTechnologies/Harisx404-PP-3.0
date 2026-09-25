@@ -9,6 +9,7 @@ services:
       - web_next_cache:/workspace/.next
     environment:
       IS_ALLOY: ${IS_ALLOY:-true}
+      PROJECT_DETAIL_PREVIEW_SEED: ${PROJECT_DETAIL_PREVIEW_SEED:-true}
       NEXT_TELEMETRY_DISABLED: "1"
       NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}
