@@ -23,7 +23,6 @@ const projectFieldsSchema = z.object({
   tagline: z.string().max(160).optional().default(""),
   category: z.string().trim().min(1).max(60),
   year: z.string().max(20).optional().default(""),
-  project_stage: z.enum(["", "in_progress", "completed"]).optional().default(""),
   latest_update_label: z.string().max(32).optional().default(""),
   source_note: z.string().max(80).optional().default(""),
   case_study_sections: z.object({
@@ -34,7 +33,7 @@ const projectFieldsSchema = z.object({
   }).strict().optional().default({}),
   tech_stack: z.array(z.string().trim().min(1).max(100)).optional().default([]),
   features: z.array(z.string().trim().min(1).max(500)).max(100).optional().default([]),
-  tags: z.array(z.string().trim().min(1).max(100)).max(100).optional().default([]),
+  tags: z.array(z.string().trim().min(1).max(100)).optional().default([]),
   gallery: z.array(z.object({ mediaId: idSchema, caption: z.string().max(1000) }).strict()).max(100).optional().default([]),
 }).strict();
 const uniqueGallery = (data: z.infer<typeof projectFieldsSchema>) => new Set(data.gallery.map((image) => image.mediaId)).size === data.gallery.length;
@@ -92,7 +91,6 @@ function projectFields(data: z.infer<typeof projectSchema>) {
     tagline: data.tagline || null,
     category: data.category,
     year: data.year || null,
-    project_stage: data.project_stage || null,
     latest_update_label: data.latest_update_label || null,
     source_note: data.source_note || null,
     case_study_sections: data.case_study_sections,
@@ -133,9 +131,6 @@ function fail(error: unknown) {
 }
 
 function projectWriteError(error: { message: string; code?: string }) {
-  if (["42703", "PGRST204"].includes(error.code || "") && /project_stage/.test(error.message)) {
-    return NextResponse.json({ error: "Project editor needs migration 2026_project_stage.sql before changes can be saved." }, { status: 503 });
-  }
   if (["42703", "PGRST204"].includes(error.code || "") && /latest_update_label|case_study_sections|live_note|source_note/.test(error.message)) {
     return NextResponse.json({ error: "Project editor needs migration 2026_project_case_studies.sql before changes can be saved." }, { status: 503 });
   }

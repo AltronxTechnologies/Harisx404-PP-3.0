@@ -24,7 +24,9 @@ test("published project cards resolve to authored detail pages", async () => {
     assert.ok(html.includes("At a glance"), `${slug} should render its facts`);
     assert.doesNotMatch(html, /Preview-only case study\.|Case study \/ /, slug);
     const facts = [...html.matchAll(/<dt[^>]*>(Built|Stage|Visit|Latest update|Source|Type)<\/dt>/g)].map((match) => match[1]);
-    assert.deepEqual(facts.slice(0, 5), ["Built", "Stage", "Visit", "Latest update", "Source"], slug);
+    assert.deepEqual(facts, ["Built", "Visit", "Latest update", "Source"], slug);
+    assert.match(html, /<dt[^>]*>Category<\/dt>/, slug);
+    assert.match(html, /<dt[^>]*>Tags<\/dt>/, slug);
     assert.ok(html.includes("<h1"), `${slug} should render a heading`);
     assert.doesNotMatch(html, /Why I Built This|Key Decisions|Performance-first build: optimized images/, slug);
   }
@@ -67,24 +69,23 @@ test("project gallery and narrative are sourced from Admin-authored data", async
   assert.match(form, /galleryImages\.map\(\(\{ mediaId, caption \}\)/);
 });
 
-test("project stage, timeline, source name and optional sections remain owner-managed", async () => {
-  const [migration, stageMigration, page, detail, api, form] = await Promise.all([
+test("project category, timeline, source name and optional sections remain owner-managed", async () => {
+  const [migration, page, detail, api, form, index, filters] = await Promise.all([
     readFile(new URL("../migrations/2026_project_case_studies.sql", import.meta.url), "utf8"),
-    readFile(new URL("../migrations/2026_project_stage.sql", import.meta.url), "utf8"),
     readFile(new URL("../app/projects/[slug]/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/projects/[slug]/ProjectDetail.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/api/admin/projects/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/components/admin/ProjectForm.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/projects/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/projects/ProjectsIndex.tsx", import.meta.url), "utf8"),
   ]);
 
   assert.match(migration, /ADD COLUMN IF NOT EXISTS latest_update_label text/);
   assert.match(migration, /case_study_sections jsonb/);
   assert.match(migration, /live_note text/);
   assert.match(migration, /source_note text/);
-  assert.match(stageMigration, /ADD COLUMN IF NOT EXISTS project_stage text/);
-  assert.match(stageMigration, /in_progress', 'completed/);
   assert.match(api, /category: z\.string\(\)\.trim\(\)\.min\(1\)\.max\(60\)/);
-  assert.match(api, /project_stage: data\.project_stage/);
+  assert.doesNotMatch(api, /project_stage/);
   assert.match(api, /tagline: z\.string\(\)\.max\(160\)/);
   assert.match(api, /latest_update_label: data\.latest_update_label/);
   assert.doesNotMatch(api, /live_note: data\.live_note/);
@@ -93,12 +94,18 @@ test("project stage, timeline, source name and optional sections remain owner-ma
   assert.match(api, /2026_project_case_studies\.sql before changes can be saved/);
   assert.match(api, /case_study_sections: data\.case_study_sections/);
   assert.match(form, /register\("latest_update_label"\)/);
-  assert.match(form, /register\("project_stage"\)/);
+  assert.doesNotMatch(form, /register\("project_stage"\)/);
   assert.doesNotMatch(form, /register\("live_note"\)/);
   assert.match(form, /register\("source_note"\)/);
   assert.match(form, /register\(`case_study_sections\.\$\{key\}`\)/);
   assert.match(page, /item\.tags\.filter/);
-  assert.match(detail, /project\.stage === "in_progress"/);
+  assert.doesNotMatch(detail, /<Fact label="Stage">|<Fact label="Type">/);
+  assert.match(detail, /<Fact label="Category">/);
+  assert.match(detail, /domainTags\.map/);
+  assert.match(api, /tags: z\.array\(z\.string\(\)\.trim\(\)\.min\(1\)\.max\(100\)\)\.optional/);
+  assert.match(index, /tags: Array\.isArray\(p\.tags\) \? p\.tags : \[\]/);
+  assert.match(filters, /filterTags\(p\)\.includes\(activeTag\)/);
+  assert.match(filters, /\.\.\.filterTags\(p\)/);
   assert.match(detail, /<Fact label="Latest update">/);
   assert.match(detail, /project\.live_url \?/);
   assert.match(detail, /sourceUrl \?/);
@@ -140,12 +147,12 @@ test("Alloy preview gives every published project a distinct, complete example w
       assert.ok(html.includes(`>${heading}</h2>`), `${slug} should have ${heading}`);
     }
     assert.ok(html.includes("Latest update"), slug);
-    assert.ok(html.includes("Stage"), slug);
+    assert.doesNotMatch(html, /<dt[^>]*>Stage<\/dt>/, slug);
     assert.ok(html.includes("preview stock image, not a project screenshot"), slug);
     assert.ok((html.match(/<figcaption/g) || []).length >= 2, `${slug} needs at least two captioned preview images`);
-    const category = html.match(/<dt[^>]*>Stage<\/dt><dd[^>]*>([^<]+)<\/dd>/)?.[1];
+    const category = html.match(/<dt[^>]*>Category<\/dt><dd[^>]*>([^<]+)<\/dd>/)?.[1];
     const summary = html.match(/<h1[^>]*>[^<]+<\/h1><p[^>]*>([^<]+)<\/p>/)?.[1];
-    assert.ok(category, `${slug} needs a project stage`);
+    assert.ok(category, `${slug} needs a category`);
     assert.ok(summary, `${slug} needs a summary`);
     categories.add(category);
     summaries.add(summary);
@@ -154,6 +161,6 @@ test("Alloy preview gives every published project a distinct, complete example w
     assert.ok(structuredData, `${slug} needs structured data`);
     assert.doesNotMatch(structuredData, /example\.com|octocat/);
   }
-  assert.deepEqual([...categories].sort(), ["Completed", "In progress"]);
+  assert.equal(categories.size, slugs.length);
   assert.equal(summaries.size, slugs.length);
 });

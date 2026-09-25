@@ -18,7 +18,6 @@ export type DetailProject = {
   content: string;
   tech: string[];
   year: string;
-  stage: "" | "in_progress" | "completed";
   latestUpdate: string;
   isPreview: boolean;
   sections: Partial<Record<"why_built" | "key_decisions" | "results" | "lessons_learned", string>>;
@@ -121,6 +120,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
   const firstShareItemRef = useRef<HTMLButtonElement>(null);
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const galleryImages = project.gallery.filter((image) => image.src && image.src !== project.image_url);
+  const domainTags = [...new Set(project.tags.map((tag) => tag.trim()).filter(Boolean))];
   const sourceUrl = /^https?:\/\/(?:www\.)?github\.com\/[^/?#]+\/?(?:\?.*)?$/i.test(project.github_url) ? "" : project.github_url;
   const summary = project.tagline || project.description;
   const overview = project.content.trim() && project.content.trim() !== summary.trim()
@@ -250,7 +250,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
 
       <section aria-labelledby="project-facts-heading" className="mt-14 px-2 sm:px-4">
         <div className="mx-auto max-w-6xl rounded-3xl border border-border-primary bg-white dark:bg-white/[0.02]">
-          <div className={`grid ${project.tech.length ? "lg:grid-cols-[1.1fr_0.9fr]" : ""}`}>
+          <div className="grid lg:grid-cols-2">
             <div className="px-5 pb-5 pt-4 sm:px-7 sm:pb-7 sm:pt-5 lg:px-8 lg:pb-8">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <h2 id="project-facts-heading" className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">At a glance</h2>
@@ -284,29 +284,42 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
                 </div>
                 <p role="status" aria-live="polite" className={copyStatus ? "w-full text-right text-xs leading-5 text-text-secondary" : "sr-only"}>{copyStatus}</p>
               </div>
-              <dl className="mt-6 grid grid-cols-2 gap-x-5 gap-y-6 sm:grid-cols-3">
+              <dl className="mt-2 grid grid-cols-2 gap-x-5 gap-y-6 sm:-mt-1">
                 <Fact label="Built">{project.year || "None"}</Fact>
-                <Fact label="Stage">{project.stage === "in_progress" ? "In progress" : project.stage === "completed" ? "Completed" : "None"}</Fact>
                 <Fact label="Visit">{project.live_url ? <a href={project.live_url} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1.5 rounded-sm text-blue-600 underline underline-offset-4 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 ${focusStyle}`}>{project.isPreview ? "Example live link" : "Live project"} <ExternalLink className="size-3.5" aria-hidden /><span className="sr-only">opens in a new tab</span></a> : <span className="text-text-secondary">None</span>}</Fact>
                 <Fact label="Latest update">{project.latestUpdate || "None"}</Fact>
                 <Fact label="Source">{sourceUrl ? <a href={sourceUrl} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1.5 rounded-sm text-blue-600 underline underline-offset-4 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 ${focusStyle}`}>{project.sourceNote || (project.isPreview ? "Example source link" : "View source")} <ExternalLink className="size-3.5" aria-hidden /><span className="sr-only">opens in a new tab</span></a> : <span className="text-text-secondary">{project.sourceNote || "None"}</span>}</Fact>
               </dl>
             </div>
-            {project.tech.length > 0 && (
-              <div className="border-t border-border-primary px-5 pb-5 pt-4 sm:px-7 sm:pb-7 sm:pt-5 lg:border-l lg:border-t-0 lg:px-8 lg:pb-8">
-                <h2 className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">Tech stack</h2>
-                <ul className="mt-6 flex flex-wrap gap-2">
-                  {project.tech.map((tech, index) => {
-                    const icon = techIcons[tech.toLowerCase().replace(/[^a-z0-9]/g, "")];
-                    return <li key={`${tech}-${index}`} className="inline-flex min-h-8 items-center gap-2 rounded-full border border-border-primary bg-neutral-50 px-3 py-1.5 font-mono text-[11px] text-text-secondary dark:bg-white/[0.04]">
-                      {icon && <span aria-hidden className="size-3.5 shrink-0 bg-text-primary" style={{ mask: `url(https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/${icon}.svg) center / contain no-repeat`, WebkitMask: `url(https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/${icon}.svg) center / contain no-repeat` }} />}
-                      {tech}
-                    </li>;
-                  })}
-                </ul>
-              </div>
-            )}
+            <div className="border-t border-border-primary px-5 pb-5 pt-4 sm:px-7 sm:pb-7 sm:pt-5 lg:border-l lg:border-t-0 lg:px-8 lg:pb-8">
+              <h2 className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">Category &amp; tags</h2>
+              <dl className="mt-6 space-y-5">
+                <Fact label="Category">{project.category}</Fact>
+                <div>
+                  <dt className="font-mono text-[11px] uppercase tracking-widest text-text-secondary">Tags</dt>
+                  <dd className="mt-2">
+                    {domainTags.length ? <ul className="flex flex-wrap gap-2">
+                      {domainTags.map((tag) => <li key={tag} className="rounded-full border border-border-primary bg-neutral-50 px-3 py-1.5 font-mono text-[11px] text-text-secondary dark:bg-white/[0.04]">{tag}</li>)}
+                    </ul> : <span className="text-sm text-text-secondary">None</span>}
+                  </dd>
+                </div>
+              </dl>
+            </div>
           </div>
+          {project.tech.length > 0 && (
+            <div className="border-t border-border-primary px-5 pb-5 pt-4 sm:px-7 sm:pb-7 sm:pt-5 lg:px-8 lg:pb-8">
+              <h2 className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">Tech stack</h2>
+              <ul className="mt-6 flex flex-wrap gap-2">
+                {project.tech.map((tech, index) => {
+                  const icon = techIcons[tech.toLowerCase().replace(/[^a-z0-9]/g, "")];
+                  return <li key={`${tech}-${index}`} className="inline-flex min-h-8 items-center gap-2 rounded-full border border-border-primary bg-neutral-50 px-3 py-1.5 font-mono text-[11px] text-text-secondary dark:bg-white/[0.04]">
+                    {icon && <span aria-hidden className="size-3.5 shrink-0 bg-text-primary" style={{ mask: `url(https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/${icon}.svg) center / contain no-repeat`, WebkitMask: `url(https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/${icon}.svg) center / contain no-repeat` }} />}
+                    {tech}
+                  </li>;
+                })}
+              </ul>
+            </div>
+          )}
         </div>
       </section>
 

@@ -32,6 +32,11 @@ import { BlogStatePanel } from "@/app/components/blog/BlogStatePanel";
 
 const PER_PAGE = 8;
 
+function filterTags(project: HomeProject): string[] {
+  const tags = [...new Set((project.tags ?? []).map((tag) => tag.trim()).filter(Boolean))];
+  return tags.length ? tags : projectTags(project);
+}
+
 function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -146,7 +151,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
   const tagCounts = useMemo(() => {
     const counts = new Map<string, number>();
     projects.forEach((p) =>
-      projectTags(p).forEach((t) => counts.set(t, (counts.get(t) ?? 0) + 1)),
+      filterTags(p).forEach((t) => counts.set(t, (counts.get(t) ?? 0) + 1)),
     );
     return [...counts.entries()].sort(
       (a, b) => b[1] - a[1] || a[0].localeCompare(b[0]),
@@ -160,7 +165,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
     return projects.filter((p) => {
-      if (activeTag !== "All" && !projectTags(p).includes(activeTag))
+      if (activeTag !== "All" && !filterTags(p).includes(activeTag))
         return false;
       if (!needle) return true;
       const hay = [
@@ -168,7 +173,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
         p.tagline,
         p.description,
         ...(p.tech ?? []),
-        ...projectTags(p),
+        ...filterTags(p),
       ]
         .join(" ")
         .toLowerCase();

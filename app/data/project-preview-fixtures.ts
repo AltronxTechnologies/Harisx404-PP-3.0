@@ -2,7 +2,7 @@
 type PreviewSeed = {
   category: string;
   tagline: string;
-  project_stage: "in_progress" | "completed";
+  tags?: string[];
   latest_update_label: string;
   content: string;
   case_study_sections: {
@@ -25,7 +25,6 @@ export const projectPreviewFixtures: Record<string, PreviewSeed> = {
   "intrushield-nids": {
     category: "Cybersecurity / Network Defense",
     tagline: "A security-operations workspace for investigating network alerts and understanding what happened on the wire.",
-    project_stage: "in_progress",
     latest_update_label: "Q3 2026",
     content: "**Preview overview.** This case study imagines the workflow from packet inspection to an analyst-facing investigation queue. A detection service groups related events; the interface then makes severity, timing, and evidence legible without forcing an analyst to inspect raw logs first. The example is here to evaluate the page layout, not to assert a shipped outcome.",
     case_study_sections: {
@@ -43,7 +42,6 @@ export const projectPreviewFixtures: Record<string, PreviewSeed> = {
   "packetvision-network-sniffer": {
     category: "Networking / CLI Tool",
     tagline: "A packet-inspection workflow for capturing traffic, narrowing noisy sessions, and exporting evidence for review.",
-    project_stage: "completed",
     latest_update_label: "Q2 2025",
     content: "**Preview overview.** The example follows a capture session from interface selection through protocol filtering and PCAP export. It deliberately presents the command-line workflow instead of suggesting that a hosted dashboard exists.",
     case_study_sections: {
@@ -63,7 +61,6 @@ export const projectPreviewFixtures: Record<string, PreviewSeed> = {
   "medicalink-hms": {
     category: "Health Tech / SaaS",
     tagline: "A hospital-workflow concept connecting appointments, clinical context, and operational handoffs in one place.",
-    project_stage: "in_progress",
     latest_update_label: "Q1 2026",
     content: "**Preview overview.** This example case study follows an appointment from booking to handoff. The interface separates patient-facing steps from staff operations and treats clinical information as sensitive throughout the workflow.",
     case_study_sections: {
@@ -82,7 +79,6 @@ export const projectPreviewFixtures: Record<string, PreviewSeed> = {
   "neurodoc-ai-assistant": {
     category: "AI / Knowledge Systems",
     tagline: "A document-questioning concept that pairs cited answers with the passages they came from.",
-    project_stage: "in_progress",
     latest_update_label: "Q2 2026",
     content: "**Preview overview.** The page illustrates a retrieval workflow: a document is ingested, relevant passages are found, and an answer is displayed with citations. The example explicitly leaves room for an 'I do not know' state when the source does not support an answer.",
     case_study_sections: {
@@ -101,7 +97,6 @@ export const projectPreviewFixtures: Record<string, PreviewSeed> = {
   "visionforge-ml-studio": {
     category: "AI / Computer Vision",
     tagline: "An experiment-workspace concept for comparing image models, reviewing predictions, and spotting failure cases.",
-    project_stage: "completed",
     latest_update_label: "Q4 2025",
     content: "**Preview overview.** This example organizes a vision experiment around inputs, model versions, and reviewable predictions. It presents the workspace as a way to inspect examples rather than claiming that a single score tells the whole story.",
     case_study_sections: {
@@ -121,7 +116,7 @@ export const projectPreviewFixtures: Record<string, PreviewSeed> = {
   "taskflow-workspace": {
     category: "Productivity / Collaboration",
     tagline: "A team-workspace concept built around clear ownership, live updates, and a calm view of work in progress.",
-    project_stage: "completed",
+    tags: ["Web", "SaaS", "Productivity", "Collaboration", "Automation"],
     latest_update_label: "Q1 2026",
     content: "**Preview overview.** The example covers a task from creation through assignment and review. A board view shows the current state, while the task detail keeps comments, ownership, and activity together.",
     case_study_sections: {
@@ -141,7 +136,6 @@ export const projectPreviewFixtures: Record<string, PreviewSeed> = {
   "demo-shopstream-commerce": {
     category: "E-commerce / Web",
     tagline: "A commerce-storefront concept joining product discovery, stock visibility, and checkout in a focused journey.",
-    project_stage: "completed",
     latest_update_label: "Q4 2024",
     content: "**Preview overview.** The example follows a shopper from search through product detail and checkout. The editorial rhythm below is meant to test a fuller case study than the existing project summary, not to verify conversion or payment performance.",
     case_study_sections: {
@@ -160,7 +154,6 @@ export const projectPreviewFixtures: Record<string, PreviewSeed> = {
   "demo-sentimentscope-nlp": {
     category: "AI / Language Processing",
     tagline: "An NLP-service concept for reviewing support-ticket sentiment and routing uncertain classifications to people.",
-    project_stage: "in_progress",
     latest_update_label: "Q3 2024",
     content: "**Preview overview.** The example describes a ticket moving through language detection, classification, and human review. Confidence is displayed as a decision aid rather than treated as a guarantee.",
     case_study_sections: {
@@ -180,7 +173,6 @@ export const projectPreviewFixtures: Record<string, PreviewSeed> = {
   "demo-vaultaudit-scanner": {
     category: "Cloud Security / Automation",
     tagline: "A cloud-audit workflow concept that turns configuration findings into reviewable remediation steps.",
-    project_stage: "completed",
     latest_update_label: "Q2 2024",
     content: "**Preview overview.** The case study imagines a read-only scan, a prioritized findings list, and a remediation review. It distinguishes observing a risky setting from changing infrastructure so the workflow remains accountable.",
     case_study_sections: {
@@ -198,7 +190,6 @@ export const projectPreviewFixtures: Record<string, PreviewSeed> = {
   "demo-pulseboard-analytics": {
     category: "Web Analytics / Privacy",
     tagline: "A privacy-conscious analytics concept for understanding traffic without turning every visitor into a profile.",
-    project_stage: "in_progress",
     latest_update_label: "Q1 2024",
     content: "**Preview overview.** This example follows an event from a lightweight collection point into an aggregate dashboard. The page explores how to make traffic trends legible while staying careful about what data is collected.",
     case_study_sections: {

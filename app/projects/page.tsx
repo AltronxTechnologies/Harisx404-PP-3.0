@@ -50,7 +50,7 @@ export default async function ProjectsPage() {
           images: [p.cover_image_url, ...(Array.isArray(p.gallery) ? p.gallery : [])]
             .filter(Boolean)
             .filter((v: string, i: number, a: string[]) => a.indexOf(v) === i),
-          tags: Array.isArray(p.tags) ? p.tags.slice(0, 3) : [],
+          tags: Array.isArray(p.tags) ? p.tags : [],
           features: Array.isArray(p.features) ? p.features : [],
         }))
       : fallbackProjects;

@@ -29,7 +29,6 @@ const projectSchema = z.object({
   tagline: z.string().max(160, "Keep the short description within 160 characters").optional(),
   category: z.string().trim().min(1, "Project type is required").max(60),
   year: z.string().optional().or(z.literal("")),
-  project_stage: z.enum(["", "in_progress", "completed"]),
   latest_update_label: z.string().max(32).optional(),
   source_note: z.string().max(80).optional(),
   case_study_sections: z.object({
@@ -92,7 +91,6 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
       tagline: initialData?.tagline ?? "",
       category: initialData?.category ?? "Web App",
       year: initialData?.year ?? "",
-      project_stage: initialData?.project_stage ?? "",
       latest_update_label: initialData?.latest_update_label ?? "",
       source_note: initialData?.source_note ?? "",
       case_study_sections: { ...emptySections, ...initialData?.case_study_sections },
@@ -249,7 +247,7 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
           {errors.tagline && <p className="text-xs text-red-500">{errors.tagline.message}</p>}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-3">
         <div className="space-y-2">
           <label className="text-sm font-medium">Project type</label>
           <input
@@ -272,16 +270,6 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="project-stage" className="text-sm font-medium">Project stage</label>
-          <select id="project-stage" {...register("project_stage")} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal">
-            <option value="">Not specified</option>
-            <option value="in_progress">In progress</option>
-            <option value="completed">Completed</option>
-          </select>
-          <p className="text-xs text-ink-secondary">Shown on the project page. Separate from publication status below.</p>
-        </div>
-
-        <div className="space-y-2">
           <label className="text-sm font-medium">Tech stack (one per line)</label>
           <textarea
             {...register("tech_stack")}
@@ -300,13 +288,14 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
 
       <div className="space-y-2">
         <label className="text-sm font-medium">Tags (comma-separated)</label>
-        <input
+        <textarea
           {...register("tags")}
+          rows={3}
           className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
-          placeholder="cybersecurity, machine-learning, saas"
+          placeholder="Web, Cybersecurity, AI/ML, Networking, SaaS..."
         />
         <p className="text-xs text-ink-secondary">
-          Used for filtering and for the Web / Cyber / AI split on the homepage stats bar.
+          Add as many comma-separated tags as you need. All are searchable and filterable; project cards show up to three.
         </p>
       </div>
 
