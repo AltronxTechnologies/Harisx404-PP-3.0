@@ -245,7 +245,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
       <section aria-labelledby="project-facts-heading" className="mt-14 px-2 sm:px-4">
         <div className="mx-auto max-w-6xl rounded-3xl border border-border-primary bg-white dark:bg-white/[0.02]">
           <div className={`grid ${project.tech.length ? "lg:grid-cols-[1.1fr_0.9fr]" : ""}`}>
-            <div className="p-5 sm:p-7 lg:p-8">
+            <div className="px-5 pb-5 pt-4 sm:px-7 sm:pb-7 sm:pt-5 lg:px-8 lg:pb-8">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h2 id="project-facts-heading" className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">At a glance</h2>
                 <div ref={shareRef} className="relative ml-auto inline-flex flex-col items-end">
@@ -291,7 +291,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
               </dl>
             </div>
             {project.tech.length > 0 && (
-              <div className="border-t border-border-primary p-5 sm:p-7 lg:border-l lg:border-t-0 lg:p-8">
+              <div className="border-t border-border-primary px-5 pb-5 pt-4 sm:px-7 sm:pb-7 sm:pt-5 lg:border-l lg:border-t-0 lg:px-8 lg:pb-8">
                 <h2 className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">Tech stack</h2>
                 <ul className="mt-6 flex flex-wrap gap-2">
                   {project.tech.map((tech, index) => {
