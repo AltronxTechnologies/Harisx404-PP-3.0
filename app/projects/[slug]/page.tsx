@@ -29,7 +29,7 @@ function mapDbProject(p: any): DetailProject {
   return {
     title: p.title,
     slug: p.slug,
-    tagline: p.tagline || p.short_description || p.description || "",
+    tagline: (p.tagline || p.short_description || p.description || "").slice(0, 160),
     description: p.description || "",
     content: p.content || "",
     tech: Array.isArray(p.tech_stack) ? p.tech_stack : [],
@@ -40,6 +40,8 @@ function mapDbProject(p: any): DetailProject {
     image_url: p.cover_image_url || (p as any).image_url || "",
     live_url: (p as any).live_url ?? "",
     github_url: (p as any).github_url ?? "",
+    liveNote: p.live_note || "",
+    sourceNote: p.source_note || "",
     features: Array.isArray(p.features) ? p.features.filter(Boolean) : [],
     tags: Array.isArray((p as any).tags) ? (p as any).tags : [],
     /* Extra screenshots (sorted); the cover is filtered out client-side so
@@ -53,7 +55,7 @@ async function resolveProject(slug: string): Promise<{
   list: NeighborProject[];
 } | null> {
   const dbProject = await getProjectBySlug(slug);
-  const dbProjects = await fetchProjects();
+  const dbProjects = await fetchProjects().catch(() => []);
 
   if (dbProject) {
     const list = (dbProjects.length > 0 ? dbProjects : [dbProject]).map(
@@ -61,7 +63,7 @@ async function resolveProject(slug: string): Promise<{
         title: p.title,
         slug: p.slug,
         category: p.category || "Project",
-        tagline: p.tagline || p.short_description || p.description || "",
+        tagline: (p.tagline || p.short_description || p.description || "").slice(0, 160),
         tags: Array.isArray(p.tags) ? p.tags : [],
         tech: Array.isArray(p.tech_stack) ? p.tech_stack : [],
       }),
@@ -88,6 +90,8 @@ async function resolveProject(slug: string): Promise<{
       image_url: fb.image_url,
       live_url: "",
       github_url: "",
+      liveNote: "",
+      sourceNote: "",
       features: fb.features || [],
       tags: (fb as any).tags ?? [],
       gallery: [],
@@ -112,12 +116,15 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
   const tokens = (values: string[]) => new Set(values.map((value) => value.toLowerCase().trim()));
   const tags = tokens(project.tags);
   const tech = tokens(project.tech);
-  const related = list.filter((item) => item.slug !== project.slug).map((item) => ({
-    item,
-    score: item.tags.filter((tag) => tags.has(tag.toLowerCase().trim())).length * 4
-      + item.tech.filter((name) => tech.has(name.toLowerCase().trim())).length
-      + Number(item.category.toLowerCase() === project.category.toLowerCase()),
-  })).filter(({ score }) => score > 0).sort((a, b) => b.score - a.score || a.item.slug.localeCompare(b.item.slug)).slice(0, 2).map(({ item }) => item);
+  const related = list.filter((item) => item.slug !== project.slug).map((item) => {
+    const sharedTags = item.tags.filter((tag) => tags.has(tag.toLowerCase().trim())).length;
+    const sharedTech = item.tech.filter((name) => tech.has(name.toLowerCase().trim())).length;
+    const sameSpecificType = item.category.toLowerCase() === project.category.toLowerCase()
+      && !["web app", "mobile app", "other", "project"].includes(project.category.toLowerCase());
+    return { item, score: sharedTags * 4 + sharedTech * 2 + Number(sameSpecificType) };
+  }).filter(({ score }) => score > 0)
+    .sort((a, b) => b.score - a.score || a.item.slug.localeCompare(b.item.slug))
+    .slice(0, 2).map(({ item }) => item);
 
   return (
     <>

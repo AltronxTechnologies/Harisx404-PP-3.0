@@ -30,6 +30,8 @@ const projectSchema = z.object({
   category: z.string().trim().min(1, "Project type is required").max(60),
   year: z.string().optional().or(z.literal("")),
   latest_update_label: z.string().max(32).optional(),
+  live_note: z.string().max(80).optional(),
+  source_note: z.string().max(80).optional(),
   case_study_sections: z.object({
     why_built: z.string().max(10000),
     key_decisions: z.string().max(10000),
@@ -59,6 +61,8 @@ interface ProjectFormProps {
     tags?: string[] | string | null;
     galleryImages?: GalleryImage[];
     latest_update_label?: string | null;
+    live_note?: string | null;
+    source_note?: string | null;
     case_study_sections?: Partial<CaseStudySections> | null;
   };
 }
@@ -90,6 +94,8 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
       category: initialData?.category ?? "Web App",
       year: initialData?.year ?? "",
       latest_update_label: initialData?.latest_update_label ?? "",
+      live_note: initialData?.live_note ?? "",
+      source_note: initialData?.source_note ?? "",
       case_study_sections: { ...emptySections, ...initialData?.case_study_sections },
       tech_stack: Array.isArray(initialData?.tech_stack)
         ? initialData.tech_stack.join("\n")
@@ -332,13 +338,16 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
 
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Live URL (Optional)</label>
+          <label className="text-sm font-medium">Visit / live project URL (Optional)</label>
           <input
             {...register("live_url")}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
             placeholder="https://..."
           />
           {errors.live_url && <p className="text-xs text-red-500">{errors.live_url.message}</p>}
+          <label htmlFor="project-live-note" className="block text-xs text-ink-secondary">If not hosted, what should Visit say?</label>
+          <input id="project-live-note" {...register("live_note")} maxLength={80} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="CLI only, runs locally, no public demo..." />
+          <p className="text-xs text-ink-secondary">Displayed only when no live URL is provided. Defaults to “No public demo.”</p>
         </div>
 
         <div className="space-y-2">
@@ -361,6 +370,9 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
           />
           <p className="text-xs text-ink-secondary">Link to this project&apos;s public repository, not your profile. Leave blank when the source is private.</p>
           {errors.github_url && <p className="text-xs text-red-500">{errors.github_url.message}</p>}
+          <label htmlFor="project-source-note" className="block text-xs text-ink-secondary">If source is not public, what should Source say?</label>
+          <input id="project-source-note" {...register("source_note")} maxLength={80} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="Private repository, not applicable..." />
+          <p className="text-xs text-ink-secondary">Displayed only when no public repository URL is provided. Defaults to “Source not published.”</p>
         </div>
       </div>
       

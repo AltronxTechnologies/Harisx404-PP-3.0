@@ -23,6 +23,8 @@ test("published project cards resolve to authored detail pages", async () => {
     assert.ok(html.includes("Case study / "), `${slug} should render its case study`);
     assert.ok(html.includes("Share project"), `${slug} should render sharing`);
     assert.ok(html.includes("At a glance"), `${slug} should render its facts`);
+    assert.ok(html.includes("Visit"), `${slug} should explain live availability`);
+    assert.ok(html.includes("Source"), `${slug} should explain source availability`);
     assert.ok(html.includes("<h1"), `${slug} should render a heading`);
     assert.doesNotMatch(html, /Why I Built This|Key Decisions|Performance-first build: optimized images/, slug);
   }
@@ -76,16 +78,29 @@ test("project type, timeline and optional sections remain owner-managed", async 
 
   assert.match(migration, /ADD COLUMN IF NOT EXISTS latest_update_label text/);
   assert.match(migration, /case_study_sections jsonb/);
+  assert.match(migration, /live_note text/);
+  assert.match(migration, /source_note text/);
   assert.match(api, /category: z\.string\(\)\.trim\(\)\.min\(1\)\.max\(60\)/);
   assert.match(api, /tagline: z\.string\(\)\.max\(160\)/);
   assert.match(api, /latest_update_label: data\.latest_update_label/);
+  assert.match(api, /live_note: data\.live_note/);
+  assert.match(api, /source_note: data\.source_note/);
+  assert.match(api, /projectWriteError\(error\)/);
+  assert.match(api, /2026_project_case_studies\.sql before changes can be saved/);
   assert.match(api, /case_study_sections: data\.case_study_sections/);
   assert.match(form, /register\("latest_update_label"\)/);
+  assert.match(form, /register\("live_note"\)/);
+  assert.match(form, /register\("source_note"\)/);
   assert.match(form, /register\(`case_study_sections\.\$\{key\}`\)/);
   assert.match(page, /item\.tags\.filter/);
   assert.match(detail, /project\.latestUpdate &&/);
-  assert.match(detail, /project\.live_url &&/);
-  assert.match(detail, /sourceUrl &&/);
+  assert.match(detail, /project\.live_url \?/);
+  assert.match(detail, /sourceUrl \?/);
   assert.match(detail, /sections\.map/);
   assert.match(detail, /Related projects/);
+  assert.match(detail, /Browse all projects/);
+  for (const action of ["Copy URL", "Copy as Markdown", "View as Markdown", "Open in ChatGPT", "Open in Claude", "Share by email"]) {
+    assert.ok(detail.includes(action), `share menu should include ${action}`);
+  }
+  assert.match(page, /fetchProjects\(\)\.catch\(\(\) => \[\]\)/);
 });

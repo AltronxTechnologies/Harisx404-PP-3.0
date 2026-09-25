@@ -1,6 +1,8 @@
 -- Optional, owner-authored case-study details. Safe to apply repeatedly.
 ALTER TABLE public.projects
   ADD COLUMN IF NOT EXISTS latest_update_label text,
+  ADD COLUMN IF NOT EXISTS live_note text,
+  ADD COLUMN IF NOT EXISTS source_note text,
   ADD COLUMN IF NOT EXISTS case_study_sections jsonb NOT NULL DEFAULT '{}'::jsonb;
 
 ALTER TABLE public.projects

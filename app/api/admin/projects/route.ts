@@ -24,6 +24,8 @@ const projectFieldsSchema = z.object({
   category: z.string().trim().min(1).max(60),
   year: z.string().max(20).optional().default(""),
   latest_update_label: z.string().max(32).optional().default(""),
+  live_note: z.string().max(80).optional().default(""),
+  source_note: z.string().max(80).optional().default(""),
   case_study_sections: z.object({
     why_built: z.string().max(10000).optional().default(""),
     key_decisions: z.string().max(10000).optional().default(""),
@@ -91,6 +93,8 @@ function projectFields(data: z.infer<typeof projectSchema>) {
     category: data.category,
     year: data.year || null,
     latest_update_label: data.latest_update_label || null,
+    live_note: data.live_note || null,
+    source_note: data.source_note || null,
     case_study_sections: data.case_study_sections,
     tech_stack: data.tech_stack,
     features: data.features,
@@ -128,6 +132,13 @@ function fail(error: unknown) {
   return NextResponse.json({ error: error instanceof Error ? error.message : "Project request failed" }, { status: 500 });
 }
 
+function projectWriteError(error: { message: string; code?: string }) {
+  if (["42703", "PGRST204"].includes(error.code || "") && /latest_update_label|case_study_sections|live_note|source_note/.test(error.message)) {
+    return NextResponse.json({ error: "Project editor needs migration 2026_project_case_studies.sql before changes can be saved." }, { status: 503 });
+  }
+  return NextResponse.json({ error: error.message }, { status: 400 });
+}
+
 export async function POST(request: Request) {
   try {
     const denied = await authorizeAdmin();
@@ -139,7 +150,7 @@ export async function POST(request: Request) {
     const db = await createSupabaseAdminClient();
     await validateGalleryMedia(db, data.gallery);
     const { data: project, error } = await db.from("projects").insert(projectFields(data)).select().single();
-    if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+    if (error) return projectWriteError(error);
 
     try {
       await saveGallery(db, project.id, data.gallery);
@@ -170,7 +181,7 @@ export async function PUT(request: Request) {
     const { data: project, error } = await db.from("projects")
       .update({ ...projectFields(data), updated_at: new Date().toISOString() })
       .eq("id", id).select().maybeSingle();
-    if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+    if (error) return projectWriteError(error);
     if (!project) return NextResponse.json({ error: "Project not found" }, { status: 404 });
 
     try {

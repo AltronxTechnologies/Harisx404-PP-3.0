@@ -4,7 +4,7 @@ import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
-import { ArrowUpRight, ChevronDown, Copy, ExternalLink, FileText, Mail, Share2 } from "lucide-react";
+import { ArrowUpRight, ChevronDown, Copy, ExternalLink, FileText, Mail, MessageCircle, Share2, Sparkles } from "lucide-react";
 import { GridWrapper } from "@/app/components/GridWrapper";
 import { PaperHeroTexture } from "@/app/components/PaperHeroTexture";
 import { CtaSection } from "@/app/components/home/CtaSection";
@@ -24,6 +24,8 @@ export type DetailProject = {
   image_url: string;
   live_url: string;
   github_url: string;
+  liveNote: string;
+  sourceNote: string;
   features: string[];
   tags: string[];
   gallery: Array<{ src: string; caption: string; alt: string }>;
@@ -168,14 +170,29 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
   }, []);
 
   const copyText = async (text: string, message: string) => {
+    let copied = false;
     try {
       await navigator.clipboard.writeText(text);
-      setCopyStatus(message);
+      copied = true;
     } catch {
-      setCopyStatus("Copy unavailable. Select and copy the address from your browser instead.");
+      // Clipboard permission can be denied even on an otherwise usable page.
+      try {
+        const field = document.createElement("textarea");
+        field.value = text;
+        field.style.position = "fixed";
+        field.style.opacity = "0";
+        document.body.appendChild(field);
+        field.select();
+        copied = document.execCommand("copy");
+        field.remove();
+      } catch {
+        copied = false;
+      }
     }
+    setCopyStatus(copied ? message : "Copy unavailable. You can copy the project URL from your browser address bar.");
     if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
-    copyTimerRef.current = setTimeout(() => setCopyStatus(""), 3000);
+    copyTimerRef.current = setTimeout(() => setCopyStatus(""), 5000);
+    return copied;
   };
 
   const projectUrl = () => new URL(`/projects/${project.slug}`, window.location.origin).href;
@@ -192,6 +209,13 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
     const url = URL.createObjectURL(new Blob([markdown()], { type: "text/markdown" }));
     window.open(url, "_blank", "noopener,noreferrer");
     window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    setShareOpen(false);
+    shareTriggerRef.current?.focus();
+  };
+
+  const openClaude = () => {
+    window.open("https://claude.ai/new", "_blank", "noopener,noreferrer");
+    void copyText(`Review this project case study: ${projectUrl()}`, "Prompt copied. Paste it into Claude to start a conversation.");
     setShareOpen(false);
     shareTriggerRef.current?.focus();
   };
@@ -215,7 +239,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
             <h1 className="heading-glow mx-auto mt-4 max-w-3xl break-words text-balance [font-family:var(--font-instrument-serif),serif] text-[46px] font-medium leading-none tracking-tight text-text-primary md:text-[56px] md:tracking-[-1.5px]">{project.title}</h1>
             {summary && <p className="mx-auto mt-4 max-w-2xl text-pretty text-[15px] leading-6 text-text-secondary">{summary}</p>}
 
-            <div ref={shareRef} className="relative mt-5 inline-flex">
+            <div ref={shareRef} className="relative mt-5 inline-flex flex-col items-center">
               <button
                 ref={shareTriggerRef}
                 type="button"
@@ -224,7 +248,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
                 onClick={(event) => {
                   if (!shareOpen) {
                     const bounds = shareTriggerRef.current?.getBoundingClientRect();
-                    if (bounds) setShareAbove(window.innerHeight - bounds.bottom < 280 && bounds.top > window.innerHeight - bounds.bottom);
+                    if (bounds) setShareAbove(window.innerHeight - bounds.bottom < 390 && bounds.top > window.innerHeight - bounds.bottom);
                   }
                   setShareOpen((open) => !open);
                   if (!shareOpen && event.detail === 0) requestAnimationFrame(() => firstShareItemRef.current?.focus());
@@ -234,11 +258,14 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
                 <Share2 className="size-3.5" aria-hidden /> Share project <ChevronDown className={`size-3.5 transition-transform motion-reduce:transition-none ${shareOpen ? "rotate-180" : ""}`} aria-hidden />
               </button>
               {shareOpen && (
-                <div id="project-share-options" role="group" aria-label="Share project" className={`absolute left-1/2 z-30 max-h-[70dvh] w-[min(280px,calc(100vw-2.5rem))] -translate-x-1/2 overflow-y-auto rounded-2xl border border-border-primary bg-bg-primary p-2 text-left shadow-[0_16px_48px_rgba(0,0,0,0.16)] dark:shadow-[0_16px_48px_rgba(0,0,0,0.5)] ${shareAbove ? "bottom-full mb-2" : "top-full mt-2"}`}>
+                <div id="project-share-options" role="group" aria-label="Share project" className={`relative z-30 mt-2 max-h-[min(70dvh,420px)] w-[min(280px,calc(100vw-2.5rem))] overflow-y-auto rounded-2xl border border-border-primary bg-bg-primary p-2 text-left shadow-[0_16px_48px_rgba(0,0,0,0.16)] dark:shadow-[0_16px_48px_rgba(0,0,0,0.5)] sm:absolute sm:left-1/2 sm:-translate-x-1/2 ${shareAbove ? "sm:bottom-full sm:mb-2 sm:mt-0" : "sm:top-full sm:mt-2"}`}>
                   <p className="px-3 pb-2 pt-1 font-mono text-[10px] uppercase tracking-widest text-text-secondary">Share this case study</p>
-                  <button ref={firstShareItemRef} type="button" onClick={() => copyText(projectUrl(), "Link copied")} className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm text-text-primary hover:bg-text-primary/5 ${focusStyle}`}><Copy className="size-4 text-text-secondary" aria-hidden /> Copy link</button>
+                  <button ref={firstShareItemRef} type="button" onClick={() => copyText(projectUrl(), "URL copied")} className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm text-text-primary hover:bg-text-primary/5 ${focusStyle}`}><Copy className="size-4 text-text-secondary" aria-hidden /> Copy URL</button>
                   <button type="button" onClick={() => copyText(markdown(), "Markdown copied")} className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm text-text-primary hover:bg-text-primary/5 ${focusStyle}`}><FileText className="size-4 text-text-secondary" aria-hidden /> Copy as Markdown</button>
-                  <button type="button" onClick={viewMarkdown} className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm text-text-primary hover:bg-text-primary/5 ${focusStyle}`}><ExternalLink className="size-4 text-text-secondary" aria-hidden /> View Markdown <span className="sr-only">(opens in a new tab)</span></button>
+                  <button type="button" onClick={viewMarkdown} className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm text-text-primary hover:bg-text-primary/5 ${focusStyle}`}><ExternalLink className="size-4 text-text-secondary" aria-hidden /> View as Markdown <span className="sr-only">(opens in a new tab)</span></button>
+                  <div aria-hidden className="my-1 border-t border-border-primary" />
+                  <a href={`https://chatgpt.com/?q=${encodeURIComponent(`Review this project case study: ${projectUrl()}`)}`} target="_blank" rel="noopener noreferrer" className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm text-text-primary hover:bg-text-primary/5 ${focusStyle}`}><MessageCircle className="size-4 text-text-secondary" aria-hidden /> Open in ChatGPT <span className="sr-only">(opens in a new tab)</span></a>
+                  <button type="button" onClick={openClaude} className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm text-text-primary hover:bg-text-primary/5 ${focusStyle}`}><Sparkles className="size-4 text-text-secondary" aria-hidden /> Open in Claude <span className="sr-only">(opens in a new tab; prompt copied to clipboard)</span></button>
                   <div aria-hidden className="my-1 border-t border-border-primary" />
                   <a href={`mailto:?subject=${encodeURIComponent(project.title)}&body=${encodeURIComponent(`${summary}\n\n${projectUrl()}`)}`} className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-sm text-text-primary hover:bg-text-primary/5 ${focusStyle}`}><Mail className="size-4 text-text-secondary" aria-hidden /> Share by email</a>
                 </div>
@@ -258,8 +285,8 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
                 <Fact label="Type">{project.category}</Fact>
                 {project.year && <Fact label="Built">{project.year}</Fact>}
                 {project.latestUpdate && <Fact label="Latest update">{project.latestUpdate}</Fact>}
-                {project.live_url && <Fact label="Visit"><a href={project.live_url} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1.5 rounded-sm text-text-primary underline underline-offset-4 ${focusStyle}`}>View project <ExternalLink className="size-3.5" aria-hidden /><span className="sr-only">opens in a new tab</span></a></Fact>}
-                {sourceUrl && <Fact label="Source"><a href={sourceUrl} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1.5 rounded-sm text-text-primary underline underline-offset-4 ${focusStyle}`}>View source <ExternalLink className="size-3.5" aria-hidden /><span className="sr-only">opens in a new tab</span></a></Fact>}
+                <Fact label="Visit">{project.live_url ? <a href={project.live_url} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1.5 rounded-sm text-text-primary underline underline-offset-4 ${focusStyle}`}>View live project <ExternalLink className="size-3.5" aria-hidden /><span className="sr-only">opens in a new tab</span></a> : <span className="text-text-secondary">{project.liveNote || "No public demo"}</span>}</Fact>
+                <Fact label="Source">{sourceUrl ? <a href={sourceUrl} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1.5 rounded-sm text-text-primary underline underline-offset-4 ${focusStyle}`}>View source <ExternalLink className="size-3.5" aria-hidden /><span className="sr-only">opens in a new tab</span></a> : <span className="text-text-secondary">{project.sourceNote || "Source not published"}</span>}</Fact>
               </dl>
             </div>
             {project.tech.length > 0 && (
@@ -307,8 +334,16 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
           </div>
         </section>
       )}
+      {related.length === 0 && (
+        <div className="mx-auto max-w-6xl px-4 py-14 text-center sm:px-6">
+          <p className="font-mono text-xs uppercase tracking-widest text-text-secondary">Keep exploring</p>
+          <Link href="/projects" className={`mt-4 inline-flex min-h-11 items-center gap-2 rounded-full border border-border-primary px-5 text-sm font-medium text-text-primary transition-colors hover:border-neutral-400/70 dark:hover:border-white/25 ${focusStyle}`}>
+            Browse all projects <ArrowUpRight className="size-4" aria-hidden />
+          </Link>
+        </div>
+      )}
 
-      <div className={related.length ? "mt-10" : "mt-28"}><CtaSection /></div>
+      <div className="mt-10"><CtaSection /></div>
     </div>
   );
 }
