@@ -166,6 +166,10 @@ just tell any AI agent the file path listed here plus your image URL/filename.
 - Experience: replace the 3 seeded placeholder entries with your real history
 - Site settings: confirm name, SEO description, social URLs
 - Legal pages (`/legal/privacy`, `/legal/terms`): review wording once before deploy
+  using `audit/20-legal-pages-presentation-review.md`. Confirm data collected by
+  Contact and reactions, Google/GitHub sign-in, Gemini chat, Loops newsletter,
+  deletion handling, originality/asset rights, and Terms effective date before
+  approving or locking the substantive policy text.
 
 ### Contact email
 

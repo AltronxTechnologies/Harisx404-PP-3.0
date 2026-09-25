@@ -1,4 +1,5 @@
-import { HeroTexture } from "@/app/components/HeroTexture";
+import { GridWrapper } from "@/app/components/GridWrapper";
+import { PaperHeroTexture } from "@/app/components/PaperHeroTexture";
 import { CtaSection } from "@/app/components/home/CtaSection";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
@@ -43,7 +44,7 @@ function SectionHeader({ index, title, subtitle }: { index: string; title: strin
       <h2 className="mt-1 font-display text-2xl font-bold leading-snug text-neutral-900 dark:text-neutral-100 md:text-3xl">
         {title}
       </h2>
-      <p className="font-display text-2xl font-bold leading-snug text-neutral-400 dark:text-[#777B84] md:text-3xl">
+      <p className="font-display text-2xl font-bold leading-snug text-text-secondary md:text-3xl">
         {subtitle}
       </p>
     </div>
@@ -51,21 +52,21 @@ function SectionHeader({ index, title, subtitle }: { index: string; title: strin
 }
 
 function Spacer() {
-  return <div aria-hidden="true" className="hidden border-x border-dashed border-neutral-200 dark:border-neutral-800 lg:col-span-1 lg:block" />;
+  return <div aria-hidden="true" className="hidden border-x border-dashed border-border-primary lg:col-span-1 lg:block" />;
 }
 
 function SectionDivider() {
   return (
     <div aria-hidden="true" className="flex w-full flex-col gap-4">
-      <div className="border-t border-neutral-200 dark:border-neutral-800" />
-      <div className="border-t border-neutral-200 dark:border-neutral-800" />
+      <div className="border-t border-border-primary" />
+      <div className="border-t border-border-primary" />
     </div>
   );
 }
 
 function FeatureCard({ icon, tag, children }: { icon: ReactNode; tag: string; children: ReactNode }) {
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-neutral-200 bg-neutral-50/50 p-6 dark:border-neutral-800 dark:bg-neutral-900/20">
+    <div className="flex flex-col gap-4 rounded-2xl border border-border-primary bg-neutral-50/50 p-6 dark:bg-neutral-900/20">
       <span className="flex size-10 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-600 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
         {icon}
       </span>
@@ -79,7 +80,7 @@ function FeatureCard({ icon, tag, children }: { icon: ReactNode; tag: string; ch
 
 function ToolCard({ icon, title, children }: { icon: ReactNode; title: string; children: ReactNode }) {
   return (
-    <div className="flex items-start gap-4 rounded-lg border border-dashed border-neutral-200 p-4 transition-colors hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-900/30">
+    <div className="flex items-start gap-4 rounded-2xl border border-dashed border-border-primary p-4 transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-900/30">
       <span className="mt-1 shrink-0 text-neutral-400">{icon}</span>
       <div>
         <p className="text-sm font-semibold text-neutral-900 dark:text-white">{title}</p>
@@ -93,41 +94,24 @@ function ToolCard({ icon, title, children }: { icon: ReactNode; title: string; c
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="relative min-w-0 pb-24">
-      {/* Hatched side rails */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 left-0 hidden w-3 border-r border-border-primary sm:block lg:w-8 [background-image:repeating-linear-gradient(45deg,rgba(0,0,0,0.04)_0px,rgba(0,0,0,0.04)_1px,transparent_1px,transparent_7px)] dark:[background-image:repeating-linear-gradient(45deg,rgba(255,255,255,0.05)_0px,rgba(255,255,255,0.05)_1px,transparent_1px,transparent_7px)]"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 right-0 hidden w-3 border-l border-border-primary sm:block lg:w-8 [background-image:repeating-linear-gradient(45deg,rgba(0,0,0,0.04)_0px,rgba(0,0,0,0.04)_1px,transparent_1px,transparent_7px)] dark:[background-image:repeating-linear-gradient(45deg,rgba(255,255,255,0.05)_0px,rgba(255,255,255,0.05)_1px,transparent_1px,transparent_7px)]"
-      />
+    <div className="relative mt-14 min-w-0">
+      <GridWrapper>
+        <div className="relative px-4 xl:px-0">
+          <PaperHeroTexture className="-inset-x-2 bottom-0 top-[-128px] sm:-inset-x-3 sm:top-[-144px] md:top-[-176px] lg:inset-x-0" />
+          <header className="relative mx-auto max-w-3xl text-center">
+            <p className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">Legal &amp; Privacy</p>
+            <h1 className="heading-glow mx-auto mt-4 max-w-xl text-balance [font-family:var(--font-instrument-serif),serif] text-[46px] font-medium leading-none tracking-tight text-text-primary md:text-[56px] md:tracking-[-1.5px]">
+              Your Data,{" "}
+              <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none] motion-reduce:animate-none">Respected</span>
+            </h1>
+            <p className="mx-auto mt-4 max-w-2xl text-pretty text-[15px] leading-6 text-text-secondary">
+              How information is handled when you use the features on this site.
+            </p>
+          </header>
+        </div>
+      </GridWrapper>
 
-      <HeroTexture />
-
-      {/* Hero */}
-      <h1 className="relative z-[2] mx-auto mt-24 mb-14 max-w-xl text-balance text-center font-medium text-[46px] tracking-tight [text-shadow:rgba(255,255,255,0.05)_0px_4px_8px,rgba(255,255,255,0.2)_0px_8px_30px] max-sm:px-5 md:mt-28 md:text-6xl">
-        <p className="mb-4 font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
-          Legal &amp; Privacy
-        </p>
-        <span className="inline-block text-text-primary [font-family:var(--font-instrument-serif),serif]">
-          Your Data,{" "}
-          <span
-            className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]"
-            style={{
-              maskImage: "linear-gradient(to right, black 70%, transparent 100%)",
-              maskSize: "200% 100%",
-              maskPosition: "left center",
-              maskRepeat: "no-repeat",
-            }}
-          >
-            Respected
-          </span>
-        </span>
-      </h1>
-
-      <div className="relative mx-auto w-full max-w-6xl space-y-10 px-4 sm:px-8 lg:px-12">
+      <div className="relative mx-auto mt-14 w-full max-w-6xl space-y-10 px-2 sm:px-4 lg:px-8">
         {/* 01 — Collect */}
         <section className="grid grid-cols-1 lg:grid-cols-12">
           <SectionHeader index="01" title="Collect." subtitle="Only What's Needed" />
@@ -198,7 +182,7 @@ export default function PrivacyPolicyPage() {
             <p className="text-lg leading-relaxed text-text-secondary">
               Anything you put on this site remains yours. Ask, and it&apos;s gone.
             </p>
-            <div className="rounded-xl border border-neutral-200 bg-neutral-50/50 p-8 dark:border-neutral-800 dark:bg-neutral-900/20">
+            <div className="rounded-2xl border border-border-primary bg-neutral-50/50 p-8 dark:bg-neutral-900/20">
               <div className="flex items-center gap-3">
                 <span className="text-neutral-600 dark:text-neutral-300">{icons.shield}</span>
                 <h3 className="text-lg font-bold text-neutral-900 dark:text-white">Ownership &amp; Deletion</h3>
@@ -210,10 +194,7 @@ export default function PrivacyPolicyPage() {
               </p>
               <div className="my-8 border-t border-dashed border-neutral-200 dark:border-neutral-800" />
               <div className="flex flex-wrap items-center justify-between gap-4">
-                <a
-                  href="mailto:itsharis.tech@gmail.com"
-                  className="font-medium text-neutral-900 hover:underline dark:text-white"
-                >
+                <a href="mailto:itsharis.tech@gmail.com" className="rounded-sm font-medium text-neutral-900 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:text-white">
                   itsharis.tech@gmail.com
                 </a>
                 <span className="flex items-center gap-1.5 font-mono text-[10px] text-text-secondary">
@@ -227,7 +208,7 @@ export default function PrivacyPolicyPage() {
       </div>
 
       {/* Contact CTA */}
-      <div className="relative mt-16">
+      <div className="mt-28">
         <CtaSection />
       </div>
     </div>

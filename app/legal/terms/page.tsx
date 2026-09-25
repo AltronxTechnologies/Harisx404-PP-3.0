@@ -1,4 +1,5 @@
-import { HeroTexture } from "@/app/components/HeroTexture";
+import { GridWrapper } from "@/app/components/GridWrapper";
+import { PaperHeroTexture } from "@/app/components/PaperHeroTexture";
 import { CtaSection } from "@/app/components/home/CtaSection";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
@@ -39,7 +40,7 @@ function SectionHeader({ index, title, subtitle }: { index: string; title: strin
       <h2 className="mt-1 font-display text-2xl font-bold leading-snug text-neutral-900 dark:text-neutral-100 md:text-3xl">
         {title}
       </h2>
-      <p className="font-display text-2xl font-bold leading-snug text-neutral-400 dark:text-[#777B84] md:text-3xl">
+      <p className="font-display text-2xl font-bold leading-snug text-text-secondary md:text-3xl">
         {subtitle}
       </p>
     </div>
@@ -47,14 +48,14 @@ function SectionHeader({ index, title, subtitle }: { index: string; title: strin
 }
 
 function Spacer() {
-  return <div aria-hidden="true" className="hidden border-x border-dashed border-neutral-200 dark:border-neutral-800 lg:col-span-1 lg:block" />;
+  return <div aria-hidden="true" className="hidden border-x border-dashed border-border-primary lg:col-span-1 lg:block" />;
 }
 
 function SectionDivider() {
   return (
     <div aria-hidden="true" className="flex w-full flex-col gap-4">
-      <div className="border-t border-neutral-200 dark:border-neutral-800" />
-      <div className="border-t border-neutral-200 dark:border-neutral-800" />
+      <div className="border-t border-border-primary" />
+      <div className="border-t border-border-primary" />
     </div>
   );
 }
@@ -63,41 +64,24 @@ function SectionDivider() {
 
 export default function TermsOfUsePage() {
   return (
-    <div className="relative min-w-0 pb-24">
-      {/* Hatched side rails */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 left-0 hidden w-3 border-r border-border-primary sm:block lg:w-8 [background-image:repeating-linear-gradient(45deg,rgba(0,0,0,0.04)_0px,rgba(0,0,0,0.04)_1px,transparent_1px,transparent_7px)] dark:[background-image:repeating-linear-gradient(45deg,rgba(255,255,255,0.05)_0px,rgba(255,255,255,0.05)_1px,transparent_1px,transparent_7px)]"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 right-0 hidden w-3 border-l border-border-primary sm:block lg:w-8 [background-image:repeating-linear-gradient(45deg,rgba(0,0,0,0.04)_0px,rgba(0,0,0,0.04)_1px,transparent_1px,transparent_7px)] dark:[background-image:repeating-linear-gradient(45deg,rgba(255,255,255,0.05)_0px,rgba(255,255,255,0.05)_1px,transparent_1px,transparent_7px)]"
-      />
+    <div className="relative mt-14 min-w-0">
+      <GridWrapper>
+        <div className="relative px-4 xl:px-0">
+          <PaperHeroTexture className="-inset-x-2 bottom-0 top-[-128px] sm:-inset-x-3 sm:top-[-144px] md:top-[-176px] lg:inset-x-0" />
+          <header className="relative mx-auto max-w-3xl text-center">
+            <p className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">Legal &amp; Policy</p>
+            <h1 className="heading-glow mx-auto mt-4 max-w-xl text-balance [font-family:var(--font-instrument-serif),serif] text-[46px] font-medium leading-none tracking-tight text-text-primary md:text-[56px] md:tracking-[-1.5px]">
+              Simple Terms,{" "}
+              <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none] motion-reduce:animate-none">Fairly</span>
+            </h1>
+            <p className="mx-auto mt-4 max-w-2xl text-pretty text-[15px] leading-6 text-text-secondary">
+              The terms that apply when you visit, read, and contribute to this site.
+            </p>
+          </header>
+        </div>
+      </GridWrapper>
 
-      <HeroTexture />
-
-      {/* Hero */}
-      <h1 className="relative z-[2] mx-auto mt-24 mb-14 max-w-xl text-balance text-center font-medium text-[46px] tracking-tight [text-shadow:rgba(255,255,255,0.05)_0px_4px_8px,rgba(255,255,255,0.2)_0px_8px_30px] max-sm:px-5 md:mt-28 md:text-6xl">
-        <p className="mb-4 font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">
-          Legal &amp; Policy
-        </p>
-        <span className="inline-block text-text-primary [font-family:var(--font-instrument-serif),serif]">
-          Simple Terms,{" "}
-          <span
-            className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]"
-            style={{
-              maskImage: "linear-gradient(to right, black 70%, transparent 100%)",
-              maskSize: "200% 100%",
-              maskPosition: "left center",
-              maskRepeat: "no-repeat",
-            }}
-          >
-            Fairly
-          </span>
-        </span>
-      </h1>
-
-      <div className="relative mx-auto w-full max-w-6xl space-y-10 px-4 sm:px-8 lg:px-12">
+      <div className="relative mx-auto mt-14 w-full max-w-6xl space-y-10 px-2 sm:px-4 lg:px-8">
         {/* 01 — Terms */}
         <section className="grid grid-cols-1 lg:grid-cols-12">
           <SectionHeader index="01" title="Terms." subtitle="The Agreement" />
@@ -107,7 +91,7 @@ export default function TermsOfUsePage() {
               By browsing this site you agree to these terms. They exist to keep things fair for
               both of us — written in plain language, no legalese required.
             </p>
-            <div className="flex items-center gap-4 rounded-xl border border-neutral-200 bg-neutral-50/50 p-4 dark:border-neutral-800 dark:bg-neutral-900/20">
+            <div className="flex items-center gap-4 rounded-2xl border border-border-primary bg-neutral-50/50 p-4 dark:bg-neutral-900/20">
               <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white text-neutral-600 shadow-sm dark:bg-neutral-800 dark:text-neutral-300">
                 {icons.calendar}
               </span>
@@ -137,7 +121,7 @@ export default function TermsOfUsePage() {
               Content and code on this site are my original work unless credited otherwise.
               Here&apos;s exactly what you can and can&apos;t do with them.
             </p>
-            <div id="design-inspiration" className="rounded-xl border border-neutral-200 bg-neutral-50/50 p-5 dark:border-neutral-800 dark:bg-neutral-900/20">
+            <div id="design-inspiration" className="rounded-2xl border border-border-primary bg-neutral-50/50 p-5 dark:bg-neutral-900/20">
               <p className="font-mono text-xs font-bold uppercase tracking-wider text-neutral-900 dark:text-white">
                 Design inspiration
               </p>
@@ -147,7 +131,7 @@ export default function TermsOfUsePage() {
                   href="https://aayushbharti.in"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-medium text-text-primary underline decoration-dotted underline-offset-4 hover:text-text-secondary"
+                  className="rounded-sm font-medium text-text-primary underline decoration-dotted underline-offset-4 hover:text-text-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary"
                 >
                   Aayush Bharti
                 </a>
@@ -156,7 +140,7 @@ export default function TermsOfUsePage() {
             </div>
             <div className="grid gap-6 md:grid-cols-2">
               {/* Restriction card (red) */}
-              <div className="rounded-xl border border-red-200 bg-red-50/50 p-6 dark:border-red-900/30 dark:bg-red-950/10">
+                <div className="rounded-2xl border border-red-200 bg-red-50/50 p-6 dark:border-red-900/30 dark:bg-red-950/10">
                 <span className="flex size-10 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400">
                   {icons.ban}
                 </span>
@@ -170,7 +154,7 @@ export default function TermsOfUsePage() {
                 </p>
               </div>
               {/* Permission card (green) */}
-              <div className="rounded-xl border border-green-200 bg-green-50/50 p-6 dark:border-green-900/30 dark:bg-green-950/10">
+                <div className="rounded-2xl border border-green-200 bg-green-50/50 p-6 dark:border-green-900/30 dark:bg-green-950/10">
                 <span className="flex size-10 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400">
                   {icons.check}
                 </span>
@@ -199,7 +183,7 @@ export default function TermsOfUsePage() {
             </p>
 
             {/* UGC card */}
-            <div className="rounded-xl border border-neutral-200 bg-neutral-50/50 p-6 dark:border-neutral-800 dark:bg-neutral-900/20">
+            <div className="rounded-2xl border border-border-primary bg-neutral-50/50 p-6 dark:bg-neutral-900/20">
               <div className="flex items-center gap-3">
                 <span className="text-neutral-500">{icons.chat}</span>
                 <h3 className="text-base font-semibold text-neutral-900 dark:text-white">User-Generated Content</h3>
@@ -235,7 +219,7 @@ export default function TermsOfUsePage() {
               <div className="my-8 border-t border-dashed border-neutral-200 dark:border-neutral-800" />
               <p className="text-sm text-text-secondary">
                 Questions about these terms?{" "}
-                <a href="mailto:itsharis.tech@gmail.com" className="font-medium text-neutral-900 hover:underline dark:text-white">
+                <a href="mailto:itsharis.tech@gmail.com" className="rounded-sm font-medium text-neutral-900 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:text-white">
                   itsharis.tech@gmail.com
                 </a>
               </p>
@@ -245,7 +229,7 @@ export default function TermsOfUsePage() {
       </div>
 
       {/* Contact CTA */}
-      <div className="relative mt-16">
+      <div className="mt-28">
         <CtaSection />
       </div>
     </div>
