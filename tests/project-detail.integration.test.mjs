@@ -103,6 +103,8 @@ test("project images enforce a cover, allow ordered additions, and deliver respo
   assert.match(carousel, /aria-expanded=\{captionOpen\}/);
   assert.match(carousel, /role="region" aria-label="Image caption"/);
   assert.match(carousel, /aria-label="Close image caption"/);
+  assert.match(carousel, /w-48 max-w-\[calc\(100%-1\.5rem\)\].*sm:w-72/);
+  assert.doesNotMatch(carousel, /text-neutral-700 hover:bg-neutral-100/);
   assert.match(carousel, /document\.addEventListener\("pointerdown", onPointerDown\)/);
   assert.match(carousel, /captionButtonRef\.current\?\.contains\(target\)/);
   assert.match(carousel, /event\.key === "Escape"/);
@@ -110,8 +112,8 @@ test("project images enforce a cover, allow ordered additions, and deliver respo
   assert.match(detail, /caption: project\.coverCaption/);
   assert.match(page, /coverCaption: p\.case_study_sections\?\.cover_caption/);
   assert.match(carousel, /aria-label="Carousel controls"/);
-  assert.match(carousel, /mt-8 flex flex-wrap items-center justify-center gap-4/);
-  assert.match(carousel, /order-1 flex w-full max-w-\[70vw\] flex-wrap items-center justify-center sm:order-none sm:w-auto/);
+  assert.match(carousel, /mt-4 flex flex-wrap items-center justify-center gap-2 sm:mt-8 sm:gap-4/);
+  assert.match(carousel, /order-1 flex w-full flex-\[0_0_100%\] flex-wrap items-center justify-center sm:order-none sm:w-auto sm:max-w-\[70vw\]/);
   assert.match(carousel, /w-14/);
   assert.match(carousel, /w-7/);
   assert.match(carousel, /bg-gradient-to-r from-blue-500 via-violet-500 to-pink-500/);
