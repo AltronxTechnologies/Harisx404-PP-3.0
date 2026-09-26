@@ -82,7 +82,13 @@ test("project images enforce a cover, allow ordered additions, and deliver respo
   assert.match(carousel, /object-contain/);
   assert.match(carousel, /drag=\{images\.length > 1/);
   assert.match(carousel, /aspect-\[4\/3\].*sm:aspect-video/);
-  assert.match(carousel, /aria-label=\{`View image \$\{index \+ 1\} in full screen`\}/);
+  assert.match(carousel, /className="pointer-events-none select-none object-cover"/);
+  assert.match(carousel, /aria-label=\{`Open image \$\{shownIndex \+ 1\} in full screen`\}/);
+  assert.doesNotMatch(carousel, /View image<\/span>|<Expand/);
+  assert.match(carousel, /<figcaption aria-live="polite"/);
+  assert.match(carousel, /aria-label="Carousel controls"/);
+  assert.match(carousel, /aria-label="Previous image"/);
+  assert.match(carousel, /aria-label="Next image"/);
   assert.match(carousel, /createPortal\(/);
   assert.match(carousel, /aria-modal="true"/);
   assert.match(carousel, /event\.key === "Escape"/);
@@ -92,9 +98,9 @@ test("project images enforce a cover, allow ordered additions, and deliver respo
   assert.match(carousel, /touch-pan-y/);
   assert.match(carousel, /entry\.intersectionRatio >= 0\.35/);
   assert.match(carousel, /visibilitychange/);
-  assert.match(carousel, /backgroundColor: "var\(--bg-primary\)"/);
   assert.match(carousel, /onLoad=\{\(\) => \{ if \(wantedSrcRef\.current === current\.src\)/);
-  assert.match(carousel, /sizes=\{zoomed \? "200vw" : "100vw"\}/);
+  assert.match(carousel, /type="range" min=\{1\} max=\{4\} step=\{0\.25\}/);
+  assert.match(carousel, /sizes=\{zoomed \? "\(max-width: 640px\) 1080px, 1920px" : "100vw"\}/);
   assert.doesNotMatch(carousel, /bg-bg-primary\/95|flex-1 truncate text-xs/);
   assert.match(fixture, /portraitPhoto\(cover_photo\)/);
   assert.match(compose, /CLOUDINARY_API_SECRET: \$\{CLOUDINARY_API_SECRET:-\}/);
