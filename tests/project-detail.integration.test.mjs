@@ -86,7 +86,14 @@ test("project images enforce a cover, allow ordered additions, and deliver respo
   assert.match(carousel, /aria-label=\{`Open image \$\{shownIndex \+ 1\} in full screen`\}/);
   assert.doesNotMatch(carousel, /View image<\/span>|<Expand/);
   assert.match(carousel, /<figcaption aria-live="polite"/);
+  assert.match(carousel, /className="flex h-14 items-center border-t border-border-primary bg-neutral-100/);
+  assert.match(carousel, /className="min-w-0 truncate"/);
+  assert.doesNotMatch(carousel, /<figcaption[^>]*>[\s\S]*?<span[^>]*>\{shownIndex \+ 1\} \/ \{images\.length\}/);
   assert.match(carousel, /aria-label="Carousel controls"/);
+  assert.match(carousel, /w-\[60vw\] max-w-full/);
+  assert.match(carousel, /gridTemplateColumns: `repeat\(\$\{images\.length\}, minmax\(0, 1fr\)\)`/);
+  assert.match(carousel, /transition=\{\{ duration: 5, ease: "linear" \}\}/);
+  assert.doesNotMatch(carousel, /images\.length <= 8|images\.length <= 12/);
   assert.match(carousel, /aria-label="Previous image"/);
   assert.match(carousel, /aria-label="Next image"/);
   assert.match(carousel, /createPortal\(/);

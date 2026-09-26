@@ -137,16 +137,20 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
           {loading && <span role="status" className="absolute bottom-3 left-3 z-10 rounded-full bg-neutral-950 px-3 py-2 text-xs text-white">{imageError ? "Image unavailable. Choose another." : "Loading image..."}</span>}
           <button ref={expandRef} type="button" disabled={loading} onClick={() => setExpanded(true)} aria-label={`Open image ${shownIndex + 1} in full screen`} className="absolute inset-0 z-10 cursor-zoom-in focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-text-primary disabled:cursor-wait" />
         </div>
-        <figcaption aria-live="polite" className="flex min-h-14 flex-wrap items-start gap-x-3 gap-y-1 border-t border-border-primary px-4 py-3 text-sm leading-5 text-text-secondary sm:px-5">
-          <span className="shrink-0 whitespace-nowrap font-mono text-xs leading-5">{shownIndex + 1} / {images.length}</span>
-          {shown.caption && <span className="min-w-0 flex-1 break-words">{shown.caption}</span>}
+        <figcaption aria-live="polite" className="flex h-14 items-center border-t border-border-primary bg-neutral-100 px-4 text-sm font-medium text-text-primary dark:bg-neutral-900 sm:px-5">
+          <span className="min-w-0 truncate" title={shown.caption || (shownIndex === 0 ? "Project cover" : "Project image")}>{shown.caption || (shownIndex === 0 ? "Project cover" : "Project image")}</span>
         </figcaption>
       </motion.figure>
-      {images.length > 1 && <div role="group" aria-label="Carousel controls" className="mt-4 flex items-center justify-between gap-3 px-2 sm:px-4">
+      {images.length > 1 && <div role="group" aria-label="Carousel controls" className="mx-auto mt-4 grid w-[60vw] max-w-full grid-cols-[44px_minmax(0,1fr)_44px] items-center gap-1 sm:gap-3">
         <button type="button" aria-label="Previous image" onClick={() => goTo(index - 1)} className="flex size-11 shrink-0 items-center justify-center rounded-full border border-border-primary text-text-primary hover:bg-text-primary/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary"><ChevronLeft aria-hidden className="size-5" /></button>
-        <div className="flex min-w-0 items-center justify-center gap-2 sm:gap-3">
-          {images.length <= 8 ? <div className="hidden items-center gap-1 sm:flex">{images.map((image, position) => <button key={`${image.src}-${position}`} type="button" aria-label={`Go to image ${position + 1}`} aria-current={position === index ? "true" : undefined} onClick={() => goTo(position)} className="group flex h-11 items-center px-1"><span className={`h-1 rounded-full transition-all ${position === index ? "w-10 bg-text-primary" : "w-5 bg-border-primary group-hover:bg-text-secondary"}`} /></button>)}</div> : null}
-          <div role="progressbar" aria-label="Image position" aria-valuenow={shownIndex + 1} aria-valuemin={1} aria-valuemax={images.length} className={`h-1 w-16 overflow-hidden rounded-full bg-border-primary ${images.length <= 8 ? "sm:hidden" : ""}`}><div className="h-full bg-text-primary" style={{ width: `${((shownIndex + 1) / images.length) * 100}%` }} /></div>
+        <div className="mx-auto flex w-full max-w-[300px] min-w-0 items-center justify-center gap-1 sm:gap-3">
+          <div className={`grid h-11 min-w-0 flex-1 items-center ${images.length > 12 ? "gap-0" : "gap-0.5 sm:gap-1"}`} style={{ gridTemplateColumns: `repeat(${images.length}, minmax(0, 1fr))` }}>
+            {images.map((image, position) => <button key={`${image.src}-${position}`} type="button" aria-label={`Go to image ${position + 1}`} aria-current={position === shownIndex ? "true" : undefined} onClick={() => goTo(position)} className="flex h-11 min-w-0 items-center justify-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary">
+              <span className="relative block h-1 w-full overflow-hidden rounded-full bg-border-primary">
+                {position === shownIndex && (canPlay ? <motion.span key={`${shownIndex}-${cycle}-${canPlay}`} className="absolute inset-0 origin-left bg-text-primary" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 5, ease: "linear" }} /> : <span className="absolute inset-0 bg-text-primary" />)}
+              </span>
+            </button>)}
+          </div>
           <button type="button" onClick={() => setPaused((value) => !value)} aria-label={paused ? "Play carousel" : "Pause carousel"} className="flex size-11 shrink-0 items-center justify-center rounded-full border border-border-primary text-text-secondary hover:bg-text-primary/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary">{paused ? <Play aria-hidden className="size-4" /> : <Pause aria-hidden className="size-4" />}</button>
         </div>
         <button type="button" aria-label="Next image" onClick={() => goTo(index + 1)} className="flex size-11 shrink-0 items-center justify-center rounded-full border border-border-primary text-text-primary hover:bg-text-primary/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary"><ChevronRight aria-hidden className="size-5" /></button>
@@ -166,7 +170,7 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
             </div>
           </motion.div>
           <div className="flex min-h-11 min-w-0 flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            <p aria-live="polite" className="max-h-24 min-w-0 flex-1 overflow-y-auto break-words text-xs leading-5 text-neutral-600 dark:text-neutral-300 sm:text-sm">{shownIndex + 1} / {images.length}{shown.caption && `  ${shown.caption}`}</p>
+            <p aria-live="polite" className="max-h-24 min-w-0 flex-1 overflow-y-auto break-words text-xs leading-5 text-neutral-600 dark:text-neutral-300 sm:text-sm">{shown.caption || (shownIndex === 0 ? "Project cover" : "Project image")}</p>
             {images.length > 1 && <div className="flex shrink-0 justify-end gap-2">
               <button type="button" aria-label="Previous full-screen image" onClick={() => goTo(index - 1)} className="flex size-11 items-center justify-center rounded-full border border-neutral-300 bg-white transition-colors hover:bg-neutral-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-950 dark:border-white/25 dark:bg-white/10 dark:hover:bg-white/20 dark:focus-visible:outline-white"><ChevronLeft aria-hidden className="size-5" /></button>
               <button type="button" aria-label="Next full-screen image" onClick={() => goTo(index + 1)} className="flex size-11 items-center justify-center rounded-full border border-neutral-300 bg-white transition-colors hover:bg-neutral-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-950 dark:border-white/25 dark:bg-white/10 dark:hover:bg-white/20 dark:focus-visible:outline-white"><ChevronRight aria-hidden className="size-5" /></button>
