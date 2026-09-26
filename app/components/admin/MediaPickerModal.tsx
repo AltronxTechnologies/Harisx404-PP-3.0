@@ -200,7 +200,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
 
                   <label className="cursor-pointer px-6 py-3 bg-accent-signal text-white rounded-xl text-sm font-medium shadow-sm hover:bg-accent-signal/90 transition-colors">
                     Choose File
-                    <input type="file" className="hidden" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" onChange={handleUpload} />
+                    <input type="file" className="hidden" accept="image/*,.heic,.heif,.tif,.tiff,.bmp" onChange={handleUpload} />
                   </label>
                 </div>
               )}

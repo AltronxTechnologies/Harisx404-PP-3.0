@@ -28,14 +28,15 @@ export async function POST(request: Request) {
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
     
-    if (!file) {
+    if (!(file instanceof File)) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
-    if (!["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"].includes(file.type)) {
-      return NextResponse.json({ error: "Choose a JPEG, PNG, WebP, GIF, or AVIF image" }, { status: 415 });
+    if (file.type === "image/svg+xml" || /\.svgz?$/i.test(file.name) ||
+        (!file.type.startsWith("image/") && !(file.type === "" && /\.(?:jpe?g|png|webp|gif|avif|heic|heif|tiff?|bmp|ico)$/i.test(file.name)))) {
+      return NextResponse.json({ error: "Choose a supported image file (SVG is not accepted)" }, { status: 415 });
     }
-    if (!file.size || file.size > 10_000_000) {
-      return NextResponse.json({ error: "Image must be smaller than 10 MB" }, { status: 413 });
+    if (!file.size) {
+      return NextResponse.json({ error: "Image is empty" }, { status: 400 });
     }
 
     // Convert the file to a buffer

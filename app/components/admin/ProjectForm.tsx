@@ -42,7 +42,7 @@ const projectSchema = z.object({
   features: z.string().optional().or(z.literal("")),
   content: z.string().optional(),
   status: z.enum(["draft", "published", "archived"]),
-  cover_image_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  cover_image_url: z.string().url("At least one image is required; choose a cover").refine((url) => /^https?:\/\//i.test(url), "Use an HTTP or HTTPS image URL"),
   cover_image_id: z.string().uuid().optional().or(z.literal("")),
   live_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   github_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
@@ -71,7 +71,8 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
-  const [mediaPickerTarget, setMediaPickerTarget] = useState<"cover" | "gallery">("cover");
+  const [mediaPickerTarget, setMediaPickerTarget] = useState<"cover" | "gallery" | "replace-gallery">("cover");
+  const [replacingIndex, setReplacingIndex] = useState(0);
   const [mediaPickerTab, setMediaPickerTab] = useState<"library" | "upload">("library");
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>(initialData?.galleryImages ?? []);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -401,7 +402,8 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
       </div>
 
       <div className="space-y-3">
-        <h2 className="text-sm font-medium">Project cover</h2>
+        <h2 className="text-sm font-medium">Project images</h2>
+        <p className="text-xs text-ink-secondary">At least one image is required. The cover appears first in the project carousel; add as many more images as you need. Reorder or replace them below.</p>
         {coverUrl && z.string().url().safeParse(coverUrl).success ? (
           <div className="relative isolate flex h-48 items-center justify-center overflow-hidden rounded-xl border border-border-hairline bg-neutral-100 dark:bg-white/[0.04]">
             {/* A direct preview supports manually entered image hosts outside Next's remote allowlist. */}
@@ -414,9 +416,9 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
         <div className="flex flex-wrap gap-2">
           <button type="button" onClick={() => { setMediaPickerTarget("cover"); setMediaPickerTab("upload"); setIsMediaPickerOpen(true); }} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border-hairline px-3 text-sm text-text-primary hover:bg-surface-base"><UploadCloud className="size-4" aria-hidden />{coverUrl ? "Upload replacement" : "Upload cover"}</button>
           <button type="button" onClick={() => { setMediaPickerTarget("cover"); setMediaPickerTab("library"); setIsMediaPickerOpen(true); }} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border-hairline px-3 text-sm text-text-primary hover:bg-surface-base"><ImageIcon className="size-4" aria-hidden />Choose from library</button>
-          {coverUrl && <button type="button" onClick={() => { setValue("cover_image_url", "", { shouldDirty: true, shouldValidate: true }); setValue("cover_image_id", "", { shouldDirty: true }); }} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border-hairline px-3 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"><Trash2 className="size-4" aria-hidden />Remove cover</button>}
+          {coverUrl && <button type="button" disabled={galleryImages.length === 0} onClick={() => { const [nextCover, ...remaining] = galleryImages; setValue("cover_image_url", nextCover.url, { shouldDirty: true, shouldValidate: true }); setValue("cover_image_id", nextCover.mediaId, { shouldDirty: true }); setGalleryImages(remaining); }} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border-hairline px-3 text-sm text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 dark:text-red-400 dark:hover:bg-red-950/30"><Trash2 className="size-4" aria-hidden />Remove cover</button>}
         </div>
-        <p className="text-xs text-ink-secondary">Replacing or removing the cover takes effect when you save. Removing it does not delete a shared media-library image.</p>
+        <p className="text-xs text-ink-secondary">Removing the cover promotes the next image. Add another image first if this is the only one. Changes take effect when you save and do not delete shared media-library images.</p>
         <label htmlFor="project-cover-url" className="block text-xs text-ink-secondary">Or enter a cover image URL</label>
         <input id="project-cover-url" {...coverField} onChange={(event) => { coverField.onChange(event); setValue("cover_image_id", "", { shouldDirty: true }); }} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="https://..." />
         <input type="hidden" {...register("cover_image_id")} />
@@ -425,7 +427,7 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
 
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-4">
-          <label className="text-sm font-medium">Gallery Images</label>
+          <h3 className="text-sm font-medium">More carousel images</h3>
           <button
             type="button"
             onClick={() => { setMediaPickerTarget("gallery"); setMediaPickerTab("library"); setIsMediaPickerOpen(true); }}
@@ -434,7 +436,7 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
             <ImageIcon className="h-4 w-4" /> Add from Media Library
           </button>
         </div>
-        {galleryImages.length === 0 && <p className="text-sm text-ink-secondary">No gallery images yet.</p>}
+        {galleryImages.length === 0 && <p className="text-sm text-ink-secondary">No additional images yet.</p>}
         <div className="space-y-3">
           {galleryImages.map((image, index) => (
             <div key={image.mediaId} className="flex flex-col gap-3 rounded-xl border border-border-hairline bg-surface-base p-3 sm:flex-row sm:items-center">
@@ -449,8 +451,10 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
                   placeholder="Optional caption"
                 />
                 {image.altText && <p className="text-xs text-ink-secondary">Alt text: {image.altText}</p>}
+                <button type="button" onClick={() => { setValue("cover_image_url", image.url, { shouldDirty: true, shouldValidate: true }); setValue("cover_image_id", image.mediaId, { shouldDirty: true }); setGalleryImages((images) => images.filter((item) => item.mediaId !== image.mediaId)); }} className="text-left text-xs text-accent-signal underline underline-offset-2">Make cover (first image)</button>
               </div>
               <div className="flex gap-1">
+                <button type="button" aria-label={`Replace image ${index + 2}`} onClick={() => { setReplacingIndex(index); setMediaPickerTarget("replace-gallery"); setMediaPickerTab("upload"); setIsMediaPickerOpen(true); }} className="rounded-lg p-2 hover:bg-surface-raised"><UploadCloud className="h-4 w-4" /></button>
                 <button type="button" aria-label={`Move image ${index + 1} up`} disabled={index === 0} onClick={() => setGalleryImages((images) => { const next = [...images]; [next[index - 1], next[index]] = [next[index], next[index - 1]]; return next; })} className="rounded-lg p-2 hover:bg-surface-raised disabled:opacity-40"><ArrowUp className="h-4 w-4" /></button>
                 <button type="button" aria-label={`Move image ${index + 1} down`} disabled={index === galleryImages.length - 1} onClick={() => setGalleryImages((images) => { const next = [...images]; [next[index], next[index + 1]] = [next[index + 1], next[index]]; return next; })} className="rounded-lg p-2 hover:bg-surface-raised disabled:opacity-40"><ArrowDown className="h-4 w-4" /></button>
                 <button type="button" aria-label={`Remove image ${index + 1}`} onClick={() => setGalleryImages((images) => images.filter((item) => item.mediaId !== image.mediaId))} className="rounded-lg p-2 text-red-500 hover:bg-surface-raised"><Trash2 className="h-4 w-4" /></button>
@@ -468,7 +472,14 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
           if (mediaPickerTarget === "cover") {
             setValue("cover_image_url", media.secure_url || media.url, { shouldDirty: true, shouldValidate: true });
             setValue("cover_image_id", media.id, { shouldDirty: true });
+            setGalleryImages((images) => images.filter((image) => image.mediaId !== media.id));
+          } else if (mediaPickerTarget === "replace-gallery") {
+            if (media.id === getValues("cover_image_id")) return;
+            setGalleryImages((images) => images.some((image, index) => image.mediaId === media.id && index !== replacingIndex)
+              ? images
+              : images.map((image, index) => index === replacingIndex ? { mediaId: media.id, url: media.secure_url || media.url, caption: image.caption, altText: media.alt_text || "" } : image));
           } else {
+            if (media.id === getValues("cover_image_id")) return;
             setGalleryImages((images) => images.some((image) => image.mediaId === media.id)
               ? images
               : [...images, { mediaId: media.id, url: media.secure_url || media.url, caption: "", altText: media.alt_text || "" }]);

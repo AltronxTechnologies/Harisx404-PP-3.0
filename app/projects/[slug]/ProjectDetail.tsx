@@ -1,14 +1,13 @@
 "use client";
 
 import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import { ArrowUpRight, ChevronDown, Copy, ExternalLink, MessageCircle, Sparkles } from "lucide-react";
 import { GridWrapper } from "@/app/components/GridWrapper";
 import { PaperHeroTexture } from "@/app/components/PaperHeroTexture";
 import { CtaSection } from "@/app/components/home/CtaSection";
-import { optimizeImageUrl } from "@/app/lib/image-utils";
+import { ProjectImageCarousel } from "./ProjectImageCarousel";
 
 export type DetailProject = {
   title: string;
@@ -119,7 +118,10 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
   const shareTriggerRef = useRef<HTMLButtonElement>(null);
   const firstShareItemRef = useRef<HTMLButtonElement>(null);
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const galleryImages = project.gallery.filter((image) => image.src && image.src !== project.image_url);
+  const images = [
+    ...(project.image_url ? [{ src: project.image_url, alt: `${project.title} cover image`, caption: "" }] : []),
+    ...project.gallery.filter((image) => image.src && image.src !== project.image_url),
+  ];
   const categories = [...new Set(project.category.split(/\s+\/\s+|,/).map((category) => category.trim()).filter(Boolean))];
   const domainTags = [...new Set(project.tags.map((tag) => tag.trim()).filter(Boolean))];
   const sourceUrl = /^https?:\/\/(?:www\.)?github\.com\/[^/?#]+\/?(?:\?.*)?$/i.test(project.github_url) ? "" : project.github_url;
@@ -141,12 +143,6 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
     const text = project.sections[key];
     if (key !== "why_built" && text) story.push({ title: label, content: <CaseStudy content={text} /> });
   }
-  if (galleryImages.length) story.push({ title: "Gallery", content: <div className="grid gap-4 sm:grid-cols-2">{galleryImages.map((image, index) => (
-    <figure key={`${image.src}-${index}`} className="overflow-hidden rounded-2xl border border-border-primary bg-neutral-100 dark:bg-white/[0.04]">
-      <div className="relative aspect-video"><Image src={optimizeImageUrl(image.src, 1000)} alt={image.alt || image.caption || `${project.title} gallery image ${index + 1}`} fill sizes="(max-width: 640px) 100vw, 50vw" className="object-contain" /></div>
-      {image.caption && <figcaption className="border-t border-border-primary px-4 py-3 text-sm leading-5 text-text-secondary">{image.caption}</figcaption>}
-    </figure>
-  ))}</div> });
 
   useEffect(() => {
     if (!shareOpen) return;
@@ -325,12 +321,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
       </section>
 
       <article className="mx-auto mt-14 max-w-6xl px-2 sm:px-4">
-        {project.image_url && (
-          <figure className="relative isolate aspect-[4/3] overflow-hidden rounded-3xl border border-border-primary bg-neutral-100 dark:bg-white/[0.04] sm:aspect-video">
-            <Image src={optimizeImageUrl(project.image_url, 1600)} alt="" aria-hidden fill sizes="(max-width: 1280px) 100vw, 1152px" className="object-cover opacity-25 blur-xl" />
-            <Image src={optimizeImageUrl(project.image_url, 1600)} alt={`${project.title} cover image`} fill priority sizes="(max-width: 1280px) 100vw, 1152px" className="z-10 object-contain" />
-          </figure>
-        )}
+        {images.length > 0 && <ProjectImageCarousel images={images} title={project.title} />}
         {story.length > 0 && <div className="mt-10 border-t border-border-primary" />}
         {story.map(({ title, content }, index) => <Fragment key={title}>
           {index > 0 && <SectionRule />}

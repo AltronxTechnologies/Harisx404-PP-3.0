@@ -47,13 +47,14 @@ test("project mutations reject unauthenticated requests", async () => {
   }
 });
 
-test("cover upload, replacement and removal keep shared media intact", async () => {
-  const [form, picker, upload, api, detail, fixture, compose] = await Promise.all([
+test("project images enforce a cover, allow ordered additions, and deliver responsive WebP", async () => {
+  const [form, picker, upload, api, detail, carousel, fixture, compose] = await Promise.all([
     readFile(new URL("../app/components/admin/ProjectForm.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/components/admin/MediaPickerModal.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/api/admin/media/upload/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/api/admin/projects/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/projects/[slug]/ProjectDetail.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/projects/[slug]/ProjectImageCarousel.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/data/project-preview-fixtures.ts", import.meta.url), "utf8"),
     readFile(new URL("../docker-compose.alloy.yaml", import.meta.url), "utf8"),
   ]);
@@ -61,17 +62,25 @@ test("cover upload, replacement and removal keep shared media intact", async () 
   assert.match(form, /Upload replacement/);
   assert.match(form, /setMediaPickerTab\("upload"\)/);
   assert.match(form, /Choose from library/);
-  assert.match(form, /setValue\("cover_image_url", ""/);
-  assert.match(form, /setValue\("cover_image_id", ""/);
-  assert.match(form, /does not delete a shared media-library image/);
+  assert.match(form, /At least one image is required/);
+  assert.match(form, /setValue\("cover_image_url", nextCover\.url/);
+  assert.match(form, /do not delete shared media-library images/);
   assert.match(form, /setValue\("cover_image_id", media\.id/);
+  assert.match(form, /Make cover \(first image\)/);
+  assert.match(form, /Replace image/);
   assert.match(picker, /setActiveTab\(initialTab\)/);
   assert.match(api, /cover_image_id: data\.cover_image_id \|\| null/);
+  assert.match(api, /cover_image_url: z\.string\(\)\.url\(\)/);
+  assert.doesNotMatch(api, /gallery: z\.array\([^\n]+\.max\(100\)/);
   assert.match(upload, /auth\.getUser\(\)/);
   assert.match(upload, /ADMIN_EMAIL/);
   assert.match(upload, /createSupabaseAdminClient\(\)/);
-  assert.match(detail, /object-cover opacity-25 blur-xl/);
-  assert.match(detail, /z-10 object-contain/);
+  assert.doesNotMatch(upload, /10_000_000/);
+  assert.match(detail, /<ProjectImageCarousel images=\{images\}/);
+  assert.doesNotMatch(detail, /title: "Gallery"/);
+  assert.match(carousel, /f_webp,q_auto:good,c_limit,w_/);
+  assert.match(carousel, /object-contain/);
+  assert.match(carousel, /drag=\{images\.length > 1/);
   assert.match(fixture, /portraitPhoto\(cover_photo\)/);
   assert.match(compose, /CLOUDINARY_API_SECRET: \$\{CLOUDINARY_API_SECRET:-\}/);
 
@@ -92,7 +101,8 @@ test("project gallery and narrative are sourced from Admin-authored data", async
   assert.match(page, /Array\.isArray\(p\.galleryDetails\)/);
   assert.doesNotMatch(page, /genericFeatures|formatQuarter/);
   assert.match(detail, /<ReactMarkdown/);
-  assert.match(detail, /image\.alt \|\| image\.caption/);
+  assert.match(detail, /project\.gallery\.filter/);
+  assert.match(detail, /<ProjectImageCarousel/);
   assert.doesNotMatch(detail, /dangerouslySetInnerHTML/);
   assert.match(publicData, /project_images \( display_order, caption, media \( secure_url, url, alt_text \) \)/);
   assert.match(api, /auth\.getUser\(\)/);
@@ -177,13 +187,15 @@ test("Alloy preview gives every published project a distinct, complete example w
     }
     assert.doesNotMatch(html, /Preview-only case study\.|Case study \/ /, slug);
     assert.ok(html.includes("noindex,nofollow"), slug);
-    for (const heading of ["Overview", "Why I built this", "Highlights", "Key decisions", "Results", "What I learned", "Gallery"]) {
+    for (const heading of ["Overview", "Why I built this", "Highlights", "Key decisions", "Results", "What I learned"]) {
       assert.ok(html.includes(`>${heading}</h2>`), `${slug} should have ${heading}`);
     }
+    assert.doesNotMatch(html, />Gallery<\/h2>/, slug);
+    assert.match(html, /aria-label="[^"]+ images"/, `${slug} needs the image carousel`);
     assert.ok(html.includes("Latest update"), slug);
     assert.doesNotMatch(html, /<dt[^>]*>Stage<\/dt>/, slug);
     assert.ok(html.includes("preview stock image, not a project screenshot"), slug);
-    assert.ok((html.match(/<figcaption/g) || []).length >= 2, `${slug} needs at least two captioned preview images`);
+    assert.match(html, /aria-label="Image 1 of [2-9][0-9]*"/, `${slug} needs a cover followed by preview images`);
     const categoryHtml = html.match(/<dt[^>]*>Category<\/dt><dd[^>]*>(.*?)<\/dd>/s)?.[1];
     const categoryPills = [...(categoryHtml || "").matchAll(/<span[^>]*rounded-full[^>]*>([^<]+)<\/span>/g)].map((match) => match[1]);
     const summary = html.match(/<h1[^>]*>[^<]+<\/h1><p[^>]*>([^<]+)<\/p>/)?.[1];

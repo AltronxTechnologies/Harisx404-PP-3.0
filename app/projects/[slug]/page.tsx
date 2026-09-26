@@ -45,8 +45,7 @@ function mapDbProject(p: any): DetailProject {
     sourceNote: p.source_note || "",
     features: Array.isArray(p.features) ? p.features.filter(Boolean) : [],
     tags: Array.isArray((p as any).tags) ? (p as any).tags : [],
-    /* Extra screenshots (sorted); the cover is filtered out client-side so
-       the gallery never repeats the hero image. */
+    /* Ordered project images after the cover; the carousel skips a duplicate cover. */
     gallery: Array.isArray(p.galleryDetails) ? p.galleryDetails : [],
   };
 }

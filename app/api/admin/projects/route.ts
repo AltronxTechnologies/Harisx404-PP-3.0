@@ -14,7 +14,7 @@ const projectFieldsSchema = z.object({
   description: optionalText,
   content: z.string().max(200000).optional().default(""),
   status: z.enum(["draft", "published", "archived"]),
-  cover_image_url: optionalUrl,
+  cover_image_url: z.string().url().refine((url) => /^https?:\/\//i.test(url), "At least one image is required"),
   cover_image_id: z.union([z.literal(""), idSchema]).optional().default(""),
   live_url: optionalUrl,
   github_url: optionalUrl,
@@ -35,7 +35,7 @@ const projectFieldsSchema = z.object({
   tech_stack: z.array(z.string().trim().min(1).max(100)).optional().default([]),
   features: z.array(z.string().trim().min(1).max(500)).max(100).optional().default([]),
   tags: z.array(z.string().trim().min(1).max(100)).optional().default([]),
-  gallery: z.array(z.object({ mediaId: idSchema, caption: z.string().max(1000) }).strict()).max(100).optional().default([]),
+  gallery: z.array(z.object({ mediaId: idSchema, caption: z.string().max(1000) }).strict()).optional().default([]),
 }).strict();
 const uniqueGallery = (data: z.infer<typeof projectFieldsSchema>) => new Set(data.gallery.map((image) => image.mediaId)).size === data.gallery.length;
 const projectSchema = projectFieldsSchema.refine(uniqueGallery, {

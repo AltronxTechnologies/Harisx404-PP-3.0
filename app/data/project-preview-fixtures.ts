@@ -33,7 +33,7 @@ export const projectPreviewFixtures: Record<string, PreviewSeed> = {
       why_built: "Network alerts are useful only when an analyst can understand and act on them. This preview frames the project around shortening the path from a raw event to a triage decision.",
       key_decisions: "- Separate sensor ingestion from the investigation interface.\n- Keep alert history visible alongside the selected event.\n- Surface uncertainty rather than presenting every detection as confirmed.",
       results: "The example result is a readable incident workflow: overview, priority, evidence, and next action stay together. Real detection accuracy and response-time figures would need to be supplied by the owner.",
-      lessons_learned: "A useful security dashboard needs a clear evidence trail more than another chart. The preview uses this idea to test long-form text, bullet lists, and gallery rhythm.",
+      lessons_learned: "A useful security dashboard needs a clear evidence trail more than another chart. The preview uses this idea to test long-form text, bullet lists, and image-carousel rhythm.",
     },
     source_note: "Private security code",
     gallery: [
