@@ -90,6 +90,12 @@ test("project images enforce a cover, allow ordered additions, and deliver respo
   assert.match(carousel, /node\.inert = true/);
   assert.match(carousel, /requestAnimationFrame\(\(\) => opener\?\.focus\(\)\)/);
   assert.match(carousel, /touch-pan-y/);
+  assert.match(carousel, /entry\.intersectionRatio >= 0\.35/);
+  assert.match(carousel, /visibilitychange/);
+  assert.match(carousel, /backgroundColor: "var\(--bg-primary\)"/);
+  assert.match(carousel, /onLoad=\{\(\) => \{ if \(wantedSrcRef\.current === current\.src\)/);
+  assert.match(carousel, /sizes=\{zoomed \? "200vw" : "100vw"\}/);
+  assert.doesNotMatch(carousel, /bg-bg-primary\/95|flex-1 truncate text-xs/);
   assert.match(fixture, /portraitPhoto\(cover_photo\)/);
   assert.match(compose, /CLOUDINARY_API_SECRET: \$\{CLOUDINARY_API_SECRET:-\}/);
 
