@@ -81,6 +81,15 @@ test("project images enforce a cover, allow ordered additions, and deliver respo
   assert.match(carousel, /f_webp,q_auto:good,c_limit,w_/);
   assert.match(carousel, /object-contain/);
   assert.match(carousel, /drag=\{images\.length > 1/);
+  assert.match(carousel, /aspect-\[4\/3\].*sm:aspect-video/);
+  assert.match(carousel, /aria-label=\{`View image \$\{index \+ 1\} in full screen`\}/);
+  assert.match(carousel, /createPortal\(/);
+  assert.match(carousel, /aria-modal="true"/);
+  assert.match(carousel, /event\.key === "Escape"/);
+  assert.match(carousel, /event\.key === "ArrowRight" \|\| event\.key === "ArrowLeft"/);
+  assert.match(carousel, /node\.inert = true/);
+  assert.match(carousel, /requestAnimationFrame\(\(\) => opener\?\.focus\(\)\)/);
+  assert.match(carousel, /touch-pan-y/);
   assert.match(fixture, /portraitPhoto\(cover_photo\)/);
   assert.match(compose, /CLOUDINARY_API_SECRET: \$\{CLOUDINARY_API_SECRET:-\}/);
 
