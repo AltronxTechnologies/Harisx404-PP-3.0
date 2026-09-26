@@ -226,6 +226,12 @@ export function withProjectPreview<T extends { slug: string; title?: string; cov
     ...project,
     ...fields,
     cover_image_url: cover_photo ? portraitPhoto(cover_photo) : project.cover_image_url,
+    case_study_sections: {
+      ...seed.case_study_sections,
+      cover_caption: cover_photo
+        ? "Portrait stock reference - preview image, not a project screenshot"
+        : (project as T & { case_study_sections?: { cover_caption?: string } }).case_study_sections?.cover_caption || "",
+    },
     description: seed.tagline,
     live_url: seed.live_url || "",
     github_url: seed.github_url || "",

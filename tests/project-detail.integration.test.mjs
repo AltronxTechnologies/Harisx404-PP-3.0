@@ -48,13 +48,14 @@ test("project mutations reject unauthenticated requests", async () => {
 });
 
 test("project images enforce a cover, allow ordered additions, and deliver responsive WebP", async () => {
-  const [form, picker, upload, api, detail, carousel, fixture, compose] = await Promise.all([
+  const [form, picker, upload, api, detail, carousel, page, fixture, compose] = await Promise.all([
     readFile(new URL("../app/components/admin/ProjectForm.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/components/admin/MediaPickerModal.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/api/admin/media/upload/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/api/admin/projects/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/projects/[slug]/ProjectDetail.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/projects/[slug]/ProjectImageCarousel.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/projects/[slug]/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/data/project-preview-fixtures.ts", import.meta.url), "utf8"),
     readFile(new URL("../docker-compose.alloy.yaml", import.meta.url), "utf8"),
   ]);
@@ -68,11 +69,15 @@ test("project images enforce a cover, allow ordered additions, and deliver respo
   assert.match(form, /setValue\("cover_image_id", media\.id/);
   assert.match(form, /Make cover \(first image\)/);
   assert.match(form, /Replace image/);
-  assert.match(form, /maxLength=\{32\}/);
-  assert.match(form, /replace\(\/\[\\r\\n\]\+\/g, " "\)\.slice\(0, 32\)/);
+  assert.match(form, /register\("case_study_sections\.cover_caption"\)/);
+  assert.match(form, /maxLength=\{200\}/);
+  assert.match(form, /\.slice\(0, 200\)/);
+  assert.match(form, /setValue\("case_study_sections\.cover_caption", nextCover\.caption/);
   assert.match(picker, /setActiveTab\(initialTab\)/);
   assert.match(api, /cover_image_id: data\.cover_image_id \|\| null/);
   assert.match(api, /cover_image_url: z\.string\(\)\.url\(\)/);
+  assert.match(api, /cover_caption: z\.string\(\)\.max\(200\)\.optional\(\)\.default\(""\)/);
+  assert.match(api, /caption: z\.string\(\)\.max\(200\)/);
   assert.doesNotMatch(api, /gallery: z\.array\([^\n]+\.max\(100\)/);
   assert.match(upload, /auth\.getUser\(\)/);
   assert.match(upload, /ADMIN_EMAIL/);
@@ -88,11 +93,13 @@ test("project images enforce a cover, allow ordered additions, and deliver respo
   assert.match(carousel, /exit="exit"/);
   assert.match(carousel, /className="pointer-events-none select-none object-cover"/);
   assert.doesNotMatch(carousel, /Open image|createPortal|data-project-image-viewer|ZoomIn|ZoomOut/);
-  assert.match(carousel, /<figcaption aria-live="polite"/);
-  assert.match(carousel, /className="flex h-12 items-center justify-center gap-1 border-t border-border-primary bg-neutral-100 px-4 text-center text-xs font-normal/);
-  assert.match(carousel, /&ldquo;|&rdquo;/);
-  assert.match(carousel, /className="min-w-0 truncate"/);
-  assert.doesNotMatch(carousel, /<figcaption[^>]*>[\s\S]*?<span[^>]*>\{shownIndex \+ 1\} \/ \{images\.length\}/);
+  assert.doesNotMatch(carousel, /<figcaption/);
+  assert.match(carousel, /<MessageSquareText/);
+  assert.match(carousel, /aria-expanded=\{captionOpen\}/);
+  assert.match(carousel, /role="region" aria-label="Image caption"/);
+  assert.match(carousel, /!paused && !captionOpen && !loading/);
+  assert.match(detail, /caption: project\.coverCaption/);
+  assert.match(page, /coverCaption: p\.case_study_sections\?\.cover_caption/);
   assert.match(carousel, /aria-label="Carousel controls"/);
   assert.match(carousel, /mt-8 flex flex-wrap items-center justify-center gap-4/);
   assert.match(carousel, /order-1 flex w-full max-w-\[70vw\] flex-wrap items-center justify-center sm:order-none sm:w-auto/);
@@ -106,7 +113,7 @@ test("project images enforce a cover, allow ordered additions, and deliver respo
   assert.match(carousel, /aria-label="Previous image"/);
   assert.match(carousel, /aria-label="Next image"/);
   assert.doesNotMatch(carousel, /onMouseEnter|onMouseLeave|setHovered|setFocused/);
-  assert.match(carousel, /visible && pageActive && !paused && !loading/);
+  assert.match(carousel, /visible && pageActive && !paused && !captionOpen && !loading/);
   assert.match(carousel, /entry\.intersectionRatio >= 0\.35/);
   assert.match(carousel, /visibilitychange/);
   assert.match(carousel, /readyUrlsRef\.current\.add\(current\.src\)/);
@@ -114,6 +121,7 @@ test("project images enforce a cover, allow ordered additions, and deliver respo
   assert.match(carousel, /window\.setTimeout\(\(\) => setShowLoading\(true\), 350\)/);
   assert.doesNotMatch(carousel, /bg-bg-primary\/95|flex-1 truncate text-xs/);
   assert.match(fixture, /portraitPhoto\(cover_photo\)/);
+  assert.match(fixture, /Portrait stock reference - preview image, not a project screenshot/);
   assert.match(compose, /CLOUDINARY_API_SECRET: \$\{CLOUDINARY_API_SECRET:-\}/);
 
   const response = await fetch(`${baseUrl}/api/admin/media/upload`, { method: "POST" });

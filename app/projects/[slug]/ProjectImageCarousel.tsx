@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image, { type ImageLoaderProps } from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
+import { ChevronLeft, ChevronRight, MessageSquareText, Pause, Play } from "lucide-react";
 
 type Slide = { src: string; alt: string; caption: string };
 
@@ -17,6 +17,7 @@ const controlClass = "flex h-11 w-11 shrink-0 items-center justify-center rounde
 export function ProjectImageCarousel({ images, title }: { images: Slide[]; title: string }) {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [captionOpen, setCaptionOpen] = useState(false);
   const [visible, setVisible] = useState(false);
   const [pageActive, setPageActive] = useState(true);
   const [cycle, setCycle] = useState(0);
@@ -37,7 +38,7 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
       .filter((image, position, list) => image.src !== shown.src && list.findIndex((item) => item.src === image.src) === position)
     : [];
   wantedSrcRef.current = current?.src;
-  const canPlay = images.length > 1 && visible && pageActive && !paused && !loading;
+  const canPlay = images.length > 1 && visible && pageActive && !paused && !captionOpen && !loading;
 
   useEffect(() => {
     if (reducedMotion) setPaused(true);
@@ -56,7 +57,7 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
 
   useEffect(() => {
     if (!canPlay) return;
-    const timer = window.setInterval(() => { setDirection(1); setIndex((value) => (value + 1) % images.length); }, 5000);
+    const timer = window.setInterval(() => { setCaptionOpen(false); setDirection(1); setIndex((value) => (value + 1) % images.length); }, 5000);
     return () => window.clearInterval(timer);
   }, [canPlay, cycle, images.length]);
 
@@ -74,6 +75,7 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
 
   const goTo = (next: number) => {
     const target = (next + images.length) % images.length;
+    setCaptionOpen(false);
     setDirection(next < index ? -1 : 1);
     setImageError(false);
     if (readyUrlsRef.current.has(images[target].src)) setDisplayed(images[target]);
@@ -105,12 +107,11 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
             </motion.div>
           </AnimatePresence>
           {loading && (showLoading || imageError) && <span role="status" className="absolute bottom-3 left-3 z-10 rounded-full bg-neutral-950 px-3 py-2 text-xs text-white">{imageError ? "Image unavailable. Choose another." : "Loading image..."}</span>}
+          {!loading && shown.caption.trim() && <>
+            {captionOpen && <div id="project-image-caption" role="region" aria-label="Image caption" className="absolute bottom-16 left-3 z-20 max-h-[min(55%,200px)] w-72 max-w-[calc(100%-1.5rem)] overflow-y-auto whitespace-pre-wrap break-words rounded-xl border border-border-primary bg-bg-primary px-4 py-3 text-sm leading-5 text-text-primary shadow-lg">{shown.caption}</div>}
+            <button type="button" aria-label={captionOpen ? "Hide image caption" : "Show image caption"} aria-expanded={captionOpen} aria-controls="project-image-caption" onClick={() => setCaptionOpen((open) => !open)} className="absolute bottom-3 left-3 z-20 flex size-11 items-center justify-center rounded-full border border-border-primary bg-bg-primary text-text-primary shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary"><MessageSquareText aria-hidden className="size-4" /></button>
+          </>}
         </motion.div>
-        <figcaption aria-live="polite" className="flex h-12 items-center justify-center gap-1 border-t border-border-primary bg-neutral-100 px-4 text-center text-xs font-normal text-text-secondary dark:bg-neutral-900 sm:px-5">
-          <span aria-hidden="true" className="shrink-0">&ldquo;</span>
-          <span className="min-w-0 truncate" title={shown.caption || (shownIndex === 0 ? "Project cover" : "Project image")}>{shown.caption || (shownIndex === 0 ? "Project cover" : "Project image")}</span>
-          <span aria-hidden="true" className="shrink-0">&rdquo;</span>
-        </figcaption>
       </figure>
       {images.length > 1 && <div role="group" aria-label="Carousel controls" className="mt-8 flex flex-wrap items-center justify-center gap-4">
         <button type="button" aria-label="Previous image" onClick={() => goTo(index - 1)} className={`${controlClass} order-2 sm:order-none`}><ChevronLeft aria-hidden className="size-3.5" /></button>

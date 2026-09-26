@@ -32,6 +32,7 @@ const projectSchema = z.object({
   latest_update_label: z.string().max(32).optional(),
   source_note: z.string().max(80).optional(),
   case_study_sections: z.object({
+    cover_caption: z.string().max(200, "Keep the cover caption within 200 characters"),
     why_built: z.string().max(10000),
     key_decisions: z.string().max(10000),
     results: z.string().max(10000),
@@ -62,7 +63,7 @@ interface ProjectFormProps {
     galleryImages?: GalleryImage[];
     latest_update_label?: string | null;
     source_note?: string | null;
-    case_study_sections?: Partial<CaseStudySections> | null;
+    case_study_sections?: Partial<CaseStudySections & { cover_caption: string }> | null;
   };
 }
 
@@ -96,7 +97,7 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
       year: initialData?.year ?? "",
       latest_update_label: initialData?.latest_update_label ?? "",
       source_note: initialData?.source_note ?? "",
-      case_study_sections: { ...emptySections, ...initialData?.case_study_sections },
+      case_study_sections: { ...emptySections, cover_caption: "", ...initialData?.case_study_sections },
       tech_stack: Array.isArray(initialData?.tech_stack)
         ? initialData.tech_stack.join("\n")
         : initialData?.tech_stack ?? "",
@@ -118,6 +119,7 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
     },
   });
   const coverUrl = watch("cover_image_url") || "";
+  const coverCaption = watch("case_study_sections.cover_caption") || "";
   const coverField = register("cover_image_url");
 
   const onSubmit = async (data: ProjectFormValues) => {
@@ -416,13 +418,17 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
         <div className="flex flex-wrap gap-2">
           <button type="button" onClick={() => { setMediaPickerTarget("cover"); setMediaPickerTab("upload"); setIsMediaPickerOpen(true); }} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border-hairline px-3 text-sm text-text-primary hover:bg-surface-base"><UploadCloud className="size-4" aria-hidden />{coverUrl ? "Upload replacement" : "Upload cover"}</button>
           <button type="button" onClick={() => { setMediaPickerTarget("cover"); setMediaPickerTab("library"); setIsMediaPickerOpen(true); }} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border-hairline px-3 text-sm text-text-primary hover:bg-surface-base"><ImageIcon className="size-4" aria-hidden />Choose from library</button>
-          {coverUrl && <button type="button" disabled={galleryImages.length === 0} onClick={() => { const [nextCover, ...remaining] = galleryImages; setValue("cover_image_url", nextCover.url, { shouldDirty: true, shouldValidate: true }); setValue("cover_image_id", nextCover.mediaId, { shouldDirty: true }); setGalleryImages(remaining); }} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border-hairline px-3 text-sm text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 dark:text-red-400 dark:hover:bg-red-950/30"><Trash2 className="size-4" aria-hidden />Remove cover</button>}
+          {coverUrl && <button type="button" disabled={galleryImages.length === 0} onClick={() => { const [nextCover, ...remaining] = galleryImages; setValue("cover_image_url", nextCover.url, { shouldDirty: true, shouldValidate: true }); setValue("cover_image_id", nextCover.mediaId, { shouldDirty: true }); setValue("case_study_sections.cover_caption", nextCover.caption, { shouldDirty: true, shouldValidate: true }); setGalleryImages(remaining); }} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border-hairline px-3 text-sm text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 dark:text-red-400 dark:hover:bg-red-950/30"><Trash2 className="size-4" aria-hidden />Remove cover</button>}
         </div>
         <p className="text-xs text-ink-secondary">Removing the cover promotes the next image. Add another image first if this is the only one. Changes take effect when you save and do not delete shared media-library images.</p>
         <label htmlFor="project-cover-url" className="block text-xs text-ink-secondary">Or enter a cover image URL</label>
-        <input id="project-cover-url" {...coverField} onChange={(event) => { coverField.onChange(event); setValue("cover_image_id", "", { shouldDirty: true }); }} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="https://..." />
+        <input id="project-cover-url" {...coverField} onChange={(event) => { coverField.onChange(event); setValue("cover_image_id", "", { shouldDirty: true }); setValue("case_study_sections.cover_caption", "", { shouldDirty: true }); }} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="https://..." />
         <input type="hidden" {...register("cover_image_id")} />
         {errors.cover_image_url && <p className="text-xs text-red-500">{errors.cover_image_url.message}</p>}
+        <label htmlFor="project-cover-caption" className="block text-xs text-ink-secondary">Cover caption (optional, up to 200 characters)</label>
+        <textarea id="project-cover-caption" {...register("case_study_sections.cover_caption")} rows={2} maxLength={200} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="Describe this image" />
+        <p className="text-xs text-ink-secondary">{coverCaption.length} / 200</p>
+        {errors.case_study_sections?.cover_caption && <p className="text-xs text-red-500">{errors.case_study_sections.cover_caption.message}</p>}
       </div>
 
       <div className="space-y-3">
@@ -436,7 +442,7 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
             <ImageIcon className="h-4 w-4" /> Add from Media Library
           </button>
         </div>
-        <p className="text-xs text-ink-secondary">Keep new captions to one line and 32 characters. Existing longer captions are preserved until you edit them.</p>
+        <p className="text-xs text-ink-secondary">Captions are optional, up to 200 characters.</p>
         {galleryImages.length === 0 && <p className="text-sm text-ink-secondary">No additional images yet.</p>}
         <div className="space-y-3">
           {galleryImages.map((image, index) => (
@@ -444,16 +450,18 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
               <Image src={image.url} alt={image.altText || image.caption || "Project gallery image"} width={128} height={96} className="h-24 w-full rounded-lg object-cover sm:w-32" />
               <div className="min-w-0 flex-1 space-y-1">
                 <label htmlFor={`gallery-caption-${image.mediaId}`} className="text-xs text-ink-secondary">Caption</label>
-                <input
+                <textarea
                   id={`gallery-caption-${image.mediaId}`}
                   value={image.caption}
-                  maxLength={32}
-                  onChange={(event) => setGalleryImages((images) => images.map((item) => item.mediaId === image.mediaId ? { ...item, caption: event.target.value.replace(/[\r\n]+/g, " ").slice(0, 32) } : item))}
+                  rows={2}
+                  maxLength={200}
+                  onChange={(event) => setGalleryImages((images) => images.map((item) => item.mediaId === image.mediaId ? { ...item, caption: event.target.value.replace(/\r\n?/g, "\n").slice(0, 200) } : item))}
                   className="w-full rounded-lg border border-border-hairline bg-surface-raised px-3 py-2 text-sm"
-                  placeholder="Optional caption (32 characters max)"
+                  placeholder="Optional caption (200 characters max)"
                 />
+                <p className="text-xs text-ink-secondary">{image.caption.length} / 200</p>
                 {image.altText && <p className="text-xs text-ink-secondary">Alt text: {image.altText}</p>}
-                <button type="button" onClick={() => { setValue("cover_image_url", image.url, { shouldDirty: true, shouldValidate: true }); setValue("cover_image_id", image.mediaId, { shouldDirty: true }); setGalleryImages((images) => images.filter((item) => item.mediaId !== image.mediaId)); }} className="text-left text-xs text-accent-signal underline underline-offset-2">Make cover (first image)</button>
+                <button type="button" onClick={() => { setValue("cover_image_url", image.url, { shouldDirty: true, shouldValidate: true }); setValue("cover_image_id", image.mediaId, { shouldDirty: true }); setValue("case_study_sections.cover_caption", image.caption, { shouldDirty: true, shouldValidate: true }); setGalleryImages((images) => images.filter((item) => item.mediaId !== image.mediaId)); }} className="text-left text-xs text-accent-signal underline underline-offset-2">Make cover (first image)</button>
               </div>
               <div className="flex gap-1">
                 <button type="button" aria-label={`Replace image ${index + 2}`} onClick={() => { setReplacingIndex(index); setMediaPickerTarget("replace-gallery"); setMediaPickerTab("upload"); setIsMediaPickerOpen(true); }} className="rounded-lg p-2 hover:bg-surface-raised"><UploadCloud className="h-4 w-4" /></button>
@@ -474,12 +482,13 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
           if (mediaPickerTarget === "cover") {
             setValue("cover_image_url", media.secure_url || media.url, { shouldDirty: true, shouldValidate: true });
             setValue("cover_image_id", media.id, { shouldDirty: true });
+            setValue("case_study_sections.cover_caption", "", { shouldDirty: true, shouldValidate: true });
             setGalleryImages((images) => images.filter((image) => image.mediaId !== media.id));
           } else if (mediaPickerTarget === "replace-gallery") {
             if (media.id === getValues("cover_image_id")) return;
             setGalleryImages((images) => images.some((image, index) => image.mediaId === media.id && index !== replacingIndex)
               ? images
-              : images.map((image, index) => index === replacingIndex ? { mediaId: media.id, url: media.secure_url || media.url, caption: image.caption, altText: media.alt_text || "" } : image));
+              : images.map((image, index) => index === replacingIndex ? { mediaId: media.id, url: media.secure_url || media.url, caption: "", altText: media.alt_text || "" } : image));
           } else {
             if (media.id === getValues("cover_image_id")) return;
             setGalleryImages((images) => images.some((image) => image.mediaId === media.id)

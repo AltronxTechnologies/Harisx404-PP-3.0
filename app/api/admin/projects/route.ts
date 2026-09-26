@@ -27,6 +27,7 @@ const projectFieldsSchema = z.object({
   latest_update_label: z.string().max(32).optional().default(""),
   source_note: z.string().max(80).optional().default(""),
   case_study_sections: z.object({
+    cover_caption: z.string().max(200).optional().default(""),
     why_built: z.string().max(10000).optional().default(""),
     key_decisions: z.string().max(10000).optional().default(""),
     results: z.string().max(10000).optional().default(""),
@@ -35,7 +36,7 @@ const projectFieldsSchema = z.object({
   tech_stack: z.array(z.string().trim().min(1).max(100)).optional().default([]),
   features: z.array(z.string().trim().min(1).max(500)).max(100).optional().default([]),
   tags: z.array(z.string().trim().min(1).max(100)).optional().default([]),
-  gallery: z.array(z.object({ mediaId: idSchema, caption: z.string().max(1000) }).strict()).optional().default([]),
+  gallery: z.array(z.object({ mediaId: idSchema, caption: z.string().max(200) }).strict()).optional().default([]),
 }).strict();
 const uniqueGallery = (data: z.infer<typeof projectFieldsSchema>) => new Set(data.gallery.map((image) => image.mediaId)).size === data.gallery.length;
 const projectSchema = projectFieldsSchema.refine(uniqueGallery, {

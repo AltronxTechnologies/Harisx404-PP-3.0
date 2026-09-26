@@ -22,6 +22,7 @@ export type DetailProject = {
   sections: Partial<Record<"why_built" | "key_decisions" | "results" | "lessons_learned", string>>;
   category: string;
   image_url: string;
+  coverCaption: string;
   live_url: string;
   github_url: string;
   sourceNote: string;
@@ -119,7 +120,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
   const firstShareItemRef = useRef<HTMLButtonElement>(null);
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const images = [
-    ...(project.image_url ? [{ src: project.image_url, alt: `${project.title} cover image`, caption: "" }] : []),
+    ...(project.image_url ? [{ src: project.image_url, alt: `${project.title} cover image`, caption: project.coverCaption }] : []),
     ...project.gallery.filter((image) => image.src && image.src !== project.image_url),
   ];
   const categories = [...new Set(project.category.split(/\s+\/\s+|,/).map((category) => category.trim()).filter(Boolean))];
