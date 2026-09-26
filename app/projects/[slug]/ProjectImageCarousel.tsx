@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import Image, { type ImageLoaderProps } from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { ChevronLeft, ChevronRight, Pause, Play, X, ZoomIn, ZoomOut } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 
 type Slide = { src: string; alt: string; caption: string };
 
@@ -18,35 +17,26 @@ const controlClass = "flex h-11 w-11 shrink-0 items-center justify-center rounde
 export function ProjectImageCarousel({ images, title }: { images: Slide[]; title: string }) {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
-  const [hovered, setHovered] = useState(false);
-  const [focused, setFocused] = useState(false);
   const [visible, setVisible] = useState(false);
   const [pageActive, setPageActive] = useState(true);
   const [cycle, setCycle] = useState(0);
-  const [expanded, setExpanded] = useState(false);
-  const [zoom, setZoom] = useState(1);
   const [displayed, setDisplayed] = useState<Slide | null>(images[0] ?? null);
   const [imageError, setImageError] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
   const figureRef = useRef<HTMLElement>(null);
-  const expandRef = useRef<HTMLButtonElement>(null);
-  const dialogRef = useRef<HTMLDivElement>(null);
-  const closeRef = useRef<HTMLButtonElement>(null);
-  const viewerStageRef = useRef<HTMLDivElement>(null);
   const wantedSrcRef = useRef(images[0]?.src);
   const readyUrlsRef = useRef(new Set<string>());
   const reducedMotion = useReducedMotion();
   const current = images[index];
   const shown = displayed ?? current;
   const shownIndex = images.findIndex((image) => image.src === shown?.src);
-  const zoomed = zoom > 1;
   const loading = Boolean(current && shown && current.src !== shown.src);
   const adjacent = images.length > 1 && visible
     ? [images[(shownIndex + 1) % images.length], images[(shownIndex - 1 + images.length) % images.length]]
       .filter((image, position, list) => image.src !== shown.src && list.findIndex((item) => item.src === image.src) === position)
     : [];
   wantedSrcRef.current = current?.src;
-  const canPlay = images.length > 1 && visible && pageActive && !paused && !hovered && !focused && !expanded && !loading;
+  const canPlay = images.length > 1 && visible && pageActive && !paused && !loading;
 
   useEffect(() => {
     if (reducedMotion) setPaused(true);
@@ -79,54 +69,10 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
     if (current && loading && readyUrlsRef.current.has(current.src)) setDisplayed(current);
   }, [current, loading]);
 
-  useEffect(() => {
-    if (!expanded || zoom <= 1 || !viewerStageRef.current) return;
-    const stage = viewerStageRef.current;
-    stage.scrollLeft = (stage.scrollWidth - stage.clientWidth) / 2;
-    stage.scrollTop = (stage.scrollHeight - stage.clientHeight) / 2;
-  }, [expanded, zoom]);
-
-  useEffect(() => {
-    if (!expanded) return;
-    const previousOverflow = document.body.style.overflow;
-    const opener = expandRef.current;
-    document.body.style.overflow = "hidden";
-    const background = [...document.body.children].filter((node): node is HTMLElement =>
-      node instanceof HTMLElement && !node.hasAttribute("data-project-image-viewer") && !["SCRIPT", "STYLE"].includes(node.tagName));
-    const previous = background.map((node) => ({ node, hidden: node.getAttribute("aria-hidden"), inert: node.inert }));
-    background.forEach((node) => { node.setAttribute("aria-hidden", "true"); node.inert = true; });
-    closeRef.current?.focus();
-
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") { event.preventDefault(); setZoom(1); setExpanded(false); }
-      if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
-        if (event.target instanceof HTMLInputElement && event.target.type === "range") return;
-        event.preventDefault();
-        setZoom(1);
-        setIndex((value) => (value + (event.key === "ArrowRight" ? 1 : -1) + images.length) % images.length);
-        setCycle((value) => value + 1);
-      }
-      if (event.key !== "Tab" || !dialogRef.current) return;
-      const controls = [...dialogRef.current.querySelectorAll<HTMLElement>('button:not([disabled]),input[type="range"]')];
-      const first = controls[0], last = controls[controls.length - 1];
-      if (!first || !last) return;
-      if (event.shiftKey && (document.activeElement === first || !dialogRef.current.contains(document.activeElement))) { event.preventDefault(); last.focus(); }
-      else if (!event.shiftKey && (document.activeElement === last || !dialogRef.current.contains(document.activeElement))) { event.preventDefault(); first.focus(); }
-    };
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = previousOverflow;
-      previous.forEach(({ node, hidden, inert }) => { if (hidden === null) node.removeAttribute("aria-hidden"); else node.setAttribute("aria-hidden", hidden); node.inert = inert; });
-      requestAnimationFrame(() => opener?.focus());
-    };
-  }, [expanded, images.length]);
-
   if (!current) return null;
 
   const goTo = (next: number) => {
     const target = (next + images.length) % images.length;
-    setZoom(1);
     setImageError(false);
     if (readyUrlsRef.current.has(images[target].src)) setDisplayed(images[target]);
     setIndex(target);
@@ -134,7 +80,7 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
   };
 
   return (
-    <section aria-label={`${title} images`} className="min-w-0" onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} onFocusCapture={() => setFocused(true)} onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false); }}>
+    <section aria-label={`${title} images`} className="min-w-0">
       <motion.figure
         ref={figureRef}
         aria-label={`Image ${shownIndex + 1} of ${images.length}`}
@@ -155,7 +101,6 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
             </motion.div>
           </AnimatePresence>
           {loading && (showLoading || imageError) && <span role="status" className="absolute bottom-3 left-3 z-10 rounded-full bg-neutral-950 px-3 py-2 text-xs text-white">{imageError ? "Image unavailable. Choose another." : "Loading image..."}</span>}
-          <button ref={expandRef} type="button" disabled={loading} onClick={() => setExpanded(true)} aria-label={`Open image ${shownIndex + 1} in full screen`} className="absolute inset-0 z-10 cursor-zoom-in focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-text-primary disabled:cursor-wait" />
         </div>
         <figcaption aria-live="polite" className="flex h-14 items-center border-t border-border-primary bg-neutral-100 px-4 text-sm font-medium text-text-primary dark:bg-neutral-900 sm:px-5">
           <span className="min-w-0 truncate" title={shown.caption || (shownIndex === 0 ? "Project cover" : "Project image")}>{shown.caption || (shownIndex === 0 ? "Project cover" : "Project image")}</span>
@@ -173,28 +118,6 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
         <button type="button" onClick={() => setPaused((value) => !value)} aria-label={paused ? "Play carousel" : "Pause carousel"} className={`${controlClass} order-3 sm:order-none`}>{paused ? <Play aria-hidden className="size-3.5" /> : <Pause aria-hidden className="size-3.5" />}</button>
         <button type="button" aria-label="Next image" onClick={() => goTo(index + 1)} className={`${controlClass} order-4 sm:order-none`}><ChevronRight aria-hidden className="size-3.5" /></button>
       </div>}
-      {expanded && createPortal(
-        <div data-project-image-viewer ref={dialogRef} role="dialog" aria-modal="true" aria-label={`${title} image viewer`} className="fixed inset-0 z-[8000] grid grid-rows-[auto_minmax(0,1fr)_auto] gap-3 bg-white/95 p-3 pb-[max(12px,env(safe-area-inset-bottom))] text-neutral-950 backdrop-blur-xl dark:bg-neutral-950/95 dark:text-white sm:gap-5 sm:p-6">
-          <div className="flex min-w-0 items-center justify-end gap-2 sm:gap-3">
-            <button type="button" disabled={zoom === 1} onClick={() => setZoom((value) => Math.max(1, value - 0.5))} aria-label="Zoom out" className="flex size-11 shrink-0 items-center justify-center rounded-full border border-neutral-300 bg-white text-neutral-950 hover:bg-neutral-100 disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-950 dark:border-white/25 dark:bg-white/10 dark:text-white dark:hover:bg-white/20 dark:focus-visible:outline-white"><ZoomOut aria-hidden className="size-5" /></button>
-            <input type="range" min={1} max={4} step={0.25} value={zoom} onChange={(event) => setZoom(Number(event.target.value))} aria-label="Image zoom" style={{ width: "clamp(64px, 12vw, 128px)" }} className="accent-neutral-900 dark:accent-white" />
-            <button type="button" disabled={zoom === 4} onClick={() => setZoom((value) => Math.min(4, value + 0.5))} aria-label="Zoom in" className="flex size-11 shrink-0 items-center justify-center rounded-full border border-neutral-300 bg-white text-neutral-950 hover:bg-neutral-100 disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-950 dark:border-white/25 dark:bg-white/10 dark:text-white dark:hover:bg-white/20 dark:focus-visible:outline-white"><ZoomIn aria-hidden className="size-5" /></button>
-            <span aria-live="polite" className="w-10 shrink-0 text-center font-mono text-[11px] tabular-nums text-neutral-600 dark:text-neutral-300">{Math.round(zoom * 100)}%</span>
-            <button ref={closeRef} type="button" onClick={() => { setZoom(1); setExpanded(false); }} aria-label="Close image viewer" className="flex size-11 shrink-0 items-center justify-center rounded-full border border-neutral-300 bg-white text-neutral-950 transition-colors hover:bg-neutral-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-950 dark:border-white/25 dark:bg-white/10 dark:text-white dark:hover:bg-white/20 dark:focus-visible:outline-white"><X aria-hidden className="size-5" /></button>
-          </div>
-          <motion.div ref={viewerStageRef} className={`relative min-h-0 rounded-xl ${zoomed ? "overflow-auto touch-auto" : "overflow-hidden touch-pan-y"}`} drag={images.length > 1 && !zoomed ? "x" : false} dragConstraints={{ left: 0, right: 0 }} dragElastic={0.06} onDragEnd={(_, info) => { if (Math.abs(info.offset.x) > 60 || Math.abs(info.velocity.x) > 400) goTo(index + (info.offset.x < 0 ? 1 : -1)); }}>
-            <div className="relative" style={{ width: `${zoom * 100}%`, height: `${zoom * 100}%` }}>
-              <Image src={shown.src} alt={shown.alt || `${title} image ${shownIndex + 1}`} fill priority sizes={zoomed ? "(max-width: 640px) 1080px, 1920px" : "100vw"} loader={isCloudinary(shown.src) ? cloudinaryLoader : undefined} unoptimized={!isOptimizedHost(shown.src)} draggable={false} className="pointer-events-none select-none object-contain" />
-            </div>
-          </motion.div>
-          <div className="flex min-h-11 min-w-0 flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            <p aria-live="polite" className="max-h-24 min-w-0 flex-1 overflow-y-auto break-words text-xs leading-5 text-neutral-600 dark:text-neutral-300 sm:text-sm">{shown.caption || (shownIndex === 0 ? "Project cover" : "Project image")}</p>
-            {images.length > 1 && <div className="flex shrink-0 justify-end gap-2">
-              <button type="button" aria-label="Previous full-screen image" onClick={() => goTo(index - 1)} className="flex size-11 items-center justify-center rounded-full border border-neutral-300 bg-white transition-colors hover:bg-neutral-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-950 dark:border-white/25 dark:bg-white/10 dark:hover:bg-white/20 dark:focus-visible:outline-white"><ChevronLeft aria-hidden className="size-5" /></button>
-              <button type="button" aria-label="Next full-screen image" onClick={() => goTo(index + 1)} className="flex size-11 items-center justify-center rounded-full border border-neutral-300 bg-white transition-colors hover:bg-neutral-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-950 dark:border-white/25 dark:bg-white/10 dark:hover:bg-white/20 dark:focus-visible:outline-white"><ChevronRight aria-hidden className="size-5" /></button>
-            </div>}
-          </div>
-        </div>, document.body)}
     </section>
   );
 }
