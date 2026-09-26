@@ -82,7 +82,7 @@ test("project images enforce a cover, allow ordered additions, and deliver respo
   assert.doesNotMatch(detail, /title: "Gallery"/);
   assert.match(carousel, /f_webp,q_auto:good,c_limit,w_/);
   assert.match(carousel, /drag=\{images\.length > 1/);
-  assert.match(carousel, /className="relative aspect-video overflow-hidden/);
+  assert.match(carousel, /className="relative aspect-\[3\/2\] overflow-hidden/);
   assert.doesNotMatch(carousel, /aspect-\[4\/3\]/);
   assert.match(carousel, /custom=\{direction\}/);
   assert.match(carousel, /exit="exit"/);

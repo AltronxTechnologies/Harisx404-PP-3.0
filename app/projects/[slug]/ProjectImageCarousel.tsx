@@ -89,7 +89,7 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
         className="isolate overflow-hidden rounded-2xl border border-border-primary bg-white dark:bg-white/[0.02] sm:rounded-3xl"
       >
         <motion.div
-          className="relative aspect-video overflow-hidden bg-neutral-100 dark:bg-white/[0.04]"
+          className="relative aspect-[3/2] overflow-hidden bg-neutral-100 dark:bg-white/[0.04]"
         drag={images.length > 1 ? "x" : false}
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.08}
