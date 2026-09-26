@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { TiptapEditor } from "./TiptapEditor";
 import { MediaPickerModal } from "./MediaPickerModal";
+import { captionWordCount } from "@/app/lib/project-captions";
 import { Image as ImageIcon, Loader2, Sparkles, ArrowUp, ArrowDown, Trash2, UploadCloud } from "lucide-react";
 
 type GalleryImage = { mediaId: string; url: string; caption: string; altText: string };
@@ -32,7 +33,7 @@ const projectSchema = z.object({
   latest_update_label: z.string().max(32).optional(),
   source_note: z.string().max(80).optional(),
   case_study_sections: z.object({
-    cover_caption: z.string().max(200, "Keep the cover caption within 200 characters"),
+    cover_caption: z.string().max(200, "Keep the cover caption within 200 characters").refine((caption) => captionWordCount(caption) <= 30, "Keep the cover caption within 30 words"),
     why_built: z.string().max(10000),
     key_decisions: z.string().max(10000),
     results: z.string().max(10000),
@@ -126,6 +127,9 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
     setIsSubmitting(true);
     setErrorMsg("");
     try {
+      if (galleryImages.some((image) => captionWordCount(image.caption) > 30)) {
+        throw new Error("Each image caption must be 30 words or fewer.");
+      }
       const payload = {
         ...data,
         tech_stack: (data.tech_stack || "")
@@ -425,9 +429,9 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
         <input id="project-cover-url" {...coverField} onChange={(event) => { coverField.onChange(event); setValue("cover_image_id", "", { shouldDirty: true }); setValue("case_study_sections.cover_caption", "", { shouldDirty: true }); }} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="https://..." />
         <input type="hidden" {...register("cover_image_id")} />
         {errors.cover_image_url && <p className="text-xs text-red-500">{errors.cover_image_url.message}</p>}
-        <label htmlFor="project-cover-caption" className="block text-xs text-ink-secondary">Cover caption (optional, up to 200 characters)</label>
+        <label htmlFor="project-cover-caption" className="block text-xs text-ink-secondary">Cover caption (optional, up to 200 characters / 30 words)</label>
         <textarea id="project-cover-caption" {...register("case_study_sections.cover_caption")} rows={2} maxLength={200} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="Describe this image" />
-        <p className="text-xs text-ink-secondary">{coverCaption.length} / 200</p>
+        <p className={`text-xs ${captionWordCount(coverCaption) > 30 ? "text-red-600 dark:text-red-400" : "text-ink-secondary"}`}>{coverCaption.length} / 200 characters, {captionWordCount(coverCaption)} / 30 words</p>
         {errors.case_study_sections?.cover_caption && <p className="text-xs text-red-500">{errors.case_study_sections.cover_caption.message}</p>}
       </div>
 
@@ -442,7 +446,7 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
             <ImageIcon className="h-4 w-4" /> Add from Media Library
           </button>
         </div>
-        <p className="text-xs text-ink-secondary">Captions are optional, up to 200 characters.</p>
+        <p className="text-xs text-ink-secondary">Captions are optional, up to 200 characters and 30 words.</p>
         {galleryImages.length === 0 && <p className="text-sm text-ink-secondary">No additional images yet.</p>}
         <div className="space-y-3">
           {galleryImages.map((image, index) => (
@@ -459,7 +463,7 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
                   className="w-full rounded-lg border border-border-hairline bg-surface-raised px-3 py-2 text-sm"
                   placeholder="Optional caption (200 characters max)"
                 />
-                <p className="text-xs text-ink-secondary">{image.caption.length} / 200</p>
+                <p className={`text-xs ${captionWordCount(image.caption) > 30 ? "text-red-600 dark:text-red-400" : "text-ink-secondary"}`}>{image.caption.length} / 200 characters, {captionWordCount(image.caption)} / 30 words</p>
                 {image.altText && <p className="text-xs text-ink-secondary">Alt text: {image.altText}</p>}
                 <button type="button" onClick={() => { setValue("cover_image_url", image.url, { shouldDirty: true, shouldValidate: true }); setValue("cover_image_id", image.mediaId, { shouldDirty: true }); setValue("case_study_sections.cover_caption", image.caption, { shouldDirty: true, shouldValidate: true }); setGalleryImages((images) => images.filter((item) => item.mediaId !== image.mediaId)); }} className="text-left text-xs text-accent-signal underline underline-offset-2">Make cover (first image)</button>
               </div>

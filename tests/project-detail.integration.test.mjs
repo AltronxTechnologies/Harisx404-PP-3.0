@@ -48,7 +48,7 @@ test("project mutations reject unauthenticated requests", async () => {
 });
 
 test("project images enforce a cover, allow ordered additions, and deliver responsive WebP", async () => {
-  const [form, picker, upload, api, detail, carousel, page, fixture, compose] = await Promise.all([
+  const [form, picker, upload, api, detail, carousel, page, fixture, compose, captions] = await Promise.all([
     readFile(new URL("../app/components/admin/ProjectForm.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/components/admin/MediaPickerModal.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/api/admin/media/upload/route.ts", import.meta.url), "utf8"),
@@ -58,6 +58,7 @@ test("project images enforce a cover, allow ordered additions, and deliver respo
     readFile(new URL("../app/projects/[slug]/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/data/project-preview-fixtures.ts", import.meta.url), "utf8"),
     readFile(new URL("../docker-compose.alloy.yaml", import.meta.url), "utf8"),
+    readFile(new URL("../app/lib/project-captions.ts", import.meta.url), "utf8"),
   ]);
 
   assert.match(form, /Upload replacement/);
@@ -76,8 +77,12 @@ test("project images enforce a cover, allow ordered additions, and deliver respo
   assert.match(picker, /setActiveTab\(initialTab\)/);
   assert.match(api, /cover_image_id: data\.cover_image_id \|\| null/);
   assert.match(api, /cover_image_url: z\.string\(\)\.url\(\)/);
-  assert.match(api, /cover_caption: z\.string\(\)\.max\(200\)\.optional\(\)\.default\(""\)/);
+  assert.match(api, /cover_caption: z\.string\(\)\.max\(200\)\.refine\(\(caption\) => captionWordCount\(caption\) <= 30/);
   assert.match(api, /caption: z\.string\(\)\.max\(200\)/);
+  assert.match(api, /captionWordCount\(value\) <= 30/);
+  assert.match(form, /captionWordCount\(image\.caption\) > 30/);
+  assert.match(form, /captionWordCount\(coverCaption\)/);
+  assert.match(captions, /text\.split\(\/\\s\+\/u\)\.length/);
   assert.doesNotMatch(api, /gallery: z\.array\([^\n]+\.max\(100\)/);
   assert.match(upload, /auth\.getUser\(\)/);
   assert.match(upload, /ADMIN_EMAIL/);
@@ -97,6 +102,10 @@ test("project images enforce a cover, allow ordered additions, and deliver respo
   assert.match(carousel, /<MessageSquareText/);
   assert.match(carousel, /aria-expanded=\{captionOpen\}/);
   assert.match(carousel, /role="region" aria-label="Image caption"/);
+  assert.match(carousel, /aria-label="Close image caption"/);
+  assert.match(carousel, /document\.addEventListener\("pointerdown", onPointerDown\)/);
+  assert.match(carousel, /captionButtonRef\.current\?\.contains\(target\)/);
+  assert.match(carousel, /event\.key === "Escape"/);
   assert.match(carousel, /!paused && !captionOpen && !loading/);
   assert.match(detail, /caption: project\.coverCaption/);
   assert.match(page, /coverCaption: p\.case_study_sections\?\.cover_caption/);

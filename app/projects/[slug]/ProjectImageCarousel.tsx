@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image, { type ImageLoaderProps } from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { ChevronLeft, ChevronRight, MessageSquareText, Pause, Play } from "lucide-react";
+import { ChevronLeft, ChevronRight, MessageSquareText, Pause, Play, X } from "lucide-react";
 
 type Slide = { src: string; alt: string; caption: string };
 
@@ -26,6 +26,8 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
   const [imageError, setImageError] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
   const figureRef = useRef<HTMLElement>(null);
+  const captionBoxRef = useRef<HTMLDivElement>(null);
+  const captionButtonRef = useRef<HTMLButtonElement>(null);
   const wantedSrcRef = useRef(images[0]?.src);
   const readyUrlsRef = useRef(new Set<string>());
   const reducedMotion = useReducedMotion();
@@ -71,6 +73,20 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
     if (current && loading && readyUrlsRef.current.has(current.src)) setDisplayed(current);
   }, [current, loading]);
 
+  useEffect(() => {
+    if (!captionOpen) return;
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target as Node;
+      if (!captionBoxRef.current?.contains(target) && !captionButtonRef.current?.contains(target)) setCaptionOpen(false);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") { setCaptionOpen(false); captionButtonRef.current?.focus(); }
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => { document.removeEventListener("pointerdown", onPointerDown); document.removeEventListener("keydown", onKeyDown); };
+  }, [captionOpen]);
+
   if (!current) return null;
 
   const goTo = (next: number) => {
@@ -108,8 +124,14 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
           </AnimatePresence>
           {loading && (showLoading || imageError) && <span role="status" className="absolute bottom-3 left-3 z-10 rounded-full bg-neutral-950 px-3 py-2 text-xs text-white">{imageError ? "Image unavailable. Choose another." : "Loading image..."}</span>}
           {!loading && shown.caption.trim() && <>
-            {captionOpen && <div id="project-image-caption" role="region" aria-label="Image caption" className="absolute bottom-16 left-3 z-20 max-h-[min(55%,200px)] w-72 max-w-[calc(100%-1.5rem)] overflow-y-auto whitespace-pre-wrap break-words rounded-xl border border-border-primary bg-bg-primary px-4 py-3 text-sm leading-5 text-text-primary shadow-lg">{shown.caption}</div>}
-            <button type="button" aria-label={captionOpen ? "Hide image caption" : "Show image caption"} aria-expanded={captionOpen} aria-controls="project-image-caption" onClick={() => setCaptionOpen((open) => !open)} className="absolute bottom-3 left-3 z-20 flex size-11 items-center justify-center rounded-full border border-border-primary bg-bg-primary text-text-primary shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary"><MessageSquareText aria-hidden className="size-4" /></button>
+            {captionOpen && <div ref={captionBoxRef} id="project-image-caption" role="region" aria-label="Image caption" className="absolute bottom-16 left-3 z-20 flex max-h-[calc(100%-5rem)] w-72 max-w-[calc(100%-1.5rem)] flex-col overflow-hidden rounded-xl border border-neutral-300 bg-white text-neutral-900 shadow-xl dark:border-white/25 dark:bg-neutral-900 dark:text-white dark:shadow-black/50 sm:max-h-48">
+              <div className="flex shrink-0 items-center justify-between border-b border-neutral-200 pl-4 pr-1 dark:border-white/15">
+                <span className="font-mono text-[10px] uppercase tracking-widest text-neutral-600 dark:text-neutral-300">Caption</span>
+                <button type="button" aria-label="Close image caption" onClick={() => { setCaptionOpen(false); captionButtonRef.current?.focus(); }} className="flex size-11 items-center justify-center rounded-lg text-neutral-700 hover:bg-neutral-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800 dark:focus-visible:outline-white"><X aria-hidden className="size-4" /></button>
+              </div>
+              <p className="min-h-0 overflow-y-auto whitespace-pre-wrap break-words px-4 py-2.5 text-[13px] leading-5">{shown.caption}</p>
+            </div>}
+            <button ref={captionButtonRef} type="button" aria-label={captionOpen ? "Hide image caption" : "Show image caption"} aria-expanded={captionOpen} aria-controls="project-image-caption" onClick={() => setCaptionOpen((open) => !open)} className="absolute bottom-3 left-3 z-20 flex size-11 items-center justify-center rounded-full border border-neutral-300 bg-white text-neutral-900 shadow-md transition-colors hover:bg-neutral-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900 dark:border-white/25 dark:bg-neutral-900 dark:text-white dark:hover:bg-neutral-800 dark:focus-visible:outline-white"><MessageSquareText aria-hidden className="size-4" /></button>
           </>}
         </motion.div>
       </figure>

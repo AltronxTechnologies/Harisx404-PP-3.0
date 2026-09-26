@@ -3,6 +3,7 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import * as z from "zod";
 import createSupabaseServerClient, { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 import { syncTags } from "@/app/lib/tag-sync";
+import { captionWordCount } from "@/app/lib/project-captions";
 
 const idSchema = z.string().uuid();
 const optionalText = z.string().max(10000).optional().default("");
@@ -27,7 +28,7 @@ const projectFieldsSchema = z.object({
   latest_update_label: z.string().max(32).optional().default(""),
   source_note: z.string().max(80).optional().default(""),
   case_study_sections: z.object({
-    cover_caption: z.string().max(200).optional().default(""),
+    cover_caption: z.string().max(200).refine((caption) => captionWordCount(caption) <= 30, "Use 30 words or fewer").optional().default(""),
     why_built: z.string().max(10000).optional().default(""),
     key_decisions: z.string().max(10000).optional().default(""),
     results: z.string().max(10000).optional().default(""),
@@ -36,7 +37,7 @@ const projectFieldsSchema = z.object({
   tech_stack: z.array(z.string().trim().min(1).max(100)).optional().default([]),
   features: z.array(z.string().trim().min(1).max(500)).max(100).optional().default([]),
   tags: z.array(z.string().trim().min(1).max(100)).optional().default([]),
-  gallery: z.array(z.object({ mediaId: idSchema, caption: z.string().max(200) }).strict()).optional().default([]),
+  gallery: z.array(z.object({ mediaId: idSchema, caption: z.string().max(200).refine((value) => captionWordCount(value) <= 30, "Use 30 words or fewer") }).strict()).optional().default([]),
 }).strict();
 const uniqueGallery = (data: z.infer<typeof projectFieldsSchema>) => new Set(data.gallery.map((image) => image.mediaId)).size === data.gallery.length;
 const projectSchema = projectFieldsSchema.refine(uniqueGallery, {
