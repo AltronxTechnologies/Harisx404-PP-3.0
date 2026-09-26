@@ -27,18 +27,24 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
   const [zoom, setZoom] = useState(1);
   const [displayed, setDisplayed] = useState<Slide | null>(images[0] ?? null);
   const [imageError, setImageError] = useState(false);
+  const [showLoading, setShowLoading] = useState(false);
   const figureRef = useRef<HTMLElement>(null);
   const expandRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const viewerStageRef = useRef<HTMLDivElement>(null);
   const wantedSrcRef = useRef(images[0]?.src);
+  const readyUrlsRef = useRef(new Set<string>());
   const reducedMotion = useReducedMotion();
   const current = images[index];
   const shown = displayed ?? current;
   const shownIndex = images.findIndex((image) => image.src === shown?.src);
   const zoomed = zoom > 1;
   const loading = Boolean(current && shown && current.src !== shown.src);
+  const adjacent = images.length > 1 && visible
+    ? [images[(shownIndex + 1) % images.length], images[(shownIndex - 1 + images.length) % images.length]]
+      .filter((image, position, list) => image.src !== shown.src && list.findIndex((item) => item.src === image.src) === position)
+    : [];
   wantedSrcRef.current = current?.src;
   const canPlay = images.length > 1 && visible && pageActive && !paused && !hovered && !focused && !expanded && !loading;
 
@@ -62,6 +68,16 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
     const timer = window.setInterval(() => setIndex((value) => (value + 1) % images.length), 5000);
     return () => window.clearInterval(timer);
   }, [canPlay, cycle, images.length]);
+
+  useEffect(() => {
+    if (!loading) { setShowLoading(false); return; }
+    const timer = window.setTimeout(() => setShowLoading(true), 350);
+    return () => window.clearTimeout(timer);
+  }, [loading, current?.src]);
+
+  useEffect(() => {
+    if (current && loading && readyUrlsRef.current.has(current.src)) setDisplayed(current);
+  }, [current, loading]);
 
   useEffect(() => {
     if (!expanded || zoom <= 1 || !viewerStageRef.current) return;
@@ -109,9 +125,11 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
   if (!current) return null;
 
   const goTo = (next: number) => {
+    const target = (next + images.length) % images.length;
     setZoom(1);
     setImageError(false);
-    setIndex((next + images.length) % images.length);
+    if (readyUrlsRef.current.has(images[target].src)) setDisplayed(images[target]);
+    setIndex(target);
     setCycle((value) => value + 1);
   };
 
@@ -129,13 +147,14 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
         }}
       >
         <div className="relative aspect-[4/3] overflow-hidden bg-neutral-100 dark:bg-white/[0.04] sm:aspect-video">
-          {loading && <Image src={current.src} alt="" aria-hidden fill priority sizes="(max-width: 1280px) 100vw, 1152px" loader={isCloudinary(current.src) ? cloudinaryLoader : undefined} unoptimized={!isOptimizedHost(current.src)} className="pointer-events-none opacity-0" onLoad={() => { if (wantedSrcRef.current === current.src) { setDisplayed(current); setImageError(false); } }} onError={() => setImageError(true)} />}
+          {adjacent.map((image) => <Image key={`prepared-${image.src}`} src={image.src} alt="" aria-hidden fill loading="eager" sizes="(max-width: 1280px) 100vw, 1152px" loader={isCloudinary(image.src) ? cloudinaryLoader : undefined} unoptimized={!isOptimizedHost(image.src)} className="pointer-events-none opacity-0" onLoad={() => { readyUrlsRef.current.add(image.src); if (wantedSrcRef.current === image.src) { setDisplayed(image); setImageError(false); } }} onError={() => { if (wantedSrcRef.current === image.src) setImageError(true); }} />)}
+          {loading && !adjacent.some((image) => image.src === current.src) && <Image src={current.src} alt="" aria-hidden fill priority sizes="(max-width: 1280px) 100vw, 1152px" loader={isCloudinary(current.src) ? cloudinaryLoader : undefined} unoptimized={!isOptimizedHost(current.src)} className="pointer-events-none opacity-0" onLoad={() => { readyUrlsRef.current.add(current.src); if (wantedSrcRef.current === current.src) { setDisplayed(current); setImageError(false); } }} onError={() => setImageError(true)} />}
           <AnimatePresence initial={false}>
             <motion.div key={shown.src} initial={reducedMotion ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reducedMotion ? 0 : 0.24 }} className="absolute inset-0">
-              <Image src={shown.src} alt={shown.alt || (shownIndex === 0 ? `${title} cover image` : `${title} image ${shownIndex + 1}`)} fill priority sizes="(max-width: 1280px) 100vw, 1152px" loader={isCloudinary(shown.src) ? cloudinaryLoader : undefined} unoptimized={!isOptimizedHost(shown.src)} draggable={false} className="pointer-events-none select-none object-cover" />
+              <Image src={shown.src} alt={shown.alt || (shownIndex === 0 ? `${title} cover image` : `${title} image ${shownIndex + 1}`)} fill priority sizes="(max-width: 1280px) 100vw, 1152px" loader={isCloudinary(shown.src) ? cloudinaryLoader : undefined} unoptimized={!isOptimizedHost(shown.src)} draggable={false} className="pointer-events-none select-none object-cover" onLoad={() => readyUrlsRef.current.add(shown.src)} />
             </motion.div>
           </AnimatePresence>
-          {loading && <span role="status" className="absolute bottom-3 left-3 z-10 rounded-full bg-neutral-950 px-3 py-2 text-xs text-white">{imageError ? "Image unavailable. Choose another." : "Loading image..."}</span>}
+          {loading && (showLoading || imageError) && <span role="status" className="absolute bottom-3 left-3 z-10 rounded-full bg-neutral-950 px-3 py-2 text-xs text-white">{imageError ? "Image unavailable. Choose another." : "Loading image..."}</span>}
           <button ref={expandRef} type="button" disabled={loading} onClick={() => setExpanded(true)} aria-label={`Open image ${shownIndex + 1} in full screen`} className="absolute inset-0 z-10 cursor-zoom-in focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-text-primary disabled:cursor-wait" />
         </div>
         <figcaption aria-live="polite" className="flex h-14 items-center border-t border-border-primary bg-neutral-100 px-4 text-sm font-medium text-text-primary dark:bg-neutral-900 sm:px-5">

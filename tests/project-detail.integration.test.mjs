@@ -109,7 +109,9 @@ test("project images enforce a cover, allow ordered additions, and deliver respo
   assert.match(carousel, /touch-pan-y/);
   assert.match(carousel, /entry\.intersectionRatio >= 0\.35/);
   assert.match(carousel, /visibilitychange/);
-  assert.match(carousel, /onLoad=\{\(\) => \{ if \(wantedSrcRef\.current === current\.src\)/);
+  assert.match(carousel, /readyUrlsRef\.current\.add\(current\.src\)/);
+  assert.match(carousel, /adjacent\.map\(\(image\) => <Image/);
+  assert.match(carousel, /window\.setTimeout\(\(\) => setShowLoading\(true\), 350\)/);
   assert.match(carousel, /type="range" min=\{1\} max=\{4\} step=\{0\.25\}/);
   assert.match(carousel, /sizes=\{zoomed \? "\(max-width: 640px\) 1080px, 1920px" : "100vw"\}/);
   assert.doesNotMatch(carousel, /bg-bg-primary\/95|flex-1 truncate text-xs/);
