@@ -13,6 +13,7 @@ const cloudinaryLoader = ({ src, width }: ImageLoaderProps) =>
 
 const isCloudinary = (src: string) => /^https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\//.test(src);
 const isOptimizedHost = (src: string) => /^https:\/\/(?:images\.unsplash\.com|res\.cloudinary\.com|avatars\.githubusercontent\.com|lh3\.googleusercontent\.com|cdn\.hashnode\.com|media\.giphy\.com|dev-to-uploads\.s3\.amazonaws\.com|badges\.pufler\.dev|img\.shields\.io|framerusercontent\.com)\//.test(src);
+const controlClass = "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border-primary text-text-secondary transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25 dark:active:border-white/25 sm:h-9 sm:w-9 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary";
 
 export function ProjectImageCarousel({ images, title }: { images: Slide[]; title: string }) {
   const [index, setIndex] = useState(0);
@@ -141,19 +142,17 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
           <span className="min-w-0 truncate" title={shown.caption || (shownIndex === 0 ? "Project cover" : "Project image")}>{shown.caption || (shownIndex === 0 ? "Project cover" : "Project image")}</span>
         </figcaption>
       </motion.figure>
-      {images.length > 1 && <div role="group" aria-label="Carousel controls" className="mx-auto mt-4 grid w-[60vw] max-w-full grid-cols-[44px_minmax(0,1fr)_44px] items-center gap-1 sm:gap-3">
-        <button type="button" aria-label="Previous image" onClick={() => goTo(index - 1)} className="flex size-11 shrink-0 items-center justify-center rounded-full border border-border-primary text-text-primary hover:bg-text-primary/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary"><ChevronLeft aria-hidden className="size-5" /></button>
-        <div className="mx-auto flex w-full max-w-[300px] min-w-0 items-center justify-center gap-1 sm:gap-4">
-          <div className={`grid h-11 min-w-0 flex-1 items-center ${images.length > 12 ? "gap-0" : "gap-0.5 sm:gap-1"}`} style={{ gridTemplateColumns: images.map((_, position) => `minmax(0, ${position === shownIndex ? 2 : 1}fr)`).join(" ") }}>
-            {images.map((image, position) => <button key={`${image.src}-${position}`} type="button" aria-label={`Go to image ${position + 1}`} aria-current={position === shownIndex ? "true" : undefined} onClick={() => goTo(position)} className="group flex h-11 min-w-0 items-center justify-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary">
-              <span className={`relative block h-1 w-full overflow-hidden rounded-full bg-border-primary transition-all duration-300 ${position === shownIndex ? "max-w-14" : "max-w-7 group-hover:bg-neutral-400/50 dark:group-hover:bg-white/25"}`}>
-                {position === shownIndex && (canPlay ? <motion.span key={`${shownIndex}-${cycle}-${canPlay}`} className="absolute inset-0 origin-left rounded-full bg-gradient-to-r from-blue-500 via-violet-500 to-pink-500" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 5, ease: "linear" }} /> : <span className="absolute inset-0 bg-text-primary" />)}
-              </span>
-            </button>)}
-          </div>
-          <button type="button" onClick={() => setPaused((value) => !value)} aria-label={paused ? "Play carousel" : "Pause carousel"} className="flex size-11 shrink-0 items-center justify-center rounded-full border border-border-primary text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 dark:hover:border-white/25 dark:active:border-white/25 sm:size-9 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary">{paused ? <Play aria-hidden className="size-3.5" /> : <Pause aria-hidden className="size-3.5" />}</button>
+      {images.length > 1 && <div role="group" aria-label="Carousel controls" className="mt-8 flex flex-wrap items-center justify-center gap-4">
+        <button type="button" aria-label="Previous image" onClick={() => goTo(index - 1)} className={`${controlClass} order-2 sm:order-none`}><ChevronLeft aria-hidden className="size-3.5" /></button>
+        <div className="order-1 flex w-full max-w-[70vw] flex-wrap items-center justify-center sm:order-none sm:w-auto">
+          {images.map((image, position) => <button key={`${image.src}-${position}`} type="button" aria-label={`Go to image ${position + 1}`} aria-current={position === shownIndex ? "true" : undefined} onClick={() => goTo(position)} className="group flex h-8 items-center px-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary">
+            <span className={`relative h-1 overflow-hidden rounded-full bg-border-primary transition-all duration-300 ${position === shownIndex ? "w-14" : "w-7 group-hover:bg-neutral-400/50 dark:group-hover:bg-white/25"}`}>
+              {position === shownIndex && <motion.span key={`${shownIndex}-${cycle}-${canPlay}`} className="absolute inset-0 origin-left rounded-full bg-gradient-to-r from-blue-500 via-violet-500 to-pink-500" initial={{ scaleX: 0 }} animate={{ scaleX: canPlay ? 1 : 0 }} transition={canPlay ? { duration: 5, ease: "linear" } : { duration: 0 }} />}
+            </span>
+          </button>)}
         </div>
-        <button type="button" aria-label="Next image" onClick={() => goTo(index + 1)} className="flex size-11 shrink-0 items-center justify-center rounded-full border border-border-primary text-text-primary hover:bg-text-primary/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary"><ChevronRight aria-hidden className="size-5" /></button>
+        <button type="button" onClick={() => setPaused((value) => !value)} aria-label={paused ? "Play carousel" : "Pause carousel"} className={`${controlClass} order-3 sm:order-none`}>{paused ? <Play aria-hidden className="size-3.5" /> : <Pause aria-hidden className="size-3.5" />}</button>
+        <button type="button" aria-label="Next image" onClick={() => goTo(index + 1)} className={`${controlClass} order-4 sm:order-none`}><ChevronRight aria-hidden className="size-3.5" /></button>
       </div>}
       {expanded && createPortal(
         <div data-project-image-viewer ref={dialogRef} role="dialog" aria-modal="true" aria-label={`${title} image viewer`} className="fixed inset-0 z-[8000] grid grid-rows-[auto_minmax(0,1fr)_auto] gap-3 bg-white/95 p-3 pb-[max(12px,env(safe-area-inset-bottom))] text-neutral-950 backdrop-blur-xl dark:bg-neutral-950/95 dark:text-white sm:gap-5 sm:p-6">
