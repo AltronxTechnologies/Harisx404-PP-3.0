@@ -91,7 +91,10 @@ test("project images enforce a cover, allow ordered additions, and deliver respo
   assert.doesNotMatch(carousel, /<figcaption[^>]*>[\s\S]*?<span[^>]*>\{shownIndex \+ 1\} \/ \{images\.length\}/);
   assert.match(carousel, /aria-label="Carousel controls"/);
   assert.match(carousel, /w-\[60vw\] max-w-full/);
-  assert.match(carousel, /gridTemplateColumns: `repeat\(\$\{images\.length\}, minmax\(0, 1fr\)\)`/);
+  assert.match(carousel, /gridTemplateColumns: images\.map/);
+  assert.match(carousel, /max-w-14/);
+  assert.match(carousel, /max-w-7/);
+  assert.match(carousel, /bg-gradient-to-r from-blue-500 via-violet-500 to-pink-500/);
   assert.match(carousel, /transition=\{\{ duration: 5, ease: "linear" \}\}/);
   assert.doesNotMatch(carousel, /images\.length <= 8|images\.length <= 12/);
   assert.match(carousel, /aria-label="Previous image"/);
