@@ -436,6 +436,7 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
             <ImageIcon className="h-4 w-4" /> Add from Media Library
           </button>
         </div>
+        <p className="text-xs text-ink-secondary">Keep new captions to one line and 32 characters. Existing longer captions are preserved until you edit them.</p>
         {galleryImages.length === 0 && <p className="text-sm text-ink-secondary">No additional images yet.</p>}
         <div className="space-y-3">
           {galleryImages.map((image, index) => (
@@ -446,9 +447,10 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
                 <input
                   id={`gallery-caption-${image.mediaId}`}
                   value={image.caption}
-                  onChange={(event) => setGalleryImages((images) => images.map((item) => item.mediaId === image.mediaId ? { ...item, caption: event.target.value } : item))}
+                  maxLength={32}
+                  onChange={(event) => setGalleryImages((images) => images.map((item) => item.mediaId === image.mediaId ? { ...item, caption: event.target.value.replace(/[\r\n]+/g, " ").slice(0, 32) } : item))}
                   className="w-full rounded-lg border border-border-hairline bg-surface-raised px-3 py-2 text-sm"
-                  placeholder="Optional caption"
+                  placeholder="Optional caption (32 characters max)"
                 />
                 {image.altText && <p className="text-xs text-ink-secondary">Alt text: {image.altText}</p>}
                 <button type="button" onClick={() => { setValue("cover_image_url", image.url, { shouldDirty: true, shouldValidate: true }); setValue("cover_image_id", image.mediaId, { shouldDirty: true }); setGalleryImages((images) => images.filter((item) => item.mediaId !== image.mediaId)); }} className="text-left text-xs text-accent-signal underline underline-offset-2">Make cover (first image)</button>

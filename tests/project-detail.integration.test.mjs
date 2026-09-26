@@ -68,6 +68,8 @@ test("project images enforce a cover, allow ordered additions, and deliver respo
   assert.match(form, /setValue\("cover_image_id", media\.id/);
   assert.match(form, /Make cover \(first image\)/);
   assert.match(form, /Replace image/);
+  assert.match(form, /maxLength=\{32\}/);
+  assert.match(form, /replace\(\/\[\\r\\n\]\+\/g, " "\)\.slice\(0, 32\)/);
   assert.match(picker, /setActiveTab\(initialTab\)/);
   assert.match(api, /cover_image_id: data\.cover_image_id \|\| null/);
   assert.match(api, /cover_image_url: z\.string\(\)\.url\(\)/);
@@ -80,11 +82,15 @@ test("project images enforce a cover, allow ordered additions, and deliver respo
   assert.doesNotMatch(detail, /title: "Gallery"/);
   assert.match(carousel, /f_webp,q_auto:good,c_limit,w_/);
   assert.match(carousel, /drag=\{images\.length > 1/);
-  assert.match(carousel, /aspect-\[4\/3\].*sm:aspect-video/);
+  assert.match(carousel, /className="relative aspect-video overflow-hidden/);
+  assert.doesNotMatch(carousel, /aspect-\[4\/3\]/);
+  assert.match(carousel, /custom=\{direction\}/);
+  assert.match(carousel, /exit="exit"/);
   assert.match(carousel, /className="pointer-events-none select-none object-cover"/);
   assert.doesNotMatch(carousel, /Open image|createPortal|data-project-image-viewer|ZoomIn|ZoomOut/);
   assert.match(carousel, /<figcaption aria-live="polite"/);
-  assert.match(carousel, /className="flex h-14 items-center border-t border-border-primary bg-neutral-100/);
+  assert.match(carousel, /className="flex h-12 items-center justify-center gap-1 border-t border-border-primary bg-neutral-100 px-4 text-center text-xs font-normal/);
+  assert.match(carousel, /&ldquo;|&rdquo;/);
   assert.match(carousel, /className="min-w-0 truncate"/);
   assert.doesNotMatch(carousel, /<figcaption[^>]*>[\s\S]*?<span[^>]*>\{shownIndex \+ 1\} \/ \{images\.length\}/);
   assert.match(carousel, /aria-label="Carousel controls"/);
@@ -94,6 +100,7 @@ test("project images enforce a cover, allow ordered additions, and deliver respo
   assert.match(carousel, /w-7/);
   assert.match(carousel, /bg-gradient-to-r from-blue-500 via-violet-500 to-pink-500/);
   assert.match(carousel, /transition=\{canPlay \? \{ duration: 5, ease: "linear" \} : \{ duration: 0 \}\}/);
+  assert.match(carousel, /initial=\{\{ scaleX: canPlay \? 0 : 1 \}\} animate=\{\{ scaleX: 1 \}\}/);
   assert.doesNotMatch(carousel, /w-\[60vw\]|gridTemplateColumns/);
   assert.match(carousel, /className=\{`\$\{controlClass\} order-2 sm:order-none`\}/);
   assert.match(carousel, /aria-label="Previous image"/);
