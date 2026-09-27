@@ -186,7 +186,7 @@ export default function TermsOfUsePage() {
                 to your contribution and allow it to be displayed on this site.
                 Inappropriate or unlawful submissions may be removed.
               </p>
-              <div className="my-8 border-t border-dashed border-neutral-200 dark:border-neutral-800" />
+              <div className="my-8 h-px bg-neutral-400/40 dark:bg-white/20" />
               <div className="grid gap-6 text-sm md:grid-cols-2">
                 <div>
                   <p className="mb-1.5 flex items-center gap-2 font-semibold text-neutral-900 dark:text-white">
@@ -210,7 +210,7 @@ export default function TermsOfUsePage() {
                   </p>
                 </div>
               </div>
-              <div className="my-8 border-t border-dashed border-neutral-200 dark:border-neutral-800" />
+              <div className="my-8 h-px bg-neutral-400/40 dark:bg-white/20" />
               <p className="text-sm text-text-secondary">
                 Questions about these terms?{" "}
                 <a href="mailto:itsharis.tech@gmail.com" className="rounded-sm font-medium text-neutral-900 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:text-white">

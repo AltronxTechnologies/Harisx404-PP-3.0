@@ -28,6 +28,8 @@ for (const [route, sourcePath, title] of [
     assert.match(source, /-top-10 h-10 border-x border-dashed border-border-primary/);
     assert.match(source, /-bottom-10 -left-px -right-px h-10 border-x/);
     assert.match(source, /-mx-2 h-px bg-neutral-400\/40 dark:bg-white\/20 sm:-mx-3 lg:mx-0/);
+    assert.equal((source.match(/my-8 h-px bg-neutral-400\/40 dark:bg-white\/20/g) || []).length, route === "/legal/privacy" ? 1 : 2);
+    assert.doesNotMatch(source, /border-t border-dashed border-neutral-200 dark:border-neutral-800/);
     assert.match(source, /hidden lg:block"><SectionDivider \/><\/div>/);
     assert.match(source, /mt-10 hidden lg:block"><SectionDivider \/><\/div>/);
     assert.match(source, /space-y-10 lg:mt-10/);
