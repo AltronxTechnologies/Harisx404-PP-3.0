@@ -247,8 +247,8 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
         </div>
       </GridWrapper>
 
-      <section aria-labelledby="project-facts-heading" className="mt-14 px-2 sm:px-4">
-        <div className="mx-auto max-w-6xl rounded-3xl border border-border-primary bg-white dark:bg-white/[0.02]">
+      <section aria-labelledby="project-facts-heading" className="mx-auto mt-14 max-w-6xl px-2 sm:px-4">
+        <div className="rounded-3xl border border-border-primary bg-white dark:bg-white/[0.02]">
           <div className="grid lg:grid-cols-2">
             <div className="px-5 pb-5 pt-4 sm:px-7 sm:pb-7 sm:pt-5 lg:px-8 lg:pb-8">
               <div className="flex flex-wrap items-start justify-between gap-3">
