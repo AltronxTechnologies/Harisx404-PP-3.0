@@ -93,7 +93,7 @@ function StorySection({ number, title, children }: { number: string; title: stri
 
 function CaseStudy({ content }: { content: string }) {
   return (
-    <div className="prose max-w-none break-words text-[15px] leading-7 text-text-secondary prose-headings:font-medium prose-headings:text-text-primary prose-p:leading-7 prose-p:text-text-secondary prose-strong:text-text-primary prose-a:text-text-primary prose-code:break-all prose-code:text-text-primary prose-blockquote:border-border-primary dark:prose-invert">
+    <div className="prose max-w-[65ch] break-words text-[15px] leading-7 text-text-secondary prose-headings:font-medium prose-headings:text-text-primary prose-p:leading-7 prose-p:text-text-secondary prose-strong:text-text-primary prose-a:text-text-primary prose-code:break-all prose-code:text-text-primary prose-blockquote:border-border-primary dark:prose-invert">
       <ReactMarkdown
         components={{
           h2: ({ children }) => <h3 className="[font-family:var(--font-instrument-serif),serif] text-2xl">{children}</h3>,
@@ -133,7 +133,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
   const story: Array<{ title: string; content: ReactNode }> = [];
   if (overview) story.push({ title: "Overview", content: <CaseStudy content={overview} /> });
   if (project.sections.why_built?.trim()) story.push({ title: "Why I built this", content: <CaseStudy content={project.sections.why_built} /> });
-  if (project.features.length) story.push({ title: "Highlights", content: <ol className="grid gap-3 md:grid-cols-2">{project.features.map((feature, index) => (
+  if (project.features.length) story.push({ title: "Highlights", content: <ol className="grid gap-3 md:grid-cols-2 lg:grid-cols-1">{project.features.map((feature, index) => (
     <li key={`${index}-${feature}`} className="flex gap-4 rounded-2xl border border-border-primary bg-white p-5 dark:bg-white/[0.02]">
       <span className="shrink-0 font-mono text-xs text-text-secondary">{String(index + 1).padStart(2, "0")}</span>
       <p className="text-[15px] leading-6 text-text-secondary">{feature}</p>
@@ -329,7 +329,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
           <div className="mt-7 grid gap-4 sm:grid-cols-2">
             {related.map((item) => <Link key={item.slug} href={`/projects/${item.slug}`} className={`group flex min-w-0 flex-col rounded-2xl border border-border-primary bg-white p-6 transition-colors hover:border-neutral-400/70 dark:bg-white/[0.02] dark:hover:border-white/25 ${focusStyle}`}>
               <span className="font-mono text-[11px] uppercase tracking-widest text-text-secondary">{item.category}</span>
-              <span className="mt-4 flex items-start justify-between gap-4 [font-family:var(--font-instrument-serif),serif] text-[28px] leading-tight text-text-primary"><span className="min-w-0 break-words">{item.title}</span><ArrowUpRight aria-hidden className="mt-1 size-5 shrink-0" /></span>
+              <span className="mt-4 flex items-start justify-between gap-4 font-display text-[28px] leading-tight text-text-primary"><span className="min-w-0 break-words">{item.title}</span><ArrowUpRight aria-hidden className="mt-1 size-5 shrink-0" /></span>
               {item.tagline && <span className="mt-3 line-clamp-2 text-sm leading-6 text-text-secondary">{item.tagline}</span>}
             </Link>)}
           </div>

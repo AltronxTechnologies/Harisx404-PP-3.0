@@ -103,6 +103,7 @@ test("project images enforce a cover, allow ordered additions, and deliver respo
   assert.match(carousel, /<MessageSquareText/);
   assert.match(carousel, /aria-expanded=\{captionOpen\}/);
   assert.match(carousel, /role="region" aria-label="Image caption"/);
+  assert.match(carousel, /border-border-primary bg-bg-primary text-text-primary shadow-xl/);
   assert.match(carousel, /aria-label="Close image caption"/);
   assert.match(carousel, /w-48 max-w-\[calc\(100%-1\.5rem\)\].*sm:w-72/);
   assert.doesNotMatch(carousel, /text-neutral-700 hover:bg-neutral-100/);
@@ -153,6 +154,9 @@ test("project gallery and narrative are sourced from Admin-authored data", async
   assert.match(page, /Array\.isArray\(p\.galleryDetails\)/);
   assert.doesNotMatch(page, /genericFeatures|formatQuarter/);
   assert.match(detail, /<ReactMarkdown/);
+  assert.match(detail, /prose max-w-\[65ch\]/);
+  assert.match(detail, /md:grid-cols-2 lg:grid-cols-1/);
+  assert.match(detail, /gap-4 font-display text-\[28px\]/);
   assert.match(detail, /<article className="mt-14">/);
   assert.match(detail, /-mx-2 border-t border-border-primary sm:-mx-3 lg:mx-0/);
   assert.match(detail, /-mx-2 mt-10 border-t border-border-primary sm:-mx-3 lg:mx-0/);
