@@ -106,7 +106,7 @@ export function BuildlogCollection({
   };
 
   return (
-    <div className="border-b border-border-primary">
+    <div className="relative after:absolute after:-left-4 after:-right-4 after:bottom-0 after:h-[1.5px] after:bg-neutral-400/60 after:content-[''] dark:after:bg-white/20 sm:after:-left-7 sm:after:-right-7 lg:after:-left-4 lg:after:-right-4">
           {projects.map((project, projectIndex) => {
             const plannedItems = project.items.filter((item) => !item.done);
             const shippedItems = sortShippedNewest(
@@ -126,9 +126,9 @@ export function BuildlogCollection({
               <article
                 key={project.id}
                 data-project-boundary
-                className="relative grid min-w-0 grid-cols-1 before:absolute before:-left-2 before:-right-2 before:top-0 before:h-[1.5px] before:bg-neutral-400/60 before:content-[''] dark:before:bg-white/20 sm:before:-left-4 sm:before:-right-4 lg:grid-cols-12"
+                className="relative grid min-w-0 grid-cols-1 before:absolute before:-left-4 before:-right-4 before:top-0 before:h-[1.5px] before:bg-neutral-400/60 before:content-[''] dark:before:bg-white/20 sm:before:-left-7 sm:before:-right-7 lg:before:-left-4 lg:before:-right-4 lg:grid-cols-12"
               >
-                <header className="border-b border-border-primary lg:sticky lg:top-28 lg:col-span-4 lg:self-start lg:border-b-0 xl:col-span-3">
+                <header className="border-b border-border-primary lg:sticky lg:top-28 lg:col-span-3 lg:self-start lg:border-b-0">
                   <div
                     data-project-status-row
                     className="flex min-h-12 items-center justify-between gap-3 border-b border-border-primary px-4 font-mono text-[10px] font-medium uppercase tracking-widest text-text-secondary sm:px-6"
@@ -181,7 +181,8 @@ export function BuildlogCollection({
                   </div>
                 </header>
 
-                <div className="min-w-0 lg:col-span-8 lg:border-l lg:border-border-primary xl:col-span-9">
+                <div aria-hidden className="hidden border-x border-dashed border-border-primary lg:col-span-1 lg:block" />
+                <div className="min-w-0 lg:col-span-8">
                   {shippedItems.length > 0 && (
                     <button
                       data-release-top-row

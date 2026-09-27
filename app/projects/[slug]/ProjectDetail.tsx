@@ -74,7 +74,7 @@ function Fact({ label, children }: { label: string; children: ReactNode }) {
 }
 
 function SectionRule() {
-  return <div aria-hidden className="-mx-2 border-t border-border-primary sm:-mx-3 lg:mx-0" />;
+  return <div aria-hidden className="-mx-2 h-[1.5px] bg-neutral-400/60 dark:bg-white/20 sm:-mx-3 lg:mx-0" />;
 }
 
 function StorySection({ number, title, children }: { number: string; title: string; children: ReactNode }) {
@@ -99,6 +99,8 @@ function CaseStudy({ content }: { content: string }) {
       <ReactMarkdown
         components={{
           h2: ({ children }) => <h3 className="[font-family:var(--font-instrument-serif),serif] text-2xl">{children}</h3>,
+          ul: ({ children }) => <ul className="my-5 list-disc space-y-2 pl-6">{children}</ul>,
+          ol: ({ children }) => <ol className="my-5 list-decimal space-y-2 pl-6">{children}</ol>,
           a: ({ href, children }) => (
             <a href={href} target={href?.startsWith("http") ? "_blank" : undefined} rel={href?.startsWith("http") ? "noopener noreferrer" : undefined} className={`underline underline-offset-4 ${focusStyle}`}>
               {children}
@@ -314,7 +316,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
 
       <article className="mt-14">
         {images.length > 0 && <div className="mx-auto max-w-6xl px-2 sm:px-4"><ProjectImageCarousel images={images} title={project.title} /></div>}
-        {story.length > 0 && <div className="-mx-2 mt-10 border-t border-border-primary sm:-mx-3 lg:mx-0" />}
+        {story.length > 0 && <div className="mt-10"><SectionRule /></div>}
         {story.map(({ title, content }, index) => <Fragment key={title}>
           {index > 0 && <SectionRule />}
           <div className="mx-auto max-w-6xl px-2 sm:px-4">

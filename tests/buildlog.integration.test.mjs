@@ -59,10 +59,15 @@ test("Buildlog source has valid hero semantics and explicit route states", async
   assert.match(collection, /data-project-status-row/);
   assert.match(collection, /data-release-top-row/);
   assert.match(collection, /data-project-boundary/);
-  assert.match(collection, /before:-left-2 before:-right-2/);
+  assert.match(collection, /before:-left-4 before:-right-4/);
+  assert.match(collection, /sm:before:-left-7 sm:before:-right-7 lg:before:-left-4 lg:before:-right-4/);
   assert.match(collection, /before:h-\[1\.5px\]/);
   assert.match(collection, /before:bg-neutral-400\/60/);
   assert.match(collection, /dark:before:bg-white\/20/);
+  assert.match(collection, /after:-left-4 after:-right-4 after:bottom-0 after:h-\[1\.5px\] after:bg-neutral-400\/60/);
+  assert.match(collection, /hidden border-x border-dashed border-border-primary lg:col-span-1 lg:block/);
+  assert.match(collection, /lg:col-span-3 lg:self-start lg:border-b-0/);
+  assert.match(collection, /min-w-0 lg:col-span-8/);
   assert.match(collection, /shippedItems\.length === 0/);
   assert.match(collection, /getLatestShippedVersion/);
   assert.match(collection, /sortShippedNewest/);
@@ -86,6 +91,7 @@ test("Buildlog source has valid hero semantics and explicit route states", async
   assert.equal((loading.match(/data-loading-project/g) || []).length >= 1, true);
   assert.match(loading, /\[0, 1, 2, 3\]\.map/);
   assert.match(loading, /data-loading-project-links/);
+  assert.match(loading, /hidden border-x border-dashed border-border-primary lg:col-span-1 lg:block/);
   assert.doesNotMatch(loading, /data-loading-hero-heading/);
   assert.match(loading, /data-loading-release-badge/);
   assert.match(loading, /data-loading-cta/);

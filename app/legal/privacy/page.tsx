@@ -53,11 +53,14 @@ function SectionHeader({ index, title, subtitle }: { index: string; title: strin
 }
 
 function Spacer() {
-  return <div aria-hidden="true" className="hidden border-x border-dashed border-border-primary lg:col-span-1 lg:block" />;
+  return <div aria-hidden="true" className="relative hidden border-x border-dashed border-border-primary lg:col-span-1 lg:block">
+    <span className="absolute -left-px -right-px -top-10 h-10 border-x border-dashed border-border-primary" />
+    <span className="absolute -bottom-10 -left-px -right-px h-10 border-x border-dashed border-border-primary" />
+  </div>;
 }
 
 function SectionDivider() {
-  return <div aria-hidden="true" className="-mx-2 border-t border-border-primary sm:-mx-3 lg:mx-0" />;
+  return <div aria-hidden="true" className="-mx-2 h-[1.5px] bg-neutral-400/60 dark:bg-white/20 sm:-mx-3 lg:mx-0" />;
 }
 
 function FeatureCard({ icon, tag, children }: { icon: ReactNode; tag: string; children: ReactNode }) {
@@ -107,7 +110,9 @@ export default function PrivacyPolicyPage() {
         </div>
       </GridWrapper>
 
-      <div className="relative mt-14 space-y-10">
+      <div className="relative mt-14">
+        <div className="hidden lg:block"><SectionDivider /></div>
+        <div className="space-y-10 lg:mt-10">
         {/* 01 — Collect */}
         <section className="mx-auto grid w-full max-w-6xl grid-cols-1 px-2 sm:px-4 lg:grid-cols-12 lg:px-8">
           <SectionHeader index="01" title="Collect." subtitle="What You Share" />
@@ -217,6 +222,8 @@ export default function PrivacyPolicyPage() {
             </div>
           </div>
         </section>
+        </div>
+        <div className="mt-10 hidden lg:block"><SectionDivider /></div>
       </div>
 
       {/* Contact CTA */}

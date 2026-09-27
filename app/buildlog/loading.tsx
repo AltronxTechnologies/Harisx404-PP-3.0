@@ -18,8 +18,8 @@ export default function BuildlogLoading() {
             const linkCount = project === 2 ? 1 : 0;
             const plannedCount = project === 3 ? 1 : 2;
             return (
-            <div data-loading-project key={project} className="relative grid before:absolute before:-left-2 before:-right-2 before:top-0 before:h-[1.5px] before:bg-neutral-400/60 before:content-[''] dark:before:bg-white/20 sm:before:-left-4 sm:before:-right-4 lg:grid-cols-12">
-              <div className="border-b border-border-primary lg:col-span-4 lg:border-b-0 xl:col-span-3">
+            <div data-loading-project key={project} className="relative grid before:absolute before:-left-4 before:-right-4 before:top-0 before:h-[1.5px] before:bg-neutral-400/60 before:content-[''] dark:before:bg-white/20 sm:before:-left-7 sm:before:-right-7 lg:before:-left-4 lg:before:-right-4 lg:grid-cols-12">
+              <div className="border-b border-border-primary lg:col-span-3 lg:border-b-0">
                 <div className="flex min-h-12 items-center justify-between gap-3 border-b border-border-primary px-4 sm:px-6">
                   <div className={`h-3 w-6 rounded bg-border-primary/35 ${pulse}`} />
                   <div className={`h-3 w-20 rounded bg-border-primary/30 ${pulse}`} />
@@ -37,7 +37,8 @@ export default function BuildlogLoading() {
                   )}
                 </div>
               </div>
-              <div className="lg:col-span-8 lg:border-l lg:border-border-primary xl:col-span-9">
+              <div aria-hidden className="hidden border-x border-dashed border-border-primary lg:col-span-1 lg:block" />
+              <div className="lg:col-span-8">
                 <div className="flex min-h-12 items-center justify-between gap-4 border-b border-border-primary px-4 sm:px-6">
                   <div className="flex items-center gap-2.5">
                     <div className={`h-3 w-36 rounded bg-border-primary/40 ${pulse}`} />

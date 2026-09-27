@@ -109,6 +109,22 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
               (article) =>
                 Math.abs(Number.parseFloat(getComputedStyle(article, "::before").height) - 1.5) > 0.1,
             ).length,
+            invalidBoundaryEdges: (() => {
+              const main = document.querySelector("main")?.getBoundingClientRect();
+              const articles = [...document.querySelectorAll("[data-project-boundary]")];
+              const collection = articles[0]?.parentElement;
+              if (!main || !collection) return true;
+              const end = collection.getBoundingClientRect();
+              const endStyle = getComputedStyle(collection, "::after");
+              return articles.some((article) => {
+                const bounds = article.getBoundingClientRect();
+                const style = getComputedStyle(article, "::before");
+                return Math.abs(bounds.left + parseFloat(style.left) - main.left) > 0.5 ||
+                  Math.abs(bounds.right - parseFloat(style.right) - main.right) > 0.5;
+              }) || Math.abs(parseFloat(endStyle.height) - 1.5) > 0.1 ||
+                Math.abs(end.left + parseFloat(endStyle.left) - main.left) > 0.5 ||
+                Math.abs(end.right - parseFloat(endStyle.right) - main.right) > 0.5;
+            })(),
             duplicateIds: ids.length - new Set(ids).size,
             insecureLinks: externalLinks.filter(
               (link) => link.getAttribute("rel") !== "noopener noreferrer",
@@ -184,6 +200,7 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
         assert.equal(initial.misalignedReleaseContent, 0, `${theme} ${width}px release content alignment`);
         assert.equal(initial.misalignedLedgerRows, 0, `${theme} ${width}px ledger row alignment`);
         assert.equal(initial.invalidProjectBoundaries, 0, `${theme} ${width}px project boundaries`);
+        assert.equal(initial.invalidBoundaryEdges, false, `${theme} ${width}px rules reach side strips`);
         assert.equal(initial.duplicateIds, 0, `${theme} ${width}px duplicate IDs`);
         assert.equal(initial.insecureLinks, 0, `${theme} ${width}px external-link security`);
         assert.equal(initial.invalidLinkLayouts, 0, `${theme} ${width}px project-link layout`);
