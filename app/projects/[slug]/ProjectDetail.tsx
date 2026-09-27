@@ -74,19 +74,19 @@ function Fact({ label, children }: { label: string; children: ReactNode }) {
 }
 
 function SectionRule() {
-  return <div aria-hidden className="border-t border-border-primary" />;
+  return <div aria-hidden className="-mx-2 border-t border-border-primary sm:-mx-3 lg:mx-0" />;
 }
 
 function StorySection({ number, title, children }: { number: string; title: string; children: ReactNode }) {
   return (
-    <section className="grid lg:grid-cols-12">
-      <div className="px-4 py-6 sm:px-6 lg:col-span-4 lg:py-14">
+    <section className="grid lg:grid-cols-2">
+      <div className="px-4 py-6 sm:px-6 lg:py-14">
         <div className="lg:sticky lg:top-32">
           <span className="font-mono text-xs font-medium text-text-secondary">{number}</span>
           <h2 className="mt-2 [font-family:var(--font-instrument-serif),serif] text-[32px] font-medium leading-none tracking-tight text-text-primary sm:text-[38px]">{title}</h2>
         </div>
       </div>
-      <div className="min-w-0 px-4 pb-10 sm:px-6 lg:col-span-8 lg:border-l lg:border-border-primary lg:py-14">{children}</div>
+      <div className="min-w-0 px-4 pb-10 sm:px-6 lg:border-l lg:border-border-primary lg:py-14">{children}</div>
     </section>
   );
 }
@@ -310,12 +310,14 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
         </div>
       </section>
 
-      <article className="mx-auto mt-14 max-w-6xl px-2 sm:px-4">
-        {images.length > 0 && <ProjectImageCarousel images={images} title={project.title} />}
-        {story.length > 0 && <div className="mt-10 border-t border-border-primary" />}
+      <article className="mt-14">
+        {images.length > 0 && <div className="mx-auto max-w-6xl px-2 sm:px-4"><ProjectImageCarousel images={images} title={project.title} /></div>}
+        {story.length > 0 && <div className="-mx-2 mt-10 border-t border-border-primary sm:-mx-3 lg:mx-0" />}
         {story.map(({ title, content }, index) => <Fragment key={title}>
           {index > 0 && <SectionRule />}
-          <StorySection number={String(index + 1).padStart(2, "0")} title={title}>{content}</StorySection>
+          <div className="mx-auto max-w-6xl px-2 sm:px-4">
+            <StorySection number={String(index + 1).padStart(2, "0")} title={title}>{content}</StorySection>
+          </div>
         </Fragment>)}
         {story.length > 0 && <SectionRule />}
       </article>
