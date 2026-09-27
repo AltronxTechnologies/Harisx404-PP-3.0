@@ -74,7 +74,10 @@ function Fact({ label, children }: { label: string; children: ReactNode }) {
 }
 
 function SectionRule() {
-  return <div aria-hidden className="-mx-2 border-t border-border-primary sm:-mx-3 lg:mx-0" />;
+  return <div aria-hidden className="-mx-2 flex flex-col gap-4 sm:-mx-3 lg:mx-0">
+    <div className="border-t border-border-primary" />
+    <div className="border-t border-border-primary" />
+  </div>;
 }
 
 function StorySection({ number, title, children }: { number: string; title: string; children: ReactNode }) {
@@ -312,7 +315,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
 
       <article className="mt-14">
         {images.length > 0 && <div className="mx-auto max-w-6xl px-2 sm:px-4"><ProjectImageCarousel images={images} title={project.title} /></div>}
-        {story.length > 0 && <div className="-mx-2 mt-10 border-t border-border-primary sm:-mx-3 lg:mx-0" />}
+        {story.length > 0 && <div className="mt-10"><SectionRule /></div>}
         {story.map(({ title, content }, index) => <Fragment key={title}>
           {index > 0 && <SectionRule />}
           <div className="mx-auto max-w-6xl px-2 sm:px-4">

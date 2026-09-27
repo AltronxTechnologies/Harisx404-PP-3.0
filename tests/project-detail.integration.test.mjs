@@ -159,8 +159,9 @@ test("project gallery and narrative are sourced from Admin-authored data", async
   assert.match(detail, /md:grid-cols-2 lg:grid-cols-1/);
   assert.match(detail, /gap-4 font-display text-\[28px\]/);
   assert.match(detail, /<article className="mt-14">/);
-  assert.match(detail, /-mx-2 border-t border-border-primary sm:-mx-3 lg:mx-0/);
-  assert.match(detail, /-mx-2 mt-10 border-t border-border-primary sm:-mx-3 lg:mx-0/);
+  assert.match(detail, /-mx-2 flex flex-col gap-4 sm:-mx-3 lg:mx-0/);
+  assert.match(detail, /<div className="border-t border-border-primary" \/>\s*<div className="border-t border-border-primary" \/>/);
+  assert.match(detail, /<div className="mt-10"><SectionRule \/><\/div>/);
   assert.match(detail, /<div className="mx-auto max-w-6xl px-2 sm:px-4">\s*<StorySection/);
   assert.match(detail, /grid lg:grid-cols-\[1fr_3fr\]/);
   assert.match(detail, /<div className="py-6 lg:py-14">/);
