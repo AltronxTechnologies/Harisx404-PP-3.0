@@ -161,7 +161,7 @@ test("project gallery and narrative are sourced from Admin-authored data", async
   assert.match(detail, /<article className="mt-14">/);
   assert.match(detail, /aria-labelledby="project-facts-heading" className="mx-auto mt-14 max-w-6xl px-2 sm:px-4"/);
   assert.match(detail, /<div className="rounded-3xl border border-border-primary bg-white dark:bg-white\/\[0\.02\]">/);
-  assert.match(detail, /-mx-2 h-px bg-neutral-400\/60 dark:bg-white\/20 sm:-mx-3 lg:mx-0/);
+  assert.match(detail, /-mx-2 h-px bg-border-primary sm:-mx-3 lg:mx-0/);
   assert.match(detail, /<div className="mt-10"><SectionRule \/><\/div>/);
   assert.match(detail, /<ul className="my-5 list-disc space-y-2 pl-6">/);
   assert.match(detail, /<ol className="my-5 list-decimal space-y-2 pl-6">/);

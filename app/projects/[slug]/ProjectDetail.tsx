@@ -74,7 +74,7 @@ function Fact({ label, children }: { label: string; children: ReactNode }) {
 }
 
 function SectionRule() {
-  return <div aria-hidden className="-mx-2 h-px bg-neutral-400/60 dark:bg-white/20 sm:-mx-3 lg:mx-0" />;
+  return <div aria-hidden className="-mx-2 h-px bg-border-primary sm:-mx-3 lg:mx-0" />;
 }
 
 function StorySection({ number, title, children }: { number: string; title: string; children: ReactNode }) {
