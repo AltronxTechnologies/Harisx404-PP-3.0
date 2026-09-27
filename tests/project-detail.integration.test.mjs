@@ -154,8 +154,8 @@ test("project gallery and narrative are sourced from Admin-authored data", async
   assert.match(page, /Array\.isArray\(p\.galleryDetails\)/);
   assert.doesNotMatch(page, /genericFeatures|formatQuarter/);
   assert.match(detail, /<ReactMarkdown/);
-  assert.match(detail, /prose ml-auto max-w-\[65ch\]/);
-  assert.match(detail, /ml-auto grid max-w-\[65ch\] gap-3 text-\[15px\]/);
+  assert.match(detail, /prose max-w-none/);
+  assert.match(detail, /grid gap-3 text-\[15px\]/);
   assert.match(detail, /md:grid-cols-2 lg:grid-cols-1/);
   assert.match(detail, /gap-4 font-display text-\[28px\]/);
   assert.match(detail, /<article className="mt-14">/);
@@ -165,7 +165,7 @@ test("project gallery and narrative are sourced from Admin-authored data", async
   assert.match(detail, /grid lg:grid-cols-12/);
   assert.match(detail, /<div className="py-6 lg:col-span-3 lg:py-14">/);
   assert.match(detail, /hidden border-x border-dashed border-border-primary lg:col-span-1 lg:block/);
-  assert.match(detail, /min-w-0 pb-10 lg:col-span-8 lg:pl-6 lg:py-14/);
+  assert.match(detail, /min-w-0 pb-10 lg:col-span-8 lg:pl-\[clamp\(16px,calc\(\(100vw-1186px\)\/2\),47px\)\] lg:py-14/);
   assert.match(detail, /project\.gallery\.filter/);
   assert.match(detail, /<ProjectImageCarousel/);
   assert.doesNotMatch(detail, /dangerouslySetInnerHTML/);
