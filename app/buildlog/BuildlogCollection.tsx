@@ -123,10 +123,11 @@ export function BuildlogCollection({
             );
 
             return (
+              // The inner rule meets the 48px status row and crosses both gutters without moving sticky content.
               <article
                 key={project.id}
                 data-project-boundary
-                className="relative grid min-w-0 grid-cols-1 before:absolute before:-left-4 before:-right-4 before:top-0 before:h-px before:bg-neutral-400/60 before:content-[''] dark:before:bg-white/20 sm:before:-left-7 sm:before:-right-7 lg:before:-left-4 lg:before:-right-4 lg:grid-cols-12"
+                className="relative grid min-w-0 grid-cols-1 before:absolute before:-left-4 before:-right-4 before:top-0 before:h-px before:bg-neutral-400/60 before:content-[''] dark:before:bg-white/20 after:pointer-events-none after:absolute after:-left-4 after:-right-4 after:top-[47px] after:h-px after:bg-border-primary after:content-[''] sm:before:-left-7 sm:before:-right-7 sm:after:-left-7 sm:after:-right-7 lg:before:-left-4 lg:before:-right-4 lg:after:-left-4 lg:after:-right-4 lg:grid-cols-12"
               >
                 <header className="border-b border-border-primary lg:sticky lg:top-28 lg:col-span-3 lg:self-start lg:border-b-0">
                   <div

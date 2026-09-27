@@ -125,6 +125,16 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
                 Math.abs(end.left + parseFloat(endStyle.left) - main.left) > 0.5 ||
                 Math.abs(end.right - parseFloat(endStyle.right) - main.right) > 0.5;
             })(),
+            invalidFirstRowEdges: [...document.querySelectorAll("[data-project-boundary]")].filter((article) => {
+              const main = document.querySelector("main")?.getBoundingClientRect();
+              const status = article.querySelector("[data-project-status-row]")?.getBoundingClientRect();
+              if (!main || !status) return true;
+              const bounds = article.getBoundingClientRect();
+              const line = getComputedStyle(article, "::after");
+              return Math.abs(bounds.left + parseFloat(line.left) - main.left) > 0.5 ||
+                Math.abs(bounds.right - parseFloat(line.right) - main.right) > 0.5 ||
+                Math.abs(bounds.top + parseFloat(line.top) + parseFloat(line.height) - status.bottom) > 0.5;
+            }).length,
             duplicateIds: ids.length - new Set(ids).size,
             insecureLinks: externalLinks.filter(
               (link) => link.getAttribute("rel") !== "noopener noreferrer",
@@ -201,6 +211,7 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
         assert.equal(initial.misalignedLedgerRows, 0, `${theme} ${width}px ledger row alignment`);
         assert.equal(initial.invalidProjectBoundaries, 0, `${theme} ${width}px project boundaries`);
         assert.equal(initial.invalidBoundaryEdges, false, `${theme} ${width}px rules reach side strips`);
+        assert.equal(initial.invalidFirstRowEdges, 0, `${theme} ${width}px first rows join side strips`);
         assert.equal(initial.duplicateIds, 0, `${theme} ${width}px duplicate IDs`);
         assert.equal(initial.insecureLinks, 0, `${theme} ${width}px external-link security`);
         assert.equal(initial.invalidLinkLayouts, 0, `${theme} ${width}px project-link layout`);
