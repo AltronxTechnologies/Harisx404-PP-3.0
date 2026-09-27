@@ -79,21 +79,21 @@ function SectionRule() {
 
 function StorySection({ number, title, children }: { number: string; title: string; children: ReactNode }) {
   return (
-    <section className="grid lg:grid-cols-[2fr_3fr]">
+    <section className="grid lg:grid-cols-[1fr_3fr]">
       <div className="py-6 lg:py-14">
         <div className="lg:sticky lg:top-32">
           <span className="font-mono text-xs font-medium text-text-secondary">{number}</span>
           <h2 className="mt-2 [font-family:var(--font-instrument-serif),serif] text-[32px] font-medium leading-none tracking-tight text-text-primary sm:text-[38px]">{title}</h2>
         </div>
       </div>
-      <div className="min-w-0 pb-10 lg:border-l lg:border-border-primary lg:px-6 lg:py-14">{children}</div>
+      <div className="min-w-0 pb-10 lg:border-l lg:border-border-primary lg:pl-6 lg:py-14">{children}</div>
     </section>
   );
 }
 
 function CaseStudy({ content }: { content: string }) {
   return (
-    <div className="prose max-w-[65ch] break-words text-[15px] leading-7 text-text-secondary prose-headings:font-medium prose-headings:text-text-primary prose-p:leading-7 prose-p:text-text-secondary prose-strong:text-text-primary prose-a:text-text-primary prose-code:break-all prose-code:text-text-primary prose-blockquote:border-border-primary dark:prose-invert">
+    <div className="prose ml-auto max-w-[65ch] break-words text-[15px] leading-7 text-text-secondary prose-headings:font-medium prose-headings:text-text-primary prose-p:leading-7 prose-p:text-text-secondary prose-strong:text-text-primary prose-a:text-text-primary prose-code:break-all prose-code:text-text-primary prose-blockquote:border-border-primary dark:prose-invert">
       <ReactMarkdown
         components={{
           h2: ({ children }) => <h3 className="[font-family:var(--font-instrument-serif),serif] text-2xl">{children}</h3>,
@@ -133,7 +133,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
   const story: Array<{ title: string; content: ReactNode }> = [];
   if (overview) story.push({ title: "Overview", content: <CaseStudy content={overview} /> });
   if (project.sections.why_built?.trim()) story.push({ title: "Why I built this", content: <CaseStudy content={project.sections.why_built} /> });
-  if (project.features.length) story.push({ title: "Highlights", content: <ol className="grid gap-3 md:grid-cols-2 lg:grid-cols-1">{project.features.map((feature, index) => (
+  if (project.features.length) story.push({ title: "Highlights", content: <ol className="ml-auto grid max-w-[65ch] gap-3 text-[15px] md:grid-cols-2 lg:grid-cols-1">{project.features.map((feature, index) => (
     <li key={`${index}-${feature}`} className="flex gap-4 rounded-2xl border border-border-primary bg-white p-5 dark:bg-white/[0.02]">
       <span className="shrink-0 font-mono text-xs text-text-secondary">{String(index + 1).padStart(2, "0")}</span>
       <p className="text-[15px] leading-6 text-text-secondary">{feature}</p>
