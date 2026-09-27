@@ -74,22 +74,20 @@ function Fact({ label, children }: { label: string; children: ReactNode }) {
 }
 
 function SectionRule() {
-  return <div aria-hidden className="-mx-2 flex flex-col gap-4 sm:-mx-3 lg:mx-0">
-    <div className="border-t border-border-primary" />
-    <div className="border-t border-border-primary" />
-  </div>;
+  return <div aria-hidden className="-mx-2 border-t border-border-primary sm:-mx-3 lg:mx-0" />;
 }
 
 function StorySection({ number, title, children }: { number: string; title: string; children: ReactNode }) {
   return (
-    <section className="grid lg:grid-cols-[1fr_3fr]">
-      <div className="py-6 lg:py-14">
+    <section className="grid lg:grid-cols-12">
+      <div className="py-6 lg:col-span-3 lg:py-14">
         <div className="lg:sticky lg:top-32">
           <span className="font-mono text-xs font-medium text-text-secondary">{number}</span>
           <h2 className="mt-2 [font-family:var(--font-instrument-serif),serif] text-[32px] font-medium leading-none tracking-tight text-text-primary sm:text-[38px]">{title}</h2>
         </div>
       </div>
-      <div className="min-w-0 pb-10 lg:border-l lg:border-border-primary lg:pl-6 lg:py-14">{children}</div>
+      <div aria-hidden className="hidden border-x border-dashed border-border-primary lg:col-span-1 lg:block" />
+      <div className="min-w-0 pb-10 lg:col-span-8 lg:pl-6 lg:py-14">{children}</div>
     </section>
   );
 }
@@ -315,7 +313,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
 
       <article className="mt-14">
         {images.length > 0 && <div className="mx-auto max-w-6xl px-2 sm:px-4"><ProjectImageCarousel images={images} title={project.title} /></div>}
-        {story.length > 0 && <div className="mt-10"><SectionRule /></div>}
+        {story.length > 0 && <div className="-mx-2 mt-10 border-t border-border-primary sm:-mx-3 lg:mx-0" />}
         {story.map(({ title, content }, index) => <Fragment key={title}>
           {index > 0 && <SectionRule />}
           <div className="mx-auto max-w-6xl px-2 sm:px-4">
