@@ -52,12 +52,7 @@ function Spacer() {
 }
 
 function SectionDivider() {
-  return (
-    <div aria-hidden="true" className="flex w-full flex-col gap-4">
-      <div className="border-t border-border-primary" />
-      <div className="border-t border-border-primary" />
-    </div>
-  );
+  return <div aria-hidden="true" className="-mx-2 border-t border-border-primary sm:-mx-3 lg:mx-0" />;
 }
 
 /* ---------- Page ---------- */
@@ -81,9 +76,9 @@ export default function TermsOfUsePage() {
         </div>
       </GridWrapper>
 
-      <div className="relative mx-auto mt-14 w-full max-w-6xl space-y-10 px-2 sm:px-4 lg:px-8">
+      <div className="relative mt-14 space-y-10">
         {/* 01 — Terms */}
-        <section className="grid grid-cols-1 lg:grid-cols-12">
+        <section className="mx-auto grid w-full max-w-6xl grid-cols-1 px-2 sm:px-4 lg:grid-cols-12 lg:px-8">
           <SectionHeader index="01" title="Terms." subtitle="Using This Site" />
           <Spacer />
           <div className="space-y-8 p-4 lg:col-span-8 lg:p-6">
@@ -113,7 +108,7 @@ export default function TermsOfUsePage() {
         <SectionDivider />
 
         {/* 02 — Rights */}
-        <section className="grid grid-cols-1 lg:grid-cols-12">
+        <section className="mx-auto grid w-full max-w-6xl grid-cols-1 px-2 sm:px-4 lg:grid-cols-12 lg:px-8">
           <SectionHeader index="02" title="Rights." subtitle="Use & Reuse" />
           <Spacer />
           <div className="space-y-8 p-4 lg:col-span-8 lg:p-6">
@@ -165,7 +160,7 @@ export default function TermsOfUsePage() {
         <SectionDivider />
 
         {/* 03 — Limits */}
-        <section className="grid grid-cols-1 lg:grid-cols-12">
+        <section className="mx-auto grid w-full max-w-6xl grid-cols-1 px-2 sm:px-4 lg:grid-cols-12 lg:px-8">
           <SectionHeader index="03" title="Community." subtitle="Use & Responsibility" />
           <Spacer />
           <div className="space-y-8 p-4 lg:col-span-8 lg:p-6">

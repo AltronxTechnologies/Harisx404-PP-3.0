@@ -24,6 +24,10 @@ for (const [route, sourcePath, title] of [
     assert.match(html, /From concept to creation/);
     assert.match(source, /<GridWrapper>/);
     assert.match(source, /<PaperHeroTexture/);
+    assert.match(source, /hidden border-x border-dashed border-border-primary lg:col-span-1 lg:block/);
+    assert.match(source, /-mx-2 border-t border-border-primary sm:-mx-3 lg:mx-0/);
+    assert.match(source, /relative mt-14 space-y-10/);
+    assert.equal((source.match(/mx-auto grid w-full max-w-6xl grid-cols-1 px-2 sm:px-4 lg:grid-cols-12 lg:px-8/g) || []).length, 3);
     assert.match(source, /className="mt-28"/);
     assert.doesNotMatch(source, /<HeroTexture|Hatched side rails/);
   });
