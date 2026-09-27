@@ -153,6 +153,7 @@ test("project gallery and narrative are sourced from Admin-authored data", async
   assert.match(page, /Array\.isArray\(p\.galleryDetails\)/);
   assert.doesNotMatch(page, /genericFeatures|formatQuarter/);
   assert.match(detail, /<ReactMarkdown/);
+  assert.match(detail, /lg:col-span-8 lg:border-l lg:border-border-primary lg:py-14/);
   assert.match(detail, /project\.gallery\.filter/);
   assert.match(detail, /<ProjectImageCarousel/);
   assert.doesNotMatch(detail, /dangerouslySetInnerHTML/);

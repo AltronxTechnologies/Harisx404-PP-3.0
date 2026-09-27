@@ -86,7 +86,7 @@ function StorySection({ number, title, children }: { number: string; title: stri
           <h2 className="mt-2 [font-family:var(--font-instrument-serif),serif] text-[32px] font-medium leading-none tracking-tight text-text-primary sm:text-[38px]">{title}</h2>
         </div>
       </div>
-      <div className="min-w-0 px-4 pb-10 sm:px-6 lg:col-span-8 lg:py-14">{children}</div>
+      <div className="min-w-0 px-4 pb-10 sm:px-6 lg:col-span-8 lg:border-l lg:border-border-primary lg:py-14">{children}</div>
     </section>
   );
 }
