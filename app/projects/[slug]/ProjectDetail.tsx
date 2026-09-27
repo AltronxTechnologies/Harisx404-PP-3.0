@@ -79,14 +79,14 @@ function SectionRule() {
 
 function StorySection({ number, title, children }: { number: string; title: string; children: ReactNode }) {
   return (
-    <section className="grid lg:grid-cols-2">
-      <div className="px-4 py-6 sm:px-6 lg:py-14">
+    <section className="grid lg:grid-cols-[2fr_3fr]">
+      <div className="py-6 lg:py-14">
         <div className="lg:sticky lg:top-32">
           <span className="font-mono text-xs font-medium text-text-secondary">{number}</span>
           <h2 className="mt-2 [font-family:var(--font-instrument-serif),serif] text-[32px] font-medium leading-none tracking-tight text-text-primary sm:text-[38px]">{title}</h2>
         </div>
       </div>
-      <div className="min-w-0 px-4 pb-10 sm:px-6 lg:border-l lg:border-border-primary lg:py-14">{children}</div>
+      <div className="min-w-0 pb-10 lg:border-l lg:border-border-primary lg:px-6 lg:py-14">{children}</div>
     </section>
   );
 }

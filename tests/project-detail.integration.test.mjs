@@ -161,8 +161,9 @@ test("project gallery and narrative are sourced from Admin-authored data", async
   assert.match(detail, /-mx-2 border-t border-border-primary sm:-mx-3 lg:mx-0/);
   assert.match(detail, /-mx-2 mt-10 border-t border-border-primary sm:-mx-3 lg:mx-0/);
   assert.match(detail, /<div className="mx-auto max-w-6xl px-2 sm:px-4">\s*<StorySection/);
-  assert.match(detail, /grid lg:grid-cols-2/);
-  assert.match(detail, /sm:px-6 lg:border-l lg:border-border-primary lg:py-14/);
+  assert.match(detail, /grid lg:grid-cols-\[2fr_3fr\]/);
+  assert.match(detail, /<div className="py-6 lg:py-14">/);
+  assert.match(detail, /min-w-0 pb-10 lg:border-l lg:border-border-primary lg:px-6 lg:py-14/);
   assert.match(detail, /project\.gallery\.filter/);
   assert.match(detail, /<ProjectImageCarousel/);
   assert.doesNotMatch(detail, /dangerouslySetInnerHTML/);
