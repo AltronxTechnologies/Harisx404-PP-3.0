@@ -9,9 +9,11 @@ import { useEffect, useState } from "react";
 interface TiptapEditorProps {
   value: string;
   onChange: (value: string) => void;
+  label?: string;
+  story?: boolean;
 }
 
-const MenuBar = ({ editor }: { editor: any }) => {
+const MenuBar = ({ editor, story }: { editor: any; story: boolean }) => {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiMenuOpen, setAiMenuOpen] = useState(false);
 
@@ -68,6 +70,8 @@ const MenuBar = ({ editor }: { editor: any }) => {
         onClick={() => editor.chain().focus().toggleBold().run()}
         disabled={!editor.can().chain().focus().toggleBold().run()}
         className={`p-2 rounded hover:bg-surface-raised transition-colors ${editor.isActive("bold") ? "bg-surface-raised text-accent-signal" : "text-ink-secondary"}`}
+        aria-label="Bold"
+        aria-pressed={editor.isActive("bold")}
         title="Bold"
       >
         <Bold className="h-4 w-4" />
@@ -77,21 +81,28 @@ const MenuBar = ({ editor }: { editor: any }) => {
         onClick={() => editor.chain().focus().toggleItalic().run()}
         disabled={!editor.can().chain().focus().toggleItalic().run()}
         className={`p-2 rounded hover:bg-surface-raised transition-colors ${editor.isActive("italic") ? "bg-surface-raised text-accent-signal" : "text-ink-secondary"}`}
+        aria-label="Italic"
+        aria-pressed={editor.isActive("italic")}
         title="Italic"
       >
         <Italic className="h-4 w-4" />
       </button>
       
-      <div className="w-px h-6 bg-border-hairline mx-1" />
-      
-      <button
-        type="button"
-        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-        className={`p-2 rounded hover:bg-surface-raised transition-colors ${editor.isActive("heading", { level: 2 }) ? "bg-surface-raised text-accent-signal" : "text-ink-secondary"}`}
-        title="Heading 2"
-      >
-        <Heading2 className="h-4 w-4" />
-      </button>
+      {!story && (
+        <>
+          <div className="w-px h-6 bg-border-hairline mx-1" />
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+            className={`p-2 rounded hover:bg-surface-raised transition-colors ${editor.isActive("heading", { level: 2 }) ? "bg-surface-raised text-accent-signal" : "text-ink-secondary"}`}
+            aria-label="Heading 2"
+            aria-pressed={editor.isActive("heading", { level: 2 })}
+            title="Heading 2"
+          >
+            <Heading2 className="h-4 w-4" />
+          </button>
+        </>
+      )}
 
       <div className="w-px h-6 bg-border-hairline mx-1" />
 
@@ -99,6 +110,8 @@ const MenuBar = ({ editor }: { editor: any }) => {
         type="button"
         onClick={() => editor.chain().focus().toggleBulletList().run()}
         className={`p-2 rounded hover:bg-surface-raised transition-colors ${editor.isActive("bulletList") ? "bg-surface-raised text-accent-signal" : "text-ink-secondary"}`}
+        aria-label="Bullet list"
+        aria-pressed={editor.isActive("bulletList")}
         title="Bullet List"
       >
         <List className="h-4 w-4" />
@@ -107,38 +120,49 @@ const MenuBar = ({ editor }: { editor: any }) => {
         type="button"
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
         className={`p-2 rounded hover:bg-surface-raised transition-colors ${editor.isActive("orderedList") ? "bg-surface-raised text-accent-signal" : "text-ink-secondary"}`}
+        aria-label="Numbered list"
+        aria-pressed={editor.isActive("orderedList")}
         title="Ordered List"
       >
         <ListOrdered className="h-4 w-4" />
       </button>
-      <button
+      {!story && <button
         type="button"
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
         className={`p-2 rounded hover:bg-surface-raised transition-colors ${editor.isActive("blockquote") ? "bg-surface-raised text-accent-signal" : "text-ink-secondary"}`}
+        aria-label="Quote"
+        aria-pressed={editor.isActive("blockquote")}
         title="Quote"
       >
         <Quote className="h-4 w-4" />
-      </button>
+      </button>}
 
-      <div className="w-px h-6 bg-border-hairline mx-1" />
-      
-      <button
-        type="button"
-        onClick={() => editor.chain().focus().toggleCode().run()}
-        disabled={!editor.can().chain().focus().toggleCode().run()}
-        className={`p-2 rounded hover:bg-surface-raised transition-colors ${editor.isActive("code") ? "bg-surface-raised text-accent-signal" : "text-ink-secondary"}`}
-        title="Code"
-      >
-        <Code className="h-4 w-4" />
-      </button>
-      <button
-        type="button"
-        onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-        className={`p-2 rounded hover:bg-surface-raised transition-colors ${editor.isActive("codeBlock") ? "bg-surface-raised text-accent-signal" : "text-ink-secondary"}`}
-        title="Code Block"
-      >
-        <Code2 className="h-4 w-4" />
-      </button>
+      {!story && (
+        <>
+          <div className="w-px h-6 bg-border-hairline mx-1" />
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().toggleCode().run()}
+            disabled={!editor.can().chain().focus().toggleCode().run()}
+            className={`p-2 rounded hover:bg-surface-raised transition-colors ${editor.isActive("code") ? "bg-surface-raised text-accent-signal" : "text-ink-secondary"}`}
+            aria-label="Inline code"
+            aria-pressed={editor.isActive("code")}
+            title="Code"
+          >
+            <Code className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+            className={`p-2 rounded hover:bg-surface-raised transition-colors ${editor.isActive("codeBlock") ? "bg-surface-raised text-accent-signal" : "text-ink-secondary"}`}
+            aria-label="Code block"
+            aria-pressed={editor.isActive("codeBlock")}
+            title="Code Block"
+          >
+            <Code2 className="h-4 w-4" />
+          </button>
+        </>
+      )}
 
       <div className="w-px h-6 bg-border-hairline mx-1" />
 
@@ -147,6 +171,7 @@ const MenuBar = ({ editor }: { editor: any }) => {
         onClick={() => editor.chain().focus().undo().run()}
         disabled={!editor.can().chain().focus().undo().run()}
         className="p-2 rounded hover:bg-surface-raised transition-colors text-ink-secondary disabled:opacity-50"
+        aria-label="Undo"
         title="Undo"
       >
         <Undo className="h-4 w-4" />
@@ -156,14 +181,16 @@ const MenuBar = ({ editor }: { editor: any }) => {
         onClick={() => editor.chain().focus().redo().run()}
         disabled={!editor.can().chain().focus().redo().run()}
         className="p-2 rounded hover:bg-surface-raised transition-colors text-ink-secondary disabled:opacity-50"
+        aria-label="Redo"
         title="Redo"
       >
         <Redo className="h-4 w-4" />
       </button>
 
-      <div className="w-px h-6 bg-border-hairline mx-1" />
-
-      <div className="relative">
+      {!story && (
+        <>
+          <div className="w-px h-6 bg-border-hairline mx-1" />
+          <div className="relative">
         <button
           type="button"
           onClick={() => setAiMenuOpen(!aiMenuOpen)}
@@ -214,12 +241,14 @@ const MenuBar = ({ editor }: { editor: any }) => {
             </button>
           </div>
         )}
-      </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
 
-export function TiptapEditor({ value, onChange }: TiptapEditorProps) {
+export function TiptapEditor({ value, onChange, label = "Case study", story = false }: TiptapEditorProps) {
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -228,7 +257,8 @@ export function TiptapEditor({ value, onChange }: TiptapEditorProps) {
     content: value,
     editorProps: {
       attributes: {
-        class: "prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[400px] p-4 text-ink-primary",
+        class: `prose prose-sm dark:prose-invert max-w-none focus:outline-none ${story ? "min-h-36" : "min-h-[400px]"} p-4 text-ink-primary`,
+        "aria-label": label,
       },
     },
     onUpdate: ({ editor }) => {
@@ -240,14 +270,14 @@ export function TiptapEditor({ value, onChange }: TiptapEditorProps) {
 
   // Handle external value changes (e.g. initial load)
   useEffect(() => {
-    if (editor && value && (editor.storage as any).markdown.getMarkdown() !== value) {
+    if (editor && (editor.storage as any).markdown.getMarkdown() !== value) {
       editor.commands.setContent(value);
     }
   }, [value, editor]);
 
   return (
     <div className="rounded-xl overflow-hidden border border-border-hairline bg-surface-raised flex flex-col">
-      <MenuBar editor={editor} />
+      <MenuBar editor={editor} story={story} />
       <div className="flex-1 overflow-y-auto max-h-[600px] cursor-text" onClick={() => editor?.commands.focus()}>
         <EditorContent editor={editor} />
       </div>

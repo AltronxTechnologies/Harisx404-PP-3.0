@@ -182,12 +182,13 @@ test("project gallery and narrative are sourced from Admin-authored data", async
 });
 
 test("project tags, timeline, source name and optional sections remain owner-managed", async () => {
-  const [migration, page, detail, api, form, index, filters, cards] = await Promise.all([
+  const [migration, page, detail, api, form, editor, index, filters, cards] = await Promise.all([
     readFile(new URL("../migrations/2026_project_case_studies.sql", import.meta.url), "utf8"),
     readFile(new URL("../app/projects/[slug]/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/projects/[slug]/ProjectDetail.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/api/admin/projects/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/components/admin/ProjectForm.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/admin/TiptapEditor.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/projects/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/projects/ProjectsIndex.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/components/home/CaseStudies.tsx", import.meta.url), "utf8"),
@@ -210,7 +211,15 @@ test("project tags, timeline, source name and optional sections remain owner-man
   assert.doesNotMatch(form, /register\("project_stage"\)/);
   assert.doesNotMatch(form, /register\("live_note"\)/);
   assert.match(form, /register\("source_note"\)/);
-  assert.match(form, /register\(`case_study_sections\.\$\{key\}`\)/);
+  assert.match(form, /name=\{`case_study_sections\.\$\{key\}`\}/);
+  assert.match(form, /<TiptapEditor label=\{label\} story value=\{field\.value \|\| ""\} onChange=\{field\.onChange\}/);
+  assert.match(editor, /const MenuBar = \(\{ editor, story \}/);
+  for (const action of ["toggleBold", "toggleItalic", "toggleBulletList", "toggleOrderedList"]) {
+    assert.ok(editor.includes(`${action}()`), `${action} should be available in the story toolbar`);
+  }
+  assert.match(editor, /!story && \([\s\S]*?toggleHeading/);
+  assert.match(editor, /markdown\.getMarkdown\(\)/);
+  assert.match(detail, /\[&>\*\]:max-w-\[68ch\]/);
   assert.match(page, /item\.tags\.filter/);
   assert.doesNotMatch(detail, /<Fact label="Stage">|<Fact label="Type">/);
   assert.doesNotMatch(detail, /<Fact label="Category">|Category &amp; tags/);

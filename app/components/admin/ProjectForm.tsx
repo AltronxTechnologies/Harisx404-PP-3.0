@@ -520,11 +520,17 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
       </div>
 
       <div className="space-y-5 border-t border-border-hairline pt-6">
-        <div><h2 className="text-lg font-medium">Case study sections</h2><p className="text-xs text-ink-secondary">Write only what applies to this project. Markdown is supported.</p></div>
+        <div><h2 className="text-lg font-medium">Case study sections</h2><p className="text-xs text-ink-secondary">Write only what applies to this project. Use bold or italic for emphasis and lists for steps or outcomes. Changes are saved as Markdown.</p></div>
         {sectionFields.map(({ key, label, hint }) => (
           <div key={key} className="space-y-2">
-            <label htmlFor={`case-study-${key}`} className="text-sm font-medium">{label} (Optional)</label>
-            <textarea id={`case-study-${key}`} {...register(`case_study_sections.${key}`)} rows={4} maxLength={10000} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder={hint} />
+            <p className="text-sm font-medium">{label} (Optional)</p>
+            <Controller
+              name={`case_study_sections.${key}`}
+              control={control}
+              render={({ field }) => <TiptapEditor label={label} story value={field.value || ""} onChange={field.onChange} />}
+            />
+            <p className="text-xs text-ink-secondary">{hint} Up to 10,000 characters.</p>
+            {errors.case_study_sections?.[key] && <p className="text-xs text-red-500">{errors.case_study_sections[key]?.message}</p>}
           </div>
         ))}
       </div>
