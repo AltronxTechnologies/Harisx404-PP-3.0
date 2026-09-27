@@ -61,10 +61,10 @@ test("Buildlog source has valid hero semantics and explicit route states", async
   assert.match(collection, /data-project-boundary/);
   assert.match(collection, /before:-left-4 before:-right-4/);
   assert.match(collection, /sm:before:-left-7 sm:before:-right-7 lg:before:-left-4 lg:before:-right-4/);
-  assert.match(collection, /before:h-\[1\.5px\]/);
+  assert.match(collection, /before:h-px/);
   assert.match(collection, /before:bg-neutral-400\/60/);
   assert.match(collection, /dark:before:bg-white\/20/);
-  assert.match(collection, /after:-left-4 after:-right-4 after:bottom-0 after:h-\[1\.5px\] after:bg-neutral-400\/60/);
+  assert.match(collection, /after:-left-4 after:-right-4 after:bottom-0 after:h-px after:bg-neutral-400\/60/);
   assert.match(collection, /hidden border-x border-dashed border-border-primary lg:col-span-1 lg:block/);
   assert.match(collection, /lg:col-span-3 lg:self-start lg:border-b-0/);
   assert.match(collection, /min-w-0 lg:col-span-8/);

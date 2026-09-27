@@ -107,7 +107,7 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
                   }).length,
             invalidProjectBoundaries: [...document.querySelectorAll("[data-project-boundary]")].filter(
               (article) =>
-                Math.abs(Number.parseFloat(getComputedStyle(article, "::before").height) - 1.5) > 0.1,
+                Math.abs(Number.parseFloat(getComputedStyle(article, "::before").height) - 1) > 0.1,
             ).length,
             invalidBoundaryEdges: (() => {
               const main = document.querySelector("main")?.getBoundingClientRect();
@@ -121,7 +121,7 @@ test("Buildlog lifecycle and shipped disclosures work across themes and widths",
                 const style = getComputedStyle(article, "::before");
                 return Math.abs(bounds.left + parseFloat(style.left) - main.left) > 0.5 ||
                   Math.abs(bounds.right - parseFloat(style.right) - main.right) > 0.5;
-              }) || Math.abs(parseFloat(endStyle.height) - 1.5) > 0.1 ||
+              }) || Math.abs(parseFloat(endStyle.height) - 1) > 0.1 ||
                 Math.abs(end.left + parseFloat(endStyle.left) - main.left) > 0.5 ||
                 Math.abs(end.right - parseFloat(endStyle.right) - main.right) > 0.5;
             })(),
