@@ -155,6 +155,7 @@ test("project gallery and narrative are sourced from Admin-authored data", async
   assert.doesNotMatch(page, /genericFeatures|formatQuarter/);
   assert.match(detail, /<ReactMarkdown/);
   assert.match(detail, /prose max-w-none/);
+  assert.match(detail, /\[&>:first-child\]:!mt-0 \[&>:last-child\]:!mb-0/);
   assert.match(detail, /grid gap-3 text-\[15px\]/);
   assert.match(detail, /grid gap-3 text-\[15px\] md:grid-cols-2/);
   assert.doesNotMatch(detail, /<ol className="[^"]*lg:grid-cols-1/);

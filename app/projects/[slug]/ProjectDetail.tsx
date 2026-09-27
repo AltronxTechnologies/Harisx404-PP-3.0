@@ -95,7 +95,7 @@ function StorySection({ number, title, children }: { number: string; title: stri
 
 function CaseStudy({ content }: { content: string }) {
   return (
-    <div className="prose max-w-none break-words text-[15px] leading-7 text-text-secondary prose-headings:font-medium prose-headings:text-text-primary prose-p:leading-7 prose-p:text-text-secondary prose-strong:text-text-primary prose-a:text-text-primary prose-code:break-all prose-code:text-text-primary prose-blockquote:border-border-primary dark:prose-invert [&>*]:max-w-[68ch]">
+    <div className="prose max-w-none break-words text-[15px] leading-7 text-text-secondary prose-headings:font-medium prose-headings:text-text-primary prose-p:leading-7 prose-p:text-text-secondary prose-strong:text-text-primary prose-a:text-text-primary prose-code:break-all prose-code:text-text-primary prose-blockquote:border-border-primary dark:prose-invert [&>*]:max-w-[68ch] [&>:first-child]:!mt-0 [&>:last-child]:!mb-0">
       <ReactMarkdown
         components={{
           h2: ({ children }) => <h3 className="[font-family:var(--font-instrument-serif),serif] text-2xl">{children}</h3>,
