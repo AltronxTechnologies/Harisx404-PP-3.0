@@ -138,7 +138,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
   if (overview) story.push({ title: "Overview", content: <CaseStudy content={overview} /> });
   if (project.sections.why_built?.trim()) story.push({ title: "Why I built this", content: <CaseStudy content={project.sections.why_built} /> });
   if (project.features.length) story.push({ title: "Highlights", content: <ol className="grid gap-3 text-[15px] md:grid-cols-2">{project.features.map((feature, index) => (
-    <li key={`${index}-${feature}`} className="flex gap-4 rounded-2xl border border-border-primary bg-white p-5 dark:bg-white/[0.02]">
+    <li key={`${index}-${feature}`} className="flex items-baseline gap-4 rounded-2xl border border-border-primary bg-white p-5 dark:bg-white/[0.02]">
       <span className="shrink-0 font-mono text-xs text-text-secondary">{String(index + 1).padStart(2, "0")}</span>
       <p className="text-[15px] leading-6 text-text-secondary">{feature}</p>
     </li>
