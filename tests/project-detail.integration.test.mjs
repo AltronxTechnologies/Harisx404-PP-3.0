@@ -159,7 +159,9 @@ test("project gallery and narrative are sourced from Admin-authored data", async
   assert.match(detail, /grid gap-3 text-\[15px\]/);
   assert.match(detail, /grid gap-3 text-\[15px\] md:grid-cols-2/);
   assert.doesNotMatch(detail, /<ol className="[^"]*lg:grid-cols-1/);
-  assert.match(detail, /gap-4 font-display text-\[28px\]/);
+  assert.match(detail, /mt-8 grid border-y border-border-primary sm:grid-cols-2/);
+  assert.match(detail, /border-t border-border-primary sm:border-l sm:border-t-0/);
+  assert.match(detail, /View case study/);
   assert.match(detail, /<article className="mt-14">/);
   assert.match(detail, /aria-labelledby="project-facts-heading" className="mx-auto mt-14 max-w-6xl px-2 sm:px-4"/);
   assert.match(detail, /<div className="rounded-3xl border border-border-primary bg-white dark:bg-white\/\[0\.02\]">/);
@@ -239,7 +241,7 @@ test("project tags, timeline, source name and optional sections remain owner-man
   assert.match(detail, /sourceUrl \?/);
   assert.match(detail, /project\.sourceNote \|\| \(project\.isPreview/);
   assert.match(detail, /sections\.map/);
-  assert.match(detail, /Related projects/);
+  assert.match(detail, /Related <em className="font-normal">projects<\/em>/);
   assert.match(detail, /Browse all projects/);
   for (const action of ["Copy URL", "View as Markdown", "Open in ChatGPT", "Open in Claude"]) {
     assert.ok(detail.includes(action), `share menu should include ${action}`);

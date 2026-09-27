@@ -328,13 +328,23 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
 
       {related.length > 0 && (
         <section aria-labelledby="related-projects-heading" className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-          <p className="font-mono text-xs uppercase tracking-widest text-text-secondary">Continue exploring</p>
-          <h2 id="related-projects-heading" className="mt-2 [font-family:var(--font-instrument-serif),serif] text-[36px] leading-none text-text-primary sm:text-[42px]">Related projects</h2>
-          <div className="mt-7 grid gap-4 sm:grid-cols-2">
-            {related.map((item) => <Link key={item.slug} href={`/projects/${item.slug}`} className={`group flex min-w-0 flex-col rounded-2xl border border-border-primary bg-white p-6 transition-colors hover:border-neutral-400/70 dark:bg-white/[0.02] dark:hover:border-white/25 ${focusStyle}`}>
-              <span className="font-mono text-[11px] uppercase tracking-widest text-text-secondary">{item.category}</span>
-              <span className="mt-4 flex items-start justify-between gap-4 font-display text-[28px] leading-tight text-text-primary"><span className="min-w-0 break-words">{item.title}</span><ArrowUpRight aria-hidden className="mt-1 size-5 shrink-0" /></span>
-              {item.tagline && <span className="mt-3 line-clamp-2 text-sm leading-6 text-text-secondary">{item.tagline}</span>}
+          <div className="flex items-center gap-3">
+            <span aria-hidden className="h-px w-8 bg-text-secondary" />
+            <p className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">Continue exploring</p>
+          </div>
+          <h2 id="related-projects-heading" className="mt-4 [font-family:var(--font-instrument-serif),serif] text-[42px] font-medium leading-none tracking-tight text-text-primary sm:text-[52px]">Related <em className="font-normal">projects</em></h2>
+          <div className="mt-8 grid border-y border-border-primary sm:grid-cols-2">
+            {related.map((item, index) => <Link key={item.slug} href={`/projects/${item.slug}`} className={`group flex min-w-0 flex-col py-7 transition-colors hover:bg-neutral-50/70 dark:hover:bg-white/[0.03] sm:px-8 sm:py-9 ${index > 0 ? "border-t border-border-primary sm:border-l sm:border-t-0" : ""} ${focusStyle}`}>
+              <span className="flex items-start justify-between gap-4 font-mono text-[11px] uppercase tracking-widest text-text-secondary">
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <span className="max-w-[75%] break-words text-right">{item.category}</span>
+              </span>
+              <span className="mt-8 break-words [font-family:var(--font-instrument-serif),serif] text-[34px] font-medium leading-[1.05] tracking-tight text-text-primary sm:text-[40px]">{item.title}</span>
+              {item.tagline && <span className="mt-4 max-w-[56ch] break-words text-[15px] leading-6 text-text-secondary">{item.tagline}</span>}
+              <span className="mt-auto flex items-center justify-between gap-4 pt-8 font-mono text-[11px] uppercase tracking-widest text-text-primary">
+                View case study
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-full border border-border-primary transition-colors group-hover:border-neutral-400/70 dark:group-hover:border-white/25"><ArrowUpRight aria-hidden className="size-4" /></span>
+              </span>
             </Link>)}
           </div>
         </section>
