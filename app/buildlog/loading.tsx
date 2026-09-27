@@ -18,7 +18,7 @@ export default function BuildlogLoading() {
             const linkCount = project === 2 ? 1 : 0;
             const plannedCount = project === 3 ? 1 : 2;
             return (
-            <div data-loading-project key={project} className="relative grid before:absolute before:-left-4 before:-right-4 before:top-0 before:h-px before:bg-neutral-400/50 before:content-[''] dark:before:bg-white/20 after:pointer-events-none after:absolute after:-left-4 after:-right-4 after:top-[47px] after:h-px after:bg-border-primary after:content-[''] sm:before:-left-7 sm:before:-right-7 sm:after:-left-7 sm:after:-right-7 lg:before:-left-4 lg:before:-right-4 lg:after:-left-4 lg:after:-right-4 lg:grid-cols-12">
+            <div data-loading-project key={project} className="relative grid before:absolute before:-left-4 before:-right-4 before:top-0 before:h-px before:bg-neutral-400/40 before:content-[''] dark:before:bg-white/20 after:pointer-events-none after:absolute after:-left-4 after:-right-4 after:top-[47px] after:h-px after:bg-border-primary after:content-[''] sm:before:-left-7 sm:before:-right-7 sm:after:-left-7 sm:after:-right-7 lg:before:-left-4 lg:before:-right-4 lg:after:-left-4 lg:after:-right-4 lg:grid-cols-12">
               <div className="border-b border-border-primary lg:col-span-3 lg:border-b-0">
                 <div className="flex min-h-12 items-center justify-between gap-3 border-b border-border-primary px-4 sm:px-6">
                   <div className={`h-3 w-6 rounded bg-border-primary/35 ${pulse}`} />
