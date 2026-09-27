@@ -27,7 +27,7 @@ for (const [route, sourcePath, title] of [
     assert.match(source, /relative hidden border-x border-dashed border-border-primary lg:col-span-1 lg:block/);
     assert.match(source, /-top-10 h-10 border-x border-dashed border-border-primary/);
     assert.match(source, /-bottom-10 -left-px -right-px h-10 border-x/);
-    assert.match(source, /-mx-2 h-px bg-neutral-400\/60 dark:bg-white\/20 sm:-mx-3 lg:mx-0/);
+    assert.match(source, /-mx-2 h-px bg-neutral-400\/40 dark:bg-white\/20 sm:-mx-3 lg:mx-0/);
     assert.match(source, /hidden lg:block"><SectionDivider \/><\/div>/);
     assert.match(source, /mt-10 hidden lg:block"><SectionDivider \/><\/div>/);
     assert.match(source, /space-y-10 lg:mt-10/);

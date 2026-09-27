@@ -1690,9 +1690,10 @@ is re-locked with all other Credentials presentation unchanged.
   `app/api/admin/buildlog/**`, all six `migrations/2026_buildlog*.sql` migrations,
   Buildlog-specific sections of `supabase_schema.sql`, `tests/buildlog*`,
   `docs/blueprints/buildlog-*`, and `audit/12-buildlog-page.md`.
-- **Public visual baseline:** locked page-header typography and paper texture;
-  56px hero-to-archive rhythm; compact archive totals; 1.5px project boundaries;
-  responsive one-column, 4/8, and 3/9 project layouts; 48px aligned lifecycle and
+- **Public visual baseline (as amended below):** locked page-header typography and
+  paper texture; 56px hero-to-archive rhythm; compact archive totals; 1px
+  strip-to-strip project boundaries (neutral-400/40 light, white/20 dark);
+  responsive one-column and 3/1/8 title/rail/content layouts; 48px aligned lifecycle and
   disclosure controls; right-aligned release badges at every width; shipped
   updates before Planned Next; and exactly one open shipped history.
 - **Release-row baseline:** shipped and planned entries are identical in geometry:
@@ -1765,6 +1766,16 @@ mobile/desktop type sizes unchanged. The loading badge shell matches. Text glyph
 centers are verified within one pixel of pill centers with no clipping or
 overflow. No other Buildlog or shared behavior changed. This amendment is
 re-locked after responsive verification.
+
+### 2026-09-27 owner-authorized Buildlog divider re-lock
+
+The owner finalized the 1px project boundaries at 40% neutral-gray opacity in
+light mode and 20% white in dark mode. Project boundaries, the full-width first
+row rule, and the final boundary meet the side strips at mobile and desktop
+widths; the desktop title/content split uses the dashed 3/1/8 rail also used by
+Project Detail. The loading state matches. Buildlog implementation, tests,
+content, layout, and Admin controls are re-locked; subsequent legal-page divider
+work must not modify Buildlog.
 
 ## 34. FINAL OWNER LOCK - Community Wall
 

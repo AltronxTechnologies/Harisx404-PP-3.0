@@ -55,7 +55,7 @@ function Spacer() {
 }
 
 function SectionDivider() {
-  return <div aria-hidden="true" className="-mx-2 h-px bg-neutral-400/60 dark:bg-white/20 sm:-mx-3 lg:mx-0" />;
+  return <div aria-hidden="true" className="-mx-2 h-px bg-neutral-400/40 dark:bg-white/20 sm:-mx-3 lg:mx-0" />;
 }
 
 /* ---------- Page ---------- */
