@@ -142,7 +142,7 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
       </figure>
       {images.length > 1 && <div role="group" aria-label="Carousel controls" className="mt-4 flex items-center justify-center gap-2 max-[319px]:gap-1 sm:mt-8 sm:flex-wrap sm:gap-4">
         <button type="button" aria-label="Previous image" onClick={() => goTo(index - 1)} className={controlClass}><ChevronLeft aria-hidden className="size-3.5" /></button>
-        <div className="flex min-w-0 flex-1 flex-wrap items-center justify-center sm:w-auto sm:max-w-[70vw] sm:flex-initial">
+        <div className="flex min-w-0 flex-initial flex-wrap items-center justify-center sm:w-auto sm:max-w-[70vw] sm:flex-initial">
           {images.map((image, position) => <button key={`${image.src}-${position}`} type="button" aria-label={`Go to image ${position + 1}`} aria-current={position === shownIndex ? "true" : undefined} onClick={() => goTo(position)} className="group flex h-8 items-center px-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary">
             <span className={`relative h-1 overflow-hidden rounded-full bg-border-primary transition-all duration-300 ${position === shownIndex ? "w-8 sm:w-14" : "w-4 group-hover:bg-neutral-400/50 dark:group-hover:bg-white/25 sm:w-7"}`}>
               {position === shownIndex && <motion.span key={`${shownIndex}-${cycle}-${canPlay}`} className="absolute inset-0 origin-left rounded-full bg-gradient-to-r from-blue-500 via-violet-500 to-pink-500" initial={{ scaleX: canPlay ? 0 : 1 }} animate={{ scaleX: 1 }} transition={canPlay ? { duration: 5, ease: "linear" } : { duration: 0 }} />}

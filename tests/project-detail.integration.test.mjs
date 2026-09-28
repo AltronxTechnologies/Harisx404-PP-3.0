@@ -157,7 +157,7 @@ test("project images enforce a cover, allow ordered additions, and deliver respo
   assert.match(page, /coverCaption: p\.case_study_sections\?\.cover_caption/);
   assert.match(carousel, /aria-label="Carousel controls"/);
   assert.match(carousel, /mt-4 flex items-center justify-center gap-2 max-\[319px\]:gap-1 sm:mt-8 sm:flex-wrap sm:gap-4/);
-  assert.match(carousel, /flex min-w-0 flex-1 flex-wrap items-center justify-center sm:w-auto sm:max-w-\[70vw\] sm:flex-initial/);
+  assert.match(carousel, /flex min-w-0 flex-initial flex-wrap items-center justify-center sm:w-auto sm:max-w-\[70vw\] sm:flex-initial/);
   assert.match(carousel, /w-8 sm:w-14/);
   assert.match(carousel, /w-4 group-hover:bg-neutral-400\/50 dark:group-hover:bg-white\/25 sm:w-7/);
   assert.match(carousel, /w-14/);
