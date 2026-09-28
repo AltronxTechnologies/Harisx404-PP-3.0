@@ -28,6 +28,7 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
   const figureRef = useRef<HTMLElement>(null);
   const captionBoxRef = useRef<HTMLDivElement>(null);
   const captionButtonRef = useRef<HTMLButtonElement>(null);
+  const nextButtonRef = useRef<HTMLButtonElement>(null);
   const wantedSrcRef = useRef(images[0]?.src);
   const readyUrlsRef = useRef(new Set<string>());
   const reducedMotion = useReducedMotion();
@@ -40,7 +41,7 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
       .filter((image, position, list) => image.src !== shown.src && list.findIndex((item) => item.src === image.src) === position)
     : [];
   wantedSrcRef.current = current?.src;
-  const canPlay = images.length > 1 && visible && pageActive && !paused && !captionOpen && !loading;
+  const canPlay = images.length > 1 && visible && pageActive && !paused && !captionOpen && !loading && !imageError;
 
   useEffect(() => {
     if (reducedMotion) setPaused(true);
@@ -119,11 +120,15 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
           {loading && !adjacent.some((image) => image.src === current.src) && <Image src={current.src} alt="" aria-hidden fill priority sizes="(max-width: 1280px) 100vw, 1152px" loader={isCloudinary(current.src) ? cloudinaryLoader : undefined} unoptimized={!isOptimizedHost(current.src)} className="pointer-events-none opacity-0" onLoad={() => { readyUrlsRef.current.add(current.src); if (wantedSrcRef.current === current.src) { setDisplayed(current); setImageError(false); } }} onError={() => setImageError(true)} />}
           <AnimatePresence initial={false} custom={direction}>
             <motion.div key={shown.src} custom={direction} variants={{ enter: (travel: number) => ({ x: `${travel * 100}%` }), center: { x: "0%" }, exit: (travel: number) => ({ x: `${-travel * 100}%` }) }} initial={reducedMotion ? false : "enter"} animate="center" exit="exit" transition={{ duration: reducedMotion ? 0 : 0.48, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0">
-              <Image src={shown.src} alt={shown.alt || (shownIndex === 0 ? `${title} cover image` : `${title} image ${shownIndex + 1}`)} fill priority sizes="(max-width: 1280px) 100vw, 1152px" loader={isCloudinary(shown.src) ? cloudinaryLoader : undefined} unoptimized={!isOptimizedHost(shown.src)} draggable={false} className="pointer-events-none select-none object-cover" onLoad={() => readyUrlsRef.current.add(shown.src)} />
+              <Image src={shown.src} alt={shown.alt || (shownIndex === 0 ? `${title} cover image` : `${title} image ${shownIndex + 1}`)} aria-hidden={imageError && !loading} fill priority sizes="(max-width: 1280px) 100vw, 1152px" loader={isCloudinary(shown.src) ? cloudinaryLoader : undefined} unoptimized={!isOptimizedHost(shown.src)} draggable={false} className={`pointer-events-none select-none object-cover ${imageError && !loading ? "opacity-0" : ""}`} onLoad={() => { readyUrlsRef.current.add(shown.src); if (wantedSrcRef.current === shown.src) setImageError(false); }} onError={() => { if (wantedSrcRef.current === shown.src) setImageError(true); }} />
             </motion.div>
           </AnimatePresence>
-          {loading && (showLoading || imageError) && <span role="status" className="absolute bottom-3 left-3 z-10 rounded-full bg-neutral-950 px-3 py-2 text-xs text-white">{imageError ? "Image unavailable. Choose another." : "Loading image..."}</span>}
-          {!loading && shown.caption.trim() && <>
+          {imageError && <div role="status" className={`absolute z-10 flex items-center gap-3 text-sm text-text-primary ${loading ? "bottom-3 left-3 max-w-[calc(100%-1.5rem)] rounded-xl bg-bg-primary px-3 py-2 shadow-md" : "inset-0 justify-center bg-bg-primary p-3"}`}>
+            <span>Image unavailable.</span>
+            {images.length > 1 && <button type="button" onClick={() => { goTo(index + 1); requestAnimationFrame(() => nextButtonRef.current?.focus()); }} className="shrink-0 rounded-md border border-border-primary px-2 py-1 text-xs font-medium hover:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25">Skip image</button>}
+          </div>}
+          {loading && showLoading && !imageError && <span role="status" className="absolute bottom-3 left-3 z-10 rounded-full bg-neutral-950 px-3 py-2 text-xs text-white">Loading image...</span>}
+          {!loading && !imageError && shown.caption.trim() && <>
             {captionOpen && <div ref={captionBoxRef} id="project-image-caption" role="region" aria-label="Image caption" className="absolute bottom-16 left-3 z-20 flex max-h-[calc(100%-5rem)] w-48 max-w-[calc(100%-1.5rem)] flex-col overflow-hidden rounded-xl border border-border-primary bg-bg-primary text-text-primary shadow-xl dark:shadow-black/50 sm:max-h-48 sm:w-72">
               <div className="flex shrink-0 items-center justify-between border-b border-border-primary pl-3 pr-1 sm:pl-4">
                 <span className="font-mono text-[10px] uppercase tracking-widest text-text-secondary">Caption</span>
@@ -145,7 +150,7 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
           </button>)}
         </div>
         <button type="button" onClick={() => setPaused((value) => !value)} aria-label={paused ? "Play carousel" : "Pause carousel"} className={`${controlClass} order-3 sm:order-none`}>{paused ? <Play aria-hidden className="size-3.5" /> : <Pause aria-hidden className="size-3.5" />}</button>
-        <button type="button" aria-label="Next image" onClick={() => goTo(index + 1)} className={`${controlClass} order-4 sm:order-none`}><ChevronRight aria-hidden className="size-3.5" /></button>
+        <button ref={nextButtonRef} type="button" aria-label="Next image" onClick={() => goTo(index + 1)} className={`${controlClass} order-4 sm:order-none`}><ChevronRight aria-hidden className="size-3.5" /></button>
       </div>}
     </section>
   );

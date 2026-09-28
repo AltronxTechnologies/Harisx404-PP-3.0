@@ -36,8 +36,10 @@ test("published project cards resolve to authored detail pages", async () => {
 test("unknown projects remain unindexable and do not display a case study", async () => {
   const response = await fetch(`${baseUrl}/projects/not-a-published-project-9d21a`);
   const html = await response.text();
-  assert.match(html, /Project Not Found/);
+  assert.equal(response.status, 404);
+  assert.match(html, /This page wandered/);
   assert.match(html, /noindex/);
+  assert.match(response.headers.get("x-robots-tag") || "", /noindex/);
   assert.doesNotMatch(html, /Share project|At a glance/);
 });
 
@@ -46,6 +48,39 @@ test("project mutations reject unauthenticated requests", async () => {
     const response = await fetch(`${baseUrl}/api/admin/projects`, { method });
     assert.equal(response.status, 401, method);
   }
+});
+
+test("project README generation requires an Admin account before external calls", async () => {
+  const routes = await Promise.all([
+    readFile(new URL("../app/api/ai/project-from-github/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/ai/assist/route.ts", import.meta.url), "utf8"),
+  ]);
+  for (const route of routes) {
+    assert.match(route, /supabase\.auth\.getUser\(\)/);
+    assert.match(route, /process\.env\.ADMIN_EMAIL\?\.trim\(\)\.toLowerCase\(\)/);
+    assert.match(route, /user\.email\?\.trim\(\)\.toLowerCase\(\) !== adminEmail/);
+  }
+  assert.ok(routes[0].indexOf("user.email?.trim().toLowerCase() !== adminEmail") < routes[0].indexOf("fetch(`https://api.github.com"));
+  assert.equal((await fetch(`${baseUrl}/api/ai/project-from-github`, { method: "POST" })).status, 401);
+  assert.equal((await fetch(`${baseUrl}/api/ai/assist`, { method: "POST" })).status, 401);
+});
+
+test("project saves use a transactional RPC and reject stale edits", async () => {
+  const [api, form, migration] = await Promise.all([
+    readFile(new URL("../app/api/admin/projects/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/admin/ProjectForm.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../migrations/2026_project_admin_atomic_save.sql", import.meta.url), "utf8"),
+  ]);
+  assert.match(api, /db\.rpc\("save_project_with_gallery_and_tags"/);
+  assert.match(api, /db\.rpc\("delete_project_and_unlink_related"/);
+  assert.match(api, /updated_at: z\.string\(\)\.datetime\(\{ offset: true \}\)/);
+  assert.match(form, /updated_at: initialData\.updated_at/);
+  assert.match(migration, /FOR UPDATE/);
+  assert.match(migration, /PROJECT_CONFLICT/);
+  assert.match(migration, /REVOKE ALL ON FUNCTION public\.save_project_with_gallery_and_tags/);
+  assert.match(migration, /REVOKE ALL ON FUNCTION public\.delete_project_and_unlink_related/);
+  assert.doesNotMatch(api, /function saveGallery|await syncTags/);
+  assert.doesNotMatch(api, /db\.from\("projects"\)\.delete\(\)/);
 });
 
 test("project images enforce a cover, allow ordered additions, and deliver responsive WebP", async () => {
@@ -76,6 +111,10 @@ test("project images enforce a cover, allow ordered additions, and deliver respo
   assert.match(form, /\.slice\(0, 200\)/);
   assert.match(form, /setValue\("case_study_sections\.cover_caption", nextCover\.caption/);
   assert.match(picker, /setActiveTab\(initialTab\)/);
+  assert.match(picker, /aria-label="Close media picker"/);
+  assert.match(picker, /document\.addEventListener\("keydown", onKeyDown\)/);
+  assert.match(picker, /previousFocus\.focus\(\)/);
+  assert.match(picker, /type="file" className="sr-only"/);
   assert.match(api, /cover_image_id: data\.cover_image_id \|\| null/);
   assert.match(api, /cover_image_url: z\.string\(\)\.url\(\)/);
   assert.match(api, /cover_caption: z\.string\(\)\.max\(200\)\.refine\(\(caption\) => captionWordCount\(caption\) <= 30/);
@@ -97,7 +136,10 @@ test("project images enforce a cover, allow ordered additions, and deliver respo
   assert.doesNotMatch(carousel, /aspect-\[4\/3\]/);
   assert.match(carousel, /custom=\{direction\}/);
   assert.match(carousel, /exit="exit"/);
-  assert.match(carousel, /className="pointer-events-none select-none object-cover"/);
+  assert.match(carousel, /pointer-events-none select-none object-cover \$\{imageError && !loading/);
+  assert.match(carousel, /onError=\{\(\) => \{ if \(wantedSrcRef\.current === shown\.src\) setImageError\(true\)/);
+  assert.match(carousel, /Image unavailable\.<\/span>/);
+  assert.match(carousel, /Skip image<\/button>/);
   assert.doesNotMatch(carousel, /Open image|createPortal|data-project-image-viewer|ZoomIn|ZoomOut/);
   assert.doesNotMatch(carousel, /<figcaption/);
   assert.match(carousel, /<MessageSquareText/);
@@ -154,6 +196,9 @@ test("project gallery and narrative are sourced from Admin-authored data", async
   assert.match(page, /Array\.isArray\(p\.galleryDetails\)/);
   assert.doesNotMatch(page, /genericFeatures|formatQuarter/);
   assert.match(detail, /<ReactMarkdown/);
+  assert.match(detail, /text-pretty text-\[15px\] leading-6 text-text-secondary \[overflow-wrap:anywhere\]/);
+  assert.match(detail, /min-w-0 break-words text-\[15px\] leading-6 text-text-secondary \[overflow-wrap:anywhere\]/);
+  assert.match(detail, /min-h-8 max-w-full items-center/);
   assert.doesNotMatch(detail, /aria-label="Breadcrumb"|aria-current="page"/);
   assert.match(detail, /prose max-w-none/);
   assert.match(detail, /\[&>:first-child\]:!mt-0 \[&>:last-child\]:!mb-0/);
@@ -180,11 +225,15 @@ test("project gallery and narrative are sourced from Admin-authored data", async
   assert.match(detail, /project\.gallery\.filter/);
   assert.match(detail, /<ProjectImageCarousel/);
   assert.doesNotMatch(detail, /dangerouslySetInnerHTML/);
-  assert.match(publicData, /project_images \( display_order, caption, media \( secure_url, url, alt_text \) \)/);
+  assert.match(publicData, /project_images \( display_order, caption, alt_text, media \( secure_url, url, alt_text \) \)/);
+  assert.match(publicData, /alt: pi\.alt_text \|\| pi\.caption \|\| ""/);
+  assert.match(page, /coverAlt: p\.case_study_sections\?\.cover_alt/);
+  assert.match(form, /register\("case_study_sections\.cover_alt"\)/);
+  assert.match(form, /gallery-alt-\$\{image\.mediaId\}/);
   assert.match(api, /auth\.getUser\(\)/);
   assert.match(api, /ADMIN_EMAIL/);
   assert.match(api, /await validateGalleryMedia/);
-  assert.match(form, /galleryImages\.map\(\(\{ mediaId, caption \}\)/);
+  assert.match(form, /galleryImages\.map\(\(\{ mediaId, caption, altText \}\)/);
 });
 
 test("project tags, timeline, source name and optional sections remain owner-managed", async () => {
@@ -345,7 +394,7 @@ test("Alloy preview gives every published project a distinct, complete example w
     assert.ok(html.includes("preview stock image, not a project screenshot"), slug);
     assert.match(html, /aria-label="Image 1 of [2-9][0-9]*"/, `${slug} needs a cover followed by preview images`);
     const tagHtml = html.match(/<h2[^>]*>Tags<\/h2><ul[^>]*>(.*?)<\/ul>/s)?.[1] || "";
-    const tags = [...tagHtml.matchAll(/<li[^>]*>([^<]+)<\/li>/g)].map((match) => match[1]);
+    const tags = [...tagHtml.matchAll(/<li[^>]*><span[^>]*>([^<]+)<\/span><\/li>/g)].map((match) => match[1]);
     const summary = html.match(/<h1[^>]*>[^<]+<\/h1><p[^>]*>([^<]+)<\/p>/)?.[1];
     if (slug === "taskflow-workspace") assert.deepEqual(tags, ["Web", "SaaS", "Productivity", "Collaboration", "Automation"]);
     assert.ok(summary, `${slug} needs a summary`);

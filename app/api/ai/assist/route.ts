@@ -4,7 +4,6 @@ import createSupabaseServerClient from '@/app/lib/supabase/server';
 
 export async function POST(request: Request) {
   try {
-    // Check if user is an admin
     const supabase = await createSupabaseServerClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
@@ -12,9 +11,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Match middleware admin policy: if ADMIN_EMAIL is set, only that user may use AI assist.
-    const adminEmail = process.env.ADMIN_EMAIL;
-    if (adminEmail && user.email !== adminEmail) {
+    const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+    if (!adminEmail) {
+      return NextResponse.json({ error: 'Admin access is not configured' }, { status: 500 });
+    }
+    if (user.email?.trim().toLowerCase() !== adminEmail) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

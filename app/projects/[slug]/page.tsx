@@ -5,6 +5,7 @@ import { fallbackProjects } from "@/app/data/fallback-home";
 import { withProjectPreview } from "@/app/data/project-preview-fixtures";
 import { siteMetadata } from "@/app/data/siteMetadata";
 import { projectStages } from "@/app/lib/project-stage";
+import { getSupabaseEnv } from "@/app/lib/supabase/safe";
 import {
   ProjectDetail,
   type DetailProject,
@@ -44,6 +45,7 @@ function mapDbProject(p: any): DetailProject {
     category: p.category || "Project",
     image_url: p.cover_image_url || "",
     coverCaption: p.case_study_sections?.cover_caption || "",
+    coverAlt: p.case_study_sections?.cover_alt || p.case_study_sections?.cover_caption || "",
     live_url: (p as any).live_url ?? "",
     github_url: (p as any).github_url ?? "",
     sourceNote: p.source_note || "",
@@ -61,6 +63,7 @@ async function resolveProject(slug: string): Promise<{
   list: NeighborProject[];
 } | null> {
   const dbProject = await getProjectBySlug(slug);
+  if (!dbProject && (process.env.NODE_ENV === "production" || getSupabaseEnv())) return null;
   const dbProjects = await fetchProjects().catch(() => []);
 
   if (dbProject) {
@@ -82,7 +85,7 @@ async function resolveProject(slug: string): Promise<{
     return { project: mapDbProject(withProjectPreview(dbProject)), canonicalProject: mapDbProject(dbProject), list };
   }
 
-  if (process.env.NODE_ENV === "production" || dbProjects.length > 0) return null;
+  if (dbProjects.length > 0) return null;
   const fb = fallbackProjects.find((p) => p.slug === slug);
   if (!fb) return null;
 
@@ -102,6 +105,7 @@ async function resolveProject(slug: string): Promise<{
       category: fb.category,
       image_url: fb.image_url,
       coverCaption: "",
+      coverAlt: "",
       live_url: "",
       github_url: "",
       sourceNote: "",
@@ -179,7 +183,7 @@ export async function generateMetadata({
   const resolved = await resolveProject(slug);
 
   if (!resolved) {
-    return { title: "Project Not Found" };
+    return { title: "Project Not Found", robots: { index: false, follow: false } };
   }
 
   const { canonicalProject: project } = resolved;

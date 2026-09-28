@@ -102,6 +102,7 @@ CREATE TABLE project_images (
   media_id UUID REFERENCES media(id) ON DELETE CASCADE,
   display_order INTEGER DEFAULT 0,
   caption TEXT,
+  alt_text TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

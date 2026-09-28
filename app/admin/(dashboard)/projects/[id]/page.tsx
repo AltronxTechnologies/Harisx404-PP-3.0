@@ -5,13 +5,19 @@ import { notFound } from "next/navigation";
 export default async function EditProjectPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createSupabaseAdminClient();
-  const [{ data: project, error }, { data: availableProjects }] = await Promise.all([
-    supabase.from("projects")
-      .select("*, project_tags ( tags ( name ) ), project_images ( media_id, caption, display_order, media ( secure_url, url, alt_text ) )")
+  const loadProject = (withAlt: boolean) => supabase.from("projects")
+      .select(withAlt
+        ? "*, project_tags ( tags ( name ) ), project_images ( media_id, caption, alt_text, display_order, media ( secure_url, url, alt_text ) )"
+        : "*, project_tags ( tags ( name ) ), project_images ( media_id, caption, display_order, media ( secure_url, url, alt_text ) )")
       .eq("id", id)
-      .single(),
+      .single();
+  let [{ data: project, error }, { data: availableProjects }] = await Promise.all([
+    loadProject(true),
     supabase.from("projects").select("id, title, slug, status").order("title"),
   ]);
+  if (error && ["42703", "PGRST200", "PGRST204"].includes(error.code) && /alt_text/.test(error.message)) {
+    ({ data: project, error } = await loadProject(false));
+  }
 
   if (error || !project) {
     notFound();
@@ -29,7 +35,7 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
       mediaId: image.media_id,
       url: image.media?.secure_url || image.media?.url || "",
       caption: image.caption ?? "",
-      altText: image.media?.alt_text ?? "",
+      altText: image.alt_text ?? "",
     }));
   const { project_tags: _ignored, project_images: _ignoredImages, ...projectFields } = project;
 

@@ -324,12 +324,18 @@ export async function fetchProjects() {
     serviceKey && process.env.NEXT_PUBLIC_SUPABASE_URL
       ? createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, serviceKey)
       : supabase;
-  const { data, error } = await db
+  const selectProjects = (withAlt: boolean) => db
     .from('projects')
-    .select('*, project_tags ( tags ( name, slug ) ), project_images ( display_order, caption, media ( secure_url, url, alt_text ) )')
+    .select(withAlt
+      ? '*, project_tags ( tags ( name, slug ) ), project_images ( display_order, caption, alt_text, media ( secure_url, url, alt_text ) )'
+      : '*, project_tags ( tags ( name, slug ) ), project_images ( display_order, caption, media ( secure_url, url, alt_text ) )')
       .eq('status', 'published')
       .order('display_order', { ascending: true })
       .order('created_at', { ascending: true });
+  let { data, error } = await selectProjects(true);
+  if (error && ['42703', 'PGRST200', 'PGRST204'].includes(error.code) && /alt_text/.test(error.message)) {
+    ({ data, error } = await selectProjects(false));
+  }
 
   if (error || !data) {
     console.warn("Supabase unavailable, using fallback content.");
@@ -344,7 +350,7 @@ export async function fetchProjects() {
     const galleryDetails = (p.project_images || [])
       .slice()
       .sort((a: any, b: any) => (a.display_order ?? 0) - (b.display_order ?? 0))
-      .map((pi: any) => ({ src: pi.media?.secure_url || pi.media?.url, caption: pi.caption || "", alt: pi.media?.alt_text || "" }))
+      .map((pi: any) => ({ src: pi.media?.secure_url || pi.media?.url, caption: pi.caption || "", alt: pi.alt_text || pi.caption || "" }))
       .filter((image: { src?: string }) => Boolean(image.src));
     const { project_tags: _ignored, project_images: _ignored2, ...rest } = p;
     return { ...rest, tags, gallery: galleryDetails.map((image: { src: string }) => image.src), galleryDetails };
@@ -352,7 +358,10 @@ export async function fetchProjects() {
 }
 
 export async function getProjectBySlug(slug: string) {
-  if (!supabase) return null;
+  if (!supabase) {
+    if (process.env.NODE_ENV === "production") throw new Error("Project database is not configured");
+    return null;
+  }
   /* Same hardening as fetchProjects: service key server-side so the
      tags/gallery joins aren't blanked by RLS, and a published-only filter
      so draft projects can never leak through a guessed URL. */
@@ -362,16 +371,21 @@ export async function getProjectBySlug(slug: string) {
     serviceKey && process.env.NEXT_PUBLIC_SUPABASE_URL
       ? createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, serviceKey)
       : supabase;
-  const { data, error } = await db
+  const selectProject = (withAlt: boolean) => db
     .from('projects')
-    .select('*, project_tags ( tags ( name, slug ) ), project_images ( display_order, caption, media ( secure_url, url, alt_text ) )')
+    .select(withAlt
+      ? '*, project_tags ( tags ( name, slug ) ), project_images ( display_order, caption, alt_text, media ( secure_url, url, alt_text ) )'
+      : '*, project_tags ( tags ( name, slug ) ), project_images ( display_order, caption, media ( secure_url, url, alt_text ) )')
     .eq('slug', slug)
     .eq('status', 'published')
-    .single();
-
-  if (error || !data) {
-    return null;
+    .maybeSingle();
+  let { data, error } = await selectProject(true);
+  if (error && ['42703', 'PGRST200', 'PGRST204'].includes(error.code) && /alt_text/.test(error.message)) {
+    ({ data, error } = await selectProject(false));
   }
+
+  if (error) throw new Error(`Project lookup failed: ${error.message}`);
+  if (!data) return null;
   // Flatten joins exactly like fetchProjects: tags -> string[],
   // gallery -> sorted string[] of screenshot URLs.
   const p: any = data;
@@ -379,7 +393,7 @@ export async function getProjectBySlug(slug: string) {
   const galleryDetails = (p.project_images || [])
     .slice()
     .sort((a: any, b: any) => (a.display_order ?? 0) - (b.display_order ?? 0))
-    .map((pi: any) => ({ src: pi.media?.secure_url || pi.media?.url, caption: pi.caption || "", alt: pi.media?.alt_text || "" }))
+    .map((pi: any) => ({ src: pi.media?.secure_url || pi.media?.url, caption: pi.caption || "", alt: pi.alt_text || pi.caption || "" }))
     .filter((image: { src?: string }) => Boolean(image.src));
   const { project_tags: _ignored, project_images: _ignored2, ...rest } = p;
   return { ...rest, tags, gallery: galleryDetails.map((image: { src: string }) => image.src), galleryDetails };

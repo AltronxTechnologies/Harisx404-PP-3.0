@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { X, Image as ImageIcon, Check, Loader2, UploadCloud } from "lucide-react";
 import Image from "next/image";
 
@@ -29,6 +29,40 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
   const [activeTab, setActiveTab] = useState<"library" | "upload">("library");
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const libraryTabRef = useRef<HTMLButtonElement>(null);
+  const uploadTabRef = useRef<HTMLButtonElement>(null);
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const frame = requestAnimationFrame(() => (initialTab === "upload" ? uploadTabRef : libraryTabRef).current?.focus());
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeRef.current();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusable = [...(dialogRef.current?.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])') ?? [])]
+        .filter((element) => element.getClientRects().length > 0);
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      cancelAnimationFrame(frame);
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = previousOverflow;
+      if (previousFocus?.isConnected) previousFocus.focus();
+    };
+  }, [isOpen, initialTab]);
 
   useEffect(() => {
     if (isOpen) {
@@ -103,11 +137,12 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
   if (!isOpen) return null;
 
   return (
-    <div role="dialog" aria-modal="true" aria-label="Choose an image" className="fixed inset-0 z-[7000] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+    <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Choose an image" className="fixed inset-0 z-[7000] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="w-full max-w-4xl bg-surface-raised rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[85vh]">
         <div className="flex items-center justify-between p-4 border-b border-border-hairline">
           <div className="flex gap-4">
             <button
+              ref={libraryTabRef}
               type="button"
               onClick={() => setActiveTab("library")}
               className={`text-lg font-semibold flex items-center gap-2 transition-colors ${
@@ -117,6 +152,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
               <ImageIcon className="h-5 w-5" /> Library
             </button>
             <button
+              ref={uploadTabRef}
               type="button"
               onClick={() => setActiveTab("upload")}
               className={`text-lg font-semibold flex items-center gap-2 transition-colors ${
@@ -126,7 +162,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
               <UploadCloud className="h-5 w-5" /> Upload
             </button>
           </div>
-          <button type="button" onClick={onClose} className="p-2 hover:bg-surface-base rounded-lg transition-colors">
+          <button type="button" aria-label="Close media picker" onClick={onClose} className="p-2 hover:bg-surface-base rounded-lg transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -198,9 +234,9 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
                     </div>
                   )}
 
-                  <label className="cursor-pointer px-6 py-3 bg-accent-signal text-white rounded-xl text-sm font-medium shadow-sm hover:bg-accent-signal/90 transition-colors">
+                  <label className="cursor-pointer px-6 py-3 bg-accent-signal text-white rounded-xl text-sm font-medium shadow-sm hover:bg-accent-signal/90 transition-colors focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-text-primary">
                     Choose File
-                    <input type="file" className="hidden" accept="image/*,.heic,.heif,.tif,.tiff,.bmp" onChange={handleUpload} />
+                    <input type="file" className="sr-only" accept="image/*,.heic,.heif,.tif,.tiff,.bmp" onChange={handleUpload} />
                   </label>
                 </div>
               )}

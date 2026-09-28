@@ -27,6 +27,7 @@ export type DetailProject = {
   category: string;
   image_url: string;
   coverCaption: string;
+  coverAlt: string;
   live_url: string;
   github_url: string;
   sourceNote: string;
@@ -131,7 +132,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
   const firstShareItemRef = useRef<HTMLButtonElement>(null);
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const images = [
-    ...(project.image_url ? [{ src: project.image_url, alt: `${project.title} cover image`, caption: project.coverCaption }] : []),
+    ...(project.image_url ? [{ src: project.image_url, alt: project.coverAlt || `${project.title} cover image`, caption: project.coverCaption }] : []),
     ...project.gallery.filter((image) => image.src && image.src !== project.image_url),
   ];
   const domainTags = [...new Set(project.tags.map((tag) => tag.trim()).filter(Boolean))];
@@ -145,9 +146,9 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
   if (overview) story.push({ title: "Overview", content: <CaseStudy content={overview} /> });
   if (project.sections.why_built?.trim()) story.push({ title: "Why I built this", content: <CaseStudy content={project.sections.why_built} /> });
   if (project.features.length) story.push({ title: "Highlights", content: <ol className="grid gap-3 text-[15px] md:grid-cols-2">{project.features.map((feature, index) => (
-    <li key={`${index}-${feature}`} className="flex items-start gap-4 rounded-2xl border border-border-primary bg-white p-5 dark:bg-white/[0.02]">
+    <li key={`${index}-${feature}`} className="flex min-w-0 items-start gap-4 rounded-2xl border border-border-primary bg-white p-5 dark:bg-white/[0.02]">
       <span className="shrink-0 font-mono text-xs leading-6 text-text-secondary">{String(index + 1).padStart(2, "0")}</span>
-      <p className="text-[15px] leading-6 text-text-secondary">{feature}</p>
+      <p className="min-w-0 break-words text-[15px] leading-6 text-text-secondary [overflow-wrap:anywhere]">{feature}</p>
     </li>
   ))}</ol> });
   for (const [key, label] of sections) {
@@ -242,7 +243,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
           <PaperHeroTexture className="-inset-x-2 bottom-0 top-[-128px] sm:-inset-x-3 sm:top-[-144px] md:top-[-176px] lg:inset-x-0" />
           <header className="relative mx-auto max-w-4xl text-center">
             <h1 className="heading-glow mx-auto mt-4 max-w-3xl break-words text-balance [font-family:var(--font-instrument-serif),serif] text-[46px] font-medium leading-none tracking-tight text-text-primary md:text-[56px] md:tracking-[-1.5px]">{project.title}</h1>
-            {summary && <p className="mx-auto mt-4 max-w-2xl text-pretty text-[15px] leading-6 text-text-secondary">{summary}</p>}
+            {summary && <p className="mx-auto mt-4 max-w-2xl text-pretty text-[15px] leading-6 text-text-secondary [overflow-wrap:anywhere]">{summary}</p>}
           </header>
         </div>
       </GridWrapper>
@@ -300,9 +301,9 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
               {project.tech.length ? <ul className="mt-6 flex flex-wrap gap-2">
                 {project.tech.map((tech, index) => {
                   const icon = techIcons[tech.toLowerCase().replace(/[^a-z0-9]/g, "")];
-                  return <li key={`${tech}-${index}`} className="inline-flex min-h-8 items-center gap-2 rounded-full border border-border-primary bg-neutral-50 px-3 py-1.5 font-mono text-[11px] text-text-secondary dark:bg-white/[0.04]">
+                  return <li key={`${tech}-${index}`} className="inline-flex min-h-8 max-w-full items-center gap-2 rounded-full border border-border-primary bg-neutral-50 px-3 py-1.5 font-mono text-[11px] text-text-secondary dark:bg-white/[0.04]">
                     {icon && <span aria-hidden className="size-3.5 shrink-0 bg-text-primary" style={{ mask: `url(https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/${icon}.svg) center / contain no-repeat`, WebkitMask: `url(https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/${icon}.svg) center / contain no-repeat` }} />}
-                    {tech}
+                    <span className="min-w-0 [overflow-wrap:anywhere]">{tech}</span>
                   </li>;
                 })}
               </ul> : <p className="mt-6 text-sm text-text-secondary">None</p>}
@@ -311,7 +312,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
           <div className="border-t border-border-primary px-5 pb-5 pt-4 sm:px-7 sm:pb-7 sm:pt-5 lg:px-8 lg:pb-8">
             <h2 className="font-mono text-xs font-semibold uppercase tracking-widest text-text-secondary">Tags</h2>
             {domainTags.length ? <ul className="mt-6 flex flex-wrap gap-2">
-              {domainTags.map((tag) => <li key={tag} className="inline-flex min-h-8 items-center rounded-full border border-border-primary bg-neutral-50 px-3 py-1.5 font-mono text-[11px] text-text-secondary dark:bg-white/[0.04]">{tag}</li>)}
+              {domainTags.map((tag) => <li key={tag} className="inline-flex min-h-8 max-w-full items-center rounded-full border border-border-primary bg-neutral-50 px-3 py-1.5 font-mono text-[11px] text-text-secondary dark:bg-white/[0.04]"><span className="min-w-0 [overflow-wrap:anywhere]">{tag}</span></li>)}
             </ul> : <p className="mt-6 text-sm text-text-secondary">None</p>}
           </div>
         </div>
@@ -347,7 +348,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
               </span>
               <span className="flex flex-1 flex-col px-3 pb-3 pt-5 sm:px-4 sm:pb-4">
                 <span title={item.title} className="block max-w-full truncate [font-family:var(--font-instrument-serif),serif] text-[30px] leading-tight text-text-primary sm:text-[34px]">{item.title}</span>
-                {item.tagline && <span className="mt-3 line-clamp-2 text-sm leading-6 text-text-secondary">{item.tagline}</span>}
+                {item.tagline && <span className="mt-3 line-clamp-2 text-sm leading-6 text-text-secondary [overflow-wrap:anywhere]">{item.tagline}</span>}
                 <span aria-hidden className="min-h-6 flex-1" />
                 <span className="flex items-center justify-between gap-4 border-t border-border-primary pt-4 font-mono text-[11px] uppercase tracking-widest text-text-primary">
                   View case study <ArrowUpRight aria-hidden className="size-5 shrink-0" />

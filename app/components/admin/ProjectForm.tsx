@@ -37,6 +37,7 @@ const projectSchema = z.object({
   source_note: z.string().max(80).optional(),
   case_study_sections: z.object({
     cover_caption: z.string().max(200, "Keep the cover caption within 200 characters").refine((caption) => captionWordCount(caption) <= 30, "Keep the cover caption within 30 words"),
+    cover_alt: z.string().trim().max(160, "Keep the cover description within 160 characters"),
     why_built: z.string().max(10000),
     key_decisions: z.string().max(10000),
     results: z.string().max(10000),
@@ -63,6 +64,7 @@ interface ProjectFormProps {
   availableProjects: Array<{ id: string; title: string; slug: string; status: string }>;
   initialData?: Partial<Omit<ProjectFormValues, "tech_stack" | "features" | "tags" | "related_project_ids" | "expected_completion_label">> & {
     id?: string;
+    updated_at?: string;
     tech_stack?: string[] | string | null;
     features?: string[] | string | null;
     tags?: string[] | string | null;
@@ -71,7 +73,7 @@ interface ProjectFormProps {
     latest_update_label?: string | null;
     expected_completion_label?: string | null;
     source_note?: string | null;
-    case_study_sections?: Partial<CaseStudySections & { cover_caption: string }> | null;
+    case_study_sections?: Partial<CaseStudySections & { cover_caption: string; cover_alt: string }> | null;
   };
 }
 
@@ -108,7 +110,7 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
       project_stage: initialData?.project_stage ?? "completed",
       expected_completion_label: initialData?.expected_completion_label ?? "",
       source_note: initialData?.source_note ?? "",
-      case_study_sections: { ...emptySections, cover_caption: "", ...initialData?.case_study_sections },
+      case_study_sections: { ...emptySections, cover_caption: "", cover_alt: "", ...initialData?.case_study_sections },
       tech_stack: Array.isArray(initialData?.tech_stack)
         ? initialData.tech_stack.join("\n")
         : initialData?.tech_stack ?? "",
@@ -158,12 +160,12 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
           .split("\n")
           .map((f) => f.trim())
           .filter(Boolean),
-        gallery: galleryImages.map(({ mediaId, caption }) => ({ mediaId, caption })),
+        gallery: galleryImages.map(({ mediaId, caption, altText }) => ({ mediaId, caption, altText })),
       };
       const res = await fetch("/api/admin/projects", {
         method: initialData?.id ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(initialData?.id ? { id: initialData.id, ...payload } : payload),
+        body: JSON.stringify(initialData?.id ? { id: initialData.id, updated_at: initialData.updated_at, ...payload } : payload),
       });
 
       if (!res.ok) {
@@ -474,17 +476,20 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
         <div className="flex flex-wrap gap-2">
           <button type="button" onClick={() => { setMediaPickerTarget("cover"); setMediaPickerTab("upload"); setIsMediaPickerOpen(true); }} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border-hairline px-3 text-sm text-text-primary hover:bg-surface-base"><UploadCloud className="size-4" aria-hidden />{coverUrl ? "Upload replacement" : "Upload cover"}</button>
           <button type="button" onClick={() => { setMediaPickerTarget("cover"); setMediaPickerTab("library"); setIsMediaPickerOpen(true); }} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border-hairline px-3 text-sm text-text-primary hover:bg-surface-base"><ImageIcon className="size-4" aria-hidden />Choose from library</button>
-          {coverUrl && <button type="button" disabled={galleryImages.length === 0} onClick={() => { const [nextCover, ...remaining] = galleryImages; setValue("cover_image_url", nextCover.url, { shouldDirty: true, shouldValidate: true }); setValue("cover_image_id", nextCover.mediaId, { shouldDirty: true }); setValue("case_study_sections.cover_caption", nextCover.caption, { shouldDirty: true, shouldValidate: true }); setGalleryImages(remaining); }} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border-hairline px-3 text-sm text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 dark:text-red-400 dark:hover:bg-red-950/30"><Trash2 className="size-4" aria-hidden />Remove cover</button>}
+          {coverUrl && <button type="button" disabled={galleryImages.length === 0} onClick={() => { const [nextCover, ...remaining] = galleryImages; setValue("cover_image_url", nextCover.url, { shouldDirty: true, shouldValidate: true }); setValue("cover_image_id", nextCover.mediaId, { shouldDirty: true }); setValue("case_study_sections.cover_caption", nextCover.caption, { shouldDirty: true, shouldValidate: true }); setValue("case_study_sections.cover_alt", nextCover.altText, { shouldDirty: true, shouldValidate: true }); setGalleryImages(remaining); }} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border-hairline px-3 text-sm text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 dark:text-red-400 dark:hover:bg-red-950/30"><Trash2 className="size-4" aria-hidden />Remove cover</button>}
         </div>
         <p className="text-xs text-ink-secondary">Removing the cover promotes the next image. Add another image first if this is the only one. Changes take effect when you save and do not delete shared media-library images.</p>
         <label htmlFor="project-cover-url" className="block text-xs text-ink-secondary">Or enter a cover image URL</label>
-        <input id="project-cover-url" {...coverField} onChange={(event) => { coverField.onChange(event); setValue("cover_image_id", "", { shouldDirty: true }); setValue("case_study_sections.cover_caption", "", { shouldDirty: true }); }} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="https://..." />
+        <input id="project-cover-url" {...coverField} onChange={(event) => { coverField.onChange(event); setValue("cover_image_id", "", { shouldDirty: true }); setValue("case_study_sections.cover_caption", "", { shouldDirty: true }); setValue("case_study_sections.cover_alt", "", { shouldDirty: true }); }} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="https://..." />
         <input type="hidden" {...register("cover_image_id")} />
         {errors.cover_image_url && <p className="text-xs text-red-500">{errors.cover_image_url.message}</p>}
         <label htmlFor="project-cover-caption" className="block text-xs text-ink-secondary">Cover caption (optional, up to 200 characters / 30 words)</label>
         <textarea id="project-cover-caption" {...register("case_study_sections.cover_caption")} rows={2} maxLength={200} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="Describe this image" />
         <p className={`text-xs ${captionWordCount(coverCaption) > 30 ? "text-red-600 dark:text-red-400" : "text-ink-secondary"}`}>{coverCaption.length} / 200 characters, {captionWordCount(coverCaption)} / 30 words</p>
         {errors.case_study_sections?.cover_caption && <p className="text-xs text-red-500">{errors.case_study_sections.cover_caption.message}</p>}
+        <label htmlFor="project-cover-alt" className="block text-xs text-ink-secondary">Cover image description for screen readers (optional, up to 160 characters)</label>
+        <input id="project-cover-alt" {...register("case_study_sections.cover_alt")} maxLength={160} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="Describe what the cover image shows" />
+        {errors.case_study_sections?.cover_alt && <p className="text-xs text-red-500">{errors.case_study_sections.cover_alt.message}</p>}
       </div>
 
       <div className="space-y-3">
@@ -516,8 +521,9 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
                   placeholder="Optional caption (200 characters max)"
                 />
                 <p className={`text-xs ${captionWordCount(image.caption) > 30 ? "text-red-600 dark:text-red-400" : "text-ink-secondary"}`}>{image.caption.length} / 200 characters, {captionWordCount(image.caption)} / 30 words</p>
-                {image.altText && <p className="text-xs text-ink-secondary">Alt text: {image.altText}</p>}
-                <button type="button" onClick={() => { setValue("cover_image_url", image.url, { shouldDirty: true, shouldValidate: true }); setValue("cover_image_id", image.mediaId, { shouldDirty: true }); setValue("case_study_sections.cover_caption", image.caption, { shouldDirty: true, shouldValidate: true }); setGalleryImages((images) => images.filter((item) => item.mediaId !== image.mediaId)); }} className="text-left text-xs text-accent-signal underline underline-offset-2">Make cover (first image)</button>
+                <label htmlFor={`gallery-alt-${image.mediaId}`} className="block text-xs text-ink-secondary">Image description for screen readers (optional, up to 160 characters)</label>
+                <input id={`gallery-alt-${image.mediaId}`} value={image.altText} maxLength={160} onChange={(event) => setGalleryImages((images) => images.map((item) => item.mediaId === image.mediaId ? { ...item, altText: event.target.value } : item))} className="w-full rounded-lg border border-border-hairline bg-surface-raised px-3 py-2 text-sm" placeholder="Describe what this image shows" />
+                <button type="button" onClick={() => { setValue("cover_image_url", image.url, { shouldDirty: true, shouldValidate: true }); setValue("cover_image_id", image.mediaId, { shouldDirty: true }); setValue("case_study_sections.cover_caption", image.caption, { shouldDirty: true, shouldValidate: true }); setValue("case_study_sections.cover_alt", image.altText, { shouldDirty: true, shouldValidate: true }); setGalleryImages((images) => images.filter((item) => item.mediaId !== image.mediaId)); }} className="text-left text-xs text-accent-signal underline underline-offset-2">Make cover (first image)</button>
               </div>
               <div className="flex gap-1">
                 <button type="button" aria-label={`Replace image ${index + 2}`} onClick={() => { setReplacingIndex(index); setMediaPickerTarget("replace-gallery"); setMediaPickerTab("upload"); setIsMediaPickerOpen(true); }} className="rounded-lg p-2 hover:bg-surface-raised"><UploadCloud className="h-4 w-4" /></button>
@@ -539,17 +545,18 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
             setValue("cover_image_url", media.secure_url || media.url, { shouldDirty: true, shouldValidate: true });
             setValue("cover_image_id", media.id, { shouldDirty: true });
             setValue("case_study_sections.cover_caption", "", { shouldDirty: true, shouldValidate: true });
+            setValue("case_study_sections.cover_alt", "", { shouldDirty: true, shouldValidate: true });
             setGalleryImages((images) => images.filter((image) => image.mediaId !== media.id));
           } else if (mediaPickerTarget === "replace-gallery") {
             if (media.id === getValues("cover_image_id")) return;
             setGalleryImages((images) => images.some((image, index) => image.mediaId === media.id && index !== replacingIndex)
               ? images
-              : images.map((image, index) => index === replacingIndex ? { mediaId: media.id, url: media.secure_url || media.url, caption: "", altText: media.alt_text || "" } : image));
+              : images.map((image, index) => index === replacingIndex ? { mediaId: media.id, url: media.secure_url || media.url, caption: "", altText: "" } : image));
           } else {
             if (media.id === getValues("cover_image_id")) return;
             setGalleryImages((images) => images.some((image) => image.mediaId === media.id)
               ? images
-              : [...images, { mediaId: media.id, url: media.secure_url || media.url, caption: "", altText: media.alt_text || "" }]);
+              : [...images, { mediaId: media.id, url: media.secure_url || media.url, caption: "", altText: "" }]);
           }
         }}
       />
