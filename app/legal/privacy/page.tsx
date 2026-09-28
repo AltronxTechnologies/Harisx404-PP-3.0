@@ -211,7 +211,7 @@ export default function PrivacyPolicyPage() {
               </p>
               <div className="my-8 h-px bg-border-primary" />
               <div className="flex flex-wrap items-center justify-between gap-4">
-                <a href="mailto:itsharis.tech@gmail.com" className="rounded-sm font-medium text-neutral-900 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:text-white">
+                <a href="mailto:itsharis.tech@gmail.com" className="min-w-0 max-w-full rounded-sm font-medium text-neutral-900 [overflow-wrap:anywhere] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:text-white">
                   itsharis.tech@gmail.com
                 </a>
                 <span className="flex items-center gap-1.5 font-mono text-[10px] text-text-secondary">

@@ -213,7 +213,7 @@ export default function TermsOfUsePage() {
               <div className="my-8 h-px bg-border-primary" />
               <p className="text-sm text-text-secondary">
                 Questions about these terms?{" "}
-                <a href="mailto:itsharis.tech@gmail.com" className="rounded-sm font-medium text-neutral-900 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:text-white">
+                <a href="mailto:itsharis.tech@gmail.com" className="rounded-sm font-medium text-neutral-900 [overflow-wrap:anywhere] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:text-white">
                   itsharis.tech@gmail.com
                 </a>
               </p>

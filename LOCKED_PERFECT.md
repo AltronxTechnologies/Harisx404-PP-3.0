@@ -2428,3 +2428,12 @@ exactly 1px, solid `#D6DADE` in light mode and white at 10% opacity in dark
 mode. The page-level rules keep `-mx-2 sm:-mx-3 lg:mx-0`; the inner-card rules
 keep `my-8`. Their existing visibility, number, positions, section spacing,
 copy, typography, cards, CTA, and shared components remain locked as before.
+
+### 2026-09-28 owner-authorized legal-page responsive amendment
+
+The Privacy request-card email and Terms question email now allow wrapping at
+narrow/zoomed widths rather than extending past their content columns. Normal
+widths, text, actions, spacing, shared surfaces, and the existing reference-site
+backlink remain unchanged. The backlink is still required by the documented
+license constraint in `audit/README.md`; remove it only after permission or a
+design/asset review establishes that the requirement no longer applies.

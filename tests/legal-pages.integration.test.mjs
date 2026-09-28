@@ -35,6 +35,7 @@ for (const [route, sourcePath, title] of [
     assert.match(source, /mt-10 hidden lg:block"><SectionDivider \/><\/div>/);
     assert.match(source, /space-y-10 lg:mt-10/);
     assert.equal((source.match(/mx-auto grid w-full max-w-6xl grid-cols-1 px-2 sm:px-4 lg:grid-cols-12 lg:px-8/g) || []).length, 3);
+    assert.match(source, /href="mailto:itsharis\.tech@gmail\.com" className="[^"]*\[overflow-wrap:anywhere\]/);
     assert.match(source, /className="mt-28"/);
     assert.doesNotMatch(source, /<HeroTexture|Hatched side rails/);
   });
