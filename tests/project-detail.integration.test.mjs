@@ -154,6 +154,8 @@ test("project gallery and narrative are sourced from Admin-authored data", async
   assert.match(page, /Array\.isArray\(p\.galleryDetails\)/);
   assert.doesNotMatch(page, /genericFeatures|formatQuarter/);
   assert.match(detail, /<ReactMarkdown/);
+  assert.match(detail, /flex min-w-0 flex-nowrap items-center justify-center gap-2 font-mono/);
+  assert.match(detail, /aria-current="page" className="min-w-0 max-w-48 truncate/);
   assert.match(detail, /prose max-w-none/);
   assert.match(detail, /\[&>:first-child\]:!mt-0 \[&>:last-child\]:!mb-0/);
   assert.match(detail, /grid gap-3 text-\[15px\]/);
