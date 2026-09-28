@@ -12,7 +12,7 @@ const cloudinaryLoader = ({ src, width }: ImageLoaderProps) =>
 
 const isCloudinary = (src: string) => /^https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\//.test(src);
 const isOptimizedHost = (src: string) => /^https:\/\/(?:images\.unsplash\.com|res\.cloudinary\.com|avatars\.githubusercontent\.com|lh3\.googleusercontent\.com|cdn\.hashnode\.com|media\.giphy\.com|dev-to-uploads\.s3\.amazonaws\.com|badges\.pufler\.dev|img\.shields\.io|framerusercontent\.com)\//.test(src);
-const controlClass = "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border-primary text-text-secondary transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25 dark:active:border-white/25 sm:h-9 sm:w-9 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary";
+const controlClass = "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border-primary text-text-secondary transition-colors hover:border-neutral-400/70 active:border-neutral-400/70 hover:text-text-primary dark:hover:border-white/25 dark:active:border-white/25 max-[319px]:h-10 max-[319px]:w-10 sm:h-9 sm:w-9 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary";
 
 export function ProjectImageCarousel({ images, title }: { images: Slide[]; title: string }) {
   const [index, setIndex] = useState(0);
@@ -140,17 +140,17 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
           </>}
         </motion.div>
       </figure>
-      {images.length > 1 && <div role="group" aria-label="Carousel controls" className="mt-4 flex flex-wrap items-center justify-center gap-2 sm:mt-8 sm:gap-4">
-        <button type="button" aria-label="Previous image" onClick={() => goTo(index - 1)} className={`${controlClass} order-2 sm:order-none`}><ChevronLeft aria-hidden className="size-3.5" /></button>
-        <div className="order-1 flex w-full flex-[0_0_100%] flex-wrap items-center justify-center sm:order-none sm:w-auto sm:max-w-[70vw] sm:flex-initial">
+      {images.length > 1 && <div role="group" aria-label="Carousel controls" className="mt-4 flex items-center justify-center gap-2 max-[319px]:gap-1 sm:mt-8 sm:flex-wrap sm:gap-4">
+        <button type="button" aria-label="Previous image" onClick={() => goTo(index - 1)} className={controlClass}><ChevronLeft aria-hidden className="size-3.5" /></button>
+        <div className="flex min-w-0 flex-1 flex-wrap items-center justify-center sm:w-auto sm:max-w-[70vw] sm:flex-initial">
           {images.map((image, position) => <button key={`${image.src}-${position}`} type="button" aria-label={`Go to image ${position + 1}`} aria-current={position === shownIndex ? "true" : undefined} onClick={() => goTo(position)} className="group flex h-8 items-center px-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary">
-            <span className={`relative h-1 overflow-hidden rounded-full bg-border-primary transition-all duration-300 ${position === shownIndex ? "w-14" : "w-7 group-hover:bg-neutral-400/50 dark:group-hover:bg-white/25"}`}>
+            <span className={`relative h-1 overflow-hidden rounded-full bg-border-primary transition-all duration-300 ${position === shownIndex ? "w-8 sm:w-14" : "w-4 group-hover:bg-neutral-400/50 dark:group-hover:bg-white/25 sm:w-7"}`}>
               {position === shownIndex && <motion.span key={`${shownIndex}-${cycle}-${canPlay}`} className="absolute inset-0 origin-left rounded-full bg-gradient-to-r from-blue-500 via-violet-500 to-pink-500" initial={{ scaleX: canPlay ? 0 : 1 }} animate={{ scaleX: 1 }} transition={canPlay ? { duration: 5, ease: "linear" } : { duration: 0 }} />}
             </span>
           </button>)}
         </div>
-        <button type="button" onClick={() => setPaused((value) => !value)} aria-label={paused ? "Play carousel" : "Pause carousel"} className={`${controlClass} order-3 sm:order-none`}>{paused ? <Play aria-hidden className="size-3.5" /> : <Pause aria-hidden className="size-3.5" />}</button>
-        <button ref={nextButtonRef} type="button" aria-label="Next image" onClick={() => goTo(index + 1)} className={`${controlClass} order-4 sm:order-none`}><ChevronRight aria-hidden className="size-3.5" /></button>
+        <button type="button" onClick={() => setPaused((value) => !value)} aria-label={paused ? "Play carousel" : "Pause carousel"} className={controlClass}>{paused ? <Play aria-hidden className="size-3.5" /> : <Pause aria-hidden className="size-3.5" />}</button>
+        <button ref={nextButtonRef} type="button" aria-label="Next image" onClick={() => goTo(index + 1)} className={controlClass}><ChevronRight aria-hidden className="size-3.5" /></button>
       </div>}
     </section>
   );

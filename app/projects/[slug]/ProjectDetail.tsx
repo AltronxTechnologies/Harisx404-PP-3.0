@@ -72,10 +72,10 @@ const sectionLabels = [
   ["lessons_learned", "What I learned"],
 ] as const;
 
-function Fact({ label, children, alignMobileLabel = false }: { label: string; children: ReactNode; alignMobileLabel?: boolean }) {
+function Fact({ label, children, shortLabel }: { label: string; children: ReactNode; shortLabel?: string }) {
   return (
     <div className="min-w-0">
-      <dt className={`font-mono text-[11px] uppercase tracking-widest text-text-secondary ${alignMobileLabel ? "min-h-[33px] sm:min-h-0" : ""}`}>{label}</dt>
+      <dt className="font-mono text-[11px] uppercase tracking-widest text-text-secondary">{shortLabel ? <><span aria-hidden className="sm:hidden">{shortLabel}</span><span className="sr-only sm:not-sr-only">{label}</span></> : label}</dt>
       <dd className="mt-2 break-words text-sm font-medium text-text-primary">{children}</dd>
     </div>
   );
@@ -273,7 +273,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
                     <span className="inline-flex items-center gap-1.5 leading-4">Share project <ChevronDown className={`size-3.5 transition-transform motion-reduce:transition-none ${shareOpen ? "rotate-180" : ""}`} aria-hidden /></span>
                   </button>
                   {shareOpen && (
-                    <div id="project-share-options" role="group" aria-label="Share project" className={`relative z-30 mt-1 max-h-[min(70dvh,380px)] w-[min(224px,calc(100vw-6.5rem))] overflow-y-auto rounded-xl border border-border-primary bg-bg-primary p-1.5 text-left shadow-lg dark:shadow-black/40 sm:absolute sm:right-0 ${shareAbove ? "sm:bottom-full sm:mb-1 sm:mt-0" : "sm:top-full sm:mt-1"}`}>
+                    <div id="project-share-options" role="group" aria-label="Share project" className={`absolute right-0 top-full z-30 mt-1 max-h-[min(70dvh,380px)] w-[min(224px,calc(100vw-6.5rem))] overflow-y-auto rounded-xl border border-border-primary bg-bg-primary p-1.5 text-left shadow-lg dark:shadow-black/40 ${shareAbove ? "sm:bottom-full sm:top-auto sm:mb-1 sm:mt-0" : ""}`}>
                       <button ref={firstShareItemRef} type="button" onClick={() => copyText(projectUrl(), "URL copied")} className={`flex min-h-11 w-full items-center gap-2.5 rounded-md px-2.5 text-[13px] text-text-primary hover:bg-text-primary/5 sm:min-h-10 ${focusStyle}`}><Copy className="size-3.5 text-text-secondary" aria-hidden /> Copy URL</button>
                       <button type="button" onClick={viewMarkdown} className={`flex min-h-11 w-full items-center gap-2.5 rounded-md px-2.5 text-[13px] text-text-primary hover:bg-text-primary/5 sm:min-h-10 ${focusStyle}`}><ExternalLink className="size-3.5 text-text-secondary" aria-hidden /> View as Markdown <span className="sr-only">(opens in a new tab)</span></button>
                       <div aria-hidden className="mx-2 my-1 border-t border-border-primary" />
@@ -289,8 +289,8 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
                   <Fact label="Built">{project.year || "None"}</Fact>
                   <Fact label="Latest update">{project.latestUpdate || "None"}</Fact>
                 </> : <>
-                  <Fact label="Stage" alignMobileLabel>{projectStageLabels[project.stage]}</Fact>
-                  <Fact label="Expected completion" alignMobileLabel>{project.expectedCompletion || "None"}</Fact>
+                  <Fact label="Stage">{projectStageLabels[project.stage]}</Fact>
+                  <Fact label="Expected completion" shortLabel="ETA">{project.expectedCompletion || "None"}</Fact>
                 </>}
                 <Fact label="Visit">{project.live_url ? <a href={project.live_url} target="_blank" rel="noopener noreferrer" className={`inline-flex max-w-full items-center gap-1.5 rounded-sm text-blue-600 underline underline-offset-4 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 ${focusStyle}`}><span className="min-w-0 [overflow-wrap:anywhere]">{project.isPreview ? "Example live link" : "Live project"}</span><ExternalLink className="size-3.5 shrink-0" aria-hidden /><span className="sr-only">opens in a new tab</span></a> : <span className="text-text-secondary">None</span>}</Fact>
                 <Fact label="Source">{sourceUrl ? <a href={sourceUrl} target="_blank" rel="noopener noreferrer" className={`inline-flex max-w-full items-center gap-1.5 rounded-sm text-blue-600 underline underline-offset-4 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 ${focusStyle}`}><span className="min-w-0 [overflow-wrap:anywhere]">{project.sourceNote || (project.isPreview ? "Example source link" : "View source")}</span><ExternalLink className="size-3.5 shrink-0" aria-hidden /><span className="sr-only">opens in a new tab</span></a> : <span className="text-text-secondary">{project.sourceNote || "None"}</span>}</Fact>

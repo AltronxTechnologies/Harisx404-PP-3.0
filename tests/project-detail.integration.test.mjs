@@ -23,7 +23,7 @@ test("published project cards resolve to authored detail pages", async () => {
     assert.ok(html.includes("Share project"), `${slug} should render sharing`);
     assert.ok(html.includes("At a glance"), `${slug} should render its facts`);
     assert.doesNotMatch(html, /Preview-only case study\.|Case study \/ /, slug);
-    const facts = [...html.matchAll(/<dt[^>]*>(Built|Stage|Expected completion|Visit|Latest update|Source|Type)<\/dt>/g)].map((match) => match[1]);
+    const facts = [...html.matchAll(/<dt[^>]*>(.*?)<\/dt>/g)].map((match) => match[1].includes("Expected completion") ? "Expected completion" : match[1]);
     assert.deepEqual(facts, facts[0] === "Stage" ? ["Stage", "Expected completion", "Visit", "Source"] : ["Built", "Latest update", "Visit", "Source"], slug);
     assert.doesNotMatch(html, /Category &amp; tags|<dt[^>]*>Category<\/dt>|<dt[^>]*>Tags<\/dt>/, slug);
     assert.match(html, />Tech stack<\/h2>/, slug);
@@ -156,15 +156,17 @@ test("project images enforce a cover, allow ordered additions, and deliver respo
   assert.match(detail, /caption: project\.coverCaption/);
   assert.match(page, /coverCaption: p\.case_study_sections\?\.cover_caption/);
   assert.match(carousel, /aria-label="Carousel controls"/);
-  assert.match(carousel, /mt-4 flex flex-wrap items-center justify-center gap-2 sm:mt-8 sm:gap-4/);
-  assert.match(carousel, /order-1 flex w-full flex-\[0_0_100%\] flex-wrap items-center justify-center sm:order-none sm:w-auto sm:max-w-\[70vw\]/);
+  assert.match(carousel, /mt-4 flex items-center justify-center gap-2 max-\[319px\]:gap-1 sm:mt-8 sm:flex-wrap sm:gap-4/);
+  assert.match(carousel, /flex min-w-0 flex-1 flex-wrap items-center justify-center sm:w-auto sm:max-w-\[70vw\] sm:flex-initial/);
+  assert.match(carousel, /w-8 sm:w-14/);
+  assert.match(carousel, /w-4 group-hover:bg-neutral-400\/50 dark:group-hover:bg-white\/25 sm:w-7/);
   assert.match(carousel, /w-14/);
   assert.match(carousel, /w-7/);
   assert.match(carousel, /bg-gradient-to-r from-blue-500 via-violet-500 to-pink-500/);
   assert.match(carousel, /transition=\{canPlay \? \{ duration: 5, ease: "linear" \} : \{ duration: 0 \}\}/);
   assert.match(carousel, /initial=\{\{ scaleX: canPlay \? 0 : 1 \}\} animate=\{\{ scaleX: 1 \}\}/);
   assert.doesNotMatch(carousel, /w-\[60vw\]|gridTemplateColumns/);
-  assert.match(carousel, /className=\{`\$\{controlClass\} order-2 sm:order-none`\}/);
+  assert.match(carousel, /aria-label="Previous image" onClick=\{\(\) => goTo\(index - 1\)\} className=\{controlClass\}/);
   assert.match(carousel, /aria-label="Previous image"/);
   assert.match(carousel, /aria-label="Next image"/);
   assert.doesNotMatch(carousel, /onMouseEnter|onMouseLeave|setHovered|setFocused/);
@@ -278,7 +280,7 @@ test("project tags, timeline, source name and optional sections remain owner-man
   assert.match(editor, /markdown\.getMarkdown\(\)/);
   assert.match(detail, /\[&>\*\]:max-w-\[68ch\]/);
   assert.match(page, /item\.tags\.filter/);
-  assert.match(detail, /<Fact label="Stage" alignMobileLabel>\{projectStageLabels\[project\.stage\]\}<\/Fact>/);
+  assert.match(detail, /<Fact label="Stage">\{projectStageLabels\[project\.stage\]\}<\/Fact>/);
   assert.doesNotMatch(detail, /<Fact label="Type">/);
   assert.doesNotMatch(detail, /<Fact label="Category">|Category &amp; tags/);
   assert.match(detail, /<h2 className="font-mono text-xs font-semibold uppercase tracking-widest text-text-secondary">Tags<\/h2>/);
@@ -304,6 +306,8 @@ test("project tags, timeline, source name and optional sections remain owner-man
   for (const action of ["Copy URL", "View as Markdown", "Open in ChatGPT", "Open in Claude"]) {
     assert.ok(detail.includes(action), `share menu should include ${action}`);
   }
+  assert.match(detail, /id="project-share-options".*?className=\{`absolute right-0 top-full z-30/);
+  assert.match(detail, /sm:bottom-full sm:top-auto sm:mb-1 sm:mt-0/);
   assert.doesNotMatch(detail, /Copy as Markdown|Share by email/);
   assert.match(page, /fetchProjects\(\)\.catch\(\(\) => \[\]\)/);
 });
@@ -355,7 +359,8 @@ test("development stage chooses between completed and in-progress project facts"
   assert.match(api, /expected_completion_label: data\.expected_completion_label \|\| null/);
   assert.match(page, /stage: projectStages\.find\(\(stage\) => stage === p\.project_stage\) \?\? "completed"/);
   assert.match(detail, /project\.stage === "completed" \? <>/);
-  assert.match(detail, /<Fact label="Expected completion" alignMobileLabel>\{project\.expectedCompletion \|\| "None"\}<\/Fact>/);
+  assert.match(detail, /<Fact label="Expected completion" shortLabel="ETA">\{project\.expectedCompletion \|\| "None"\}<\/Fact>/);
+  assert.match(detail, /<span aria-hidden className="sm:hidden">\{shortLabel\}<\/span><span className="sr-only sm:not-sr-only">\{label\}<\/span>/);
 });
 
 test("Alloy preview gives every published project a distinct, complete example without changing structured data", {
@@ -387,7 +392,7 @@ test("Alloy preview gives every published project a distinct, complete example w
     assert.match(html, /aria-label="[^"]+ images"/, `${slug} needs the image carousel`);
     if (slug === "demo-vaultaudit-scanner") {
       assert.match(html, /<dt[^>]*>Stage<\/dt><dd[^>]*>Planning<\/dd>/, slug);
-      assert.match(html, /<dt[^>]*>Expected completion<\/dt><dd[^>]*>Q2 2027<\/dd>/, slug);
+      assert.match(html, /<dt[^>]*>.*?ETA.*?Expected completion.*?<\/dt><dd[^>]*>Q2 2027<\/dd>/, slug);
       assert.doesNotMatch(html, /<dt[^>]*>Built<\/dt>|<dt[^>]*>Latest update<\/dt>/, slug);
     } else {
       assert.ok(html.includes("Latest update"), slug);
