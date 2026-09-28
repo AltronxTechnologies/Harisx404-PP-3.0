@@ -7,6 +7,7 @@ import { ArrowUpRight, ChevronDown, Copy, ExternalLink, MessageCircle, Sparkles 
 import { GridWrapper } from "@/app/components/GridWrapper";
 import { PaperHeroTexture } from "@/app/components/PaperHeroTexture";
 import { CtaSection } from "@/app/components/home/CtaSection";
+import { SectionHeading } from "@/app/components/home/SectionHeading";
 import { ProjectImageCarousel } from "./ProjectImageCarousel";
 
 export type DetailProject = {
@@ -328,8 +329,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
 
       {related.length > 0 && (
         <section aria-labelledby="related-projects-heading" className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-          <p className="font-mono text-xs uppercase tracking-widest text-text-secondary">Continue exploring</p>
-          <h2 id="related-projects-heading" className="mt-2 [font-family:var(--font-instrument-serif),serif] text-[36px] leading-none text-text-primary sm:text-[42px]">Related projects</h2>
+          <SectionHeading kicker="Continue exploring" headingId="related-projects-heading">Related projects</SectionHeading>
           <div className="mt-7 grid gap-4 sm:grid-cols-2">
             {related.map((item) => <Link key={item.slug} href={`/projects/${item.slug}`} className={`group flex min-w-0 flex-col rounded-2xl border border-border-primary bg-white p-6 transition-colors hover:border-neutral-400/70 dark:bg-white/[0.02] dark:hover:border-white/25 ${focusStyle}`}>
               <span className="font-mono text-[11px] uppercase tracking-widest text-text-secondary">{item.category}</span>
