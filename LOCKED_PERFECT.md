@@ -2418,3 +2418,13 @@ this lock. Prior project checks passed (11/11 project tests, TypeScript,
 targeted ESLint, and responsive light/dark browser inspection). This is a
 presentation sign-off, not a claim that every Admin save/reopen, deployed
 database mutation, or owner-authored project screenshot has been verified.
+
+### 2026-09-28 owner-authorized legal-divider amendment
+
+The owner requested that Privacy and Terms horizontal dividers match the
+project-detail rules from entry 41. Their page-level `SectionDivider` and the
+one Privacy / two Terms inner-card rules now use `h-px bg-border-primary`:
+exactly 1px, solid `#D6DADE` in light mode and white at 10% opacity in dark
+mode. The page-level rules keep `-mx-2 sm:-mx-3 lg:mx-0`; the inner-card rules
+keep `my-8`. Their existing visibility, number, positions, section spacing,
+copy, typography, cards, CTA, and shared components remain locked as before.

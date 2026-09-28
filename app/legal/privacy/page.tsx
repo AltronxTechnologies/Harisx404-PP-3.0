@@ -60,7 +60,7 @@ function Spacer() {
 }
 
 function SectionDivider() {
-  return <div aria-hidden="true" className="-mx-2 h-px bg-neutral-400/40 dark:bg-white/20 sm:-mx-3 lg:mx-0" />;
+  return <div aria-hidden="true" className="-mx-2 h-px bg-border-primary sm:-mx-3 lg:mx-0" />;
 }
 
 function FeatureCard({ icon, tag, children }: { icon: ReactNode; tag: string; children: ReactNode }) {
@@ -209,7 +209,7 @@ export default function PrivacyPolicyPage() {
                 what can be changed or removed, and explain any limits that apply
                 to provider systems or backups.
               </p>
-              <div className="my-8 h-px bg-neutral-400/40 dark:bg-white/20" />
+              <div className="my-8 h-px bg-border-primary" />
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <a href="mailto:itsharis.tech@gmail.com" className="rounded-sm font-medium text-neutral-900 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:text-white">
                   itsharis.tech@gmail.com
