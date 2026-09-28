@@ -113,7 +113,7 @@ function scrambleAt(target: string, progress: number) {
   return out;
 }
 
-/* Matrix-style decode (per the reference site): every character cycles
+/* Matrix-style decode: every character cycles
    through random glyphs, then locks into place left-to-right. Phrases
    morph directly into each other - no blank state. First paint is the
    full first phrase (SSR/SEO safe). */

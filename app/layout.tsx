@@ -6,7 +6,7 @@ import { Footer } from "./components/Footer";
 import { cx } from "./lib/utils";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
-import { Instrument_Serif, JetBrains_Mono, Source_Serif_4, Space_Grotesk } from "next/font/google";
+import { Instrument_Serif, JetBrains_Mono, Outfit, Source_Serif_4, Space_Grotesk } from "next/font/google";
 import Script from "next/script";
 
 const instrumentSerif = Instrument_Serif({
@@ -14,6 +14,12 @@ const instrumentSerif = Instrument_Serif({
   style: ["normal", "italic"],
   subsets: ["latin"],
   variable: "--font-instrument-serif",
+  display: "swap",
+});
+
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-outfit",
   display: "swap",
 });
 
@@ -125,7 +131,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`relative bg-bg-primary ${GeistMono.variable} ${GeistSans.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} ${sourceSerif.variable} ${spaceGrotesk.variable}`}
+      className={`relative bg-bg-primary ${GeistMono.variable} ${GeistSans.variable} ${outfit.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} ${sourceSerif.variable} ${spaceGrotesk.variable}`}
     >
       <body className="flex min-h-screen flex-col font-sans md:max-w-7xl lg:mx-auto lg:flex-row" suppressHydrationWarning>
         <script

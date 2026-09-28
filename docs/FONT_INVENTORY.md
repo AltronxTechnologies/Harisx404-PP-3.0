@@ -2,10 +2,10 @@
 
 Last audited: 2026-09-03
 
-This document is the source of truth for the fonts currently declared, loaded,
-and used by the site. It also records unused fonts, fallback stacks, synthetic
-weight/style risks, third-party dependencies, and the files needed for a safe
-local-font migration.
+This is a historical font audit from 2026-09-03. Its original inventory below
+records the then-current declarations and external dependencies; the dated
+update at the end describes the live font routing after the owner-authorized
+2026-09-28 migration.
 
 No font implementation was changed as part of this audit. The approved Home,
 About, Navbar, Search, Reach Out, and Footer presentation remains locked under
@@ -25,8 +25,8 @@ The effective primary type system is:
 | Hero decode headline | JetBrains Mono | Explicit CSS variable family |
 | Article code/table mono | Geist Mono | Direct scoped CSS rules |
 
-Three font URLs that define most of the site's appearance are fetched directly
-by the browser from `aayushbharti.in`. They are not stored in this repository.
+Three font URLs that defined most of the site's appearance were fetched directly
+by the browser from the historical reference host. They are not stored in this repository.
 The URL exposed in CSS as Reference Bluu Next was inspected after the initial
 source audit and is actually an Instrument Serif Regular binary. This is both a
 reliability issue and a misleading family alias that must be resolved.
@@ -99,10 +99,10 @@ font-weight: 100 900;
 font-display: swap;
 ```
 
-Current third-party runtime URL:
+Historical third-party runtime URL:
 
 ```text
-https://aayushbharti.in/_next/static/immutable/media/1b99372b3eaef0c8-s.p.1ay-qk1u8nydy.woff2
+[historical reference-host font URL redacted]
 ```
 
 The URL returned HTTP 200 on 2026-09-03 with `font/woff2`, wildcard CORS,
@@ -178,10 +178,10 @@ font-weight: 400;
 font-display: swap;
 ```
 
-Current third-party runtime URL:
+Historical third-party runtime URL:
 
 ```text
-https://aayushbharti.in/_next/static/immutable/media/CoreMono_Beta01Regular-s.p.1d0e8tars77x7.woff2
+[historical reference-host font URL redacted]
 ```
 
 The URL returned HTTP 200 on 2026-09-03 with `font/woff2`, wildcard CORS,
@@ -259,10 +259,10 @@ font-weight: 400 700;
 font-display: swap;
 ```
 
-Current third-party runtime URL:
+Historical third-party runtime URL:
 
 ```text
-https://aayushbharti.in/_next/static/immutable/media/e41d5df559864f9e-s.p.2rlzm4mj5kw8e.woff2
+[historical reference-host font URL redacted]
 ```
 
 The URL returned HTTP 200 on 2026-09-03 with `font/woff2`, wildcard CORS,
@@ -734,7 +734,7 @@ Font replacement changes layout even when the family appears similar. Verify:
 - Light and dark themes.
 - Viewports: 1440x900, 1024x768, 768x1024, 390x844, 375x667, and 360x640.
 - Browser console and font network requests.
-- No remaining browser requests to `aayushbharti.in` after migration.
+- No remaining browser requests to the historical reference host after migration.
 
 Because the core surfaces are locked, replacing their fonts requires explicit
 owner unlock permission even if the intended result is visual parity.
@@ -780,3 +780,17 @@ For every font file or official link supplied later, record:
 - Any visual differences the owner accepts.
 
 Do not commit unverified font binaries or files without a known license.
+
+## 2026-09-28 owner-authorized font-source update
+
+The live application no longer declares or requests fonts from the historical
+reference host. `app/layout.tsx` loads Outfit through `next/font/google` and
+attaches `--font-outfit` to the root; the already-loaded Instrument Serif remains
+the display family. `tailwind.config.ts` routes sans/grotesk to Outfit, display
+to Instrument Serif, and mono to the existing system mono fallback (the old
+custom mono alias had no declared font face). The external `@font-face` rules
+were removed from `app/globals.css`. On the Privacy page, a browser reload
+showed no requests to the historical reference host; measured desktop hero,
+section heading, body paragraph, and footer dimensions matched the pre-change
+values. The older URLs and family descriptions above are audit history, not
+instructions to restore those runtime dependencies.

@@ -38,10 +38,12 @@ test("retired Test, Attribution, and Stats routes are fully removed", async () =
     assert.equal(response.status, 404, `${route} should be removed`);
   }
 
-  const [footer, sitemap, terms] = await Promise.all([
+  const [footer, sitemap, terms, styles, fonts] = await Promise.all([
     readFile(new URL("../app/components/Footer.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/sitemap.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/legal/terms/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+    readFile(new URL("../tailwind.config.ts", import.meta.url), "utf8"),
   ]);
   assert.doesNotMatch(footer, /\/test|\/attribution|\/stats|Test Page/);
   const specifics = footer.slice(footer.indexOf('title: "Specifics"'), footer.indexOf('title: "Extra"'));
@@ -49,6 +51,8 @@ test("retired Test, Attribution, and Stats routes are fully removed", async () =
   assert.doesNotMatch(specifics, /href: "\/links"/);
   assert.ok(extra.indexOf('href: "/links"') < extra.indexOf('href: "/buildlog"'));
   assert.doesNotMatch(sitemap, /\/test|\/attribution|\/stats/);
-  assert.match(terms, /https:\/\/aayushbharti\.in/);
-  assert.doesNotMatch(terms, /nofollow/);
+  assert.doesNotMatch(terms, /href="https?:\/\//);
+  assert.doesNotMatch(styles, /@font-face|https?:\/\/[^"']+\.woff2?/);
+  assert.match(fonts, /sans: \["var\(--font-outfit\)"/);
+  assert.match(fonts, /display: \["var\(--font-instrument-serif\)"/);
 });

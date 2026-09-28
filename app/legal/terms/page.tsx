@@ -80,7 +80,7 @@ export default function TermsOfUsePage() {
       </GridWrapper>
 
       <div className="relative mt-14">
-        <div className="hidden lg:block"><SectionDivider /></div>
+        <div><SectionDivider /></div>
         <div className="space-y-10 lg:mt-10">
         {/* 01 — Terms */}
         <section className="mx-auto grid w-full max-w-6xl grid-cols-1 px-2 sm:px-4 lg:grid-cols-12 lg:px-8">
@@ -118,7 +118,7 @@ export default function TermsOfUsePage() {
           <Spacer />
           <div className="space-y-8 p-4 lg:col-span-8 lg:p-6">
             <p className="text-lg leading-relaxed text-text-secondary">
-              The site combines portfolio material, credited third-party work,
+              The site combines portfolio material, third-party materials,
               and contributions from visitors. Please respect each creator&apos;s rights.
             </p>
             <div className="grid gap-6 md:grid-cols-2">
@@ -217,7 +217,7 @@ export default function TermsOfUsePage() {
           </div>
         </section>
         </div>
-        <div className="mt-10 hidden lg:block"><SectionDivider /></div>
+        <div className="lg:mt-10"><SectionDivider /></div>
       </div>
 
       {/* Contact CTA */}

@@ -1,11 +1,13 @@
-# PARITY_AUDIT.md — Reference-Site Design Parity: Status & Remaining Work
+# PARITY_AUDIT.md — Historical Design Comparison
 
 > Comparison of this project against the reference design standard
-> (aayushbharti.in) — structure, layout, styling, typography, motion, and UX.
+> (historical design study) — structure, layout, styling, typography, motion, and UX.
 > **Scope rule:** we match the *design language* (layouts, components,
 > animations, fonts, interaction patterns). All *content* (text, photos,
 > projects, bios, testimonials) is Muhammad Haris's own — never copied.
 > Audited: 2026-08-15. Update this file whenever a gap is closed.
+> This is an archived comparison, not a current instruction to match another
+> site or a statement about ownership of the present design.
 
 Legend: ✅ matched · 🟡 partial (minor visual delta) · 🔴 missing · 📦 content-blocked (code ready, needs owner content)
 

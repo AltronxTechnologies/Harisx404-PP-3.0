@@ -1,10 +1,10 @@
 # PROJECT_PHASES.md — Master Plan & Session Continuity Guide
 
-> **Purpose:** This is the single source of truth for the aayush-style portfolio
+> **Historical plan (superseded):** This was the phase guide for an early portfolio
 > rebuild of harisx404/p-site. Any AI agent (Claude, Antigravity, Alloy, etc.)
-> or human continuing this work MUST read this file first, work in the listed
-> phase order, and update the checkboxes + "Current status" section after every
-> work session. Do not re-plan from scratch; continue from here.
+> or human should treat the phase notes below as a record, not instructions to
+> recreate another site's design. The current implementation and locked-surface
+> rules in `LOCKED_PERFECT.md` take precedence.
 
 ---
 
@@ -36,7 +36,7 @@
    - Motion: framer-motion fade+y `whileInView` with `viewport={{ once: true }}`,
      stagger 0.08–0.12s, duration ~0.6s ease-out.
 2. **Content policy:** structure/motion may mirror the reference site
-   (aayushbharti.in) but ALL text, images, testimonials, project descriptions
+   (historical design study) but ALL text, images, testimonials, project descriptions
    must be ORIGINAL placeholder copy for Muhammad Haris, replaceable via the
    admin panel. Never copy the reference site's copy, photos, or personal data.
 3. **Dynamic-first:** every section reads Supabase via helpers in

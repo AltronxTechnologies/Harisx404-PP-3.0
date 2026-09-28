@@ -1,7 +1,8 @@
 # Design Parity Audit — Reference Site vs This Project
 
-**Goal:** every page, section, component, window, feature, animation and
-transition matches the reference design (aayushbharti.in) pixel-by-pixel
+**Historical audit goal (not a current instruction):** every page, section,
+component, window, feature, animation and transition matches the reference
+design (historical reference) pixel-by-pixel
 in *pattern* — while ALL content (text, photos, projects, goals,
 testimonials) stays Muhammad Haris's own.
 
@@ -55,3 +56,13 @@ site. Consequences for this project:
    The site keeps its current inspiration-informed state; future design work
    should deliberately differentiate rather than converge further.
 3. All content (text, photos, projects, testimonials, goals) remains original.
+
+## 2026-09-28 owner update
+
+The owner states the present design was built and adapted independently and
+does not want a public credit or backlink. The Terms backlink was removed;
+the live font routing no longer requests assets from the historical reference
+host. The earlier parity work and license assessment above remain an audit
+record, not an instruction to clone the reference or proof that any particular
+license condition has been waived. Rights clearance for historical design and
+asset use remains the owner's responsibility.

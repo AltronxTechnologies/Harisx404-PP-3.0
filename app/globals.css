@@ -1,21 +1,3 @@
-/* Reversible reference-typography experiment. These immutable font assets
-   are the exact faces used by the supplied live reference. */
-@font-face {
-  font-family: "Reference Outfit";
-  src: url("https://aayushbharti.in/_next/static/immutable/media/1b99372b3eaef0c8-s.p.1ay-qk1u8nydy.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 100 900;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Reference Bluu Next";
-  src: url("https://aayushbharti.in/_next/static/immutable/media/e41d5df559864f9e-s.p.2rlzm4mj5kw8e.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 400 700;
-  font-display: swap;
-}
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -98,7 +80,7 @@ body {
   --rule-color: #404040;
 }
 
-/* ===== Display / accent typography (aayush-style design language) =====
+/* ===== Display / accent typography =====
    `font-display` is provided by tailwind.config.ts (fontFamily.display) —
    a duplicate class here previously shadowed the utility; removed. */
 

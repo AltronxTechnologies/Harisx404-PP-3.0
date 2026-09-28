@@ -10,7 +10,7 @@ Privacy was reviewed and corrected first, then Terms. Changes were limited to
 the local page frame, semantic hero, contrast, local card radii and borders, link
 focus, and spacing before the existing shared CTA. The Navbar, Search, CTA,
 Footer, and their locked implementations were not changed. Terms' visible
-credit and dofollow link to Aayush Bharti remain intact.
+historical reference-site credit and dofollow link remained intact at that time.
 
 Both pages now follow the same `mt-14` frame, `GridWrapper` and `PaperHeroTexture`
 hero, 12px mono kicker, 46/56px Instrument Serif title, 15/24px description,
@@ -58,7 +58,8 @@ services and intended commitments:
 5. Terms describes all code/content as original and proprietary despite imported
    blog material and third-party assets needing attribution or rights review.
    Its usage permissions, liability limits, moderation commitments, and effective
-   date require owner or legal review. The required Aayush Bharti credit must stay.
+   date require owner or legal review. At the time, the documented reference-site
+   credit requirement was treated as active; see the later owner decisions.
 
 ## Lock Decision
 

@@ -31,8 +31,8 @@ for (const [route, sourcePath, title] of [
     assert.equal((source.match(/my-8 h-px bg-border-primary/g) || []).length, route === "/legal/privacy" ? 1 : 2);
     assert.doesNotMatch(source, /bg-neutral-400\/40 dark:bg-white\/20/);
     assert.doesNotMatch(source, /border-t border-dashed border-neutral-200 dark:border-neutral-800/);
-    assert.match(source, /hidden lg:block"><SectionDivider \/><\/div>/);
-    assert.match(source, /mt-10 hidden lg:block"><SectionDivider \/><\/div>/);
+    assert.match(source, /<div><SectionDivider \/><\/div>/);
+    assert.match(source, /<div className="lg:mt-10"><SectionDivider \/><\/div>/);
     assert.match(source, /space-y-10 lg:mt-10/);
     assert.equal((source.match(/mx-auto grid w-full max-w-6xl grid-cols-1 px-2 sm:px-4 lg:grid-cols-12 lg:px-8/g) || []).length, 3);
     assert.match(source, /href="mailto:itsharis\.tech@gmail\.com" className="[^"]*\[overflow-wrap:anywhere\]/);
@@ -44,8 +44,10 @@ for (const [route, sourcePath, title] of [
 test("Terms does not show the retired design-inspiration credit", async () => {
   const response = await fetch(`${baseUrl}/legal/terms`);
   const html = await response.text();
+  const main = html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/)?.[1] || "";
+  assert.ok(main);
   assert.doesNotMatch(html, /id="design-inspiration"|>Design inspiration</);
-  assert.doesNotMatch(html, /href="https:\/\/aayushbharti\.in"|Aayush Bharti/);
+  assert.doesNotMatch(main, /<a[^>]*href="https?:\/\//);
   assert.match(html, /Third-party materials and visitor contributions remain with their/);
 });
 
@@ -69,10 +71,10 @@ test("Privacy describes the implemented visitor data flows without absolute trac
   assert.doesNotMatch(html, /Newsletter Email|Google Gemini|>Loops</);
 });
 
-test("Terms distinguishes credited material and visitor submissions", async () => {
+test("Terms distinguishes portfolio material and visitor submissions", async () => {
   const response = await fetch(`${baseUrl}/legal/terms`);
   const html = await response.text();
-  assert.match(html, /credited third-party work/);
+  assert.match(html, /portfolio material, third-party materials/);
   assert.match(html, /testimonials are reviewed before publication/);
   assert.match(html, /To the extent permitted by applicable law/);
   assert.match(html, /dateTime="2026-09-25"/);

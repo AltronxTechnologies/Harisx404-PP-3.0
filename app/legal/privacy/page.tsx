@@ -111,7 +111,7 @@ export default function PrivacyPolicyPage() {
       </GridWrapper>
 
       <div className="relative mt-14">
-        <div className="hidden lg:block"><SectionDivider /></div>
+        <div><SectionDivider /></div>
         <div className="space-y-10 lg:mt-10">
         {/* 01 — Collect */}
         <section className="mx-auto grid w-full max-w-6xl grid-cols-1 px-2 sm:px-4 lg:grid-cols-12 lg:px-8">
@@ -223,7 +223,7 @@ export default function PrivacyPolicyPage() {
           </div>
         </section>
         </div>
-        <div className="mt-10 hidden lg:block"><SectionDivider /></div>
+        <div className="lg:mt-10"><SectionDivider /></div>
       </div>
 
       {/* Contact CTA */}

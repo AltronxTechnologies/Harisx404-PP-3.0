@@ -11,10 +11,10 @@ export default {
           "0 0 0 1px rgba(14, 22, 34, 0.1), 0 2px 4px 0 rgba(0, 0, 0, 0.06)",
       },
       fontFamily: {
-        sans: ["Reference Outfit", "system-ui", "sans-serif"],
-        mono: ["Reference Core Mono", "ui-monospace", "monospace"],
-        display: ["Reference Bluu Next", "Georgia", "serif"],
-        grotesk: ["Reference Outfit", "system-ui", "sans-serif"],
+        sans: ["var(--font-outfit)", "system-ui", "sans-serif"],
+        mono: ["ui-monospace", "monospace"],
+        display: ["var(--font-instrument-serif)", "Georgia", "serif"],
+        grotesk: ["var(--font-outfit)", "system-ui", "sans-serif"],
       },
       colors: {
         "bg-primary": "var(--bg-primary)",

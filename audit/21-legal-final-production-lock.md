@@ -20,7 +20,7 @@
   contributions. It describes public wall notes, moderated testimonials, limits
   on misuse, and informational examples without claiming all published material
   is original or promising moderation outcomes it cannot guarantee.
-- The visible dofollow design-inspiration credit to Aayush Bharti and its safe
+- The visible dofollow design-inspiration credit to the historical reference site and its safe
   new-tab link remain unchanged.
 - Both pages retain an explicit revision/effective date. These dates should only
   change when the actual policy changes, not just because time passes.
@@ -84,7 +84,7 @@ provider-specific policy copy. Both heroes now use the kicker `Legal`, with
   by function. Cookie, request-signal, contact-field, testimonial, and public
   contribution disclosures remain explicit.
 - The separate Design inspiration card was removed from Terms. A small visible
-  Aayush Bharti link remains in the Rights section to retain the existing
+  reference-site link remained in the Rights section to retain the then-existing
   reference-site attribution obligation documented in `audit/README.md`.
 
 The new titles, card and service copy, and credit treatment are covered by the
@@ -95,7 +95,7 @@ older title and provider-specific wording above.
 ## Owner-Authorized Credit Removal
 
 On 2026-09-28, after being told about the reference site's documented backlink
-condition, the owner explicitly requested removal of the visible Aayush Bharti
+condition, the owner explicitly requested removal of the visible reference-site
 link from Terms. The named credit is no longer on the public legal page; the
 general third-party-rights notice remains. This supersedes the link-preserved
 status above, not the underlying license concern in `audit/README.md`. Rights

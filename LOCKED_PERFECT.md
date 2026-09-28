@@ -1876,7 +1876,7 @@ responsive light/dark viewport. This limited amendment is re-locked.
 - **Discovery amendment:** `/attribution` was removed from sitemap generation and
   public preview route expectations. `/test` was already excluded from sitemap.
 - **Credit preservation:** the documented visible dofollow design-inspiration
-  credit to Aayush Bharti was moved into the existing public `/legal/terms` Rights
+  reference-site credit was moved into the existing public `/legal/terms` Rights
   section. The dedicated Attribution route remains removed; do not recreate it.
 - **Removal behavior:** both retired URLs return the standard application 404 and
   neither appears in Footer HTML or sitemap XML.
@@ -2315,7 +2315,7 @@ derived abuse prevention. Absolute claims about no cookies, no sharing of any
 data, only manually provided fields, and guaranteed permanent deletion were
 removed. Terms distinguishes original, credited, and visitor-contributed work,
 explains public wall and moderated testimonial behavior, and retains the visible
-dofollow Aayush Bharti design-inspiration credit. Its effective date is
+dofollow reference-site design-inspiration credit. Its effective date is
 September 25, 2026; the Privacy review marker is September 2026.
 
 TypeScript, targeted ESLint, legal integration (5/5), navigation integration
@@ -2364,7 +2364,7 @@ worded by function, while actual cookies, submitted fields, and public content
 remain accurately described.
 
 Terms no longer has a Design inspiration card. Its compact visible attribution
-link to Aayush Bharti remains in the Rights section because `audit/README.md`
+link to the reference site remained in the Rights section because `audit/README.md`
 records a reference-site backlink constraint; the owner has removed the separate
 card, not the documented credit obligation. No other shared locked design or
 legal behavior changed. The adjusted page copy and hero hierarchy are protected
@@ -2441,9 +2441,40 @@ design/asset review establishes that the requirement no longer applies.
 ### 2026-09-28 owner-authorized Terms credit removal
 
 After the reference-site backlink condition was explained, the owner expressly
-requested removal of the named Aayush Bharti credit and link from `/legal/terms`.
+requested removal of the named reference-site credit and link from `/legal/terms`.
 The Rights section retains only its general statement about third-party
 materials and visitor contributions; its other copy, structure, and locked
 presentation remain unchanged. The documented license condition is not waived
 by this code change. Permission or an independent design/asset review remains
 necessary before asserting the omission is cleared for production.
+
+### 2026-09-28 owner-authorized legal outer-divider visibility
+
+The owner requested the top and bottom `SectionDivider` on Privacy and Terms
+be visible on phones and tablets as well as desktops. The middle dividers,
+`h-px bg-border-primary` color and thickness, section copy, and shared layout
+remain unchanged. Below `lg`, the bottom rule sits immediately after the last
+section; at `lg` the existing 40px separation before that rule remains.
+
+### 2026-09-28 owner-authorized independent font sources
+
+The owner requested removal of remaining live reference-host links. The two
+external font-face declarations were removed. The primary sans now loads
+official Outfit through `next/font/google`, display typography uses the
+already-loaded Instrument Serif, and mono uses its existing system fallback.
+The legal page's measured desktop hero, section heading, paragraph, and Footer
+dimensions were unchanged; browser resource inspection found no requests to
+the reference host. This narrow font-source change does not unlock other Home,
+About, Navbar, Footer, or global layout presentation changes. Historical
+reference-site assessments remain archived and are not a legal rights finding.
+
+### 2026-09-28 owner-directed wording correction
+
+The owner removed the explicit reference-site attribution and asserts that the
+current design was independently built and adapted. Terms now says "third-party
+materials" rather than "credited third-party work" while retaining accurate
+rights language for external assets and visitor content. Two stale source
+comments describing live Home headings as reference-site copies were corrected
+without changing code or presentation. This records the owner's design claim;
+it is not a blanket claim of ownership over third-party fonts, libraries, media,
+or visitor submissions.
