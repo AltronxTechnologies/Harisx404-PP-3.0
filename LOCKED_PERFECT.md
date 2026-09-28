@@ -2371,3 +2371,50 @@ legal behavior changed. The adjusted page copy and hero hierarchy are protected
 by `tests/legal-pages.integration.test.mjs` and documented in
 `audit/21-legal-final-production-lock.md`. This amendment is frozen subject to
 the same material-practices-change exception as entry 40.
+
+## 41. FINAL OWNER LOCK - Project Detail Presentation
+
+**Date:** 2026-09-28. **Approved page baseline:** `ea097ee` (the current
+project-detail implementation; this documentation entry is not itself a commit).
+**Scope:** `/projects/[slug]` presentation in
+`app/projects/[slug]/ProjectDetail.tsx`,
+`app/projects/[slug]/ProjectImageCarousel.tsx`, and the presentation mapping in
+`app/projects/[slug]/page.tsx`. Do not alter their approved layout, typography,
+section rhythm, image controls, related cards, theme treatment, or responsive
+behavior without the owner's explicit permission. The shared Navbar, Footer,
+GridWrapper, PaperHeroTexture, SectionHeading, CTA, and global color tokens
+remain independently locked; this entry does not unlock them.
+
+- The page starts at `mt-14`. Its hero uses Instrument Serif at 46px on phones
+  and 56px from `md`, weight 500; the summary uses 15px/24px secondary text.
+  There is 56px from the summary to the facts panel and 56px from the facts
+  panel to the image carousel. Story content starts after a 40px gap and a 1px
+  rule. Story headings use Instrument Serif at 32px on phones and 38px from
+  `sm`, weight 500; narrative text is 15px with 28px line height.
+- `SectionRule` is a decorative, solid, borderless `h-px` (exactly 1px) bar
+  using `bg-border-primary`: `#D6DADE` / `rgb(214, 218, 222)` in light mode,
+  `rgba(255, 255, 255, 0.1)` in dark mode. It has no shadow or gradient. One
+  rule precedes the first story section, one separates each pair of story
+  sections, and one follows the last; no story means no story rules. The bar
+  extends 8px beyond its article at phone sizes (`-mx-2`), 12px from `sm` to
+  below `lg` (`sm:-mx-3`), and uses the article width from `lg` (`lg:mx-0`).
+  Measured: 345px wide from x=15 to x=360 at a 375px viewport, and 1214px
+  wide from x=113 to x=1327 at 1440px. Both themes retain 1px thickness.
+- The facts frame and carousel frame use the same token as a 1px border. The
+  facts card's Tech stack and Tags rows have 1px horizontal separators below
+  `lg`; from `lg`, Tech stack uses a 1px vertical separator instead while the
+  Tags row retains its horizontal separator. The related-card action row and
+  open image-caption panel also use 1px `border-border-primary` separators.
+- On phones, Share project floats over the facts card without changing its
+  height; the stage fact shows the compact visual label `ETA` while assistive
+  technology and larger screens retain `Expected completion`. The carousel
+  indicators, previous/next arrows, and play/pause button share one centered
+  row, with 8px gaps at standard phone widths (4px below 320px); the compact
+  indicator bars remain 4px high. From `sm`, the existing 16px control gap,
+  larger indicator widths, and full fact label remain unchanged.
+
+The owner approved the current project-detail page as perfect and requested
+this lock. Prior project checks passed (11/11 project tests, TypeScript,
+targeted ESLint, and responsive light/dark browser inspection). This is a
+presentation sign-off, not a claim that every Admin save/reopen, deployed
+database mutation, or owner-authored project screenshot has been verified.
