@@ -199,6 +199,8 @@ test("project gallery and narrative are sourced from Admin-authored data", async
   assert.match(detail, /text-pretty text-\[15px\] leading-6 text-text-secondary \[overflow-wrap:anywhere\]/);
   assert.match(detail, /min-w-0 break-words text-\[15px\] leading-6 text-text-secondary \[overflow-wrap:anywhere\]/);
   assert.match(detail, /min-h-8 max-w-full items-center/);
+  assert.match(detail, /<Fact label="Source">.*?inline-flex max-w-full items-center.*?<span className="min-w-0 \[overflow-wrap:anywhere\]">/);
+  assert.match(detail, /<Fact label="Visit">.*?inline-flex max-w-full items-center.*?<span className="min-w-0 \[overflow-wrap:anywhere\]">/);
   assert.doesNotMatch(detail, /aria-label="Breadcrumb"|aria-current="page"/);
   assert.match(detail, /prose max-w-none/);
   assert.match(detail, /\[&>:first-child\]:!mt-0 \[&>:last-child\]:!mb-0/);
