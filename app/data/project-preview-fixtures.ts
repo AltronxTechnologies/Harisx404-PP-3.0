@@ -1,9 +1,13 @@
 // Disposable Alloy-only presentation data. Never write these examples to Supabase.
+import type { ProjectStage } from "@/app/lib/project-stage";
+
 type PreviewSeed = {
   category: string;
   tagline: string;
   tags?: string[];
   latest_update_label: string;
+  project_stage?: ProjectStage;
+  expected_completion_label?: string;
   content: string;
   case_study_sections: {
     why_built: string;
@@ -177,6 +181,8 @@ export const projectPreviewFixtures: Record<string, PreviewSeed> = {
     category: "Cloud Security / Automation",
     tagline: "A cloud-audit workflow concept that turns configuration findings into reviewable remediation steps.",
     latest_update_label: "Q2 2024",
+    project_stage: "planning",
+    expected_completion_label: "Q2 2027",
     content: "**Preview overview.** The case study imagines a read-only scan, a prioritized findings list, and a remediation review. It distinguishes observing a risky setting from changing infrastructure so the workflow remains accountable.",
     case_study_sections: {
       why_built: "A long list of cloud checks is not useful if teams cannot tell what changed or how to respond. This preview puts context around each finding.",

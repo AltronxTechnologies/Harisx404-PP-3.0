@@ -79,6 +79,8 @@ CREATE TABLE projects (
   github_url TEXT,
   status TEXT DEFAULT 'draft' CHECK (status IN ('published', 'draft', 'archived')),
   featured BOOLEAN DEFAULT FALSE,
+  project_stage TEXT NOT NULL DEFAULT 'completed' CHECK (project_stage IN ('planning', 'initializing', 'in_progress', 'testing', 'on_hold', 'completed')),
+  expected_completion_label TEXT,
   related_project_ids UUID[] NOT NULL DEFAULT '{}'::uuid[],
   display_order INTEGER DEFAULT 0,     -- Manual sort order
   start_date DATE,

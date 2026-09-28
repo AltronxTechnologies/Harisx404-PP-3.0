@@ -9,6 +9,7 @@ import * as z from "zod";
 import { TiptapEditor } from "./TiptapEditor";
 import { MediaPickerModal } from "./MediaPickerModal";
 import { captionWordCount } from "@/app/lib/project-captions";
+import { projectStages, projectStageLabels } from "@/app/lib/project-stage";
 import { Image as ImageIcon, Loader2, Sparkles, ArrowUp, ArrowDown, Trash2, UploadCloud } from "lucide-react";
 
 type GalleryImage = { mediaId: string; url: string; caption: string; altText: string };
@@ -31,6 +32,8 @@ const projectSchema = z.object({
   category: z.string().trim().min(1, "At least one category is required").max(60),
   year: z.string().optional().or(z.literal("")),
   latest_update_label: z.string().max(32).optional(),
+  project_stage: z.enum(projectStages),
+  expected_completion_label: z.string().trim().max(32).optional(),
   source_note: z.string().max(80).optional(),
   case_study_sections: z.object({
     cover_caption: z.string().max(200, "Keep the cover caption within 200 characters").refine((caption) => captionWordCount(caption) <= 30, "Keep the cover caption within 30 words"),
@@ -58,7 +61,7 @@ type ProjectFormValues = z.infer<typeof projectSchema>;
 
 interface ProjectFormProps {
   availableProjects: Array<{ id: string; title: string; slug: string; status: string }>;
-  initialData?: Partial<Omit<ProjectFormValues, "tech_stack" | "features" | "tags" | "related_project_ids">> & {
+  initialData?: Partial<Omit<ProjectFormValues, "tech_stack" | "features" | "tags" | "related_project_ids" | "expected_completion_label">> & {
     id?: string;
     tech_stack?: string[] | string | null;
     features?: string[] | string | null;
@@ -66,6 +69,7 @@ interface ProjectFormProps {
     related_project_ids?: string[] | null;
     galleryImages?: GalleryImage[];
     latest_update_label?: string | null;
+    expected_completion_label?: string | null;
     source_note?: string | null;
     case_study_sections?: Partial<CaseStudySections & { cover_caption: string }> | null;
   };
@@ -101,6 +105,8 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
       category: initialData?.category ?? "Web App",
       year: initialData?.year ?? "",
       latest_update_label: initialData?.latest_update_label ?? "",
+      project_stage: initialData?.project_stage ?? "completed",
+      expected_completion_label: initialData?.expected_completion_label ?? "",
       source_note: initialData?.source_note ?? "",
       case_study_sections: { ...emptySections, cover_caption: "", ...initialData?.case_study_sections },
       tech_stack: Array.isArray(initialData?.tech_stack)
@@ -125,6 +131,7 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
     },
   });
   const coverUrl = watch("cover_image_url") || "";
+  const completed = watch("project_stage") === "completed";
   const selectedRelatedIds = watch("related_project_ids") || [];
   const relatedOptions = availableProjects.filter((item) => item.id !== initialData?.id && `${item.title} ${item.slug}`.toLowerCase().includes(relatedSearch.trim().toLowerCase()));
   const coverCaption = watch("case_study_sections.cover_caption") || "";
@@ -266,6 +273,15 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
           {errors.tagline && <p className="text-xs text-red-500">{errors.tagline.message}</p>}
       </div>
 
+      <div className="space-y-2">
+        <label htmlFor="project-stage" className="text-sm font-medium">Development stage</label>
+        <select id="project-stage" {...register("project_stage")} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal">
+          {projectStages.map((stage) => <option key={stage} value={stage}>{projectStageLabels[stage]}</option>)}
+        </select>
+        <p className="text-xs text-ink-secondary">Independent of publication status. Completed shows Built and Latest update; other stages show Stage and Expected completion.</p>
+        {errors.project_stage && <p className="text-xs text-red-500">{errors.project_stage.message}</p>}
+      </div>
+
       <div className="grid gap-6 md:grid-cols-3">
         <div className="space-y-2">
           <label className="text-sm font-medium">Categories</label>
@@ -279,15 +295,14 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
           {errors.category && <p className="text-xs text-red-500">{errors.category.message}</p>}
         </div>
 
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Built (Optional)</label>
-          <input
-            {...register("year")}
-            maxLength={20}
-            className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
-            placeholder="Q2 2026 or 2025"
-          />
-        </div>
+        {completed ? <div className="space-y-2">
+          <label htmlFor="project-built" className="text-sm font-medium">Built (Optional)</label>
+          <input id="project-built" {...register("year")} maxLength={20} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="Q2 2026 or 2025" />
+        </div> : <div className="space-y-2">
+          <label htmlFor="project-expected-completion" className="text-sm font-medium">Expected completion (Optional)</label>
+          <input id="project-expected-completion" {...register("expected_completion_label")} maxLength={32} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="Q2 2027" />
+          {errors.expected_completion_label && <p className="text-xs text-red-500">{errors.expected_completion_label.message}</p>}
+        </div>}
 
         <div className="space-y-2">
           <label className="text-sm font-medium">Tech stack (one per line)</label>
@@ -300,11 +315,11 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
         </div>
       </div>
 
-      <div className="space-y-2">
+      {completed && <div className="space-y-2">
         <label className="text-sm font-medium">Latest project update (Optional)</label>
         <input {...register("latest_update_label")} maxLength={32} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="Q3 2026" />
         <p className="text-xs text-ink-secondary">Set this when you update the project itself, not when you edit this page.</p>
-      </div>
+      </div>}
 
       <div className="space-y-2">
         <label className="text-sm font-medium">Tags (comma-separated)</label>

@@ -4,6 +4,7 @@ import * as z from "zod";
 import createSupabaseServerClient, { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 import { syncTags } from "@/app/lib/tag-sync";
 import { captionWordCount } from "@/app/lib/project-captions";
+import { projectStages } from "@/app/lib/project-stage";
 
 const idSchema = z.string().uuid();
 const optionalText = z.string().max(10000).optional().default("");
@@ -26,6 +27,8 @@ const projectFieldsSchema = z.object({
   category: z.string().trim().min(1).max(60),
   year: z.string().max(20).optional().default(""),
   latest_update_label: z.string().max(32).optional().default(""),
+  project_stage: z.enum(projectStages).optional().default("completed"),
+  expected_completion_label: z.string().trim().max(32).optional().default(""),
   source_note: z.string().max(80).optional().default(""),
   case_study_sections: z.object({
     cover_caption: z.string().max(200).refine((caption) => captionWordCount(caption) <= 30, "Use 30 words or fewer").optional().default(""),
@@ -106,6 +109,8 @@ function projectFields(data: z.infer<typeof projectSchema>) {
     category: data.category,
     year: data.year || null,
     latest_update_label: data.latest_update_label || null,
+    project_stage: data.project_stage,
+    expected_completion_label: data.expected_completion_label || null,
     source_note: data.source_note || null,
     case_study_sections: data.case_study_sections,
     tech_stack: data.tech_stack,
@@ -154,6 +159,9 @@ function fail(error: unknown) {
 }
 
 function projectWriteError(error: { message: string; code?: string }) {
+  if (["42703", "PGRST204"].includes(error.code || "") && /project_stage|expected_completion_label/.test(error.message)) {
+    return NextResponse.json({ error: "Apply migration 2026_project_development_stage.sql before saving project stages." }, { status: 503 });
+  }
   if (["42703", "PGRST204"].includes(error.code || "") && /related_project_ids/.test(error.message)) {
     return NextResponse.json({ error: "Apply migration 2026_project_related_selections.sql before saving related projects." }, { status: 503 });
   }

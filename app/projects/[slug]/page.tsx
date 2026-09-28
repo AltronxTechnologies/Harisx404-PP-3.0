@@ -4,6 +4,7 @@ import { fetchProjects, getProjectBySlug } from "@/app/lib/utils";
 import { fallbackProjects } from "@/app/data/fallback-home";
 import { withProjectPreview } from "@/app/data/project-preview-fixtures";
 import { siteMetadata } from "@/app/data/siteMetadata";
+import { projectStages } from "@/app/lib/project-stage";
 import {
   ProjectDetail,
   type DetailProject,
@@ -36,6 +37,8 @@ function mapDbProject(p: any): DetailProject {
     tech: Array.isArray(p.tech_stack) ? p.tech_stack : [],
     year: p.year || "",
     latestUpdate: p.latest_update_label || "",
+    stage: projectStages.find((stage) => stage === p.project_stage) ?? "completed",
+    expectedCompletion: p.expected_completion_label || "",
     isPreview: p.isPreview || false,
     sections: p.case_study_sections || {},
     category: p.category || "Project",
@@ -92,6 +95,8 @@ async function resolveProject(slug: string): Promise<{
       tech: fb.tech,
       year: fb.year,
       latestUpdate: "",
+      stage: "completed",
+      expectedCompletion: "",
       isPreview: false,
       sections: {},
       category: fb.category,

@@ -8,6 +8,7 @@ import { GridWrapper } from "@/app/components/GridWrapper";
 import { PaperHeroTexture } from "@/app/components/PaperHeroTexture";
 import { CtaSection } from "@/app/components/home/CtaSection";
 import { SectionHeading } from "@/app/components/home/SectionHeading";
+import { projectStageLabels, type ProjectStage } from "@/app/lib/project-stage";
 import { ProjectImageCarousel } from "./ProjectImageCarousel";
 
 export type DetailProject = {
@@ -19,6 +20,8 @@ export type DetailProject = {
   tech: string[];
   year: string;
   latestUpdate: string;
+  stage: ProjectStage;
+  expectedCompletion: string;
   isPreview: boolean;
   sections: Partial<Record<"why_built" | "key_decisions" | "results" | "lessons_learned", string>>;
   category: string;
@@ -68,10 +71,10 @@ const sectionLabels = [
   ["lessons_learned", "What I learned"],
 ] as const;
 
-function Fact({ label, children }: { label: string; children: ReactNode }) {
+function Fact({ label, children, alignMobileLabel = false }: { label: string; children: ReactNode; alignMobileLabel?: boolean }) {
   return (
     <div className="min-w-0">
-      <dt className="font-mono text-[11px] uppercase tracking-widest text-text-secondary">{label}</dt>
+      <dt className={`font-mono text-[11px] uppercase tracking-widest text-text-secondary ${alignMobileLabel ? "min-h-[33px] sm:min-h-0" : ""}`}>{label}</dt>
       <dd className="mt-2 break-words text-sm font-medium text-text-primary">{children}</dd>
     </div>
   );
@@ -290,8 +293,13 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
                 <p role="status" aria-live="polite" className={copyStatus ? "w-full text-right text-xs leading-5 text-text-secondary" : "sr-only"}>{copyStatus}</p>
               </div>
               <dl className="mt-2 grid grid-cols-2 gap-x-5 gap-y-6 sm:-mt-1">
-                <Fact label="Built">{project.year || "None"}</Fact>
-                <Fact label="Latest update">{project.latestUpdate || "None"}</Fact>
+                {project.stage === "completed" ? <>
+                  <Fact label="Built">{project.year || "None"}</Fact>
+                  <Fact label="Latest update">{project.latestUpdate || "None"}</Fact>
+                </> : <>
+                  <Fact label="Stage" alignMobileLabel>{projectStageLabels[project.stage]}</Fact>
+                  <Fact label="Expected completion" alignMobileLabel>{project.expectedCompletion || "None"}</Fact>
+                </>}
                 <Fact label="Visit">{project.live_url ? <a href={project.live_url} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1.5 rounded-sm text-blue-600 underline underline-offset-4 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 ${focusStyle}`}>{project.isPreview ? "Example live link" : "Live project"} <ExternalLink className="size-3.5" aria-hidden /><span className="sr-only">opens in a new tab</span></a> : <span className="text-text-secondary">None</span>}</Fact>
                 <Fact label="Source">{sourceUrl ? <a href={sourceUrl} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1.5 rounded-sm text-blue-600 underline underline-offset-4 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 ${focusStyle}`}>{project.sourceNote || (project.isPreview ? "Example source link" : "View source")} <ExternalLink className="size-3.5" aria-hidden /><span className="sr-only">opens in a new tab</span></a> : <span className="text-text-secondary">{project.sourceNote || "None"}</span>}</Fact>
               </dl>

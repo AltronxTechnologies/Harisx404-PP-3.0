@@ -23,8 +23,8 @@ test("published project cards resolve to authored detail pages", async () => {
     assert.ok(html.includes("Share project"), `${slug} should render sharing`);
     assert.ok(html.includes("At a glance"), `${slug} should render its facts`);
     assert.doesNotMatch(html, /Preview-only case study\.|Case study \/ /, slug);
-    const facts = [...html.matchAll(/<dt[^>]*>(Built|Stage|Visit|Latest update|Source|Type)<\/dt>/g)].map((match) => match[1]);
-    assert.deepEqual(facts, ["Built", "Latest update", "Visit", "Source"], slug);
+    const facts = [...html.matchAll(/<dt[^>]*>(Built|Stage|Expected completion|Visit|Latest update|Source|Type)<\/dt>/g)].map((match) => match[1]);
+    assert.deepEqual(facts, facts[0] === "Stage" ? ["Stage", "Expected completion", "Visit", "Source"] : ["Built", "Latest update", "Visit", "Source"], slug);
     assert.doesNotMatch(html, /Category &amp; tags|<dt[^>]*>Category<\/dt>|<dt[^>]*>Tags<\/dt>/, slug);
     assert.match(html, />Tech stack<\/h2>/, slug);
     assert.match(html, />Tags<\/h2>/, slug);
@@ -206,7 +206,7 @@ test("project tags, timeline, source name and optional sections remain owner-man
   assert.match(migration, /live_note text/);
   assert.match(migration, /source_note text/);
   assert.match(api, /category: z\.string\(\)\.trim\(\)\.min\(1\)\.max\(60\)/);
-  assert.doesNotMatch(api, /project_stage/);
+  assert.match(api, /project_stage: data\.project_stage/);
   assert.match(api, /tagline: z\.string\(\)\.max\(160\)/);
   assert.match(api, /latest_update_label: data\.latest_update_label/);
   assert.doesNotMatch(api, /live_note: data\.live_note/);
@@ -215,7 +215,7 @@ test("project tags, timeline, source name and optional sections remain owner-man
   assert.match(api, /2026_project_case_studies\.sql before changes can be saved/);
   assert.match(api, /case_study_sections: data\.case_study_sections/);
   assert.match(form, /register\("latest_update_label"\)/);
-  assert.doesNotMatch(form, /register\("project_stage"\)/);
+  assert.match(form, /register\("project_stage"\)/);
   assert.doesNotMatch(form, /register\("live_note"\)/);
   assert.match(form, /register\("source_note"\)/);
   assert.match(form, /name=\{`case_study_sections\.\$\{key\}`\}/);
@@ -228,7 +228,8 @@ test("project tags, timeline, source name and optional sections remain owner-man
   assert.match(editor, /markdown\.getMarkdown\(\)/);
   assert.match(detail, /\[&>\*\]:max-w-\[68ch\]/);
   assert.match(page, /item\.tags\.filter/);
-  assert.doesNotMatch(detail, /<Fact label="Stage">|<Fact label="Type">/);
+  assert.match(detail, /<Fact label="Stage" alignMobileLabel>\{projectStageLabels\[project\.stage\]\}<\/Fact>/);
+  assert.doesNotMatch(detail, /<Fact label="Type">/);
   assert.doesNotMatch(detail, /<Fact label="Category">|Category &amp; tags/);
   assert.match(detail, /<h2 className="font-mono text-xs font-semibold uppercase tracking-widest text-text-secondary">Tags<\/h2>/);
   assert.match(detail, /<h2 className="font-mono text-xs font-semibold uppercase tracking-widest text-text-secondary">Tech stack<\/h2>/);
@@ -283,6 +284,30 @@ test("related projects are selected in Admin and only published choices render i
   assert.match(detail, /related\.map\(\(item, index\) => <Link/);
 });
 
+test("development stage chooses between completed and in-progress project facts", async () => {
+  const [migration, stages, form, api, page, detail] = await Promise.all([
+    readFile(new URL("../migrations/2026_project_development_stage.sql", import.meta.url), "utf8"),
+    readFile(new URL("../app/lib/project-stage.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/admin/ProjectForm.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/admin/projects/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/projects/[slug]/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/projects/[slug]/ProjectDetail.tsx", import.meta.url), "utf8"),
+  ]);
+  assert.match(migration, /project_stage text NOT NULL DEFAULT 'completed'/);
+  assert.match(migration, /expected_completion_label text/);
+  for (const stage of ["planning", "initializing", "in_progress", "testing", "on_hold", "completed"]) {
+    assert.ok(stages.includes(`"${stage}"`), `${stage} must be selectable`);
+  }
+  assert.match(form, /project_stage: initialData\?\.project_stage \?\? "completed"/);
+  assert.match(form, /completed = watch\("project_stage"\) === "completed"/);
+  assert.match(form, /register\("expected_completion_label"\)/);
+  assert.match(api, /project_stage: z\.enum\(projectStages\)\.optional\(\)\.default\("completed"\)/);
+  assert.match(api, /expected_completion_label: data\.expected_completion_label \|\| null/);
+  assert.match(page, /stage: projectStages\.find\(\(stage\) => stage === p\.project_stage\) \?\? "completed"/);
+  assert.match(detail, /project\.stage === "completed" \? <>/);
+  assert.match(detail, /<Fact label="Expected completion" alignMobileLabel>\{project\.expectedCompletion \|\| "None"\}<\/Fact>/);
+});
+
 test("Alloy preview gives every published project a distinct, complete example without changing structured data", {
   skip: process.env.PROJECTS_EXPECT_PREVIEW !== "1",
 }, async () => {
@@ -310,8 +335,14 @@ test("Alloy preview gives every published project a distinct, complete example w
     }
     assert.doesNotMatch(html, />Gallery<\/h2>/, slug);
     assert.match(html, /aria-label="[^"]+ images"/, `${slug} needs the image carousel`);
-    assert.ok(html.includes("Latest update"), slug);
-    assert.doesNotMatch(html, /<dt[^>]*>Stage<\/dt>/, slug);
+    if (slug === "demo-vaultaudit-scanner") {
+      assert.match(html, /<dt[^>]*>Stage<\/dt><dd[^>]*>Planning<\/dd>/, slug);
+      assert.match(html, /<dt[^>]*>Expected completion<\/dt><dd[^>]*>Q2 2027<\/dd>/, slug);
+      assert.doesNotMatch(html, /<dt[^>]*>Built<\/dt>|<dt[^>]*>Latest update<\/dt>/, slug);
+    } else {
+      assert.ok(html.includes("Latest update"), slug);
+      assert.doesNotMatch(html, /<dt[^>]*>Stage<\/dt>/, slug);
+    }
     assert.ok(html.includes("preview stock image, not a project screenshot"), slug);
     assert.match(html, /aria-label="Image 1 of [2-9][0-9]*"/, `${slug} needs a cover followed by preview images`);
     const tagHtml = html.match(/<h2[^>]*>Tags<\/h2><ul[^>]*>(.*?)<\/ul>/s)?.[1] || "";
