@@ -160,6 +160,9 @@ test("project gallery and narrative are sourced from Admin-authored data", async
   assert.match(detail, /grid gap-3 text-\[15px\] md:grid-cols-2/);
   assert.doesNotMatch(detail, /<ol className="[^"]*lg:grid-cols-1/);
   assert.match(detail, /aspect-\[16\/9\] overflow-hidden rounded-xl/);
+  assert.match(detail, /title=\{item\.title\} className="block max-w-full truncate/);
+  assert.match(detail, /item\.tagline && <span className="mt-3 line-clamp-2/);
+  assert.doesNotMatch(detail, /<span className="font-mono text-\[11px\] uppercase tracking-widest text-text-secondary">\{item\.category\}<\/span>/);
   assert.match(detail, /View case study <ArrowUpRight/);
   assert.match(detail, /<article className="mt-14">/);
   assert.match(detail, /aria-labelledby="project-facts-heading" className="mx-auto mt-14 max-w-6xl px-2 sm:px-4"/);

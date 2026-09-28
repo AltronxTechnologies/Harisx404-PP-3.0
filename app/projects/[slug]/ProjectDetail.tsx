@@ -347,8 +347,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
                 <span className="absolute left-3 top-3 rounded-md bg-bg-primary/90 px-2.5 py-1.5 font-mono text-[11px] text-text-primary backdrop-blur-sm">{String(index + 1).padStart(2, "0")}</span>
               </span>
               <span className="flex flex-1 flex-col px-3 pb-3 pt-5 sm:px-4 sm:pb-4">
-                <span className="font-mono text-[11px] uppercase tracking-widest text-text-secondary">{item.category}</span>
-                <span className="mt-2 break-words [font-family:var(--font-instrument-serif),serif] text-[30px] leading-tight text-text-primary sm:text-[34px]">{item.title}</span>
+                <span title={item.title} className="block max-w-full truncate [font-family:var(--font-instrument-serif),serif] text-[30px] leading-tight text-text-primary sm:text-[34px]">{item.title}</span>
                 {item.tagline && <span className="mt-3 line-clamp-2 text-sm leading-6 text-text-secondary">{item.tagline}</span>}
                 <span aria-hidden className="min-h-6 flex-1" />
                 <span className="flex items-center justify-between gap-4 border-t border-border-primary pt-4 font-mono text-[11px] uppercase tracking-widest text-text-primary">
