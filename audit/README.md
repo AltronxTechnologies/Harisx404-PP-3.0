@@ -46,8 +46,11 @@ design are proprietary: cloning or replicating the site in its entirety is
 prohibited; studying specific UI components for education/inspiration is
 permitted; and substantial usage requires a visible dofollow backlink to the
 site. Consequences for this project:
-1. A visible credit + backlink to the reference is maintained in `/legal/terms`
-   after the dedicated `/attribution` route was retired by the owner on 2026-09-22.
+1. The owner removed the visible credit + backlink from `/legal/terms` on
+   2026-09-28, after the dedicated `/attribution` route was retired on 2026-09-22.
+   This owner decision does not waive the reference site's documented license
+   condition; permission or an independent design/asset review is still needed
+   before claiming the current site can omit attribution.
 2. Further "pixel-identical whole-site" refinement passes are STOPPED.
    The site keeps its current inspiration-informed state; future design work
    should deliberately differentiate rather than converge further.

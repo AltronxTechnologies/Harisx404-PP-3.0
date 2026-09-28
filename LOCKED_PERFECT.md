@@ -2437,3 +2437,13 @@ widths, text, actions, spacing, shared surfaces, and the existing reference-site
 backlink remain unchanged. The backlink is still required by the documented
 license constraint in `audit/README.md`; remove it only after permission or a
 design/asset review establishes that the requirement no longer applies.
+
+### 2026-09-28 owner-authorized Terms credit removal
+
+After the reference-site backlink condition was explained, the owner expressly
+requested removal of the named Aayush Bharti credit and link from `/legal/terms`.
+The Rights section retains only its general statement about third-party
+materials and visitor contributions; its other copy, structure, and locked
+presentation remain unchanged. The documented license condition is not waived
+by this code change. Permission or an independent design/asset review remains
+necessary before asserting the omission is cleared for production.

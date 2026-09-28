@@ -152,12 +152,8 @@ export default function TermsOfUsePage() {
               </div>
             </div>
             <p className="text-sm leading-relaxed text-text-secondary">
-              Selected interface patterns reference work by{" "}
-              <a href="https://aayushbharti.in" target="_blank" rel="noopener noreferrer" className="rounded-sm font-medium text-text-primary underline decoration-dotted underline-offset-4 hover:text-text-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary">
-                Aayush Bharti
-              </a>
-              . Other third-party materials and visitor contributions remain with
-              their respective owners.
+              Third-party materials and visitor contributions remain with their
+              respective owners.
             </p>
           </div>
         </section>

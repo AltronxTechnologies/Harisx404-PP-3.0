@@ -91,3 +91,12 @@ The new titles, card and service copy, and credit treatment are covered by the
 legal integration tests. The amendment changes no shared locked components and
 preserves the established responsive/theme visual system. It supersedes the
 older title and provider-specific wording above.
+
+## Owner-Authorized Credit Removal
+
+On 2026-09-28, after being told about the reference site's documented backlink
+condition, the owner explicitly requested removal of the visible Aayush Bharti
+link from Terms. The named credit is no longer on the public legal page; the
+general third-party-rights notice remains. This supersedes the link-preserved
+status above, not the underlying license concern in `audit/README.md`. Rights
+clearance or a review of reference-derived design and assets remains open.

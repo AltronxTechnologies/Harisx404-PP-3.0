@@ -41,13 +41,12 @@ for (const [route, sourcePath, title] of [
   });
 }
 
-test("Terms omits the design-inspiration card while retaining the required credit", async () => {
+test("Terms does not show the retired design-inspiration credit", async () => {
   const response = await fetch(`${baseUrl}/legal/terms`);
   const html = await response.text();
   assert.doesNotMatch(html, /id="design-inspiration"|>Design inspiration</);
-  assert.match(html, /href="https:\/\/aayushbharti\.in"/);
-  assert.match(html, /rel="noopener noreferrer"/);
-  assert.match(html, /Aayush Bharti/);
+  assert.doesNotMatch(html, /href="https:\/\/aayushbharti\.in"|Aayush Bharti/);
+  assert.match(html, /Third-party materials and visitor contributions remain with their/);
 });
 
 test("Privacy describes the implemented visitor data flows without absolute tracking claims", async () => {
