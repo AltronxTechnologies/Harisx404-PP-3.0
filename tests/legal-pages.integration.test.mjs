@@ -24,6 +24,8 @@ for (const [route, sourcePath, title] of [
     assert.match(html, /From concept to creation/);
     assert.match(source, /<GridWrapper>/);
     assert.match(source, /<PaperHeroTexture/);
+    assert.match(source, /<h2 className="mt-1 font-display text-2xl font-medium leading-snug/);
+    assert.match(source, /<p className="font-display text-2xl font-medium leading-snug text-text-secondary/);
     assert.match(source, /relative hidden border-x border-dashed border-border-primary lg:col-span-1 lg:block/);
     assert.match(source, /-top-10 h-10 border-x border-dashed border-border-primary/);
     assert.match(source, /-bottom-10 -left-px -right-px h-10 border-x/);

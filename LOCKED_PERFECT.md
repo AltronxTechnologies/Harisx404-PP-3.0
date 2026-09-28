@@ -2478,3 +2478,12 @@ comments describing live Home headings as reference-site copies were corrected
 without changing code or presentation. This records the owner's design claim;
 it is not a blanket claim of ownership over third-party fonts, libraries, media,
 or visitor submissions.
+
+### 2026-09-28 owner-authorized legal heading-weight correction
+
+The owner reported that Privacy and Terms section typography looked heavier
+after the independent font-source change. Their local `SectionHeader` title
+and subtitle now use weight 500 rather than a synthesized weight 700. The
+Instrument Serif family, 24/30px sizes, line heights, colors, hero, cards, and
+shared components are unchanged. A browser probe measured identical heading
+boxes before and after the local weight correction.

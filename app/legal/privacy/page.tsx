@@ -42,10 +42,10 @@ function SectionHeader({ index, title, subtitle }: { index: string; title: strin
   return (
     <div className="p-4 lg:sticky lg:top-32 lg:col-span-3 lg:self-start lg:p-6">
       <p className="font-mono text-xs font-bold text-text-secondary">{index}</p>
-      <h2 className="mt-1 font-display text-2xl font-bold leading-snug text-neutral-900 dark:text-neutral-100 md:text-3xl">
+      <h2 className="mt-1 font-display text-2xl font-medium leading-snug text-neutral-900 dark:text-neutral-100 md:text-3xl">
         {title}
       </h2>
-      <p className="font-display text-2xl font-bold leading-snug text-text-secondary md:text-3xl">
+      <p className="font-display text-2xl font-medium leading-snug text-text-secondary md:text-3xl">
         {subtitle}
       </p>
     </div>
