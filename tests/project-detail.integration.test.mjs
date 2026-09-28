@@ -159,7 +159,8 @@ test("project gallery and narrative are sourced from Admin-authored data", async
   assert.match(detail, /grid gap-3 text-\[15px\]/);
   assert.match(detail, /grid gap-3 text-\[15px\] md:grid-cols-2/);
   assert.doesNotMatch(detail, /<ol className="[^"]*lg:grid-cols-1/);
-  assert.match(detail, /gap-4 font-display text-\[28px\]/);
+  assert.match(detail, /aspect-\[16\/9\] overflow-hidden rounded-xl/);
+  assert.match(detail, /View case study <ArrowUpRight/);
   assert.match(detail, /<article className="mt-14">/);
   assert.match(detail, /aria-labelledby="project-facts-heading" className="mx-auto mt-14 max-w-6xl px-2 sm:px-4"/);
   assert.match(detail, /<div className="rounded-3xl border border-border-primary bg-white dark:bg-white\/\[0\.02\]">/);
@@ -249,6 +250,32 @@ test("project tags, timeline, source name and optional sections remain owner-man
   }
   assert.doesNotMatch(detail, /Copy as Markdown|Share by email/);
   assert.match(page, /fetchProjects\(\)\.catch\(\(\) => \[\]\)/);
+});
+
+test("related projects are selected in Admin and only published choices render in order", async () => {
+  const [migration, form, api, edit, create, page, detail] = await Promise.all([
+    readFile(new URL("../migrations/2026_project_related_selections.sql", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/admin/ProjectForm.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/admin/projects/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/admin/(dashboard)/projects/[id]/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/admin/(dashboard)/projects/new/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/projects/[slug]/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/projects/[slug]/ProjectDetail.tsx", import.meta.url), "utf8"),
+  ]);
+  assert.match(migration, /related_project_ids uuid\[\] NOT NULL DEFAULT/);
+  assert.match(migration, /cardinality\(related_project_ids\) <= 2/);
+  assert.match(form, /related_project_ids: initialData\?\.related_project_ids \?\? \[\]/);
+  assert.match(form, /relatedOptions = availableProjects\.filter\(\(item\) => item\.id !== initialData\?\.id/);
+  assert.match(form, /!selected && \(item\.status !== "published" \|\| selectedRelatedIds\.length >= 2\)/);
+  assert.match(form, /Selected \{selectedRelatedIds\.length\} \/ 2/);
+  assert.match(api, /related_project_ids: data\.related_project_ids/);
+  assert.match(api, /validateRelatedProjects\(db, data\.related_project_ids, id\)/);
+  assert.match(api, /referringProjectSlugs\(db, id\)/);
+  assert.match(api, /\.eq\("status", "published"\)/);
+  assert.match(edit, /availableProjects=\{availableProjects \?\? \[\]\}/);
+  assert.match(create, /availableProjects=\{availableProjects \?\? \[\]\}/);
+  assert.match(page, /project\.relatedProjectIds\.map\(\(id\) => list\.find/);
+  assert.match(detail, /related\.map\(\(item, index\) => <Link/);
 });
 
 test("Alloy preview gives every published project a distinct, complete example without changing structured data", {

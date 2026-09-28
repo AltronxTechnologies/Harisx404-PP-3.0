@@ -5,11 +5,13 @@ import { notFound } from "next/navigation";
 export default async function EditProjectPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createSupabaseAdminClient();
-  const { data: project, error } = await supabase
-    .from("projects")
-    .select("*, project_tags ( tags ( name ) ), project_images ( media_id, caption, display_order, media ( secure_url, url, alt_text ) )")
-    .eq("id", id)
-    .single();
+  const [{ data: project, error }, { data: availableProjects }] = await Promise.all([
+    supabase.from("projects")
+      .select("*, project_tags ( tags ( name ) ), project_images ( media_id, caption, display_order, media ( secure_url, url, alt_text ) )")
+      .eq("id", id)
+      .single(),
+    supabase.from("projects").select("id, title, slug, status").order("title"),
+  ]);
 
   if (error || !project) {
     notFound();
@@ -39,7 +41,7 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
       </div>
       
       <div className="rounded-xl border border-border-hairline bg-surface-raised p-6 shadow-sm">
-        <ProjectForm initialData={{ ...projectFields, tags, galleryImages }} />
+        <ProjectForm initialData={{ ...projectFields, tags, galleryImages }} availableProjects={availableProjects ?? []} />
       </div>
     </div>
   );

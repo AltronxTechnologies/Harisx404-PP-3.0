@@ -27,16 +27,19 @@ export type DetailProject = {
   live_url: string;
   github_url: string;
   sourceNote: string;
+  relatedProjectIds: string[];
   features: string[];
   tags: string[];
   gallery: Array<{ src: string; caption: string; alt: string }>;
 };
 
 export type NeighborProject = {
+  id: string;
   title: string;
   slug: string;
   category: string;
   tagline?: string;
+  image_url: string;
   tags: string[];
   tech: string[];
 };
@@ -334,10 +337,24 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
             <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">projects</span>
           </SectionHeading>
           <div className="mt-14 grid gap-4 sm:grid-cols-2">
-            {related.map((item) => <Link key={item.slug} href={`/projects/${item.slug}`} className={`group flex min-w-0 flex-col rounded-2xl border border-border-primary bg-white p-6 transition-colors hover:border-neutral-400/70 dark:bg-white/[0.02] dark:hover:border-white/25 ${focusStyle}`}>
-              <span className="font-mono text-[11px] uppercase tracking-widest text-text-secondary">{item.category}</span>
-              <span className="mt-4 flex items-start justify-between gap-4 font-display text-[28px] leading-tight text-text-primary"><span className="min-w-0 break-words">{item.title}</span><ArrowUpRight aria-hidden className="mt-1 size-5 shrink-0" /></span>
-              {item.tagline && <span className="mt-3 line-clamp-2 text-sm leading-6 text-text-secondary">{item.tagline}</span>}
+            {related.map((item, index) => <Link key={item.slug} href={`/projects/${item.slug}`} className={`group flex min-w-0 flex-col rounded-2xl border border-border-primary bg-white p-2 transition-colors hover:border-neutral-400/70 dark:bg-white/[0.02] dark:hover:border-white/25 ${focusStyle}`}>
+              <span className="relative block aspect-[16/9] overflow-hidden rounded-xl bg-neutral-100 dark:bg-white/[0.04]">
+                {item.image_url && <>
+                  {/* Remote project covers can come from owner-entered hosts outside Next's image allowlist. */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={item.image_url} alt="" loading="lazy" className="h-full w-full object-cover" />
+                </>}
+                <span className="absolute left-3 top-3 rounded-md bg-bg-primary/90 px-2.5 py-1.5 font-mono text-[11px] text-text-primary backdrop-blur-sm">{String(index + 1).padStart(2, "0")}</span>
+              </span>
+              <span className="flex flex-1 flex-col px-3 pb-3 pt-5 sm:px-4 sm:pb-4">
+                <span className="font-mono text-[11px] uppercase tracking-widest text-text-secondary">{item.category}</span>
+                <span className="mt-2 break-words [font-family:var(--font-instrument-serif),serif] text-[30px] leading-tight text-text-primary sm:text-[34px]">{item.title}</span>
+                {item.tagline && <span className="mt-3 line-clamp-2 text-sm leading-6 text-text-secondary">{item.tagline}</span>}
+                <span aria-hidden className="min-h-6 flex-1" />
+                <span className="flex items-center justify-between gap-4 border-t border-border-primary pt-4 font-mono text-[11px] uppercase tracking-widest text-text-primary">
+                  View case study <ArrowUpRight aria-hidden className="size-5 shrink-0" />
+                </span>
+              </span>
             </Link>)}
           </div>
         </section>

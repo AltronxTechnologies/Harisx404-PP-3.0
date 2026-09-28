@@ -37,6 +37,7 @@ const projectFieldsSchema = z.object({
   tech_stack: z.array(z.string().trim().min(1).max(100)).optional().default([]),
   features: z.array(z.string().trim().min(1).max(500)).max(100).optional().default([]),
   tags: z.array(z.string().trim().min(1).max(100)).optional().default([]),
+  related_project_ids: z.array(idSchema).max(2).refine((ids) => new Set(ids).size === ids.length, "Choose two different projects").optional().default([]),
   gallery: z.array(z.object({ mediaId: idSchema, caption: z.string().max(200).refine((value) => captionWordCount(value) <= 30, "Use 30 words or fewer") }).strict()).optional().default([]),
 }).strict();
 const uniqueGallery = (data: z.infer<typeof projectFieldsSchema>) => new Set(data.gallery.map((image) => image.mediaId)).size === data.gallery.length;
@@ -78,6 +79,15 @@ function revalidateProjectPaths(...slugs: Array<string | null | undefined>) {
   }
 }
 
+async function referringProjectSlugs(db: Awaited<ReturnType<typeof createSupabaseAdminClient>>, id: string) {
+  const { data, error } = await db.from("projects").select("slug").contains("related_project_ids", [id]);
+  if (error) {
+    console.error("Could not revalidate related project pages:", error);
+    return [];
+  }
+  return data?.map((project) => project.slug) ?? [];
+}
+
 function projectFields(data: z.infer<typeof projectSchema>) {
   return {
     title: data.title,
@@ -100,7 +110,16 @@ function projectFields(data: z.infer<typeof projectSchema>) {
     case_study_sections: data.case_study_sections,
     tech_stack: data.tech_stack,
     features: data.features,
+    related_project_ids: data.related_project_ids,
   };
+}
+
+async function validateRelatedProjects(db: Awaited<ReturnType<typeof createSupabaseAdminClient>>, ids: string[], currentId?: string) {
+  if (currentId && ids.includes(currentId)) return "A project cannot link to itself";
+  if (!ids.length) return null;
+  const { data, error } = await db.from("projects").select("id").in("id", ids).eq("status", "published");
+  if (error) throw error;
+  return data?.length === ids.length ? null : "Choose only published projects that still exist";
 }
 
 async function validateGalleryMedia(db: Awaited<ReturnType<typeof createSupabaseAdminClient>>, gallery: z.infer<typeof projectSchema>["gallery"]) {
@@ -135,6 +154,9 @@ function fail(error: unknown) {
 }
 
 function projectWriteError(error: { message: string; code?: string }) {
+  if (["42703", "PGRST204"].includes(error.code || "") && /related_project_ids/.test(error.message)) {
+    return NextResponse.json({ error: "Apply migration 2026_project_related_selections.sql before saving related projects." }, { status: 503 });
+  }
   if (["42703", "PGRST204"].includes(error.code || "") && /latest_update_label|case_study_sections|live_note|source_note/.test(error.message)) {
     return NextResponse.json({ error: "Project editor needs migration 2026_project_case_studies.sql before changes can be saved." }, { status: 503 });
   }
@@ -150,6 +172,8 @@ export async function POST(request: Request) {
 
     const data = parsed.data;
     const db = await createSupabaseAdminClient();
+    const relatedError = await validateRelatedProjects(db, data.related_project_ids);
+    if (relatedError) return NextResponse.json({ error: relatedError }, { status: 400 });
     await validateGalleryMedia(db, data.gallery);
     const { data: project, error } = await db.from("projects").insert(projectFields(data)).select().single();
     if (error) return projectWriteError(error);
@@ -175,6 +199,8 @@ export async function PUT(request: Request) {
 
     const { id, ...data } = parsed.data;
     const db = await createSupabaseAdminClient();
+    const relatedError = await validateRelatedProjects(db, data.related_project_ids, id);
+    if (relatedError) return NextResponse.json({ error: relatedError }, { status: 400 });
     await validateGalleryMedia(db, data.gallery);
     const { data: previous, error: lookupError } = await db.from("projects").select("slug").eq("id", id).maybeSingle();
     if (lookupError) throw lookupError;
@@ -190,7 +216,7 @@ export async function PUT(request: Request) {
       await saveGallery(db, id, data.gallery);
       await syncTags({ joinTable: "project_tags", entityColumn: "project_id", entityId: id, tags: data.tags });
     } finally {
-      revalidateProjectPaths(previous.slug, project.slug);
+      revalidateProjectPaths(previous.slug, project.slug, ...await referringProjectSlugs(db, id));
     }
     return NextResponse.json(project);
   } catch (error) {
@@ -209,7 +235,7 @@ export async function DELETE(request: Request) {
     const { data: project, error } = await db.from("projects").delete().eq("id", id!).select("slug").maybeSingle();
     if (error) return NextResponse.json({ error: error.message }, { status: 400 });
     if (!project) return NextResponse.json({ error: "Project not found" }, { status: 404 });
-    revalidateProjectPaths(project.slug);
+    revalidateProjectPaths(project.slug, ...await referringProjectSlugs(db, id!));
     return NextResponse.json({ success: true });
   } catch (error) {
     return fail(error);

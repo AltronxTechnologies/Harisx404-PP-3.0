@@ -79,11 +79,18 @@ CREATE TABLE projects (
   github_url TEXT,
   status TEXT DEFAULT 'draft' CHECK (status IN ('published', 'draft', 'archived')),
   featured BOOLEAN DEFAULT FALSE,
+  related_project_ids UUID[] NOT NULL DEFAULT '{}'::uuid[],
   display_order INTEGER DEFAULT 0,     -- Manual sort order
   start_date DATE,
   end_date DATE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  CONSTRAINT projects_related_project_ids_valid CHECK (
+    cardinality(related_project_ids) <= 2
+    AND array_position(related_project_ids, NULL) IS NULL
+    AND NOT (id = ANY(related_project_ids))
+    AND (cardinality(related_project_ids) < 2 OR related_project_ids[1] <> related_project_ids[2])
+  )
 );
 
 -- Project gallery images (multiple images per project)

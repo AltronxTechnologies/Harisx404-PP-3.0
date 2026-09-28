@@ -44,6 +44,7 @@ function mapDbProject(p: any): DetailProject {
     live_url: (p as any).live_url ?? "",
     github_url: (p as any).github_url ?? "",
     sourceNote: p.source_note || "",
+    relatedProjectIds: Array.isArray(p.related_project_ids) ? p.related_project_ids : [],
     features: Array.isArray(p.features) ? p.features.filter(Boolean) : [],
     tags: Array.isArray((p as any).tags) ? (p as any).tags : [],
     /* Ordered project images after the cover; the carousel skips a duplicate cover. */
@@ -64,10 +65,12 @@ async function resolveProject(slug: string): Promise<{
       (raw: any) => {
         const p = withProjectPreview(raw);
         return {
+          id: p.id,
           title: p.title,
           slug: p.slug,
           category: p.category || "Project",
           tagline: (p.tagline || p.short_description || p.description || "").slice(0, 160),
+          image_url: p.cover_image_url || "",
           tags: Array.isArray(p.tags) ? p.tags : [],
           tech: Array.isArray(p.tech_stack) ? p.tech_stack : [],
         };
@@ -97,6 +100,7 @@ async function resolveProject(slug: string): Promise<{
       live_url: "",
       github_url: "",
       sourceNote: "",
+      relatedProjectIds: [],
       features: fb.features || [],
       tags: (fb as any).tags ?? [],
       gallery: [],
@@ -105,10 +109,12 @@ async function resolveProject(slug: string): Promise<{
     project: fallbackProject,
     canonicalProject: fallbackProject,
     list: fallbackProjects.map((p) => ({
+      id: p.slug,
       title: p.title,
       slug: p.slug,
       category: p.category,
       tagline: p.tagline,
+      image_url: p.image_url,
       tags: p.tags || [],
       tech: p.tech,
     })),
@@ -124,7 +130,7 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
   const tokens = (values: string[]) => new Set(values.map((value) => value.toLowerCase().trim()));
   const tags = tokens(project.tags);
   const tech = tokens(project.tech);
-  const related = list.filter((item) => item.slug !== project.slug).map((item) => {
+  const previewMatches = list.filter((item) => item.slug !== project.slug).map((item) => {
     const sharedTags = item.tags.filter((tag) => tags.has(tag.toLowerCase().trim())).length;
     const sharedTech = item.tech.filter((name) => tech.has(name.toLowerCase().trim())).length;
     const sameSpecificType = item.category.toLowerCase() === project.category.toLowerCase()
@@ -133,6 +139,9 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
   }).filter(({ score }) => score > 0)
     .sort((a, b) => b.score - a.score || a.item.slug.localeCompare(b.item.slug))
     .slice(0, 2).map(({ item }) => item);
+  const related = project.isPreview && project.relatedProjectIds.length === 0
+    ? previewMatches
+    : project.relatedProjectIds.map((id) => list.find((item) => item.id === id && item.slug !== project.slug)).filter((item): item is NeighborProject => Boolean(item));
 
   return (
     <>

@@ -1,6 +1,9 @@
 import { ProjectForm } from "@/app/components/admin/ProjectForm";
+import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 
-export default function NewProjectPage() {
+export default async function NewProjectPage() {
+  const db = await createSupabaseAdminClient();
+  const { data: availableProjects } = await db.from("projects").select("id, title, slug, status").order("title");
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -9,7 +12,7 @@ export default function NewProjectPage() {
       </div>
       
       <div className="rounded-xl border border-border-hairline bg-surface-raised p-6 shadow-sm">
-        <ProjectForm />
+        <ProjectForm availableProjects={availableProjects ?? []} />
       </div>
     </div>
   );

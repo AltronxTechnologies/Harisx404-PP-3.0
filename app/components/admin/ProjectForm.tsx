@@ -42,6 +42,7 @@ const projectSchema = z.object({
   tech_stack: z.string().optional().or(z.literal("")),
   tags: z.string().optional().or(z.literal("")),
   features: z.string().optional().or(z.literal("")),
+  related_project_ids: z.array(z.string().uuid()).max(2, "Choose no more than two projects").refine((ids) => new Set(ids).size === ids.length, "Choose two different projects"),
   content: z.string().optional(),
   status: z.enum(["draft", "published", "archived"]),
   cover_image_url: z.string().url("At least one image is required; choose a cover").refine((url) => /^https?:\/\//i.test(url), "Use an HTTP or HTTPS image URL"),
@@ -56,11 +57,13 @@ const projectSchema = z.object({
 type ProjectFormValues = z.infer<typeof projectSchema>;
 
 interface ProjectFormProps {
-  initialData?: Partial<Omit<ProjectFormValues, "tech_stack" | "features" | "tags">> & {
+  availableProjects: Array<{ id: string; title: string; slug: string; status: string }>;
+  initialData?: Partial<Omit<ProjectFormValues, "tech_stack" | "features" | "tags" | "related_project_ids">> & {
     id?: string;
     tech_stack?: string[] | string | null;
     features?: string[] | string | null;
     tags?: string[] | string | null;
+    related_project_ids?: string[] | null;
     galleryImages?: GalleryImage[];
     latest_update_label?: string | null;
     source_note?: string | null;
@@ -68,7 +71,7 @@ interface ProjectFormProps {
   };
 }
 
-export function ProjectForm({ initialData }: ProjectFormProps) {
+export function ProjectForm({ initialData, availableProjects }: ProjectFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -78,6 +81,7 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
   const [mediaPickerTab, setMediaPickerTab] = useState<"library" | "upload">("library");
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>(initialData?.galleryImages ?? []);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [relatedSearch, setRelatedSearch] = useState("");
 
   const {
     register,
@@ -108,6 +112,7 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
       features: Array.isArray(initialData?.features)
         ? initialData.features.join("\n")
         : initialData?.features ?? "",
+      related_project_ids: initialData?.related_project_ids ?? [],
       content: initialData?.content ?? "",
       status: (initialData?.status as ProjectFormValues["status"]) ?? "draft",
       cover_image_url: initialData?.cover_image_url ?? "",
@@ -120,6 +125,8 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
     },
   });
   const coverUrl = watch("cover_image_url") || "";
+  const selectedRelatedIds = watch("related_project_ids") || [];
+  const relatedOptions = availableProjects.filter((item) => item.id !== initialData?.id && `${item.title} ${item.slug}`.toLowerCase().includes(relatedSearch.trim().toLowerCase()));
   const coverCaption = watch("case_study_sections.cover_caption") || "";
   const coverField = register("cover_image_url");
 
@@ -321,6 +328,36 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
           placeholder={"Realtime dashboard with live charts\nRole-based access control"}
         />
       </div>
+
+      <fieldset className="space-y-3 rounded-xl border border-border-hairline p-4">
+        <legend className="px-1 text-sm font-medium">Related projects</legend>
+        <p className="text-xs text-ink-secondary">Choose up to two published projects to show below this case study. They appear in the order selected. Leave empty to hide the section.</p>
+        <p className="text-xs font-medium text-ink-secondary">Selected {selectedRelatedIds.length} / 2</p>
+        {selectedRelatedIds.length > 0 && <ol className="space-y-1">
+          {selectedRelatedIds.map((id, index) => {
+            const chosen = availableProjects.find((item) => item.id === id);
+            return <li key={id} className="flex items-center justify-between gap-3 rounded-lg bg-surface-base px-3 py-2 text-sm text-ink-primary">
+              <span className="min-w-0 break-words">{index + 1}. {chosen?.title || "Project no longer available"}</span>
+              <button type="button" onClick={() => setValue("related_project_ids", selectedRelatedIds.filter((value) => value !== id), { shouldDirty: true, shouldValidate: true })} className="shrink-0 text-xs text-ink-secondary underline underline-offset-2 hover:text-ink-primary">Remove</button>
+            </li>;
+          })}
+        </ol>}
+        <label htmlFor="related-project-search" className="sr-only">Search projects for related links</label>
+        <input id="related-project-search" type="search" value={relatedSearch} onChange={(event) => setRelatedSearch(event.target.value)} placeholder="Search all projects..." className="w-full rounded-lg border border-border-hairline bg-surface-base px-3 py-2 text-sm text-ink-primary focus:outline-none focus:ring-2 focus:ring-accent-signal" />
+        <div className="max-h-56 space-y-1 overflow-y-auto">
+          {relatedOptions.map((item) => {
+            const selected = selectedRelatedIds.includes(item.id);
+            const disabled = !selected && (item.status !== "published" || selectedRelatedIds.length >= 2);
+            return <label key={item.id} className={`flex items-center gap-3 rounded-lg border border-border-hairline px-3 py-2 text-sm ${disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-surface-base"}`}>
+              <input type="checkbox" checked={selected} disabled={disabled} onChange={() => setValue("related_project_ids", selected ? selectedRelatedIds.filter((id) => id !== item.id) : [...selectedRelatedIds, item.id], { shouldDirty: true, shouldValidate: true })} className="size-4 shrink-0 rounded border-border-hairline text-accent-signal focus:ring-accent-signal" />
+              <span className="min-w-0 flex-1 break-words text-ink-primary">{item.title}</span>
+              <span className="shrink-0 text-xs text-ink-secondary">{selected ? `#${selectedRelatedIds.indexOf(item.id) + 1}` : item.status}</span>
+            </label>;
+          })}
+          {relatedOptions.length === 0 && <p className="px-3 py-4 text-sm text-ink-secondary">No matching projects.</p>}
+        </div>
+        {errors.related_project_ids && <p className="text-xs text-red-500">{errors.related_project_ids.message}</p>}
+      </fieldset>
 
       <div className="grid gap-6 md:grid-cols-3">
         <div className="space-y-2">
