@@ -239,8 +239,10 @@ test("project tags, timeline, source name and optional sections remain owner-man
   assert.match(detail, /sourceUrl \?/);
   assert.match(detail, /project\.sourceNote \|\| \(project\.isPreview/);
   assert.match(detail, /sections\.map/);
-  assert.match(detail, /Related projects/);
-  assert.match(detail, /<SectionHeading kicker="Continue exploring" headingId="related-projects-heading">Related projects<\/SectionHeading>/);
+  assert.match(detail, /<SectionHeading kicker="Continue exploring" headingId="related-projects-heading">/);
+  assert.match(detail, /Related\{" "\}/);
+  assert.match(detail, /animate-gradient-x text-colorfull px-1 pb-1 italic \[text-shadow:none\]">projects<\/span>/);
+  assert.match(detail, /mt-14 grid gap-4 sm:grid-cols-2/);
   assert.match(detail, /Browse all projects/);
   for (const action of ["Copy URL", "View as Markdown", "Open in ChatGPT", "Open in Claude"]) {
     assert.ok(detail.includes(action), `share menu should include ${action}`);
