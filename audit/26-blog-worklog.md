@@ -27,10 +27,13 @@ Date: 2026-09-29. Branch: `haris-dev/set-up-this-codebase-for-FcY5YL`.
 
 ## Next exact step
 
-1. Owner to run the read-only `migrations/verify_blog_security.sql` in the
-   connected Supabase SQL editor and confirm that every result is true. Owner
-   reports running SQL, but the exact installed policy/function definitions
-   remain unverified without catalog output. Do not reapply migrations blindly.
+1. Owner reports eight true results from the connected SQL catalog check in
+   `migrations/verify_blog_security.sql`: tag-join RLS, both direct-write
+   revocations, RPC existence, both public RPC revocations, service-role RPC
+   access and collision-safe RPC body. The ninth result,
+   `live_tags_only_policy`, was not supplied. Confirm that value or inspect
+   the policy name, roles and expression read-only before claiming full
+   installed-policy verification. Do not reapply migrations blindly.
 2. Before deploying, replace the temporary imported articles and images with
    owner-authored/licensed posts and descriptions. Remove old DB rows and
    checked-in `content/blog` fixtures deliberately, then recheck the index,
@@ -500,3 +503,17 @@ Date: 2026-09-29. Branch: `haris-dev/set-up-this-codebase-for-FcY5YL`.
   a 502 for a development chunk after package replacement, then rendered the
   article and enabled controls on a fresh navigation. No persistent app
   console error was seen after it settled.
+
+## Continuation: Owner SQL catalog report (2026-09-29)
+
+- **Owner-confirmed true (8/9):** `tag_join_rls_enabled`,
+  `anon_direct_writes_revoked`, `authenticated_direct_writes_revoked`,
+  `blog_save_rpc_exists`, `anon_blog_rpc_revoked`,
+  `authenticated_blog_rpc_revoked`, `service_role_blog_rpc_allowed`, and
+  `collision_safe_blog_rpc`. This is owner-reported SQL editor output; no SQL
+  migration was rerun from this sandbox.
+- **Still unknown:** `live_tags_only_policy` was absent from the supplied
+  results. Earlier anonymous REST tests hid draft/future tag links, but they
+  do not prove the named policy expression is installed. Inspect it read-only
+  before database sign-off. Temporary imported articles remain in place for
+  development as the owner requested; replace them before public deployment.
