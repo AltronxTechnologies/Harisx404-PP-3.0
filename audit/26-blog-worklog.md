@@ -27,35 +27,26 @@ Date: 2026-09-29. Branch: `haris-dev/set-up-this-codebase-for-FcY5YL`.
 
 ## Next exact step
 
-1. **New workflow migration NOT applied to connected Supabase:** after the
-   previously verified Blog migrations, run
-   `migrations/2026_blog_editor_delete_slug_history.sql` in the connected SQL
-   editor, then run read-only `migrations/verify_blog_workflow.sql` and confirm
-   all twelve results are true. Until then, existing archive/restore retains
-   its guarded legacy path, while permanent delete returns a clear 503 and
-   new posts will not reopen rich without the rollout.
-   The earlier `verify_blog_security.sql` 9/9 confirmation covers only the
-   preceding Blog migrations, not this one.
-2. After the rollout, use only uniquely marked temporary QA posts to repeat
-   authenticated create/reopen/rich edit/no-op save, slug rename/redirect,
-   archive/restore, and permanent-delete confirmation/conflict/cleanup. Never
-   use the imported production-like articles as fixtures.
-3. Before deploying, replace the temporary imported articles and images with
+1. **Connected workflow acceptance completed for disposable records:** owner
+   reports applying the new SQL/checker; live REST, service-role RPC and
+   authenticated Admin browser QA passed, with zero QA posts/history/views
+   remaining. Do not rerun the migration or delete current articles.
+2. Before deploying, replace the temporary imported articles and images with
    owner-authored/licensed posts and descriptions. Remove old DB rows and
    checked-in `content/blog` fixtures deliberately, then recheck the index,
    article routes, sitemap/RSS, metadata and linked images. Never assert that
    the current imported articles have cleared production rights review.
-4. Archives remain reversible with no automatic purge. Permanent deletion is
-   available only after archiving and exact-slug confirmation once the new
-   SQL is installed; shared tags and media survive. Recheck source-mode MDX
-   editing with an owner-authored post when available.
-5. Run final production deployment QA on the actual hosting platform. Docker
+3. Archives remain reversible with no automatic purge. Permanent deletion is
+   available only after archiving and exact-slug confirmation; shared tags and
+   media survive. Recheck source-mode MDX editing on final owner-authored
+   content when available.
+4. Run final production deployment QA on the actual hosting platform. Docker
    production build and both dependency audits pass; two existing non-fatal
    build warnings remain documented below.
-6. The temporary local-draft status caveat and final-content rights/SEO
+5. The temporary local-draft status caveat and final-content rights/SEO
    review remain deployment gates, not a reason to modify imported examples
-   during development. Do not call this feature 100% deployed before the new
-   workflow SQL and authenticated acceptance are verified.
+   during development. Do not call the eventual public deployment signed off
+   before replacement and hosting checks.
 
 ## Phase 1: Protect existing behavior
 
@@ -629,3 +620,42 @@ Date: 2026-09-29. Branch: `haris-dev/set-up-this-codebase-for-FcY5YL`.
   Admin API/list action/form/editor, public Blog article and middleware,
   Blog tests including `tests/blog-editor-delete-slugs.database.test.sql`,
   and this worklog.
+
+## Continuation: Connected workflow acceptance (2026-09-29)
+
+- **Completed:** owner reports the new Blog workflow SQL and read-only
+  verifier executed successfully. In the connected database, both
+  `blog_posts.editor_mode` and anonymous `blog_slug_history` reads returned
+  HTTP 200. The previous 9/9 checker applied to older migrations; the new
+  12/12 catalog output was confirmed in disposable PostgreSQL and the owner
+  reports successful connected execution, not independently inspected by the
+  sandbox SQL catalog.
+- **Live service-role QA:** an opt-in test created a uniquely named draft,
+  confirmed rich mode, byte-identical metadata-only save, two published slug
+  renames with direct 308s, archive/restore, stale-delete rejection, archived
+  deletion and 410 tombstones. All QA post/history/view rows were removed by
+  exact identity afterward. `tests/blog-workflow.live.test.mjs` passed 1/1.
+- **Authenticated browser QA:** a one-time Admin session was established in
+  memory through the existing Supabase Auth infrastructure without storing or
+  printing a password, link or token. The opt-in browser test created a draft
+  with the rich editor, reopened it, saved metadata without altering content,
+  edited content, published it, renamed it and observed a direct old-slug
+  redirect, archived/restored/re-archived it, rejected an incorrect deletion
+  slug, then permanently deleted it with the correct typed slug. New/edit and
+  list stayed within the 320px document width. Initial attempts exposed a
+  blank-canonical client validator exception, fixed by guarding URL parsing;
+  the final browser test passed 1/1. A final privileged check found **zero**
+  QA rows in `blog_posts`, `blog_slug_history` and `article_views`; the original
+  **63** published rows remained. Files: `BlogForm.tsx`, opt-in
+  `tests/blog-admin.workflow.browser.test.mjs` and this worklog.
+- **Regression verification:** final Docker Blog/Admin/metadata HTTP suite
+  29/29; Home/About, legal, navigation and Projects 22 passed / 1 pre-existing
+  skip; editor/image 10/10; public responsive/TOC/lightbox/pre-hydration
+  browser suite 6/6; Docker TypeScript, production build and `git diff --check`
+  passed; full npm audit reported zero vulnerabilities. The build still emits
+  the existing unrelated image-lint and edge/static notices. No imported
+  article, shared CTA, legal page or other locked surface was changed.
+- **Remaining (explicitly deferred by owner):** replace temporary imported
+  articles/images with licensed owner-authored material before public launch,
+  then perform final content and hosting-platform acceptance. Do not delete
+  those temporary articles in this development session.

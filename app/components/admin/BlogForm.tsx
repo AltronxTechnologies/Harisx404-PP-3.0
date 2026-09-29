@@ -29,8 +29,13 @@ const blogSchema = z.object({
     .optional(),
   cover_image_id: z.string().optional(),
   canonical_url: z.string().url("Must be a valid URL").refine((value) => {
-    const url = new URL(value);
-    return ["http:", "https:"].includes(url.protocol) && !url.username && !url.password;
+    if (!value) return true;
+    try {
+      const url = new URL(value);
+      return ["http:", "https:"].includes(url.protocol) && !url.username && !url.password;
+    } catch {
+      return false;
+    }
   }, "Use an HTTP(S) URL without credentials").optional().or(z.literal("")),
   published_at: z.string().refine((value) => !value || !Number.isNaN(Date.parse(value)), "Choose a valid publish date").optional(),
   tags: z.array(z.string().trim().min(1).max(50)).max(25).optional(),
