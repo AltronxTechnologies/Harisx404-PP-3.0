@@ -390,7 +390,7 @@ function slugify(str) {
 
 function createHeading(level) {
   // eslint-disable-next-line react/display-name
-  return ({ children, id }) => {
+  return ({ children, id, "data-section-number": number }) => {
     const slug = id || slugify(children);
     let textSize = "text-4xl";
     if (level === 2) textSize = "text-2xl md:text-3xl";
@@ -401,15 +401,30 @@ function createHeading(level) {
       {
         id: slug,
         className: `${textSize} text-text-primary font-medium leading-8 mb-6 ${level === 2 ? "mt-8" : "mt-3"} text-balance`,
+        style: number ? { display: "flex", alignItems: "baseline", gap: "0.7rem" } : undefined,
       },
       [
         React.createElement("a", {
           href: `#${slug}`,
           key: `link-${slug}`,
-          className: "anchor ",
+          className: "anchor focus-visible:!opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary",
           "aria-label": `Link to section: ${slug.replace(/-/g, " ")}`,
         }),
       ],
+      number && React.createElement("span", {
+        key: `number-${slug}`,
+        "aria-hidden": true,
+        style: {
+          flexShrink: 0,
+          minWidth: level === 2 ? "1.5em" : "2.6em",
+          fontFamily: "var(--font-geist-mono), monospace",
+          fontSize: level === 2 ? "0.55em" : "0.62em",
+          fontWeight: 600,
+          fontVariantNumeric: "tabular-nums",
+          letterSpacing: "0.01em",
+          color: "var(--text-secondary)",
+        },
+      }, number),
       children,
     );
   };

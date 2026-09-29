@@ -20,6 +20,8 @@ test("Blog article stays readable across both themes and responsive widths", asy
             const article = document.querySelector("#blog-article");
             const box = article.getBoundingClientRect();
             const images = [...article.querySelectorAll("img")];
+            const code = article.querySelector("pre");
+            const copy = code?.parentElement?.querySelector('button[aria-label="Copy code"]');
             return {
               width: window.innerWidth,
               scrollWidth: document.documentElement.scrollWidth,
@@ -28,6 +30,9 @@ test("Blog article stays readable across both themes and responsive widths", asy
               bodyText: article.textContent.trim().length,
               theme: document.documentElement.classList.contains("dark") ? "dark" : "light",
               failedImages: images.filter((image) => image.complete && image.naturalWidth === 0).length,
+              codeMarkupValid: Boolean(code && code.parentElement?.tagName === "DIV" && code.querySelector("code") && !code.querySelector("div")),
+              codeContained: Boolean(code && code.getBoundingClientRect().left >= 0 && code.getBoundingClientRect().right <= window.innerWidth + 1),
+              copyVisible: Boolean(copy && getComputedStyle(copy).opacity !== "0" && copy.getBoundingClientRect().width > 0),
             };
           });
           assert.equal(state.theme, theme, `${width}px theme`);
@@ -35,6 +40,9 @@ test("Blog article stays readable across both themes and responsive widths", asy
           assert.ok(state.articleLeft >= 0 && state.articleRight <= state.width + 1, `${width}px ${theme} article bounds`);
           assert.ok(state.bodyText > 1000, `${width}px ${theme} article content`);
           assert.equal(state.failedImages, 0, `${width}px ${theme} broken images`);
+          assert.equal(state.codeMarkupValid, true, `${width}px ${theme} valid fenced code structure`);
+          assert.equal(state.codeContained, true, `${width}px ${theme} code viewport containment`);
+          assert.equal(state.copyVisible, true, `${width}px ${theme} copy button visible without hover`);
         }
       } finally {
         await context.close();

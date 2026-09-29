@@ -6,6 +6,7 @@ export interface TocHeading {
   level: 2 | 3;
   text: string;
   slug: string;
+  number: string;
 }
 
 export function slugify(str: string): string {
@@ -36,6 +37,8 @@ function textOf(node: MdNode): string {
 function headingsIn(tree: MdNode, setIds: boolean): TocHeading[] {
   const headings: TocHeading[] = [];
   const counts = new Map<string, number>();
+  let section = 0;
+  let subsection = 0;
 
   for (const node of tree.children || []) {
     if (node.type !== "heading") continue;
@@ -46,13 +49,25 @@ function headingsIn(tree: MdNode, setIds: boolean): TocHeading[] {
     counts.set(base, count + 1);
     const slug = count ? `${base}-${count + 1}` : base;
     const level = node.depth === 1 ? 2 : node.depth;
+    let number = "";
+    if (level === 2) {
+      section += 1;
+      subsection = 0;
+      number = String(section);
+    } else if (level === 3) {
+      if (!section) section = 1;
+      subsection += 1;
+      number = `${section}.${subsection}`;
+    }
+    if (/^(?:\d+[.)]|\d+(?:\.\d+)+[.)]?)\s/.test(text)) number = "";
     if (setIds) {
       if (node.depth === 1) node.depth = 2;
       node.data ||= {};
       node.data.hProperties = { ...node.data.hProperties, id: slug };
+      if (number) node.data.hProperties["data-section-number"] = number;
     }
     if (level === 2 || level === 3) {
-      headings.push({ level, text, slug });
+      headings.push({ level, text, slug, number });
     }
   }
   return headings;

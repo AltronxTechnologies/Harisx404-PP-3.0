@@ -27,6 +27,11 @@ Date: 2026-09-29. Branch: `haris-dev/set-up-this-codebase-for-FcY5YL`.
 
 ## Next exact step
 
+Article-detail design verification completed below. The remaining public
+deployment gate is still the owner's replacement of temporary imported
+articles/images with approved content, followed by real-host content and
+browser QA; do not delete or reattribute the current development corpus.
+
 1. **Connected workflow acceptance completed for disposable records:** owner
    reports applying the new SQL/checker; live REST, service-role RPC and
    authenticated Admin browser QA passed, with zero QA posts/history/views
@@ -659,3 +664,46 @@ Date: 2026-09-29. Branch: `haris-dev/set-up-this-codebase-for-FcY5YL`.
   articles/images with licensed owner-authored material before public launch,
   then perform final content and hosting-platform acceptance. Do not delete
   those temporary articles in this development session.
+
+## Continuation: Article detail editorial pass (2026-09-29)
+
+- **Completed:** narrowed the public article header, metadata, body and
+  reactions to a 680px reading column. Shared Blog MDX heading extraction and
+  rendering now display H2/H3 section numbers in both the body and floating
+  TOC, without altering stored text, slugs or anchor IDs; existing authored
+  numeric prefixes are not duplicated. The page title remains the only H1.
+  The collapsed TOC docks outside the reading column on desktop and becomes
+  a compact control beside the chat button on mobile; its expanded panel
+  clears the chat button. Hidden focus and reduced-motion behavior remain.
+- **Completed:** Blog-only public and private-preview code components render
+  fenced snippets as one labelled window with highlighted semantic `<pre><code>`,
+  a persistent Copy control, keyboard-scrollable long lines, and a plain
+  inline-code treatment. No tabs or content rewrites were added. Removed the
+  inherited inner `<pre>` border after visual review so each snippet has one
+  frame. The shared heading component changes its presentation only when a
+  Blog-generated section number is present.
+- **Verification:** the 320/360/390/768/1024/1440px matrix passed in light
+  and dark modes for page containment, article content, code structure,
+  always-visible Copy and loaded images. A touch-emulated 390px browser
+  copied exact snippet text (including the source trailing newline), scrolled
+  a synthetic long line inside the code window without page overflow and
+  opened the mobile TOC by tap. TOC keyboard/reduced-motion and copy-name
+  browser checks passed (4/4). Heading, code-window and Admin-preview tests
+  passed (8/8). Docker TypeScript, targeted ESLint, `git diff --check` and
+  production build passed; the build retained the existing unrelated image
+  lint and edge/static notices. Running the build concurrently with the dev
+  server briefly invalidated HTTP checks (site-wide 500s); after restarting
+  only the web container and rerunning tests sequentially, Blog, Home/About,
+  legal, navigation, preview and Projects passed **30/30**, with the one
+  pre-existing preview-only Project skip. The web container remains running.
+- **Files:** `app/blog/[slug]/page.tsx`, private Blog preview page,
+  `app/components/blog/BlogCode.tsx`, `app/components/TableOfContents.tsx`
+  and its CSS module, `app/components/mdx-components.tsx`,
+  `app/lib/toc-utils.ts`, Blog heading/code/TOC/responsive/preview tests,
+  and this worklog. No Blog index, CTA, legal page, imported article or
+  database row was edited.
+- **Remaining:** review the final owner-authored corpus for actual image
+  captions, table widths, rich code languages, author attribution and page
+  outlines; verify the deployed host on touch and keyboard devices. Current
+  representative article and automated fixture coverage are not final
+  production content sign-off.

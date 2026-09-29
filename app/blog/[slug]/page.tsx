@@ -6,6 +6,7 @@ import { MDXContent } from "@/app/components/mdx";
 import { RelatedPostCard } from "@/app/components/blog/RelatedPostCard";
 import { ImageLightbox } from "@/app/components/blog/ImageLightbox";
 import { BlogArticleImage } from "@/app/components/blog/BlogArticleImage";
+import { BlogCodeWindow, BlogInlineCode } from "@/app/components/blog/BlogCode";
 import ArticleReactionWrapper from "@/app/components/ArticleReactionsWrapper";
 import { CtaSection } from "@/app/components/home/CtaSection";
 import { CopyUrlButton } from "@/app/components/blog/CopyUrlButton";
@@ -159,7 +160,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
       )}
 
       {/* Article header — reference: centered max-w-3xl, pt-56 total from top */}
-      <header className="relative mx-auto flex w-full max-w-3xl flex-col items-center gap-y-5 px-4 pt-40 text-center sm:pt-36 md:px-6">
+      <header className="relative mx-auto flex w-full max-w-3xl flex-col items-center gap-y-5 px-4 pt-40 text-center sm:pt-36 md:px-6" style={{ maxWidth: "680px" }}>
         <Link
           href="/blog"
           className="text-neutral-500 text-sm transition-colors hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
@@ -178,7 +179,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
 
       {/* Meta row — reading time + copy URL on the left, date on the right */}
       <div className="relative mt-16 px-4 md:px-6">
-        <div className="mx-auto flex w-full max-w-3xl flex-wrap items-center justify-between gap-x-4 gap-y-2 text-text-secondary text-sm">
+        <div className="mx-auto flex w-full max-w-3xl flex-wrap items-center justify-between gap-x-4 gap-y-2 text-text-secondary text-sm" style={{ maxWidth: "680px" }}>
           <div className="flex items-center gap-x-4 gap-y-2">
             <div className="flex items-center gap-1.5">
               <svg
@@ -215,14 +216,16 @@ export default async function BlogPage({ params }: BlogPageProps) {
         <article
           id="blog-article"
           className="blog-article-shell prose prose-neutral dark:prose-invert mx-auto min-w-0 max-w-3xl overflow-x-hidden break-words [&>*:first-child]:mt-0 [&>div>*:first-child]:mt-0"
+          style={{ maxWidth: "680px" }}
         >
-          <MDXContent code={post.code} components={{ img: BlogArticleImage, Image: BlogArticleImage }} />
+          <MDXContent code={post.code} components={{ img: BlogArticleImage, Image: BlogArticleImage, pre: BlogCodeWindow, code: BlogInlineCode }} />
         </article>
       </div>
 
       <section
         aria-labelledby="article-reactions-heading"
         className="relative mx-auto mb-16 w-full max-w-3xl border-t border-border-primary px-4 pt-6 md:px-6"
+        style={{ maxWidth: "680px" }}
       >
         <h2
           id="article-reactions-heading"

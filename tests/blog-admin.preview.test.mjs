@@ -36,7 +36,7 @@ test("preview is non-indexed, uncached, and authorizes before the service-role r
 test("preview renders the saved body with public editorial styles without public side effects", async () => {
   const page = await readFile(previewUrl, "utf8");
   assert.match(page, /import \{ MDXContent \} from "@\/app\/components\/mdx"/);
-  assert.match(page, /<MDXContent code=\{post\.content \|\| ""\} components=\{\{ img: BlogArticleImage, Image: BlogArticleImage \}\} \/>/);
+  assert.match(page, /<MDXContent code=\{post\.content \|\| ""\} components=\{\{ img: BlogArticleImage, Image: BlogArticleImage, pre: BlogCodeWindow, code: BlogInlineCode \}\} \/>/);
   assert.match(page, /<TableOfContents headings=\{extractHeadingsFromMdx\(post\.content \|\| ""\)\} \/>/);
   assert.match(page, /<ImageLightbox \/>/);
   assert.match(page, /blog-article-shell prose prose-neutral dark:prose-invert/);
