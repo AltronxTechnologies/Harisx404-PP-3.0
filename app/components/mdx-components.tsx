@@ -401,7 +401,6 @@ function createHeading(level) {
       {
         id: slug,
         className: `${textSize} text-text-primary font-medium leading-8 mb-6 ${level === 2 ? "mt-8" : "mt-3"} text-balance`,
-        style: number ? { display: "flex", alignItems: "baseline", gap: "0.7rem" } : undefined,
       },
       [
         React.createElement("a", {
@@ -414,16 +413,7 @@ function createHeading(level) {
       number && React.createElement("span", {
         key: `number-${slug}`,
         "aria-hidden": true,
-        style: {
-          flexShrink: 0,
-          minWidth: level === 2 ? "1.5em" : "2.6em",
-          fontFamily: "var(--font-geist-mono), monospace",
-          fontSize: level === 2 ? "0.55em" : "0.62em",
-          fontWeight: 600,
-          fontVariantNumeric: "tabular-nums",
-          letterSpacing: "0.01em",
-          color: "var(--text-secondary)",
-        },
+        style: { marginRight: "0.35em", fontVariantNumeric: "tabular-nums" },
       }, number),
       children,
     );

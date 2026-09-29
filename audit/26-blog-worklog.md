@@ -707,3 +707,32 @@ browser QA; do not delete or reattribute the current development corpus.
   outlines; verify the deployed host on touch and keyboard devices. Current
   representative article and automated fixture coverage are not final
   production content sign-off.
+
+## Continuation: Owner-directed article refinement (2026-09-29)
+
+- **Changed:** restored the floating TOC to the viewport center with its
+  original full-width collapsed pill. On small screens it sits above the
+  existing chat control instead of covering it. H2/H3 numbers now inherit
+  their heading's actual typography and color, with normal inline spacing;
+  neither source MDX nor anchors changed. The Blog article route alone removes
+  both its own decorative rails and the outer layout's hatched grid columns;
+  the shared layout and locked Blog index keep their original frame.
+- **Polished:** the single-snippet code window now has an inset code canvas,
+  restrained title bar, file glyph, optional language label, neutral window
+  dots, a persistent Copy action and a stronger but still theme-aware frame.
+  The article title tracking, metadata divider and body handoff were refined.
+  Blog-only MDX notes use a quiet inset card instead of another striped frame.
+  No switchable code tabs were introduced.
+- **Checked:** browser screenshots and DOM measurements at mobile/dark and
+  desktop/light confirm the centered TOC, matched heading-number typography,
+  code and note presentation, and zero-width article-only hatched gutters.
+  The 320/360/390/768/1024/1440px light/dark responsive matrix and mobile
+  TOC keyboard/reduced-motion checks pass. Touch copy and long-line containment
+  pass. Docker TypeScript, targeted ESLint, diff checks and the production
+  build passed. Blog, Home/About, legal, navigation, preview and Project
+  regressions passed except for one transient responsive timing assertion
+  when the broad HTTP and browser suites ran together. The responsive test
+  now waits for the numbered article heading before measuring it. After the
+  build, the web container was restarted and the Blog HTTP/browser smoke
+  suite passed 8/8; it remains running. Existing unrelated build warnings
+  remain unchanged.

@@ -52,11 +52,11 @@ test("Blog TOC stays out of hidden tab order and honors reduced motion", async (
     assert.equal(result.focus, result.hash);
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.waitForFunction(() => document.querySelector('nav[aria-label="Table of contents"]')?.getBoundingClientRect().width >= 280);
-    const desktop = await page.evaluate(() => ({
-      articleRight: document.getElementById("blog-article").getBoundingClientRect().right,
-      tocLeft: document.querySelector('nav[aria-label="Table of contents"]').getBoundingClientRect().left,
-    }));
-    assert.ok(desktop.tocLeft >= desktop.articleRight, "Desktop TOC must dock outside the reading column");
+    const desktop = await page.evaluate(() => {
+      const box = document.querySelector('nav[aria-label="Table of contents"]').getBoundingClientRect();
+      return { center: (box.left + box.right) / 2, viewportCenter: innerWidth / 2 };
+    });
+    assert.ok(Math.abs(desktop.center - desktop.viewportCenter) < 1, "Desktop TOC must be centered");
   } finally {
     await browser.close();
   }

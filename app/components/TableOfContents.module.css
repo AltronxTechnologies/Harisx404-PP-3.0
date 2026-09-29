@@ -1,17 +1,9 @@
 .dock {
-  right: 92px;
-  bottom: 20px;
-}
-
-.dock[data-open="true"] {
-  right: 16px;
   bottom: 92px;
 }
 
-@media (min-width: 1280px) {
-  .dock,
-  .dock[data-open="true"] {
-    right: max(16px, calc((100vw - 1280px) / 2 + 16px));
+@media (min-width: 640px) {
+  .dock {
     bottom: 30px;
   }
 }

@@ -112,16 +112,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
   const coverSrc = blogCoverSrc(post.imageName);
 
   return (
-    <div className="relative min-w-0 pb-20">
-      {/* Decorative hatched side rails — reference frame: 12px mobile / 32px desktop */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 left-0 hidden w-3 border-r border-border-primary sm:block lg:w-8 [background-image:repeating-linear-gradient(45deg,var(--tw-shadow-color,rgba(0,0,0,0.04))_0px,var(--tw-shadow-color,rgba(0,0,0,0.04))_1px,transparent_1px,transparent_7px)] dark:[background-image:repeating-linear-gradient(45deg,rgba(255,255,255,0.05)_0px,rgba(255,255,255,0.05)_1px,transparent_1px,transparent_7px)]"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 right-0 hidden w-3 border-l border-border-primary sm:block lg:w-8 [background-image:repeating-linear-gradient(45deg,var(--tw-shadow-color,rgba(0,0,0,0.04))_0px,var(--tw-shadow-color,rgba(0,0,0,0.04))_1px,transparent_1px,transparent_7px)] dark:[background-image:repeating-linear-gradient(45deg,rgba(255,255,255,0.05)_0px,rgba(255,255,255,0.05)_1px,transparent_1px,transparent_7px)]"
-      />
+    <div className="blog-detail relative min-w-0 pb-20">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -167,7 +158,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
         >
           Blog
         </Link>
-        <h1 className="text-balance font-display text-3xl tracking-wide text-neutral-900 dark:text-white sm:text-4xl md:text-5xl">
+        <h1 className="text-balance font-display text-3xl leading-tight tracking-tight text-neutral-900 dark:text-white sm:text-4xl md:text-5xl">
           {post.title}
         </h1>
         {post.summary && (
@@ -179,7 +170,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
 
       {/* Meta row — reading time + copy URL on the left, date on the right */}
       <div className="relative mt-16 px-4 md:px-6">
-        <div className="mx-auto flex w-full max-w-3xl flex-wrap items-center justify-between gap-x-4 gap-y-2 text-text-secondary text-sm" style={{ maxWidth: "680px" }}>
+        <div className="mx-auto flex w-full max-w-3xl flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-border-primary pb-4 text-text-secondary text-sm" style={{ maxWidth: "680px" }}>
           <div className="flex items-center gap-x-4 gap-y-2">
             <div className="flex items-center gap-1.5">
               <svg
@@ -212,7 +203,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
       </div>
 
       {/* Article body — reference: prose prose-neutral, centered max-w-3xl */}
-      <div className="relative mt-6 mb-16 px-4 md:px-6">
+      <div className="relative mt-8 mb-16 px-4 md:px-6">
         <article
           id="blog-article"
           className="blog-article-shell prose prose-neutral dark:prose-invert mx-auto min-w-0 max-w-3xl overflow-x-hidden break-words [&>*:first-child]:mt-0 [&>div>*:first-child]:mt-0"

@@ -95,7 +95,7 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
       aria-label="Table of contents"
       aria-hidden={!visible && !open}
       data-open={open}
-      className={`fixed ${styles.dock} z-[99] flex flex-col items-center transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none ${
+      className={`fixed left-1/2 ${styles.dock} z-[99] flex -translate-x-1/2 flex-col items-center transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none ${
         visible || open
           ? "pointer-events-auto translate-y-0 scale-100 opacity-100"
           : "pointer-events-none translate-y-[50px] scale-90 opacity-0"
@@ -105,7 +105,7 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
         className={`relative overflow-hidden bg-white/70 text-neutral-900 shadow-[0_0_0_0.8px_rgba(0,0,0,0.06),0_4px_12px_-4px_rgba(0,0,0,0.06),inset_0_0.5px_0.5px_0.5px_rgba(255,255,255,0.6)] backdrop-blur-[12px] transition-[width,height,border-radius] duration-300 ease-out motion-reduce:transition-none dark:bg-neutral-800/80 dark:text-white dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),inset_0_0_0_1px_rgba(255,255,255,0.06)] ${
           open
             ? "h-[min(72vh,560px)] w-[min(360px,calc(100vw-2rem))] rounded-2xl"
-            : "h-[52px] w-[52px] rounded-[26px] xl:w-[280px]"
+            : "h-[52px] w-[min(280px,calc(100vw-2rem))] rounded-[26px]"
         }`}
       >
         {!open ? (
@@ -115,13 +115,13 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
             onClick={() => setOpen(true)}
             tabIndex={visible ? 0 : -1}
             aria-label={`Open table of contents: ${active.number ? `${active.number} ` : ""}${active.text}`}
-            className="absolute inset-0 flex w-full items-center justify-center gap-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-primary/40 xl:justify-start xl:px-5"
+            className="absolute inset-0 flex w-full items-center gap-3 px-5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-primary/40"
           >
-            <span aria-hidden="true" className="relative hidden size-1.5 shrink-0 xl:flex">
+            <span aria-hidden="true" className="relative flex size-1.5 shrink-0">
               <span className="absolute inline-flex size-full animate-ping rounded-full bg-current opacity-40 motion-reduce:animate-none" />
               <span className="relative inline-flex size-1.5 rounded-full bg-current" />
             </span>
-            <span className="hidden flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium xl:block">
+            <span className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium">
               {active.number && <span aria-hidden="true" style={{ marginRight: "0.65rem", fontFamily: "var(--font-geist-mono), monospace", fontSize: "0.75rem", opacity: 0.68 }}>{active.number}</span>}
               {active.text}
             </span>
@@ -178,7 +178,7 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
                         activeId === heading.slug ? "scale-y-100 opacity-100" : "scale-y-0 opacity-0"
                       }`}
                     />
-                    {heading.number && <span aria-hidden="true" style={{ flexShrink: 0, minWidth: heading.level === 2 ? "1.4rem" : "2.6rem", fontFamily: "var(--font-geist-mono), monospace", fontSize: "0.7rem", fontVariantNumeric: "tabular-nums", opacity: 0.7 }}>{heading.number}</span>}
+                    {heading.number && <span aria-hidden="true" style={{ flexShrink: 0, minWidth: heading.level === 2 ? "1.4rem" : "2.6rem", fontVariantNumeric: "tabular-nums" }}>{heading.number}</span>}
                     <span className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">{heading.text}</span>
                   </button>
                 ))}

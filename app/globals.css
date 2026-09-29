@@ -936,6 +936,15 @@ blockquote p {
 }
 
 /* Blog article reference treatment. Scoped so locked pages keep their current presentation. */
+.grid:has(> #main-content > .blog-detail) {
+  grid-template-columns: 0 minmax(0, 1fr) 0;
+}
+
+.grid:has(> #main-content > .blog-detail) > div:first-child,
+.grid:has(> #main-content > .blog-detail) > div:last-child {
+  visibility: hidden;
+}
+
 .blog-article-shell :not(pre) > code {
   border-radius: 2px;
   background: #e5e5e5;
@@ -1233,6 +1242,25 @@ blockquote p {
 .dark .blog-article-shell blockquote {
   border-left-color: #364153;
   color: #f3f4f6;
+}
+
+/* Blog MDX notes use a quiet inset card instead of the shared striped frame. */
+.blog-article-shell blockquote:has(> .blog-container) {
+  margin: 2rem 0;
+  width: 100%;
+  border: 1px solid var(--border-primary);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--text-primary) 4%, var(--bg-primary));
+  background-image: none;
+  padding: 4px;
+  font-style: normal;
+}
+
+.blog-article-shell blockquote > .blog-container {
+  border-radius: 10px;
+  background: var(--bg-primary);
+  box-shadow: none;
+  padding: clamp(18px, 4vw, 24px);
 }
 
 /* Horizontal rules */
