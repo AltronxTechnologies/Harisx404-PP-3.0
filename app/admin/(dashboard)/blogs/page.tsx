@@ -1,13 +1,38 @@
 import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 import Link from "next/link";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit } from "lucide-react";
+import { BlogArchiveAction } from "./BlogArchiveAction";
+import { blogListStatus, blogListUrl, PAGE_SIZE, parseBlogListParams } from "./blogList";
 
-export default async function AdminBlogsPage() {
+export default async function AdminBlogsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = parseBlogListParams(await searchParams);
+  const now = new Date();
+  const nowIso = now.toISOString();
   const supabase = await createSupabaseAdminClient();
-  const { data: blogs } = await supabase
+  let query = supabase
     .from("blog_posts")
-    .select("id, title, slug, status, published_at")
-    .order("created_at", { ascending: false });
+    .select("id, title, slug, status, published_at, updated_at")
+    .order(params.sort, { ascending: params.direction === "asc", nullsFirst: false })
+    .order("id", { ascending: true });
+
+  if (params.q) query = query.ilike("title", `%${params.q.replace(/[\\%_]/g, "\\$&")}%`);
+  if (params.status === "draft" || params.status === "archived") {
+    query = query.eq("status", params.status);
+  } else if (params.status === "scheduled") {
+    query = query.eq("status", "published").gt("published_at", nowIso);
+  } else if (params.status === "live") {
+    query = query.eq("status", "published").lte("published_at", nowIso);
+  }
+
+  const start = (params.page - 1) * PAGE_SIZE;
+  const { data: blogs, error } = await query.range(start, start + PAGE_SIZE);
+  const posts = blogs?.slice(0, PAGE_SIZE) ?? [];
+  const hasNext = (blogs?.length ?? 0) > PAGE_SIZE && params.page < 1000;
+  const filtered = Boolean(params.q || params.status !== "all");
 
   return (
     <div className="flex flex-col gap-6">
@@ -25,64 +50,119 @@ export default async function AdminBlogsPage() {
         </Link>
       </div>
 
-      <div className="rounded-xl border border-border-hairline bg-surface-raised shadow-sm overflow-hidden">
+      <form action="/admin/blogs" method="get" className="flex flex-wrap items-end gap-3 rounded-xl border border-border-hairline bg-surface-raised p-4 text-sm shadow-sm">
+        <div className="min-w-48 flex-1">
+          <label htmlFor="blog-search" className="mb-1 block font-medium text-ink-primary">Search titles</label>
+          <input id="blog-search" name="q" type="search" defaultValue={params.q} maxLength={100} placeholder="Search post titles" className="w-full rounded-lg border border-border-hairline bg-surface-base px-3 py-2 text-ink-primary" />
+        </div>
+        <div>
+          <label htmlFor="blog-status" className="mb-1 block font-medium text-ink-primary">Status</label>
+          <select id="blog-status" name="status" defaultValue={params.status} className="rounded-lg border border-border-hairline bg-surface-base px-3 py-2 text-ink-primary">
+            <option value="all">All statuses</option>
+            <option value="draft">Draft</option>
+            <option value="scheduled">Scheduled</option>
+            <option value="live">Live</option>
+            <option value="archived">Archived</option>
+          </select>
+        </div>
+        <div>
+          <label htmlFor="blog-sort" className="mb-1 block font-medium text-ink-primary">Sort by</label>
+          <select id="blog-sort" name="sort" defaultValue={params.sort} className="rounded-lg border border-border-hairline bg-surface-base px-3 py-2 text-ink-primary">
+            <option value="created_at">Created date</option>
+            <option value="updated_at">Updated date</option>
+            <option value="published_at">Publication date</option>
+            <option value="title">Title</option>
+          </select>
+        </div>
+        <div>
+          <label htmlFor="blog-direction" className="mb-1 block font-medium text-ink-primary">Direction</label>
+          <select id="blog-direction" name="direction" defaultValue={params.direction} className="rounded-lg border border-border-hairline bg-surface-base px-3 py-2 text-ink-primary">
+            <option value="desc">Descending</option>
+            <option value="asc">Ascending</option>
+          </select>
+        </div>
+        <button type="submit" className="rounded-lg bg-accent-signal px-4 py-2 font-medium text-white hover:bg-accent-signal/90">Apply</button>
+        <Link href="/admin/blogs" className="rounded-lg px-3 py-2 text-ink-secondary underline hover:text-ink-primary">Clear</Link>
+      </form>
+
+      {error && (
+        <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-400">
+          Blog posts could not be loaded. Please try again later or clear the filters.
+        </div>
+      )}
+      {!error && <div className="rounded-xl border border-border-hairline bg-surface-raised shadow-sm overflow-hidden">
+        <p className="border-b border-border-hairline px-6 py-3 text-sm text-ink-secondary">
+          Page {params.page}: Showing {posts.length} {posts.length === 1 ? "post" : "posts"}{hasNext ? " (more available)" : ""}
+        </p>
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
+            <caption className="sr-only">Blog posts matching the selected search and status</caption>
             <thead className="bg-surface-base border-b border-border-hairline text-ink-secondary">
               <tr>
-                <th className="px-6 py-4 font-medium">Title</th>
-                <th className="px-6 py-4 font-medium">Status</th>
-                <th className="px-6 py-4 font-medium">Date</th>
-                <th className="px-6 py-4 font-medium text-right">Actions</th>
+                <th scope="col" className="px-6 py-4 font-medium">Title</th>
+                <th scope="col" className="px-6 py-4 font-medium">Status</th>
+                <th scope="col" className="px-6 py-4 font-medium">Publication date</th>
+                <th scope="col" className="px-6 py-4 font-medium text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border-hairline">
-              {blogs?.length === 0 ? (
+              {posts.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="px-6 py-8 text-center text-ink-secondary">
-                    No blog posts found. Create one to get started!
+                    {params.page > 1 ? "No posts on this page. Go to the previous page." : filtered ? "No posts match these filters. Try another search or clear the filters." : "No blog posts yet. Create one to get started!"}
                   </td>
                 </tr>
               ) : (
-                blogs?.map((blog) => (
-                  <tr key={blog.id} className="hover:bg-surface-base/50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-ink-primary">
-                      {blog.title}
-                      <div className="text-xs text-ink-secondary font-normal mt-1">{blog.slug}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                        blog.status === "published" 
-                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                          : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
-                      }`}>
-                        {blog.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-ink-secondary">
-                      {blog.published_at ? new Date(blog.published_at).toLocaleDateString() : "Not published"}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Link 
-                          href={`/admin/blogs/${blog.id}`}
-                          className="p-2 text-ink-secondary hover:text-accent-signal hover:bg-surface-base rounded-lg transition-colors"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Link>
-                        {/* We will add a delete action later */}
-                        <button className="p-2 text-ink-secondary hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors">
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                posts.map((blog) => {
+                  const label = blogListStatus(blog.status, blog.published_at, now.getTime());
+                  return (
+                    <tr key={blog.id} className="hover:bg-surface-base/50 transition-colors">
+                      <td className="px-6 py-4 font-medium text-ink-primary">
+                        {blog.title}
+                        <div className="text-xs text-ink-secondary font-normal mt-1">{blog.slug}</div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                          label === "Live"
+                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                            : label === "Archived"
+                              ? "bg-surface-base text-ink-secondary"
+                              : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
+                        }`}>
+                          {label}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-ink-secondary">
+                        {blog.status === "published" && blog.published_at && Number.isFinite(Date.parse(blog.published_at)) ? new Date(blog.published_at).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) : "Not published"}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          {blog.status !== "archived" && (
+                            <Link
+                              href={`/admin/blogs/${blog.id}`}
+                              aria-label={`Edit ${blog.title}`}
+                              className="p-2 text-ink-secondary hover:text-accent-signal hover:bg-surface-base rounded-lg transition-colors"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Link>
+                          )}
+                          <BlogArchiveAction post={blog} />
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
-      </div>
+        {(params.page > 1 || hasNext) && (
+          <nav aria-label="Blog post pages" className="flex items-center justify-between border-t border-border-hairline px-6 py-4 text-sm">
+            {params.page > 1 ? <Link href={blogListUrl(params, params.page - 1)} className="text-accent-signal underline">Previous page</Link> : <span />}
+            {hasNext && <Link href={blogListUrl(params, params.page + 1)} className="text-accent-signal underline">Next page</Link>}
+          </nav>
+        )}
+      </div>}
     </div>
   );
 }

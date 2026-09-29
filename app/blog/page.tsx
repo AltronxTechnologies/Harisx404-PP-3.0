@@ -359,7 +359,6 @@ export default async function BlogPage({
           {queryParam ? ` found for ${queryParam}` : " in this collection"}
         </p>
 
-        <div className={compact ? "lg:hidden" : "hidden lg:block"}>
         <div className="mt-[30px] space-y-14 px-2 sm:px-4">
           {featuredPost && (
             <section aria-labelledby="featured-article-heading">
@@ -510,16 +509,6 @@ export default async function BlogPage({
         </div>
         <div className="mt-28">
           <CtaSection />
-        </div>
-        </div>
-
-        <div
-          role="status"
-          className={`min-h-screen items-start justify-center pt-20 font-mono text-xs uppercase tracking-widest text-text-secondary ${
-            compact ? "hidden lg:flex" : "flex lg:hidden"
-          }`}
-        >
-          Aligning articles to this screen
         </div>
       </section>
     </div>

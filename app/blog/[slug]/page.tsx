@@ -18,6 +18,7 @@ import { optimizeImageUrl } from "@/app/lib/image-utils";
 import { fetchBlogIndexPosts, isLocalBlogDraft } from "@/app/blog/data";
 import { getBlogImageSrc } from "@/app/components/blog/blogImage";
 import { formatReadingTime } from "@/app/lib/reading-time";
+import { siteMetadata } from "@/app/data/siteMetadata";
 
 interface BlogPageProps {
   params: Promise<{ slug: string }>;
@@ -49,6 +50,20 @@ async function getPostFromParams(params: BlogPageProps["params"]) {
   const post = await getBlogPostBySlug(slug);
   if (!post) notFound();
   return post;
+}
+
+function safeCanonicalUrl(value: string | undefined, slug: string) {
+  if (value) {
+    try {
+      const url = new URL(value);
+      if (["http:", "https:"].includes(url.protocol) && url.hostname && !url.username && !url.password) {
+        return url.href;
+      }
+    } catch {
+      // Ignore malformed legacy canonical URLs.
+    }
+  }
+  return `/blog/${slug}`;
 }
 
 export default async function BlogPage({ params }: BlogPageProps) {
@@ -86,11 +101,10 @@ export default async function BlogPage({ params }: BlogPageProps) {
             "@context": "https://schema.org",
             "@type": "BlogPosting",
             headline: post.title,
-            ...(coverSrc ? { image: coverSrc } : {}),
+            ...(coverSrc ? { image: new URL(coverSrc, siteMetadata.siteUrl).href } : {}),
             datePublished: post.publishedAt,
-            author: { "@type": "Person", name: "Muhammad Haris" },
             description: post.summary,
-          }),
+          }).replace(/</g, "\\u003c"),
         }}
       />
 
@@ -163,7 +177,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
             className="cursor-help text-text-secondary"
             title={`Published ${formatDate(post.publishedAt)}`}
           >
-            <span className="hidden sm:inline">Updated </span>
+            <span className="hidden sm:inline">Published </span>
             <time dateTime={post.publishedAt}>{longDate(post.publishedAt)}</time>
           </span>
         </div>
@@ -244,14 +258,13 @@ export async function generateMetadata(
     title: post.title,
     description: post.summary,
     alternates: {
-      canonical: post.canonicalUrl || `/blog/${post.slug}`,
+      canonical: safeCanonicalUrl(post.canonicalUrl, post.slug),
     },
     openGraph: {
       title: post.title,
       description: post.summary,
       type: "article",
       publishedTime: post.publishedAt,
-      authors: ["Muhammad Haris"],
       images: [
         {
           url: `/api/og?title=${encodeURIComponent(post.title)}&summary=${encodeURIComponent(post.summary)}&image=${encodeURIComponent(post.imageName)}`,

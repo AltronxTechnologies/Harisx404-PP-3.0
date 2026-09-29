@@ -1,7 +1,7 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import createSupabaseServerClient from "@/app/lib/supabase/server";
+import createSupabaseServerClient, { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 import { saveBlogPostWithTags } from "@/app/lib/tag-sync";
 import { isAllowedBlogImageUrl } from "@/app/components/blog/blogImage";
 import { estimateReadingMinutes } from "@/app/lib/reading-time";
@@ -29,8 +29,11 @@ const optionalText = (max: number) =>
     .optional()
     .transform((value) => (value?.trim() ? value.trim() : null));
 
-const optionalUrl = z
-  .union([z.string().trim().max(2048).url(), z.literal(""), z.null()])
+const optionalCanonicalUrl = z
+  .union([z.string().trim().max(2048).url().refine((value) => {
+    const url = new URL(value);
+    return ["http:", "https:"].includes(url.protocol) && !url.username && !url.password;
+  }, "Canonical URL must be an HTTP(S) URL without credentials"), z.literal(""), z.null()])
   .optional()
   .transform((value) => value || null);
 
@@ -85,15 +88,14 @@ const blogSchema = z
     content: z
       .string()
       .max(1_000_000)
-      .transform((value) => value.replace(/\r\n?/g, "\n").trim())
-      .pipe(z.string().min(1, "Content is required")),
+      .refine((value) => value.trim().length > 0, "Content is required"),
     status: z.enum(["draft", "published"]),
     cover_image_url: optionalCoverUrl,
     cover_image_id: z
       .union([z.string().uuid(), z.literal(""), z.null()])
       .optional()
       .transform((value) => value || null),
-    canonical_url: optionalUrl,
+    canonical_url: optionalCanonicalUrl,
     published_at: optionalDate,
     tags: tagsSchema.optional().default([]),
   })
@@ -103,6 +105,12 @@ const updateSchema = blogSchema.extend({
   id: z.string().uuid(),
   updated_at: z.string().datetime({ offset: true }),
 });
+
+const archiveSchema = z.object({
+  id: z.string().uuid(),
+  updated_at: z.string().datetime({ offset: true }),
+  action: z.enum(["archive", "restore"]),
+}).strict();
 
 async function authorizeAdmin() {
   const supabase = await createSupabaseServerClient();
@@ -127,6 +135,21 @@ async function authorizeAdmin() {
   return null;
 }
 
+async function validateCoverMedia(coverId: string | null, coverUrl: string | null) {
+  if (!coverId) return null;
+  const admin = await createSupabaseAdminClient();
+  const { data: media, error } = await admin
+    .from("media")
+    .select("url, secure_url")
+    .eq("id", coverId)
+    .maybeSingle();
+  if (error) throw error;
+  if (!media || (coverUrl !== media.secure_url && coverUrl !== media.url)) {
+    return NextResponse.json({ error: "Choose a matching cover image from the media library." }, { status: 400 });
+  }
+  return null;
+}
+
 // Best-effort ISR invalidation must never fail a completed mutation.
 function revalidateBlogPaths(slug?: string | null) {
   try {
@@ -134,6 +157,7 @@ function revalidateBlogPaths(slug?: string | null) {
     revalidateTag("blog-reactions");
     revalidatePath("/");
     revalidatePath("/blog");
+    revalidatePath("/admin/blogs");
     if (slug) revalidatePath(`/blog/${slug}`);
     revalidatePath("/rss.xml");
     revalidatePath("/sitemap.xml");
@@ -163,9 +187,16 @@ function errorResponse(error: unknown) {
   if (message.includes("BLOG_POST_NOT_FOUND")) {
     return NextResponse.json({ error: "Blog post not found" }, { status: 404 });
   }
+  const code = error && typeof error === "object" && "code" in error ? error.code : null;
+  if (code === "23505") {
+    return NextResponse.json({ error: "A blog post or tag with that name already exists." }, { status: 409 });
+  }
+  if (code === "23503") {
+    return NextResponse.json({ error: "The selected cover image is no longer available." }, { status: 400 });
+  }
 
   console.error("Blog save failed:", error);
-  return NextResponse.json({ error: message }, { status: 500 });
+  return NextResponse.json({ error: "Unable to save blog post. Please try again." }, { status: 500 });
 }
 
 export async function POST(request: Request) {
@@ -174,6 +205,8 @@ export async function POST(request: Request) {
     if (authorizationError) return authorizationError;
 
     const data = blogSchema.parse(await request.json());
+    const coverError = await validateCoverMedia(data.cover_image_id, data.cover_image_url);
+    if (coverError) return coverError;
     const { tags, ...post } = data;
     const result = await saveBlogPostWithTags({
       post: { ...post, reading_time_minutes: estimateReadingMinutes(post.content) },
@@ -193,7 +226,20 @@ export async function PUT(request: Request) {
     if (authorizationError) return authorizationError;
 
     const data = updateSchema.parse(await request.json());
+    const coverError = await validateCoverMedia(data.cover_image_id, data.cover_image_url);
+    if (coverError) return coverError;
     const { id, updated_at, tags, ...post } = data;
+    const admin = await createSupabaseAdminClient();
+    const { data: current, error: lookupError } = await admin
+      .from("blog_posts")
+      .select("status")
+      .eq("id", id)
+      .maybeSingle();
+    if (lookupError) throw lookupError;
+    if (!current) return NextResponse.json({ error: "Blog post not found" }, { status: 404 });
+    if (current.status === "archived") {
+      return NextResponse.json({ error: "Restore this post before editing it." }, { status: 409 });
+    }
     const result = await saveBlogPostWithTags({
       id,
       expectedUpdatedAt: updated_at,
@@ -206,5 +252,46 @@ export async function PUT(request: Request) {
     return NextResponse.json(result.post);
   } catch (error) {
     return errorResponse(error);
+  }
+}
+
+export async function PATCH(request: Request) {
+  try {
+    const authorizationError = await authorizeAdmin();
+    if (authorizationError) return authorizationError;
+
+    const { id, updated_at, action } = archiveSchema.parse(await request.json());
+    const admin = await createSupabaseAdminClient();
+    const nextStatus = action === "archive" ? "archived" : "draft";
+    const nextUpdatedAt = new Date(Math.max(Date.now(), Date.parse(updated_at) + 1)).toISOString();
+    const mutation = admin.from("blog_posts")
+      .update({ status: nextStatus, updated_at: nextUpdatedAt })
+      .eq("id", id)
+      .eq("updated_at", updated_at);
+    const { data: post, error } = await (action === "archive"
+      ? mutation.in("status", ["draft", "published"])
+      : mutation.eq("status", "archived"))
+      .select("id, slug, status, updated_at")
+      .maybeSingle();
+    if (error) throw error;
+    if (!post) {
+      const { data: existing, error: lookupError } = await admin
+        .from("blog_posts")
+        .select("id")
+        .eq("id", id)
+        .maybeSingle();
+      if (lookupError) throw lookupError;
+      return NextResponse.json(
+        { error: existing ? "This post was changed elsewhere. Reload the page and try again." : "Blog post not found" },
+        { status: existing ? 409 : 404 },
+      );
+    }
+
+    revalidateBlogPaths(post.slug);
+    return NextResponse.json(post);
+  } catch (error) {
+    if (error instanceof SyntaxError || error instanceof z.ZodError) return errorResponse(error);
+    console.error("Blog archive/restore failed:", error);
+    return NextResponse.json({ error: "Unable to update blog post" }, { status: 500 });
   }
 }

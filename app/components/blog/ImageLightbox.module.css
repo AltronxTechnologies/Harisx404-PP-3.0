@@ -1,0 +1,4 @@
+.trigger:focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: 4px;
+}

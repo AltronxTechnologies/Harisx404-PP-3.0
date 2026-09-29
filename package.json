@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "test:blog": "node --test tests/blog.integration.test.mjs",
+    "test:blog:browser": "node --test tests/blog.browser.test.mjs",
     "test:contact": "node --test tests/contact.integration.test.mjs",
     "test:links": "node --test tests/links.integration.test.mjs",
     "test:legal": "node --test tests/legal-pages.integration.test.mjs",

@@ -183,6 +183,7 @@ INSERT INTO site_settings (key, value) VALUES
 
 -- Enable RLS on all tables
 ALTER TABLE blog_posts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE blog_post_tags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE media ENABLE ROW LEVEL SECURITY;
 ALTER TABLE changelog_entries ENABLE ROW LEVEL SECURITY;
@@ -193,7 +194,17 @@ ALTER TABLE tags ENABLE ROW LEVEL SECURITY;
 -- PUBLIC: Read published content only
 CREATE POLICY "Public can view published blog posts"
   ON blog_posts FOR SELECT
-  USING (status = 'published');
+  USING (status = 'published' AND published_at IS NOT NULL AND published_at <= NOW());
+
+CREATE POLICY "Public can view live blog post tags"
+  ON blog_post_tags FOR SELECT TO anon, authenticated
+  USING (EXISTS (
+    SELECT 1 FROM blog_posts
+    WHERE blog_posts.id = blog_post_tags.blog_post_id
+      AND blog_posts.status = 'published'
+      AND blog_posts.published_at IS NOT NULL
+      AND blog_posts.published_at <= NOW()
+  ));
 
 CREATE POLICY "Public can view published projects"
   ON projects FOR SELECT

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -195,7 +196,7 @@ export function BlogForm({ initialData }: BlogFormProps) {
           <label className="text-sm font-medium">Cover Image</label>
           <div className="flex gap-2">
             <input
-              {...register("cover_image_url")}
+              {...register("cover_image_url", { onChange: () => setValue("cover_image_id", "") })}
               className="flex-1 rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
               placeholder="https://... or choose from library"
             />
@@ -262,18 +263,41 @@ export function BlogForm({ initialData }: BlogFormProps) {
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Content</label>
+        <label htmlFor={initialData?.id ? "blog-content-source" : undefined} className="text-sm font-medium">Content</label>
+        {initialData?.id && (
+          <p className="text-sm text-ink-secondary">
+            Edit the original Markdown/MDX directly. The rich editor can remove embeds and custom formatting from existing articles.
+          </p>
+        )}
         <Controller
           name="content"
           control={control}
           render={({ field }) => (
-            <TiptapEditor value={field.value} onChange={field.onChange} />
+            initialData?.id ? (
+              <textarea
+                {...field}
+                id="blog-content-source"
+                spellCheck={false}
+                rows={22}
+                className="w-full rounded-xl border border-border-hairline bg-surface-base p-4 font-mono text-sm leading-6 text-ink-primary focus:outline-none focus:ring-2 focus:ring-accent-signal"
+              />
+            ) : (
+              <TiptapEditor value={field.value} onChange={field.onChange} label="Blog article content" />
+            )
           )}
         />
         {errors.content && <p className="text-xs text-red-500">{errors.content.message}</p>}
       </div>
 
       <div className="flex justify-end gap-4">
+        {initialData?.id && (
+          <Link
+            href={`/admin/blogs/${initialData.id}/preview`}
+            className="rounded-xl px-4 py-2 text-sm font-medium text-accent-signal underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-signal"
+          >
+            Preview saved post
+          </Link>
+        )}
         <button
           type="button"
           onClick={() => router.back()}

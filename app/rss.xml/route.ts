@@ -35,7 +35,7 @@ export async function GET() {
   <channel>
     <title>Muhammad Haris — Blog</title>
     <link>${escapeXml(siteUrl)}</link>
-    <description>Articles on full-stack development, cybersecurity, and AI by Muhammad Haris.</description>
+    <description>Articles on full-stack development, cybersecurity, and AI.</description>
     <language>en</language>
 ${items}
   </channel>

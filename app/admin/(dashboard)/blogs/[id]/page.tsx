@@ -14,6 +14,7 @@ export default async function EditBlogPage({ params }: { params: Promise<{ id: s
   if (error || !blog) {
     notFound();
   }
+  if (blog.status === "archived") notFound();
 
   const tags =
     blog.blog_post_tags
@@ -28,7 +29,7 @@ export default async function EditBlogPage({ params }: { params: Promise<{ id: s
       </div>
       
       <div className="rounded-xl border border-border-hairline bg-surface-raised p-6 shadow-sm">
-        <BlogForm initialData={{ ...blog, tags }} />
+        <BlogForm initialData={{ ...blog, content: blog.content || "", tags }} />
       </div>
     </div>
   );
