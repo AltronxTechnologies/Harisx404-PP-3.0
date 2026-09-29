@@ -65,3 +65,13 @@ test("Every syndicated article route renders without the Blog error state", asyn
     );
   });
 });
+
+test("formatted article headings have distinct, usable anchors", async () => {
+  const html = await responseText("/blog/effective-use-of-beforeeach-and-aftereach-in-angular-unit-tests");
+  const ids = Array.from(html.matchAll(/<h[23]\b[^>]*\bid="([^"]+)"/g), (match) => match[1]);
+  assert.ok(ids.length > 2);
+  assert.equal(new Set(ids).size, ids.length);
+  assert.ok(ids.includes("what-are-the-beforeeach-and-aftereach-methods"));
+  assert.match(html, /href="#what-are-the-beforeeach-and-aftereach-methods"/);
+  assert.doesNotMatch(html, /id="object-object"/);
+});

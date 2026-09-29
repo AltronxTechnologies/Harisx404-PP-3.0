@@ -45,6 +45,7 @@ import {
 } from "./mdx-components";
 import { CodePlayground } from "./CodePlayground";
 import { Details, DetailsSummary } from "./Details";
+import { addHeadingIds } from "@/app/lib/toc-utils";
 
 interface MDXProps {
   code: string;
@@ -102,7 +103,7 @@ export const MDXContent = async ({ code, components }: MDXProps) => {
   try {
     const { default: Content } = await evaluate(
       replaceUnavailableCodePenEmbeds(code),
-      runtime as any,
+      { ...runtime, remarkPlugins: [() => addHeadingIds] } as any,
     );
     return (
       <Content

@@ -390,8 +390,8 @@ function slugify(str) {
 
 function createHeading(level) {
   // eslint-disable-next-line react/display-name
-  return ({ children }) => {
-    let slug = slugify(children);
+  return ({ children, id }) => {
+    const slug = id || slugify(children);
     let textSize = "text-4xl";
     if (level === 2) textSize = "text-2xl md:text-3xl";
     if (level === 3) textSize = "text-xl md:text-2xl";
