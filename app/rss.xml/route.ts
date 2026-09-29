@@ -1,5 +1,6 @@
 import { fetchBlogIndexPosts } from "@/app/blog/data";
 import { siteMetadata } from "@/app/data/siteMetadata";
+import { isOwnBlogCanonical } from "@/app/lib/blog-canonical";
 
 export const revalidate = 60;
 
@@ -17,6 +18,7 @@ export async function GET() {
   const posts = await fetchBlogIndexPosts();
 
   const items = posts
+    .filter((post) => isOwnBlogCanonical(post.slug, post.canonicalUrl, siteUrl))
     .map((post) => {
       const link = `${siteUrl}/blog/${post.slug}`;
       const pubDate = new Date(post.publishedAt).toUTCString();

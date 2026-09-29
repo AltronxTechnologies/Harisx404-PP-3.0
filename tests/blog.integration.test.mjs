@@ -60,6 +60,11 @@ test("Every syndicated article route renders without the Blog error state", asyn
     );
     assert.doesNotMatch(
       html,
+      /This article content is unavailable because its formatting could not be safely rendered/,
+      `${slugs[index]} failed Blog MDX validation or rendering`,
+    );
+    assert.doesNotMatch(
+      html,
       /Enjoyed this write-up\?|bobloblaw@gmail\.com|>Subscribe<\/button>/,
       `${slugs[index]} still renders the newsletter signup`,
     );

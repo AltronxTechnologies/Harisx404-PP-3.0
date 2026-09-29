@@ -5,6 +5,7 @@ import { Metadata, ResolvingMetadata } from "next";
 import { MDXContent } from "@/app/components/mdx";
 import { RelatedPostCard } from "@/app/components/blog/RelatedPostCard";
 import { ImageLightbox } from "@/app/components/blog/ImageLightbox";
+import { BlogArticleImage } from "@/app/components/blog/BlogArticleImage";
 import ArticleReactionWrapper from "@/app/components/ArticleReactionsWrapper";
 import { CtaSection } from "@/app/components/home/CtaSection";
 import { CopyUrlButton } from "@/app/components/blog/CopyUrlButton";
@@ -66,6 +67,14 @@ function safeCanonicalUrl(value: string | undefined, slug: string) {
   return `/blog/${slug}`;
 }
 
+function blogCoverSrc(imageName: string) {
+  if (!imageName) return "";
+  const normalized = imageName.startsWith("http") || imageName.startsWith("/")
+    ? imageName
+    : `/blog/${imageName}`;
+  return getBlogImageSrc(optimizeImageUrl(normalized, 1600)) || "";
+}
+
 export default async function BlogPage({ params }: BlogPageProps) {
   const post = await getPostFromParams(params);
   const similarPosts = (await getRelatedBlogPosts(post)).filter(
@@ -76,12 +85,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
     ? `${post.readingTimeMinutes} min read`
     : formatReadingTime(post.code);
 
-  const normalizedCover = post.imageName.startsWith("http") || post.imageName.startsWith("/")
-    ? post.imageName
-    : `/blog/${post.imageName}`;
-  const coverSrc = post.imageName
-    ? getBlogImageSrc(optimizeImageUrl(normalizedCover, 1600)) || ""
-    : "";
+  const coverSrc = blogCoverSrc(post.imageName);
 
   return (
     <div className="relative min-w-0 pb-20">
@@ -189,7 +193,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
           id="blog-article"
           className="blog-article-shell prose prose-neutral dark:prose-invert mx-auto min-w-0 max-w-3xl overflow-x-hidden break-words [&>*:first-child]:mt-0 [&>div>*:first-child]:mt-0"
         >
-          <MDXContent code={post.code} />
+          <MDXContent code={post.code} components={{ img: BlogArticleImage, Image: BlogArticleImage }} />
         </article>
       </div>
 
@@ -253,6 +257,10 @@ export async function generateMetadata(
   }
 
   const previousImages = (await parent)?.openGraph?.images || [];
+  const coverSrc = blogCoverSrc(post.imageName);
+  const socialImage = coverSrc
+    ? new URL(coverSrc, siteMetadata.siteUrl).href
+    : `/api/og?title=${encodeURIComponent(post.title)}&category=Blog`;
 
   return {
     title: post.title,
@@ -267,9 +275,7 @@ export async function generateMetadata(
       publishedTime: post.publishedAt,
       images: [
         {
-          url: `/api/og?title=${encodeURIComponent(post.title)}&summary=${encodeURIComponent(post.summary)}&image=${encodeURIComponent(post.imageName)}`,
-          width: 1200,
-          height: 630,
+          url: socialImage,
           alt: post.title,
         },
         ...previousImages,
@@ -279,9 +285,7 @@ export async function generateMetadata(
       card: "summary_large_image",
       title: post.title,
       description: post.summary,
-      images: [
-        `/api/og?title=${encodeURIComponent(post.title)}&summary=${encodeURIComponent(post.summary)}&image=${encodeURIComponent(post.imageName)}`,
-      ],
+      images: [socialImage],
     },
   };
 }

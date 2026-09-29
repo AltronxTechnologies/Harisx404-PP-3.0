@@ -45,4 +45,6 @@ test("server list filters before bounded fetch, retains archive control and repo
   assert.match(page, /role="alert"/);
   assert.match(page, /No posts match these filters/);
   assert.match(page, /aria-label="Blog post pages"/);
+  assert.match(page, /rawParams\.saved === "1"/);
+  assert.match(page, /Post saved successfully/);
 });

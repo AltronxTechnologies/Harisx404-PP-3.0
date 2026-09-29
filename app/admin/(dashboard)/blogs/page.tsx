@@ -9,7 +9,8 @@ export default async function AdminBlogsPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const params = parseBlogListParams(await searchParams);
+  const rawParams = await searchParams;
+  const params = parseBlogListParams(rawParams);
   const now = new Date();
   const nowIso = now.toISOString();
   const supabase = await createSupabaseAdminClient();
@@ -49,6 +50,12 @@ export default async function AdminBlogsPage({
           New Post
         </Link>
       </div>
+
+      {rawParams.saved === "1" && (
+        <p role="status" className="rounded-xl border border-border-hairline bg-surface-raised p-4 text-sm text-ink-primary">
+          Post saved successfully.
+        </p>
+      )}
 
       <form action="/admin/blogs" method="get" className="flex flex-wrap items-end gap-3 rounded-xl border border-border-hairline bg-surface-raised p-4 text-sm shadow-sm">
         <div className="min-w-48 flex-1">

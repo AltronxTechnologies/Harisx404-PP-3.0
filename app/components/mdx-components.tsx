@@ -324,7 +324,7 @@ function Code({ children, ...props }) {
           </div>
           {filename && <span className="code-frame-filename">{filename}</span>}
         </div>
-        <button onClick={copyToClipboard}>
+        <button type="button" onClick={copyToClipboard} aria-label={isCopied ? "Code copied" : "Copy code"} className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary">
           {isCopied ? (
             <svg
               className="h-5 w-5 text-indigo-400"

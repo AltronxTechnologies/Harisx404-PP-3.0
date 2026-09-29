@@ -27,15 +27,17 @@ Date: 2026-09-29. Branch: `haris-dev/set-up-this-codebase-for-FcY5YL`.
 
 ## Next exact step
 
-1. Apply `migrations/2026_blog_tag_join_rls.sql` only through the approved
-   database rollout, then verify catalog policies/grants and anon/authenticated
-   reads against safe draft, scheduled and live fixtures; no live write probe.
+1. Apply `migrations/2026_blog_tag_join_rls.sql` and
+   `migrations/2026_blog_admin_tag_collisions.sql` only through an approved
+   database rollout (the latter after the original Blog save RPC), then verify
+   catalog policies/grants and role-specific reads using safe fixtures.
 2. Verify authenticated Admin create/edit/source round-trip, saved preview,
    archive/restore, conflicts, scheduling and cache invalidation with an
    authorized test record; public HTTP/source tests do not establish these.
-3. Fill remaining Blog content tooling: practical links/images/captions/tables
-   in the new-post editor, cover alt text, slug defaults, richer feedback and
-   unsaved preview if needed; test Markdown/MDX and browser states.
+3. Finish remaining content/SEO gates: owner-provided alt text/credits for
+   imported images, verified author/canonical data, rich-editing of legacy
+   MDX only if it can round-trip losslessly, unsaved preview if needed, and
+   browser verification of Admin save/reopen, dates and content edge cases.
 4. Resolve imported content provenance/rights and archive retention with the
    owner before authorship schema/metadata, permanent deletion, production
    sign-off or a final lock. Run full theme/viewport/content/SEO QA after.
@@ -91,6 +93,24 @@ Date: 2026-09-29. Branch: `haris-dev/set-up-this-codebase-for-FcY5YL`.
   passed. Files: `ImageLightbox.tsx`, its scoped CSS module, `app/blog/[slug]/page.tsx`,
   `app/rss.xml/route.ts`, `tests/blog-lightbox.browser.test.mjs`,
   `tests/blog-article-metadata.test.mjs`.
+- **New image/table and social output (2026-09-29):** published article bodies
+  use a Blog-local image component that preserves supplied alt text, displays
+  optional Markdown titles as captions, links safely to unsupported HTTPS
+  hosts, and omits unsafe sources. GFM Markdown tables now render actual table
+  cells; social metadata uses a validated absolute cover when present and the
+  existing branded card otherwise. Missing imported image descriptions remain
+  editorial work, not synthesized alt text. Files: `BlogArticleImage.tsx`,
+  article page, `app/components/mdx.tsx`, `tests/blog-article-image.test.tsx`,
+  `tests/blog-mdx-gfm.test.mjs`, and metadata tests.
+- **Runtime MDX boundary (2026-09-29):** Blog-only AST validation rejects
+  arbitrary ESM/expressions, JSX spreads/handlers and unsafe URLs before
+  Admin persistence and before public/preview evaluation. Rejected content
+  displays a safe unavailable message instead of raw source. Read-only anon
+  REST preflight found 63/63 currently published posts accepted (0 rejected);
+  focused policy tests covered malicious cases and safe relative links.
+  The preflight does not establish rights/alt-text quality, nor does it cover
+  draft content not accessible anonymously. Files: `app/lib/blog-mdx-policy.mjs`,
+  `app/components/mdx.tsx`, Blog API, `tests/blog-mdx-policy.test.mjs`.
 
 ## Phase 3: Admin safety
 
@@ -124,6 +144,13 @@ Date: 2026-09-29. Branch: `haris-dev/set-up-this-codebase-for-FcY5YL`.
   `supabase_schema.sql` now includes the same protections and excludes future
   posts from Blog reads. `tests/blog-tag-security.test.mjs` verifies the
   checked-in contract only. Deployed policies remain unverified.
+- **Tag-collision follow-up (2026-09-29):** additive Blog save-RPC migration
+  `migrations/2026_blog_admin_tag_collisions.sql` reuses tags by exact name
+  and assigns distinct slugs on normalized collisions, rather than renaming
+  project tags. A disposable PostgreSQL test passed and rolled back; it has
+  not been applied to the connected database. Blog API deduplicates tag names
+  without dropping different names sharing a normalized slug. Files:
+  migration, Blog API, `tests/blog-tag-collisions.*`.
 
 ## Phase 4: Editorial workflow
 
@@ -137,21 +164,116 @@ Date: 2026-09-29. Branch: `haris-dev/set-up-this-codebase-for-FcY5YL`.
   passed. No authenticated browser save/preview was exercised. Files:
   `app/admin/(dashboard)/blogs/[id]/preview/page.tsx`, BlogForm,
   `tests/blog-admin.preview.test.mjs`.
+- **New-post authoring (2026-09-29):** title supplies an editable slug until
+  manually changed; blank summary on create defaults from article prose only,
+  while existing-post summary remains untouched. Blog-only rich-editor controls
+  now support H3, rule, validated links, media-library images with required
+  author alt and optional caption, and simple editable GFM tables. The editor
+  is lazy-loaded for new posts; existing posts stay in lossless source mode.
+  BlogForm labels/tag actions were made explicit. Tests cover Markdown
+  save/reload and show Project/Changelog controls remain unchanged.
+  `@tiptap/*` was upgraded together to patched 3.31.3; shared-editor Project
+  regressions passed 10 with one pre-existing skip. Files: BlogForm, scoped
+  `blogTools` in shared TiptapEditor, `app/lib/blog-defaults.ts`, Blog API,
+  package/lock, tests/blog-editor.test.tsx and tests/blog-defaults.test.mjs.
 
 ## Latest verification
 
 - Blog HTTP 4/4; pre-hydration Blog browser 1/1; image lightbox browser 2/2;
-  Admin/metadata/security scoped tests 15/15; navigation 4/4, preview 3/3;
+  Admin/metadata/security scoped tests passed; new editor 5/5, image 4/4,
+  GFM 1/1 and MDX policy 22/22; navigation 4/4, preview 3/3;
   Docker TypeScript, targeted ESLint and `git diff --check` passed.
 - Locked-surface regression checks: Home/About 3/3, legal 5/5, projects
   10 passed / 1 skipped (preview-only data fixture), with no changes to
   those page implementations.
 - No Admin write, tag-join migration or imported-article content was applied
   to the connected database. Docker web stack remains running. Tests do not
-  prove production deletion, scheduling, copyright clearance or a complete
-  rich editor.
+  prove production deletion, scheduling or copyright clearance. The initial
+  full-site dependency audit reported high findings outside the scoped Tiptap
+  patch (including Next/PostCSS and image processing); no broad dependency
+  upgrade was performed because it would alter unrelated locked surfaces.
 
 ## Phase 5: Final QA and owner sign-off
 
 - **Status:** pending. Rights, production database and authenticated Admin
   acceptance are separate from a visually rendered Blog page.
+
+## Continuation: Article media, editor and MDX safety (2026-09-29)
+
+- **Completed:** A Blog-only MDX image renderer preserves authored alt text,
+  renders optional captions, links unsupported HTTPS hosts safely and omits
+  unsafe sources. The public Markdown parser now supports GFM tables. Blog
+  OG/X metadata uses a validated cover with the branded card as fallback.
+- **Completed:** New Blog titles generate editable slugs until manually
+  changed; a blank create-only summary uses article prose. The Blog-only
+  editor mode supports H3, rules, validated links, media-library images with
+  required alt/optional captions, and editable 2x2 GFM tables. Existing posts
+  remain in source mode. BlogForm labels and tag actions are accessible;
+  the rich editor is lazy-loaded on new-post forms.
+- **Completed:** The Blog MDX AST policy blocks arbitrary ESM, expressions,
+  spread/event attributes and unsafe URLs before API writes and public/preview
+  evaluation. It allows the observed static article constructs. Rejected
+  content shows a safe unavailable message instead of raw source. Read-only
+  anon REST preflight: **63 published rows, 63 accepted, 0 rejected**. The
+  syndicated-route suite also asserts that every listed post actually renders
+  content, not the safe error state.
+- **Completed:** `@tiptap/core`, React, StarterKit, PM, image and table packages
+  upgraded together to 3.31.3 to remove the editor-core high-severity audit
+  finding. Blog editor round-trip and Project editor regressions passed after
+  the upgrade; the Project test's brittle MenuBar-signature assertion was
+  adjusted, with Project presentation unchanged. No broad `npm audit fix` was
+  used. Other dependency findings remain outside this scoped change.
+- **Completed:** Blog MDX code-copy buttons now announce `Copy code` or
+  `Code copied` and have visible keyboard focus. A published code-heavy
+  article passes the accessible-name regression. Files:
+  `app/components/mdx-components.tsx`, `tests/blog-code-accessibility.test.mjs`.
+- **Verified:** Blog HTTP 4/4, editor 5/5, Blog image 4/4, GFM 1/1, MDX
+  policy 22/22, Docker TypeScript/targeted ESLint and diff checks passed.
+  Project 10 passed / 1 pre-existing skip; Home/About 3/3. Browser on the
+  Alloy preview measured 320px dark and 1440px light article: document width
+  equals viewport, 0 overflowing article text nodes, 0 failed article images,
+  and no app console errors. Database read-only canonical scan: 63 published,
+  0 canonical overrides. No Admin session or live write was used.
+- **Post-upgrade checks:** Blog pre-hydration browser 1/1, lightbox browser
+  2/2, legal 5/5, navigation 4/4 and preview 3/3 passed. Production-only
+  dependency audit still reports 12 advisories (5 high) outside patched
+  Tiptap. New code-copy check 1/1, TypeScript and targeted lint passed.
+- **Files changed:** `app/blog/[slug]/page.tsx`, `app/components/blog/BlogArticleImage.tsx`,
+  `app/components/mdx.tsx`, `app/lib/blog-defaults.ts`,
+  `app/lib/blog-mdx-policy.mjs`, `app/components/admin/BlogForm.tsx`,
+  `app/components/admin/TiptapEditor.tsx`, `app/components/mdx-components.tsx`,
+  `app/api/admin/blogs/route.ts`,
+  `package.json`, `package-lock.json`, Blog-focused tests and the Project
+  source-contract test.
+- **Remaining:** apply/check both Blog migrations with approved database
+  access; exercise authenticated save/reopen, schedule, archive/restore and
+  preview on an approved test record; obtain owner attribution/rights and
+  archive-retention decisions; provide meaningful alt/credits for legacy
+  content; expand full
+  multi-viewport/theme and content-edge QA. Production `npm audit --omit=dev`
+  still reports 12 findings (5 high) in other packages, including Next's
+  bundled PostCSS and image handling; changing those broadly would touch
+  unrelated locked surfaces. Do not claim a final production lock yet.
+
+## Continuation: Canonical discovery and Admin feedback (2026-09-29)
+
+- **Completed:** Blog index data now carries each post's canonical override.
+  Blog sitemap and RSS entries use the same Blog-only canonical check: posts
+  with an external or different canonical are omitted from both feeds, while
+  posts without an override remain. Current read-only REST scan found no
+  published overrides, so the existing public collection is unchanged.
+  Files: `app/lib/blog-canonical.ts`, `app/blog/data.ts`, `app/sitemap.ts`,
+  `app/rss.xml/route.ts`, `tests/blog-canonical.test.mjs`.
+- **Completed:** On a successful create/edit, the Blog form redirects to a
+  status message on the Admin Blog list rather than silently navigating.
+  URL-backed filters and clearing the list do not retain that message. Files:
+  `app/components/admin/BlogForm.tsx`, `app/admin/(dashboard)/blogs/page.tsx`,
+  `tests/blog-admin.list.test.mjs`.
+- **Verification:** Blog HTTP 4/4 including all syndicated article routes,
+  canonical helper 1/1, code-copy 1/1, navigation 4/4, TypeScript,
+  targeted ESLint and diff check passed. 320px dark and 1440px light article
+  browser measurements have no page overflow or failed article images.
+- **Still blocked:** authenticated Admin save/preview/archive tests and live
+  database migration rollout need an approved test account/data strategy;
+  editorial rights, author attribution and archived-post retention need owner
+  decisions. These are not inferred from route rendering or source tests.

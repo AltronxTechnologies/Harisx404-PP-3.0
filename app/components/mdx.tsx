@@ -15,6 +15,7 @@
 // (a "use client" module's object export can't be spread inside an RSC, so we
 // rebuild the map here from named exports).
 import { evaluate } from "@mdx-js/mdx";
+import remarkGfm from "remark-gfm";
 import * as jsxRuntime from "react/jsx-runtime";
 import * as jsxDevRuntime from "react/jsx-dev-runtime";
 import React from "react";
@@ -46,6 +47,7 @@ import {
 import { CodePlayground } from "./CodePlayground";
 import { Details, DetailsSummary } from "./Details";
 import { addHeadingIds } from "@/app/lib/toc-utils";
+import { validateBlogMdx } from "@/app/lib/blog-mdx-policy.mjs";
 
 interface MDXProps {
   code: string;
@@ -101,9 +103,10 @@ function replaceUnavailableCodePenEmbeds(code: string) {
 
 export const MDXContent = async ({ code, components }: MDXProps) => {
   try {
+    validateBlogMdx(code);
     const { default: Content } = await evaluate(
       replaceUnavailableCodePenEmbeds(code),
-      { ...runtime, remarkPlugins: [() => addHeadingIds] } as any,
+      { ...runtime, remarkPlugins: [remarkGfm, () => addHeadingIds] } as any,
     );
     return (
       <Content
@@ -111,11 +114,11 @@ export const MDXContent = async ({ code, components }: MDXProps) => {
       />
     );
   } catch (error) {
-    console.warn("MDX compile failed, rendering raw content fallback:", error);
+    console.warn("Blog MDX rejected or failed to compile:", error);
     return (
-      <pre className="whitespace-pre-wrap text-base leading-7 text-text-secondary">
-        {code}
-      </pre>
+      <p role="alert" className="text-base leading-7 text-text-secondary">
+        This article content is unavailable because its formatting could not be safely rendered.
+      </p>
     );
   }
 };

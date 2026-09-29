@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { fetchProjects } from "@/app/lib/utils";
 import { fetchBlogIndexPosts } from "@/app/blog/data";
 import { siteMetadata } from "@/app/data/siteMetadata";
+import { isOwnBlogCanonical } from "@/app/lib/blog-canonical";
 
 export const revalidate = 60;
 
@@ -9,7 +10,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const posts = await fetchBlogIndexPosts();
   const projects = await fetchProjects();
   
-  const blogUrls = posts.map((post) => ({
+  const blogUrls = posts.filter((post) => isOwnBlogCanonical(post.slug, post.canonicalUrl, siteMetadata.siteUrl)).map((post) => ({
     url: `${siteMetadata.siteUrl}/blog/${post.slug}`,
     lastModified: new Date(post.publishedAt),
     changeFrequency: "weekly" as const,

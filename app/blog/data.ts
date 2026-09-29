@@ -35,6 +35,7 @@ export type BlogIndexPost = {
   imageName: string;
   categories: string[];
   featured: boolean;
+  canonicalUrl: string | null;
 };
 
 type LocalMetadata = {
@@ -124,7 +125,7 @@ const loadBlogIndexPosts = async (): Promise<BlogIndexPost[]> => {
   const { data, error } = await supabase
     .from("blog_posts")
     .select(`
-      title, slug, summary, published_at, cover_image_url,
+      title, slug, summary, published_at, cover_image_url, canonical_url,
       reading_time_minutes, featured,
       blog_post_tags ( tags ( name, slug ) )
     `)
@@ -195,6 +196,7 @@ const loadBlogIndexPosts = async (): Promise<BlogIndexPost[]> => {
               ) === index,
           ),
         featured: post.featured === true,
+        canonicalUrl: post.canonical_url || null,
       };
     });
 };

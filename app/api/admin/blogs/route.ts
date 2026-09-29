@@ -5,15 +5,8 @@ import createSupabaseServerClient, { createSupabaseAdminClient } from "@/app/lib
 import { saveBlogPostWithTags } from "@/app/lib/tag-sync";
 import { isAllowedBlogImageUrl } from "@/app/components/blog/blogImage";
 import { estimateReadingMinutes } from "@/app/lib/reading-time";
-
-const normalizeSlug = (value: string) =>
-  value
-    .trim()
-    .toLowerCase()
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+import { defaultBlogSummary, normalizeBlogSlug } from "@/app/lib/blog-defaults";
+import { BlogMdxValidationError, validateBlogMdx } from "@/app/lib/blog-mdx-policy.mjs";
 
 const normalizeTagSlug = (value: string) =>
   value
@@ -60,10 +53,9 @@ const tagsSchema = z
   .transform((tags) => {
     const seen = new Set<string>();
     return tags.flatMap((tag) => {
-      const slug = normalizeTagSlug(tag);
-      if (seen.has(slug)) return [];
-      seen.add(slug);
-      return [{ name: tag, slug }];
+      if (seen.has(tag)) return [];
+      seen.add(tag);
+      return [{ name: tag, slug: normalizeTagSlug(tag) }];
     });
   });
 
@@ -82,7 +74,7 @@ const blogSchema = z
     slug: z
       .string()
       .max(300)
-      .transform(normalizeSlug)
+      .transform(normalizeBlogSlug)
       .pipe(z.string().min(1, "Slug is required").max(200)),
     summary: optionalText(1000),
     content: z
@@ -167,6 +159,9 @@ function revalidateBlogPaths(slug?: string | null) {
 }
 
 function errorResponse(error: unknown) {
+  if (error instanceof BlogMdxValidationError) {
+    return NextResponse.json({ error: error.message }, { status: 400 });
+  }
   if (error instanceof SyntaxError) {
     return NextResponse.json({ error: "Request body must be valid JSON" }, { status: 400 });
   }
@@ -205,11 +200,16 @@ export async function POST(request: Request) {
     if (authorizationError) return authorizationError;
 
     const data = blogSchema.parse(await request.json());
+    validateBlogMdx(data.content);
     const coverError = await validateCoverMedia(data.cover_image_id, data.cover_image_url);
     if (coverError) return coverError;
     const { tags, ...post } = data;
     const result = await saveBlogPostWithTags({
-      post: { ...post, reading_time_minutes: estimateReadingMinutes(post.content) },
+      post: {
+        ...post,
+        summary: post.summary ?? defaultBlogSummary(post.content, post.title),
+        reading_time_minutes: estimateReadingMinutes(post.content),
+      },
       tags,
     });
 
@@ -226,6 +226,7 @@ export async function PUT(request: Request) {
     if (authorizationError) return authorizationError;
 
     const data = updateSchema.parse(await request.json());
+    validateBlogMdx(data.content);
     const coverError = await validateCoverMedia(data.cover_image_id, data.cover_image_url);
     if (coverError) return coverError;
     const { id, updated_at, tags, ...post } = data;

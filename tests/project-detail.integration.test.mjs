@@ -272,7 +272,8 @@ test("project tags, timeline, source name and optional sections remain owner-man
   assert.match(form, /register\("source_note"\)/);
   assert.match(form, /name=\{`case_study_sections\.\$\{key\}`\}/);
   assert.match(form, /<TiptapEditor label=\{label\} story value=\{field\.value \|\| ""\} onChange=\{field\.onChange\}/);
-  assert.match(editor, /const MenuBar = \(\{ editor, story \}/);
+  assert.match(editor, /const MenuBar = \(\{ editor, story(?:, blogTools)? \}/);
+  assert.match(editor, /blogTools = false/);
   for (const action of ["toggleBold", "toggleItalic", "toggleBulletList", "toggleOrderedList"]) {
     assert.ok(editor.includes(`${action}()`), `${action} should be available in the story toolbar`);
   }

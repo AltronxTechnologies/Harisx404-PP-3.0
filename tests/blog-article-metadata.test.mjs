@@ -20,6 +20,9 @@ test("published article uses truthful dates, no invented author, and an absolute
   assert.ok(html.includes(`<meta property="article:published_time" content="${article.datePublished}"`));
   assert.ok(article.image, "fixture article should have a cover");
   assert.match(article.image, /^https?:\/\/[^/]+\//);
+  const escapedImage = article.image.replace(/&/g, "&amp;");
+  assert.ok(html.includes(`<meta property="og:image" content="${escapedImage}"`));
+  assert.ok(html.includes(`<meta name="twitter:image" content="${escapedImage}"`));
   assert.ok(html.includes(`/_next/image?url=${encodeURIComponent(article.image)}`), "cover should still render");
   assert.match(html, /<link rel="canonical" href="https?:\/\/[^" ]+"/);
 });

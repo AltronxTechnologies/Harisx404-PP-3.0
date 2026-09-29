@@ -1,25 +1,113 @@
 "use client";
 
-import { useEditor, EditorContent } from "@tiptap/react";
+import { useEditor, useEditorState, EditorContent, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import Image from "@tiptap/extension-image";
+import { TableKit } from "@tiptap/extension-table";
 import { Markdown } from "tiptap-markdown";
-import { Bold, Italic, List, ListOrdered, Quote, Heading2, Code, Undo, Redo, Code2, Sparkles, Loader2, ChevronDown } from "lucide-react";
+import { Bold, Italic, List, ListOrdered, Quote, Heading2, Heading3, Minus, Link as LinkIcon, Image as ImageIcon, Table as TableIcon, Code, Undo, Redo, Code2, Sparkles, Loader2, ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
+import { MediaPickerModal } from "./MediaPickerModal";
 
 interface TiptapEditorProps {
   value: string;
   onChange: (value: string) => void;
   label?: string;
   story?: boolean;
+  blogTools?: boolean;
 }
 
-const MenuBar = ({ editor, story }: { editor: any; story: boolean }) => {
+export function validBlogLinkUrl(input: string): boolean {
+  const url = input.trim();
+  if (!url || /[\u0000-\u001f\u007f]/.test(input) || /[\s\\<>"']/.test(url) || url.startsWith("//")) return false;
+  if (/^https?:\/\//i.test(url)) {
+    try {
+      const parsed = new URL(url);
+      return Boolean(parsed.hostname) && !parsed.username && !parsed.password;
+    } catch {
+      return false;
+    }
+  }
+  return !/^[a-z][a-z\d+.-]*:/i.test(url) && (/^[/.#?]/.test(url) || /^[a-z\d_-]/i.test(url));
+}
+
+const TableTools = ({ editor }: { editor: Editor }) => {
+  const isInTable = useEditorState({ editor, selector: ({ editor }) => editor.isActive("table") });
+  if (!isInTable) return null;
+
+  return (
+    <div role="group" aria-label="Edit table" className="flex flex-wrap items-center gap-1">
+      <button type="button" onClick={() => editor.chain().focus().addRowAfter().run()} aria-label="Add row below"
+        className="rounded p-2 text-sm text-ink-secondary hover:bg-surface-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-signal">+ Row</button>
+      <button type="button" onClick={() => editor.chain().focus().deleteRow().run()} aria-label="Delete row"
+        className="rounded p-2 text-sm text-ink-secondary hover:bg-surface-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-signal">- Row</button>
+      <button type="button" onClick={() => editor.chain().focus().addColumnAfter().run()} aria-label="Add column to right"
+        className="rounded p-2 text-sm text-ink-secondary hover:bg-surface-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-signal">+ Column</button>
+      <button type="button" onClick={() => editor.chain().focus().deleteColumn().run()} aria-label="Delete column"
+        className="rounded p-2 text-sm text-ink-secondary hover:bg-surface-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-signal">- Column</button>
+      <button type="button" onClick={() => editor.chain().focus().deleteTable().run()} aria-label="Delete table"
+        className="rounded p-2 text-sm text-ink-secondary hover:bg-surface-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-signal">Delete table</button>
+    </div>
+  );
+};
+
+const MenuBar = ({ editor, story, blogTools }: { editor: Editor | null; story: boolean; blogTools: boolean }) => {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiMenuOpen, setAiMenuOpen] = useState(false);
+  const [linkOpen, setLinkOpen] = useState(false);
+  const [linkUrl, setLinkUrl] = useState("");
+  const [linkText, setLinkText] = useState("");
+  const [linkError, setLinkError] = useState("");
+  const [linkRange, setLinkRange] = useState({ from: 0, to: 0, existing: false });
+  const [imagePickerOpen, setImagePickerOpen] = useState(false);
+  const [imageUrl, setImageUrl] = useState("");
+  const [imageAlt, setImageAlt] = useState("");
+  const [imageCaption, setImageCaption] = useState("");
+  const [imagePosition, setImagePosition] = useState(0);
 
   if (!editor) {
     return null;
   }
+
+  const openLink = () => {
+    setImageUrl("");
+    const { from, to } = editor.state.selection;
+    const existing = editor.isActive("link");
+    setLinkRange({ from, to, existing });
+    setLinkUrl(existing ? editor.getAttributes("link").href || "" : "");
+    setLinkText(from === to && !existing ? "" : editor.state.doc.textBetween(from, to));
+    setLinkError("");
+    setLinkOpen(true);
+  };
+
+  const saveLink = () => {
+    const href = linkUrl.trim();
+    if (!validBlogLinkUrl(href)) {
+      setLinkError("Enter a valid HTTP(S) or relative URL.");
+      return;
+    }
+    const { from, to, existing } = linkRange;
+    if (!existing && from === to) {
+      if (!linkText.trim()) {
+        setLinkError("Enter link text.");
+        return;
+      }
+      editor.chain().focus().setTextSelection(from).insertContent({ type: "text", text: linkText.trim(), marks: [{ type: "link", attrs: { href } }] }).run();
+    } else {
+      editor.chain().focus().setTextSelection({ from, to }).extendMarkRange("link").setLink({ href }).run();
+    }
+    setLinkOpen(false);
+  };
+
+  const insertImage = () => {
+    if (!imageAlt.trim()) return;
+    editor.chain().focus().setTextSelection(imagePosition).setImage({
+      src: imageUrl,
+      alt: imageAlt.trim(),
+      title: imageCaption.trim() || undefined,
+    }).run();
+    setImageUrl("");
+  };
 
   const handleAiAssist = async (action: string) => {
     try {
@@ -64,6 +152,7 @@ const MenuBar = ({ editor, story }: { editor: any; story: boolean }) => {
   };
 
   return (
+    <>
     <div className="flex flex-wrap items-center gap-1 border-b border-border-hairline bg-surface-base p-2">
       <button
         type="button"
@@ -101,6 +190,40 @@ const MenuBar = ({ editor, story }: { editor: any; story: boolean }) => {
           >
             <Heading2 className="h-4 w-4" />
           </button>
+        </>
+      )}
+
+      {blogTools && (
+        <>
+          <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+            aria-label="Heading 3" title="Heading 3" aria-pressed={editor.isActive("heading", { level: 3 })}
+            className="p-2 rounded text-ink-secondary hover:bg-surface-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-signal">
+            <Heading3 className="h-4 w-4" />
+          </button>
+          <button type="button" onClick={() => editor.chain().focus().setHorizontalRule().run()}
+            aria-label="Horizontal rule" title="Horizontal rule"
+            className="p-2 rounded text-ink-secondary hover:bg-surface-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-signal">
+            <Minus className="h-4 w-4" />
+          </button>
+          <button type="button" onClick={openLink} aria-label="Insert or edit link" title="Insert or edit link"
+            aria-expanded={linkOpen} aria-pressed={editor.isActive("link")}
+            className="p-2 rounded text-ink-secondary hover:bg-surface-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-signal">
+            <LinkIcon className="h-4 w-4" />
+          </button>
+          <button type="button" onClick={() => {
+            setLinkOpen(false);
+            setImagePosition(editor.state.selection.to);
+            setImagePickerOpen(true);
+          }} aria-label="Insert image" title="Insert image"
+            className="p-2 rounded text-ink-secondary hover:bg-surface-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-signal">
+            <ImageIcon className="h-4 w-4" />
+          </button>
+          <button type="button" onClick={() => editor.chain().focus().insertTable({ rows: 2, cols: 2, withHeaderRow: true }).run()}
+            aria-label="Insert 2 by 2 table" title="Insert 2 by 2 table"
+            className="p-2 rounded text-ink-secondary hover:bg-surface-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-signal">
+            <TableIcon className="h-4 w-4" />
+          </button>
+          <TableTools editor={editor} />
         </>
       )}
 
@@ -245,13 +368,62 @@ const MenuBar = ({ editor, story }: { editor: any; story: boolean }) => {
         </>
       )}
     </div>
+    {blogTools && linkOpen && (
+      <div className="flex flex-wrap items-end gap-2 border-b border-border-hairline bg-surface-base p-3" role="group" aria-label="Edit link">
+        {linkRange.from === linkRange.to && !linkRange.existing && (
+          <label className="flex flex-col gap-1 text-sm text-ink-primary">Link text
+            <input value={linkText} onChange={(event) => setLinkText(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); saveLink(); } }} className="rounded border border-border-hairline bg-surface-raised p-2" />
+          </label>
+        )}
+        <label className="flex flex-col gap-1 text-sm text-ink-primary">URL
+            <input type="text" value={linkUrl} onChange={(event) => { setLinkUrl(event.target.value); setLinkError(""); }}
+            onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); saveLink(); } }}
+            aria-invalid={Boolean(linkError)} aria-describedby={linkError ? "blog-link-error" : undefined}
+            autoFocus className="rounded border border-border-hairline bg-surface-raised p-2" placeholder="https://example.com or /blog/post" />
+        </label>
+        <button type="button" onClick={saveLink} className="rounded border border-border-hairline p-2 text-sm hover:bg-surface-raised">Apply link</button>
+        {linkRange.existing && (
+          <button type="button" onClick={() => {
+            editor.chain().focus().setTextSelection({ from: linkRange.from, to: linkRange.to }).extendMarkRange("link").unsetLink().run();
+            setLinkOpen(false);
+          }} className="rounded border border-border-hairline p-2 text-sm hover:bg-surface-raised">Remove link</button>
+        )}
+        <button type="button" onClick={() => { setLinkOpen(false); editor.commands.focus(); }} className="rounded border border-border-hairline p-2 text-sm hover:bg-surface-raised">Cancel</button>
+        {linkError && <p id="blog-link-error" role="alert" className="w-full text-sm text-red-500">{linkError}</p>}
+      </div>
+    )}
+    {blogTools && imageUrl && (
+      <div role="group" aria-label="Image details" className="flex flex-wrap items-end gap-2 border-b border-border-hairline bg-surface-base p-3">
+        <label className="flex flex-col gap-1 text-sm text-ink-primary">Alt text (required)
+          <input required value={imageAlt} onChange={(event) => setImageAlt(event.target.value)}
+            onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); insertImage(); } }}
+            className="rounded border border-border-hairline bg-surface-raised p-2" />
+        </label>
+        <label className="flex flex-col gap-1 text-sm text-ink-primary">Caption (optional)
+          <input value={imageCaption} onChange={(event) => setImageCaption(event.target.value)}
+            onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); insertImage(); } }}
+            className="rounded border border-border-hairline bg-surface-raised p-2" />
+        </label>
+        <button type="button" disabled={!imageAlt.trim()} onClick={insertImage} className="rounded border border-border-hairline p-2 text-sm hover:bg-surface-raised disabled:opacity-50">Insert image</button>
+        <button type="button" onClick={() => setImageUrl("")} className="rounded border border-border-hairline p-2 text-sm hover:bg-surface-raised">Cancel</button>
+      </div>
+    )}
+    {blogTools && <MediaPickerModal isOpen={imagePickerOpen} onClose={() => setImagePickerOpen(false)} onSelect={(media) => {
+      const src = media.secure_url || media.url;
+      if (!/^https:\/\//i.test(src) && !/^\/(?!\/)/.test(src)) return;
+      setImageUrl(src);
+      setImageAlt(media.alt_text || "");
+      setImageCaption("");
+    }} />}
+    </>
   );
 };
 
-export function TiptapEditor({ value, onChange, label = "Case study", story = false }: TiptapEditorProps) {
+export function TiptapEditor({ value, onChange, label = "Case study", story = false, blogTools = false }: TiptapEditorProps) {
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      blogTools ? StarterKit.configure({ link: { openOnClick: false } }) : StarterKit,
+      ...(blogTools ? [Image, TableKit] : []),
       Markdown,
     ],
     content: value,
@@ -277,7 +449,7 @@ export function TiptapEditor({ value, onChange, label = "Case study", story = fa
 
   return (
     <div className="rounded-xl overflow-hidden border border-border-hairline bg-surface-raised flex flex-col">
-      <MenuBar editor={editor} story={story} />
+      <MenuBar editor={editor} story={story} blogTools={blogTools} />
       <div className="flex-1 overflow-y-auto max-h-[600px] cursor-text" onClick={() => editor?.commands.focus()}>
         <EditorContent editor={editor} />
       </div>
