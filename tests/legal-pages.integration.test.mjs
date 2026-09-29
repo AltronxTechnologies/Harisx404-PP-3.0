@@ -65,6 +65,9 @@ test("Privacy describes the implemented visitor data flows without absolute trac
     "external AI provider",
     "email-derived hash",
     "Abuse prevention",
+    "Error diagnostics",
+    "technical trace, and error identifier",
+    "Error details can contain information involved in the failure",
     "Access &amp; Deletion Requests",
   ]) {
     assert.ok(html.includes(value), `${value} should appear in Privacy`);

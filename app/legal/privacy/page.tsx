@@ -163,6 +163,12 @@ export default function PrivacyPolicyPage() {
                 submissions and handles account sign-in. Your chosen sign-in
                 provider may also process account information.
               </ToolCard>
+              <ToolCard icon={icons.shieldSmall} title="Error diagnostics">
+                If a site error is caught, its name, message, technical trace,
+                and error identifier may be sent to the database provider for
+                troubleshooting. Error details can contain information involved
+                in the failure.
+              </ToolCard>
               <ToolCard icon={icons.mail} title="Email services">
                 Contact messages may be forwarded through an email service.
                 If you opt in to email updates on a blog article, your address
