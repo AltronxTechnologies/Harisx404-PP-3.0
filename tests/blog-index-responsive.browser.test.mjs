@@ -15,7 +15,7 @@ test("Blog index cards stay visible across both themes and responsive widths", a
         await page.goto(`${baseUrl}/blog`, { waitUntil: "domcontentloaded" });
         const collection = page.locator('section[aria-label="Browse articles"]');
         await collection.locator('a[href^="/blog/"]').first().waitFor({ state: "visible" });
-        for (const width of [320, 390, 768, 1024, 1440]) {
+        for (const width of [320, 360, 390, 768, 1024, 1440]) {
           await page.setViewportSize({ width, height: width === 320 ? 640 : 900 });
           await collection.locator('a[href^="/blog/"]').first().waitFor({ state: "visible" });
           const state = await page.evaluate(() => {

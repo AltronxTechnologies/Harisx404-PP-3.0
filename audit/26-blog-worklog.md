@@ -419,3 +419,22 @@ Date: 2026-09-29. Branch: `haris-dev/set-up-this-codebase-for-FcY5YL`.
   and archive retention; approved connected-database inspection/application of
   both Blog SQL migrations; unusual imported-MDX edit acceptance and the
   streaming HTTP-status caveat. Production/legal sign-off remains blocked.
+
+## Continuation: Final public viewport gap and HTTP probe (2026-09-29)
+
+- **Completed:** the existing public Blog article and index browser matrices
+  now include the missing 360px width, alongside 320/390/768/1024/1440px in
+  both light and dark. Docker Chromium passed both tests (2/2). The running
+  container had been recreated, so its disposable Playwright browser and
+  system-library cache had to be reinstalled; no browser artifacts were added
+  to the repository. The Docker app remains running.
+- **HTTP probe:** calling `notFound()` from Blog metadata generation as well
+  as the article renderer did not change the direct app response for a missing
+  article: it still returned HTTP 200 with a streamed not-found body. That
+  ineffective change was removed. A literal 404 for this path remains an
+  unresolved framework/routing acceptance issue; the not-found/noindex body
+  and scheduled-post content embargo did work.
+- **Database access:** the sandbox exposed a Supabase service-role REST key
+  but no PostgreSQL connection URL. REST row reads cannot verify the installed
+  SQL policy and RPC definitions. Neither pending Blog migration was applied
+  during this pass.

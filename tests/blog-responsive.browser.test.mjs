@@ -14,7 +14,7 @@ test("Blog article stays readable across both themes and responsive widths", asy
       try {
         await page.goto(`${baseUrl}/blog/the-only-nextjs-favicon-guide-youll-need`, { waitUntil: "domcontentloaded" });
         await page.locator("#blog-article img").first().waitFor({ state: "visible" });
-        for (const width of [320, 390, 768, 1024, 1440]) {
+        for (const width of [320, 360, 390, 768, 1024, 1440]) {
           await page.setViewportSize({ width, height: width === 320 ? 640 : 900 });
           const state = await page.evaluate(() => {
             const article = document.querySelector("#blog-article");
