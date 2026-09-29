@@ -185,6 +185,8 @@ test("Blog-only toolbar controls do not appear in Project/Changelog editors", as
     for (const label of ["Heading 3", "Horizontal rule", "Insert or edit link", "Insert image", "Insert 2 by 2 table"]) {
       assert.ok(host.querySelector(`[aria-label="${label}"]`), label);
     }
+    await act(async () => root.render(React.createElement(TiptapEditor, { value: "Example\n\nAdditional body", onChange: (value) => changes.push(value), blogTools: true })));
+    assert.equal(changes.length, 0, "loading existing Markdown should not mark content as edited");
     assert.equal(host.querySelector('[role="group"][aria-label="Edit table"]'), null);
     const insertTable = host.querySelector<HTMLButtonElement>('[aria-label="Insert 2 by 2 table"]')!;
     assert.equal(insertTable.type, "button");

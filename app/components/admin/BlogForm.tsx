@@ -39,7 +39,7 @@ const blogSchema = z.object({
 type BlogFormValues = z.infer<typeof blogSchema>;
 
 interface BlogFormProps {
-  initialData?: BlogFormValues & { id?: string; updated_at?: string };
+  initialData?: BlogFormValues & { id?: string; updated_at?: string; editor_mode?: "source" | "rich" };
 }
 
 export function BlogForm({ initialData }: BlogFormProps) {
@@ -49,6 +49,8 @@ export function BlogForm({ initialData }: BlogFormProps) {
   const [tagInput, setTagInput] = useState("");
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
   const slugEdited = useRef(Boolean(initialData?.id));
+  const richContentEdited = useRef(false);
+  const richEditor = !initialData?.id || initialData.editor_mode === "rich";
 
   const {
     register,
@@ -104,6 +106,7 @@ export function BlogForm({ initialData }: BlogFormProps) {
 
   const onSubmit = async (data: BlogFormValues) => {
     const publishedAt = serializeBlogPublishDate(data.published_at, initialData?.published_at);
+    const content = richEditor && initialData?.id && !richContentEdited.current ? initialData.content : data.content;
     const publicationChanged = Boolean(initialData?.id && initialData.status === "published" && publishedAt !== initialData.published_at);
     if ((data.status !== initialData?.status || publicationChanged) && (data.status === "published" || initialData?.status === "published")) {
       const action = data.status === "draft"
@@ -123,13 +126,15 @@ export function BlogForm({ initialData }: BlogFormProps) {
           initialData?.id
             ? {
                 id: initialData.id,
-                updated_at: initialData.updated_at,
-                ...data,
-                published_at: publishedAt,
+                 updated_at: initialData.updated_at,
+                 ...data,
+                 content,
+                 published_at: publishedAt,
               }
             : {
-                ...data,
-                published_at: publishedAt,
+                 ...data,
+                 content,
+                 published_at: publishedAt,
               },
         ),
       });
@@ -306,8 +311,8 @@ export function BlogForm({ initialData }: BlogFormProps) {
       </div>
 
       <div className="space-y-2">
-        <label htmlFor={initialData?.id ? "blog-content-source" : undefined} className="text-sm font-medium">Content</label>
-        {initialData?.id && (
+        <label htmlFor={!richEditor ? "blog-content-source" : undefined} className="text-sm font-medium">Content</label>
+        {!richEditor && (
           <p className="text-sm text-ink-secondary">
             Edit the original Markdown/MDX directly. The rich editor can remove embeds and custom formatting from existing articles.
           </p>
@@ -316,7 +321,7 @@ export function BlogForm({ initialData }: BlogFormProps) {
           name="content"
           control={control}
           render={({ field }) => (
-            initialData?.id ? (
+            !richEditor ? (
               <textarea
                 {...field}
                 id="blog-content-source"
@@ -325,7 +330,10 @@ export function BlogForm({ initialData }: BlogFormProps) {
                 className="w-full rounded-xl border border-border-hairline bg-surface-base p-4 font-mono text-sm leading-6 text-ink-primary focus:outline-none focus:ring-2 focus:ring-accent-signal"
               />
             ) : (
-              <TiptapEditor value={field.value} onChange={field.onChange} label="Blog article content" blogTools />
+              <TiptapEditor value={field.value} onChange={(value) => {
+                richContentEdited.current = true;
+                field.onChange(value);
+              }} label="Blog article content" blogTools />
             )
           )}
         />

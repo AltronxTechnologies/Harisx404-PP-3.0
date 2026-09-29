@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { RotateCcw, Trash2 } from "lucide-react";
+import { Archive, RotateCcw, Trash2 } from "lucide-react";
 
-type Post = { id: string; title: string; status: string; updated_at: string };
+type Post = { id: string; slug: string; title: string; status: string; updated_at: string };
 
 export function BlogArchiveAction({ post }: { post: Post }) {
   const router = useRouter();
@@ -40,6 +40,32 @@ export function BlogArchiveAction({ post }: { post: Post }) {
     }
   }
 
+  async function handleDelete() {
+    const confirmation = window.prompt(`Permanently delete "${post.title}"? This cannot be undone. Type the exact slug to confirm: ${post.slug}`);
+    if (confirmation === null) return;
+    if (confirmation !== post.slug) {
+      setMessage("Deletion cancelled. The slug did not match.");
+      return;
+    }
+    setPending(true);
+    setMessage("");
+    try {
+      const response = await fetch("/api/admin/blogs", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: post.id, updated_at: current.updated_at, confirm_slug: confirmation }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Could not permanently delete post");
+      setMessage("Post permanently deleted.");
+      router.refresh();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not permanently delete post");
+    } finally {
+      setPending(false);
+    }
+  }
+
   return (
     <div className="flex items-center gap-2">
       <span role="status" className="max-w-40 text-xs text-ink-secondary">{message}</span>
@@ -50,8 +76,19 @@ export function BlogArchiveAction({ post }: { post: Post }) {
         aria-label={`${archived ? "Restore" : "Archive"} ${post.title}`}
         className="rounded-lg p-2 text-ink-secondary transition-colors hover:bg-surface-base hover:text-accent-signal disabled:opacity-50"
       >
-        {archived ? <RotateCcw className="h-4 w-4" aria-hidden="true" /> : <Trash2 className="h-4 w-4" aria-hidden="true" />}
+        {archived ? <RotateCcw className="h-4 w-4" aria-hidden="true" /> : <Archive className="h-4 w-4" aria-hidden="true" />}
       </button>
+      {archived && (
+        <button
+          type="button"
+          onClick={handleDelete}
+          disabled={pending}
+          aria-label={`Permanently delete ${post.title}`}
+          className="rounded-lg p-2 text-ink-secondary transition-colors hover:bg-surface-base hover:text-red-500 disabled:opacity-50"
+        >
+          <Trash2 className="h-4 w-4" aria-hidden="true" />
+        </button>
+      )}
     </div>
   );
 }

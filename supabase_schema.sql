@@ -39,6 +39,7 @@ CREATE TABLE blog_posts (
   title TEXT NOT NULL,
   summary TEXT,
   content TEXT,                        -- MDX/Markdown content body
+  editor_mode TEXT NOT NULL DEFAULT 'source' CHECK (editor_mode IN ('source', 'rich')),
   cover_image_id UUID REFERENCES media(id),  -- Featured image
   cover_image_url TEXT,                -- Fallback: direct URL (for migrated posts)
   published_at TIMESTAMPTZ,
@@ -59,6 +60,12 @@ CREATE TABLE blog_post_tags (
   tag_id UUID REFERENCES tags(id) ON DELETE CASCADE,
   PRIMARY KEY (blog_post_id, tag_id)
 );
+
+CREATE TABLE blog_slug_history (
+  slug TEXT PRIMARY KEY,
+  post_id UUID REFERENCES blog_posts(id) ON DELETE SET NULL
+);
+CREATE INDEX blog_slug_history_post_id_idx ON blog_slug_history(post_id);
 
 -- Full text search index on blog posts
 CREATE INDEX blog_posts_fts ON blog_posts
@@ -184,6 +191,7 @@ INSERT INTO site_settings (key, value) VALUES
 -- Enable RLS on all tables
 ALTER TABLE blog_posts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE blog_post_tags ENABLE ROW LEVEL SECURITY;
+ALTER TABLE blog_slug_history ENABLE ROW LEVEL SECURITY;
 ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE media ENABLE ROW LEVEL SECURITY;
 ALTER TABLE changelog_entries ENABLE ROW LEVEL SECURITY;
@@ -205,6 +213,12 @@ CREATE POLICY "Public can view live blog post tags"
       AND blog_posts.published_at IS NOT NULL
       AND blog_posts.published_at <= NOW()
   ));
+
+CREATE POLICY "Public can view blog slug history"
+  ON blog_slug_history FOR SELECT TO anon, authenticated USING (true);
+REVOKE ALL ON public.blog_slug_history FROM PUBLIC, anon, authenticated;
+GRANT SELECT ON public.blog_slug_history TO anon, authenticated;
+GRANT ALL ON public.blog_slug_history TO service_role;
 
 CREATE POLICY "Public can view published projects"
   ON projects FOR SELECT

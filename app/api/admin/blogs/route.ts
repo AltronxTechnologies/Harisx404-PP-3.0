@@ -109,6 +109,12 @@ const archiveSchema = z.object({
   action: z.enum(["archive", "restore"]),
 }).strict();
 
+const deleteSchema = z.object({
+  id: z.string().uuid(),
+  updated_at: z.string().datetime({ offset: true }),
+  confirm_slug: z.string().min(1),
+}).strict();
+
 async function authorizeAdmin() {
   const supabase = await createSupabaseServerClient();
   const {
@@ -152,6 +158,7 @@ function revalidateBlogPaths(slug?: string | null) {
   try {
     revalidateTag("blog-index");
     revalidateTag("blog-reactions");
+    revalidateTag("server-stats");
     revalidatePath("/");
     revalidatePath("/blog");
     revalidatePath("/admin/blogs");
@@ -163,7 +170,7 @@ function revalidateBlogPaths(slug?: string | null) {
   }
 }
 
-function errorResponse(error: unknown) {
+function errorResponse(error: unknown, fallback = "Unable to save blog post. Please try again.") {
   if (error instanceof BlogMdxValidationError) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
@@ -187,7 +194,13 @@ function errorResponse(error: unknown) {
   if (message.includes("BLOG_POST_NOT_FOUND")) {
     return NextResponse.json({ error: "Blog post not found" }, { status: 404 });
   }
+  if (message.includes("BLOG_SLUG_RESERVED")) {
+    return NextResponse.json({ error: "This slug belongs to a previously published post. Choose another slug." }, { status: 409 });
+  }
   const code = error && typeof error === "object" && "code" in error ? error.code : null;
+  if (code === "PGRST202") {
+    return NextResponse.json({ error: "The Blog database update is required for this action." }, { status: 503 });
+  }
   if (code === "23505") {
     return NextResponse.json({ error: "A blog post or tag with that name already exists." }, { status: 409 });
   }
@@ -195,8 +208,8 @@ function errorResponse(error: unknown) {
     return NextResponse.json({ error: "The selected cover image is no longer available." }, { status: 400 });
   }
 
-  console.error("Blog save failed:", error);
-  return NextResponse.json({ error: "Unable to save blog post. Please try again." }, { status: 500 });
+  console.error("Blog operation failed:", error);
+  return NextResponse.json({ error: fallback }, { status: 500 });
 }
 
 export async function POST(request: Request) {
@@ -268,36 +281,77 @@ export async function PATCH(request: Request) {
 
     const { id, updated_at, action } = archiveSchema.parse(await request.json());
     const admin = await createSupabaseAdminClient();
-    const nextStatus = action === "archive" ? "archived" : "draft";
-    const nextUpdatedAt = new Date(Math.max(Date.now(), Date.parse(updated_at) + 1)).toISOString();
-    const mutation = admin.from("blog_posts")
-      .update({ status: nextStatus, updated_at: nextUpdatedAt })
-      .eq("id", id)
-      .eq("updated_at", updated_at);
-    const { data: post, error } = await (action === "archive"
-      ? mutation.in("status", ["draft", "published"])
-      : mutation.eq("status", "archived"))
-      .select("id, slug, status, updated_at")
-      .maybeSingle();
-    if (error) throw error;
-    if (!post) {
-      const { data: existing, error: lookupError } = await admin
-        .from("blog_posts")
-        .select("id")
+    const { data, error } = await admin.rpc("transition_blog_post", {
+      p_id: id,
+      p_expected_updated_at: updated_at,
+      p_action: action,
+    });
+    let post = data;
+    if (error?.code === "PGRST202") {
+      // Keep existing archive/restore usable until the additive workflow SQL is installed.
+      const nextStatus = action === "archive" ? "archived" : "draft";
+      const nextUpdatedAt = new Date(Math.max(Date.now(), Date.parse(updated_at) + 1)).toISOString();
+      const mutation = admin.from("blog_posts")
+        .update({ status: nextStatus, updated_at: nextUpdatedAt })
         .eq("id", id)
+        .eq("updated_at", updated_at);
+      const { data: previous, error: updateError } = await (action === "archive"
+        ? mutation.in("status", ["draft", "published"])
+        : mutation.eq("status", "archived"))
+        .select("id, slug, status, updated_at")
         .maybeSingle();
-      if (lookupError) throw lookupError;
-      return NextResponse.json(
-        { error: existing ? "This post was changed elsewhere. Reload the page and try again." : "Blog post not found" },
-        { status: existing ? 409 : 404 },
-      );
+      if (updateError) throw updateError;
+      if (!previous) {
+        const { data: existing, error: lookupError } = await admin.from("blog_posts")
+          .select("id").eq("id", id).maybeSingle();
+        if (lookupError) throw lookupError;
+        return NextResponse.json({ error: existing ? "This post was changed elsewhere. Reload and try again." : "Blog post not found" }, { status: existing ? 409 : 404 });
+      }
+      post = previous;
+    } else if (error) {
+      throw error;
     }
+    if (!post?.slug || !post.updated_at) throw new Error("Blog transition returned an invalid response");
 
     revalidateBlogPaths(post.slug);
     return NextResponse.json(post);
   } catch (error) {
-    if (error instanceof SyntaxError || error instanceof z.ZodError) return errorResponse(error);
-    console.error("Blog archive/restore failed:", error);
-    return NextResponse.json({ error: "Unable to update blog post" }, { status: 500 });
+    return errorResponse(error, "Unable to archive or restore post.");
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const authorizationError = await authorizeAdmin();
+    if (authorizationError) return authorizationError;
+
+    const { id, updated_at, confirm_slug } = deleteSchema.parse(await request.json());
+    const admin = await createSupabaseAdminClient();
+    const { data: post, error: lookupError } = await admin
+      .from("blog_posts")
+      .select("slug")
+      .eq("id", id)
+      .maybeSingle();
+    if (lookupError) throw lookupError;
+    if (!post) return NextResponse.json({ error: "Blog post not found" }, { status: 404 });
+    if (confirm_slug !== post.slug) {
+      return NextResponse.json({ error: "Type the exact post slug to confirm permanent deletion." }, { status: 400 });
+    }
+
+    const { data, error } = await admin.rpc("delete_archived_blog_post", {
+      p_id: id,
+      p_expected_updated_at: updated_at,
+    });
+    if (error) throw error;
+    if (!data || data.deleted_slug !== post.slug || !Array.isArray(data.aliases)) {
+      throw new Error("Blog deletion returned an invalid response");
+    }
+    revalidateBlogPaths(data.deleted_slug);
+    for (const alias of data.aliases) {
+      if (typeof alias === "string") revalidateBlogPaths(alias);
+    }
+    return NextResponse.json({ deleted: true });
+  } catch (error) {
+    return errorResponse(error, "Unable to permanently delete post.");
   }
 }

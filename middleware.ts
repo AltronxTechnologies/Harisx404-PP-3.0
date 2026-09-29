@@ -184,10 +184,41 @@ export async function middleware(request: NextRequest) {
         .select("slug")
         .eq("slug", blogSlug)
         .eq("status", "published")
-        .lte("published_at", new Date().toISOString())
-        .maybeSingle();
+      .lte("published_at", new Date().toISOString())
+      .maybeSingle();
       if (error) throw error;
-      if (!data) return blogStatusPage(404, request);
+      if (!data) {
+        const { data: history, error: historyError } = await supabase
+          .from("blog_slug_history")
+          .select("post_id")
+          .eq("slug", blogSlug)
+          .maybeSingle();
+        // The additive history migration may not yet be installed on a dev database.
+        if (historyError?.code === "PGRST205" || historyError?.code === "42P01") return blogStatusPage(404, request);
+        if (historyError) throw historyError;
+        if (!history) return blogStatusPage(404, request);
+        if (!history.post_id) {
+          return new NextResponse("Gone", {
+            status: 410,
+            headers: { "X-Robots-Tag": "noindex, nofollow", "Cache-Control": "no-store" },
+          });
+        }
+        const { data: current, error: currentError } = await supabase
+          .from("blog_posts")
+          .select("slug")
+          .eq("id", history.post_id)
+          .eq("status", "published")
+          .lte("published_at", new Date().toISOString())
+          .maybeSingle();
+        if (currentError) throw currentError;
+        if (!current) return blogStatusPage(404, request);
+        const destination = request.nextUrl.clone();
+        destination.pathname = `/blog/${encodeURIComponent(current.slug)}`;
+        return NextResponse.redirect(destination, {
+          status: 308,
+          headers: { "Cache-Control": "no-store" },
+        });
+      }
     } catch (error) {
       console.error("Blog preflight failed", error);
       return blogStatusPage(503, request);

@@ -20,27 +20,28 @@ test("archive endpoint rejects unauthenticated requests before parsing or mutati
 });
 
 test("archive and restore retain posts with guarded state transitions", async () => {
-  const [api, list, action, edit, policy, publicRead] = await Promise.all([
+  const [api, list, action, edit, policy, publicRead, migration] = await Promise.all([
     readFile(new URL("../app/api/admin/blogs/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/admin/(dashboard)/blogs/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/admin/(dashboard)/blogs/BlogArchiveAction.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/admin/(dashboard)/blogs/[id]/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../migrations/2026_blog_publication_policy.sql", import.meta.url), "utf8"),
     readFile(new URL("../app/lib/utils.ts", import.meta.url), "utf8"),
+    readFile(new URL("../migrations/2026_blog_editor_delete_slug_history.sql", import.meta.url), "utf8"),
   ]);
 
-  const patch = api.slice(api.indexOf("export async function PATCH"));
+  const patch = api.slice(api.indexOf("export async function PATCH"), api.indexOf("export async function DELETE"));
   assert.match(patch, /await authorizeAdmin\(\)/);
   assert.ok(patch.indexOf("await authorizeAdmin()") < patch.indexOf("request.json()"));
   assert.match(api, /user\.email\?\.toLowerCase\(\) !== adminEmail/);
   assert.match(api, /id: z\.string\(\)\.uuid\(\)/);
   assert.match(api, /updated_at: z\.string\(\)\.datetime\(\{ offset: true \}\)/);
   assert.match(api, /action: z\.enum\(\["archive", "restore"\]\)/);
-  assert.match(patch, /action === "archive" \? "archived" : "draft"/);
-  assert.match(patch, /\.eq\("id", id\)/);
-  assert.match(patch, /\.eq\("updated_at", updated_at\)/);
-  assert.match(patch, /\.in\("status", \["draft", "published"\]\)/);
-  assert.match(patch, /\.eq\("status", "archived"\)/);
+  assert.match(patch, /admin\.rpc\("transition_blog_post"/);
+  assert.match(patch, /p_expected_updated_at: updated_at/);
+  assert.match(migration, /target\.status IN \('draft', 'published'\)/);
+  assert.match(migration, /target\.status IS DISTINCT FROM 'archived'/);
+  assert.match(migration, /INSERT INTO public\.blog_slug_history \(slug, post_id\)/);
   assert.doesNotMatch(patch, /\.delete\(/);
   assert.match(patch, /revalidateBlogPaths\(post\.slug\)/);
   assert.match(api, /revalidatePath\("\/admin\/blogs"\)/);
@@ -55,12 +56,14 @@ test("archive and restore retain posts with guarded state transitions", async ()
   assert.match(publicRead, /\.eq\('status', 'published'\)/);
 });
 
-test("editing an existing blog keeps the original MDX in a source field", async () => {
+test("legacy Blog posts stay in source mode while rich-authored posts can reopen in the editor", async () => {
   const [form, api] = await Promise.all([
     readFile(new URL("../app/components/admin/BlogForm.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/api/admin/blogs/route.ts", import.meta.url), "utf8"),
   ]);
-  assert.match(form, /initialData\?\.id \? \(\s*<textarea/);
+  assert.match(form, /!initialData\?\.id \|\| initialData\.editor_mode === "rich"/);
+  assert.match(form, /!richEditor \? \(\s*<textarea/);
+  assert.match(form, /richContentEdited\.current \? initialData\.content : data\.content/);
   assert.match(form, /\{\.\.\.field\}\s+id="blog-content-source"/);
   assert.match(form, /rich editor can remove embeds and custom formatting/);
   assert.match(api, /refine\(\(value\) => value\.trim\(\)\.length > 0, "Content is required"\)/);

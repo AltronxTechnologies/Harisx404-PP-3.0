@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { Metadata, ResolvingMetadata } from "next";
@@ -20,6 +20,7 @@ import { fetchBlogIndexPosts, isLocalBlogDraft } from "@/app/blog/data";
 import { getBlogImageSrc } from "@/app/components/blog/blogImage";
 import { formatReadingTime } from "@/app/lib/reading-time";
 import { siteMetadata } from "@/app/data/siteMetadata";
+import { getPublicSupabase } from "@/app/lib/supabase/safe";
 
 interface BlogPageProps {
   params: Promise<{ slug: string }>;
@@ -49,7 +50,29 @@ async function getPostFromParams(params: BlogPageProps["params"]) {
   const { slug } = await params;
   if (isLocalBlogDraft(slug)) notFound();
   const post = await getBlogPostBySlug(slug);
-  if (!post) notFound();
+  if (!post) {
+    const supabase = getPublicSupabase();
+    if (supabase) {
+      const { data: history, error } = await supabase
+        .from("blog_slug_history")
+        .select("post_id")
+        .eq("slug", slug)
+        .maybeSingle();
+      if (error && error.code !== "PGRST205" && error.code !== "42P01") throw new Error("Unable to resolve Blog article");
+      if (history?.post_id) {
+        const { data: current, error: lookupError } = await supabase
+          .from("blog_posts")
+          .select("slug")
+          .eq("id", history.post_id)
+          .eq("status", "published")
+          .lte("published_at", new Date().toISOString())
+          .maybeSingle();
+        if (lookupError) throw new Error("Unable to resolve Blog article");
+        if (current) permanentRedirect(`/blog/${encodeURIComponent(current.slug)}`);
+      }
+    }
+    notFound();
+  }
   return post;
 }
 

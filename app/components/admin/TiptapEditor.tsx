@@ -445,9 +445,9 @@ export function TiptapEditor({ value, onChange, label = "Case study", story = fa
   // Handle external value changes (e.g. initial load)
   useEffect(() => {
     if (editor && (editor.storage as any).markdown.getMarkdown() !== value) {
-      editor.commands.setContent(value);
+      editor.commands.setContent(value, blogTools ? { emitUpdate: false } : undefined);
     }
-  }, [value, editor]);
+  }, [value, editor, blogTools]);
 
   return (
     <div className="rounded-xl overflow-hidden border border-border-hairline bg-surface-raised flex flex-col">
