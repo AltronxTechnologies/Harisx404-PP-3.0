@@ -33,10 +33,11 @@ Date: 2026-09-29. Branch: `haris-dev/set-up-this-codebase-for-FcY5YL`.
    original Blog save RPC), then verify installed policy/RPC definitions.
    Live reads now confirm drafts, future rows and draft tag links are hidden;
    they do not prove the exact migration versions or direct-write grants.
-2. Verify any still-untested media upload, unusual MDX/imported-article edit,
-   and scheduled publication at its actual due time using approved records.
-   Authenticated draft/save/reopen/preview, future scheduling, archive/restore,
-   stale-edit rejection and filter/sort were checked in the 2026-09-29 pass.
+2. Verify unusual MDX/imported-article edits using approved records, and
+   review the streaming not-found HTTP status before production sign-off.
+   Authenticated draft/save/reopen/preview, future scheduling at the actual
+   due time, archive/restore, stale-edit rejection, filter/sort and a scoped
+   media upload were checked in the 2026-09-29 passes below.
 3. Finish remaining content/SEO gates: owner-provided alt text/credits for
    imported images, verified author/canonical data, rich-editing of legacy
    MDX only if it can round-trip losslessly, and unsaved preview if needed.
@@ -389,3 +390,32 @@ Date: 2026-09-29. Branch: `haris-dev/set-up-this-codebase-for-FcY5YL`.
   checked-in Blog SQL migrations are not verified on the connected database;
   schedule-at-due-time and media upload are untested. These are outstanding
   gates, not assumed complete from authenticated browser access.
+
+## Continuation: Scheduled publication and image upload (2026-09-29)
+
+- **Completed:** a uniquely named QA post was created with `published` status
+  and a publish time 90 seconds in the future. Before that time, it was absent
+  from the public Blog index and RSS, and its article URL rendered only the
+  not-found/noindex page (no QA title or body). After the due time, the article
+  body and index card appeared without another Admin save. RSS and sitemap
+  initially served cached output but included the post after their 60-second
+  revalidation window. The post was archived using the Admin API, then deleted
+  by exact archived ID/slug; a privileged read returned zero rows. The public
+  article body, index, RSS and sitemap no longer contained the fixture.
+- **Completed:** on the Blog new-post form, the media picker listed existing
+  library assets and selecting one populated the cover field without saving a
+  post. An authenticated SVG upload returned HTTP 415. A tiny QA PNG upload
+  returned HTTP 200 and a media row; its exact row and Cloudinary public ID
+  were subsequently removed and the media lookup returned zero rows. No
+  existing articles or media were altered. This verifies the upload endpoint,
+  not image authoring/alt quality for imported posts.
+- **HTTP caveat:** the public article URL for the future and later removed QA
+  post returned HTTP 200 with a streamed Next.js not-found/noindex body. The
+  content was not disclosed before its due time, but a literal HTTP 404 status
+  is not established for this streaming path; review before claiming the HTTP
+  status acceptance gate. The feed refresh is eventual, not exactly at the
+  scheduled second.
+- **Remaining:** owner decisions on imported rights/attribution/image credits
+  and archive retention; approved connected-database inspection/application of
+  both Blog SQL migrations; unusual imported-MDX edit acceptance and the
+  streaming HTTP-status caveat. Production/legal sign-off remains blocked.
