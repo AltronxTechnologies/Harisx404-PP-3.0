@@ -2487,3 +2487,49 @@ and subtitle now use weight 500 rather than a synthesized weight 700. The
 Instrument Serif family, 24/30px sizes, line heights, colors, hero, cards, and
 shared components are unchanged. A browser probe measured identical heading
 boxes before and after the local weight correction.
+
+## 42. FINAL OWNER RE-LOCK - Privacy And Terms
+
+**Date:** 2026-09-29. **Approved implementation baseline:** `ad56626`.
+**Scope:** `/legal/privacy` and `/legal/terms` in
+`app/legal/privacy/page.tsx` and `app/legal/terms/page.tsx`, including their
+visitor-facing copy, route-specific layout, typography, and the assertions in
+`tests/legal-pages.integration.test.mjs`. This entry supersedes the historical
+descriptions of an active reference-site credit in entry 40 and
+`audit/21-legal-final-production-lock.md`; it does not erase the documented
+rights-review obligation.
+
+- Both pages retain the 12px mono Legal kicker, 46/56px Instrument Serif hero,
+  15px/24px hero description, 24/30px weight-500 local section headings,
+  `mt-14` frame, 56px hero/content gap, and 112px contact-CTA handoff.
+- Each page has four decorative, solid, 1px `bg-border-primary` outer/section
+  rules, visible at phone, tablet, and desktop widths; Privacy has one and Terms
+  two additional `my-8` inner-card rules. The page rules extend 8px on phones,
+  12px from `sm` below `lg`, and use the content width from `lg`.
+- Privacy includes the conditional **Error diagnostics** service disclosure:
+  caught error name, message, technical trace, and identifier may be sent to
+  the database provider; error details can contain information involved in
+  the failure. It is a separate dashed service row to keep narrow cards legible.
+  Terms retains general third-party and visitor rights wording without a named
+  reference-site link. Privacy's request email and Terms' question email wrap
+  on narrow/zoomed viewports.
+- Intentional variations: Terms' red restriction and green limited-use cards
+  communicate different meanings; Privacy's filled feature cards and dashed
+  service rows have different roles. Do not flatten these into a single style.
+
+The shared `CtaSection`, Navbar, Search, Footer, GridWrapper, hero texture,
+fonts, and theme tokens remain **separately locked and unchanged**. The owner
+explicitly instructed that the shared CTA must not be changed for this audit;
+the previously measured 240px CTA email-button clipping is a shared-component
+limit, not a legal-page-specific fix authorization. TypeScript, targeted ESLint,
+legal (5/5), navigation (4/4), and preview (3/3) checks passed. Browser review
+covered light/dark legal pages from hero to Footer, narrow/mobile/tablet/desktop
+geometry, four visible rules, and no detected legal-content clipping or console
+errors at measured widths. Evidence and historical amendments:
+`audit/21-legal-final-production-lock.md`.
+
+This is an engineering and owner presentation lock, **not legal sign-off**.
+Actual retention/deletion handling, provider practices, rights to third-party
+or editorial material, and jurisdiction-specific requirements still require
+owner review. Material changes in site data flows or those facts require an
+accurate policy update, even though these pages are locked.

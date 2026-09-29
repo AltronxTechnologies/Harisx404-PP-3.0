@@ -373,6 +373,7 @@ Date: · Commit: · Routes:
 | 2 | **Projects index** | 2026-09-04 | Passed production audit and received final owner approval | entry 24 |
 | 3 | **Blog index** | 2026-09-04 | UI/behavior audit passed; awaiting owner review and content-ownership decision | pending |
 | 4 | **About final production re-lock** | 2026-09-24 | Passed full page, responsive, interaction, and reduced-motion audit | entry 38 |
+| 5 | **Privacy and Terms final owner re-lock** | 2026-09-29 | Legal copy, responsive layout, dividers, and conditional error disclosure checked; external legal/rights review remains open | entry 42 |
 
 ---
 

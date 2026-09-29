@@ -100,3 +100,20 @@ link from Terms. The named credit is no longer on the public legal page; the
 general third-party-rights notice remains. This supersedes the link-preserved
 status above, not the underlying license concern in `audit/README.md`. Rights
 clearance or a review of reference-derived design and assets remains open.
+
+## Final Owner Re-Lock
+
+On 2026-09-29 the owner requested the current legal pages be locked again.
+`LOCKED_PERFECT.md` entry 42 records the approved implementation baseline
+`ad56626`, including the now-absent named Terms credit, locally served fonts,
+weight-500 section headings, four 1px dividers on each page, narrow email
+wrapping, and Privacy's conditional error-diagnostics disclosure. Historical
+statements above about a preserved dofollow reference-site link describe an
+earlier state; they are not a claim about the current public Terms page.
+
+Final recheck: legal integration 5/5, navigation 4/4, preview 3/3, TypeScript,
+targeted ESLint, and `git diff --check` passed. Full-page light/dark browser
+inspection and computed geometry at representative mobile, tablet, and desktop
+widths found no legal-content overflow or application console errors. The
+shared CTA remains independently locked and was not modified. This re-lock
+does not establish legal compliance or settle third-party rights clearance.
