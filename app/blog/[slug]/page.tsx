@@ -5,7 +5,6 @@ import { Metadata, ResolvingMetadata } from "next";
 import { MDXContent } from "@/app/components/mdx";
 import { RelatedPostCard } from "@/app/components/blog/RelatedPostCard";
 import { ImageLightbox } from "@/app/components/blog/ImageLightbox";
-import { NewsletterSignUp } from "@/app/components/NewsletterSignUp";
 import ArticleReactionWrapper from "@/app/components/ArticleReactionsWrapper";
 import { CtaSection } from "@/app/components/home/CtaSection";
 import { CopyUrlButton } from "@/app/components/blog/CopyUrlButton";
@@ -219,14 +218,6 @@ export default async function BlogPage({ params }: BlogPageProps) {
           <div aria-hidden="true" className="w-full border-t border-border-primary" />
         </div>
       )}
-
-      {/* Newsletter — stay in the loop after reading */}
-      <div className="relative mx-auto mt-10 w-full max-w-3xl px-4 md:px-6">
-        <NewsletterSignUp
-          title="Enjoyed this write-up?"
-          description="Get new articles on web, security, and AI/ML straight to your inbox. No spam, unsubscribe anytime."
-        />
-      </div>
 
       {/* Contact CTA — same section used across the site */}
       <div className="relative mt-6">

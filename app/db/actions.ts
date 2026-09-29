@@ -16,11 +16,6 @@ const VALID_REACTIONS: ReactionType[] = [
   "insightful",
 ];
 
-type CreateContactResponse = {
-  success: boolean;
-  error?: string;
-};
-
 // Warn only once when article_views is missing (PGRST205) instead of
 // logging on every page view.
 let warnedMissingViewsTable = false;
@@ -262,39 +257,6 @@ export async function toggleReaction(slug: string, reactionType: ReactionType) {
         ? "You're reacting too quickly. Please wait a few minutes and try again."
         : "We couldn't save your reaction. Please try again.",
     };
-  }
-}
-
-export async function createContact(
-  email: string,
-  honeypot?: string
-): Promise<CreateContactResponse> {
-  // If honeypot field is filled, it's likely a bot - silently reject
-  // Return success to fool the bot, but don't actually create the contact
-  if (honeypot) {
-    return { success: true };
-  }
-
-  try {
-    const response = await fetch(
-      "https://app.loops.so/api/v1/contacts/create",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.LOOPS_API_KEY}`,
-        },
-        body: JSON.stringify({ email, userGroup: "Blogfolio" }),
-      },
-    );
-
-    if (!response.ok) {
-      throw new Error("Failed to create contact");
-    }
-
-    return { success: true };
-  } catch (error) {
-    return { success: false, error: "Failed to create contact" };
   }
 }
 

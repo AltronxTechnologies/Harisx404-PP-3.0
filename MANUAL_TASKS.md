@@ -196,7 +196,7 @@ reads these names — keep them exact:
 | `CLOUDINARY_CLOUD_NAME` / `_API_KEY` / `_API_SECRET` | for media | /admin/media uploads |
 | `GITHUB_TOKEN` | optional | GitHub API integrations that require authenticated limits; Home/About activity uses the public feed |
 | `PAGESPEED_API_KEY` | optional | Admin Analytics Lighthouse health |
-| `LOOPS_API_KEY` | optional | newsletter signups |
+| `LOOPS_API_KEY` / `LOOPS_TESTIMONIAL_TRANSACTIONAL_ID` | optional | owner notification for testimonial submissions |
 | `SPOTIFY_CLIENT_ID/SECRET/REFRESH_TOKEN` | optional | currently-playing card |
 | `NEXT_PUBLIC_SITE_URL` | yes | canonical URLs, sitemap, RSS, OG |
 | `NEXT_PUBLIC_SITE_NAME` | yes | fallback site title |

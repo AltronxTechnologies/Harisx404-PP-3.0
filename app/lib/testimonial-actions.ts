@@ -91,7 +91,7 @@ async function resolveGravatar(email: string): Promise<string | null> {
  * capped at 5s and wrapped so a mail failure can never fail the
  * visitor's submission. Requirements (both optional — this no-ops
  * silently if either is missing):
- *   - LOOPS_API_KEY (already used by the newsletter integration)
+ *   - LOOPS_API_KEY
  *   - LOOPS_TESTIMONIAL_TRANSACTIONAL_ID: create a Transactional email
  *     in the Loops dashboard (Transactional -> New) with data variables
  *     {name} {role} {headline} {quote} {submitterEmail}, then put its

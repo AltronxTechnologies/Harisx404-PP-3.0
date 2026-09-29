@@ -58,5 +58,10 @@ test("Every syndicated article route renders without the Blog error state", asyn
       /The articles could not be loaded/i,
       `${slugs[index]} rendered the Blog error state`,
     );
+    assert.doesNotMatch(
+      html,
+      /Enjoyed this write-up\?|bobloblaw@gmail\.com|>Subscribe<\/button>/,
+      `${slugs[index]} still renders the newsletter signup`,
+    );
   });
 });

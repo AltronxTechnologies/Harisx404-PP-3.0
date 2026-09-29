@@ -171,9 +171,7 @@ export default function PrivacyPolicyPage() {
               </ToolCard>
               <ToolCard icon={icons.mail} title="Email services">
                 Contact messages may be forwarded through an email service.
-                If you opt in to email updates on a blog article, your address
-                is sent to a mailing provider. Testimonial submissions may
-                trigger an email notification.
+                Testimonial submissions may trigger an email notification.
               </ToolCard>
               <ToolCard icon={icons.message} title="Search and AI assistant">
                 Search queries help find site content. If you use the AI assistant,

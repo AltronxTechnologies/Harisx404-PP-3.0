@@ -117,3 +117,11 @@ inspection and computed geometry at representative mobile, tablet, and desktop
 widths found no legal-content overflow or application console errors. The
 shared CTA remains independently locked and was not modified. This re-lock
 does not establish legal compliance or settle third-party rights clearance.
+
+## Newsletter Removal Amendment
+
+On 2026-09-29 the owner removed the only rendered newsletter signup from blog
+articles and retired its server action. Privacy's conditional email-updates
+sentence was removed to match the new behavior; contact delivery and optional
+testimonial-notification email remain disclosed. The other legal copy, Terms,
+and shared CTA are unchanged. Older newsletter descriptions above are historical.

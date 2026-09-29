@@ -60,7 +60,8 @@ test("Privacy describes the implemented visitor data flows without absolute trac
     "offered provider",
     "subject, inquiry type",
     "Testimonials",
-    "email updates on a blog article",
+    "Contact messages may be forwarded through an email service",
+    "Testimonial submissions may trigger an email notification",
     "identifier cookie",
     "external AI provider",
     "email-derived hash",
@@ -73,7 +74,7 @@ test("Privacy describes the implemented visitor data flows without absolute trac
     assert.ok(html.includes(value), `${value} should appear in Privacy`);
   }
   assert.doesNotMatch(html, /No cookies, no IP logs|no selling or sharing of personal data|permanent deletion of anything/);
-  assert.doesNotMatch(html, /Newsletter Email|Google Gemini|>Loops</);
+  assert.doesNotMatch(html, /Newsletter Email|email updates on a blog article|Google Gemini|>Loops</);
 });
 
 test("Terms distinguishes portfolio material and visitor submissions", async () => {

@@ -15,7 +15,7 @@
 ### Setup
 1. Go to https://vercel.com and sign in with GitHub
 2. Click "New Project" ? Import your GitHub repo
-3. Vercel auto-detects Next.js — click Deploy
+3. Vercel auto-detects Next.js ï¿½ click Deploy
 4. Add environment variables (see section 3 below)
 
 ---
@@ -55,9 +55,10 @@ SPOTIFY_CLIENT_SECRET=your_client_secret
 SPOTIFY_REFRESH_TOKEN=your_refresh_token
 
 # ===========================
-# LOOPS.SO (Optional - for newsletter)
+# LOOPS.SO (Optional - testimonial notification to owner)
 # ===========================
 LOOPS_API_KEY=your_loops_key
+LOOPS_TESTIMONIAL_TRANSACTIONAL_ID=your_transactional_id
 
 # ===========================
 # GITHUB (Optional - for stats)
@@ -100,7 +101,7 @@ PAGESPEED_API_KEY=your_key
 ## 5. Supabase Production Setup
 
 ### Database URL
-Your Supabase database is already in the cloud — no extra setup needed for production.
+Your Supabase database is already in the cloud ï¿½ no extra setup needed for production.
 Just make sure your production Vercel env vars have the correct Supabase URL.
 
 ### Supabase Free Tier Limits
@@ -142,19 +143,19 @@ A personal portfolio will stay well within these limits for years.
 
 ## 7. Post-Launch Monitoring
 
-- **Vercel Analytics** — Free, shows page views and performance
-- **Supabase Dashboard** — Monitor database queries and auth
-- **Cloudinary Dashboard** — Monitor media usage
-- **Google Search Console** — Monitor SEO indexing
+- **Vercel Analytics** ï¿½ Free, shows page views and performance
+- **Supabase Dashboard** ï¿½ Monitor database queries and auth
+- **Cloudinary Dashboard** ï¿½ Monitor media usage
+- **Google Search Console** ï¿½ Monitor SEO indexing
 
 ---
 
 ## 8. GitHub Workflow
 
 ### Branch Strategy
-- `main` — production (auto-deploys to Vercel)
-- `dev` — development (create PRs to main)
-- `feature/phase-N-description` — feature branches
+- `main` ï¿½ production (auto-deploys to Vercel)
+- `dev` ï¿½ development (create PRs to main)
+- `feature/phase-N-description` ï¿½ feature branches
 
 ### Commit Convention
 ```

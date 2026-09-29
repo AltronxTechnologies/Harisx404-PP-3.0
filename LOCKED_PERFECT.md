@@ -728,8 +728,8 @@
     are exactly 64px tall (widths intentionally differ, 205 vs 271px).
     NO aria-label/cursor-copy additions — owner rejected (reverted a45ef79).
   - **Trust line (cta.note1):** "Full-time roles & freelance projects —
-    remote, worldwide." — sole homepage closer; newsletter stays on
-    blog-related pages only.
+    remote, worldwide." — sole homepage closer; the shared CTA is
+    unchanged on other routes.
   - **Motion:** entrance fade/rise gated by useReducedMotion
     (`initial={false}` when reduced).
   - **Verified before lock (final audit 2026-08-21):** 390/768/1440 in
@@ -2533,3 +2533,14 @@ Actual retention/deletion handling, provider practices, rights to third-party
 or editorial material, and jurisdiction-specific requirements still require
 owner review. Material changes in site data flows or those facts require an
 accurate policy update, even though these pages are locked.
+
+### 2026-09-29 owner-authorized newsletter removal
+
+The owner requested removal of the site-wide newsletter signup. The only
+rendered signup was in `/blog/[slug]`; its component and contact-creation server
+action are removed. Privacy's Email services card no longer describes an
+email-updates signup or a mailing-list address transfer. Contact email delivery
+and the optional Loops notification to the owner on testimonial submission
+remain separate features and disclosures. The legal page's layout, all other
+copy, dividers, typography, and the shared CTA remain locked and unchanged.
+Historical references above to an active newsletter describe earlier states.
