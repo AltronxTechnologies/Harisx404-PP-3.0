@@ -438,3 +438,17 @@ Date: 2026-09-29. Branch: `haris-dev/set-up-this-codebase-for-FcY5YL`.
   but no PostgreSQL connection URL. REST row reads cannot verify the installed
   SQL policy and RPC definitions. Neither pending Blog migration was applied
   during this pass.
+
+## Continuation: Live anonymous write boundary (2026-09-29)
+
+- **Verified:** an anonymous direct REST INSERT into `blog_post_tags` using
+  nonexistent post/tag UUIDs was rejected with HTTP 401, SQLSTATE 42501, and
+  an RLS violation. No row could be created by that probe. Together with the
+  earlier private-read checks, this confirms two observed live boundaries,
+  not the full installed policy/grant definitions or the tag-collision RPC.
+- **Routing finding:** the Blog-level `loading.tsx` boundary can send a
+  streaming response before an async article lookup calls `notFound()`. A
+  route-scoped metadata `notFound()` trial still returned HTTP 200, so it was
+  removed. Moving the boundary or adding a preflight layer is not a safe
+  one-line change; literal 404 remains open without altering shared loading
+  behavior. No unrelated or locked page was changed.
