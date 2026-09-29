@@ -42,8 +42,8 @@ Date: 2026-09-29. Branch: `haris-dev/set-up-this-codebase-for-FcY5YL`.
    Blog articles now passes; the temporary local-draft override caveat below
    ends when the legacy fixtures are removed.
 4. Run final production deployment QA on the actual hosting platform. Docker
-   production build and production-dependency audit pass; dev-only advisories
-   and two existing non-fatal build warnings remain documented below.
+   production build and both dependency audits pass; two existing non-fatal
+   build warnings remain documented below.
 
 ## Phase 1: Protect existing behavior
 
