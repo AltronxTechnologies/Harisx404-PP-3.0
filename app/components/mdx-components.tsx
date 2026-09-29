@@ -407,6 +407,7 @@ function createHeading(level) {
           href: `#${slug}`,
           key: `link-${slug}`,
           className: "anchor ",
+          "aria-label": `Link to section: ${slug.replace(/-/g, " ")}`,
         }),
       ],
       children,

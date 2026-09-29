@@ -53,10 +53,10 @@ Date: 2026-09-29. Branch: `haris-dev/set-up-this-codebase-for-FcY5YL`.
   TypeScript, targeted ESLint, `git diff --check`. Browser measured 9/9
   unique heading IDs and 0 mismatched self-links at 800px. No shared style
   or unrelated route changed.
-- **Known test gap:** a standalone TypeScript AST unit test could not run
-  through the repo's current `tsx` ESM/CJS loader; it was removed rather than
-  left failing. The HTTP regression tests a real published formatted article,
-  but synthetic duplicate/fenced fixtures still need a runnable test harness.
+- **Test gap resolved (2026-09-29):** Node's native TypeScript import runs the
+  shared TOC utility without the earlier `tsx` ESM/CJS loader issue.
+  `tests/blog-headings.test.mjs` now covers formatted and duplicate headings,
+  H1/H2 ID collisions, and heading-like text in fenced code. It passed 1/1.
 - **In progress:** live policy verification and broader public/Admin tests.
 - **Live read-only policy probe:** both service-role and anonymous REST reads
   succeeded (HTTP 200), but neither returned a draft nor a future-published
@@ -277,3 +277,43 @@ Date: 2026-09-29. Branch: `haris-dev/set-up-this-codebase-for-FcY5YL`.
   database migration rollout need an approved test account/data strategy;
   editorial rights, author attribution and archived-post retention need owner
   decisions. These are not inferred from route rendering or source tests.
+
+## Continuation: Responsive and fixture checks (2026-09-29)
+
+- **Completed:** `tests/blog-headings.test.mjs` now tests the shared MDX/TOC
+  implementation against synthetic duplicate/formatted headings and fenced
+  code. A Blog-only browser test checks a published image/code article at
+  320/390/768/1024/1440px in light and dark, requiring visible article text,
+  no page overflow and no failed loaded body images. Both tests passed.
+- **Completed:** article heading self-links now announce their destination
+  rather than only `#`; the published-code regression also verifies the new
+  accessible link name. TypeScript and targeted ESLint passed.
+- **Public security check:** unauthenticated `/admin/blogs` redirects to
+  `/admin/login` in the Alloy browser; this is not an authenticated Admin QA
+  substitute. Files: `tests/blog-headings.test.mjs`,
+  `tests/blog-responsive.browser.test.mjs`.
+- **Remaining:** authenticated Admin CRUD/migration verification and editorial
+  rights/retention decisions remain the gating work in Next exact step above.
+
+## Continuation: Isolated Blog RLS verification (2026-09-29)
+
+- **Completed:** `tests/blog-rls.database.test.sql` passed in disposable
+  PostgreSQL 16 with base schema and Blog migrations applied. A rollback-only
+  transaction exercised anon/authenticated reads of live vs draft/future/
+  archived/no-date posts and their tag links, denial of direct tag-join writes,
+  and service-role-only transactional Blog RPC create/update. Exit 0; the
+  post-test fixture count was 0 posts / 0 tags. No connected Supabase rows
+  were touched, and the disposable database was removed without stopping the
+  app stack.
+- **Remaining:** this proves the checked-in migration behavior in isolation,
+  not that the live database has the same grants/policies or either Blog
+  migration applied. Deployed SQL inspection and an authenticated Admin test
+  record still require approved access and an owner rollout decision.
+
+## Continuation: Blog index viewport matrix (2026-09-29)
+
+- **Completed:** `tests/blog-index-responsive.browser.test.mjs` checks first
+  article-card visibility, its viewport containment, and page horizontal
+  scroll width at 320/390/768/1024/1440px in both light and dark modes.
+  Docker Chromium passed 1/1. This supplements the article viewport matrix
+  and pre-hydration listing test; it is not authenticated Admin visual QA.
