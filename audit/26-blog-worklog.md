@@ -27,23 +27,23 @@ Date: 2026-09-29. Branch: `haris-dev/set-up-this-codebase-for-FcY5YL`.
 
 ## Next exact step
 
-1. Obtain approved SQL catalog access or an owner-executed rollout for
-   `migrations/2026_blog_tag_join_rls.sql` and
-   `migrations/2026_blog_admin_tag_collisions.sql` (the latter after the
-   original Blog save RPC), then verify installed policy/RPC definitions.
-   Live reads now confirm drafts, future rows and draft tag links are hidden;
-   they do not prove the exact migration versions or direct-write grants.
-2. Verify unusual MDX/imported-article edits using approved records, and
-   review the streaming not-found HTTP status before production sign-off.
-   Authenticated draft/save/reopen/preview, future scheduling at the actual
-   due time, archive/restore, stale-edit rejection, filter/sort and a scoped
-   media upload were checked in the 2026-09-29 passes below.
-3. Finish remaining content/SEO gates: owner-provided alt text/credits for
-   imported images, verified author/canonical data, rich-editing of legacy
-   MDX only if it can round-trip losslessly, and unsaved preview if needed.
-4. Resolve imported content provenance/rights and archive retention with the
-   owner before authorship schema/metadata, permanent deletion, production
-   sign-off or a final lock. Run full theme/viewport/content/SEO QA after.
+1. Owner to run the read-only `migrations/verify_blog_security.sql` in the
+   connected Supabase SQL editor and confirm that every result is true. Owner
+   reports running SQL, but the exact installed policy/function definitions
+   remain unverified without catalog output. Do not reapply migrations blindly.
+2. Before deploying, replace the temporary imported articles and images with
+   owner-authored/licensed posts and descriptions. Remove old DB rows and
+   checked-in `content/blog` fixtures deliberately, then recheck the index,
+   article routes, sitemap/RSS, metadata and linked images. Never assert that
+   the current imported articles have cleared production rights review.
+3. Keep archives reversible with no automatic purge; explicit owner-directed
+   permanent deletion is separate. Recheck source-mode editing with an
+   owner-authored MDX post when available. A literal 404 for missing public
+   Blog articles now passes; the temporary local-draft override caveat below
+   ends when the legacy fixtures are removed.
+4. Run final production deployment QA on the actual hosting platform. Docker
+   production build and production-dependency audit pass; dev-only advisories
+   and two existing non-fatal build warnings remain documented below.
 
 ## Phase 1: Protect existing behavior
 
@@ -452,3 +452,51 @@ Date: 2026-09-29. Branch: `haris-dev/set-up-this-codebase-for-FcY5YL`.
   removed. Moving the boundary or adding a preflight layer is not a safe
   one-line change; literal 404 remains open without altering shared loading
   behavior. No unrelated or locked page was changed.
+
+## Continuation: Deployment hardening (2026-09-29)
+
+- **HTTP status fixed:** public Blog article *document* requests now use the
+  existing Project preflight pattern in `middleware.ts`: an anonymous/public
+  Supabase read checks slug, published status and due date before Next can
+  stream. Missing posts return the existing site 404 page with HTTP 404 and
+  `noindex`; a DB failure fails closed with HTTP 503. Browser navigation to
+  an unknown slug rendered the real 404, while a published article returned
+  200 and the existing five 410 Gone paths stayed 410. A GET/HEAD regression
+  was added to `tests/blog.integration.test.mjs`. Internal RSC navigation
+  continues to reach the route boundary, as it already does for Projects.
+- **Legacy caveat:** `content/blog/tailwind-2-is-live.mdx` has a local `draft:
+  true` override while its database row is published. The middleware's DB
+  preflight therefore returns 200 for that legacy URL; the page itself still
+  withholds its body and emits a streamed noindex/not-found view. Do not call
+  this a blanket local-draft 404 fix. Remove the temporary imported files and
+  rows as part of the owner's pre-deployment replacement, and use database
+  draft/publish status as the source of truth for new owner-authored posts.
+- **Dependencies:** a controlled Next 15.5 patch, Supabase 2.50.5, Nodemailer
+  10.0.12 and UUID 11.1.1 update plus bounded transitive overrides resolved
+  the previous 12 production audit findings. A non-forced dev lockfile update
+  and a version-scoped `minimatch@3` override resolved the remaining tooling
+  findings. Both `npm audit --omit=dev` and the full `npm audit` now show
+  **0**. This did not upgrade to Next 16. The Compose web container was
+  recreated once to install the matching lockfile; it remains running.
+- **Static article correctness:** moved only visitor-specific reaction reads
+  from static generation to the client after hydration. Aggregate counts
+  remain server-rendered; controls wait until cookie/visitor state loads.
+  The second Docker production build finished successfully without the prior
+  repeated Blog cookie/dynamic-render errors. It still reports a pre-existing
+  `CurrentlyReadingBento` image lint warning and an edge/static-generation
+  advisory. The isolated production-build output was removed afterward.
+- **Verification:** Blog/Admin/metadata HTTP suite 20/20; Home/About 3/3,
+  legal 5/5, navigation 4/4, preview 3/3, Project 10 passed / 1 pre-existing
+  skip, Blog editor 5/5. Docker TypeScript and targeted ESLint passed. The
+  Alloy browser rendered a published article and enabled reaction controls
+  after visitor state loaded. SQL catalog verification remains for the owner;
+  no current imported article was edited or removed.
+- **Additional live embargo check:** a unique future-published QA row returned
+  GET and HEAD 404 without its article body under the new middleware. It was
+  deleted by exact ID/slug in a finally block. No fixture was left behind.
+  A browser-only legacy reaction cookie was also read after hydration on the
+  direct Docker frontend: the Heart control became pressed without changing
+  server counts; the test cookie was removed. The Alloy proxy briefly returned
+  a 502 for a development chunk after package replacement, then rendered the
+  article and enabled controls on a fresh navigation. No persistent app
+  console error was seen after it settled.

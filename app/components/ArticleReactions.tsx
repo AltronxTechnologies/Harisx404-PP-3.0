@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { toggleReaction } from "../db/actions";
+import { getUserReactions, toggleReaction } from "../db/actions";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { ReactionIcon } from "./ReactionIcon";
 
@@ -11,7 +11,6 @@ type ReactionType = "like" | "heart" | "celebrate" | "insightful";
 interface ArticleReactionsProps {
   slug: string;
   initialReactions: Record<string, number>;
-  initialUserReactions: string[];
 }
 
 const CelebrateSVG = ({ isActive }: { isActive: boolean }) => (
@@ -369,15 +368,30 @@ const AnimatedNumber = ({
 export default function ArticleReactions({
   slug,
   initialReactions,
-  initialUserReactions,
 }: ArticleReactionsProps) {
   const [reactions, setReactions] =
     useState<Record<string, number>>(initialReactions);
-  const [userReactions, setUserReactions] =
-    useState<string[]>(initialUserReactions);
+  const [userReactions, setUserReactions] = useState<string[]>([]);
+  const [isReady, setIsReady] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState<ReactionType | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const reduceMotion = useReducedMotion() ?? false;
+
+  useEffect(() => {
+    let active = true;
+    setIsReady(false);
+    getUserReactions(slug)
+      .then((current) => {
+        if (active) setUserReactions(current);
+      })
+      .catch(() => {
+        if (active) setErrorMessage("Your previous reactions could not be loaded. Try reloading this page.");
+      })
+      .finally(() => {
+        if (active) setIsReady(true);
+      });
+    return () => { active = false; };
+  }, [slug]);
 
   const handleReaction = async (type: ReactionType) => {
     // Prevent multiple clicks
@@ -456,7 +470,7 @@ export default function ArticleReactions({
   };
 
   return (
-    <div className="my-6">
+    <div className="my-6" aria-busy={!isReady}>
       <div className="flex flex-wrap items-center gap-3">
         {Object.entries(REACTION_EMOJIS).map(([type, emoji]) => {
           const count = reactions[type] || 0;
@@ -466,7 +480,7 @@ export default function ArticleReactions({
             <motion.button
               key={type}
               onClick={() => handleReaction(type as ReactionType)}
-              disabled={isSubmitting !== null}
+              disabled={!isReady || isSubmitting !== null}
               whileTap={reduceMotion ? undefined : { scale: 0.9 }}
               className={`flex items-center gap-1 rounded-full border px-3 py-1 text-sm transition-colors ${
                 isActive

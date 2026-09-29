@@ -1,4 +1,4 @@
-import { getArticleReactions, getUserReactions } from "../db/actions";
+import { getArticleReactions } from "../db/actions";
 import ArticleReactions from "./ArticleReactions";
 
 export default async function ArticleReactionWrapper({
@@ -6,16 +6,10 @@ export default async function ArticleReactionWrapper({
 }: {
   slug: string;
 }) {
-  const [initialReactions, initialUserReactions] = await Promise.all([
-    getArticleReactions(slug).catch((error) => {
-      console.error("Unable to load optional article reactions.", error);
-      return null;
-    }),
-    getUserReactions(slug).catch((error) => {
-      console.error("Unable to load optional visitor reactions.", error);
-      return [];
-    }),
-  ]);
+  const initialReactions = await getArticleReactions(slug).catch((error) => {
+    console.error("Unable to load optional article reactions.", error);
+    return null;
+  });
 
   if (!initialReactions) {
     return (
@@ -29,7 +23,6 @@ export default async function ArticleReactionWrapper({
     <ArticleReactions
       slug={slug}
       initialReactions={initialReactions}
-      initialUserReactions={initialUserReactions}
     />
   );
 }

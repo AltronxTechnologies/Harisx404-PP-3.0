@@ -19,19 +19,43 @@ function projectStatusPage(status: 404 | 503, request: NextRequest) {
   });
 }
 
+function blogStatusPage(status: 404 | 503, request: NextRequest) {
+  if (status === 503) {
+    return new NextResponse("Blog temporarily unavailable", {
+      status,
+      headers: { "X-Robots-Tag": "noindex, nofollow", "Cache-Control": "no-store" },
+    });
+  }
+  return NextResponse.rewrite(new URL("/__missing_blog", request.url), {
+    status,
+    headers: { "X-Robots-Tag": "noindex, nofollow", "Cache-Control": "no-store" },
+  });
+}
+
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const projectPath = /^\/projects\/([^/]+)\/?$/.exec(pathname);
+  const blogPath = /^\/blog\/([^/]+)\/?$/.exec(pathname);
   // Next strips RSC headers and _rsc before middleware. Browser RSC fetches
   // retain their Fetch Metadata headers and must reach the route boundary.
-  const projectDocument = projectPath && (request.method === "GET" || request.method === "HEAD")
+  const documentRequest = (request.method === "GET" || request.method === "HEAD")
     && !(request.headers.get("sec-fetch-dest") === "empty" && request.headers.get("sec-fetch-mode") === "cors");
+  const projectDocument = projectPath && documentRequest;
+  const blogDocument = blogPath && documentRequest;
   let projectSlug = projectPath?.[1] ?? "";
   if (projectDocument) {
     try {
       projectSlug = decodeURIComponent(projectSlug);
     } catch {
       return projectStatusPage(404, request);
+    }
+  }
+  let blogSlug = blogPath?.[1] ?? "";
+  if (blogDocument) {
+    try {
+      blogSlug = decodeURIComponent(blogSlug);
+    } catch {
+      return blogStatusPage(404, request);
     }
   }
 
@@ -65,6 +89,7 @@ export async function middleware(request: NextRequest) {
         return projectStatusPage(404, request);
       }
     }
+    if (blogDocument) return blogStatusPage(503, request);
     return response;
   }
 
@@ -148,6 +173,24 @@ export async function middleware(request: NextRequest) {
     } catch (error) {
       console.error("Project preflight failed", error);
       return projectStatusPage(503, request);
+    }
+  }
+
+  if (blogDocument) {
+    // Match the public article query, including the publish-time embargo.
+    try {
+      const { data, error } = await supabase
+        .from("blog_posts")
+        .select("slug")
+        .eq("slug", blogSlug)
+        .eq("status", "published")
+        .lte("published_at", new Date().toISOString())
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) return blogStatusPage(404, request);
+    } catch (error) {
+      console.error("Blog preflight failed", error);
+      return blogStatusPage(503, request);
     }
   }
 

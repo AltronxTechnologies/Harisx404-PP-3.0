@@ -47,6 +47,15 @@ test("RSS and sitemap expose the same non-empty Blog collection", async () => {
   assert.deepEqual(new Set(feed), new Set(mapped));
 });
 
+test("missing Blog articles return a real 404 before streaming", async () => {
+  const url = `${baseUrl}/blog/alloy-blog-article-that-does-not-exist`;
+  const [get, head] = await Promise.all([fetch(url), fetch(url, { method: "HEAD" })]);
+  assert.equal(get.status, 404);
+  assert.equal(head.status, 404);
+  assert.match(get.headers.get("x-robots-tag") || "", /noindex/);
+  assert.doesNotMatch(await get.text(), /id="blog-article"/);
+});
+
 test("Every syndicated article route renders without the Blog error state", async () => {
   const rss = await responseText("/rss.xml");
   const slugs = rssSlugs(rss);
