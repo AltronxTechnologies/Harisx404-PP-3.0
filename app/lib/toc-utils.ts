@@ -45,12 +45,14 @@ function headingsIn(tree: MdNode, setIds: boolean): TocHeading[] {
     const count = counts.get(base) || 0;
     counts.set(base, count + 1);
     const slug = count ? `${base}-${count + 1}` : base;
+    const level = node.depth === 1 ? 2 : node.depth;
     if (setIds) {
+      if (node.depth === 1) node.depth = 2;
       node.data ||= {};
       node.data.hProperties = { ...node.data.hProperties, id: slug };
     }
-    if (node.depth === 2 || node.depth === 3) {
-      headings.push({ level: node.depth, text, slug });
+    if (level === 2 || level === 3) {
+      headings.push({ level, text, slug });
     }
   }
   return headings;

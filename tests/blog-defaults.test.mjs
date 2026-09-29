@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { readFile } from "node:fs/promises";
-import { defaultBlogSummary, normalizeBlogSlug } from "../app/lib/blog-defaults.ts";
+import { defaultBlogSummary, normalizeBlogSlug, serializeBlogPublishDate, toLocalBlogDateTime } from "../app/lib/blog-defaults.ts";
 
 test("new Blog slugs normalize titles but remain editable", async () => {
   assert.equal(normalizeBlogSlug("  Crème & Code: 101! "), "creme-code-101");
@@ -23,4 +23,11 @@ test("missing summaries get a concise prose excerpt, never fenced code", async (
   assert.ok(defaultBlogSummary("Long text ".repeat(40), "Title").length <= 160);
   const api = await readFile(new URL("../app/api/admin/blogs/route.ts", import.meta.url), "utf8");
   assert.equal((api.match(/defaultBlogSummary\(post\.content, post\.title\)/g) || []).length, 1);
+});
+
+test("unchanged publication dates preserve the exact stored instant", () => {
+  const previous = "2026-10-01T12:34:56.123456+00:00";
+  assert.equal(serializeBlogPublishDate(toLocalBlogDateTime(previous), previous), previous);
+  assert.equal(serializeBlogPublishDate("", previous), "");
+  assert.equal(serializeBlogPublishDate("2026-10-02T12:35"), new Date("2026-10-02T12:35").toISOString());
 });

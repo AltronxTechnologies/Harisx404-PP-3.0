@@ -157,7 +157,7 @@ export async function fetchAndSortBlogPosts(): Promise<Blog[]> {
 }
 
 export async function getBlogPostBySlug(slug: string): Promise<Blog | null> {
-  if (!supabase) return null;
+  if (!supabase) throw new Error("Blog data is unavailable");
   const { data, error } = await supabase
     .from('blog_posts')
     .select(`
@@ -171,7 +171,10 @@ export async function getBlogPostBySlug(slug: string): Promise<Blog | null> {
     .lte('published_at', new Date().toISOString())
     .single();
 
-  if (error || !data) {
+  if (error && error.code !== "PGRST116") {
+    throw new Error("Unable to load Blog article");
+  }
+  if (!data) {
     return null;
   }
 

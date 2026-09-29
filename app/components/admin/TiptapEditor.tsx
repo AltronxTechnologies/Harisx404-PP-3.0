@@ -398,6 +398,7 @@ const MenuBar = ({ editor, story, blogTools }: { editor: Editor | null; story: b
           <input required value={imageAlt} onChange={(event) => setImageAlt(event.target.value)}
             onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); insertImage(); } }}
             className="rounded border border-border-hairline bg-surface-raised p-2" />
+          <span className="text-xs text-ink-secondary">Describe the image, not its filename.</span>
         </label>
         <label className="flex flex-col gap-1 text-sm text-ink-primary">Caption (optional)
           <input value={imageCaption} onChange={(event) => setImageCaption(event.target.value)}
@@ -412,7 +413,7 @@ const MenuBar = ({ editor, story, blogTools }: { editor: Editor | null; story: b
       const src = media.secure_url || media.url;
       if (!/^https:\/\//i.test(src) && !/^\/(?!\/)/.test(src)) return;
       setImageUrl(src);
-      setImageAlt(media.alt_text || "");
+       setImageAlt("");
       setImageCaption("");
     }} />}
     </>

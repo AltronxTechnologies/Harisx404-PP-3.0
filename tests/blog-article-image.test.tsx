@@ -3,6 +3,7 @@ import test from "node:test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { BlogArticleImage } from "../app/components/blog/BlogArticleImage";
+import { isAllowedBlogImageUrl } from "../app/components/blog/blogImage";
 
 function render(props: Parameters<typeof BlogArticleImage>[0]) {
   return renderToStaticMarkup(createElement("p", null, createElement(BlogArticleImage, props)));
@@ -44,4 +45,10 @@ test("missing, malformed and unsafe sources never become images or links", () =>
   for (const src of [undefined, "", "data:image/svg+xml;base64,AAAA", "javascript:alert(1)", "//evil.example/image", "http://evil.example/image", "https://user:pass@evil.example/image", "https://user:pass@images.unsplash.com/image", "not-a-url"]) {
     assert.equal(render({ src, alt: "Supplied alt", title: "Supplied title" }), "<p></p>", String(src));
   }
+});
+
+test("allowed Blog image hosts reject credentials and custom ports", () => {
+  assert.equal(isAllowedBlogImageUrl("https://images.unsplash.com/photo.jpg"), true);
+  assert.equal(isAllowedBlogImageUrl("https://user:pass@images.unsplash.com/photo.jpg"), false);
+  assert.equal(isAllowedBlogImageUrl("https://images.unsplash.com:8443/photo.jpg"), false);
 });

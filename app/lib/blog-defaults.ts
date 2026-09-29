@@ -8,6 +8,18 @@ export function normalizeBlogSlug(value: string) {
     .replace(/^-+|-+$/g, "");
 }
 
+export function toLocalBlogDateTime(value?: string) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
+}
+
+export function serializeBlogPublishDate(value?: string, previous?: string) {
+  if (!value) return "";
+  return previous && value === toLocalBlogDateTime(previous) ? previous : new Date(value).toISOString();
+}
+
 export function defaultBlogSummary(content: string, title: string) {
   const prose = content
     .replace(/```[\s\S]*?```/g, "")

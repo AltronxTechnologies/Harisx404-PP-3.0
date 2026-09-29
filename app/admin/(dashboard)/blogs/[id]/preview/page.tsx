@@ -3,7 +3,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { MDXContent } from "@/app/components/mdx";
+import { BlogArticleImage } from "@/app/components/blog/BlogArticleImage";
+import { ImageLightbox } from "@/app/components/blog/ImageLightbox";
+import { TableOfContents } from "@/app/components/TableOfContents";
 import { getBlogImageSrc } from "@/app/components/blog/blogImage";
+import { extractHeadingsFromMdx } from "@/app/lib/toc-utils";
 import { formatReadingTime } from "@/app/lib/reading-time";
 import createSupabaseServerClient, { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 
@@ -89,10 +93,12 @@ export default async function SavedBlogPreviewPage({
       </header>
 
       <div className="relative mt-10 px-4 md:px-6">
-        <article className="blog-article-shell prose prose-neutral dark:prose-invert mx-auto min-w-0 max-w-3xl overflow-x-hidden break-words [&>*:first-child]:mt-0 [&>div>*:first-child]:mt-0">
-          <MDXContent code={post.content || ""} />
+        <article id="blog-article" className="blog-article-shell prose prose-neutral dark:prose-invert mx-auto min-w-0 max-w-3xl overflow-x-hidden break-words [&>*:first-child]:mt-0 [&>div>*:first-child]:mt-0">
+          <MDXContent code={post.content || ""} components={{ img: BlogArticleImage, Image: BlogArticleImage }} />
         </article>
       </div>
+      <TableOfContents headings={extractHeadingsFromMdx(post.content || "")} />
+      <ImageLightbox />
     </div>
   );
 }

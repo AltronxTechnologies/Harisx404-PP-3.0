@@ -43,6 +43,12 @@ Date: 2026-09-29. Branch: `haris-dev/set-up-this-codebase-for-FcY5YL`.
 4. Run final production deployment QA on the actual hosting platform. Docker
    production build and both dependency audits pass; two existing non-fatal
    build warnings remain documented below.
+5. Close the remaining Admin product gates before calling the original prompt
+   100% complete: rich editing after the first save without legacy MDX loss;
+   an owner-approved permanent-delete/retention workflow if deletion is truly
+   required; and a stable-URL policy for published slug changes (redirects or
+   immutable published slugs). Add repeatable authenticated tests for these
+   workflows, then check real replacement content on the deployment host.
 
 ## Phase 1: Protect existing behavior
 
@@ -512,3 +518,60 @@ Date: 2026-09-29. Branch: `haris-dev/set-up-this-codebase-for-FcY5YL`.
 - **Remaining:** temporary imported articles remain in place for development
   as the owner requested. Replace them before public deployment, then run
   hosting-platform QA using the new owner-authored posts.
+
+## Continuation: Full-prompt acceptance audit (2026-09-29)
+
+- **Completed:** independently rechecked the public article and Admin Blog
+  source against the complete prompt and previous roadmap. Found and fixed
+  Blog-only gaps: hidden TOC focus and forced smooth motion; unchanged publish
+  timestamps losing seconds; unclear publish/unpublish transitions and generic
+  validation feedback; preview body images/TOC not matching public rendering;
+  filename-prefilled image descriptions; credential-bearing/custom-port image
+  host URLs; RSS origin and unsafe legacy canonical disagreement; internal RSC
+  database failures being mistaken for missing articles; and a second H1 from
+  body Markdown. The form now also rejects whitespace-only content and reports
+  overlong/invalid/excess tags before submitting. Existing imported MDX bytes
+  were not changed.
+- **Decisions:** an existing post remains source-edited rather than risking a
+  lossy Tiptap conversion. Archive stays reversible with no automated purge.
+  Publish/unpublish/schedule transitions now require confirmation; ordinary
+  edits to an already published post do not. New image insertions require an
+  authored description instead of silently accepting an uploaded filename.
+  Body `#` headings render as H2 and enter the TOC while the page title remains
+  H1. The owner-confirmed SQL catalog checks remain 9/9; no migration was
+  rerun.
+- **Verification:** Docker production build succeeded, Docker TypeScript and
+  targeted ESLint passed; full and production-only npm audits report zero
+  vulnerabilities. Blog/Admin/metadata/defaults/headings/canonical HTTP and
+  unit suite passed **26/26**; Blog image/editor passed **10/10**; security/
+  GFM/code-copy suite **25/25**; public index/article/pre-hydration/lightbox/
+  TOC browser suite **6/6**; Home/About, legal, navigation, preview and Project
+  regressions **25 passed / 1 pre-existing skip**. Browser confirmed the
+  hidden TOC is not focusable, Escape restores focus, and reduced-motion uses
+  non-smooth scrolling and focuses the target. Read-only published-row scan
+  found one temporary article with body H1. A fresh uniquely marked QA post
+  rendered one title H1 and a body H2 on the public route, then was deleted
+  by exact ID/slug. A cache-dependent test against the existing dev prerender
+  was removed in favor of that fresh-route check and an MDX processor test.
+  Following the final form checks, Docker TypeScript, targeted ESLint and the
+  focused preview/defaults/headings suite passed again (8/8).
+- **In progress / remaining:** do not claim 100% or lock. The Admin has no
+  permanent-delete control (archive is a reversible hide), and every saved
+  post reopens in source mode, even when it began as owner-authored simple
+  Markdown. Changing a published slug invalidates the old URL without a
+  redirect/metric migration. The current temporary imported corpus still
+  needs replacement before deployment; author/alt/credits and page outlines
+  must be reviewed on the final owner-authored content. Repeat authenticated
+  transition/preview checks on an approved record after these latest UI edits;
+  test deployment-host HTTP, CSP/embeds, broken links and performance with the
+  final corpus. The shared media uploader buffers the file before external
+  upload without an app-level size cap; assess infrastructure limits before
+  claiming large/malicious uploads are comprehensively handled. Existing
+  unrelated build warnings and the legacy local-draft status caveat remain.
+- **Files changed in this pass:** `app/components/TableOfContents.tsx`,
+  `app/components/admin/BlogForm.tsx`, the Blog-only image toolbar branch in
+  `app/components/admin/TiptapEditor.tsx`,
+  `app/admin/(dashboard)/blogs/[id]/preview/page.tsx`,
+  `app/components/blog/blogImage.ts`, `app/lib/blog-canonical.ts`,
+  `app/lib/blog-defaults.ts`, `app/lib/toc-utils.ts`, Blog-only lookup in
+  `app/lib/utils.ts`, `app/rss.xml/route.ts`, scoped tests and this worklog.

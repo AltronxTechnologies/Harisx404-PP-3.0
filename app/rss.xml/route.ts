@@ -14,7 +14,7 @@ function escapeXml(value: string): string {
 }
 
 export async function GET() {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || siteMetadata.siteUrl;
+  const siteUrl = siteMetadata.siteUrl;
   const posts = await fetchBlogIndexPosts();
 
   const items = posts

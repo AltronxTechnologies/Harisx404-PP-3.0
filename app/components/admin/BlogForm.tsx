@@ -9,41 +9,37 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Loader2, Plus, X, Image as ImageIcon } from "lucide-react";
 import { MediaPickerModal } from "./MediaPickerModal";
-import { normalizeBlogSlug } from "@/app/lib/blog-defaults";
+import { normalizeBlogSlug, serializeBlogPublishDate, toLocalBlogDateTime } from "@/app/lib/blog-defaults";
+import { isAllowedBlogImageUrl } from "@/app/components/blog/blogImage";
 
 const TiptapEditor = dynamic(() => import("./TiptapEditor").then((module) => module.TiptapEditor), { ssr: false });
 
 const blogSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  slug: z.string().min(1, "Slug is required"),
-  summary: z.string().optional(),
-  content: z.string().min(1, "Content is required"),
+  title: z.string().min(1, "Title is required").max(200, "Title must be 200 characters or fewer"),
+  slug: z.string().min(1, "Slug is required").max(300).refine((value) => normalizeBlogSlug(value).length <= 200, "Slug must be 200 characters or fewer"),
+  summary: z.string().max(1000, "Summary must be 1000 characters or fewer").optional(),
+  content: z.string().min(1, "Content is required").max(1_000_000, "Article is too long").refine((value) => value.trim().length > 0, "Content is required"),
   status: z.enum(["draft", "published"]),
   cover_image_url: z
     .string()
     .refine(
-      (value) => !value || value.startsWith("/blog/") || /^https:\/\//.test(value),
-      "Must be a local Blog image or HTTPS URL",
+      (value) => !value || value.startsWith("/blog/") || isAllowedBlogImageUrl(value),
+      "Choose a local Blog image or an approved HTTPS image host",
     )
     .optional(),
   cover_image_id: z.string().optional(),
-  canonical_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
-  published_at: z.string().optional(),
-  tags: z.array(z.string()).optional(),
+  canonical_url: z.string().url("Must be a valid URL").refine((value) => {
+    const url = new URL(value);
+    return ["http:", "https:"].includes(url.protocol) && !url.username && !url.password;
+  }, "Use an HTTP(S) URL without credentials").optional().or(z.literal("")),
+  published_at: z.string().refine((value) => !value || !Number.isNaN(Date.parse(value)), "Choose a valid publish date").optional(),
+  tags: z.array(z.string().trim().min(1).max(50)).max(25).optional(),
 });
 
 type BlogFormValues = z.infer<typeof blogSchema>;
 
 interface BlogFormProps {
   initialData?: BlogFormValues & { id?: string; updated_at?: string };
-}
-
-function toLocalDateTime(value?: string) {
-  if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  const offset = date.getTimezoneOffset() * 60_000;
-  return new Date(date.getTime() - offset).toISOString().slice(0, 16);
 }
 
 export function BlogForm({ initialData }: BlogFormProps) {
@@ -60,6 +56,8 @@ export function BlogForm({ initialData }: BlogFormProps) {
     control,
     watch,
     setValue,
+    setError,
+    clearErrors,
     formState: { errors },
   } = useForm<BlogFormValues>({
     resolver: zodResolver(blogSchema),
@@ -69,7 +67,7 @@ export function BlogForm({ initialData }: BlogFormProps) {
       cover_image_url: initialData.cover_image_url || "",
       cover_image_id: initialData.cover_image_id || "",
       canonical_url: initialData.canonical_url || "",
-      published_at: toLocalDateTime(initialData.published_at),
+      published_at: toLocalBlogDateTime(initialData.published_at),
     } : {
       title: "",
       slug: "",
@@ -85,12 +83,19 @@ export function BlogForm({ initialData }: BlogFormProps) {
   });
 
   const tags = watch("tags") || [];
+  const status = watch("status");
+  const scheduled = status === "published" && Date.parse(watch("published_at") || "") > Date.now();
 
   const addTag = () => {
-    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
-      setValue("tags", [...tags, tagInput.trim()]);
-      setTagInput("");
+    const value = tagInput.trim();
+    if (!value || tags.includes(value)) return;
+    if (value.length > 50 || !/[\p{L}\p{N}]/u.test(value) || tags.length >= 25) {
+      setError("tags", { message: "Use up to 25 tags of at most 50 characters, each with a letter or number." });
+      return;
     }
+    clearErrors("tags");
+    setValue("tags", [...tags, value]);
+    setTagInput("");
   };
 
   const removeTag = (tagToRemove: string) => {
@@ -98,6 +103,16 @@ export function BlogForm({ initialData }: BlogFormProps) {
   };
 
   const onSubmit = async (data: BlogFormValues) => {
+    const publishedAt = serializeBlogPublishDate(data.published_at, initialData?.published_at);
+    const publicationChanged = Boolean(initialData?.id && initialData.status === "published" && publishedAt !== initialData.published_at);
+    if ((data.status !== initialData?.status || publicationChanged) && (data.status === "published" || initialData?.status === "published")) {
+      const action = data.status === "draft"
+        ? "Unpublish this post? It will disappear from the public Blog and return to drafts."
+        : publishedAt && Date.parse(publishedAt) > Date.now()
+          ? "Schedule this post? It will become public automatically at the selected time."
+          : "Publish this post now? It will become public as soon as it is saved.";
+      if (!window.confirm(action)) return;
+    }
     setIsSubmitting(true);
     setErrorMsg("");
     try {
@@ -110,21 +125,24 @@ export function BlogForm({ initialData }: BlogFormProps) {
                 id: initialData.id,
                 updated_at: initialData.updated_at,
                 ...data,
-                published_at: data.published_at
-                  ? new Date(data.published_at).toISOString()
-                  : "",
+                published_at: publishedAt,
               }
             : {
                 ...data,
-                published_at: data.published_at
-                  ? new Date(data.published_at).toISOString()
-                  : "",
+                published_at: publishedAt,
               },
         ),
       });
 
       if (!res.ok) {
         const err = await res.json();
+        if (err.issues?.fieldErrors) {
+          for (const [name, messages] of Object.entries(err.issues.fieldErrors)) {
+            if (name in blogSchema.shape && Array.isArray(messages) && typeof messages[0] === "string") {
+              setError(name as keyof BlogFormValues, { message: messages[0] });
+            }
+          }
+        }
         throw new Error(err.error || "Failed to save blog post");
       }
 
@@ -182,6 +200,7 @@ export function BlogForm({ initialData }: BlogFormProps) {
           className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
           placeholder="Optional: generated from the article on first save"
         />
+        {errors.summary && <p className="text-xs text-red-500">{errors.summary.message}</p>}
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -195,6 +214,7 @@ export function BlogForm({ initialData }: BlogFormProps) {
             <option value="draft">Draft</option>
             <option value="published">Published</option>
           </select>
+          <p className="text-xs text-ink-secondary">Publishing without a future date makes this post public when saved.</p>
         </div>
 
         <div className="space-y-2">
@@ -205,6 +225,7 @@ export function BlogForm({ initialData }: BlogFormProps) {
             id="blog-published-at"
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
           />
+          {errors.published_at && <p className="text-xs text-red-500">{errors.published_at.message}</p>}
         </div>
       </div>
 
@@ -281,6 +302,7 @@ export function BlogForm({ initialData }: BlogFormProps) {
             <Plus className="h-4 w-4" />
           </button>
         </div>
+        {errors.tags && <p className="text-xs text-red-500">{errors.tags.message}</p>}
       </div>
 
       <div className="space-y-2">
@@ -332,7 +354,11 @@ export function BlogForm({ initialData }: BlogFormProps) {
           className="inline-flex items-center justify-center rounded-xl bg-accent-signal px-6 py-2 text-sm font-medium text-white shadow hover:bg-accent-signal/90 focus:outline-none disabled:opacity-50 transition-all"
         >
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Save Post
+          {status === "published" && initialData?.status !== "published"
+            ? scheduled ? "Schedule Post" : "Publish Post"
+            : status === "draft" && initialData?.status === "published"
+              ? "Unpublish Post"
+              : status === "draft" && !initialData?.id ? "Save Draft" : "Save Post"}
         </button>
       </div>
     </form>

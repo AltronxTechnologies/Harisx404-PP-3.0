@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createProcessor } from "@mdx-js/mdx";
+import { evaluate } from "@mdx-js/mdx";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import * as jsxRuntime from "react/jsx-runtime";
 import { addHeadingIds, extractHeadingsFromMdx } from "../app/lib/toc-utils.ts";
 
 test("TOC entries and rendered IDs agree for formatted, duplicate, and fenced headings", () => {
@@ -16,6 +20,7 @@ test("TOC entries and rendered IDs agree for formatted, duplicate, and fenced he
   ].join("\n");
   const headings = extractHeadingsFromMdx(source);
   assert.deepEqual(headings, [
+    { level: 2, text: "Repeated title", slug: "repeated-title" },
     { level: 2, text: "What are the methods?", slug: "what-are-the-methods" },
     { level: 2, text: "What are the methods?", slug: "what-are-the-methods-2" },
     { level: 3, text: "An inline example", slug: "an-inline-example" },
@@ -24,6 +29,7 @@ test("TOC entries and rendered IDs agree for formatted, duplicate, and fenced he
 
   const tree = createProcessor().parse(source);
   addHeadingIds(tree);
+  assert.equal(tree.children.filter((node) => node.type === "heading" && node.depth === 1).length, 0);
   const ids = tree.children
     .filter((node) => node.type === "heading")
     .map((node) => node.data?.hProperties?.id);
@@ -35,4 +41,13 @@ test("TOC entries and rendered IDs agree for formatted, duplicate, and fenced he
     "repeated-title-2",
   ]);
   assert.equal(new Set(ids).size, ids.length);
+});
+
+test("body H1 is rendered as H2 so the article title remains the only H1", async () => {
+  const { default: Content } = await evaluate("# Introduction", {
+    ...jsxRuntime,
+    remarkPlugins: [() => addHeadingIds],
+  });
+  const html = renderToStaticMarkup(createElement(Content));
+  assert.match(html, /<h2 id="introduction">Introduction<\/h2>/);
 });

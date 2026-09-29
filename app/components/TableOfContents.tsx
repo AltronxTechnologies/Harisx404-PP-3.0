@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useActiveSection } from "@/app/hooks/useActiveSection";
 import type { TocHeading } from "@/app/lib/toc-utils";
 
@@ -48,28 +48,51 @@ function useRevealAfterHero() {
 
 export function TableOfContents({ headings }: { headings: TocHeading[] }) {
   const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
   const activeId = useActiveSection({ headingIds: headings.map((heading) => heading.slug) });
   const active = headings.find((heading) => heading.slug === activeId) || headings[0];
   const progress = useReadingProgress();
   const visible = useRevealAfterHero();
 
+  const closeToc = () => {
+    setOpen(false);
+    if (visible) requestAnimationFrame(() => triggerRef.current?.focus());
+  };
+
   useEffect(() => {
-    const onKey = (event: KeyboardEvent) => event.key === "Escape" && setOpen(false);
+    if (open) closeRef.current?.focus();
+  }, [open]);
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && open) {
+        event.preventDefault();
+        setOpen(false);
+        if (visible) requestAnimationFrame(() => triggerRef.current?.focus());
+      }
+    };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [open, visible]);
 
   if (!headings.length) return null;
 
   const selectHeading = (slug: string) => {
-    document.getElementById(slug)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const heading = document.getElementById(slug);
+    heading?.scrollIntoView({
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+      block: "start",
+    });
     window.history.pushState(null, "", `#${slug}`);
     setOpen(false);
+    heading?.querySelector<HTMLElement>('a[href^="#"]')?.focus({ preventScroll: true });
   };
 
   return (
     <nav
       aria-label="Table of contents"
+      aria-hidden={!visible && !open}
       className={`fixed bottom-[30px] left-1/2 z-[99] flex -translate-x-1/2 flex-col items-center transition-all duration-500 ease-out motion-reduce:transition-none ${
         visible || open
           ? "pointer-events-auto translate-y-0 scale-100 opacity-100"
@@ -85,8 +108,10 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
       >
         {!open ? (
           <button
+            ref={triggerRef}
             type="button"
             onClick={() => setOpen(true)}
+            tabIndex={visible ? 0 : -1}
             className="absolute inset-0 flex w-full items-center gap-3 px-5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
           >
             <span aria-hidden="true" className="relative flex size-1.5 shrink-0">
@@ -121,8 +146,9 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
                 Table of contents
               </span>
               <button
+                ref={closeRef}
                 type="button"
-                onClick={() => setOpen(false)}
+                onClick={closeToc}
                 aria-label="Close table of contents"
                 className="flex size-7 items-center justify-center rounded-full text-current/55 transition-colors hover:bg-current/10 hover:text-current"
               >

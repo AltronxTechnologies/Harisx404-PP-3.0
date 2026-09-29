@@ -13,7 +13,7 @@ const ALLOWED_REMOTE_HOSTS = new Set([
 export function isAllowedBlogImageUrl(value: string) {
   try {
     const url = new URL(value);
-    return url.protocol === "https:" && ALLOWED_REMOTE_HOSTS.has(url.hostname);
+    return url.protocol === "https:" && !url.username && !url.password && !url.port && ALLOWED_REMOTE_HOSTS.has(url.hostname);
   } catch {
     return false;
   }
