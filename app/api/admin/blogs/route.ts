@@ -24,8 +24,13 @@ const optionalText = (max: number) =>
 
 const optionalCanonicalUrl = z
   .union([z.string().trim().max(2048).url().refine((value) => {
-    const url = new URL(value);
-    return ["http:", "https:"].includes(url.protocol) && !url.username && !url.password;
+    if (!value) return true;
+    try {
+      const url = new URL(value);
+      return ["http:", "https:"].includes(url.protocol) && !url.username && !url.password;
+    } catch {
+      return false;
+    }
   }, "Canonical URL must be an HTTP(S) URL without credentials"), z.literal(""), z.null()])
   .optional()
   .transform((value) => value || null);

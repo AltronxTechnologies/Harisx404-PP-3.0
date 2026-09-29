@@ -27,17 +27,19 @@ Date: 2026-09-29. Branch: `haris-dev/set-up-this-codebase-for-FcY5YL`.
 
 ## Next exact step
 
-1. Apply `migrations/2026_blog_tag_join_rls.sql` and
-   `migrations/2026_blog_admin_tag_collisions.sql` only through an approved
-   database rollout (the latter after the original Blog save RPC), then verify
-   catalog policies/grants and role-specific reads using safe fixtures.
-2. Verify authenticated Admin create/edit/source round-trip, saved preview,
-   archive/restore, conflicts, scheduling and cache invalidation with an
-   authorized test record; public HTTP/source tests do not establish these.
+1. Obtain approved SQL catalog access or an owner-executed rollout for
+   `migrations/2026_blog_tag_join_rls.sql` and
+   `migrations/2026_blog_admin_tag_collisions.sql` (the latter after the
+   original Blog save RPC), then verify installed policy/RPC definitions.
+   Live reads now confirm drafts, future rows and draft tag links are hidden;
+   they do not prove the exact migration versions or direct-write grants.
+2. Verify any still-untested media upload, unusual MDX/imported-article edit,
+   and scheduled publication at its actual due time using approved records.
+   Authenticated draft/save/reopen/preview, future scheduling, archive/restore,
+   stale-edit rejection and filter/sort were checked in the 2026-09-29 pass.
 3. Finish remaining content/SEO gates: owner-provided alt text/credits for
    imported images, verified author/canonical data, rich-editing of legacy
-   MDX only if it can round-trip losslessly, unsaved preview if needed, and
-   browser verification of Admin save/reopen, dates and content edge cases.
+   MDX only if it can round-trip losslessly, and unsaved preview if needed.
 4. Resolve imported content provenance/rights and archive retention with the
    owner before authorship schema/metadata, permanent deletion, production
    sign-off or a final lock. Run full theme/viewport/content/SEO QA after.
@@ -317,3 +319,73 @@ Date: 2026-09-29. Branch: `haris-dev/set-up-this-codebase-for-FcY5YL`.
   scroll width at 320/390/768/1024/1440px in both light and dark modes.
   Docker Chromium passed 1/1. This supplements the article viewport matrix
   and pre-hydration listing test; it is not authenticated Admin visual QA.
+
+## Continuation: Authenticated Blog Admin acceptance (2026-09-29)
+
+- **Completed:** owner-provided Admin login reached the dashboard. A uniquely
+  marked private QA draft was created through the new-post rich editor with a
+  generated slug and summary; Admin list, edit-source reopen and saved
+  noindex/nofollow preview worked. A source edit containing a heading, link
+  and GFM table was persisted and rendered in preview. A later unchanged
+  save preserved its SHA-256 exactly. The test post was scheduled for a future
+  date (Admin showed Scheduled), hidden from anon REST, archived, restored as
+  a draft, and archived again. A stale timestamp PATCH returned 409 without
+  changing the row. The QA row was then removed by exact archived ID/slug;
+  privileged and anonymous reads returned zero. No existing article changed.
+- **Completed:** a second uniquely marked tagged QA draft tested Admin tag
+  save and Blog list title search, Draft filter and ascending Title sort.
+  Service-role reads saw the post/tag link; anon REST returned zero post and
+  tag-link rows. It was archived; the filter showed its empty state. The
+  archived post and its otherwise unused tag were deleted by exact identity
+  after confirming no other links, reactions or view records. Final service
+  reads returned zero QA posts and zero QA tags. No fixture remains.
+- **Defects found and fixed:** blank canonical input caused `new URL("")` to
+  throw and return HTTP 500 on create; the optional validator now accepts
+  blank safely and rejects malformed URLs as validation errors. Existing
+  posts with nullable cover/canonical fields failed client-side edit
+  validation; BlogForm now supplies empty-string defaults. The Admin
+  dashboard's Recent Blog Posts query selected nonexistent `publishedAt` and
+  displayed an empty list despite 63 posts; the Blog-only query uses the
+  verified Admin client and `published_at`, accurate Live counts/status and
+  an explicit query-error state. New-post Tiptap now uses deferred initial
+  rendering; its Next.js hydration warnings disappeared in the browser.
+- **Verification:** authenticated browser create/edit/reopen/preview/schedule/
+  archive/restore/filter/sort passed; service-role and anon REST observations
+  corroborated privacy and cleanup. Blog overview displayed recent posts.
+  Targeted Blog Admin/metadata tests, Docker TypeScript, ESLint and diff
+  checks passed after the fixes. Credentials were not written to files or
+  worklog. Files: `app/api/admin/blogs/route.ts`,
+  `app/components/admin/BlogForm.tsx`, `app/components/admin/TiptapEditor.tsx`,
+  `app/admin/(dashboard)/page.tsx`, `tests/blog-admin.archive.test.mjs`,
+  `tests/blog-admin.overview.test.mjs`.
+- **Remaining:** live catalog verification of applied Blog migrations is not
+  possible with REST-only credentials; tag-join private reads were verified,
+  but direct-write grants and collision-RPC version remain unproven in that
+  database. Editorial rights, author attribution, archive-retention policy,
+  legacy image descriptions/credits and unrelated package vulnerabilities
+  still block a blanket production/legal sign-off.
+
+## Continuation: Authenticated Admin responsive QA (2026-09-29)
+
+- **Completed:** Blog-only list/new/edit page wrappers and form controls now
+  shrink within narrow Admin layouts. At 320px the list document remained
+  320px wide while its 248px-wide table panel scrolled internally to 476px.
+  The new-post form (including its loaded rich editor) had no controls outside
+  the viewport. On a read-only existing published-post edit page, the form
+  occupied x=60..260 and the preview link originally clipped left; wrapping
+  the action row kept all inputs, buttons and links within the 320px viewport.
+  The existing article was not saved or otherwise changed.
+- **Verification:** the existing-post edit form also had zero overflowing
+  controls at 768px; the 390px light-mode new-post form and Blog list had no
+  document overflow (list table scrolled inside its 310px panel). The 1440px
+  dark-mode Blog list displayed 20 rows without page overflow. Browser console
+  showed no app errors. Docker TypeScript, targeted ESLint, Blog Admin/list/
+  archive/overview/preview and article-metadata tests, Blog editor 5/5, and
+  `git diff --check` passed. Full Blog HTTP suite passed 4/4 when run alone;
+  its all-articles case took 132 seconds, so a combined run with a 120-second
+  timeout was interrupted before that case completed.
+- **Remaining:** owner approval is still needed for imported article rights,
+  attribution/image descriptions and credits, and archive retention. The
+  checked-in Blog SQL migrations are not verified on the connected database;
+  schedule-at-due-time and media upload are untested. These are outstanding
+  gates, not assumed complete from authenticated browser access.

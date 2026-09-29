@@ -65,6 +65,8 @@ test("editing an existing blog keeps the original MDX in a source field", async 
   assert.match(form, /rich editor can remove embeds and custom formatting/);
   assert.match(api, /refine\(\(value\) => value\.trim\(\)\.length > 0, "Content is required"\)/);
   assert.doesNotMatch(api, /replace\(\/\\r\\n\?\/g, "\\n"\)\.trim\(\)/);
+  assert.match(form, /cover_image_url: initialData\.cover_image_url \|\| ""/);
+  assert.match(form, /canonical_url: initialData\.canonical_url \|\| ""/);
 });
 
 test("manual cover URL edits clear their media ID and saves validate the pair", async () => {

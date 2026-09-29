@@ -421,6 +421,7 @@ const MenuBar = ({ editor, story, blogTools }: { editor: Editor | null; story: b
 
 export function TiptapEditor({ value, onChange, label = "Case study", story = false, blogTools = false }: TiptapEditorProps) {
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       blogTools ? StarterKit.configure({ link: { openOnClick: false } }) : StarterKit,
       ...(blogTools ? [Image, TableKit] : []),

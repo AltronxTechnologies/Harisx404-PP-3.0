@@ -65,6 +65,10 @@ export function BlogForm({ initialData }: BlogFormProps) {
     resolver: zodResolver(blogSchema),
     defaultValues: initialData ? {
       ...initialData,
+      summary: initialData.summary || "",
+      cover_image_url: initialData.cover_image_url || "",
+      cover_image_id: initialData.cover_image_id || "",
+      canonical_url: initialData.canonical_url || "",
       published_at: toLocalDateTime(initialData.published_at),
     } : {
       title: "",
@@ -134,7 +138,7 @@ export function BlogForm({ initialData }: BlogFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+    <form onSubmit={handleSubmit(onSubmit)} className="min-w-0 space-y-8">
       {errorMsg && (
         <div role="alert" className="rounded-lg bg-red-50 p-4 text-sm text-red-500 dark:bg-red-950/30">
           {errorMsg}
@@ -204,20 +208,20 @@ export function BlogForm({ initialData }: BlogFormProps) {
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <div className="space-y-2">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 md:grid-cols-2">
+        <div className="min-w-0 space-y-2">
           <label htmlFor="blog-cover-url" className="text-sm font-medium">Cover Image</label>
           <div className="flex gap-2">
             <input
               {...register("cover_image_url", { onChange: () => setValue("cover_image_id", "") })}
               id="blog-cover-url"
-              className="flex-1 rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
+              className="min-w-0 flex-1 rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
               placeholder="https://... or choose from library"
             />
             <button
               type="button"
               onClick={() => setIsMediaPickerOpen(true)}
-              className="px-3 py-2 bg-surface-raised border border-border-hairline rounded-xl hover:bg-surface-base transition-colors flex items-center gap-2 text-sm font-medium"
+              className="flex shrink-0 items-center gap-2 rounded-xl border border-border-hairline bg-surface-raised px-3 py-2 text-sm font-medium transition-colors hover:bg-surface-base"
             >
               <ImageIcon className="h-4 w-4" /> Pick
             </button>
@@ -234,12 +238,12 @@ export function BlogForm({ initialData }: BlogFormProps) {
           />
         </div>
 
-        <div className="space-y-2">
+        <div className="min-w-0 space-y-2">
           <label htmlFor="blog-canonical-url" className="text-sm font-medium">Canonical URL (SEO)</label>
           <input
             {...register("canonical_url")}
             id="blog-canonical-url"
-            className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
+            className="min-w-0 w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
             placeholder="https://..."
           />
           {errors.canonical_url && <p className="text-xs text-red-500">{errors.canonical_url.message}</p>}
@@ -265,14 +269,14 @@ export function BlogForm({ initialData }: BlogFormProps) {
             value={tagInput}
             onChange={e => setTagInput(e.target.value)}
             onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addTag())}
-            className="flex-1 rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
+            className="min-w-0 flex-1 rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
             placeholder="Add a tag and press Enter"
           />
           <button
             type="button"
             onClick={addTag}
             aria-label="Add tag"
-            className="px-4 py-2 bg-surface-raised border border-border-hairline rounded-xl hover:bg-surface-base transition-colors"
+            className="shrink-0 rounded-xl border border-border-hairline bg-surface-raised px-4 py-2 transition-colors hover:bg-surface-base"
           >
             <Plus className="h-4 w-4" />
           </button>
@@ -306,7 +310,7 @@ export function BlogForm({ initialData }: BlogFormProps) {
         {errors.content && <p className="text-xs text-red-500">{errors.content.message}</p>}
       </div>
 
-      <div className="flex justify-end gap-4">
+      <div className="flex flex-wrap justify-end gap-4">
         {initialData?.id && (
           <Link
             href={`/admin/blogs/${initialData.id}/preview`}

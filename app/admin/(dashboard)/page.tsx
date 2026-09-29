@@ -1,7 +1,8 @@
 import { FileText, Briefcase, Image, Settings, Plus, ExternalLink, ArrowUpRight, Layers, Eye, Heart, ChartNoAxesCombined } from "lucide-react";
 import Link from "next/link";
-import createSupabaseServerClient from "@/app/lib/supabase/server";
+import createSupabaseServerClient, { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 import { getServerStats } from "@/app/lib/stats/server-stats";
+import { blogListStatus } from "./blogs/blogList";
 
 export const metadata = {
   title: "Dashboard | Admin",
@@ -9,6 +10,8 @@ export const metadata = {
 
 export default async function AdminDashboard() {
   const supabase = await createSupabaseServerClient();
+  const blogAdmin = await createSupabaseAdminClient();
+  const now = new Date();
 
   // Fetch stats in parallel
   const [
@@ -16,22 +19,22 @@ export default async function AdminDashboard() {
     { count: publishedBlogCount },
     { count: draftBlogCount },
     { count: projectCount },
-    { data: recentPosts },
+    { data: recentPosts, error: recentPostsError },
     { data: recentProjects },
     serverStats,
   ] = await Promise.all([
-    supabase.from("blog_posts").select("*", { count: "exact", head: true }),
-    supabase.from("blog_posts").select("*", { count: "exact", head: true }).eq("status", "published"),
-    supabase.from("blog_posts").select("*", { count: "exact", head: true }).eq("status", "draft"),
+    blogAdmin.from("blog_posts").select("id", { count: "exact", head: true }),
+    blogAdmin.from("blog_posts").select("id", { count: "exact", head: true }).eq("status", "published").lte("published_at", now.toISOString()),
+    blogAdmin.from("blog_posts").select("id", { count: "exact", head: true }).eq("status", "draft"),
     supabase.from("projects").select("*", { count: "exact", head: true }),
-    supabase.from("blog_posts").select("id, title, slug, status, publishedAt").order("created_at", { ascending: false }).limit(5),
+    blogAdmin.from("blog_posts").select("id, title, slug, status, published_at").order("created_at", { ascending: false }).limit(5),
     supabase.from("projects").select("id, title, slug, status").order("created_at", { ascending: false }).limit(5),
     getServerStats().catch(() => null),
   ]);
 
   const statCards = [
     { label: "Total Blog Posts", value: blogCount ?? 0, icon: FileText, href: "/admin/blogs", color: "text-indigo-600", bg: "bg-indigo-50 dark:bg-indigo-950/30" },
-    { label: "Published Posts", value: publishedBlogCount ?? 0, icon: FileText, href: "/admin/blogs", color: "text-green-600", bg: "bg-green-50 dark:bg-green-950/30" },
+    { label: "Live Posts", value: publishedBlogCount ?? 0, icon: FileText, href: "/admin/blogs", color: "text-green-600", bg: "bg-green-50 dark:bg-green-950/30" },
     { label: "Draft Posts", value: draftBlogCount ?? 0, icon: FileText, href: "/admin/blogs", color: "text-amber-600", bg: "bg-amber-50 dark:bg-amber-950/30" },
     { label: "Total Projects", value: projectCount ?? 0, icon: Briefcase, href: "/admin/projects", color: "text-purple-600", bg: "bg-purple-50 dark:bg-purple-950/30" },
     { label: "Article Views", value: serverStats ? serverStats.totalViews : "—", icon: Eye, href: "/admin/analytics", color: "text-sky-600", bg: "bg-sky-50 dark:bg-sky-950/30" },
@@ -123,7 +126,9 @@ export default async function AdminDashboard() {
             </Link>
           </div>
           <div className="divide-y divide-border-primary/30">
-            {(recentPosts ?? []).length === 0 ? (
+            {recentPostsError ? (
+              <p role="alert" className="px-6 py-8 text-center text-sm text-text-secondary">Recent blog posts could not be loaded. Try again later.</p>
+            ) : (recentPosts ?? []).length === 0 ? (
               <p className="px-6 py-8 text-center text-sm text-text-secondary">No posts yet. <Link href="/admin/blogs/new" className="text-indigo-600 hover:underline">Create your first one.</Link></p>
             ) : (
               (recentPosts ?? []).map((post: any) => (
@@ -131,14 +136,14 @@ export default async function AdminDashboard() {
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium text-text-primary">{post.title}</p>
                     <p className="text-xs text-text-secondary mt-0.5">
-                      {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "Not published"}
+                      {post.status === "published" && post.published_at ? new Date(post.published_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "Not published"}
                     </p>
                   </div>
                   <div className="ml-3 flex shrink-0 items-center gap-2">
-                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${post.status === "published" ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400" : "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400"}`}>
-                      {post.status}
+                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${blogListStatus(post.status, post.published_at, now.getTime()) === "Live" ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400" : post.status === "archived" ? "bg-surface-base text-ink-secondary" : "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400"}`}>
+                      {blogListStatus(post.status, post.published_at, now.getTime())}
                     </span>
-                    <Link href={`/admin/blogs/${post.id}`} className="text-indigo-600 hover:text-indigo-700">
+                    <Link href={post.status === "archived" ? "/admin/blogs?status=archived" : `/admin/blogs/${post.id}`} aria-label={post.status === "archived" ? "View archived posts" : `Edit ${post.title}`} className="text-indigo-600 hover:text-indigo-700">
                       <ArrowUpRight className="h-4 w-4" />
                     </Link>
                   </div>
