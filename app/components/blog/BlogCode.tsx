@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Check, Copy, FileCode2 } from "lucide-react";
+import { Check, Copy } from "lucide-react";
 import { highlight } from "sugar-high";
 
 export function BlogInlineCode({ children }: { children?: React.ReactNode }) {
@@ -25,9 +25,8 @@ export function BlogCodeWindow({ children }: { children?: React.ReactNode }) {
 
   const raw = codeElement.props.children;
   const code = typeof raw === "string" ? raw : React.Children.toArray(raw).join("");
-  const match = /^language-([^:\s]+)(?::([^\s]+))?/.exec(codeElement.props.className || "");
+  const match = /^language-([^:\s]+)/.exec(codeElement.props.className || "");
   const language = match?.[1] || "";
-  const filename = match?.[2] || "";
 
   const copy = async () => {
     try {
@@ -39,53 +38,38 @@ export function BlogCodeWindow({ children }: { children?: React.ReactNode }) {
   };
 
   return (
-    <div className="not-prose" style={{
+    <div className="blog-code-window not-prose" style={{
       width: "100%",
       minWidth: 0,
       margin: "2rem 0 2.25rem",
       overflow: "hidden",
-      border: "1px solid var(--border-primary)",
-      borderRadius: "16px",
-      padding: "4px",
-      background: "color-mix(in srgb, var(--text-primary) 5%, var(--bg-primary))",
-      boxShadow: "0 16px 42px -26px rgb(0 0 0 / 0.3), 0 2px 10px rgb(0 0 0 / 0.04)",
+      border: "1px solid #326083",
+      borderRadius: "17px",
+      padding: "clamp(6px, 1.8vw, 12px)",
+      background: "#1d496d",
+      boxShadow: "0 18px 38px -24px rgb(0 16 34 / 0.48)",
     }}>
       <div style={{
         display: "flex",
-        minHeight: "48px",
+        minHeight: "54px",
         alignItems: "center",
         justifyContent: "space-between",
-        gap: "10px",
-        padding: "5px 10px 9px 12px",
-        color: "var(--text-primary)",
+        gap: "12px",
+        borderRadius: "9px 9px 0 0",
+        padding: "8px clamp(14px, 3vw, 24px)",
+        background: "#061b2d",
       }}>
-        <div style={{ display: "flex", minWidth: 0, alignItems: "center", gap: "10px" }}>
-          <span aria-hidden="true" style={{ display: "flex", flexShrink: 0, gap: "4px" }}>
-            {[0.6, 0.4, 0.25].map((opacity) => (
-              <span key={opacity} style={{ width: "7px", height: "7px", borderRadius: "50%", background: "currentColor", opacity }} />
-            ))}
-          </span>
-          <span aria-hidden="true" style={{ height: "18px", width: "1px", flexShrink: 0, background: "var(--border-primary)" }} />
-          <span title={filename || language || "Plain text"} style={{
-            display: "flex",
-            minWidth: 0,
-            alignItems: "center",
-            gap: "7px",
-            fontFamily: "var(--font-geist-mono), monospace",
-            fontSize: "11px",
-            fontWeight: 600,
-          }}>
-            <FileCode2 size={14} aria-hidden="true" style={{ flexShrink: 0, color: "var(--text-secondary)" }} />
-            <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{filename || language || "Plain text"}</span>
-          </span>
-        </div>
-        <div style={{ display: "flex", flexShrink: 0, alignItems: "center", gap: "8px" }}>
-          {filename && language && <span aria-hidden="true" style={{ color: "var(--text-secondary)", fontFamily: "var(--font-geist-mono), monospace", fontSize: "10px" }}>{language}</span>}
+        <span aria-hidden="true" style={{ display: "flex", flexShrink: 0, gap: "8px" }}>
+          {["#ff605c", "#ffbd44", "#29c95f"].map((color) => (
+            <span key={color} style={{ width: "12px", height: "12px", borderRadius: "50%", background: color }} />
+          ))}
+        </span>
+        <div style={{ display: "flex", flexShrink: 0, alignItems: "center" }}>
           <button
             type="button"
             onClick={copy}
             aria-label={copyStatus === "copied" ? "Code copied" : copyStatus === "error" ? "Copy failed" : "Copy code"}
-            className="flex shrink-0 items-center gap-1.5 rounded-lg border border-border-primary bg-bg-primary px-3 text-xs font-medium text-text-primary transition-colors hover:bg-neutral-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:bg-neutral-700"
+            className="flex shrink-0 items-center gap-1.5 rounded-md border border-white/20 bg-[#15314a] px-3 text-xs font-medium text-slate-100 transition-colors hover:bg-white/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             style={{ minHeight: "36px" }}
           >
             {copyStatus === "copied" ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
@@ -98,14 +82,15 @@ export function BlogCodeWindow({ children }: { children?: React.ReactNode }) {
         maxWidth: "100%",
         overflowX: "auto",
         border: 0,
-        borderRadius: "11px",
+        borderRadius: "0 0 9px 9px",
         boxShadow: "none",
-        padding: "clamp(18px, 3vw, 24px)",
-        background: "var(--bg-primary)",
-        color: "var(--text-primary)",
+        padding: "clamp(18px, 3vw, 26px)",
+        paddingTop: "16px",
+        background: "#061b2d",
+        color: "#d8e6f4",
         fontFamily: "var(--font-geist-mono), monospace",
-        fontSize: "13px",
-        lineHeight: "1.7",
+        fontSize: "clamp(13px, 2vw, 16px)",
+        lineHeight: "1.75",
         tabSize: 2,
       }}><code style={{ fontFamily: "inherit", fontSize: "inherit", lineHeight: "inherit" }} dangerouslySetInnerHTML={{ __html: highlight(code) }} /></pre>
       <span role="status" className="sr-only">{copyStatus === "copied" ? "Code copied" : copyStatus === "error" ? "Could not copy code" : ""}</span>

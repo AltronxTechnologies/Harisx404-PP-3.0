@@ -322,6 +322,13 @@ const REACTION_EMOJIS: Record<
   insightful: (isActive) => <InsightfulSVG isActive={isActive} />,
 };
 
+const REACTION_LABELS: Record<ReactionType, string> = {
+  like: "Like",
+  heart: "Love",
+  celebrate: "Celebrate",
+  insightful: "Insightful",
+};
+
 const AnimatedNumber = ({
   number,
   reduceMotion,
@@ -470,8 +477,8 @@ export default function ArticleReactions({
   };
 
   return (
-    <div className="my-6" aria-busy={!isReady}>
-      <div className="flex flex-wrap items-center gap-3">
+    <div className="mt-5" aria-busy={!isReady}>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {Object.entries(REACTION_EMOJIS).map(([type, emoji]) => {
           const count = reactions[type] || 0;
           const isActive = userReactions.includes(type);
@@ -481,31 +488,31 @@ export default function ArticleReactions({
               key={type}
               onClick={() => handleReaction(type as ReactionType)}
               disabled={!isReady || isSubmitting !== null}
-              whileTap={reduceMotion ? undefined : { scale: 0.9 }}
-              className={`flex items-center gap-1 rounded-full border px-3 py-1 text-sm transition-colors ${
+              className={`flex min-h-[56px] min-w-0 items-center gap-1.5 rounded-xl border px-2 text-xs font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary sm:gap-2 sm:px-3 sm:text-sm ${
                 isActive
-                  ? "bg-white dark:bg-[#1A1F2B] text-text-primary"
-                  : "bg-bg-primary text-text-secondary hover:border-neutral-400/70 active:border-neutral-400/70 hover:bg-slate-100 dark:hover:border-white/25 dark:active:border-white/25 dark:hover:bg-[#1A1F2B] dark:bg-[#1A1F2B]"
-              } `}
+                  ? "border-text-secondary bg-bg-primary text-text-primary"
+                  : "border-border-primary bg-bg-primary text-text-secondary hover:border-text-secondary hover:text-text-primary"
+              }`}
               aria-label={`${isActive ? "Remove" : "Add"} ${type} reaction, ${count} ${count === 1 ? "reaction" : "reactions"}`}
               aria-pressed={isActive}
             >
-              <span aria-hidden>
+              <span aria-hidden className="flex size-7 shrink-0 items-center justify-center">
                 {reduceMotion ? (
                   <ReactionIcon type={type as ReactionType} active={isActive} />
                 ) : (
                   emoji(isActive)
                 )}
               </span>
-              {count > 0 && (
+              <span className="min-w-0 truncate">{REACTION_LABELS[type as ReactionType]}</span>
+              <span className="ml-auto text-xs text-text-secondary" aria-hidden="true">
                 <AnimatedNumber number={count} reduceMotion={reduceMotion} />
-              )}
+              </span>
             </motion.button>
           );
         })}
       </div>
       <p
-        className={`mt-2 text-sm text-red-600 dark:text-red-400 ${errorMessage ? "" : "sr-only"}`}
+        className={`mt-3 text-sm text-red-600 dark:text-red-400 ${errorMessage ? "" : "sr-only"}`}
         role="alert"
         aria-live="assertive"
       >

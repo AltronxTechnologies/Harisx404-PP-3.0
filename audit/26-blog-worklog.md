@@ -736,3 +736,44 @@ browser QA; do not delete or reattribute the current development corpus.
   build, the web container was restarted and the Blog HTTP/browser smoke
   suite passed 8/8; it remains running. Existing unrelated build warnings
   remain unchanged.
+
+## Continuation: Reference-driven article details (2026-09-30)
+
+- **Completed:** article H2/H3 and TOC numbers now have a trailing dot. H2
+  weight is 600 instead of 700; H3/H4 are 500 instead of 600. Neither stored
+  MDX nor generated anchor IDs was modified.
+- **Completed:** Blog-only fenced snippets now use the supplied reference's
+  dark navy canvas, inset blue frame, red/yellow/green window dots and
+  high-contrast syntax colors in both site themes. The Copy button stays
+  visible, focusable and usable by touch. Filename strips are omitted even
+  for language/filename-fenced source; the language remains in the accessible
+  code label. No script path was added to the UI or repository.
+- **Completed:** article notes retain authored Idea, Info, Thought and Warning
+  labels and use restrained semantic tints with a matching left rule; ordinary
+  Markdown quotes use a neutral editorial surface. The article-only reaction
+  area has a clear heading and four equal-size labelled controls with visible
+  counts, keyboard focus and the existing optimistic/error behavior. No live
+  reaction was clicked during this design QA.
+- **Image fix:** the existing Blog middleware preflight was treating local
+  `/blog/*.jpeg` assets as article slugs, returning 404 and causing optimizer
+  400s. Image extensions now bypass only the Blog article preflight. A real
+  image returns HTTP 200 and the representative article reports zero broken
+  images, without changing any temporary imported file or row.
+- **Verification:** Docker TypeScript, targeted ESLint and diff checks passed;
+  Blog heading/preview/code-window tests passed. Browser tests passed for the
+  320/360/390/768/1024/1440px light/dark article, touch copy, code overflow,
+  centered TOC and 320/390/768/1440px Idea/Info/Thought/Warning and ordinary
+  quote containment. The broad HTTP/Blog/locked-surface run passed 41 tests
+  with one existing Project skip; one callout browser test hit a navigation
+  `load` timeout while its third-party video loaded. It passed when run on
+  its own and now waits for DOM content rather than the external iframe.
+  Browser screenshots at mobile light/dark show the code, callouts and
+  reaction card; no app console exceptions were seen (the legacy YouTube
+  embed logs sandbox WebGPU warnings). Docker production build passed with
+  the existing unrelated image-lint and edge/static notices. After restarting
+  the web container, the Blog HTTP/browser smoke suite passed 10/10; the
+  container remains running.
+- **Remaining:** owner must replace the temporary imported corpus before
+  public launch and review content rights, alt text and attribution. Deployment
+  host checks are still deferred; do not claim literal pixel-perfect or
+  production sign-off from sandbox screenshots alone.

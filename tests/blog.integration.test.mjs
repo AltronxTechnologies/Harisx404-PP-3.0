@@ -56,6 +56,12 @@ test("missing Blog articles return a real 404 before streaming", async () => {
   assert.doesNotMatch(await get.text(), /id="blog-article"/);
 });
 
+test("Blog image assets reach Next instead of the article slug preflight", async () => {
+  const image = await fetch(`${baseUrl}/blog/favicon_download_page.jpeg`);
+  assert.equal(image.status, 200);
+  assert.match(image.headers.get("content-type") || "", /^image\/jpeg/);
+});
+
 test("Every syndicated article route renders without the Blog error state", async () => {
   const rss = await responseText("/rss.xml");
   const slugs = rssSlugs(rss);

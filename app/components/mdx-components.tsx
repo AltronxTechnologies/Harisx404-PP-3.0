@@ -414,7 +414,7 @@ function createHeading(level) {
         key: `number-${slug}`,
         "aria-hidden": true,
         style: { marginRight: "0.35em", fontVariantNumeric: "tabular-nums" },
-      }, number),
+      }, `${number}.`),
       children,
     );
   };
@@ -541,7 +541,7 @@ function FullWidthCallout({ children, type }) {
   const badge = badges[type];
 
   return (
-    <blockquote className="relative -mx-3 mb-8 w-[calc(100%+1.5rem)] overflow-clip border-y border-border-primary px-6 py-8 [background-image:linear-gradient(45deg,theme(colors.border-primary)_12.50%,transparent_12.50%,transparent_50%,theme(colors.border-primary)_50%,theme(colors.border-primary)_62.50%,transparent_62.50%,transparent_100%)] [background-size:5px_5px] md:col-start-1 md:col-end-4 md:mx-0 md:w-full md:px-0">
+    <blockquote data-note-type={type} className="relative -mx-3 mb-8 w-[calc(100%+1.5rem)] overflow-clip border-y border-border-primary px-6 py-8 [background-image:linear-gradient(45deg,theme(colors.border-primary)_12.50%,transparent_12.50%,transparent_50%,theme(colors.border-primary)_50%,theme(colors.border-primary)_62.50%,transparent_62.50%,transparent_100%)] [background-size:5px_5px] md:col-start-1 md:col-end-4 md:mx-0 md:w-full md:px-0">
       <span className="absolute -top-1/2 left-1/2 -z-10 -translate-x-1/2 opacity-50">
         <BgGradient />
       </span>

@@ -4,10 +4,10 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { BlogCodeWindow, BlogInlineCode } from "../app/components/blog/BlogCode";
 
-test("Blog code windows have valid markup, a filename and a visible copy action", () => {
+test("Blog code windows have valid markup, no filename strip and a visible copy action", () => {
   const html = renderToStaticMarkup(createElement(BlogCodeWindow, null,
     createElement("code", { className: "language-jsx:example.tsx" }, 'const markup = "<script>alert(1)</script>";\n')));
-  assert.match(html, /example\.tsx/);
+  assert.doesNotMatch(html, /example\.tsx/);
   assert.match(html, /aria-label="Code snippet in jsx"/);
   assert.match(html, /aria-label="Copy code"/);
   assert.match(html, /<pre[^>]*><code/);

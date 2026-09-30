@@ -37,8 +37,9 @@ test("Blog article stays readable across both themes and responsive widths", asy
                numberedHeadingMatchesText: (() => {
                  const number = article.querySelector('h2 > span[aria-hidden="true"]');
                  const heading = number?.parentElement;
-                 return Boolean(number && getComputedStyle(number).fontSize === getComputedStyle(heading).fontSize && getComputedStyle(number).color === getComputedStyle(heading).color);
+                 return Boolean(number?.textContent.endsWith(".") && getComputedStyle(number).fontSize === getComputedStyle(heading).fontSize && getComputedStyle(number).color === getComputedStyle(heading).color);
                })(),
+               reactionButtonsFit: [...document.querySelectorAll('[aria-labelledby="article-reactions-heading"] button')].length === 4 && [...document.querySelectorAll('[aria-labelledby="article-reactions-heading"] button')].every((button) => button.scrollWidth <= button.clientWidth + 1),
                sideRails: (() => {
                  const frame = document.querySelector("#main-content").parentElement;
                  const columns = getComputedStyle(frame).gridTemplateColumns.split(" ").map(parseFloat);
@@ -55,6 +56,7 @@ test("Blog article stays readable across both themes and responsive widths", asy
           assert.equal(state.codeContained, true, `${width}px ${theme} code viewport containment`);
            assert.equal(state.copyVisible, true, `${width}px ${theme} copy button visible without hover`);
            assert.equal(state.numberedHeadingMatchesText, true, `${width}px ${theme} heading numbers match typography`);
+           assert.equal(state.reactionButtonsFit, true, `${width}px ${theme} reaction labels fit`);
            assert.equal(state.sideRails, false, `${width}px ${theme} no hatched side rails`);
         }
       } finally {

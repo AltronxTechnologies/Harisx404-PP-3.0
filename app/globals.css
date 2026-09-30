@@ -1125,7 +1125,7 @@ blockquote p {
   margin-top: 2em !important;
   margin-bottom: 1em !important;
   font-size: 1.5rem !important;
-  font-weight: 700 !important;
+  font-weight: 600 !important;
   line-height: 1.333 !important;
   letter-spacing: normal !important;
   color: #101828;
@@ -1135,7 +1135,7 @@ blockquote p {
   margin-top: 1.6em !important;
   margin-bottom: 0.6em !important;
   font-size: 1.25rem !important;
-  font-weight: 600 !important;
+  font-weight: 500 !important;
   line-height: 1.6 !important;
   letter-spacing: normal !important;
   color: #101828;
@@ -1145,7 +1145,7 @@ blockquote p {
   margin-top: 1.5em !important;
   margin-bottom: 0.5em !important;
   font-size: 1rem !important;
-  font-weight: 600 !important;
+  font-weight: 500 !important;
   line-height: 1.5 !important;
   letter-spacing: normal !important;
   color: #101828;
@@ -1244,23 +1244,43 @@ blockquote p {
   color: #f3f4f6;
 }
 
-/* Blog MDX notes use a quiet inset card instead of the shared striped frame. */
-.blog-article-shell blockquote:has(> .blog-container) {
+/* Article notes keep their editorial labels without the shared striped frame. */
+.blog-article-shell blockquote[data-note-type] {
   margin: 2rem 0;
   width: 100%;
   border: 1px solid var(--border-primary);
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--text-primary) 4%, var(--bg-primary));
+  border-left: 3px solid var(--note-accent, var(--text-secondary));
+  border-radius: 0 14px 14px 0;
+  background: color-mix(in srgb, var(--note-accent, var(--text-primary)) 6%, var(--bg-primary));
   background-image: none;
-  padding: 4px;
+  padding: clamp(18px, 4vw, 26px);
   font-style: normal;
 }
 
-.blog-article-shell blockquote > .blog-container {
-  border-radius: 10px;
-  background: var(--bg-primary);
+.blog-article-shell blockquote[data-note-type="idea"] { --note-accent: #b7791f; }
+.blog-article-shell blockquote[data-note-type="info"] { --note-accent: #3976b5; }
+.blog-article-shell blockquote[data-note-type="thought"] { --note-accent: #705db2; }
+.blog-article-shell blockquote[data-note-type="warning"] { --note-accent: #bf5860; }
+
+.blog-article-shell blockquote[data-note-type] > .blog-container {
+  border-radius: 0;
+  background: transparent;
   box-shadow: none;
-  padding: clamp(18px, 4vw, 24px);
+  padding: 0;
+}
+
+.blog-article-shell blockquote[data-note-type] .blog-container > span {
+  margin-bottom: 0.75rem;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.055em;
+}
+
+.blog-article-shell blockquote:not([data-note-type]) {
+  border-radius: 0 12px 12px 0;
+  background: color-mix(in srgb, var(--text-primary) 4%, var(--bg-primary));
+  padding: 1rem 1.25rem;
 }
 
 /* Horizontal rules */
@@ -1396,6 +1416,20 @@ blockquote p {
   --sh-string: #99ffe4;
   --sh-keyword: #ff8080;
   --sh-comment: #8b8b8b;
+}
+
+/* The reference-inspired code canvas stays dark in either site theme. */
+.blog-article-shell .blog-code-window pre code,
+.dark .blog-article-shell .blog-code-window pre code {
+  --sh-class: #f2bc78;
+  --sh-identifier: #a8c8ff;
+  --sh-sign: #c0d2e4;
+  --sh-property: #91b9ef;
+  --sh-entity: #ff9978;
+  --sh-jsxliterals: #d3baff;
+  --sh-string: #f2bc78;
+  --sh-keyword: #8db9ff;
+  --sh-comment: #99a8b8;
 }
 
 /* Strong text inside article */

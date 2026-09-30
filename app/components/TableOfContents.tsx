@@ -122,7 +122,7 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
               <span className="relative inline-flex size-1.5 rounded-full bg-current" />
             </span>
             <span className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium">
-              {active.number && <span aria-hidden="true" style={{ marginRight: "0.65rem", fontFamily: "var(--font-geist-mono), monospace", fontSize: "0.75rem", opacity: 0.68 }}>{active.number}</span>}
+              {active.number && <span aria-hidden="true" style={{ marginRight: "0.65rem", fontFamily: "var(--font-geist-mono), monospace", fontSize: "0.75rem", opacity: 0.68 }}>{active.number}.</span>}
               {active.text}
             </span>
             <span aria-hidden="true" className="relative flex size-[22px] shrink-0 items-center justify-center">
@@ -178,7 +178,7 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
                         activeId === heading.slug ? "scale-y-100 opacity-100" : "scale-y-0 opacity-0"
                       }`}
                     />
-                    {heading.number && <span aria-hidden="true" style={{ flexShrink: 0, minWidth: heading.level === 2 ? "1.4rem" : "2.6rem", fontVariantNumeric: "tabular-nums" }}>{heading.number}</span>}
+                    {heading.number && <span aria-hidden="true" style={{ flexShrink: 0, minWidth: heading.level === 2 ? "1.4rem" : "2.6rem", fontVariantNumeric: "tabular-nums" }}>{heading.number}.</span>}
                     <span className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">{heading.text}</span>
                   </button>
                 ))}

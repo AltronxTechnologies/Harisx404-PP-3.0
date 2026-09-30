@@ -41,7 +41,8 @@ export async function middleware(request: NextRequest) {
   const documentRequest = (request.method === "GET" || request.method === "HEAD")
     && !(request.headers.get("sec-fetch-dest") === "empty" && request.headers.get("sec-fetch-mode") === "cors");
   const projectDocument = projectPath && documentRequest;
-  const blogDocument = blogPath && documentRequest;
+  // Public /blog images share the article prefix but are not article slugs.
+  const blogDocument = blogPath && documentRequest && !/\.(?:avif|gif|ico|jpe?g|png|svg|webp)$/i.test(blogPath[1]);
   let projectSlug = projectPath?.[1] ?? "";
   if (projectDocument) {
     try {
