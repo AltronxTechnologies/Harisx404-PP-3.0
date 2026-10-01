@@ -926,3 +926,20 @@ browser QA; do not delete or reattribute the current development corpus.
   build passed. After restarting the web container, TOC and responsive browser
   smoke tests passed 5/5; the stack remains running. No article data, locked
   page or related-post behavior changed.
+
+## Continuation: Real touch TOC gesture (2026-10-01)
+
+- Rechecked the owner-repeated TOC requests against the checked-in UI. Number
+  sizing, lighter hover versus selection, equal side insets, subtle divider,
+  X hover and outside click were already present and browser-verified.
+- Found a gap in the earlier drag check: it dispatched synthetic pointer
+  events, but a native touch swipe causes Chromium to emit `pointercancel`
+  before touch end. The open TOC now tracks native touch start/end separately
+  while retaining mouse drag and outside-pointer dismissal. A pull-down from
+  the header or the top of the outline closes it; dragging an already-scrolled
+  list continues to scroll instead. No other TOC presentation changed.
+- A real CDP touch sequence initially reproduced the failure and passed after
+  the fix. Post-build Docker TOC tests passed 5/5; responsive, heading and
+  touch checks passed 10/10. TypeScript, focused ESLint, diff check and
+  production build passed. The web container remains running. No content,
+  related-post data or locked page was changed.

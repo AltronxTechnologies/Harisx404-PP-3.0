@@ -14,6 +14,7 @@ const depthStyles: Record<TocHeading["level"], string> = {
   5: "pl-[86px] text-xs",
   6: "pl-[100px] text-xs",
 };
+type DragStart = { x: number; y: number; scrollingList: boolean };
 
 function useReadingProgress() {
   const [progress, setProgress] = useState(0);
@@ -58,7 +59,8 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
   const [open, setOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
-  const dragStartRef = useRef<{ x: number; y: number; scrollingList: boolean } | null>(null);
+  const dragStartRef = useRef<DragStart | null>(null);
+  const touchStartRef = useRef<DragStart | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const activeId = useActiveSection({ headingIds: headings.map((heading) => heading.slug) });
@@ -96,32 +98,54 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
 
   useEffect(() => {
     if (!open) return;
+    const startAt = (target: EventTarget | null, x: number, y: number): DragStart => ({
+      x,
+      y,
+      scrollingList: !!listRef.current?.contains(target as Node) && listRef.current.scrollTop > 0,
+    });
+    const pulledDown = (start: DragStart | null, x: number, y: number) => {
+      if (!start || start.scrollingList) return false;
+      const distance = y - start.y;
+      return distance > 70 && Math.abs(x - start.x) < distance;
+    };
     const onPointerDown = (event: PointerEvent) => {
       if (!navRef.current?.contains(event.target as Node)) {
         setOpen(false);
         return;
       }
-      dragStartRef.current = {
-        x: event.clientX,
-        y: event.clientY,
-        scrollingList: !!listRef.current?.contains(event.target as Node) && listRef.current.scrollTop > 0,
-      };
+      dragStartRef.current = startAt(event.target, event.clientX, event.clientY);
     };
     const onPointerUp = (event: PointerEvent) => {
       const start = dragStartRef.current;
       dragStartRef.current = null;
-      if (!start || start.scrollingList) return;
-      const distance = event.clientY - start.y;
-      if (distance > 70 && Math.abs(event.clientX - start.x) < distance) setOpen(false);
+      if (pulledDown(start, event.clientX, event.clientY)) setOpen(false);
     };
     const onPointerCancel = () => { dragStartRef.current = null; };
+    const onTouchStart = (event: TouchEvent) => {
+      if (!navRef.current?.contains(event.target as Node) || event.touches.length !== 1) return;
+      const touch = event.touches[0];
+      touchStartRef.current = startAt(event.target, touch.clientX, touch.clientY);
+    };
+    const onTouchEnd = (event: TouchEvent) => {
+      const start = touchStartRef.current;
+      touchStartRef.current = null;
+      const touch = event.changedTouches[0];
+      if (touch && pulledDown(start, touch.clientX, touch.clientY)) setOpen(false);
+    };
+    const onTouchCancel = () => { touchStartRef.current = null; };
     document.addEventListener("pointerdown", onPointerDown);
     document.addEventListener("pointerup", onPointerUp);
     document.addEventListener("pointercancel", onPointerCancel);
+    document.addEventListener("touchstart", onTouchStart, { passive: true });
+    document.addEventListener("touchend", onTouchEnd);
+    document.addEventListener("touchcancel", onTouchCancel);
     return () => {
       document.removeEventListener("pointerdown", onPointerDown);
       document.removeEventListener("pointerup", onPointerUp);
       document.removeEventListener("pointercancel", onPointerCancel);
+      document.removeEventListener("touchstart", onTouchStart);
+      document.removeEventListener("touchend", onTouchEnd);
+      document.removeEventListener("touchcancel", onTouchCancel);
     };
   }, [open]);
 

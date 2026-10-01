@@ -208,3 +208,30 @@ test("long TOC outlines expose a styled internal scrollbar without dismissing on
     await browser.close();
   }
 });
+
+test("a native touch pull-down dismisses the open TOC", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+    const page = await context.newPage();
+    await page.goto(`${baseUrl}/blog/the-hard-part-isnt-writing-tests-anymore`);
+    const toc = page.locator('nav[aria-label="Table of contents"]');
+    await toc.waitFor({ state: "attached" });
+    await page.evaluate(() => window.scrollTo(0, 700));
+    await page.waitForFunction(() => document.querySelector('nav[aria-label="Table of contents"]')?.getAttribute("aria-hidden") === "false");
+    await toc.locator("button").first().tap();
+    await page.waitForTimeout(350);
+    const box = await toc.locator("span.font-mono").first().boundingBox();
+    const x = box.x + 20;
+    const y = box.y + box.height / 2;
+    const cdp = await context.newCDPSession(page);
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
+    for (const offset of [20, 40, 60, 80, 110]) {
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x, y: y + offset }] });
+    }
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    await page.waitForFunction(() => document.querySelector('nav[aria-label="Table of contents"]')?.getAttribute("data-open") === "false");
+  } finally {
+    await browser.close();
+  }
+});
