@@ -43,19 +43,18 @@ export function BlogCodeWindow({ children }: { children?: React.ReactNode }) {
       minWidth: 0,
       margin: "2rem 0 2.25rem",
       overflow: "hidden",
-      border: "1px solid #326083",
-      borderRadius: "17px",
-      padding: "clamp(6px, 1.8vw, 12px)",
-      background: "#1d496d",
-      boxShadow: "0 18px 38px -24px rgb(0 16 34 / 0.48)",
+      border: "1px solid var(--border-primary)",
+      borderRadius: "14px",
+      background: "#061b2d",
+      boxShadow: "0 12px 32px -22px rgb(0 0 0 / 0.36)",
     }}>
       <div style={{
         display: "flex",
-        minHeight: "54px",
+        minHeight: "52px",
         alignItems: "center",
         justifyContent: "space-between",
         gap: "12px",
-        borderRadius: "9px 9px 0 0",
+        borderBottom: "1px solid rgb(255 255 255 / 0.12)",
         padding: "8px clamp(14px, 3vw, 24px)",
         background: "#061b2d",
       }}>
@@ -69,7 +68,7 @@ export function BlogCodeWindow({ children }: { children?: React.ReactNode }) {
             type="button"
             onClick={copy}
             aria-label={copyStatus === "copied" ? "Code copied" : copyStatus === "error" ? "Copy failed" : "Copy code"}
-            className="flex shrink-0 items-center gap-1.5 rounded-md border border-white/20 bg-[#15314a] px-3 text-xs font-medium text-slate-100 transition-colors hover:bg-white/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            className="flex shrink-0 items-center gap-1.5 rounded-md border border-white/20 bg-white/5 px-3 text-xs font-medium text-slate-100 transition-colors hover:bg-white/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             style={{ minHeight: "36px" }}
           >
             {copyStatus === "copied" ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
@@ -82,7 +81,7 @@ export function BlogCodeWindow({ children }: { children?: React.ReactNode }) {
         maxWidth: "100%",
         overflowX: "auto",
         border: 0,
-        borderRadius: "0 0 9px 9px",
+        borderRadius: 0,
         boxShadow: "none",
         padding: "clamp(18px, 3vw, 26px)",
         paddingTop: "16px",
@@ -92,7 +91,7 @@ export function BlogCodeWindow({ children }: { children?: React.ReactNode }) {
         fontSize: "clamp(13px, 2vw, 16px)",
         lineHeight: "1.75",
         tabSize: 2,
-      }}><code style={{ fontFamily: "inherit", fontSize: "inherit", lineHeight: "inherit" }} dangerouslySetInnerHTML={{ __html: highlight(code) }} /></pre>
+      }}><code style={{ fontFamily: "inherit", fontSize: "inherit", lineHeight: "inherit" }} {...(language ? { dangerouslySetInnerHTML: { __html: highlight(code) } } : { children: code })} /></pre>
       <span role="status" className="sr-only">{copyStatus === "copied" ? "Code copied" : copyStatus === "error" ? "Could not copy code" : ""}</span>
     </div>
   );

@@ -20,3 +20,10 @@ test("Inline code remains a semantic code element", () => {
   const html = renderToStaticMarkup(createElement(BlogInlineCode, null, "a < b"));
   assert.match(html, /^<code[^>]*>a &lt; b<\/code>$/);
 });
+
+test("Unlabelled snippets render literal text without misleading syntax tokens", () => {
+  const html = renderToStaticMarkup(createElement(BlogCodeWindow, null,
+    createElement("code", null, "file.js & build\n")));
+  assert.match(html, /<pre[^>]*><code[^>]*>file\.js &amp; build\n<\/code><\/pre>/);
+  assert.doesNotMatch(html, /sh__token/);
+});

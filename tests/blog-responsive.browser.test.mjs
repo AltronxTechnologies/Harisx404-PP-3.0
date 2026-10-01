@@ -21,9 +21,20 @@ test("Blog article stays readable across both themes and responsive widths", asy
             const article = document.querySelector("#blog-article");
             const box = article.getBoundingClientRect();
             const images = [...article.querySelectorAll("img")];
-            const code = article.querySelector("pre");
-            const copy = code?.parentElement?.querySelector('button[aria-label="Copy code"]');
-            return {
+             const code = article.querySelector("pre");
+             const copy = code?.parentElement?.querySelector('button[aria-label="Copy code"]');
+             const codeWindow = article.querySelector(".blog-code-window");
+             const meta = document.querySelector(".blog-detail [class*='border-b']");
+             const nestedHeadings = [4, 5, 6].map((level) => {
+               const heading = document.createElement(`h${level}`);
+               heading.textContent = "Nested heading";
+               article.appendChild(heading);
+               const style = getComputedStyle(heading);
+               const metrics = [parseFloat(style.fontSize), parseInt(style.fontWeight, 10)];
+               heading.remove();
+               return metrics;
+             });
+             return {
               width: window.innerWidth,
               scrollWidth: document.documentElement.scrollWidth,
               articleLeft: box.left,
@@ -34,6 +45,8 @@ test("Blog article stays readable across both themes and responsive widths", asy
               codeMarkupValid: Boolean(code && code.parentElement?.tagName === "DIV" && code.querySelector("code") && !code.querySelector("div")),
               codeContained: Boolean(code && code.getBoundingClientRect().left >= 0 && code.getBoundingClientRect().right <= window.innerWidth + 1),
                copyVisible: Boolean(copy && getComputedStyle(copy).opacity !== "0" && copy.getBoundingClientRect().width > 0),
+               codeFrameNeutral: Boolean(codeWindow && meta && getComputedStyle(codeWindow).borderTopColor === getComputedStyle(meta).borderBottomColor && getComputedStyle(codeWindow).paddingTop === "0px"),
+               nestedHeadings,
                numberedHeadingMatchesText: (() => {
                  const number = article.querySelector('h2 > span[aria-hidden="true"]');
                  const heading = number?.parentElement;
@@ -55,6 +68,8 @@ test("Blog article stays readable across both themes and responsive widths", asy
           assert.equal(state.codeMarkupValid, true, `${width}px ${theme} valid fenced code structure`);
           assert.equal(state.codeContained, true, `${width}px ${theme} code viewport containment`);
            assert.equal(state.copyVisible, true, `${width}px ${theme} copy button visible without hover`);
+           assert.equal(state.codeFrameNeutral, true, `${width}px ${theme} neutral single code frame`);
+           assert.deepEqual(state.nestedHeadings, [[16, 500], [15, 600], [14, 600]], `${width}px ${theme} nested heading scale`);
            assert.equal(state.numberedHeadingMatchesText, true, `${width}px ${theme} heading numbers match typography`);
            assert.equal(state.reactionButtonsFit, true, `${width}px ${theme} reaction labels fit`);
            assert.equal(state.sideRails, false, `${width}px ${theme} no hatched side rails`);

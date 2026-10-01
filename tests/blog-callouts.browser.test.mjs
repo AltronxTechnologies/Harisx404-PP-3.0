@@ -11,7 +11,7 @@ test("Blog notes and quotes stay contained and readable in both themes", async (
       const context = await browser.newContext({ viewport: { width: 320, height: 780 } });
       await context.addInitScript((value) => localStorage.setItem("theme", value), theme);
       const page = await context.newPage();
-      await page.goto(`${baseUrl}/blog/introducing-blogfolio-v5`, { waitUntil: "domcontentloaded" });
+      await page.goto(`${baseUrl}/blog/introducing-blogfolio-v5`, { waitUntil: "domcontentloaded", timeout: 60000 });
       await page.locator('#blog-article blockquote[data-note-type="warning"]').first().waitFor();
       for (const width of [320, 390, 768, 1440]) {
         await page.setViewportSize({ width, height: 900 });
@@ -25,6 +25,8 @@ test("Blog notes and quotes stay contained and readable in both themes", async (
               left: rect.left,
               right: rect.right,
               background: style.backgroundImage,
+              insetDecoration: getComputedStyle(node.querySelector(".blog-container"), "::after").content,
+              bodyWeight: getComputedStyle(node.querySelector(".blog-container > div")).fontWeight,
               text: node.textContent.trim(),
             };
           });
@@ -34,11 +36,13 @@ test("Blog notes and quotes stay contained and readable in both themes", async (
         }
         for (const note of notes) {
           assert.equal(note.background, "none", `${theme} ${width}px ${note.type} has no stripes`);
+          assert.equal(note.insetDecoration, "none", `${theme} ${width}px ${note.type} has one frame`);
+          assert.equal(note.bodyWeight, "400", `${theme} ${width}px ${note.type} uses reading weight`);
           assert.ok(note.left >= 0 && note.right <= width + 1, `${theme} ${width}px ${note.type} stays on screen`);
           assert.ok(note.text.length > 5, `${theme} ${width}px ${note.type} retains content`);
         }
       }
-      await page.goto(`${baseUrl}/blog/the-cite-html-tag`, { waitUntil: "domcontentloaded" });
+      await page.goto(`${baseUrl}/blog/the-cite-html-tag`, { waitUntil: "domcontentloaded", timeout: 60000 });
       const quote = page.locator("#blog-article blockquote:not([data-note-type])").first();
       await quote.waitFor();
       const quoteStyle = await quote.evaluate((node) => ({

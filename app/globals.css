@@ -1151,9 +1151,29 @@ blockquote p {
   color: #101828;
 }
 
+.blog-article-shell h5 {
+  margin-top: 1.4em;
+  margin-bottom: 0.5em;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: #101828;
+}
+
+.blog-article-shell h6 {
+  margin-top: 1.3em;
+  margin-bottom: 0.5em;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: #101828;
+}
+
 .dark .blog-article-shell h2,
 .dark .blog-article-shell h3,
-.dark .blog-article-shell h4 {
+.dark .blog-article-shell h4,
+.dark .blog-article-shell h5,
+.dark .blog-article-shell h6 {
   color: #ffffff;
 }
 
@@ -1249,12 +1269,12 @@ blockquote p {
   margin: 2rem 0;
   width: 100%;
   border: 1px solid var(--border-primary);
-  border-left: 3px solid var(--note-accent, var(--text-secondary));
-  border-radius: 0 14px 14px 0;
-  background: color-mix(in srgb, var(--note-accent, var(--text-primary)) 6%, var(--bg-primary));
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--text-primary) 3%, var(--bg-primary));
   background-image: none;
   padding: clamp(18px, 4vw, 26px);
   font-style: normal;
+  font-weight: 400;
 }
 
 .blog-article-shell blockquote[data-note-type="idea"] { --note-accent: #b7791f; }
@@ -1269,12 +1289,36 @@ blockquote p {
   padding: 0;
 }
 
+.blog-article-shell blockquote[data-note-type] > .blog-container::after,
+.blog-article-shell .blog-code-window pre::after {
+  content: none;
+}
+
+.blog-article-shell blockquote[data-note-type] > span:first-child {
+  display: none;
+}
+
 .blog-article-shell blockquote[data-note-type] .blog-container > span {
   margin-bottom: 0.75rem;
-  padding: 0.3rem 0.65rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
   font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.055em;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--text-primary);
+}
+
+.blog-article-shell blockquote[data-note-type] .blog-container > span::before {
+  display: inline-block;
+  width: 0.4375rem;
+  height: 0.4375rem;
+  margin-right: 0.55rem;
+  border-radius: 50%;
+  background: var(--note-accent);
+  content: "";
 }
 
 .blog-article-shell blockquote:not([data-note-type]) {
