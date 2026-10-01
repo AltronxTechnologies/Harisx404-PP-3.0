@@ -1125,7 +1125,7 @@ blockquote p {
   margin-top: 2em !important;
   margin-bottom: 1em !important;
   font-size: 1.5rem !important;
-  font-weight: 600 !important;
+  font-weight: 500 !important;
   line-height: 1.333 !important;
   letter-spacing: normal !important;
   color: #101828;
@@ -1155,7 +1155,7 @@ blockquote p {
   margin-top: 1.4em;
   margin-bottom: 0.5em;
   font-size: 0.9375rem;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.5;
   color: #101828;
 }
@@ -1164,7 +1164,7 @@ blockquote p {
   margin-top: 1.3em;
   margin-bottom: 0.5em;
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.5;
   color: #101828;
 }

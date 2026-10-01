@@ -793,7 +793,7 @@ browser QA; do not delete or reattribute the current development corpus.
   type scale rather than inheriting the shared 36px heading class.
 - **Measured heading scale:** article title H1 uses Instrument Serif 400 at
   30px below `sm`, 36px from `sm`, and 48px from `md`. Body headings use Outfit:
-  H2 24px/600, H3 20px/500, H4 16px/500, H5 15px/600, H6 14px/600.
+  H2 24px/500, H3 20px/500, H4 16px/500, H5 15px/500, H6 14px/500.
   MDX body H1 renders as an H2; visual numbering applies to H2/H3 only and
   does not change the stored heading text or anchor IDs.
 - **Verification:** Docker code-window 3/3; responsive, callout, touch-copy

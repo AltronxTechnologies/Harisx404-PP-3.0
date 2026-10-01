@@ -25,7 +25,7 @@ test("Blog article stays readable across both themes and responsive widths", asy
              const copy = code?.parentElement?.querySelector('button[aria-label="Copy code"]');
              const codeWindow = article.querySelector(".blog-code-window");
              const meta = document.querySelector(".blog-detail [class*='border-b']");
-             const nestedHeadings = [4, 5, 6].map((level) => {
+             const headingScale = [2, 3, 4, 5, 6].map((level) => {
                const heading = document.createElement(`h${level}`);
                heading.textContent = "Nested heading";
                article.appendChild(heading);
@@ -46,7 +46,7 @@ test("Blog article stays readable across both themes and responsive widths", asy
               codeContained: Boolean(code && code.getBoundingClientRect().left >= 0 && code.getBoundingClientRect().right <= window.innerWidth + 1),
                copyVisible: Boolean(copy && getComputedStyle(copy).opacity !== "0" && copy.getBoundingClientRect().width > 0),
                codeFrameNeutral: Boolean(codeWindow && meta && getComputedStyle(codeWindow).borderTopColor === getComputedStyle(meta).borderBottomColor && getComputedStyle(codeWindow).paddingTop === "0px"),
-               nestedHeadings,
+               headingScale,
                numberedHeadingMatchesText: (() => {
                  const number = article.querySelector('h2 > span[aria-hidden="true"]');
                  const heading = number?.parentElement;
@@ -69,7 +69,7 @@ test("Blog article stays readable across both themes and responsive widths", asy
           assert.equal(state.codeContained, true, `${width}px ${theme} code viewport containment`);
            assert.equal(state.copyVisible, true, `${width}px ${theme} copy button visible without hover`);
            assert.equal(state.codeFrameNeutral, true, `${width}px ${theme} neutral single code frame`);
-           assert.deepEqual(state.nestedHeadings, [[16, 500], [15, 600], [14, 600]], `${width}px ${theme} nested heading scale`);
+           assert.deepEqual(state.headingScale, [[24, 500], [20, 500], [16, 500], [15, 500], [14, 500]], `${width}px ${theme} article heading scale`);
            assert.equal(state.numberedHeadingMatchesText, true, `${width}px ${theme} heading numbers match typography`);
            assert.equal(state.reactionButtonsFit, true, `${width}px ${theme} reaction labels fit`);
            assert.equal(state.sideRails, false, `${width}px ${theme} no hatched side rails`);
