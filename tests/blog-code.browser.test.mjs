@@ -28,9 +28,28 @@ test("Blog code can be copied by touch and long lines scroll inside the window",
     const widths = await page.evaluate(() => {
       const pre = document.querySelector("#blog-article pre");
       pre.querySelector("code").textContent = "long-identifier".repeat(100);
-      return { inner: pre.clientWidth, scroll: pre.scrollWidth, page: document.documentElement.scrollWidth, viewport: innerWidth };
+      const header = pre.previousElementSibling;
+      const button = header.querySelector("button");
+      pre.scrollLeft = 80;
+      return {
+        inner: pre.clientWidth,
+        scroll: pre.scrollWidth,
+        scrollLeft: pre.scrollLeft,
+        scrollbarWidth: getComputedStyle(pre).scrollbarWidth,
+        scrollbarColor: getComputedStyle(pre).scrollbarColor,
+        headerHeight: header.getBoundingClientRect().height,
+        buttonHeight: button.getBoundingClientRect().height,
+        codeSize: getComputedStyle(pre.querySelector("code")).fontSize,
+        page: document.documentElement.scrollWidth,
+        viewport: innerWidth,
+      };
     });
     assert.ok(widths.scroll > widths.inner, "long lines must scroll in the code window");
+    assert.ok(widths.scrollLeft > 0, "the horizontal code scrollbar moves the content");
+    assert.equal(widths.scrollbarWidth, "thin");
+    assert.notEqual(widths.scrollbarColor, "auto");
+    assert.ok(widths.headerHeight <= 48 && widths.buttonHeight >= 32 && widths.buttonHeight < 36);
+    assert.equal(widths.codeSize, "13px");
     assert.ok(widths.page <= widths.viewport + 1, "code must not widen the page");
 
     await page.evaluate(() => window.scrollTo(0, 600));

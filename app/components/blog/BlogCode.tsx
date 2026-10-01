@@ -50,17 +50,17 @@ export function BlogCodeWindow({ children }: { children?: React.ReactNode }) {
     }}>
       <div style={{
         display: "flex",
-        minHeight: "52px",
+        minHeight: "44px",
         alignItems: "center",
         justifyContent: "space-between",
         gap: "12px",
         borderBottom: "1px solid rgb(255 255 255 / 0.12)",
-        padding: "8px clamp(14px, 3vw, 24px)",
+        padding: "4px clamp(12px, 3vw, 20px)",
         background: "#061b2d",
       }}>
-        <span aria-hidden="true" style={{ display: "flex", flexShrink: 0, gap: "8px" }}>
+        <span aria-hidden="true" style={{ display: "flex", flexShrink: 0, gap: "6px" }}>
           {["#ff605c", "#ffbd44", "#29c95f"].map((color) => (
-            <span key={color} style={{ width: "12px", height: "12px", borderRadius: "50%", background: color }} />
+            <span key={color} style={{ width: "10px", height: "10px", borderRadius: "50%", background: color }} />
           ))}
         </span>
         <div style={{ display: "flex", flexShrink: 0, alignItems: "center" }}>
@@ -68,10 +68,10 @@ export function BlogCodeWindow({ children }: { children?: React.ReactNode }) {
             type="button"
             onClick={copy}
             aria-label={copyStatus === "copied" ? "Code copied" : copyStatus === "error" ? "Copy failed" : "Copy code"}
-            className="flex shrink-0 items-center gap-1.5 rounded-md border border-white/20 bg-white/5 px-3 text-xs font-medium text-slate-100 transition-colors hover:bg-white/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-            style={{ minHeight: "36px" }}
+            className="flex shrink-0 items-center gap-1 rounded-md border border-white/20 bg-white/5 px-2.5 text-[11px] font-medium text-slate-100 transition-colors hover:bg-white/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            style={{ minHeight: "32px" }}
           >
-            {copyStatus === "copied" ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
+            {copyStatus === "copied" ? <Check size={12} aria-hidden="true" /> : <Copy size={12} aria-hidden="true" />}
             {copyStatus === "copied" ? "Copied" : "Copy"}
           </button>
         </div>
@@ -80,6 +80,7 @@ export function BlogCodeWindow({ children }: { children?: React.ReactNode }) {
         margin: 0,
         maxWidth: "100%",
         overflowX: "auto",
+        overscrollBehaviorX: "contain",
         border: 0,
         borderRadius: 0,
         boxShadow: "none",

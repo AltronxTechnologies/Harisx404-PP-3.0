@@ -1476,6 +1476,25 @@ blockquote p {
   --sh-comment: #99a8b8;
 }
 
+.blog-article-shell .blog-code-window pre {
+  scrollbar-width: thin;
+  scrollbar-color: #8495a6 #112c40;
+}
+
+.blog-article-shell .blog-code-window pre::-webkit-scrollbar {
+  height: 8px;
+}
+
+.blog-article-shell .blog-code-window pre::-webkit-scrollbar-track {
+  background: #112c40;
+}
+
+.blog-article-shell .blog-code-window pre::-webkit-scrollbar-thumb {
+  border: 2px solid #112c40;
+  border-radius: 8px;
+  background: #8495a6;
+}
+
 /* Strong text inside article */
 .blog-article-shell strong {
   color: #101828;

@@ -808,3 +808,21 @@ browser QA; do not delete or reattribute the current development corpus.
   was modified.
 - **Remaining:** final owner-authored content rights, image descriptions and
   deployment-host QA are still separate sign-off gates.
+
+## Continuation: Compact code controls and scrolling (2026-10-01)
+
+- Reduced the Blog-only snippet header from 52px to 44px and its Copy control
+  from 36px to 32px; window dots and control type/icon were scaled with it.
+  The button remains keyboard-focusable and above the 24px target minimum.
+- The existing focusable `<pre>` now has an explicitly styled native horizontal
+  scrollbar below overflowing code in both themes. Long lines scroll within
+  the window without widening the article or document; copy still takes the
+  original unmodified code. Code text uses Geist Mono at `clamp(13px, 2vw,
+  16px)`: 13px at phone widths through 650px, 15.36px at 768px and 16px from
+  800px upward. Inline code retains its separate relative `0.86em` scale.
+- Docker responsive light/dark tests passed at 320/360/390/768/1024/1440px;
+  touch copy/scrollbar checks passed, including scrollbar movement and no page
+  overflow. Docker TypeScript, targeted ESLint, diff check and production build
+  passed. After the build, the web container was restarted, touch code checks
+  passed again and the stack remains running. Temporary imported content and
+  locked pages were not edited.
