@@ -869,3 +869,12 @@ browser QA; do not delete or reattribute the current development corpus.
   public three-card order after the owner applies the new SQL. Final public
   launch still waits on replacement of temporary imported content and
   deployment-host QA; do not call this a live database sign-off.
+
+## Continuation: TOC rollback (2026-10-01)
+
+- Per owner request, restored only `TableOfContents.tsx` and its browser test
+  to the state before the curated-article pass: centered pill with down arrow,
+  original full-height expanded panel and compact single-line entries. The
+  downward-page-scroll auto-close was removed; explicit close, Escape, and
+  heading selection still work. Code sizing, reactions and related Blog
+  selection are unchanged by this rollback.
