@@ -38,6 +38,17 @@ test("Blog TOC stays out of hidden tab order and honors reduced motion", async (
     assert.equal(await trigger.evaluate((button) => button === document.activeElement), true);
 
     await trigger.click();
+    await page.mouse.click(8, 200);
+    await page.waitForFunction(() => document.querySelector('nav[aria-label="Table of contents"]')?.getAttribute("data-open") === "false");
+    await trigger.click();
+    const top = await toc.evaluate((nav) => nav.getBoundingClientRect().top);
+    await page.mouse.move(200, top + 20);
+    await page.mouse.down();
+    await page.mouse.move(200, top + 105, { steps: 5 });
+    await page.mouse.up();
+    await page.waitForFunction(() => document.querySelector('nav[aria-label="Table of contents"]')?.getAttribute("data-open") === "false");
+
+    await trigger.click();
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.waitForFunction(() => document.querySelector('nav[aria-label="Table of contents"]')?.getAttribute("data-open") === "false");
     await page.waitForFunction(() => document.querySelector('nav[aria-label="Table of contents"]')?.getAttribute("aria-hidden") === "true");
@@ -87,6 +98,7 @@ test("nested H2-H4 headings identify the reader's section on touch devices", asy
       const list = nav.querySelector(".overflow-y-auto");
       return {
         sizes: ["What is SwiftUI?", "Views", "HStack"].map((name) => getComputedStyle(byTitle(name)).fontSize),
+        numberSizes: ["What is SwiftUI?", "Views"].map((name) => getComputedStyle(byTitle(name).querySelector("span.font-mono")).fontSize),
         active: byTitle("HStack")?.getAttribute("aria-current"),
         scrollbar: getComputedStyle(list).scrollbarWidth,
         overflow: list.scrollHeight > list.clientHeight,
@@ -94,10 +106,19 @@ test("nested H2-H4 headings identify the reader's section on touch devices", asy
       };
     });
     assert.deepEqual(levels.sizes, ["14px", "13px", "12px"]);
+    assert.deepEqual(levels.numberSizes, ["14px", "13px"]);
     assert.equal(levels.active, "location");
     assert.equal(levels.scrollbar, "thin");
     assert.equal(levels.overflow, true);
     assert.ok(levels.documentWidth <= 390);
+    await page.evaluate(() => {
+      const nav = document.querySelector('nav[aria-label="Table of contents"]');
+      const label = nav.querySelector('span.font-mono');
+      const box = label.getBoundingClientRect();
+      label.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, pointerType: "touch", clientX: box.x + 4, clientY: box.y + 4 }));
+      document.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, pointerType: "touch", clientX: box.x + 4, clientY: box.y + 90 }));
+    });
+    await page.waitForFunction(() => document.querySelector('nav[aria-label="Table of contents"]')?.getAttribute("data-open") === "false");
   } finally {
     await browser.close();
   }
@@ -122,8 +143,22 @@ test("light-mode TOC keeps a clear active entry and hover feedback", async () =>
     await page.waitForTimeout(250);
     assert.notEqual(await other.evaluate((button) => getComputedStyle(button).backgroundColor), before);
     assert.equal(await active.getAttribute("aria-current"), "location");
+    const gutters = await toc.evaluate((nav) => {
+      const list = nav.querySelector(".overflow-y-auto").getBoundingClientRect();
+      const selected = nav.querySelector('[aria-current="location"]').getBoundingClientRect();
+      const hovered = [...nav.querySelectorAll("button")].find((button) => button.textContent.includes("The skill that actually matters")).getBoundingClientRect();
+      return { left: selected.left - list.left, right: list.right - selected.right, selectedWidth: selected.width, hoverWidth: hovered.width };
+    });
+    assert.ok(Math.abs(gutters.left - gutters.right) < 1, "TOC rows have balanced side gutters");
+    assert.equal(gutters.selectedWidth, gutters.hoverWidth, "active and hover surfaces share a width");
+    const close = toc.getByRole("button", { name: "Close table of contents" });
+    const closeBefore = await close.evaluate((button) => getComputedStyle(button).backgroundColor);
+    await close.hover();
+    await page.waitForTimeout(250);
+    assert.notEqual(await close.evaluate((button) => getComputedStyle(button).backgroundColor), closeBefore);
     await page.getByRole("button", { name: "Switch to dark mode" }).click();
     await page.waitForFunction(() => document.documentElement.classList.contains("dark"));
+    await toc.locator("button").first().click();
     await page.mouse.move(10, 10);
     const darkBefore = await other.evaluate((button) => getComputedStyle(button).backgroundColor);
     await other.hover();
@@ -154,6 +189,21 @@ test("long TOC outlines expose a styled internal scrollbar without dismissing on
     assert.equal(state.width, "thin");
     assert.notEqual(state.color, "auto");
     assert.equal(state.open, "true");
+    await toc.evaluate((nav) => {
+      const list = nav.querySelector(".overflow-y-auto");
+      const box = list.getBoundingClientRect();
+      list.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, pointerType: "touch", clientX: box.x + 30, clientY: box.y + 30 }));
+      document.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, pointerType: "touch", clientX: box.x + 30, clientY: box.y + 120 }));
+    });
+    assert.equal(await toc.getAttribute("data-open"), "true", "dragging a scrolled outline must not dismiss it");
+    await toc.evaluate((nav) => {
+      const list = nav.querySelector(".overflow-y-auto");
+      list.scrollTop = 0;
+      const box = list.getBoundingClientRect();
+      list.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, pointerType: "touch", clientX: box.x + 30, clientY: box.y + 30 }));
+      document.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, pointerType: "touch", clientX: box.x + 30, clientY: box.y + 120 }));
+    });
+    await page.waitForFunction(() => document.querySelector('nav[aria-label="Table of contents"]')?.getAttribute("data-open") === "false");
   } finally {
     await browser.close();
   }

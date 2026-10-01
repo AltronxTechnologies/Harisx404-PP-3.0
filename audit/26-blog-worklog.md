@@ -907,3 +907,22 @@ browser QA; do not delete or reattribute the current development corpus.
   heading, responsive and TOC checks passed 15/15; the stack remains running.
   Imported article content, related-post selection, reactions and locked pages
   were not edited.
+
+## Continuation: TOC interaction details (2026-10-01)
+
+- In the open TOC, H2 and H3 section numbers now inherit their row's font size
+  (14px and 13px). The selected row uses a stronger neutral surface; hover is
+  deliberately lighter in both themes. All row backgrounds share equal 8px
+  left/right insets. The divider is a subtler gray, and the X has visible
+  hover and keyboard-focus treatment.
+- An outside pointer press closes the open panel without stealing focus from
+  the clicked target. Dragging downward more than 70px closes it, including a
+  touch pull from the top of the outline. When the outline itself is scrolled,
+  downward dragging continues to scroll it instead. Escape, heading selection,
+  top-of-page dismissal and the centered pill are unchanged.
+- Docker pointer/touch/hover/TOC tests passed 4/4 and article responsive tests
+  passed at 320/360/390/768/1024/1440px in both themes. Heading/Blog HTTP
+  tests passed 15/15. TypeScript, focused ESLint, diff check and production
+  build passed. After restarting the web container, TOC and responsive browser
+  smoke tests passed 5/5; the stack remains running. No article data, locked
+  page or related-post behavior changed.

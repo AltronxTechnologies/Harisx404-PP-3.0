@@ -58,6 +58,7 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
   const [open, setOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const dragStartRef = useRef<{ x: number; y: number; scrollingList: boolean } | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const activeId = useActiveSection({ headingIds: headings.map((heading) => heading.slug) });
@@ -91,6 +92,37 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (event: PointerEvent) => {
+      if (!navRef.current?.contains(event.target as Node)) {
+        setOpen(false);
+        return;
+      }
+      dragStartRef.current = {
+        x: event.clientX,
+        y: event.clientY,
+        scrollingList: !!listRef.current?.contains(event.target as Node) && listRef.current.scrollTop > 0,
+      };
+    };
+    const onPointerUp = (event: PointerEvent) => {
+      const start = dragStartRef.current;
+      dragStartRef.current = null;
+      if (!start || start.scrollingList) return;
+      const distance = event.clientY - start.y;
+      if (distance > 70 && Math.abs(event.clientX - start.x) < distance) setOpen(false);
+    };
+    const onPointerCancel = () => { dragStartRef.current = null; };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("pointerup", onPointerUp);
+    document.addEventListener("pointercancel", onPointerCancel);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("pointerup", onPointerUp);
+      document.removeEventListener("pointercancel", onPointerCancel);
+    };
   }, [open]);
 
   useEffect(() => {
@@ -175,7 +207,7 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
           </button>
         ) : (
           <div className="absolute inset-0 flex flex-col">
-            <div className="flex shrink-0 items-center justify-between border-b border-current/10 px-5 pb-3 pt-4">
+            <div className="flex shrink-0 items-center justify-between border-b border-neutral-900/[0.08] px-5 pb-3 pt-4 dark:border-white/[0.08]">
               <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-current/80">
                 Table of contents
               </span>
@@ -184,12 +216,12 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
                 type="button"
                 onClick={closeToc}
                 aria-label="Close table of contents"
-                className="flex size-7 items-center justify-center rounded-full text-current/55 transition-colors hover:bg-current/10 hover:text-current"
+                className="flex size-7 items-center justify-center rounded-full text-neutral-600 transition-colors hover:bg-neutral-900/[0.07] hover:text-neutral-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current dark:text-neutral-300 dark:hover:bg-white/[0.10] dark:hover:text-white"
               >
                 <X className="size-4" />
               </button>
             </div>
-            <div ref={listRef} className={`min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-3 ${styles.outlineList}`}>
+            <div ref={listRef} className={`min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-3 ${styles.outlineList}`}>
               <div className="flex flex-col gap-0.5">
                 {headings.map((heading) => (
                   <button
@@ -199,8 +231,8 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
                     aria-current={currentId === heading.slug ? "location" : undefined}
                     className={`group relative flex min-h-11 w-full shrink-0 items-center rounded-lg border-none py-2 pr-3 text-left leading-5 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current/50 ${
                       currentId === heading.slug
-                        ? "bg-neutral-900/[0.09] text-neutral-950 dark:bg-white/[0.12] dark:text-white"
-                        : "bg-transparent text-neutral-600 hover:bg-neutral-900/[0.06] hover:text-neutral-950 dark:text-neutral-300 dark:hover:bg-white/[0.08] dark:hover:text-white"
+                        ? "bg-neutral-900/[0.11] text-neutral-950 dark:bg-white/[0.12] dark:text-white"
+                        : "bg-transparent text-neutral-600 hover:bg-neutral-900/[0.05] hover:text-neutral-700 dark:text-neutral-300 dark:hover:bg-white/[0.06] dark:hover:text-neutral-200"
                     } ${depthStyles[heading.level]}`}
                   >
                     <span
@@ -209,7 +241,7 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
                         currentId === heading.slug ? "scale-y-100 opacity-100" : "scale-y-0 opacity-0"
                       }`}
                     />
-                    {heading.number && <span aria-hidden="true" className="font-mono text-[11px] tabular-nums" style={{ flexShrink: 0, minWidth: heading.level === 2 ? "1.4rem" : "2.6rem", opacity: 0.8 }}>{heading.number}.</span>}
+                    {heading.number && <span aria-hidden="true" className="font-mono tabular-nums" style={{ flexShrink: 0, minWidth: heading.level === 2 ? "1.4rem" : "2.6rem", fontSize: "inherit", opacity: 0.8 }}>{heading.number}.</span>}
                     <span className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">{heading.text}</span>
                   </button>
                 ))}
