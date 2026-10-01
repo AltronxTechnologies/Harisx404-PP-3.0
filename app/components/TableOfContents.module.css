@@ -7,3 +7,25 @@
     bottom: 30px;
   }
 }
+
+.outlineList {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(0 0 0 / 0.35) transparent;
+}
+
+:global(.dark) .outlineList {
+  scrollbar-color: rgb(255 255 255 / 0.4) transparent;
+}
+
+.outlineList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.outlineList::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.35);
+}
+
+:global(.dark) .outlineList::-webkit-scrollbar-thumb {
+  background: rgb(255 255 255 / 0.4);
+}

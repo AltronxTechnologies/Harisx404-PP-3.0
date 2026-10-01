@@ -49,6 +49,21 @@ test("authored numbering is not duplicated and nesting resets per section", () =
   assert.deepEqual(extractHeadingsFromMdx(source).map(({ number }) => number), ["1", "1.1", "", "2", "2.1", ""]);
 });
 
+test("deeper article headings enter the outline with their existing anchors", () => {
+  const source = "## Section\n### Subsection\n#### Detail\n##### Further detail\n###### Fine detail";
+  const headings = extractHeadingsFromMdx(source);
+  assert.deepEqual(headings.map(({ level, number, slug }) => ({ level, number, slug })), [
+    { level: 2, number: "1", slug: "section" },
+    { level: 3, number: "1.1", slug: "subsection" },
+    { level: 4, number: "", slug: "detail" },
+    { level: 5, number: "", slug: "further-detail" },
+    { level: 6, number: "", slug: "fine-detail" },
+  ]);
+  const tree = createProcessor().parse(source);
+  addHeadingIds(tree);
+  assert.deepEqual(tree.children.filter((node) => node.type === "heading").map((node) => node.data?.hProperties?.id), headings.map(({ slug }) => slug));
+});
+
 test("body H1 is rendered as H2 so the article title remains the only H1", async () => {
   const { default: Content } = await evaluate("# Introduction", {
     ...jsxRuntime,

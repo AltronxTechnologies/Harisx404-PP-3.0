@@ -1,12 +1,19 @@
 "use client";
 
-import { ChevronDown, X } from "lucide-react";
+import { ChevronUp, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useActiveSection } from "@/app/hooks/useActiveSection";
 import type { TocHeading } from "@/app/lib/toc-utils";
 import styles from "./TableOfContents.module.css";
 
 const RING_CIRCUMFERENCE = 62.83; // 2 * PI * r (r=10)
+const depthStyles: Record<TocHeading["level"], string> = {
+  2: "pl-3 text-sm font-medium",
+  3: "pl-5 text-[13px]",
+  4: "pl-[72px] text-xs",
+  5: "pl-[86px] text-xs",
+  6: "pl-[100px] text-xs",
+};
 
 function useReadingProgress() {
   const [progress, setProgress] = useState(0);
@@ -49,12 +56,15 @@ function useRevealAfterHero() {
 
 export function TableOfContents({ headings }: { headings: TocHeading[] }) {
   const [open, setOpen] = useState(false);
+  const navRef = useRef<HTMLElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const activeId = useActiveSection({ headingIds: headings.map((heading) => heading.slug) });
   const active = headings.find((heading) => heading.slug === activeId) || headings[0];
   const progress = useReadingProgress();
   const visible = useRevealAfterHero();
+  const currentId = activeId || headings[0]?.slug;
 
   const closeToc = () => {
     setOpen(false);
@@ -63,6 +73,24 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
 
   useEffect(() => {
     if (open) closeRef.current?.focus();
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    listRef.current?.querySelector<HTMLElement>('[aria-current="location"]')?.scrollIntoView({ block: "nearest", behavior: "auto" });
+  }, [open, currentId]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onScroll = () => {
+      if (window.scrollY > 320) return;
+      if (navRef.current?.contains(document.activeElement)) {
+        document.querySelector<HTMLElement>('main .blog-detail header a, main nav a[href^="/admin/blogs/"]')?.focus({ preventScroll: true });
+      }
+      setOpen(false);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, [open]);
 
   useEffect(() => {
@@ -92,6 +120,7 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
 
   return (
     <nav
+      ref={navRef}
       aria-label="Table of contents"
       aria-hidden={!visible && !open}
       data-open={open}
@@ -102,11 +131,12 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
       }`}
     >
       <div
-        className={`relative overflow-hidden bg-white/70 text-neutral-900 shadow-[0_0_0_0.8px_rgba(0,0,0,0.06),0_4px_12px_-4px_rgba(0,0,0,0.06),inset_0_0.5px_0.5px_0.5px_rgba(255,255,255,0.6)] backdrop-blur-[12px] transition-[width,height,border-radius] duration-300 ease-out motion-reduce:transition-none dark:bg-neutral-800/80 dark:text-white dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),inset_0_0_0_1px_rgba(255,255,255,0.06)] ${
+        className={`relative overflow-hidden bg-white/95 text-neutral-900 shadow-[0_0_0_0.8px_rgba(0,0,0,0.06),0_4px_12px_-4px_rgba(0,0,0,0.06),inset_0_0.5px_0.5px_0.5px_rgba(255,255,255,0.6)] backdrop-blur-[12px] transition-[width,height,border-radius] duration-300 ease-out motion-reduce:transition-none dark:bg-neutral-800/95 dark:text-white dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),inset_0_0_0_1px_rgba(255,255,255,0.06)] ${
           open
-            ? "h-[min(72vh,560px)] w-[min(360px,calc(100vw-2rem))] rounded-2xl"
+            ? "w-[min(360px,calc(100vw-2rem))] rounded-2xl"
             : "h-[52px] w-[min(280px,calc(100vw-2rem))] rounded-[26px]"
         }`}
+        style={{ height: open ? `min(72vh, ${Math.min(560, 80 + headings.length * 48)}px)` : undefined }}
       >
         {!open ? (
           <button
@@ -140,13 +170,13 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
                   strokeDashoffset={RING_CIRCUMFERENCE * (1 - progress)}
                 />
               </svg>
-              <ChevronDown className="absolute size-3" />
+              <ChevronUp className="absolute size-3" />
             </span>
           </button>
         ) : (
           <div className="absolute inset-0 flex flex-col">
-            <div className="flex shrink-0 items-center justify-between px-5 pb-3 pt-4">
-              <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-current/55">
+            <div className="flex shrink-0 items-center justify-between border-b border-current/10 px-5 pb-3 pt-4">
+              <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-current/80">
                 Table of contents
               </span>
               <button
@@ -159,26 +189,27 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
                 <X className="size-4" />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto overscroll-contain px-3 pb-4">
+            <div ref={listRef} className={`min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-3 ${styles.outlineList}`}>
               <div className="flex flex-col gap-0.5">
                 {headings.map((heading) => (
                   <button
                     key={heading.slug}
                     type="button"
                     onClick={() => selectHeading(heading.slug)}
-                    className={`group relative flex w-full shrink-0 items-center rounded-lg border-none py-2 pr-3 text-left text-sm transition-colors duration-300 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 ${
-                      activeId === heading.slug
-                        ? "bg-current/[0.08] font-medium text-current"
-                        : "bg-transparent text-current/50 hover:bg-current/[0.05] hover:text-current"
-                    } ${heading.level === 3 ? "pl-[26px]" : "pl-3"}`}
+                    aria-current={currentId === heading.slug ? "location" : undefined}
+                    className={`group relative flex min-h-11 w-full shrink-0 items-center rounded-lg border-none py-2 pr-3 text-left leading-5 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current/50 ${
+                      currentId === heading.slug
+                        ? "bg-neutral-900/[0.09] text-neutral-950 dark:bg-white/[0.12] dark:text-white"
+                        : "bg-transparent text-neutral-600 hover:bg-neutral-900/[0.06] hover:text-neutral-950 dark:text-neutral-300 dark:hover:bg-white/[0.08] dark:hover:text-white"
+                    } ${depthStyles[heading.level]}`}
                   >
                     <span
                       aria-hidden="true"
                       className={`absolute left-1 top-1/2 h-4 w-[2px] origin-center -translate-y-1/2 rounded-full bg-current transition-transform duration-300 ease-out motion-reduce:transition-none ${
-                        activeId === heading.slug ? "scale-y-100 opacity-100" : "scale-y-0 opacity-0"
+                        currentId === heading.slug ? "scale-y-100 opacity-100" : "scale-y-0 opacity-0"
                       }`}
                     />
-                    {heading.number && <span aria-hidden="true" style={{ flexShrink: 0, minWidth: heading.level === 2 ? "1.4rem" : "2.6rem", fontVariantNumeric: "tabular-nums" }}>{heading.number}.</span>}
+                    {heading.number && <span aria-hidden="true" className="font-mono text-[11px] tabular-nums" style={{ flexShrink: 0, minWidth: heading.level === 2 ? "1.4rem" : "2.6rem", opacity: 0.8 }}>{heading.number}.</span>}
                     <span className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">{heading.text}</span>
                   </button>
                 ))}

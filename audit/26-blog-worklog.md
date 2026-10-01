@@ -878,3 +878,32 @@ browser QA; do not delete or reattribute the current development corpus.
   downward-page-scroll auto-close was removed; explicit close, Escape, and
   heading selection still work. Code sizing, reactions and related Blog
   selection are unchanged by this rollback.
+
+## Continuation: Focused TOC polish (2026-10-01)
+
+- The centered pill keeps its reading-progress ring and now uses an up arrow
+  because its panel opens above it. The `Table of contents` label has a little
+  more weight and a thin divider. Open-panel height grows for short outlines
+  and caps at 72vh/560px for long ones. Its internal list has a theme-aware
+  thin scrollbar and does not dismiss when only that list scrolls.
+- The shared Blog outline parser now includes H4-H6 in addition to H2/H3,
+  using the existing generated heading IDs without changing article text or
+  the H2/H3 numbering. Within the TOC, H2 stays 14px; H3 is 13px; H4-H6 are
+  12px with progressively deeper indentation. The active heading is marked
+  with `aria-current="location"`, a subtle surface and a vertical marker;
+  other rows have verified light/dark hover feedback. Opening a long outline
+  scrolls its selected entry into the panel's view.
+- If a reader scrolls back above the pill's 320px reveal point while the
+  panel is open, it closes and fades with the pill. When keyboard focus was
+  inside the TOC, focus moves to the visible Blog/back-to-editor link instead
+  of remaining in hidden controls. Normal downward page scrolling does not
+  close the TOC; Escape and explicit close continue to work.
+- Docker heading/TOC/browser checks passed 7/7, including touch H4 tracking,
+  reduced motion, top-scroll dismissal, long-list scrolling and hover in both
+  themes. Blog responsive/code/callout browser checks passed 7/7, and Blog,
+  Home/About, legal, navigation and Project regressions passed 35 with one
+  pre-existing Project skip. Docker TypeScript, focused ESLint, diff check and
+  production build passed. After restarting the web container, Blog HTTP,
+  heading, responsive and TOC checks passed 15/15; the stack remains running.
+  Imported article content, related-post selection, reactions and locked pages
+  were not edited.

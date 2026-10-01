@@ -3,7 +3,7 @@ import { createProcessor } from "@mdx-js/mdx";
 /** Table of Contents utilities shared by extraction and MDX rendering. */
 
 export interface TocHeading {
-  level: 2 | 3;
+  level: 2 | 3 | 4 | 5 | 6;
   text: string;
   slug: string;
   number: string;
@@ -66,8 +66,8 @@ function headingsIn(tree: MdNode, setIds: boolean): TocHeading[] {
       node.data.hProperties = { ...node.data.hProperties, id: slug };
       if (number) node.data.hProperties["data-section-number"] = number;
     }
-    if (level === 2 || level === 3) {
-      headings.push({ level, text, slug, number });
+    if (level && level >= 2 && level <= 6) {
+      headings.push({ level: level as TocHeading["level"], text, slug, number });
     }
   }
   return headings;
