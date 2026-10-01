@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, X } from "lucide-react";
+import { ChevronUp, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useActiveSection } from "@/app/hooks/useActiveSection";
 import type { TocHeading } from "@/app/lib/toc-utils";
@@ -49,32 +49,54 @@ function useRevealAfterHero() {
 
 export function TableOfContents({ headings }: { headings: TocHeading[] }) {
   const [open, setOpen] = useState(false);
+  const navRef = useRef<HTMLElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const focusTriggerOnCloseRef = useRef(false);
   const activeId = useActiveSection({ headingIds: headings.map((heading) => heading.slug) });
   const active = headings.find((heading) => heading.slug === activeId) || headings[0];
   const progress = useReadingProgress();
   const visible = useRevealAfterHero();
 
   const closeToc = () => {
+    focusTriggerOnCloseRef.current = visible;
     setOpen(false);
-    if (visible) requestAnimationFrame(() => triggerRef.current?.focus());
   };
 
   useEffect(() => {
-    if (open) closeRef.current?.focus();
+    if (open) {
+      closeRef.current?.focus();
+    } else if (focusTriggerOnCloseRef.current) {
+      focusTriggerOnCloseRef.current = false;
+      triggerRef.current?.focus({ preventScroll: true });
+    }
   }, [open]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape" && open) {
         event.preventDefault();
+        focusTriggerOnCloseRef.current = visible;
         setOpen(false);
-        if (visible) requestAnimationFrame(() => triggerRef.current?.focus());
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
+  }, [open, visible]);
+
+  useEffect(() => {
+    if (!open) return;
+    let lastY = window.scrollY;
+    const onScroll = () => {
+      const currentY = window.scrollY;
+      if (currentY > lastY + 4) {
+        focusTriggerOnCloseRef.current = visible && !!navRef.current?.contains(document.activeElement);
+        setOpen(false);
+      }
+      lastY = currentY;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, [open, visible]);
 
   if (!headings.length) return null;
@@ -92,6 +114,7 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
 
   return (
     <nav
+      ref={navRef}
       aria-label="Table of contents"
       aria-hidden={!visible && !open}
       data-open={open}
@@ -104,7 +127,7 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
       <div
         className={`relative overflow-hidden bg-white/70 text-neutral-900 shadow-[0_0_0_0.8px_rgba(0,0,0,0.06),0_4px_12px_-4px_rgba(0,0,0,0.06),inset_0_0.5px_0.5px_0.5px_rgba(255,255,255,0.6)] backdrop-blur-[12px] transition-[width,height,border-radius] duration-300 ease-out motion-reduce:transition-none dark:bg-neutral-800/80 dark:text-white dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),inset_0_0_0_1px_rgba(255,255,255,0.06)] ${
           open
-            ? "h-[min(72vh,560px)] w-[min(360px,calc(100vw-2rem))] rounded-2xl"
+            ? "max-h-[min(72vh,560px)] w-[min(360px,calc(100vw-2rem))] rounded-2xl"
             : "h-[52px] w-[min(280px,calc(100vw-2rem))] rounded-[26px]"
         }`}
       >
@@ -114,6 +137,7 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
             type="button"
             onClick={() => setOpen(true)}
             tabIndex={visible ? 0 : -1}
+            aria-expanded={false}
             aria-label={`Open table of contents: ${active.number ? `${active.number} ` : ""}${active.text}`}
             className="absolute inset-0 flex w-full items-center gap-3 px-5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-primary/40"
           >
@@ -140,46 +164,47 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
                   strokeDashoffset={RING_CIRCUMFERENCE * (1 - progress)}
                 />
               </svg>
-              <ChevronDown className="absolute size-3" />
+              <ChevronUp className="absolute size-3" />
             </span>
           </button>
         ) : (
-          <div className="absolute inset-0 flex flex-col">
-            <div className="flex shrink-0 items-center justify-between px-5 pb-3 pt-4">
-              <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-current/55">
-                Table of contents
-              </span>
+          <div className="flex max-h-[min(72vh,560px)] min-h-0 flex-col">
+            <div className="flex shrink-0 items-center justify-between gap-3 border-b border-current/10 px-5 py-4">
+              <div className="min-w-0">
+                <span className="block text-sm font-semibold">On this page</span>
+                <span className="mt-0.5 block font-mono text-[11px] text-current/65">{headings.filter((heading) => heading.level === 2).length} sections</span>
+              </div>
               <button
                 ref={closeRef}
                 type="button"
                 onClick={closeToc}
                 aria-label="Close table of contents"
-                className="flex size-7 items-center justify-center rounded-full text-current/55 transition-colors hover:bg-current/10 hover:text-current"
+                className="flex size-8 shrink-0 items-center justify-center rounded-full text-current/70 transition-colors hover:bg-current/10 hover:text-current focus-visible:outline focus-visible:outline-2 focus-visible:outline-current"
               >
                 <X className="size-4" />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto overscroll-contain px-3 pb-4">
-              <div className="flex flex-col gap-0.5">
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-3">
+              <div className="flex flex-col gap-1">
                 {headings.map((heading) => (
                   <button
                     key={heading.slug}
                     type="button"
                     onClick={() => selectHeading(heading.slug)}
-                    className={`group relative flex w-full shrink-0 items-center rounded-lg border-none py-2 pr-3 text-left text-sm transition-colors duration-300 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 ${
+                    className={`group relative flex w-full shrink-0 items-start gap-2 rounded-lg py-2.5 pr-3 text-left leading-5 transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-current ${
                       activeId === heading.slug
-                        ? "bg-current/[0.08] font-medium text-current"
-                        : "bg-transparent text-current/50 hover:bg-current/[0.05] hover:text-current"
-                    } ${heading.level === 3 ? "pl-[26px]" : "pl-3"}`}
+                        ? "bg-current/[0.08] text-current"
+                        : "bg-transparent text-current/70 hover:bg-current/[0.05] hover:text-current"
+                    } ${heading.level === 3 ? "ml-4 w-[calc(100%-1rem)] border-l border-current/15 pl-3 text-[13px]" : "pl-3 text-sm font-medium"}`}
                   >
                     <span
                       aria-hidden="true"
-                      className={`absolute left-1 top-1/2 h-4 w-[2px] origin-center -translate-y-1/2 rounded-full bg-current transition-transform duration-300 ease-out motion-reduce:transition-none ${
+                      className={`absolute left-0 top-1/2 h-4 w-[2px] origin-center -translate-y-1/2 rounded-full bg-current transition-transform duration-300 ease-out motion-reduce:transition-none ${
                         activeId === heading.slug ? "scale-y-100 opacity-100" : "scale-y-0 opacity-0"
                       }`}
                     />
-                    {heading.number && <span aria-hidden="true" style={{ flexShrink: 0, minWidth: heading.level === 2 ? "1.4rem" : "2.6rem", fontVariantNumeric: "tabular-nums" }}>{heading.number}.</span>}
-                    <span className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">{heading.text}</span>
+                    {heading.number && <span aria-hidden="true" className="shrink-0 font-mono text-[11px] tabular-nums text-current/75" style={{ minWidth: heading.level === 2 ? "1.5rem" : "2.5rem" }}>{heading.number}.</span>}
+                    <span className="min-w-0 flex-1 break-words text-pretty">{heading.text}</span>
                   </button>
                 ))}
               </div>

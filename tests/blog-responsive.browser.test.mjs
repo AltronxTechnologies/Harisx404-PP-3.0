@@ -52,7 +52,10 @@ test("Blog article stays readable across both themes and responsive widths", asy
                  const heading = number?.parentElement;
                  return Boolean(number?.textContent.endsWith(".") && getComputedStyle(number).fontSize === getComputedStyle(heading).fontSize && getComputedStyle(number).color === getComputedStyle(heading).color);
                })(),
-               reactionButtonsFit: [...document.querySelectorAll('[aria-labelledby="article-reactions-heading"] button')].length === 4 && [...document.querySelectorAll('[aria-labelledby="article-reactions-heading"] button')].every((button) => button.scrollWidth <= button.clientWidth + 1),
+                reactionButtonsFit: (() => {
+                  const buttons = [...document.querySelectorAll('[aria-labelledby="article-reactions-heading"] button')];
+                  return buttons.length === 4 && buttons.every((button) => button.scrollWidth <= button.clientWidth + 1 && Math.abs(button.getBoundingClientRect().top - buttons[0].getBoundingClientRect().top) < 1);
+                })(),
                sideRails: (() => {
                  const frame = document.querySelector("#main-content").parentElement;
                  const columns = getComputedStyle(frame).gridTemplateColumns.split(" ").map(parseFloat);
@@ -71,7 +74,7 @@ test("Blog article stays readable across both themes and responsive widths", asy
            assert.equal(state.codeFrameNeutral, true, `${width}px ${theme} neutral single code frame`);
            assert.deepEqual(state.headingScale, [[24, 500], [20, 500], [16, 500], [15, 500], [14, 500]], `${width}px ${theme} article heading scale`);
            assert.equal(state.numberedHeadingMatchesText, true, `${width}px ${theme} heading numbers match typography`);
-           assert.equal(state.reactionButtonsFit, true, `${width}px ${theme} reaction labels fit`);
+           assert.equal(state.reactionButtonsFit, true, `${width}px ${theme} reactions fit in one row`);
            assert.equal(state.sideRails, false, `${width}px ${theme} no hatched side rails`);
         }
       } finally {

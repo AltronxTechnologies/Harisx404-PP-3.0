@@ -14,6 +14,7 @@ export interface Blog {
   audioFile?: string;
   canonicalUrl?: string;
   readingTimeMinutes?: number;
+  relatedBlogPostIds?: string[];
 }
 
 export interface Changelog {
@@ -158,18 +159,19 @@ export async function fetchAndSortBlogPosts(): Promise<Blog[]> {
 
 export async function getBlogPostBySlug(slug: string): Promise<Blog | null> {
   if (!supabase) throw new Error("Blog data is unavailable");
-  const { data, error } = await supabase
-    .from('blog_posts')
-    .select(`
+  const now = new Date().toISOString();
+  let { data, error } = await supabase.from('blog_posts').select(`
+    id, title, slug, summary, content, published_at, cover_image_url, status, canonical_url, reading_time_minutes, related_blog_post_ids,
+    blog_post_tags ( tags ( name, slug ) )
+  `).eq('slug', slug).eq('status', 'published').lte('published_at', now).single();
+  if (error && ['42703', 'PGRST204'].includes(error.code) && error.message.includes('related_blog_post_ids')) {
+    const fallback = await supabase.from('blog_posts').select(`
       id, title, slug, summary, content, published_at, cover_image_url, status, canonical_url, reading_time_minutes,
-      blog_post_tags (
-        tags ( name, slug )
-      )
-    `)
-    .eq('slug', slug)
-    .eq('status', 'published')
-    .lte('published_at', new Date().toISOString())
-    .single();
+      blog_post_tags ( tags ( name, slug ) )
+    `).eq('slug', slug).eq('status', 'published').lte('published_at', now).single();
+    data = fallback.data as typeof data;
+    error = fallback.error;
+  }
 
   if (error && error.code !== "PGRST116") {
     throw new Error("Unable to load Blog article");
@@ -191,6 +193,7 @@ export async function getBlogPostBySlug(slug: string): Promise<Blog | null> {
     categories: categories as string[],
     canonicalUrl: data.canonical_url || undefined,
     readingTimeMinutes: data.reading_time_minutes || undefined,
+    relatedBlogPostIds: data.related_blog_post_ids ?? [],
     draft: false,
     headings: extractHeadingsFromMdx(data.content)
   } as any;
@@ -198,108 +201,21 @@ export async function getBlogPostBySlug(slug: string): Promise<Blog | null> {
 
 export async function getRelatedBlogPosts(
   currentPost: Blog,
-  maxResults: number = 3,
-): Promise<Blog[]> {
-  if (!supabase) return [];
-  try {
-    // 1. Try to fetch the embedding for the current post
-    const { data: postData } = await supabase
-      .from('blog_posts')
-      .select('content_embedding')
-      .eq('slug', currentPost.slug)
-      .eq('status', 'published')
-      .lte('published_at', new Date().toISOString())
-      .single();
-
-    if (postData && postData.content_embedding) {
-      // 2. Perform semantic search using the embedding
-      const { data: searchResults, error } = await supabase.rpc('search_blog_posts', {
-        query_embedding: postData.content_embedding,
-        similarity_threshold: 0.1, // low threshold to ensure we get *some* related posts
-        match_count: maxResults,
-        exclude_slug: currentPost.slug
-      });
-
-      if (!error && searchResults && searchResults.length > 0) {
-        // We only get basic metadata back from the RPC, so let's fetch the full post data
-        // for these slugs to match the Blog interface
-        const slugs = searchResults.map((s: any) => s.slug);
-        const { data: fullPosts } = await supabase
-          .from('blog_posts')
-          .select(`
-            id, title, slug, summary, content, published_at, cover_image_url, status, canonical_url, reading_time_minutes,
-            blog_post_tags (
-              tags ( name, slug )
-            )
-          `)
-          .in('slug', slugs)
-          .eq('status', 'published')
-          .lte('published_at', new Date().toISOString());
-
-        if (fullPosts) {
-          // Map to Blog interface and preserve semantic order
-          const relatedPosts = slugs.map((slug: string) => {
-            const fp = fullPosts.find(p => p.slug === slug);
-            if (!fp) return null;
-            const categories = fp.blog_post_tags?.map((bpt: any) => bpt.tags?.name).filter(Boolean) || [];
-            return {
-              title: fp.title,
-              slug: fp.slug,
-              slugAsParams: fp.slug,
-              summary: fp.summary,
-              content: fp.content,
-              code: fp.content,
-              publishedAt: fp.published_at || new Date().toISOString(),
-              imageName: fp.cover_image_url || '',
-              categories: categories as string[],
-              canonicalUrl: fp.canonical_url || undefined,
-              readingTimeMinutes: fp.reading_time_minutes || undefined,
-              draft: false,
-              headings: extractHeadingsFromMdx(fp.content)
-            } as any;
-          }).filter(Boolean);
-          
-          // Fallback if we didn't get enough results from vector search
-          if (relatedPosts.length >= maxResults) {
-             return relatedPosts.slice(0, maxResults);
-          }
-        }
-      }
-    }
-  } catch (err) {
-    console.warn("Semantic search failed or pgvector not set up. Falling back to category matching.", err);
-  }
-
-  // FALLBACK: Traditional Category-based matching
-  const allPosts = (await fetchAndSortBlogPosts()).filter(
-    (post) => post.slug !== currentPost.slug,
-  );
-
-  const sameCategories = allPosts.filter((post) =>
-    post.categories.some((category) =>
-      currentPost.categories.includes(category),
-    ),
-  );
-
-  const sortedByRelevance = sameCategories.sort((a, b) => {
-    const aMatches = a.categories.filter((cat) =>
-      currentPost.categories.includes(cat),
-    ).length;
-    const bMatches = b.categories.filter((cat) =>
-      currentPost.categories.includes(cat),
-    ).length;
-    return bMatches - aMatches;
+): Promise<Array<{ title: string; slug: string; summary: string; imageName: string }>> {
+  const ids = currentPost.relatedBlogPostIds ?? [];
+  if (!supabase || !ids.length) return [];
+  const { data, error } = await supabase.from('blog_posts')
+    .select('id, title, slug, summary, cover_image_url')
+    .in('id', ids)
+    .eq('status', 'published')
+    .lte('published_at', new Date().toISOString());
+  if (error) throw new Error('Unable to load related Blog posts');
+  return ids.flatMap((id) => {
+    const post = data?.find((item) => item.id === id);
+    return post && post.slug !== currentPost.slug
+      ? [{ title: post.title, slug: post.slug, summary: post.summary ?? '', imageName: post.cover_image_url ?? '' }]
+      : [];
   });
-
-  if (sortedByRelevance.length >= maxResults) {
-    return sortedByRelevance.slice(0, maxResults);
-  }
-
-  const remainingPosts = allPosts.filter(
-    (post) => !sortedByRelevance.some((related) => related.slug === post.slug),
-  );
-
-  return [...sortedByRelevance, ...remainingPosts].slice(0, maxResults);
 }
 
 export async function fetchAndSortChangelogPosts(): Promise<Changelog[]> {

@@ -826,3 +826,46 @@ browser QA; do not delete or reattribute the current development corpus.
   passed. After the build, the web container was restarted, touch code checks
   passed again and the stack remains running. Temporary imported content and
   locked pages were not edited.
+
+## Continuation: Curated article handoff and TOC hierarchy (2026-10-01)
+
+- **Completed:** reduced the Blog code font scale to `clamp(12.5px, 1.8vw,
+  14px)` and tightened snippet padding; touch copy and the styled horizontal
+  scrollbar remain. The centered TOC pill now points upward. Its panel sizes
+  to short outlines, caps long ones with internal scrolling, wraps titles,
+  indents H3 beneath H2 and closes on downward page scroll. Escape, close and
+  scroll return keyboard focus to the collapsed pill when appropriate.
+- **Completed:** the article reaction controls occupy a single row at all
+  checked widths. Phones show accessible icon-and-count controls; larger
+  screens retain labels. Four controls remain 48px high on phones and 56px
+  from `sm`, without clipping counts or expanding the document.
+- **Completed in code, not deployed to connected DB:** an additive Blog
+  migration adds at most three ordered, distinct related post IDs, validates
+  selected rows as currently live in the service-role save transaction, and
+  removes a deleted post from referring arrays. Admin create/edit can search,
+  select and remove recommendations in order; the API rechecks selections and
+  revalidates referring article pages. Existing posts default to no selection.
+  Until the migration is installed, ordinary empty-selection saves remain
+  usable; attempting to save a selection returns a migration-required error.
+- **Public behavior:** only Admin-selected, currently live posts render as
+  cards, in the chosen order. The section reuses the site's `SectionHeading`
+  with `Continue exploring` and `Related articles`, followed by up to three
+  Blog-only cards. With no live selection, the Project-detail-style `Keep
+  exploring` link leads to the Blog index instead of inventing recommendations.
+  Imported article bodies/media, shared SectionHeading and locked pages were
+  not changed.
+- **Verification:** migration applied and reapplied in isolated PostgreSQL 16;
+  rollback-only selection/delete/validation SQL passed, and the new read-only
+  catalog verifier returned six true results there. The connected Supabase DB
+  was not mutated; apply `migrations/2026_blog_related_selections.sql` there
+  before attempting curated Admin saves, then check
+  `migrations/verify_blog_related_selections.sql`. Docker TypeScript, targeted
+  ESLint, production build and diff checks passed. Blog/Admin/locked-page HTTP
+  regressions passed (40 passed, one existing Project skip); focused Blog
+  browser tests passed 5/5 and related-card/code tests passed 4/4. After the
+  build the web container was restarted; Blog HTTP/TOC/responsive smoke tests
+  passed 10/10 and the app remains running.
+- **Remaining:** authenticate and exercise Admin selection/save/reopen plus
+  public three-card order after the owner applies the new SQL. Final public
+  launch still waits on replacement of temporary imported content and
+  deployment-host QA; do not call this a live database sign-off.

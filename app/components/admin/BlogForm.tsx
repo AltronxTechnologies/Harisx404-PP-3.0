@@ -39,19 +39,22 @@ const blogSchema = z.object({
   }, "Use an HTTP(S) URL without credentials").optional().or(z.literal("")),
   published_at: z.string().refine((value) => !value || !Number.isNaN(Date.parse(value)), "Choose a valid publish date").optional(),
   tags: z.array(z.string().trim().min(1).max(50)).max(25).optional(),
+  related_blog_post_ids: z.array(z.string().uuid()).max(3, "Choose no more than three posts").refine((ids) => new Set(ids).size === ids.length, "Choose different posts"),
 });
 
 type BlogFormValues = z.infer<typeof blogSchema>;
 
 interface BlogFormProps {
   initialData?: BlogFormValues & { id?: string; updated_at?: string; editor_mode?: "source" | "rich" };
+  availablePosts: Array<{ id: string; title: string; slug: string; status: string; published_at: string | null }>;
 }
 
-export function BlogForm({ initialData }: BlogFormProps) {
+export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [tagInput, setTagInput] = useState("");
+  const [relatedSearch, setRelatedSearch] = useState("");
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
   const slugEdited = useRef(Boolean(initialData?.id));
   const richContentEdited = useRef(false);
@@ -75,6 +78,7 @@ export function BlogForm({ initialData }: BlogFormProps) {
       cover_image_id: initialData.cover_image_id || "",
       canonical_url: initialData.canonical_url || "",
       published_at: toLocalBlogDateTime(initialData.published_at),
+      related_blog_post_ids: initialData.related_blog_post_ids ?? [],
     } : {
       title: "",
       slug: "",
@@ -86,11 +90,14 @@ export function BlogForm({ initialData }: BlogFormProps) {
       canonical_url: "",
       published_at: "",
       tags: [],
+      related_blog_post_ids: [],
     },
   });
 
   const tags = watch("tags") || [];
   const status = watch("status");
+  const selectedRelatedIds = watch("related_blog_post_ids") || [];
+  const relatedOptions = availablePosts.filter((item) => item.id !== initialData?.id && `${item.title} ${item.slug}`.toLowerCase().includes(relatedSearch.trim().toLowerCase()));
   const scheduled = status === "published" && Date.parse(watch("published_at") || "") > Date.now();
 
   const addTag = () => {
@@ -314,6 +321,37 @@ export function BlogForm({ initialData }: BlogFormProps) {
         </div>
         {errors.tags && <p className="text-xs text-red-500">{errors.tags.message}</p>}
       </div>
+
+      <fieldset className="space-y-3 rounded-xl border border-border-hairline p-4">
+        <legend className="px-1 text-sm font-medium">Related posts</legend>
+        <p className="text-xs text-ink-secondary">Choose up to three live published posts. They appear in the order selected. Leave empty to hide the section.</p>
+        <p className="text-xs font-medium text-ink-secondary">Selected {selectedRelatedIds.length} / 3</p>
+        {selectedRelatedIds.length > 0 && <ol className="space-y-1">
+          {selectedRelatedIds.map((id, index) => {
+            const chosen = availablePosts.find((item) => item.id === id);
+            return <li key={id} className="flex items-center justify-between gap-3 rounded-lg bg-surface-base px-3 py-2 text-sm text-ink-primary">
+              <span className="min-w-0 break-words">{index + 1}. {chosen?.title || "Post no longer available"}</span>
+              <button type="button" onClick={() => setValue("related_blog_post_ids", selectedRelatedIds.filter((value) => value !== id), { shouldDirty: true, shouldValidate: true })} className="shrink-0 text-xs text-ink-secondary underline underline-offset-2 hover:text-ink-primary">Remove</button>
+            </li>;
+          })}
+        </ol>}
+        <label htmlFor="related-blog-search" className="sr-only">Search posts for related links</label>
+        <input id="related-blog-search" type="search" value={relatedSearch} onChange={(event) => setRelatedSearch(event.target.value)} placeholder="Search all posts..." className="w-full rounded-lg border border-border-hairline bg-surface-base px-3 py-2 text-sm text-ink-primary focus:outline-none focus:ring-2 focus:ring-accent-signal" />
+        <div className="max-h-56 space-y-1 overflow-y-auto">
+          {relatedOptions.map((item) => {
+            const selected = selectedRelatedIds.includes(item.id);
+            const live = item.status === "published" && !!item.published_at && Date.parse(item.published_at) <= Date.now();
+            const disabled = !selected && (!live || selectedRelatedIds.length >= 3);
+            return <label key={item.id} className={`flex items-center gap-3 rounded-lg border border-border-hairline px-3 py-2 text-sm ${disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-surface-base"}`}>
+              <input type="checkbox" checked={selected} disabled={disabled} onChange={() => setValue("related_blog_post_ids", selected ? selectedRelatedIds.filter((id) => id !== item.id) : [...selectedRelatedIds, item.id], { shouldDirty: true, shouldValidate: true })} className="size-4 shrink-0 rounded border-border-hairline text-accent-signal focus:ring-accent-signal" />
+              <span className="min-w-0 flex-1 break-words text-ink-primary">{item.title}</span>
+              <span className="shrink-0 text-xs text-ink-secondary">{selected ? `#${selectedRelatedIds.indexOf(item.id) + 1}` : live ? "published" : item.status === "published" ? "scheduled" : item.status}</span>
+            </label>;
+          })}
+          {relatedOptions.length === 0 && <p className="px-3 py-4 text-sm text-ink-secondary">No matching posts.</p>}
+        </div>
+        {errors.related_blog_post_ids && <p className="text-xs text-red-500">{errors.related_blog_post_ids.message}</p>}
+      </fieldset>
 
       <div className="space-y-2">
         <label htmlFor={!richEditor ? "blog-content-source" : undefined} className="text-sm font-medium">Content</label>

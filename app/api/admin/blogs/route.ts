@@ -95,6 +95,7 @@ const blogSchema = z
     canonical_url: optionalCanonicalUrl,
     published_at: optionalDate,
     tags: tagsSchema.optional().default([]),
+    related_blog_post_ids: z.array(z.string().uuid()).max(3).refine((ids) => new Set(ids).size === ids.length, "Choose different posts").optional().default([]),
   })
   .strict();
 
@@ -153,6 +154,35 @@ async function validateCoverMedia(coverId: string | null, coverUrl: string | nul
   return null;
 }
 
+async function validateRelatedPosts(ids: string[], currentId?: string) {
+  if (currentId && ids.includes(currentId)) return NextResponse.json({ error: "A post cannot link to itself." }, { status: 400 });
+  const admin = await createSupabaseAdminClient();
+  // Do not let the old RPC silently ignore selections before the additive migration.
+  const { error: schemaError } = await admin.from("blog_posts").select("related_blog_post_ids").limit(1);
+  if (schemaError) {
+    if (["42703", "PGRST204"].includes(schemaError.code) && schemaError.message.includes("related_blog_post_ids")) {
+      if (!ids.length) return null;
+      return NextResponse.json({ error: "Apply migration 2026_blog_related_selections.sql before saving Blog posts." }, { status: 503 });
+    }
+    throw schemaError;
+  }
+  if (!ids.length) return null;
+  const { data, error } = await admin.from("blog_posts").select("id").in("id", ids)
+    .eq("status", "published").lte("published_at", new Date().toISOString());
+  if (error) throw error;
+  return data?.length === ids.length ? null : NextResponse.json({ error: "Choose only live published posts that still exist." }, { status: 400 });
+}
+
+async function referringBlogSlugs(id: string) {
+  const admin = await createSupabaseAdminClient();
+  const { data, error } = await admin.from("blog_posts").select("slug").contains("related_blog_post_ids", [id]);
+  if (error) {
+    console.error("Could not revalidate related Blog pages:", error);
+    return [];
+  }
+  return data?.map((post) => post.slug) ?? [];
+}
+
 // Best-effort ISR invalidation must never fail a completed mutation.
 function revalidateBlogPaths(slug?: string | null) {
   try {
@@ -197,9 +227,18 @@ function errorResponse(error: unknown, fallback = "Unable to save blog post. Ple
   if (message.includes("BLOG_SLUG_RESERVED")) {
     return NextResponse.json({ error: "This slug belongs to a previously published post. Choose another slug." }, { status: 409 });
   }
+  if (message.includes("BLOG_RELATED_INVALID")) {
+    return NextResponse.json({ error: message.replace(/^.*BLOG_RELATED_INVALID: /, "Invalid related posts: ") }, { status: 400 });
+  }
   const code = error && typeof error === "object" && "code" in error ? error.code : null;
   if (code === "PGRST202") {
     return NextResponse.json({ error: "The Blog database update is required for this action." }, { status: 503 });
+  }
+  if (["42703", "PGRST204"].includes(String(code)) && message.includes("related_blog_post_ids")) {
+    return NextResponse.json({ error: "Apply migration 2026_blog_related_selections.sql before saving related posts." }, { status: 503 });
+  }
+  if (code === "23514" && message.includes("related_blog_post_ids")) {
+    return NextResponse.json({ error: "Invalid related posts." }, { status: 400 });
   }
   if (code === "23505") {
     return NextResponse.json({ error: "A blog post or tag with that name already exists." }, { status: 409 });
@@ -221,6 +260,8 @@ export async function POST(request: Request) {
     validateBlogMdx(data.content);
     const coverError = await validateCoverMedia(data.cover_image_id, data.cover_image_url);
     if (coverError) return coverError;
+    const relatedError = await validateRelatedPosts(data.related_blog_post_ids);
+    if (relatedError) return relatedError;
     const { tags, ...post } = data;
     const result = await saveBlogPostWithTags({
       post: {
@@ -247,6 +288,8 @@ export async function PUT(request: Request) {
     validateBlogMdx(data.content);
     const coverError = await validateCoverMedia(data.cover_image_id, data.cover_image_url);
     if (coverError) return coverError;
+    const relatedError = await validateRelatedPosts(data.related_blog_post_ids, data.id);
+    if (relatedError) return relatedError;
     const { id, updated_at, tags, ...post } = data;
     const admin = await createSupabaseAdminClient();
     const { data: current, error: lookupError } = await admin
@@ -266,8 +309,10 @@ export async function PUT(request: Request) {
       tags,
     });
 
+    const referringSlugs = await referringBlogSlugs(id);
     revalidateBlogPaths(result.old_slug);
     if (result.post.slug !== result.old_slug) revalidateBlogPaths(result.post.slug);
+    for (const slug of referringSlugs) revalidateBlogPaths(slug);
     return NextResponse.json(result.post);
   } catch (error) {
     return errorResponse(error);
@@ -314,6 +359,7 @@ export async function PATCH(request: Request) {
     if (!post?.slug || !post.updated_at) throw new Error("Blog transition returned an invalid response");
 
     revalidateBlogPaths(post.slug);
+    for (const slug of await referringBlogSlugs(id)) revalidateBlogPaths(slug);
     return NextResponse.json(post);
   } catch (error) {
     return errorResponse(error, "Unable to archive or restore post.");
@@ -338,6 +384,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Type the exact post slug to confirm permanent deletion." }, { status: 400 });
     }
 
+    const referringSlugs = await referringBlogSlugs(id);
     const { data, error } = await admin.rpc("delete_archived_blog_post", {
       p_id: id,
       p_expected_updated_at: updated_at,
@@ -347,6 +394,7 @@ export async function DELETE(request: Request) {
       throw new Error("Blog deletion returned an invalid response");
     }
     revalidateBlogPaths(data.deleted_slug);
+    for (const slug of referringSlugs) revalidateBlogPaths(slug);
     for (const alias of data.aliases) {
       if (typeof alias === "string") revalidateBlogPaths(alias);
     }

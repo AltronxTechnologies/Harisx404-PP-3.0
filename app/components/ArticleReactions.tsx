@@ -348,11 +348,11 @@ const AnimatedNumber = ({
   const isIncrementing = number > prevNumber;
 
   if (reduceMotion) {
-    return <span className="min-w-[2.5ch] text-center font-mono">{number}</span>;
+    return <span className="min-w-[1.5ch] text-center font-mono">{number}</span>;
   }
 
   return (
-    <div className="relative inline-flex h-[1.2em] min-w-[2.5ch] items-center overflow-hidden">
+    <div className="relative inline-flex h-[1.2em] min-w-[1.5ch] items-center overflow-hidden">
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.span
           key={number}
@@ -478,7 +478,7 @@ export default function ArticleReactions({
 
   return (
     <div className="mt-5" aria-busy={!isReady}>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
         {Object.entries(REACTION_EMOJIS).map(([type, emoji]) => {
           const count = reactions[type] || 0;
           const isActive = userReactions.includes(type);
@@ -488,23 +488,24 @@ export default function ArticleReactions({
               key={type}
               onClick={() => handleReaction(type as ReactionType)}
               disabled={!isReady || isSubmitting !== null}
-              className={`flex min-h-[56px] min-w-0 items-center gap-1.5 rounded-xl border px-2 text-xs font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary sm:gap-2 sm:px-3 sm:text-sm ${
+              className={`flex min-h-12 min-w-0 items-center justify-center gap-1 rounded-xl border px-1 text-xs font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary sm:min-h-[56px] sm:justify-start sm:gap-2 sm:px-3 sm:text-sm ${
                 isActive
                   ? "border-text-secondary bg-bg-primary text-text-primary"
                   : "border-border-primary bg-bg-primary text-text-secondary hover:border-text-secondary hover:text-text-primary"
               }`}
               aria-label={`${isActive ? "Remove" : "Add"} ${type} reaction, ${count} ${count === 1 ? "reaction" : "reactions"}`}
               aria-pressed={isActive}
+              title={REACTION_LABELS[type as ReactionType]}
             >
-              <span aria-hidden className="flex size-7 shrink-0 items-center justify-center">
+              <span aria-hidden className="flex size-6 shrink-0 items-center justify-center sm:size-7">
                 {reduceMotion ? (
                   <ReactionIcon type={type as ReactionType} active={isActive} />
                 ) : (
                   emoji(isActive)
                 )}
               </span>
-              <span className="min-w-0 truncate">{REACTION_LABELS[type as ReactionType]}</span>
-              <span className="ml-auto text-xs text-text-secondary" aria-hidden="true">
+              <span className="hidden min-w-0 truncate sm:block">{REACTION_LABELS[type as ReactionType]}</span>
+              <span className="text-[10px] text-text-secondary sm:ml-auto sm:text-xs" aria-hidden="true">
                 <AnimatedNumber number={count} reduceMotion={reduceMotion} />
               </span>
             </motion.button>

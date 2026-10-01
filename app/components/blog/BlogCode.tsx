@@ -41,10 +41,10 @@ export function BlogCodeWindow({ children }: { children?: React.ReactNode }) {
     <div className="blog-code-window not-prose" style={{
       width: "100%",
       minWidth: 0,
-      margin: "2rem 0 2.25rem",
+      margin: "1.75rem 0 2rem",
       overflow: "hidden",
       border: "1px solid var(--border-primary)",
-      borderRadius: "14px",
+      borderRadius: "12px",
       background: "#061b2d",
       boxShadow: "0 12px 32px -22px rgb(0 0 0 / 0.36)",
     }}>
@@ -84,13 +84,13 @@ export function BlogCodeWindow({ children }: { children?: React.ReactNode }) {
         border: 0,
         borderRadius: 0,
         boxShadow: "none",
-        padding: "clamp(18px, 3vw, 26px)",
-        paddingTop: "16px",
+        padding: "clamp(14px, 2.4vw, 20px)",
+        paddingTop: "14px",
         background: "#061b2d",
         color: "#d8e6f4",
         fontFamily: "var(--font-geist-mono), monospace",
-        fontSize: "clamp(13px, 2vw, 16px)",
-        lineHeight: "1.75",
+        fontSize: "clamp(12.5px, 1.8vw, 14px)",
+        lineHeight: "1.65",
         tabSize: 2,
       }}><code style={{ fontFamily: "inherit", fontSize: "inherit", lineHeight: "inherit" }} {...(language ? { dangerouslySetInnerHTML: { __html: highlight(code) } } : { children: code })} /></pre>
       <span role="status" className="sr-only">{copyStatus === "copied" ? "Code copied" : copyStatus === "error" ? "Could not copy code" : ""}</span>

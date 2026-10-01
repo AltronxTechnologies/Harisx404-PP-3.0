@@ -49,9 +49,20 @@ CREATE TABLE blog_posts (
   og_image_id UUID REFERENCES media(id),
   audio_file TEXT,                     -- Optional audio narration file path
   reading_time_minutes INTEGER,
+  related_blog_post_ids UUID[] NOT NULL DEFAULT '{}'::uuid[],
   view_count INTEGER DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  CONSTRAINT blog_posts_related_blog_post_ids_valid CHECK (
+    cardinality(related_blog_post_ids) <= 3
+    AND array_position(related_blog_post_ids, NULL) IS NULL
+    AND NOT (id = ANY(related_blog_post_ids))
+    AND (cardinality(related_blog_post_ids) < 2 OR related_blog_post_ids[1] <> related_blog_post_ids[2])
+    AND (cardinality(related_blog_post_ids) < 3 OR (
+      related_blog_post_ids[1] <> related_blog_post_ids[3]
+      AND related_blog_post_ids[2] <> related_blog_post_ids[3]
+    ))
+  )
 );
 
 -- Blog post + tag join table

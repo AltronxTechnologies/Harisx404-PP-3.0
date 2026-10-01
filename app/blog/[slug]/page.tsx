@@ -2,6 +2,7 @@ import { notFound, permanentRedirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { Metadata, ResolvingMetadata } from "next";
+import { ArrowUpRight } from "lucide-react";
 import { MDXContent } from "@/app/components/mdx";
 import { RelatedPostCard } from "@/app/components/blog/RelatedPostCard";
 import { ImageLightbox } from "@/app/components/blog/ImageLightbox";
@@ -9,6 +10,7 @@ import { BlogArticleImage } from "@/app/components/blog/BlogArticleImage";
 import { BlogCodeWindow, BlogInlineCode } from "@/app/components/blog/BlogCode";
 import ArticleReactionWrapper from "@/app/components/ArticleReactionsWrapper";
 import { CtaSection } from "@/app/components/home/CtaSection";
+import { SectionHeading } from "@/app/components/home/SectionHeading";
 import { CopyUrlButton } from "@/app/components/blog/CopyUrlButton";
 import { TableOfContents } from "@/app/components/TableOfContents";
 import {
@@ -232,27 +234,31 @@ export default async function BlogPage({ params }: BlogPageProps) {
       <TableOfContents headings={post.headings} />
       <ImageLightbox />
 
-      {/* More posts — reference: mono label between hairline dividers + 3-col grid */}
+      {/* Curated recommendations retain their Admin-defined order. */}
       {similarPosts.length > 0 && (
-        <div className="relative py-10">
-          <p className="mb-6 text-center font-mono text-[10px] text-text-secondary uppercase tracking-widest">
-            More posts
-          </p>
-          <div aria-hidden="true" className="w-full border-t border-border-primary" />
-          <div className="px-2 py-4 sm:px-4">
-            <div className="mx-auto grid max-w-6xl grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-              {similarPosts.slice(0, 3).map((related) => (
-                <RelatedPostCard
-                  key={related.slug}
-                  slug={related.slug}
-                  title={related.title}
-                  summary={related.summary}
-                  imageName={related.imageName}
-                />
-              ))}
-            </div>
+        <section aria-labelledby="related-articles-heading" className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6">
+          <SectionHeading kicker="Continue exploring" headingId="related-articles-heading">
+            Related <span className="italic">articles</span>
+          </SectionHeading>
+          <div className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {similarPosts.map((related) => (
+              <RelatedPostCard
+                key={related.slug}
+                slug={related.slug}
+                title={related.title}
+                summary={related.summary}
+                imageName={related.imageName}
+              />
+            ))}
           </div>
-          <div aria-hidden="true" className="w-full border-t border-border-primary" />
+        </section>
+      )}
+      {similarPosts.length === 0 && (
+        <div className="mx-auto max-w-6xl px-4 py-14 text-center sm:px-6">
+          <p className="font-mono text-xs uppercase tracking-widest text-text-secondary">Keep exploring</p>
+          <Link href="/blog" className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full border border-border-primary px-5 text-sm font-medium text-text-primary transition-colors hover:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25">
+            Browse all articles <ArrowUpRight className="size-4" aria-hidden="true" />
+          </Link>
         </div>
       )}
 

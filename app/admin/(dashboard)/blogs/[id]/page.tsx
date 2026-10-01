@@ -5,12 +5,12 @@ import { notFound } from "next/navigation";
 export default async function EditBlogPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createSupabaseAdminClient();
-  const { data: blog, error } = await supabase
-    .from("blog_posts")
-    .select("*, blog_post_tags(tags(name))")
-    .eq("id", id)
-    .single();
+  const [{ data: blog, error }, { data: availablePosts, error: optionsError }] = await Promise.all([
+    supabase.from("blog_posts").select("*, blog_post_tags(tags(name))").eq("id", id).single(),
+    supabase.from("blog_posts").select("id, title, slug, status, published_at").order("title"),
+  ]);
 
+  if (optionsError) throw optionsError;
   if (error || !blog) {
     notFound();
   }
@@ -29,7 +29,7 @@ export default async function EditBlogPage({ params }: { params: Promise<{ id: s
       </div>
       
       <div className="min-w-0 rounded-xl border border-border-hairline bg-surface-raised p-6 shadow-sm">
-        <BlogForm initialData={{ ...blog, content: blog.content || "", tags }} />
+        <BlogForm initialData={{ ...blog, content: blog.content || "", tags }} availablePosts={availablePosts ?? []} />
       </div>
     </div>
   );

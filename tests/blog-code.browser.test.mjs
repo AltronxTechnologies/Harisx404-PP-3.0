@@ -49,7 +49,7 @@ test("Blog code can be copied by touch and long lines scroll inside the window",
     assert.equal(widths.scrollbarWidth, "thin");
     assert.notEqual(widths.scrollbarColor, "auto");
     assert.ok(widths.headerHeight <= 48 && widths.buttonHeight >= 32 && widths.buttonHeight < 36);
-    assert.equal(widths.codeSize, "13px");
+    assert.equal(widths.codeSize, "12.5px");
     assert.ok(widths.page <= widths.viewport + 1, "code must not widen the page");
 
     await page.evaluate(() => window.scrollTo(0, 600));
