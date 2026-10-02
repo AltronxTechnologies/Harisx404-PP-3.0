@@ -105,3 +105,11 @@ The article-image alt/caption quality and stale imported editorial references
 (including a removed newsletter in an older post) require owner review; do not
 invent descriptions or rewrite syndicated copy in a presentation pass. A formal
 new lock still requires the `AUDIT_TESTING.md` audit and owner approval.
+
+### Owner-directed article divider spacing
+
+The owner requested matching spacing around the article text. The gap from the
+metadata divider to the first text block and from the last text block to the
+divider before reactions is now 32px on both sides, at all tested responsive
+widths and in both themes. Only the article wrapper's bottom margin changed;
+the reactions section and both divider styles remain unchanged.

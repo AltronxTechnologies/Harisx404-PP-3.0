@@ -188,7 +188,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
       </div>
 
       {/* Article body — reference: prose prose-neutral, centered max-w-3xl */}
-      <div className="relative mt-8 mb-16 px-4 md:px-6">
+      <div className="relative mt-8 mb-8 px-4 md:px-6">
         <article
           id="blog-article"
           className="blog-article-shell prose prose-neutral dark:prose-invert mx-auto min-w-0 max-w-3xl break-words [&>*:first-child]:mt-0 [&>div>*:first-child]:mt-0"
