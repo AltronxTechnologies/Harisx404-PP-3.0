@@ -451,8 +451,8 @@ export default function ArticleReactions({
   };
 
   return (
-    <div className="mt-5" aria-busy={!isReady}>
-      <div className="-mx-2 grid grid-cols-4 overflow-hidden rounded-xl border border-border-primary bg-bg-primary sm:mx-0">
+    <div className="mt-4" aria-busy={!isReady}>
+      <div className="grid grid-cols-4 overflow-hidden rounded-xl border border-border-primary bg-bg-primary">
         {Object.entries(REACTION_EMOJIS).map(([type, emoji]) => {
           const count = reactions[type] || 0;
           const isActive = selectedReaction === type;
@@ -462,7 +462,7 @@ export default function ArticleReactions({
               key={type}
               onClick={() => handleReaction(type as ReactionType)}
               disabled={!isReady || isSubmitting !== null}
-              className={`relative flex min-h-[72px] min-w-0 flex-col items-center justify-center gap-1 border-r border-border-primary px-1 py-2 text-text-secondary transition-colors last:border-r-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-text-primary/70 sm:min-h-[56px] sm:flex-row sm:justify-start sm:gap-2 sm:px-3 ${
+              className={`relative flex min-h-[72px] min-w-0 flex-col items-center justify-center gap-1 border-r border-border-primary px-1 py-2 text-text-secondary transition-colors last:border-r-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-text-primary/70 md:min-h-[56px] md:flex-row md:justify-start md:gap-2 md:px-3 ${
                 isActive
                   ? "bg-neutral-100 text-text-primary dark:bg-white/[0.08]"
                   : "hover:bg-neutral-100/70 hover:text-text-primary dark:hover:bg-white/[0.05]"
@@ -478,8 +478,8 @@ export default function ArticleReactions({
                   emoji(isActive)
                 )}
               </span>
-              <span className="min-w-0 max-w-full truncate text-[11px] font-medium sm:text-sm">{REACTION_LABELS[type as ReactionType]}</span>
-              <span className="absolute right-1.5 top-1.5 whitespace-nowrap text-[10px] text-text-secondary sm:static sm:ml-auto sm:text-xs" aria-hidden="true">
+              <span className="min-w-0 max-w-full truncate text-[11px] font-medium md:text-sm">{REACTION_LABELS[type as ReactionType]}</span>
+              <span className="absolute right-1.5 top-1.5 whitespace-nowrap text-[10px] text-text-secondary md:static md:ml-auto md:text-xs" aria-hidden="true">
                 <AnimatedNumber number={count} reduceMotion={reduceMotion} />
               </span>
             </motion.button>

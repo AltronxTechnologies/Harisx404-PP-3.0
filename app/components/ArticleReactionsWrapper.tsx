@@ -13,7 +13,7 @@ export default async function ArticleReactionWrapper({
 
   if (!initialReactions) {
     return (
-      <p className="my-6 text-sm text-text-secondary" role="status">
+      <p className="mt-4 text-sm leading-6 text-text-secondary" role="status">
         Reactions are temporarily unavailable. The article is still ready to read.
       </p>
     );
