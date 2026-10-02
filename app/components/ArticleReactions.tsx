@@ -478,7 +478,7 @@ export default function ArticleReactions({
 
   return (
     <div className="mt-5" aria-busy={!isReady}>
-      <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
+      <div className="-mx-2 grid grid-cols-4 overflow-hidden rounded-xl border border-border-primary bg-bg-primary sm:mx-0">
         {Object.entries(REACTION_EMOJIS).map(([type, emoji]) => {
           const count = reactions[type] || 0;
           const isActive = userReactions.includes(type);
@@ -488,24 +488,24 @@ export default function ArticleReactions({
               key={type}
               onClick={() => handleReaction(type as ReactionType)}
               disabled={!isReady || isSubmitting !== null}
-              className={`flex min-h-12 min-w-0 items-center justify-center gap-1 rounded-xl border px-1 text-xs font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary sm:min-h-[56px] sm:justify-start sm:gap-2 sm:px-3 sm:text-sm ${
+              className={`relative flex min-h-[72px] min-w-0 flex-col items-center justify-center gap-1 border-r border-border-primary px-1 py-2 text-text-secondary transition-colors last:border-r-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-text-primary/70 sm:min-h-[56px] sm:flex-row sm:justify-start sm:gap-2 sm:px-3 ${
                 isActive
-                  ? "border-text-secondary bg-bg-primary text-text-primary"
-                  : "border-border-primary bg-bg-primary text-text-secondary hover:border-text-secondary hover:text-text-primary"
+                  ? "bg-neutral-100 text-text-primary dark:bg-white/[0.08]"
+                  : "hover:bg-neutral-100/70 hover:text-text-primary dark:hover:bg-white/[0.05]"
               }`}
               aria-label={`${isActive ? "Remove" : "Add"} ${type} reaction, ${count} ${count === 1 ? "reaction" : "reactions"}`}
               aria-pressed={isActive}
               title={REACTION_LABELS[type as ReactionType]}
             >
-              <span aria-hidden className="flex size-6 shrink-0 items-center justify-center sm:size-7">
+              <span aria-hidden className="flex size-6 shrink-0 items-center justify-center">
                 {reduceMotion ? (
                   <ReactionIcon type={type as ReactionType} active={isActive} />
                 ) : (
                   emoji(isActive)
                 )}
               </span>
-              <span className="hidden min-w-0 truncate sm:block">{REACTION_LABELS[type as ReactionType]}</span>
-              <span className="text-[10px] text-text-secondary sm:ml-auto sm:text-xs" aria-hidden="true">
+              <span className="min-w-0 max-w-full truncate text-[11px] font-medium sm:text-sm">{REACTION_LABELS[type as ReactionType]}</span>
+              <span className="absolute right-1.5 top-1.5 whitespace-nowrap text-[10px] text-text-secondary sm:static sm:ml-auto sm:text-xs" aria-hidden="true">
                 <AnimatedNumber number={count} reduceMotion={reduceMotion} />
               </span>
             </motion.button>

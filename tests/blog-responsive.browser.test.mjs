@@ -52,10 +52,17 @@ test("Blog article stays readable across both themes and responsive widths", asy
                  const heading = number?.parentElement;
                  return Boolean(number?.textContent.endsWith(".") && getComputedStyle(number).fontSize === getComputedStyle(heading).fontSize && getComputedStyle(number).color === getComputedStyle(heading).color);
                })(),
-                reactionButtonsFit: (() => {
-                  const buttons = [...document.querySelectorAll('[aria-labelledby="article-reactions-heading"] button')];
-                  return buttons.length === 4 && buttons.every((button) => button.scrollWidth <= button.clientWidth + 1 && Math.abs(button.getBoundingClientRect().top - buttons[0].getBoundingClientRect().top) < 1);
-                })(),
+                 reactionButtonsFit: (() => {
+                   const buttons = [...document.querySelectorAll('[aria-labelledby="article-reactions-heading"] button')];
+                   return buttons.length === 4 && buttons.every((button) => {
+                     const label = button.children[1];
+                     return button.scrollWidth <= button.clientWidth + 1
+                       && Math.abs(button.getBoundingClientRect().top - buttons[0].getBoundingClientRect().top) < 1
+                       && button.getBoundingClientRect().height >= 44
+                       && getComputedStyle(label).display !== "none"
+                       && label.getBoundingClientRect().width > 0;
+                   });
+                 })(),
                sideRails: (() => {
                  const frame = document.querySelector("#main-content").parentElement;
                  const columns = getComputedStyle(frame).gridTemplateColumns.split(" ").map(parseFloat);

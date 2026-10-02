@@ -943,3 +943,23 @@ browser QA; do not delete or reattribute the current development corpus.
   touch checks passed 10/10. TypeScript, focused ESLint, diff check and
   production build passed. The web container remains running. No content,
   related-post data or locked page was changed.
+
+## Continuation: Blog reaction bar (2026-10-01)
+
+- Replaced the article-only nested reaction card and four separate pills with
+  a quiet top rule and one segmented, four-column toolbar. On phones, every
+  reaction retains a visible name beneath its icon and its count in the upper
+  corner; from `sm`, icon, name and count align horizontally. A narrow phone
+  breakout provides enough room for long labels without shrinking them or
+  overflowing the article. Pressed state, accessible names/counts, optimistic
+  updates, error feedback and reduced-motion behavior remain unchanged.
+- Browser measurements at 320/360/390/768/1024/1440px in light and dark modes
+  found all four labelled actions in a single row, no clipped contents, at
+  least 44px hit height and no page overflow. Mobile/dark and desktop/light+
+  dark screenshots were reviewed; no live reactions were clicked or written.
+  Docker Blog and locked-page regressions passed (30 passed, one pre-existing
+  Project skip). TypeScript, focused ESLint, diff check and production build
+  passed. After restarting the web container, Blog HTTP and responsive smoke
+  checks passed 7/7; the preview remains running. Only the Blog article
+  reaction section, its existing component and scoped browser assertion were
+  changed.

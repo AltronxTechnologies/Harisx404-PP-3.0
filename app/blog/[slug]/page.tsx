@@ -217,18 +217,13 @@ export default async function BlogPage({ params }: BlogPageProps) {
 
       <section
         aria-labelledby="article-reactions-heading"
-        className="relative mx-auto mb-16 w-full max-w-3xl px-4 md:px-6"
+        className="relative mx-auto mb-16 w-full max-w-3xl border-t border-border-primary px-4 pt-8 md:px-6"
         style={{ maxWidth: "680px" }}
       >
-        <div className="rounded-2xl border border-border-primary p-4 sm:p-6" style={{ background: "color-mix(in srgb, var(--text-primary) 2%, var(--bg-primary))" }}>
-          <h2
-            id="article-reactions-heading"
-            className="text-lg font-semibold tracking-tight text-text-primary"
-          >
-            React to this article
-          </h2>
-          <ArticleReactionWrapper slug={post.slug} />
-        </div>
+        <h2 id="article-reactions-heading" className="text-lg font-medium tracking-tight text-text-primary">
+          React to this article
+        </h2>
+        <ArticleReactionWrapper slug={post.slug} />
       </section>
 
       <TableOfContents headings={post.headings} />
