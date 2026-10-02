@@ -1176,23 +1176,17 @@ blockquote p {
   position: relative;
 }
 
-/* Heading anchor `#` follows the title without changing its left alignment. */
+/* Heading text remains the permalink; the hash is a desktop-only affordance. */
 .blog-article-shell h2 .anchor,
 .blog-article-shell h3 .anchor,
 .blog-article-shell h4 .anchor,
 .blog-article-shell h5 .anchor,
 .blog-article-shell h6 .anchor {
-  display: inline-flex;
-  width: 24px;
-  height: 24px;
-  align-items: center;
-  justify-content: center;
-  vertical-align: middle;
-  opacity: 0;
-  color: var(--text-secondary);
-  font-weight: 400;
+  display: block;
+  min-height: 24px;
+  color: inherit;
+  font-weight: inherit;
   text-decoration: none;
-  transition: opacity 200ms ease;
 }
 
 .blog-article-shell h2 .anchor::after,
@@ -1201,24 +1195,26 @@ blockquote p {
 .blog-article-shell h5 .anchor::after,
 .blog-article-shell h6 .anchor::after {
   content: "#";
+  margin-left: 0.35em;
+  color: var(--text-secondary);
+  font-size: 1em;
+  font-weight: 400;
+  opacity: 0;
+  transition: opacity 200ms ease;
 }
 
-.blog-article-shell h2:hover .anchor,
-.blog-article-shell h3:hover .anchor,
-.blog-article-shell h4:hover .anchor,
-.blog-article-shell h5:hover .anchor,
-.blog-article-shell h6:hover .anchor,
-.blog-article-shell .anchor:focus {
+.blog-article-shell h2:hover .anchor::after,
+.blog-article-shell h3:hover .anchor::after,
+.blog-article-shell h4:hover .anchor::after,
+.blog-article-shell h5:hover .anchor::after,
+.blog-article-shell h6:hover .anchor::after,
+.blog-article-shell .anchor:focus-visible::after {
   opacity: 1;
 }
 
-@media (max-width: 639px) {
-  .blog-article-shell h2 .anchor,
-  .blog-article-shell h3 .anchor,
-  .blog-article-shell h4 .anchor,
-  .blog-article-shell h5 .anchor,
-  .blog-article-shell h6 .anchor {
-    opacity: 1;
+@media (max-width: 639px), (hover: none) {
+  .blog-article-shell .anchor::after {
+    display: none;
   }
 }
 

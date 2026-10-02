@@ -25,17 +25,15 @@ test("mobile article headings align with prose and trailing permalinks remain ta
         articleRight: article.right,
         headingLeft: link.closest("h2").getBoundingClientRect().left,
         proseLeft: document.querySelector("#blog-article p").getBoundingClientRect().left,
-        trailing: link.closest("h2").lastElementChild.contains(link),
-        opacity: getComputedStyle(link).opacity,
+        hashDisplay: getComputedStyle(link, "::after").display,
         hittable: link.contains(document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2)),
       };
     });
     assert.ok(geometry.width >= 24 && geometry.height >= 24, "permalink has a 24px target");
     assert.equal(geometry.headingLeft, geometry.proseLeft, "heading text aligns with article prose");
-    assert.equal(geometry.trailing, true, "permalink follows the heading content");
-    assert.ok(geometry.left > geometry.headingLeft && geometry.right <= geometry.articleRight, "permalink stays to the right of the title inside the article");
-    assert.equal(geometry.opacity, "1", "permalink is visible without hover on touch screens");
-    assert.equal(geometry.hittable, true, "permalink receives pointer hits");
+    assert.ok(geometry.left >= geometry.articleLeft && geometry.right <= geometry.articleRight, "linked heading stays inside the article");
+    assert.equal(geometry.hashDisplay, "none", "the hash is hidden on touch screens");
+    assert.equal(geometry.hittable, true, "the heading text receives pointer hits");
     const href = await anchor.getAttribute("href");
     assert.equal(href, `#${await heading.getAttribute("id")}`);
     await anchor.tap();
@@ -54,19 +52,27 @@ test("desktop headings align with prose and trailing permalinks have visible key
     await page.goto(`${baseUrl}/blog/the-hard-part-isnt-writing-tests-anymore`);
     const link = page.locator("#blog-article h2 a.anchor").first();
     await link.waitFor();
+    const hidden = await link.evaluate((anchor) => getComputedStyle(anchor, "::after").opacity);
+    assert.equal(hidden, "0");
+    await link.hover();
+    await page.waitForFunction(() => getComputedStyle(document.querySelector("#blog-article h2 a.anchor"), "::after").opacity === "1");
     await link.focus();
-    await page.waitForFunction(() => getComputedStyle(document.querySelector("#blog-article h2 a.anchor")).opacity === "1");
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Shift+Tab");
+    await page.mouse.move(0, 0);
+    await page.waitForFunction(() => getComputedStyle(document.querySelector("#blog-article h2 a.anchor"), "::after").opacity === "1");
     const geometry = await link.evaluate((anchor) => {
       const box = anchor.getBoundingClientRect();
       const article = document.querySelector("#blog-article").getBoundingClientRect();
       const heading = anchor.closest("h2");
-      return { left: box.left, right: box.right, articleLeft: article.left, articleRight: article.right, trailing: heading.lastElementChild.contains(anchor), headingLeft: heading.getBoundingClientRect().left, proseLeft: document.querySelector("#blog-article p").getBoundingClientRect().left, width: box.width, height: box.height, opacity: getComputedStyle(anchor).opacity };
+      return { left: box.left, right: box.right, articleLeft: article.left, articleRight: article.right, headingLeft: heading.getBoundingClientRect().left, proseLeft: document.querySelector("#blog-article p").getBoundingClientRect().left, width: box.width, height: box.height, hashSize: getComputedStyle(anchor, "::after").fontSize, headingSize: getComputedStyle(heading).fontSize, hashOpacity: getComputedStyle(anchor, "::after").opacity, focused: document.activeElement === anchor };
     });
     assert.equal(geometry.headingLeft, geometry.proseLeft);
-    assert.equal(geometry.trailing, true);
-    assert.ok(geometry.left > geometry.articleLeft && geometry.right <= geometry.articleRight);
+    assert.ok(geometry.left >= geometry.articleLeft && geometry.right <= geometry.articleRight);
     assert.ok(geometry.width >= 24 && geometry.height >= 24);
-    assert.equal(geometry.opacity, "1");
+    assert.equal(geometry.hashSize, geometry.headingSize);
+    assert.equal(geometry.hashOpacity, "1");
+    assert.equal(geometry.focused, true);
 
     await page.evaluate(() => {
       for (const level of [5, 6]) {
@@ -74,18 +80,18 @@ test("desktop headings align with prose and trailing permalinks have visible key
         const anchor = document.createElement("a");
         anchor.className = "anchor";
         anchor.href = `#deep-heading-${level}`;
+        anchor.textContent = `Deep heading ${level}`;
         heading.id = `deep-heading-${level}`;
-        heading.append(`Deep heading ${level}`, anchor);
+        heading.append(anchor);
         document.getElementById("blog-article").append(heading);
       }
     });
     for (const level of [5, 6]) {
       const deepLink = page.locator(`#deep-heading-${level} a.anchor`);
       await deepLink.focus();
-      await page.waitForFunction((selector) => getComputedStyle(document.querySelector(selector)).opacity === "1", `#deep-heading-${level} a.anchor`);
       const box = await deepLink.boundingBox();
       assert.ok(box.width >= 24 && box.height >= 24, `H${level} permalink has a usable target`);
-      assert.ok(box.x > geometry.articleLeft && box.x + box.width <= geometry.articleRight, `H${level} permalink follows the title inside the article`);
+      assert.ok(box.x >= geometry.articleLeft && box.x + box.width <= geometry.articleRight, `H${level} linked heading remains inside the article`);
     }
   } finally {
     await browser.close();

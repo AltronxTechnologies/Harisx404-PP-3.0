@@ -1166,3 +1166,18 @@ browser QA; do not delete or reattribute the current development corpus.
   passed. After restarting only web, Blog/TOC/responsive smoke checks passed
   17/17. Preview remains running. Owner/content and live-host deployment gates
   recorded above remain open.
+
+## Continuation: Heading link without a phone hash (2026-10-02)
+
+- Replaced the separate heading hash link with one native link wrapping each
+  H2-H6 title. The entire heading can be tapped or keyboard-activated to update
+  its original hash. The `#` is decorative and hidden on phone/touch screens;
+  on hover-capable screens it appears at the same type size on heading hover
+  or keyboard focus. Headings retain their left alignment with prose.
+- Browser review at 390px shows no visible hash, and tapping the heading
+  preserves navigation. The responsive/heading/TOC checks passed (14/14);
+  Docker TypeScript, focused ESLint and production build passed, followed by
+  17/17 post-build Blog/TOC/responsive checks. Preview remains running.
+- Image caption copy remains an editorial choice: existing title captions are
+  rendered, but many imported images have empty alt text or filename-like alt
+  text. No generic or invented descriptions were added to those articles.
