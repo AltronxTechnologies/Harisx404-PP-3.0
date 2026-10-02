@@ -15,7 +15,7 @@ test("Blog article stays readable across both themes and responsive widths", asy
         await page.goto(`${baseUrl}/blog/the-only-nextjs-favicon-guide-youll-need`, { waitUntil: "domcontentloaded" });
         await page.locator("#blog-article img").first().waitFor({ state: "visible" });
         await page.locator('#blog-article h2 > a.anchor > span[aria-hidden="true"]').first().waitFor({ state: "visible" });
-        for (const width of [320, 360, 390, 768, 1024, 1440]) {
+         for (const width of [320, 360, 375, 390, 768, 1024, 1440]) {
           await page.setViewportSize({ width, height: width === 320 ? 640 : 900 });
           const state = await page.evaluate(() => {
              const article = document.querySelector("#blog-article");
@@ -28,7 +28,14 @@ test("Blog article stays readable across both themes and responsive widths", asy
              const code = article.querySelector("pre");
              const copy = code?.parentElement?.querySelector('button[aria-label="Copy code"]');
              const codeWindow = article.querySelector(".blog-code-window");
-             const meta = document.querySelector(".blog-detail [class*='border-b']");
+              const meta = document.querySelector(".blog-detail [class*='border-b']");
+              const metaActions = meta.firstElementChild;
+              const metaDate = meta.querySelector("time");
+              const copyUrl = meta.querySelector('button');
+              const moreShare = meta.querySelector('button[aria-label="More share options"]');
+              const metaBox = meta.getBoundingClientRect();
+              const actionsBox = metaActions.getBoundingClientRect();
+              const dateBox = metaDate.getBoundingClientRect();
              const headingScale = [2, 3, 4, 5, 6].map((level) => {
                const heading = document.createElement(`h${level}`);
                heading.textContent = "Nested heading";
@@ -50,7 +57,18 @@ test("Blog article stays readable across both themes and responsive widths", asy
                heroGaps: [title.getBoundingClientRect().top - kicker.getBoundingClientRect().bottom, summary.getBoundingClientRect().top - title.getBoundingClientRect().bottom],
                heroKickerHeight: kicker.getBoundingClientRect().height,
                heroTopGap: kicker.getBoundingClientRect().top - document.querySelector("#main-content").getBoundingClientRect().top - parseFloat(getComputedStyle(document.querySelector("#main-content")).paddingTop),
-               heroToMetaGap: document.querySelector(".blog-detail time").closest(".relative.mt-14").getBoundingClientRect().top - hero.getBoundingClientRect().bottom,
+                heroToMetaGap: document.querySelector(".blog-detail time").closest(".relative.mt-14").getBoundingClientRect().top - hero.getBoundingClientRect().bottom,
+                metaLayout: {
+                  alignedWithArticle: Math.abs(metaBox.left - box.left) < 1 && Math.abs(metaBox.right - box.right) < 1,
+                  maxWidth: metaBox.width <= 680,
+                  noOverlap: dateBox.top >= actionsBox.bottom || actionsBox.right + 16 <= dateBox.left,
+                  dateContained: dateBox.right <= metaBox.right + 1,
+                  dateRightAligned: Math.abs(dateBox.right - metaBox.right) < 1,
+                  dateWrapped: dateBox.top >= actionsBox.bottom,
+                  type: [metaActions, metaDate, copyUrl].map((element) => [getComputedStyle(element).fontSize, getComputedStyle(element).fontWeight]),
+                  controls: [copyUrl, moreShare].map((element) => element.getBoundingClientRect().height),
+                  divider: [getComputedStyle(meta).borderBottomWidth, getComputedStyle(meta).borderBottomColor],
+                },
                heroRules: ["::before", "::after"].map((side) => getComputedStyle(hero.parentElement.parentElement, side).height),
                 heroBackground: (() => {
                   const background = hero.previousElementSibling;
@@ -100,7 +118,18 @@ test("Blog article stays readable across both themes and responsive widths", asy
            assert.deepEqual(state.heroGaps, [16, 16], `${width}px ${theme} hero rhythm`);
            assert.ok(state.heroKickerHeight >= 24, `${width}px ${theme} Blog link touch target`);
            assert.equal(state.heroTopGap, 56, `${width}px ${theme} locked page top spacing`);
-           assert.equal(state.heroToMetaGap, 56, `${width}px ${theme} hero to metadata spacing`);
+            assert.equal(state.heroToMetaGap, 56, `${width}px ${theme} hero to metadata spacing`);
+            assert.deepEqual(state.metaLayout, {
+              alignedWithArticle: true,
+              maxWidth: true,
+              noOverlap: true,
+              dateContained: true,
+              dateRightAligned: true,
+              dateWrapped: width < 390,
+              type: [["14px", "400"], ["14px", "400"], ["14px", "400"]],
+              controls: [24, 24],
+              divider: ["1px", theme === "dark" ? "rgba(255, 255, 255, 0.1)" : "rgb(214, 218, 222)"],
+            }, `${width}px ${theme} metadata alignment and divider`);
            assert.deepEqual(state.heroRules, ["1px", "1px"], `${width}px ${theme} shared hero frame`);
            assert.deepEqual(state.heroBackground, {
               masked: true,
