@@ -1014,3 +1014,19 @@ browser QA; do not delete or reattribute the current development corpus.
   build passed with existing non-fatal warnings. Restarted web preview passed
   the three-card/destination smoke check and remains running. Connected Admin
   write workflow and owner content-rights/host acceptance remain separate gates.
+
+## Continuation: Related-card reaction footer (2026-10-02)
+
+- Confirmed the section already uses the site's locked shared `SectionHeading`;
+  neither its typography nor the Blog index presentation was changed. The
+  related cards now reuse the index's `ReactionSummaryPill` and
+  `ArticleCardArrow`: count/icon pill left, Read article/arrow right. The
+  article fetches all three reaction summaries in one cached request and shows
+  the shared unavailable state if counts cannot be loaded. No reaction was
+  submitted during validation.
+- Browser checks at 320/390/768/1024/1440px in light and dark confirmed three
+  non-overlapping footers and no page overflow. Unit tests (3/3), scoped
+  TypeScript/ESLint, Blog/related/responsive/locked-surface regressions (11/11),
+  and the production build passed with existing non-fatal warnings. After
+  restarting only web, the three-pill preview smoke check passed; it remains
+  running.

@@ -1,19 +1,22 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
 import { optimizeImageUrl } from "@/app/lib/image-utils";
+import { ArticleCardArrow } from "./ArticleCardArrow";
+import { ReactionSummaryPill } from "./ReactionSummaryPill";
 import { getBlogImageSrc } from "./blogImage";
+import type { ReactionSummary } from "@/app/blog/data";
 
 interface RelatedPostCardProps {
   slug: string;
   title: string;
   summary: string;
   imageName?: string;
+  reactionSummary?: ReactionSummary;
 }
 
 /** Related-post card for the article's curated recommendations. */
-export function RelatedPostCard({ slug, title, summary, imageName }: RelatedPostCardProps) {
+export function RelatedPostCard({ slug, title, summary, imageName, reactionSummary }: RelatedPostCardProps) {
   const coverSrc = imageName
     ? getBlogImageSrc(optimizeImageUrl(
         imageName.startsWith("http") || imageName.startsWith("/") ? imageName : `/blog/${imageName}`,
@@ -24,6 +27,7 @@ export function RelatedPostCard({ slug, title, summary, imageName }: RelatedPost
   return (
     <Link
       href={`/blog/${slug}`}
+      aria-label={reactionSummary ? `Read ${title}. ${reactionSummary.total} reactions.` : `Read ${title}.`}
       className={`group flex h-full min-w-0 flex-col rounded-2xl border border-border-primary bg-white transition-colors hover:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:bg-white/[0.02] dark:hover:border-white/25 ${coverSrc ? "p-2" : "min-h-[220px]"}`}
     >
       {coverSrc && (
@@ -45,9 +49,12 @@ export function RelatedPostCard({ slug, title, summary, imageName }: RelatedPost
         </h3>
         {summary && <p className="line-clamp-3 text-sm leading-relaxed text-text-secondary">{summary}</p>}
 
-        <div className="mt-auto flex items-center justify-between gap-3 border-t border-border-primary pt-4 font-mono text-[11px] uppercase tracking-widest text-text-primary">
-          <span>Read article</span>
-          <ArrowUpRight aria-hidden="true" className="size-5 shrink-0" />
+        <div className="mt-auto flex min-h-7 items-center justify-between gap-2.5 border-t border-border-primary pt-4">
+          <ReactionSummaryPill summary={reactionSummary} />
+          <span className="inline-flex shrink-0 items-center gap-2 font-mono text-[11px] uppercase leading-none tracking-widest text-text-secondary transition-colors group-hover:text-text-primary">
+            <span>Read article</span>
+            <ArticleCardArrow />
+          </span>
         </div>
       </div>
     </Link>

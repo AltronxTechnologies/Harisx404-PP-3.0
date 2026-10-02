@@ -1,8 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createElement } from "react";
+import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { RelatedPostCard } from "../app/components/blog/RelatedPostCard";
+
+const { createElement } = React;
+(globalThis as typeof globalThis & { React: typeof React }).React = React;
 
 test("curated Blog cards have readable titles, a clear action, and no duplicate image label", () => {
   const html = renderToStaticMarkup(createElement(RelatedPostCard, {
@@ -10,12 +13,16 @@ test("curated Blog cards have readable titles, a clear action, and no duplicate 
     title: "A Related Article",
     summary: "Why this article is worth reading.",
     imageName: "/blog/related-cover.jpeg",
+    reactionSummary: { total: 3, counts: { like: 2, heart: 1, celebrate: 0, insightful: 0 } },
   }));
   assert.match(html, /href="\/blog\/a-related-article"/);
   assert.match(html, /<h3[^>]*>A Related Article<\/h3>/);
   assert.match(html, /Why this article is worth reading/);
   assert.match(html, /Read article/);
   assert.match(html, /alt=""/);
+  assert.match(html, /aria-label="Read A Related Article\. 3 reactions\."/);
+  assert.match(html, /3 reactions: 2 like, 1 heart/);
+  assert.match(html, /<span class="inline-flex h-7[^>]+role="img"/);
 });
 
 test("coverless recommendations show content instead of an empty image slot", () => {

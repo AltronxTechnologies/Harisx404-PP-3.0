@@ -19,7 +19,7 @@ import {
   formatDate,
 } from "@/app/lib/utils";
 import { optimizeImageUrl } from "@/app/lib/image-utils";
-import { fetchBlogIndexPosts, isLocalBlogDraft } from "@/app/blog/data";
+import { fetchBlogIndexPosts, fetchBlogReactionSummaries, isLocalBlogDraft } from "@/app/blog/data";
 import { getBlogImageSrc } from "@/app/components/blog/blogImage";
 import { formatReadingTime } from "@/app/lib/reading-time";
 import { siteMetadata } from "@/app/data/siteMetadata";
@@ -106,6 +106,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
   const similarPosts = (await getRelatedBlogPosts(post)).filter(
     (related) => !isLocalBlogDraft(related.slug),
   );
+  const relatedReactions = await fetchBlogReactionSummaries(similarPosts.map((related) => related.slug));
 
   const readingTime = post.readingTimeMinutes
     ? `${post.readingTimeMinutes} min read`
@@ -243,6 +244,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
                 title={related.title}
                 summary={related.summary}
                 imageName={related.imageName}
+                reactionSummary={relatedReactions[related.slug]}
               />
             ))}
           </div>
