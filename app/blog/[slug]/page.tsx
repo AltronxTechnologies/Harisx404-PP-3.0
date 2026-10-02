@@ -199,7 +199,6 @@ export default async function BlogPage({ params }: BlogPageProps) {
             className="cursor-help text-text-secondary"
             title={`Published ${formatDate(post.publishedAt)}`}
           >
-            <span className="hidden sm:inline">Published </span>
             <time dateTime={post.publishedAt}>{longDate(post.publishedAt)}</time>
           </span>
         </div>
