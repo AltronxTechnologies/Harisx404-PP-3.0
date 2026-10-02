@@ -1048,3 +1048,28 @@ browser QA; do not delete or reattribute the current development corpus.
   passed. After restarting web, responsive and metadata smoke checks passed
   4/4; the preview remains running. Broader security and deployment gates in
   `audit/27-blog-detail-verification.md` are still outstanding.
+
+## Continuation: Article frame and CTA handoff (2026-10-02)
+
+- Restored the shared global hatched side rails by removing only the Blog
+  detail-specific hiding rule. The article header now starts at the site's
+  56px page offset and uses `GridWrapper` for the shared top/bottom hairlines.
+  The kicker reads `Blog`, retains its accessible back link and focus state,
+  and changes color slightly on hover without an underline. Existing heading,
+  summary typography and 16px internal gaps remain untouched.
+- The summary-to-metadata gap now follows the site's 56px hero handoff; a date
+  that wraps on a narrow phone stays right-aligned. The cover mask fades sooner
+  so the summary stays legible in light mode behind the earlier-positioned
+  hero image. The shared `CtaSection` and root `Footer` were already used;
+  removing the article-only 80px bottom padding makes their handoff match the
+  locked Blog index and other public pages without editing those components.
+- Browser checks at 320/390/768/1440px in both themes confirmed visible rails,
+  1px hero rules, 56px top/hero gaps, zero page overflow, subtle no-underline
+  kicker hover and zero extra space between CTA and Footer. Two sampled cover
+  images' light-mode summary backgrounds measured at least 5.7:1 contrast;
+  coverless long titles also stayed in bounds. Docker TypeScript, targeted
+  ESLint, diff checks, Blog/TOC/locked-page regressions (36 passed, one existing
+  Project skip), and production build passed. After restarting only web, Blog,
+  responsive and TOC smoke checks passed 12/12; the preview remains running.
+  The separate security/content/host gates in
+  `audit/27-blog-detail-verification.md` are still unresolved.

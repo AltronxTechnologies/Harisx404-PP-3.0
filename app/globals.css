@@ -935,16 +935,6 @@ blockquote p {
   }
 }
 
-/* Blog article reference treatment. Scoped so locked pages keep their current presentation. */
-.grid:has(> #main-content > .blog-detail) {
-  grid-template-columns: 0 minmax(0, 1fr) 0;
-}
-
-.grid:has(> #main-content > .blog-detail) > div:first-child,
-.grid:has(> #main-content > .blog-detail) > div:last-child {
-  visibility: hidden;
-}
-
 .blog-article-shell :not(pre) > code {
   border-radius: 2px;
   background: #e5e5e5;

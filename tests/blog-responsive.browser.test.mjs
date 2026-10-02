@@ -48,6 +48,13 @@ test("Blog article stays readable across both themes and responsive widths", asy
                heroType: [kicker, title, summary].map((element) => [getComputedStyle(element).fontSize, getComputedStyle(element).fontWeight]),
                heroGaps: [title.getBoundingClientRect().top - kicker.getBoundingClientRect().bottom, summary.getBoundingClientRect().top - title.getBoundingClientRect().bottom],
                heroKickerHeight: kicker.getBoundingClientRect().height,
+               heroTopGap: kicker.getBoundingClientRect().top - document.querySelector("#main-content").getBoundingClientRect().top - parseFloat(getComputedStyle(document.querySelector("#main-content")).paddingTop),
+               heroToMetaGap: document.querySelector(".blog-detail time").closest(".relative.mt-14").getBoundingClientRect().top - hero.getBoundingClientRect().bottom,
+               heroRules: ["::before", "::after"].map((side) => getComputedStyle(hero.parentElement, side).height),
+               ctaFooterGap: (() => {
+                 const cta = [...document.querySelectorAll(".blog-detail section")].find((section) => section.textContent.includes("Available for opportunities"));
+                 return document.querySelector("footer").getBoundingClientRect().top - cta.getBoundingClientRect().bottom;
+               })(),
                heroTitleFits: title.getBoundingClientRect().left >= 0 && title.getBoundingClientRect().right <= innerWidth,
                failedImages: images.filter((image) => image.complete && image.naturalWidth === 0).length,
               codeMarkupValid: Boolean(code && code.parentElement?.tagName === "DIV" && code.querySelector("code") && !code.querySelector("div")),
@@ -82,6 +89,10 @@ test("Blog article stays readable across both themes and responsive widths", asy
            assert.deepEqual(state.heroType, [["12px", "500"], [width >= 768 ? "56px" : "46px", "500"], ["15px", "400"]], `${width}px ${theme} shared hero typography`);
            assert.deepEqual(state.heroGaps, [16, 16], `${width}px ${theme} hero rhythm`);
            assert.ok(state.heroKickerHeight >= 24, `${width}px ${theme} Blog link touch target`);
+           assert.equal(state.heroTopGap, 56, `${width}px ${theme} locked page top spacing`);
+           assert.equal(state.heroToMetaGap, 56, `${width}px ${theme} hero to metadata spacing`);
+           assert.deepEqual(state.heroRules, ["1px", "1px"], `${width}px ${theme} shared hero frame`);
+           assert.equal(state.ctaFooterGap, 0, `${width}px ${theme} CTA to Footer handoff`);
            assert.equal(state.heroTitleFits, true, `${width}px ${theme} article title fits`);
           assert.ok(state.scrollWidth <= state.width + 1, `${width}px ${theme} page overflow`);
           assert.ok(state.articleLeft >= 0 && state.articleRight <= state.width + 1, `${width}px ${theme} article bounds`);
@@ -94,7 +105,7 @@ test("Blog article stays readable across both themes and responsive widths", asy
            assert.deepEqual(state.headingScale, [[24, 500], [20, 500], [16, 500], [15, 500], [14, 500]], `${width}px ${theme} article heading scale`);
            assert.equal(state.numberedHeadingMatchesText, true, `${width}px ${theme} heading numbers match typography`);
            assert.equal(state.reactionButtonsFit, true, `${width}px ${theme} reactions fit in one row`);
-           assert.equal(state.sideRails, false, `${width}px ${theme} no hatched side rails`);
+           assert.equal(state.sideRails, true, `${width}px ${theme} shared hatched side rails`);
         }
       } finally {
         await context.close();

@@ -11,6 +11,7 @@ import { BlogCodeWindow, BlogInlineCode } from "@/app/components/blog/BlogCode";
 import ArticleReactionWrapper from "@/app/components/ArticleReactionsWrapper";
 import { CtaSection } from "@/app/components/home/CtaSection";
 import { SectionHeading } from "@/app/components/home/SectionHeading";
+import { GridWrapper } from "@/app/components/GridWrapper";
 import { CopyUrlButton } from "@/app/components/blog/CopyUrlButton";
 import { TableOfContents } from "@/app/components/TableOfContents";
 import {
@@ -115,7 +116,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
   const coverSrc = blogCoverSrc(post.imageName);
 
   return (
-    <div className="blog-detail relative min-w-0 pb-20">
+    <div className="blog-detail relative mt-14 min-w-0">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -137,9 +138,9 @@ export default async function BlogPage({ params }: BlogPageProps) {
           className="absolute inset-x-0 -top-16 z-0 h-80 w-full overflow-hidden bg-neutral-100/50 dark:bg-neutral-950/60 sm:-top-20"
           style={{
             maskImage:
-              "linear-gradient(rgb(0,0,0) 40%, rgba(0,0,0,0) 100%)",
+              "linear-gradient(rgb(0,0,0) 30%, rgba(0,0,0,0) 85%)",
             WebkitMaskImage:
-              "linear-gradient(rgb(0,0,0) 40%, rgba(0,0,0,0) 100%)",
+              "linear-gradient(rgb(0,0,0) 30%, rgba(0,0,0,0) 85%)",
           }}
         >
           <Image
@@ -153,27 +154,28 @@ export default async function BlogPage({ params }: BlogPageProps) {
         </div>
       )}
 
-      {/* Article header — reference: centered max-w-3xl, pt-56 total from top */}
-      <header className="relative mx-auto flex w-full max-w-3xl flex-col items-center px-4 pt-40 text-center sm:pt-36 md:px-6" style={{ maxWidth: "680px" }}>
-        <Link
-          href="/blog"
-          aria-label="Back to Blog"
-          className="inline-flex min-h-6 items-center font-mono text-xs font-medium uppercase tracking-widest text-text-primary transition-colors hover:underline hover:underline-offset-4 focus-visible:rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current"
-        >
-          The Blog
-        </Link>
-        <h1 className="heading-glow mx-auto mt-4 max-w-xl break-words text-balance font-display text-[46px] font-medium leading-none tracking-tight text-text-primary md:text-[56px] md:tracking-[-1.5px]">
-          {post.title}
-        </h1>
-        {post.summary && (
-          <p className="mx-auto mt-4 max-w-2xl text-pretty text-[15px] leading-6 text-text-secondary [overflow-wrap:anywhere]">
-            {post.summary}
-          </p>
-        )}
-      </header>
+      <GridWrapper>
+        <header className="relative mx-auto flex w-full max-w-3xl flex-col items-center px-4 text-center md:px-6" style={{ maxWidth: "680px" }}>
+          <Link
+            href="/blog"
+            aria-label="Back to Blog"
+            className="inline-flex min-h-6 items-center font-mono text-xs font-medium uppercase tracking-widest text-text-primary transition-colors hover:text-neutral-800 focus-visible:rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current dark:hover:text-neutral-200"
+          >
+            Blog
+          </Link>
+          <h1 className="heading-glow mx-auto mt-4 max-w-xl break-words text-balance font-display text-[46px] font-medium leading-none tracking-tight text-text-primary md:text-[56px] md:tracking-[-1.5px]">
+            {post.title}
+          </h1>
+          {post.summary && (
+            <p className="mx-auto mt-4 max-w-2xl text-pretty text-[15px] leading-6 text-text-secondary [overflow-wrap:anywhere]">
+              {post.summary}
+            </p>
+          )}
+        </header>
+      </GridWrapper>
 
       {/* Meta row — reading time + copy URL on the left, date on the right */}
-      <div className="relative mt-16 px-4 md:px-6">
+      <div className="relative mt-14 px-4 md:px-6">
         <div className="mx-auto flex w-full max-w-3xl flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-border-primary pb-4 text-text-secondary text-sm" style={{ maxWidth: "680px" }}>
           <div className="flex items-center gap-x-4 gap-y-2">
             <div className="flex items-center gap-1.5">
@@ -197,7 +199,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
             <CopyUrlButton />
           </div>
           <span
-            className="cursor-help text-text-secondary"
+            className="ml-auto cursor-help text-text-secondary"
             title={`Published ${formatDate(post.publishedAt)}`}
           >
             <time dateTime={post.publishedAt}>{longDate(post.publishedAt)}</time>
