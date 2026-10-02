@@ -69,6 +69,12 @@ test("Blog article stays readable across both themes and responsive widths", asy
                   controls: [copyUrl, moreShare].map((element) => element.getBoundingClientRect().height),
                   divider: [getComputedStyle(meta).borderBottomWidth, getComputedStyle(meta).borderBottomColor],
                 },
+                articleHandoff: {
+                  afterDivider: box.top - metaBox.bottom,
+                  firstBlockOffset: article.firstElementChild.getBoundingClientRect().top - box.top,
+                  beforeLastDivider: document.querySelector('[aria-labelledby="article-reactions-heading"]').getBoundingClientRect().top - box.bottom,
+                  paragraphType: [getComputedStyle(article.querySelector("p")).fontSize, getComputedStyle(article.querySelector("p")).lineHeight],
+                },
                heroRules: ["::before", "::after"].map((side) => getComputedStyle(hero.parentElement.parentElement, side).height),
                 heroBackground: (() => {
                   const background = hero.previousElementSibling;
@@ -130,6 +136,12 @@ test("Blog article stays readable across both themes and responsive widths", asy
               controls: [24, 24],
               divider: ["1px", theme === "dark" ? "rgba(255, 255, 255, 0.1)" : "rgb(214, 218, 222)"],
             }, `${width}px ${theme} metadata alignment and divider`);
+            assert.deepEqual(state.articleHandoff, {
+              afterDivider: 32,
+              firstBlockOffset: 0,
+              beforeLastDivider: 64,
+              paragraphType: ["16px", "28px"],
+            }, `${width}px ${theme} article start, reading type and final divider`);
            assert.deepEqual(state.heroRules, ["1px", "1px"], `${width}px ${theme} shared hero frame`);
            assert.deepEqual(state.heroBackground, {
               masked: true,

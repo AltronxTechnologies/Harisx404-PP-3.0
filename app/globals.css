@@ -1078,7 +1078,7 @@ blockquote p {
   font-family: var(--font-geist-mono), monospace;
   font-size: 11px;
   font-weight: 400;
-  color: #737373;
+  color: #525252;
 }
 
 .dark .blog-article-shell .th-badge {
@@ -1338,6 +1338,11 @@ blockquote p {
   border-radius: 0 12px 12px 0;
   background: color-mix(in srgb, var(--text-primary) 4%, var(--bg-primary));
   padding: 1rem 1.25rem;
+}
+
+.blog-article-shell blockquote:not([data-note-type]) p,
+.dark .blog-article-shell blockquote:not([data-note-type]) p {
+  color: inherit;
 }
 
 /* Horizontal rules */

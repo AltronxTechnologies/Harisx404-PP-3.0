@@ -50,10 +50,13 @@ test("Blog notes and quotes stay contained and readable in both themes", async (
         right: node.getBoundingClientRect().right,
         background: getComputedStyle(node).backgroundColor,
         border: getComputedStyle(node).borderLeftWidth,
+        textColor: getComputedStyle(node.querySelector("p")).color,
+        quoteColor: getComputedStyle(node).color,
       }));
       assert.ok(quoteStyle.left >= 0 && quoteStyle.right <= 1441, `${theme} ordinary quote stays contained`);
       assert.notEqual(quoteStyle.background, "rgba(0, 0, 0, 0)", `${theme} ordinary quote has a surface`);
       assert.equal(quoteStyle.border, "4px", `${theme} ordinary quote keeps its editorial rule`);
+      assert.equal(quoteStyle.textColor, quoteStyle.quoteColor, `${theme} quote text uses the intended foreground`);
       await context.close();
     }
   } finally {

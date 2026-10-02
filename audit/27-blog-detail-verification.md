@@ -78,3 +78,30 @@ The article presentation and shared dependencies remain protected by
 This verification does not certify pixel perfection on every device or real-host
 production readiness. Complete the remaining owner and connected-host gates
 before a public sign-off.
+
+## 2026-10-02 Article Body Review
+
+Scope: from the metadata divider through the divider before reactions. This is
+not a new lock or an editorial sign-off. Compared against the existing Blog and
+Project detail reading rhythm without changing their shared surfaces.
+
+- Measured at 320, 360, 375, 390, 768, 1024 and 1440px in both themes: 32px
+  from metadata divider to article, first paragraph flush with the article top,
+  16px/28px paragraph type, 680px maximum reading width, and 64px from article
+  bottom to the final divider. No horizontal page overflow in the tested article.
+- Corrected light-mode 11px table-header badge contrast by using `#525252` text
+  on the existing badge background. Ordinary blockquote paragraphs now inherit
+  their quote's intended foreground in both themes, leaving labeled notes
+  unchanged. Failed code copying now displays `Copy failed` as well as announcing
+  the error. No authored article text or images were modified.
+- Targeted Blog article/TOC/lightbox/callout/code/table/accessibility tests:
+  21/21 passed when run with the `.mjs` runner; five image tests passed with
+  `tsx`. TypeScript and targeted ESLint passed. Locked public-page regression
+  tests: 25 passed, one pre-existing Project skip. The desktop preview rendered
+  without console errors. A prior attempt to run a `.tsx` test with plain Node
+  failed solely because that runner does not support the file extension.
+
+The article-image alt/caption quality and stale imported editorial references
+(including a removed newsletter in an older post) require owner review; do not
+invent descriptions or rewrite syndicated copy in a presentation pass. A formal
+new lock still requires the `AUDIT_TESTING.md` audit and owner approval.

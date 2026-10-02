@@ -72,7 +72,7 @@ export function BlogCodeWindow({ children }: { children?: React.ReactNode }) {
             style={{ minHeight: "32px" }}
           >
             {copyStatus === "copied" ? <Check size={12} aria-hidden="true" /> : <Copy size={12} aria-hidden="true" />}
-            {copyStatus === "copied" ? "Copied" : "Copy"}
+            {copyStatus === "copied" ? "Copied" : copyStatus === "error" ? "Copy failed" : "Copy"}
           </button>
         </div>
       </div>

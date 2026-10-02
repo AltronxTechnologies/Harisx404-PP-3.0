@@ -60,3 +60,26 @@ test("Blog code can be copied by touch and long lines scroll inside the window",
     await browser.close();
   }
 });
+
+test("Blog code copy failure is visible as well as announced", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage();
+    await page.goto(`${baseUrl}/blog/the-only-nextjs-favicon-guide-youll-need`);
+    const copy = page.getByRole("button", { name: "Copy code" }).first();
+    await copy.waitFor();
+    await page.evaluate(() => {
+      Object.defineProperty(navigator.clipboard, "writeText", {
+        configurable: true,
+        value: async () => { throw new Error("Clipboard blocked"); },
+      });
+    });
+    await copy.click();
+    const failed = page.getByRole("button", { name: "Copy failed" }).first();
+    await failed.waitFor();
+    assert.equal(await failed.innerText(), "Copy failed");
+    await page.getByRole("status").getByText("Could not copy code").first().waitFor();
+  } finally {
+    await browser.close();
+  }
+});
