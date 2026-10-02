@@ -1136,3 +1136,18 @@ browser QA; do not delete or reattribute the current development corpus.
   passed. The preview remains running. Connected reaction mutation acceptance,
   owner content rights/alt review, authenticated Admin workflow and real-host
   QA remain separate gates, as detailed in `audit/27-blog-detail-verification.md`.
+
+## Continuation: Article heading alignment (2026-10-02)
+
+- Per the owner's correction, removed the added left padding from H2-H6 so
+  heading text starts on the same vertical line as article paragraphs. Their
+  24px `#` permalinks sit in the adjacent visible left gutter; touch, pointer,
+  focus, TOC hash and existing heading IDs remain intact. The article no longer
+  clips the gutter. A 320px sweep of all 53 syndicated articles caught two
+  fixed-width YouTube frames in one post; Blog-scoped iframe sizing now keeps
+  them in their original 16:9 aspect ratio inside the reading column.
+- Mobile/dark visual review, heading/TOC/browser/code and locked-page checks
+  passed (34 passed, one existing Project skip). All 53 syndicated posts fit
+  at 320px without article or document overflow. Docker TypeScript, focused
+  ESLint, diff check and production build passed; after restarting web, the
+  Blog/TOC/responsive smoke suite passed 16/16. Preview remains running.

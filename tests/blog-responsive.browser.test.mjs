@@ -42,7 +42,8 @@ test("Blog article stays readable across both themes and responsive widths", asy
               width: window.innerWidth,
               scrollWidth: document.documentElement.scrollWidth,
               articleLeft: box.left,
-              articleRight: box.right,
+               articleRight: box.right,
+               headingAligned: Math.abs(article.querySelector("h2").getBoundingClientRect().left - article.querySelector("p").getBoundingClientRect().left) < 1,
               bodyText: article.textContent.trim().length,
                theme: document.documentElement.classList.contains("dark") ? "dark" : "light",
                heroType: [kicker, title, summary].map((element) => [getComputedStyle(element).fontSize, getComputedStyle(element).fontWeight]),
@@ -110,7 +111,8 @@ test("Blog article stays readable across both themes and responsive widths", asy
            assert.equal(state.ctaFooterGap, 0, `${width}px ${theme} CTA to Footer handoff`);
            assert.equal(state.heroTitleFits, true, `${width}px ${theme} article title fits`);
           assert.ok(state.scrollWidth <= state.width + 1, `${width}px ${theme} page overflow`);
-          assert.ok(state.articleLeft >= 0 && state.articleRight <= state.width + 1, `${width}px ${theme} article bounds`);
+           assert.ok(state.articleLeft >= 0 && state.articleRight <= state.width + 1, `${width}px ${theme} article bounds`);
+           assert.equal(state.headingAligned, true, `${width}px ${theme} heading aligns with prose`);
           assert.ok(state.bodyText > 1000, `${width}px ${theme} article content`);
           assert.equal(state.failedImages, 0, `${width}px ${theme} broken images`);
           assert.equal(state.codeMarkupValid, true, `${width}px ${theme} valid fenced code structure`);
@@ -125,6 +127,31 @@ test("Blog article stays readable across both themes and responsive widths", asy
       } finally {
         await context.close();
       }
+    }
+  } finally {
+    await browser.close();
+  }
+});
+
+test("article video embeds fit the reading column without clipping", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage();
+    await page.goto(`${baseUrl}/blog/no-code-build-games-with-gamesalad`);
+    const embeds = page.locator("#blog-article iframe");
+    await embeds.first().waitFor();
+    for (const width of [320, 390, 768, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      const state = await embeds.evaluateAll((items) => {
+        const article = document.querySelector("#blog-article").getBoundingClientRect();
+        return items.map((item) => {
+          const box = item.getBoundingClientRect();
+          return { left: box.left, right: box.right, width: box.width, ratio: box.width / box.height, articleLeft: article.left, articleRight: article.right };
+        });
+      });
+      assert.equal(state.length, 2);
+      assert.ok(state.every((item) => item.left >= item.articleLeft && item.right <= item.articleRight + 1 && Math.abs(item.ratio - 16 / 9) < 0.01), `${width}px video embeds stay visible`);
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `${width}px page has no overflow`);
     }
   } finally {
     await browser.close();

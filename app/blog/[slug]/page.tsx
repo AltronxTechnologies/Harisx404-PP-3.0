@@ -191,7 +191,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
       <div className="relative mt-8 mb-16 px-4 md:px-6">
         <article
           id="blog-article"
-          className="blog-article-shell prose prose-neutral dark:prose-invert mx-auto min-w-0 max-w-3xl overflow-x-hidden break-words [&>*:first-child]:mt-0 [&>div>*:first-child]:mt-0"
+          className="blog-article-shell prose prose-neutral dark:prose-invert mx-auto min-w-0 max-w-3xl break-words [&>*:first-child]:mt-0 [&>div>*:first-child]:mt-0"
           style={{ maxWidth: "680px" }}
         >
           <MDXContent code={post.code} components={{ img: BlogArticleImage, Image: BlogArticleImage, pre: BlogCodeWindow, code: BlogInlineCode }} />

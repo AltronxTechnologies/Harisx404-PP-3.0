@@ -4,7 +4,7 @@ import { chromium } from "playwright";
 
 const baseUrl = process.env.BLOG_BASE_URL || "http://localhost:3000";
 
-test("mobile article heading permalinks remain visible and tappable inside the clipped article", async () => {
+test("mobile article headings align with prose while permalinks remain visible and tappable", async () => {
   const browser = await chromium.launch({ headless: true });
   try {
     const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
@@ -20,13 +20,17 @@ test("mobile article heading permalinks remain visible and tappable inside the c
         width: box.width,
         height: box.height,
         left: box.left,
+        right: box.right,
         articleLeft: article.left,
+        headingLeft: link.parentElement.getBoundingClientRect().left,
+        proseLeft: document.querySelector("#blog-article p").getBoundingClientRect().left,
         opacity: getComputedStyle(link).opacity,
         hittable: link.contains(document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2)),
       };
     });
     assert.ok(geometry.width >= 24 && geometry.height >= 24, "permalink has a 24px target");
-    assert.ok(geometry.left >= geometry.articleLeft, "permalink stays inside the clipped article");
+    assert.equal(geometry.headingLeft, geometry.proseLeft, "heading text aligns with article prose");
+    assert.ok(geometry.left >= 0 && geometry.right <= geometry.articleLeft, "permalink sits in the left gutter without leaving the viewport");
     assert.equal(geometry.opacity, "1", "permalink is visible without hover on touch screens");
     assert.equal(geometry.hittable, true, "permalink receives pointer hits");
     const href = await anchor.getAttribute("href");
@@ -40,7 +44,7 @@ test("mobile article heading permalinks remain visible and tappable inside the c
   }
 });
 
-test("desktop heading permalinks remain within the article and have visible keyboard focus", async () => {
+test("desktop headings align with prose and gutter permalinks have visible keyboard focus", async () => {
   const browser = await chromium.launch({ headless: true });
   try {
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
@@ -52,9 +56,10 @@ test("desktop heading permalinks remain within the article and have visible keyb
     const geometry = await link.evaluate((anchor) => {
       const box = anchor.getBoundingClientRect();
       const article = document.querySelector("#blog-article").getBoundingClientRect();
-      return { left: box.left, right: box.right, articleLeft: article.left, width: box.width, height: box.height, opacity: getComputedStyle(anchor).opacity };
+      return { left: box.left, right: box.right, articleLeft: article.left, headingLeft: anchor.parentElement.getBoundingClientRect().left, proseLeft: document.querySelector("#blog-article p").getBoundingClientRect().left, width: box.width, height: box.height, opacity: getComputedStyle(anchor).opacity };
     });
-    assert.ok(geometry.left >= geometry.articleLeft && geometry.right <= 1440);
+    assert.equal(geometry.headingLeft, geometry.proseLeft);
+    assert.ok(geometry.left >= 0 && geometry.right <= geometry.articleLeft);
     assert.ok(geometry.width >= 24 && geometry.height >= 24);
     assert.equal(geometry.opacity, "1");
 
@@ -75,7 +80,7 @@ test("desktop heading permalinks remain within the article and have visible keyb
       await page.waitForFunction((selector) => getComputedStyle(document.querySelector(selector)).opacity === "1", `#deep-heading-${level} a.anchor`);
       const box = await deepLink.boundingBox();
       assert.ok(box.width >= 24 && box.height >= 24, `H${level} permalink has a usable target`);
-      assert.ok(box.x >= geometry.articleLeft, `H${level} permalink remains within the article`);
+      assert.ok(box.x >= 0 && box.x + box.width <= geometry.articleLeft, `H${level} permalink remains in the visible gutter`);
     }
   } finally {
     await browser.close();

@@ -1174,7 +1174,6 @@ blockquote p {
 .blog-article-shell h6 {
   scroll-margin-top: 6rem;
   position: relative;
-  padding-left: 28px;
 }
 
 /* Heading anchor `#` reveal on hover */
@@ -1184,7 +1183,7 @@ blockquote p {
 .blog-article-shell h5 .anchor,
 .blog-article-shell h6 .anchor {
   position: absolute;
-  left: 0;
+  left: -24px;
   top: 50%;
   transform: translateY(-50%);
   display: flex;
@@ -1224,6 +1223,12 @@ blockquote p {
   .blog-article-shell h6 .anchor {
     opacity: 1;
   }
+}
+
+.blog-article-shell iframe {
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
 }
 
 /* Article links — blue accent, medium, no underline */
