@@ -27,6 +27,9 @@ test("Admin-selected related Blog cards follow section rhythm and responsive vis
             const kicker = section.querySelector("p");
             const heading = section.querySelector("h2");
             const grid = section.querySelector(".grid");
+            const ctaWrapper = section.nextElementSibling;
+            const cta = ctaWrapper.querySelector("section");
+            const ctaKicker = cta.querySelector("p");
             const cards = [...grid.children];
             const visible = cards.filter((card) => getComputedStyle(card).display !== "none");
             const bounds = (node) => node.getBoundingClientRect();
@@ -38,6 +41,12 @@ test("Admin-selected related Blog cards follow section rhythm and responsive vis
                 bounds(kicker).top - bounds(reactions).bottom,
                 bounds(heading).top - bounds(kicker).bottom,
                 bounds(grid).top - bounds(heading).bottom,
+              ],
+              ctaHandoff: [
+                bounds(section).bottom - bounds(grid).bottom,
+                bounds(ctaWrapper).top - bounds(section).bottom,
+                bounds(ctaKicker).top - bounds(grid).bottom,
+                bounds(document.querySelector("footer")).top - bounds(cta).bottom,
               ],
               kickerType: [getComputedStyle(kicker).fontSize, getComputedStyle(kicker).fontWeight, getComputedStyle(kicker).color],
               headingType: [getComputedStyle(heading).fontSize, getComputedStyle(heading).fontWeight, getComputedStyle(heading).fontFamily],
@@ -56,6 +65,7 @@ test("Admin-selected related Blog cards follow section rhythm and responsive vis
           assert.equal(state.theme, theme);
           assert.ok(state.overflow <= 1, `${theme} ${width}px page overflow`);
           assert.deepEqual(state.gaps, [112, 16, 56], `${theme} ${width}px section rhythm`);
+          assert.deepEqual(state.ctaHandoff, [64, 40, width >= 768 ? 136 : 128, 0], `${theme} ${width}px locked Project-detail CTA handoff`);
           assert.deepEqual(state.kickerType, ["12px", "500", theme === "dark" ? "rgb(161, 161, 161)" : "rgb(94, 95, 110)"], `${theme} ${width}px shared kicker`);
           assert.equal(state.headingType[0], width >= 768 ? "56px" : "46px");
           assert.equal(state.headingType[1], "500");
@@ -78,6 +88,32 @@ test("Admin-selected related Blog cards follow section rhythm and responsive vis
       } finally {
         await context.close();
       }
+    }
+  } finally {
+    await browser.close();
+  }
+});
+
+test("article without related selections retains its CTA fallback spacing", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage();
+    await page.goto(`${baseUrl}/blog/the-only-nextjs-favicon-guide-youll-need`);
+    const browse = page.getByRole("link", { name: "Browse all articles" });
+    await browse.waitFor();
+    assert.equal(await page.locator("#related-articles-heading").count(), 0);
+    for (const width of [320, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      const gap = await browse.evaluate((link) => {
+        const fallback = link.parentElement;
+        const wrapper = fallback.nextElementSibling;
+        const kicker = wrapper.querySelector("section p");
+        return {
+          wrapper: wrapper.getBoundingClientRect().top - fallback.getBoundingClientRect().bottom,
+          kicker: kicker.getBoundingClientRect().top - fallback.getBoundingClientRect().bottom,
+        };
+      });
+      assert.deepEqual(gap, { wrapper: 24, kicker: width >= 768 ? 56 : 48 });
     }
   } finally {
     await browser.close();
