@@ -93,45 +93,24 @@ export async function getArticleReactions(slug: string) {
   }
 }
 
-// Get user's reactions for an article from cookie
+// The marker, not the legacy presentation cookie, is the authoritative choice.
 export async function getUserReactions(slug: string) {
   const cookieStore = await cookies();
-  const reactionsJson = cookieStore.get(`article_reactions_${slug}`)?.value;
-  let legacyReactions: string[] = [];
-  if (reactionsJson) {
-    try {
-      legacyReactions = (JSON.parse(reactionsJson) as string[]).filter(
-        (reaction) => VALID_REACTIONS.includes(reaction as ReactionType),
-      );
-    } catch {
-      legacyReactions = [];
-    }
-  }
-
   const visitorId = cookieStore.get("visitor_id")?.value;
-  if (visitorId && process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    try {
-      const supabase = await createSupabaseAdminClient();
-      const { data, error } = await supabase
-        .from("article_reaction_visitors")
-        .select("reaction_type")
-        .eq("article_slug", slug)
-        .eq("visitor_id", visitorId);
-      if (!error) {
-        const storedReactions = data?.map((row) => row.reaction_type) || [];
-        return storedReactions;
-      }
-      console.error("Error fetching optional visitor reactions:", error);
-    } catch (error) {
-      console.error("Error fetching optional visitor reactions:", error);
-      // Fall through to the legacy cookie until the migration is applied.
-    }
-  }
-
-  return legacyReactions;
+  if (!visitorId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(visitorId)) return [];
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) throw new Error("Reactions unavailable");
+  const supabase = await createSupabaseAdminClient();
+  const { data, error } = await supabase
+    .from("article_reaction_visitors")
+    .select("reaction_type")
+    .eq("article_slug", slug)
+    .eq("visitor_id", visitorId)
+    .maybeSingle();
+  if (error) throw new Error("Unable to load visitor reaction");
+  return data ? [data.reaction_type] : [];
 }
 
-// Toggle reaction (add or remove)
+// Toggle the selected reaction, or switch to a different one.
 export async function toggleReaction(slug: string, reactionType: ReactionType) {
   const cookieStore = await cookies();
   
@@ -146,40 +125,16 @@ export async function toggleReaction(slug: string, reactionType: ReactionType) {
       };
     }
     const supabase = await createSupabaseAdminClient();
-    let visitorId = cookieStore.get('visitor_id')?.value;
-    if (!visitorId) {
+    let visitorId = cookieStore.get("visitor_id")?.value;
+    if (!visitorId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(visitorId)) {
       visitorId = uuidv4();
-      cookieStore.set('visitor_id', visitorId, { 
+      cookieStore.set("visitor_id", visitorId, {
         expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
-        path: '/',
+        path: "/",
         httpOnly: true,
-        sameSite: 'strict'
+        sameSite: "strict",
       });
     }
-    
-    // Get user's current reactions for this article
-    const cookieKey = `article_reactions_${slug}`;
-    const existingReactionsJson = cookieStore.get(cookieKey)?.value;
-    let userReactions: string[] = [];
-    
-    if (existingReactionsJson) {
-      try {
-        userReactions = JSON.parse(existingReactionsJson);
-      } catch {
-        userReactions = [];
-      }
-    }
-
-    const { data: existingVisitorReaction, error: visitorReactionError } =
-      await supabase
-        .from("article_reaction_visitors")
-        .select("reaction_type")
-        .eq("article_slug", slug)
-        .eq("reaction_type", reactionType)
-        .eq("visitor_id", visitorId)
-        .maybeSingle();
-    if (visitorReactionError) throw visitorReactionError;
-    const hasReacted = Boolean(existingVisitorReaction);
 
     const headerStore = await headers();
     const requestSignal =
@@ -195,57 +150,59 @@ export async function toggleReaction(slug: string, reactionType: ReactionType) {
       .update(`${process.env.SUPABASE_SERVICE_ROLE_KEY}:${scopedSignal}`)
       .digest("hex");
     
-    const { data: adjustedCount, error: reactionError } = await supabase.rpc(
-      "adjust_article_reaction",
+    const { data, error: reactionError } = await supabase.rpc(
+      "toggle_article_reaction",
       {
         target_slug: slug,
         target_type: reactionType,
         target_visitor: visitorId,
         target_signal_hash: signalHash,
-        should_add: !hasReacted,
       },
     );
     if (reactionError) throw reactionError;
-
-    const { data: storedReactions, error: storedReactionsError } = await supabase
-      .from("article_reaction_visitors")
-      .select("reaction_type")
-      .eq("article_slug", slug)
-      .eq("visitor_id", visitorId);
-    userReactions = storedReactionsError
-      ? hasReacted
-        ? userReactions.filter((reaction) => reaction !== reactionType)
-        : Array.from(new Set([...userReactions, reactionType]))
-      : storedReactions?.map((row) => row.reaction_type) || [];
+    const result = data as {
+      reaction: ReactionType | null;
+      counts: Record<ReactionType, number>;
+    } | null;
+    if (
+      !result || !result.counts ||
+      !VALID_REACTIONS.every((type) =>
+        Number.isInteger(result.counts[type]) && result.counts[type] >= 0,
+      ) ||
+      (result.reaction !== null && !VALID_REACTIONS.includes(result.reaction))
+    ) {
+      throw new Error("Invalid reaction response");
+    }
     
-    // Update cookie with new reactions
     try {
       revalidateTag("blog-reactions");
-    } catch (cacheError) {
-      console.warn("Reaction saved, but card summaries may refresh later.", cacheError);
+    } catch {
+      console.warn("Reaction saved, but card summaries may refresh later.");
     }
     try {
-      cookieStore.set(cookieKey, JSON.stringify(userReactions), {
-        expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-        path: "/",
-        httpOnly: true,
-        sameSite: "lax",
-      });
+      cookieStore.set(
+        `article_reactions_${slug}`,
+        JSON.stringify(result.reaction ? [result.reaction] : []),
+        {
+          expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          path: "/",
+          httpOnly: true,
+          sameSite: "lax",
+        },
+      );
+    } catch {
+      console.warn("Reaction saved, but local cookie could not be refreshed.");
+    }
+    try {
       revalidatePath(`/blog/${slug}`);
       revalidatePath("/blog");
-    } catch (postCommitError) {
-      console.warn("Reaction saved, but local state could not be refreshed.", postCommitError);
+    } catch {
+      console.warn("Reaction saved, but local state could not be refreshed.");
     }
     
-    return { 
-      success: true, 
-      added: !hasReacted, 
-      removed: hasReacted,
-      userReactions,
-      count: Number(adjustedCount) || 0,
-    };
+    return { success: true, reaction: result.reaction, counts: result.counts };
   } catch (error) {
-    console.error('Error toggling reaction:', error);
+    console.error("Error toggling reaction.");
     const errorMessage =
       error && typeof error === "object" && "message" in error
         ? String(error.message)

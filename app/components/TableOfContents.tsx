@@ -14,7 +14,7 @@ const depthStyles: Record<TocHeading["level"], string> = {
   5: "pl-[86px] text-xs",
   6: "pl-[100px] text-xs",
 };
-type DragStart = { x: number; y: number; scrollingList: boolean };
+type DragStart = { x: number; y: number; listScrollTop: number; fromList: boolean };
 
 function useReadingProgress() {
   const [progress, setProgress] = useState(0);
@@ -98,15 +98,14 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
 
   useEffect(() => {
     if (!open) return;
-    const startAt = (target: EventTarget | null, x: number, y: number): DragStart => ({
-      x,
-      y,
-      scrollingList: !!listRef.current?.contains(target as Node) && listRef.current.scrollTop > 0,
-    });
+    const startAt = (target: EventTarget | null, x: number, y: number): DragStart => {
+      const fromList = !!listRef.current?.contains(target as Node);
+      return { x, y, fromList, listScrollTop: fromList ? listRef.current?.scrollTop ?? 0 : 0 };
+    };
     const pulledDown = (start: DragStart | null, x: number, y: number) => {
-      if (!start || start.scrollingList) return false;
+      if (!start || (start.fromList && (listRef.current?.scrollTop ?? 0) > 0)) return false;
       const distance = y - start.y;
-      return distance > 70 && Math.abs(x - start.x) < distance;
+      return distance > start.listScrollTop + 70 && Math.abs(x - start.x) < distance;
     };
     const onPointerDown = (event: PointerEvent) => {
       if (!navRef.current?.contains(event.target as Node)) {
@@ -187,12 +186,12 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
       }`}
     >
       <div
-        className={`relative overflow-hidden bg-white/95 text-neutral-900 shadow-[0_0_0_0.8px_rgba(0,0,0,0.06),0_4px_12px_-4px_rgba(0,0,0,0.06),inset_0_0.5px_0.5px_0.5px_rgba(255,255,255,0.6)] backdrop-blur-[12px] transition-[width,height,border-radius] duration-300 ease-out motion-reduce:transition-none dark:bg-neutral-800/95 dark:text-white dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),inset_0_0_0_1px_rgba(255,255,255,0.06)] ${
+        className={`relative overflow-hidden bg-white/95 text-neutral-900 shadow-[0_0_0_0.8px_rgba(0,0,0,0.06),0_4px_12px_-4px_rgba(0,0,0,0.06),inset_0_0.5px_0.5px_0.5px_rgba(255,255,255,0.6)] backdrop-blur-[12px] transition-[width,height,border-radius] duration-300 ease-out motion-reduce:transition-none dark:bg-neutral-800/95 dark:text-white dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),inset_0_0_0_1px_rgba(255,255,255,0.06)] ${styles.panel} ${
           open
             ? "w-[min(360px,calc(100vw-2rem))] rounded-2xl"
             : "h-[52px] w-[min(280px,calc(100vw-2rem))] rounded-[26px]"
         }`}
-        style={{ height: open ? `min(72vh, ${Math.min(560, 80 + headings.length * 48)}px)` : undefined }}
+        style={{ height: open ? `min(var(--toc-max-height), ${Math.min(560, 80 + headings.length * 48)}px)` : undefined }}
       >
         {!open ? (
           <button
@@ -231,6 +230,7 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
           </button>
         ) : (
           <div className="absolute inset-0 flex flex-col">
+            <span aria-hidden="true" className="absolute left-1/2 top-2 h-1 w-8 -translate-x-1/2 touch-none rounded-full bg-neutral-400/70 dark:bg-white/35 sm:hidden" />
             <div className="flex shrink-0 items-center justify-between border-b border-neutral-900/[0.08] px-5 pb-3 pt-4 dark:border-white/[0.08]">
               <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-current/80">
                 Table of contents

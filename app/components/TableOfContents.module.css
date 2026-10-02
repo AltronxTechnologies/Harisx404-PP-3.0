@@ -1,10 +1,24 @@
 .dock {
   bottom: 92px;
+  --toc-max-height: min(50dvh, 390px);
+}
+
+.dock[data-open="true"] .panel {
+  border: 1px solid #d6dade;
+  background-color: #fff;
+  box-shadow: 0 20px 48px -18px rgb(15 23 42 / 0.28), 0 2px 8px rgb(15 23 42 / 0.06);
+}
+
+:global(.dark) .dock[data-open="true"] .panel {
+  border-color: rgb(255 255 255 / 0.14);
+  background-color: #242427;
+  box-shadow: 0 22px 52px -18px rgb(0 0 0 / 0.55);
 }
 
 @media (min-width: 640px) {
   .dock {
     bottom: 30px;
+    --toc-max-height: min(72vh, 560px);
   }
 }
 

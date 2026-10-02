@@ -963,3 +963,32 @@ browser QA; do not delete or reattribute the current development corpus.
   checks passed 7/7; the preview remains running. Only the Blog article
   reaction section, its existing component and scoped browser assertion were
   changed.
+
+## Continuation: Single-choice reactions and compact TOC (2026-10-02)
+
+- Prepared `migrations/2026_article_reactions_single_choice.sql` to retain the
+  newest choice per visitor/article, subtract only known duplicate markers from
+  existing aggregate totals, and enforce one marker with a unique index. Its
+  atomic service-role RPC switches, removes or adds a choice, returns all four
+  counts, and retains rate limits. The old RPC signature delegates safely while
+  older application instances are replaced. The article client uses the stored
+  marker as its choice and restores both choice and counts after a failed save;
+  a failed choice lookup disables controls rather than guessing from old cookies.
+- The open TOC has an opaque bordered surface in both themes and a mobile height
+  ceiling of half the viewport (390px maximum). The mobile drag handle and
+  native touch detection let readers dismiss it by pulling down, including
+  after reaching the top of a scrolled outline. Article copy and anchors,
+  imported content, the Blog index, and protected pages were not modified.
+- Verification: the migration ran twice in a fresh disposable PostgreSQL 16
+  database, and the SQL test passed deduplication, aggregate preservation,
+  switching/removal, legacy RPC, grants and rate limits. A browser test blocked
+  the reaction server action before any database write and confirmed rollback
+  and retry. Focused Blog/TOC/responsive and locked-page regressions passed
+  39/40 (one pre-existing Project skip); TypeScript, focused ESLint, diff check,
+  and production build passed. After restarting only the web preview, Blog HTTP
+  and reaction/TOC browser smoke checks passed 13/13; the preview remains up.
+- **Connected rollout gate:** the new RPC is not in connected Supabase. Apply
+  and verify this migration **before** deploying the updated server action, and
+  arrange owner-approved production validation of a choice, switch, removal,
+  and counts. No connected reaction rows were written during this work. The
+  separate curated-related-post migration and final-content/host gates remain.

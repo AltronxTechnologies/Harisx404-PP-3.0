@@ -92,6 +92,7 @@ test("nested H2-H4 headings identify the reader's section on touch devices", asy
     const toc = page.locator('nav[aria-label="Table of contents"]');
     await page.waitForFunction(() => document.querySelector('nav[aria-label="Table of contents"]')?.getAttribute("aria-hidden") === "false");
     await toc.locator("button").first().tap();
+    await page.waitForTimeout(350);
     const levels = await toc.evaluate((nav) => {
       const buttons = [...nav.querySelectorAll("button")];
       const byTitle = (name) => buttons.find((button) => button.textContent.includes(name));
@@ -100,6 +101,7 @@ test("nested H2-H4 headings identify the reader's section on touch devices", asy
         sizes: ["What is SwiftUI?", "Views", "HStack"].map((name) => getComputedStyle(byTitle(name)).fontSize),
         numberSizes: ["What is SwiftUI?", "Views"].map((name) => getComputedStyle(byTitle(name).querySelector("span.font-mono")).fontSize),
         active: byTitle("HStack")?.getAttribute("aria-current"),
+        panelHeight: nav.getBoundingClientRect().height,
         scrollbar: getComputedStyle(list).scrollbarWidth,
         overflow: list.scrollHeight > list.clientHeight,
         documentWidth: document.documentElement.scrollWidth,
@@ -108,6 +110,7 @@ test("nested H2-H4 headings identify the reader's section on touch devices", asy
     assert.deepEqual(levels.sizes, ["14px", "13px", "12px"]);
     assert.deepEqual(levels.numberSizes, ["14px", "13px"]);
     assert.equal(levels.active, "location");
+    assert.ok(levels.panelHeight > 250 && levels.panelHeight <= 390, "mobile TOC should occupy at most half the viewport");
     assert.equal(levels.scrollbar, "thin");
     assert.equal(levels.overflow, true);
     assert.ok(levels.documentWidth <= 390);
@@ -137,6 +140,7 @@ test("light-mode TOC keeps a clear active entry and hover feedback", async () =>
     await toc.locator("button").first().click();
     const active = toc.locator('button[aria-current="location"]');
     assert.equal(await active.count(), 1);
+    assert.equal(await toc.evaluate((nav) => getComputedStyle(nav.firstElementChild).backgroundColor), "rgb(255, 255, 255)");
     const other = toc.getByRole("button", { name: "The skill that actually matters" });
     const before = await other.evaluate((button) => getComputedStyle(button).backgroundColor);
     await other.hover();
@@ -159,6 +163,7 @@ test("light-mode TOC keeps a clear active entry and hover feedback", async () =>
     await page.getByRole("button", { name: "Switch to dark mode" }).click();
     await page.waitForFunction(() => document.documentElement.classList.contains("dark"));
     await toc.locator("button").first().click();
+    assert.equal(await toc.evaluate((nav) => getComputedStyle(nav.firstElementChild).backgroundColor), "rgb(36, 36, 39)");
     await page.mouse.move(10, 10);
     const darkBefore = await other.evaluate((button) => getComputedStyle(button).backgroundColor);
     await other.hover();
@@ -196,13 +201,15 @@ test("long TOC outlines expose a styled internal scrollbar without dismissing on
       document.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, pointerType: "touch", clientX: box.x + 30, clientY: box.y + 120 }));
     });
     assert.equal(await toc.getAttribute("data-open"), "true", "dragging a scrolled outline must not dismiss it");
-    await toc.evaluate((nav) => {
-      const list = nav.querySelector(".overflow-y-auto");
-      list.scrollTop = 0;
-      const box = list.getBoundingClientRect();
-      list.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, pointerType: "touch", clientX: box.x + 30, clientY: box.y + 30 }));
-      document.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, pointerType: "touch", clientX: box.x + 30, clientY: box.y + 120 }));
-    });
+    const box = await toc.locator(".overflow-y-auto").boundingBox();
+    const x = box.x + 30;
+    const y = box.y + 30;
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
+    for (const offset of [40, 80, 120, 160, 200, 240, 280]) {
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x, y: y + offset }] });
+    }
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
     await page.waitForFunction(() => document.querySelector('nav[aria-label="Table of contents"]')?.getAttribute("data-open") === "false");
   } finally {
     await browser.close();

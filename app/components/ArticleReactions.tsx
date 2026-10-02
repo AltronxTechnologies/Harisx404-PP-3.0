@@ -1,7 +1,7 @@
 // components/article-reactions.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getUserReactions, toggleReaction } from "../db/actions";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { ReactionIcon } from "./ReactionIcon";
@@ -378,27 +378,33 @@ export default function ArticleReactions({
 }: ArticleReactionsProps) {
   const [reactions, setReactions] =
     useState<Record<string, number>>(initialReactions);
-  const [userReactions, setUserReactions] = useState<string[]>([]);
+  const [selectedReaction, setSelectedReaction] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState<ReactionType | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const currentSlug = useRef(slug);
   const reduceMotion = useReducedMotion() ?? false;
 
   useEffect(() => {
     let active = true;
+    currentSlug.current = slug;
     setIsReady(false);
+    setIsSubmitting(null);
+    setReactions(initialReactions);
+    setSelectedReaction(null);
+    setErrorMessage("");
     getUserReactions(slug)
       .then((current) => {
-        if (active) setUserReactions(current);
+        if (active) {
+          setSelectedReaction(current[0] ?? null);
+          setIsReady(true);
+        }
       })
       .catch(() => {
         if (active) setErrorMessage("Your previous reactions could not be loaded. Try reloading this page.");
-      })
-      .finally(() => {
-        if (active) setIsReady(true);
       });
     return () => { active = false; };
-  }, [slug]);
+  }, [slug, initialReactions]);
 
   const handleReaction = async (type: ReactionType) => {
     // Prevent multiple clicks
@@ -407,72 +413,40 @@ export default function ArticleReactions({
     setIsSubmitting(type);
     setErrorMessage("");
 
+    const previousReaction = selectedReaction;
+    const previousCounts = reactions;
+    const nextReaction = previousReaction === type ? null : type;
+    setSelectedReaction(nextReaction);
+    setReactions((prev) => ({
+      ...prev,
+      ...(previousReaction ? { [previousReaction]: Math.max(0, (prev[previousReaction] || 0) - 1) } : {}),
+      ...(nextReaction ? { [nextReaction]: (prev[nextReaction] || 0) + 1 } : {}),
+    }));
+
     try {
-      // Optimistic UI update
-      const hasReacted = userReactions.includes(type);
-
-      // Update local state optimistically
-      if (hasReacted) {
-        setUserReactions((prev) => prev.filter((r) => r !== type));
-        setReactions((prev) => ({
-          ...prev,
-          [type]: Math.max(0, (prev[type] || 0) - 1),
-        }));
-      } else {
-        setUserReactions((prev) => [...prev, type]);
-        setReactions((prev) => ({ ...prev, [type]: (prev[type] || 0) + 1 }));
-      }
-
-      // Call server action
       const result = await toggleReaction(slug, type);
-
-      // If server action successful, update with server data
-      if (result.success && result.userReactions) {
-        setReactions((prev) => ({
-          ...prev,
-          [type]: result.count,
-        }));
-        setUserReactions(result.userReactions);
+      if (currentSlug.current !== slug) return;
+      if (result.success && "counts" in result && result.counts) {
+        setReactions(result.counts);
+        setSelectedReaction(result.reaction);
       } else {
-        // If there was an error, revert optimistic update
         const message =
           "message" in result
             ? result.message
             : "We couldn't save your reaction. Please try again.";
-        console.error("Error toggling reaction", message);
         setErrorMessage(
           message || "We couldn't save your reaction. Please try again.",
         );
-
-        // Revert optimistic update
-        if (hasReacted) {
-          setUserReactions((prev) => [...prev, type]);
-          setReactions((prev) => ({ ...prev, [type]: (prev[type] || 0) + 1 }));
-        } else {
-          setUserReactions((prev) => prev.filter((r) => r !== type));
-          setReactions((prev) => ({
-            ...prev,
-            [type]: Math.max(0, (prev[type] || 0) - 1),
-          }));
-        }
+        setSelectedReaction(previousReaction);
+        setReactions(previousCounts);
       }
-    } catch (error) {
-      console.error("Error handling reaction:", error);
+    } catch {
+      if (currentSlug.current !== slug) return;
       setErrorMessage("We couldn't save your reaction. Please try again.");
-      const hadReaction = userReactions.includes(type);
-      setUserReactions((prev) =>
-        hadReaction
-          ? Array.from(new Set([...prev, type]))
-          : prev.filter((reaction) => reaction !== type),
-      );
-      setReactions((prev) => ({
-        ...prev,
-        [type]: hadReaction
-          ? (prev[type] || 0) + 1
-          : Math.max(0, (prev[type] || 0) - 1),
-      }));
+      setSelectedReaction(previousReaction);
+      setReactions(previousCounts);
     } finally {
-      setIsSubmitting(null);
+      if (currentSlug.current === slug) setIsSubmitting(null);
     }
   };
 
@@ -481,7 +455,7 @@ export default function ArticleReactions({
       <div className="-mx-2 grid grid-cols-4 overflow-hidden rounded-xl border border-border-primary bg-bg-primary sm:mx-0">
         {Object.entries(REACTION_EMOJIS).map(([type, emoji]) => {
           const count = reactions[type] || 0;
-          const isActive = userReactions.includes(type);
+          const isActive = selectedReaction === type;
 
           return (
             <motion.button
