@@ -234,7 +234,8 @@ export default async function BlogPage({ params }: BlogPageProps) {
       {similarPosts.length > 0 && (
         <section aria-labelledby="related-articles-heading" className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6">
           <SectionHeading kicker="Continue exploring" headingId="related-articles-heading">
-            Related <span className="italic">articles</span>
+            Related{" "}
+            <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">articles</span>
           </SectionHeading>
           <div className="mt-14 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {similarPosts.map((related) => (
