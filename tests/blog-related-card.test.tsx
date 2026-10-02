@@ -17,3 +17,25 @@ test("curated Blog cards have readable titles, a clear action, and no duplicate 
   assert.match(html, /Read article/);
   assert.match(html, /alt=""/);
 });
+
+test("coverless recommendations show content instead of an empty image slot", () => {
+  const html = renderToStaticMarkup(createElement(RelatedPostCard, {
+    slug: "without-cover",
+    title: "An Article Without a Cover",
+    summary: "The summary stays readable without a decorative placeholder.",
+  }));
+  assert.match(html, /An Article Without a Cover/);
+  assert.match(html, /The summary stays readable/);
+  assert.doesNotMatch(html, /<img|aspect-video/);
+});
+
+test("unsupported cover URLs use the same text-first card instead of breaking image rendering", () => {
+  const html = renderToStaticMarkup(createElement(RelatedPostCard, {
+    slug: "unsupported-cover",
+    title: "A Related Article",
+    summary: "The article remains accessible.",
+    imageName: "https://untrusted.example/cover.jpg",
+  }));
+  assert.doesNotMatch(html, /<img|aspect-video/);
+  assert.match(html, /href="\/blog\/unsupported-cover"/);
+});

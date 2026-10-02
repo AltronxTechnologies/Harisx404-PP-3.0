@@ -235,7 +235,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
           <SectionHeading kicker="Continue exploring" headingId="related-articles-heading">
             Related <span className="italic">articles</span>
           </SectionHeading>
-          <div className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-14 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {similarPosts.map((related) => (
               <RelatedPostCard
                 key={related.slug}

@@ -992,3 +992,25 @@ browser QA; do not delete or reattribute the current development corpus.
   arrange owner-approved production validation of a choice, switch, removal,
   and counts. No connected reaction rows were written during this work. The
   separate curated-related-post migration and final-content/host gates remain.
+
+## Continuation: Related article cards (2026-10-02)
+
+- Read-only inspection now finds the related-selection column available in the
+  connected database and three saved recommendations on the published link-
+  preview article. The other inspected article has no selections and correctly
+  shows the Blog link instead; no selections or content were edited.
+- All three saved cards rendered in their chosen order, but lacked cover images
+  and reserved large empty image frames. Related cards now omit the media slot
+  when no safe cover exists, give the authored summaries more room, and retain
+  the site's serif card-title and mono action hierarchy. Cards with valid
+  covers retain their image layout. The existing shared kicker/heading is
+  untouched; the heading-to-cards gap now matches the site's 56px rhythm.
+- Browser checks at 320/390/768/1024/1440px in both themes confirmed three
+  distinct cards, no horizontal overflow, and HTTP 200 for each destination.
+  Desktop/mobile light/dark visual review found aligned card heights and no
+  empty media placeholders. Card tests (cover, missing cover, unsafe cover),
+  TypeScript, focused ESLint, Blog/related/headings/responsive and protected-
+  page regressions passed (25/26, one pre-existing Project skip); production
+  build passed with existing non-fatal warnings. Restarted web preview passed
+  the three-card/destination smoke check and remains running. Connected Admin
+  write workflow and owner content-rights/host acceptance remain separate gates.
