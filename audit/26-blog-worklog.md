@@ -1030,3 +1030,21 @@ browser QA; do not delete or reattribute the current development corpus.
   and the production build passed with existing non-fatal warnings. After
   restarting only web, the three-pill preview smoke check passed; it remains
   running.
+
+## Continuation: Article header typography (2026-10-02)
+
+- Matched the Blog detail header to the locked public hero type scale: a
+  linked 12px/500 uppercase mono `The Blog` kicker, a 46px mobile / 56px
+  desktop Instrument Serif 500 title, a 15px/24px summary, and 16px internal
+  gaps. The link remains a route back to `/blog`, with a 24px-high target and
+  visible focus. Its stronger text color is intentional over the article cover;
+  the common muted kicker color failed contrast on that image. The cover,
+  header position, metadata, article body and shared headings were unchanged.
+- Browser checks across three published posts (including the longest title and
+  a coverless post), 320/390/768/1440px and both themes found the exact type
+  metrics/gaps, no title or page overflow. Two sampled covers measured at
+  least 10:1 light and 17:1 dark contrast around the kicker. Blog HTTP and
+  metadata checks, TypeScript, focused ESLint, diff check and production build
+  passed. After restarting web, responsive and metadata smoke checks passed
+  4/4; the preview remains running. Broader security and deployment gates in
+  `audit/27-blog-detail-verification.md` are still outstanding.

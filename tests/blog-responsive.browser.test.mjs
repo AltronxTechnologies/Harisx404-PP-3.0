@@ -18,9 +18,13 @@ test("Blog article stays readable across both themes and responsive widths", asy
         for (const width of [320, 360, 390, 768, 1024, 1440]) {
           await page.setViewportSize({ width, height: width === 320 ? 640 : 900 });
           const state = await page.evaluate(() => {
-            const article = document.querySelector("#blog-article");
-            const box = article.getBoundingClientRect();
-            const images = [...article.querySelectorAll("img")];
+             const article = document.querySelector("#blog-article");
+             const box = article.getBoundingClientRect();
+             const hero = document.querySelector(".blog-detail header");
+             const kicker = hero.querySelector('a[href="/blog"]');
+             const title = hero.querySelector("h1");
+             const summary = hero.querySelector("p");
+             const images = [...article.querySelectorAll("img")];
              const code = article.querySelector("pre");
              const copy = code?.parentElement?.querySelector('button[aria-label="Copy code"]');
              const codeWindow = article.querySelector(".blog-code-window");
@@ -40,8 +44,12 @@ test("Blog article stays readable across both themes and responsive widths", asy
               articleLeft: box.left,
               articleRight: box.right,
               bodyText: article.textContent.trim().length,
-              theme: document.documentElement.classList.contains("dark") ? "dark" : "light",
-              failedImages: images.filter((image) => image.complete && image.naturalWidth === 0).length,
+               theme: document.documentElement.classList.contains("dark") ? "dark" : "light",
+               heroType: [kicker, title, summary].map((element) => [getComputedStyle(element).fontSize, getComputedStyle(element).fontWeight]),
+               heroGaps: [title.getBoundingClientRect().top - kicker.getBoundingClientRect().bottom, summary.getBoundingClientRect().top - title.getBoundingClientRect().bottom],
+               heroKickerHeight: kicker.getBoundingClientRect().height,
+               heroTitleFits: title.getBoundingClientRect().left >= 0 && title.getBoundingClientRect().right <= innerWidth,
+               failedImages: images.filter((image) => image.complete && image.naturalWidth === 0).length,
               codeMarkupValid: Boolean(code && code.parentElement?.tagName === "DIV" && code.querySelector("code") && !code.querySelector("div")),
               codeContained: Boolean(code && code.getBoundingClientRect().left >= 0 && code.getBoundingClientRect().right <= window.innerWidth + 1),
                copyVisible: Boolean(copy && getComputedStyle(copy).opacity !== "0" && copy.getBoundingClientRect().width > 0),
@@ -70,7 +78,11 @@ test("Blog article stays readable across both themes and responsive widths", asy
                })(),
             };
           });
-          assert.equal(state.theme, theme, `${width}px theme`);
+           assert.equal(state.theme, theme, `${width}px theme`);
+           assert.deepEqual(state.heroType, [["12px", "500"], [width >= 768 ? "56px" : "46px", "500"], ["15px", "400"]], `${width}px ${theme} shared hero typography`);
+           assert.deepEqual(state.heroGaps, [16, 16], `${width}px ${theme} hero rhythm`);
+           assert.ok(state.heroKickerHeight >= 24, `${width}px ${theme} Blog link touch target`);
+           assert.equal(state.heroTitleFits, true, `${width}px ${theme} article title fits`);
           assert.ok(state.scrollWidth <= state.width + 1, `${width}px ${theme} page overflow`);
           assert.ok(state.articleLeft >= 0 && state.articleRight <= state.width + 1, `${width}px ${theme} article bounds`);
           assert.ok(state.bodyText > 1000, `${width}px ${theme} article content`);

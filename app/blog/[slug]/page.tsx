@@ -154,18 +154,19 @@ export default async function BlogPage({ params }: BlogPageProps) {
       )}
 
       {/* Article header — reference: centered max-w-3xl, pt-56 total from top */}
-      <header className="relative mx-auto flex w-full max-w-3xl flex-col items-center gap-y-5 px-4 pt-40 text-center sm:pt-36 md:px-6" style={{ maxWidth: "680px" }}>
+      <header className="relative mx-auto flex w-full max-w-3xl flex-col items-center px-4 pt-40 text-center sm:pt-36 md:px-6" style={{ maxWidth: "680px" }}>
         <Link
           href="/blog"
-          className="text-neutral-500 text-sm transition-colors hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
+          aria-label="Back to Blog"
+          className="inline-flex min-h-6 items-center font-mono text-xs font-medium uppercase tracking-widest text-text-primary transition-colors hover:underline hover:underline-offset-4 focus-visible:rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current"
         >
-          Blog
+          The Blog
         </Link>
-        <h1 className="text-balance font-display text-3xl leading-tight tracking-tight text-neutral-900 dark:text-white sm:text-4xl md:text-5xl">
+        <h1 className="heading-glow mx-auto mt-4 max-w-xl break-words text-balance font-display text-[46px] font-medium leading-none tracking-tight text-text-primary md:text-[56px] md:tracking-[-1.5px]">
           {post.title}
         </h1>
         {post.summary && (
-          <p className="max-w-2xl text-pretty text-base text-text-secondary leading-relaxed sm:text-lg">
+          <p className="mx-auto mt-4 max-w-2xl text-pretty text-[15px] leading-6 text-text-secondary [overflow-wrap:anywhere]">
             {post.summary}
           </p>
         )}
