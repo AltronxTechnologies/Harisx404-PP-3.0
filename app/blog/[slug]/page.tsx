@@ -12,6 +12,7 @@ import ArticleReactionWrapper from "@/app/components/ArticleReactionsWrapper";
 import { CtaSection } from "@/app/components/home/CtaSection";
 import { SectionHeading } from "@/app/components/home/SectionHeading";
 import { GridWrapper } from "@/app/components/GridWrapper";
+import { PaperHeroTexture } from "@/app/components/PaperHeroTexture";
 import { CopyUrlButton } from "@/app/components/blog/CopyUrlButton";
 import { TableOfContents } from "@/app/components/TableOfContents";
 import {
@@ -131,47 +132,33 @@ export default async function BlogPage({ params }: BlogPageProps) {
         }}
       />
 
-      {/* Background hero cover — reference: absolute masked image behind the header */}
-      {coverSrc && (
-        <div
-          aria-hidden="true"
-          className="absolute inset-x-0 -top-16 z-0 h-80 w-full overflow-hidden bg-neutral-100/50 dark:bg-neutral-950/60 sm:-top-20"
-          style={{
-            maskImage:
-              "linear-gradient(rgb(0,0,0) 30%, rgba(0,0,0,0) 85%)",
-            WebkitMaskImage:
-              "linear-gradient(rgb(0,0,0) 30%, rgba(0,0,0,0) 85%)",
-          }}
-        >
-          <Image
-            src={coverSrc}
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-            className="pointer-events-none select-none object-cover mix-blend-overlay"
-          />
-        </div>
-      )}
-
       <GridWrapper>
-        <header className="relative mx-auto flex w-full max-w-3xl flex-col items-center px-4 text-center md:px-6" style={{ maxWidth: "680px" }}>
-          <Link
-            href="/blog"
-            aria-label="Back to Blog"
-            className="inline-flex min-h-6 items-center font-mono text-xs font-medium uppercase tracking-widest text-text-primary transition-colors hover:text-neutral-800 focus-visible:rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current dark:hover:text-neutral-200"
-          >
-            Blog
-          </Link>
-          <h1 className="heading-glow mx-auto mt-4 max-w-xl break-words text-balance font-display text-[46px] font-medium leading-none tracking-tight text-text-primary md:text-[56px] md:tracking-[-1.5px]">
-            {post.title}
-          </h1>
-          {post.summary && (
-            <p className="mx-auto mt-4 max-w-2xl text-pretty text-[15px] leading-6 text-text-secondary [overflow-wrap:anywhere]">
-              {post.summary}
-            </p>
+        <div className="relative px-4 xl:px-0">
+          {coverSrc ? (
+            <div aria-hidden="true" className="pointer-events-none absolute -inset-x-2 bottom-0 top-[-128px] overflow-hidden [mask-image:linear-gradient(to_bottom,black_55%,transparent_100%)] sm:-inset-x-3 sm:top-[-144px] md:top-[-176px] lg:inset-x-0">
+              <Image src={coverSrc} alt="" fill priority sizes="100vw" className="select-none object-cover opacity-10 dark:opacity-20" />
+            </div>
+          ) : (
+            <PaperHeroTexture className="-inset-x-2 bottom-0 top-[-128px] sm:-inset-x-3 sm:top-[-144px] md:top-[-176px] lg:inset-x-0" />
           )}
-        </header>
+          <header className="relative mx-auto flex w-full max-w-3xl flex-col items-center text-center" style={{ maxWidth: "680px" }}>
+            <Link
+              href="/blog"
+              aria-label="Back to Blog"
+              className="inline-flex min-h-6 items-center font-mono text-xs font-medium uppercase tracking-widest text-text-primary transition-colors hover:text-neutral-800 focus-visible:rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current dark:hover:text-neutral-200"
+            >
+              Blog
+            </Link>
+            <h1 className="heading-glow mx-auto mt-4 max-w-xl break-words text-balance font-display text-[46px] font-medium leading-none tracking-tight text-text-primary md:text-[56px] md:tracking-[-1.5px]">
+              {post.title}
+            </h1>
+            {post.summary && (
+              <p className="mx-auto mt-4 max-w-2xl text-pretty text-[15px] leading-6 text-text-secondary [overflow-wrap:anywhere]">
+                {post.summary}
+              </p>
+            )}
+          </header>
+        </div>
       </GridWrapper>
 
       {/* Meta row — reading time + copy URL on the left, date on the right */}

@@ -50,7 +50,17 @@ test("Blog article stays readable across both themes and responsive widths", asy
                heroKickerHeight: kicker.getBoundingClientRect().height,
                heroTopGap: kicker.getBoundingClientRect().top - document.querySelector("#main-content").getBoundingClientRect().top - parseFloat(getComputedStyle(document.querySelector("#main-content")).paddingTop),
                heroToMetaGap: document.querySelector(".blog-detail time").closest(".relative.mt-14").getBoundingClientRect().top - hero.getBoundingClientRect().bottom,
-               heroRules: ["::before", "::after"].map((side) => getComputedStyle(hero.parentElement, side).height),
+               heroRules: ["::before", "::after"].map((side) => getComputedStyle(hero.parentElement.parentElement, side).height),
+               heroBackground: (() => {
+                 const background = hero.previousElementSibling;
+                 const image = background.querySelector("img");
+                 return {
+                   masked: getComputedStyle(background).maskImage.includes("55%"),
+                   topOffset: background.getBoundingClientRect().top - hero.getBoundingClientRect().top,
+                   opacity: getComputedStyle(image).opacity,
+                   loaded: image.complete && image.naturalWidth > 0,
+                 };
+               })(),
                ctaFooterGap: (() => {
                  const cta = [...document.querySelectorAll(".blog-detail section")].find((section) => section.textContent.includes("Available for opportunities"));
                  return document.querySelector("footer").getBoundingClientRect().top - cta.getBoundingClientRect().bottom;
@@ -92,6 +102,12 @@ test("Blog article stays readable across both themes and responsive widths", asy
            assert.equal(state.heroTopGap, 56, `${width}px ${theme} locked page top spacing`);
            assert.equal(state.heroToMetaGap, 56, `${width}px ${theme} hero to metadata spacing`);
            assert.deepEqual(state.heroRules, ["1px", "1px"], `${width}px ${theme} shared hero frame`);
+           assert.deepEqual(state.heroBackground, {
+             masked: true,
+             topOffset: width >= 768 ? -176 : width >= 640 ? -144 : -128,
+             opacity: theme === "dark" ? "0.2" : "0.1",
+             loaded: true,
+           }, `${width}px ${theme} thumbnail follows the shared heading background`);
            assert.equal(state.ctaFooterGap, 0, `${width}px ${theme} CTA to Footer handoff`);
            assert.equal(state.heroTitleFits, true, `${width}px ${theme} article title fits`);
           assert.ok(state.scrollWidth <= state.width + 1, `${width}px ${theme} page overflow`);

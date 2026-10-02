@@ -1073,3 +1073,22 @@ browser QA; do not delete or reattribute the current development corpus.
   responsive and TOC smoke checks passed 12/12; the preview remains running.
   The separate security/content/host gates in
   `audit/27-blog-detail-verification.md` are still unresolved.
+
+## Continuation: Thumbnail hero background (2026-10-02)
+
+- The Blog detail hero now treats the article thumbnail like the background of
+  the site's other page headings: the same responsive negative top insets and
+  55%-to-100% downward mask as `PaperHeroTexture`, with a restrained image
+  opacity so kicker, title and summary remain readable in both themes. This
+  replaces the old fixed-height image block and its visible top edge below the
+  navbar. Articles without a cover use the existing shared paper hero texture.
+  The thumbnail remains the article's image; its metadata and image source
+  were not altered, and no shared/locked hero component was changed.
+- The cover article was visually reviewed at mobile/desktop in light/dark and
+  the coverless article in light mode. The responsive browser assertion now
+  checks that the thumbnail loads and matches the shared hero mask/insets at
+  320/360/390/768/1024/1440px in both themes. Docker TypeScript, focused
+  ESLint, diff check, Blog/TOC/locked-page regressions (28 passed, one existing
+  Project skip), and production build passed. After restarting only web, Blog,
+  metadata and responsive smoke checks passed 10/10; the preview remains up.
+  Other production gates in `audit/27-blog-detail-verification.md` still apply.
