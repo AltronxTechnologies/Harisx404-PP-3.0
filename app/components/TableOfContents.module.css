@@ -5,7 +5,7 @@
 
 .dock[data-open="true"] .panel {
   border: 1px solid #d6dade;
-  background-color: #fff;
+  background-color: #f1f2f4;
   box-shadow: 0 20px 48px -18px rgb(15 23 42 / 0.28), 0 2px 8px rgb(15 23 42 / 0.06);
 }
 

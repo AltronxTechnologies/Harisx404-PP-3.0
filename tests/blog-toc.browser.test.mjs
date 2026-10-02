@@ -140,7 +140,7 @@ test("light-mode TOC keeps a clear active entry and hover feedback", async () =>
     await toc.locator("button").first().click();
     const active = toc.locator('button[aria-current="location"]');
     assert.equal(await active.count(), 1);
-    assert.equal(await toc.evaluate((nav) => getComputedStyle(nav.firstElementChild).backgroundColor), "rgb(255, 255, 255)");
+    assert.equal(await toc.evaluate((nav) => getComputedStyle(nav.firstElementChild).backgroundColor), "rgb(241, 242, 244)");
     const other = toc.getByRole("button", { name: "The skill that actually matters" });
     const before = await other.evaluate((button) => getComputedStyle(button).backgroundColor);
     await other.hover();
