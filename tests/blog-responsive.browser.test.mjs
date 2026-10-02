@@ -139,7 +139,7 @@ test("Blog article stays readable across both themes and responsive widths", asy
             assert.deepEqual(state.articleHandoff, {
               afterDivider: 32,
               firstBlockOffset: 0,
-              beforeLastDivider: 32,
+               beforeLastDivider: 48,
               paragraphType: ["16px", "28px"],
             }, `${width}px ${theme} article start, reading type and final divider`);
            assert.deepEqual(state.heroRules, ["1px", "1px"], `${width}px ${theme} shared hero frame`);

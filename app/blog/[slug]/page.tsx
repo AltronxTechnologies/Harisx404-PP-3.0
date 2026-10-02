@@ -188,7 +188,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
       </div>
 
       {/* Article body — reference: prose prose-neutral, centered max-w-3xl */}
-      <div className="relative mt-8 mb-8 px-4 md:px-6">
+      <div className="relative mt-8 mb-12 px-4 md:px-6">
         <article
           id="blog-article"
           className="blog-article-shell prose prose-neutral dark:prose-invert mx-auto min-w-0 max-w-3xl break-words [&>*:first-child]:mt-0 [&>div>*:first-child]:mt-0"
@@ -202,7 +202,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
         aria-labelledby="article-reactions-heading"
         className="relative mb-16 px-4 md:px-6"
       >
-        <div className="-mx-2 w-[calc(100%+16px)] border-t border-border-primary pt-12 sm:mx-auto sm:w-full" style={{ maxWidth: "680px" }}>
+        <div className="-mx-2 w-[calc(100%+16px)] border-t border-border-primary pt-8 sm:mx-auto sm:w-full" style={{ maxWidth: "680px" }}>
           <h2 id="article-reactions-heading" className="px-2 text-xl font-medium tracking-tight text-text-primary sm:px-0">
             React to this article
           </h2>

@@ -108,8 +108,11 @@ new lock still requires the `AUDIT_TESTING.md` audit and owner approval.
 
 ### Owner-directed article divider spacing
 
-The owner requested matching spacing around the article text. The gap from the
-metadata divider to the first text block and from the last text block to the
-divider before reactions is now 32px on both sides, at all tested responsive
-widths and in both themes. Only the article wrapper's bottom margin changed;
-the reactions section and both divider styles remain unchanged.
+The owner initially requested matching spacing around the article text. The gap
+from the metadata divider to the first text block and from the last text block
+to the divider before reactions was set to 32px on both sides. Only the article
+wrapper's bottom margin changed; both divider styles remained unchanged.
+
+The owner subsequently clarified that the **last article text to divider** gap
+should be 48px. The first text block still starts 32px after the metadata rule,
+and the "React to this article" heading remains 32px below the final rule.

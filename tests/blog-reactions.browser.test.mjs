@@ -58,8 +58,8 @@ test("reaction section aligns to the reading column and keeps every label visibl
           assert.equal(state.width, width);
           assert.ok(state.pageOverflow <= 1, `${theme} ${width}px page overflow`);
           assert.equal(state.headingSize, "20px");
-          assert.equal(state.articleToDivider, 32, `${theme} ${width}px article handoff`);
-          assert.equal(state.dividerToHeading, 48, `${theme} ${width}px divider-to-heading spacing`);
+          assert.equal(state.articleToDivider, 48, `${theme} ${width}px article handoff`);
+          assert.equal(state.dividerToHeading, 32, `${theme} ${width}px divider-to-heading spacing`);
           assert.equal(state.headingAligned, true, `${theme} ${width}px heading aligns to prose`);
           assert.equal(state.toolbarAligned, true, `${theme} ${width}px toolbar aligns to divider`);
           assert.equal(state.toolbarGap, 16, `${theme} ${width}px heading-to-toolbar gap`);
