@@ -215,15 +215,16 @@ export default async function BlogPage({ params }: BlogPageProps) {
 
       {/* Curated recommendations retain their Admin-defined order. */}
       {similarPosts.length > 0 && (
-        <section aria-labelledby="related-articles-heading" className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6">
+        <section aria-labelledby="related-articles-heading" className="relative mx-auto max-w-6xl px-4 pb-16 pt-12 sm:px-6">
           <SectionHeading kicker="Continue exploring" headingId="related-articles-heading">
             Related{" "}
             <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">articles</span>
           </SectionHeading>
-          <div className="mt-14 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {similarPosts.map((related) => (
+          <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {similarPosts.map((related, index) => (
               <RelatedPostCard
                 key={related.slug}
+                className={index >= 2 ? "hidden lg:flex" : undefined}
                 slug={related.slug}
                 title={related.title}
                 summary={related.summary}

@@ -8,6 +8,7 @@ import { getBlogImageSrc } from "./blogImage";
 import type { ReactionSummary } from "@/app/blog/data";
 
 interface RelatedPostCardProps {
+  className?: string;
   slug: string;
   title: string;
   summary: string;
@@ -16,7 +17,7 @@ interface RelatedPostCardProps {
 }
 
 /** Related-post card for the article's curated recommendations. */
-export function RelatedPostCard({ slug, title, summary, imageName, reactionSummary }: RelatedPostCardProps) {
+export function RelatedPostCard({ className = "flex", slug, title, summary, imageName, reactionSummary }: RelatedPostCardProps) {
   const coverSrc = imageName
     ? getBlogImageSrc(optimizeImageUrl(
         imageName.startsWith("http") || imageName.startsWith("/") ? imageName : `/blog/${imageName}`,
@@ -28,7 +29,7 @@ export function RelatedPostCard({ slug, title, summary, imageName, reactionSumma
     <Link
       href={`/blog/${slug}`}
       aria-label={reactionSummary ? `Read ${title}. ${reactionSummary.total} reactions.` : `Read ${title}.`}
-      className={`group flex h-full min-w-0 flex-col rounded-2xl border border-border-primary bg-white transition-colors hover:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:bg-white/[0.02] dark:hover:border-white/25 ${coverSrc ? "p-2" : "min-h-[220px]"}`}
+      className={`group ${className} h-full min-w-0 flex-col rounded-2xl border border-border-primary bg-white transition-colors hover:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:bg-white/[0.02] dark:hover:border-white/25 ${coverSrc ? "p-2" : "min-h-[220px]"}`}
     >
       {coverSrc && (
         <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-neutral-200 dark:bg-neutral-900">
@@ -36,7 +37,7 @@ export function RelatedPostCard({ slug, title, summary, imageName, reactionSumma
             src={coverSrc}
             alt=""
             fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+             sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
             className="object-cover"
           />
           <div aria-hidden="true" className="absolute inset-0 hidden bg-black/25 dark:block" />
@@ -49,9 +50,9 @@ export function RelatedPostCard({ slug, title, summary, imageName, reactionSumma
         </h3>
         {summary && <p className="line-clamp-3 text-sm leading-relaxed text-text-secondary">{summary}</p>}
 
-        <div className="mt-auto flex min-h-7 items-center justify-between gap-2.5 border-t border-border-primary pt-4">
+        <div className="mt-auto flex min-h-7 flex-wrap items-center justify-between gap-x-2.5 gap-y-3 border-t border-border-primary pt-4">
           <ReactionSummaryPill summary={reactionSummary} />
-          <span className="inline-flex shrink-0 items-center gap-2 font-mono text-[11px] uppercase leading-none tracking-widest text-text-secondary transition-colors group-hover:text-text-primary">
+          <span className="ml-auto inline-flex shrink-0 items-center gap-2 font-mono text-[11px] uppercase leading-none tracking-widest text-text-secondary transition-colors group-hover:text-text-primary">
             <span>Read article</span>
             <ArticleCardArrow />
           </span>

@@ -38,5 +38,7 @@ test("Blog related selections are ordered, opt-in, and checked at both write bou
   assert.match(page, /\{similarPosts\.length > 0 && \(/);
   assert.match(page, /similarPosts\.map\(\(related\) =>/);
   assert.match(page, /SectionHeading kicker="Continue exploring"/);
+  assert.match(page, /sm:grid-cols-2 lg:grid-cols-3/);
+  assert.match(page, /className=\{index >= 2 \? "hidden lg:flex" : undefined\}/);
   assert.match(page, /Browse all articles/);
 });
