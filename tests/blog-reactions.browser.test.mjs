@@ -103,6 +103,32 @@ test("reaction labels and touch targets remain readable on a touch viewport", as
   }
 });
 
+test("reduced-motion preference keeps hover feedback without icon movement", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage({ reducedMotion: "reduce" });
+    await page.goto(`${baseUrl}/blog/the-only-nextjs-favicon-guide-youll-need`);
+    const button = page.getByRole("button", { name: /Add Like \(like\) reaction/ });
+    await button.waitFor();
+    await page.waitForFunction(() => !document.querySelector('[aria-labelledby="article-reactions-heading"] button')?.disabled);
+    const icon = button.locator("span").first();
+    const before = await icon.evaluate((element) => getComputedStyle(element).backgroundColor);
+    await button.hover();
+    await page.waitForFunction((color) => {
+      const element = document.querySelector('[aria-labelledby="article-reactions-heading"] button span');
+      return element && getComputedStyle(element).backgroundColor !== color;
+    }, before);
+    const after = await icon.evaluate((element) => ({
+      background: getComputedStyle(element).backgroundColor,
+      scale: new DOMMatrixReadOnly(getComputedStyle(element).transform).a,
+    }));
+    assert.notEqual(after.background, before, "hover still has a visible surface");
+    assert.equal(after.scale, 1, "reduced motion does not scale the icon");
+  } finally {
+    await browser.close();
+  }
+});
+
 test("failed reaction requests restore the original choice and count without a database write", async () => {
   const browser = await chromium.launch({ headless: true });
   try {
@@ -125,7 +151,19 @@ test("failed reaction requests restore the original choice and count without a d
         await route.continue();
       }
     });
-    await buttons.first().click();
+    await buttons.first().hover();
+    await page.waitForFunction(() => {
+      const element = document.querySelector('[aria-labelledby="article-reactions-heading"] button span');
+      return element && new DOMMatrixReadOnly(getComputedStyle(element).transform).a > 1.01;
+    });
+    const box = await buttons.first().boundingBox();
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.waitForFunction(() => {
+      const element = document.querySelector('[aria-labelledby="article-reactions-heading"] button span');
+      return element && new DOMMatrixReadOnly(getComputedStyle(element).transform).a < 0.98;
+    });
+    await page.mouse.up();
     await page.getByRole("alert").getByText("We couldn't save your reaction. Please try again.").waitFor();
     assert.equal(intercepted, true, "server action was blocked before reaching the database");
     assert.deepEqual(await buttons.evaluateAll((items) => items.map((button) => ({

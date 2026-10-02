@@ -462,22 +462,31 @@ export default function ArticleReactions({
               key={type}
               onClick={() => handleReaction(type as ReactionType)}
               disabled={!isReady || isSubmitting !== null}
-              className={`relative flex min-h-[72px] min-w-0 flex-col items-center justify-center gap-1 border-r border-border-primary px-1 py-2 text-text-secondary transition-colors last:border-r-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-text-primary/70 md:min-h-[56px] md:flex-row md:justify-start md:gap-2 md:px-3 ${
+              initial="rest"
+              animate="rest"
+              whileHover={!isReady || isSubmitting !== null || reduceMotion ? undefined : "hover"}
+              whileTap={!isReady || isSubmitting !== null || reduceMotion ? undefined : "tap"}
+              className={`group relative flex min-h-[72px] min-w-0 cursor-pointer flex-col items-center justify-center gap-1 border-r border-border-primary px-1 py-2 text-text-secondary transition-colors duration-200 last:border-r-0 disabled:cursor-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-text-primary/70 md:min-h-[56px] md:flex-row md:justify-start md:gap-2 md:px-3 ${
                 isActive
                   ? "bg-neutral-100 text-text-primary dark:bg-white/[0.08]"
-                  : "hover:bg-neutral-100/70 hover:text-text-primary dark:hover:bg-white/[0.05]"
+                  : "[@media(hover:hover)]:enabled:hover:bg-neutral-100/70 [@media(hover:hover)]:enabled:hover:text-text-primary enabled:active:bg-neutral-200/70 dark:[@media(hover:hover)]:enabled:hover:bg-white/[0.05] dark:enabled:active:bg-white/[0.1]"
               }`}
               aria-label={`${isActive ? "Remove" : "Add"} ${REACTION_LABELS[type as ReactionType]} (${type}) reaction, ${count} ${count === 1 ? "reaction" : "reactions"}`}
               aria-pressed={isActive}
               title={REACTION_LABELS[type as ReactionType]}
             >
-              <span aria-hidden className="flex size-6 shrink-0 items-center justify-center">
+              <motion.span
+                aria-hidden
+                className={`flex size-8 shrink-0 items-center justify-center rounded-full transition-colors duration-200 ${isReady && isSubmitting === null ? "[@media(hover:hover)]:group-hover:bg-neutral-200/60 dark:[@media(hover:hover)]:group-hover:bg-white/[0.08]" : ""}`}
+                variants={{ rest: { scale: 1, rotate: 0 }, hover: { scale: 1.08, rotate: -6 }, tap: { scale: 0.9, rotate: 0 } }}
+                transition={{ type: "spring", stiffness: 380, damping: 22 }}
+              >
                 {reduceMotion ? (
                   <ReactionIcon type={type as ReactionType} active={isActive} />
                 ) : (
                   emoji(isActive)
                 )}
-              </span>
+              </motion.span>
               <span className="min-w-0 max-w-full truncate text-[11px] font-medium md:text-sm">{REACTION_LABELS[type as ReactionType]}</span>
               <span className="absolute right-1.5 top-1.5 whitespace-nowrap text-[10px] text-text-secondary md:static md:ml-auto md:text-xs" aria-hidden="true">
                 <AnimatedNumber number={count} reduceMotion={reduceMotion} />
