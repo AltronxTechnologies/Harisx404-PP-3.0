@@ -202,7 +202,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
         aria-labelledby="article-reactions-heading"
         className="relative mb-16 px-4 md:px-6"
       >
-        <div className="-mx-2 w-[calc(100%+16px)] border-t border-border-primary pt-8 sm:mx-auto sm:w-full" style={{ maxWidth: "680px" }}>
+        <div className="-mx-2 w-[calc(100%+16px)] border-t border-border-primary pt-12 sm:mx-auto sm:w-full" style={{ maxWidth: "680px" }}>
           <h2 id="article-reactions-heading" className="px-2 text-xl font-medium tracking-tight text-text-primary sm:px-0">
             React to this article
           </h2>
