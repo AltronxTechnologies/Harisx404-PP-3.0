@@ -14,7 +14,7 @@ test("published article uses truthful dates, no invented author, and an absolute
   assert.ok(article, "BlogPosting JSON-LD should render");
   assert.ok(article.datePublished);
   assert.equal(Object.hasOwn(article, "author"), false);
-  assert.match(html, /<span class="hidden sm:inline">Published <\/span><time dateTime="[^"]+">/);
+  assert.doesNotMatch(html, /<span class="hidden sm:inline">Published <\/span>/);
   assert.ok(html.includes(`<time dateTime="${article.datePublished}"`));
   assert.doesNotMatch(html, /<meta property="article:author"/);
   assert.ok(html.includes(`<meta property="article:published_time" content="${article.datePublished}"`));
