@@ -23,6 +23,21 @@ test("article image lightbox supports keyboard, focus containment and restoratio
     await dialog.waitFor();
     const close = dialog.getByRole("button", { name: "Close image" });
     await close.waitFor();
+    const overlay = await page.evaluate(() => {
+      const dialog = document.querySelector('[role="dialog"][aria-modal="true"]');
+      const hitOver = (element) => {
+        const box = element.getBoundingClientRect();
+        return dialog.contains(document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2));
+      };
+      return {
+        zIndex: getComputedStyle(dialog).zIndex,
+        navbar: hitOver(document.querySelector("header.fixed nav .pointer-events-auto")),
+        chat: hitOver(document.querySelector('button[aria-label="Toggle chat"]')),
+      };
+    });
+    assert.equal(overlay.zIndex, "7000");
+    assert.equal(overlay.navbar, true, "lightbox covers the navbar hit target");
+    assert.equal(overlay.chat, true, "lightbox covers the chat hit target");
     assert.equal(await close.evaluate((element) => element === document.activeElement), true);
     assert.equal(await page.evaluate(() => document.body.style.overflow), "hidden");
     await page.keyboard.press("Tab");

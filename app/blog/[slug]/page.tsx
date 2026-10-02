@@ -255,6 +255,7 @@ export async function generateMetadata(
   parent: ResolvingMetadata,
 ): Promise<Metadata> {
   const slug = (await params).slug;
+  if (isLocalBlogDraft(slug)) notFound();
   const post = await getBlogPostBySlug(slug);
 
   if (!post) {

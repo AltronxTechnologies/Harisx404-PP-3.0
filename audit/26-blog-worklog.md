@@ -1107,3 +1107,32 @@ browser QA; do not delete or reattribute the current development corpus.
   and responsive smoke checks passed 4/4; preview remains running. The
   security and deployment gates in `audit/27-blog-detail-verification.md`
   remain unresolved.
+
+## Continuation: Detail page findings repaired (2026-10-02)
+
+- Fixed the confirmed CodePen MDX validation gap by encoding captured URL
+  segments and validating the exact rewritten source before evaluation. An
+  inert execution probe does not run, while a normal embed still yields a
+  CodePen link. The Edge article preflight and metadata now agree on local
+  drafts: the previously contradictory published-DB/local-draft slug returns
+  GET/HEAD 404 with noindex rather than an HTTP-200 not-found view. A test
+  guards the Edge draft list against local MDX frontmatter drift.
+- The Blog-only lightbox now covers navbar/chat at the site's modal layer.
+  H2-H6 permalinks have visible 24px targets inside the article at phone and
+  desktop widths, including programmatic focus after TOC navigation. Article
+  share controls meet the 24px floor and use honest native button-group
+  keyboard semantics with focus restoration and announced copy feedback. The
+  Love reaction's accessible name includes its visible label; no live reaction
+  was submitted.
+- Recommendation-query failures now degrade to the existing Blog-browse link
+  instead of failing the article. A separate Blog detail loading shell keeps
+  the paper hero, meta divider and prose geometry rather than showing index
+  cards. Isolated query-rejection and error-result tests cover the fail-open
+  behavior; no connected recommendations were altered.
+- Docker TypeScript, focused ESLint and diff checks passed. The relevant
+  browser/HTTP/MDX/security and locked-page suite passed 75 tests with one
+  pre-existing Project skip. The production build passed with existing
+  non-fatal warnings; after restarting only web, 23/23 focused smoke checks
+  passed. The preview remains running. Connected reaction mutation acceptance,
+  owner content rights/alt review, authenticated Admin workflow and real-host
+  QA remain separate gates, as detailed in `audit/27-blog-detail-verification.md`.

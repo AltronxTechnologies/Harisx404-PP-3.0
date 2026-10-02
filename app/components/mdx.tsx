@@ -97,15 +97,17 @@ function replaceUnavailableCodePenEmbeds(code: string) {
   return code.replace(
     /<iframe\b(?=[^>]*\bsrc=["']https:\/\/codepen\.io\/([^/"']+)\/embed\/(?:preview\/)?([^?"']+)[^"']*["'])[^>]*>[\s\S]*?<\/iframe>/gi,
     (_match, author: string, penId: string) =>
-      `[Open this interactive example on CodePen](https://codepen.io/${author}/pen/${penId})`,
+      `[Open this interactive example on CodePen](https://codepen.io/${encodeURIComponent(author)}/pen/${encodeURIComponent(penId)})`,
   );
 }
 
 export const MDXContent = async ({ code, components }: MDXProps) => {
   try {
     validateBlogMdx(code);
+    const evaluatedCode = replaceUnavailableCodePenEmbeds(code);
+    validateBlogMdx(evaluatedCode);
     const { default: Content } = await evaluate(
-      replaceUnavailableCodePenEmbeds(code),
+      evaluatedCode,
       { ...runtime, remarkPlugins: [remarkGfm, () => addHeadingIds] } as any,
     );
     return (

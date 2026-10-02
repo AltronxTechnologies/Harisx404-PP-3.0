@@ -467,7 +467,7 @@ export default function ArticleReactions({
                   ? "bg-neutral-100 text-text-primary dark:bg-white/[0.08]"
                   : "hover:bg-neutral-100/70 hover:text-text-primary dark:hover:bg-white/[0.05]"
               }`}
-              aria-label={`${isActive ? "Remove" : "Add"} ${type} reaction, ${count} ${count === 1 ? "reaction" : "reactions"}`}
+              aria-label={`${isActive ? "Remove" : "Add"} ${REACTION_LABELS[type as ReactionType]} (${type}) reaction, ${count} ${count === 1 ? "reaction" : "reactions"}`}
               aria-pressed={isActive}
               title={REACTION_LABELS[type as ReactionType]}
             >

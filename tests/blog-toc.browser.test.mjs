@@ -4,6 +4,84 @@ import { chromium } from "playwright";
 
 const baseUrl = process.env.BLOG_BASE_URL || "http://localhost:3000";
 
+test("mobile article heading permalinks remain visible and tappable inside the clipped article", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+    await page.goto(`${baseUrl}/blog/the-hard-part-isnt-writing-tests-anymore`);
+    const heading = page.locator("#blog-article h2:has(> a.anchor)").first();
+    await heading.waitFor();
+    const anchor = heading.locator("a.anchor");
+    await heading.scrollIntoViewIfNeeded();
+    const geometry = await anchor.evaluate((link) => {
+      const box = link.getBoundingClientRect();
+      const article = document.getElementById("blog-article").getBoundingClientRect();
+      return {
+        width: box.width,
+        height: box.height,
+        left: box.left,
+        articleLeft: article.left,
+        opacity: getComputedStyle(link).opacity,
+        hittable: link.contains(document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2)),
+      };
+    });
+    assert.ok(geometry.width >= 24 && geometry.height >= 24, "permalink has a 24px target");
+    assert.ok(geometry.left >= geometry.articleLeft, "permalink stays inside the clipped article");
+    assert.equal(geometry.opacity, "1", "permalink is visible without hover on touch screens");
+    assert.equal(geometry.hittable, true, "permalink receives pointer hits");
+    const href = await anchor.getAttribute("href");
+    assert.equal(href, `#${await heading.getAttribute("id")}`);
+    await anchor.tap();
+    assert.equal(new URL(page.url()).hash, href);
+    await anchor.focus();
+    assert.equal(await anchor.evaluate((link) => link === document.activeElement), true);
+  } finally {
+    await browser.close();
+  }
+});
+
+test("desktop heading permalinks remain within the article and have visible keyboard focus", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await page.goto(`${baseUrl}/blog/the-hard-part-isnt-writing-tests-anymore`);
+    const link = page.locator("#blog-article h2 a.anchor").first();
+    await link.waitFor();
+    await link.focus();
+    await page.waitForFunction(() => getComputedStyle(document.querySelector("#blog-article h2 a.anchor")).opacity === "1");
+    const geometry = await link.evaluate((anchor) => {
+      const box = anchor.getBoundingClientRect();
+      const article = document.querySelector("#blog-article").getBoundingClientRect();
+      return { left: box.left, right: box.right, articleLeft: article.left, width: box.width, height: box.height, opacity: getComputedStyle(anchor).opacity };
+    });
+    assert.ok(geometry.left >= geometry.articleLeft && geometry.right <= 1440);
+    assert.ok(geometry.width >= 24 && geometry.height >= 24);
+    assert.equal(geometry.opacity, "1");
+
+    await page.evaluate(() => {
+      for (const level of [5, 6]) {
+        const heading = document.createElement(`h${level}`);
+        const anchor = document.createElement("a");
+        anchor.className = "anchor";
+        anchor.href = `#deep-heading-${level}`;
+        heading.id = `deep-heading-${level}`;
+        heading.append(anchor, `Deep heading ${level}`);
+        document.getElementById("blog-article").append(heading);
+      }
+    });
+    for (const level of [5, 6]) {
+      const deepLink = page.locator(`#deep-heading-${level} a.anchor`);
+      await deepLink.focus();
+      await page.waitForFunction((selector) => getComputedStyle(document.querySelector(selector)).opacity === "1", `#deep-heading-${level} a.anchor`);
+      const box = await deepLink.boundingBox();
+      assert.ok(box.width >= 24 && box.height >= 24, `H${level} permalink has a usable target`);
+      assert.ok(box.x >= geometry.articleLeft, `H${level} permalink remains within the article`);
+    }
+  } finally {
+    await browser.close();
+  }
+});
+
 test("Blog TOC stays out of hidden tab order and honors reduced motion", async () => {
   const browser = await chromium.launch({ headless: true });
   try {
@@ -135,8 +213,10 @@ test("light-mode TOC keeps a clear active entry and hover feedback", async () =>
     await page.goto(`${baseUrl}/blog/the-hard-part-isnt-writing-tests-anymore`);
     const toc = page.locator('nav[aria-label="Table of contents"]');
     await toc.waitFor({ state: "attached" });
-    await page.evaluate(() => window.scrollTo(0, 650));
-    await page.waitForFunction(() => document.querySelector('nav[aria-label="Table of contents"]')?.getAttribute("aria-hidden") === "false");
+    await page.waitForFunction(() => {
+      if (window.scrollY < 500) window.scrollTo(0, 650);
+      return document.querySelector('nav[aria-label="Table of contents"]')?.getAttribute("aria-hidden") === "false";
+    });
     await toc.locator("button").first().click();
     const active = toc.locator('button[aria-current="location"]');
     assert.equal(await active.count(), 1);

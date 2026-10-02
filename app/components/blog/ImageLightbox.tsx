@@ -118,7 +118,7 @@ export function ImageLightbox() {
       onClick={(event) => {
         if (event.target === event.currentTarget) close();
       }}
-      className={`fixed inset-0 z-[200] flex cursor-zoom-out items-center justify-center bg-black/80 p-4 backdrop-blur-sm transition-opacity duration-200 motion-reduce:transition-none sm:p-10 ${
+      className={`fixed inset-0 z-[7000] flex cursor-zoom-out items-center justify-center bg-black/80 p-4 backdrop-blur-sm transition-opacity duration-200 motion-reduce:transition-none sm:p-10 ${
         visible ? "opacity-100" : "opacity-0"
       }`}
     >

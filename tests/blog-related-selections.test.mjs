@@ -32,7 +32,9 @@ test("Blog related selections are ordered, opt-in, and checked at both write bou
   assert.match(utils, /if \(!supabase \|\| !ids\.length\) return \[\]/);
   assert.match(utils, /return ids\.flatMap\(\(id\) =>/);
   assert.match(utils, /\.eq\('status', 'published'\)[\s\S]*?\.lte\('published_at', new Date\(\)\.toISOString\(\)\)/);
-  assert.doesNotMatch(utils.slice(utils.indexOf("export async function getRelatedBlogPosts"), utils.indexOf("export async function fetchAndSortChangelogPosts")), /search_blog_posts|fetchAndSortBlogPosts/);
+  const relatedRead = utils.slice(utils.indexOf("export async function getRelatedBlogPosts"), utils.indexOf("export async function fetchAndSortChangelogPosts"));
+  assert.match(relatedRead, /catch \{[\s\S]*?return \[\];/);
+  assert.doesNotMatch(relatedRead, /search_blog_posts|fetchAndSortBlogPosts/);
   assert.match(page, /\{similarPosts\.length > 0 && \(/);
   assert.match(page, /similarPosts\.map\(\(related\) =>/);
   assert.match(page, /SectionHeading kicker="Continue exploring"/);

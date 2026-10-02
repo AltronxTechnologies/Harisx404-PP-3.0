@@ -12,6 +12,21 @@ const GONE_URLS = [
   "/blog/hello-world!",
 ];
 
+// Middleware runs at the edge, where the filesystem-backed draft check is unavailable.
+// Keep this list in sync with content/blog/*.mdx (verified by the route test).
+const LOCAL_BLOG_DRAFTS = new Set([
+  "10-best-custom-and-creative-developer-blogs-in-2021",
+  "10-developers-you-need-to-follow-on-twitter",
+  "8-tips-to-improve-your-ui-designs",
+  "code-on-your-ipad-pro",
+  "display-apple-music-playlist-on-your-website",
+  "gatsbyconf-2021-gatsby-v3-and-the-new-gatsby-image",
+  "how-to-implement-dark-mode-with-tailwind-2",
+  "learn-tailwind-with-tailwindplay",
+  "lighthouse-and-integrating-with-netlify",
+  "tailwind-2-is-live",
+]);
+
 function projectStatusPage(status: 404 | 503, request: NextRequest) {
   return NextResponse.rewrite(new URL(status === 404 ? "/__missing_project" : "/project-data-unavailable", request.url), {
     status,
@@ -179,6 +194,7 @@ export async function middleware(request: NextRequest) {
 
   if (blogDocument) {
     // Match the public article query, including the publish-time embargo.
+    if (LOCAL_BLOG_DRAFTS.has(blogSlug)) return blogStatusPage(404, request);
     try {
       const { data, error } = await supabase
         .from("blog_posts")
@@ -213,6 +229,7 @@ export async function middleware(request: NextRequest) {
           .maybeSingle();
         if (currentError) throw currentError;
         if (!current) return blogStatusPage(404, request);
+        if (LOCAL_BLOG_DRAFTS.has(current.slug)) return blogStatusPage(404, request);
         const destination = request.nextUrl.clone();
         destination.pathname = `/blog/${encodeURIComponent(current.slug)}`;
         return NextResponse.redirect(destination, {

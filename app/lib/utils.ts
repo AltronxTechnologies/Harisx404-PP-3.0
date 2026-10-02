@@ -204,18 +204,23 @@ export async function getRelatedBlogPosts(
 ): Promise<Array<{ title: string; slug: string; summary: string; imageName: string }>> {
   const ids = currentPost.relatedBlogPostIds ?? [];
   if (!supabase || !ids.length) return [];
-  const { data, error } = await supabase.from('blog_posts')
-    .select('id, title, slug, summary, cover_image_url')
-    .in('id', ids)
-    .eq('status', 'published')
-    .lte('published_at', new Date().toISOString());
-  if (error) throw new Error('Unable to load related Blog posts');
-  return ids.flatMap((id) => {
-    const post = data?.find((item) => item.id === id);
-    return post && post.slug !== currentPost.slug
-      ? [{ title: post.title, slug: post.slug, summary: post.summary ?? '', imageName: post.cover_image_url ?? '' }]
-      : [];
-  });
+  try {
+    const { data, error } = await supabase.from('blog_posts')
+      .select('id, title, slug, summary, cover_image_url')
+      .in('id', ids)
+      .eq('status', 'published')
+      .lte('published_at', new Date().toISOString());
+    if (error) throw error;
+    return ids.flatMap((id) => {
+      const post = data?.find((item) => item.id === id);
+      return post && post.slug !== currentPost.slug
+        ? [{ title: post.title, slug: post.slug, summary: post.summary ?? '', imageName: post.cover_image_url ?? '' }]
+        : [];
+    });
+  } catch {
+    console.warn('Optional related Blog posts could not be loaded.');
+    return [];
+  }
 }
 
 export async function fetchAndSortChangelogPosts(): Promise<Changelog[]> {

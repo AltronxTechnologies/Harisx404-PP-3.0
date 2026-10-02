@@ -1169,21 +1169,31 @@ blockquote p {
 
 .blog-article-shell h2,
 .blog-article-shell h3,
-.blog-article-shell h4 {
+.blog-article-shell h4,
+.blog-article-shell h5,
+.blog-article-shell h6 {
   scroll-margin-top: 6rem;
   position: relative;
+  padding-left: 28px;
 }
 
 /* Heading anchor `#` reveal on hover */
 .blog-article-shell h2 .anchor,
 .blog-article-shell h3 .anchor,
-.blog-article-shell h4 .anchor {
+.blog-article-shell h4 .anchor,
+.blog-article-shell h5 .anchor,
+.blog-article-shell h6 .anchor {
   position: absolute;
-  left: -1.15em;
+  left: 0;
   top: 50%;
   transform: translateY(-50%);
+  display: flex;
+  width: 24px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
   opacity: 0;
-  color: #a3a3a3;
+  color: var(--text-secondary);
   font-weight: 400;
   text-decoration: none;
   transition: opacity 200ms ease;
@@ -1191,14 +1201,29 @@ blockquote p {
 
 .blog-article-shell h2 .anchor::after,
 .blog-article-shell h3 .anchor::after,
-.blog-article-shell h4 .anchor::after {
+.blog-article-shell h4 .anchor::after,
+.blog-article-shell h5 .anchor::after,
+.blog-article-shell h6 .anchor::after {
   content: "#";
 }
 
 .blog-article-shell h2:hover .anchor,
 .blog-article-shell h3:hover .anchor,
-.blog-article-shell h4:hover .anchor {
+.blog-article-shell h4:hover .anchor,
+.blog-article-shell h5:hover .anchor,
+.blog-article-shell h6:hover .anchor,
+.blog-article-shell .anchor:focus {
   opacity: 1;
+}
+
+@media (max-width: 639px) {
+  .blog-article-shell h2 .anchor,
+  .blog-article-shell h3 .anchor,
+  .blog-article-shell h4 .anchor,
+  .blog-article-shell h5 .anchor,
+  .blog-article-shell h6 .anchor {
+    opacity: 1;
+  }
 }
 
 /* Article links — blue accent, medium, no underline */

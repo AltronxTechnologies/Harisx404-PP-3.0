@@ -10,12 +10,22 @@ export function CopyUrlButton() {
   const [copied, setCopied] = useState(false);
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const moreRef = useRef<HTMLButtonElement>(null);
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => {
+    if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+  }, []);
 
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+      copyTimerRef.current = setTimeout(() => {
+        setCopied(false);
+        copyTimerRef.current = null;
+      }, 2000);
     } catch {
       /* clipboard unavailable */
     }
@@ -26,7 +36,12 @@ export function CopyUrlButton() {
     const onPointer = (event: MouseEvent) => {
       if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
     };
-    const onKey = (event: KeyboardEvent) => event.key === "Escape" && setOpen(false);
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      const focusIsInside = rootRef.current?.contains(document.activeElement);
+      setOpen(false);
+      if (focusIsInside) moreRef.current?.focus();
+    };
     document.addEventListener("mousedown", onPointer);
     window.addEventListener("keydown", onKey);
     return () => {
@@ -44,6 +59,7 @@ export function CopyUrlButton() {
         : `https://www.linkedin.com/sharing/share-offsite/?url=${url}`;
     window.open(target, "_blank", "noopener,noreferrer,width=600,height=500");
     setOpen(false);
+    moreRef.current?.focus();
   };
 
   return (
@@ -51,17 +67,19 @@ export function CopyUrlButton() {
       <button
         type="button"
         onClick={copy}
-        className="inline-flex cursor-pointer items-center gap-1.5 whitespace-nowrap transition-colors hover:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 dark:hover:text-blue-300"
+        className="inline-flex min-h-6 cursor-pointer items-center gap-1.5 whitespace-nowrap transition-colors hover:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 dark:hover:text-blue-300"
       >
         {copied ? <Check className="size-3.5 shrink-0" aria-hidden="true" /> : <LinkIcon className="size-3.5 shrink-0" aria-hidden="true" />}
         {copied ? "Copied!" : "Copy URL"}
       </button>
+      <span role="status" className="sr-only">{copied ? "Copied URL" : ""}</span>
       <button
+        ref={moreRef}
         type="button"
         onClick={() => setOpen((value) => !value)}
         aria-label="More share options"
         aria-expanded={open}
-        className="ml-1 inline-flex cursor-pointer items-center rounded p-0.5 transition-colors hover:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 dark:hover:text-blue-300"
+        className="ml-1 inline-flex size-6 cursor-pointer items-center justify-center rounded transition-colors hover:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 dark:hover:text-blue-300"
       >
         <ChevronDown
           aria-hidden="true"
@@ -71,15 +89,16 @@ export function CopyUrlButton() {
 
       {open && (
         <div
-          role="menu"
+          role="group"
+          aria-label="Share options"
           className="absolute left-0 top-full z-50 mt-2 w-44 overflow-hidden rounded-xl border border-neutral-200 bg-white/90 p-1 text-neutral-700 shadow-lg backdrop-blur-md dark:border-neutral-800 dark:bg-neutral-900/90 dark:text-neutral-300"
         >
           <button
             type="button"
-            role="menuitem"
             onClick={() => {
               copy();
               setOpen(false);
+              moreRef.current?.focus();
             }}
             className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800"
           >
@@ -88,7 +107,6 @@ export function CopyUrlButton() {
           </button>
           <button
             type="button"
-            role="menuitem"
             onClick={() => shareTo("x")}
             className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800"
           >
@@ -97,7 +115,6 @@ export function CopyUrlButton() {
           </button>
           <button
             type="button"
-            role="menuitem"
             onClick={() => shareTo("linkedin")}
             className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800"
           >

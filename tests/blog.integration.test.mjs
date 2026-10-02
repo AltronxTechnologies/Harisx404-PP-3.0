@@ -56,6 +56,12 @@ test("missing Blog articles return a real 404 before streaming", async () => {
   assert.doesNotMatch(await get.text(), /id="blog-article"/);
 });
 
+test("Blog detail streams an article-shaped loading state, not the index skeleton", async () => {
+  const html = await responseText("/blog/build-link-previews-with-playwright-and-the-popover-api");
+  assert.match(html, /Loading article/);
+  assert.doesNotMatch(html, /Loading articles/);
+});
+
 test("Blog image assets reach Next instead of the article slug preflight", async () => {
   const image = await fetch(`${baseUrl}/blog/favicon_download_page.jpeg`);
   assert.equal(image.status, 200);
