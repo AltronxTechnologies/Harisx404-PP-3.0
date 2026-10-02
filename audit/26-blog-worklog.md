@@ -1092,3 +1092,18 @@ browser QA; do not delete or reattribute the current development corpus.
   Project skip), and production build passed. After restarting only web, Blog,
   metadata and responsive smoke checks passed 10/10; the preview remains up.
   Other production gates in `audit/27-blog-detail-verification.md` still apply.
+
+## Continuation: Paper-only article hero (2026-10-02)
+
+- Per the owner's follow-up, every Blog detail header now uses the same shared
+  `PaperHeroTexture` as the site's other page headings. The thumbnail is no
+  longer rendered in the article header; authored inline article images and
+  related-post cards remain intact. A valid thumbnail is still used for the
+  article's structured data and social previews, not as an on-page image.
+- Mobile/desktop and light/dark visual review, responsive checks at
+  320/360/390/768/1024/1440px, metadata checks, Blog/TOC/locked-page
+  regressions (29 passed, one existing Project skip), TypeScript, ESLint, diff
+  check, and Docker production build passed. After restarting web, metadata
+  and responsive smoke checks passed 4/4; preview remains running. The
+  security and deployment gates in `audit/27-blog-detail-verification.md`
+  remain unresolved.

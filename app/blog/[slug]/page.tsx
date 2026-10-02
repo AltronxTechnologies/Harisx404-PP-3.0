@@ -1,5 +1,4 @@
 import { notFound, permanentRedirect } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import { Metadata, ResolvingMetadata } from "next";
 import { ArrowUpRight } from "lucide-react";
@@ -134,13 +133,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
 
       <GridWrapper>
         <div className="relative px-4 xl:px-0">
-          {coverSrc ? (
-            <div aria-hidden="true" className="pointer-events-none absolute -inset-x-2 bottom-0 top-[-128px] overflow-hidden [mask-image:linear-gradient(to_bottom,black_55%,transparent_100%)] sm:-inset-x-3 sm:top-[-144px] md:top-[-176px] lg:inset-x-0">
-              <Image src={coverSrc} alt="" fill priority sizes="100vw" className="select-none object-cover opacity-10 dark:opacity-20" />
-            </div>
-          ) : (
-            <PaperHeroTexture className="-inset-x-2 bottom-0 top-[-128px] sm:-inset-x-3 sm:top-[-144px] md:top-[-176px] lg:inset-x-0" />
-          )}
+          <PaperHeroTexture className="-inset-x-2 bottom-0 top-[-128px] sm:-inset-x-3 sm:top-[-144px] md:top-[-176px] lg:inset-x-0" />
           <header className="relative mx-auto flex w-full max-w-3xl flex-col items-center text-center" style={{ maxWidth: "680px" }}>
             <Link
               href="/blog"
