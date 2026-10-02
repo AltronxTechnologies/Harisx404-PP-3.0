@@ -1176,21 +1176,18 @@ blockquote p {
   position: relative;
 }
 
-/* Heading anchor `#` reveal on hover */
+/* Heading anchor `#` follows the title without changing its left alignment. */
 .blog-article-shell h2 .anchor,
 .blog-article-shell h3 .anchor,
 .blog-article-shell h4 .anchor,
 .blog-article-shell h5 .anchor,
 .blog-article-shell h6 .anchor {
-  position: absolute;
-  left: -24px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
+  display: inline-flex;
   width: 24px;
   height: 24px;
   align-items: center;
   justify-content: center;
+  vertical-align: middle;
   opacity: 0;
   color: var(--text-secondary);
   font-weight: 400;

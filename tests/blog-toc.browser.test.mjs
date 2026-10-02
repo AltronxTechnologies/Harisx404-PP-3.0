@@ -4,12 +4,12 @@ import { chromium } from "playwright";
 
 const baseUrl = process.env.BLOG_BASE_URL || "http://localhost:3000";
 
-test("mobile article headings align with prose while permalinks remain visible and tappable", async () => {
+test("mobile article headings align with prose and trailing permalinks remain tappable", async () => {
   const browser = await chromium.launch({ headless: true });
   try {
     const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
     await page.goto(`${baseUrl}/blog/the-hard-part-isnt-writing-tests-anymore`);
-    const heading = page.locator("#blog-article h2:has(> a.anchor)").first();
+    const heading = page.locator("#blog-article h2:has(a.anchor)").first();
     await heading.waitFor();
     const anchor = heading.locator("a.anchor");
     await heading.scrollIntoViewIfNeeded();
@@ -22,15 +22,18 @@ test("mobile article headings align with prose while permalinks remain visible a
         left: box.left,
         right: box.right,
         articleLeft: article.left,
-        headingLeft: link.parentElement.getBoundingClientRect().left,
+        articleRight: article.right,
+        headingLeft: link.closest("h2").getBoundingClientRect().left,
         proseLeft: document.querySelector("#blog-article p").getBoundingClientRect().left,
+        trailing: link.closest("h2").lastElementChild.contains(link),
         opacity: getComputedStyle(link).opacity,
         hittable: link.contains(document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2)),
       };
     });
     assert.ok(geometry.width >= 24 && geometry.height >= 24, "permalink has a 24px target");
     assert.equal(geometry.headingLeft, geometry.proseLeft, "heading text aligns with article prose");
-    assert.ok(geometry.left >= 0 && geometry.right <= geometry.articleLeft, "permalink sits in the left gutter without leaving the viewport");
+    assert.equal(geometry.trailing, true, "permalink follows the heading content");
+    assert.ok(geometry.left > geometry.headingLeft && geometry.right <= geometry.articleRight, "permalink stays to the right of the title inside the article");
     assert.equal(geometry.opacity, "1", "permalink is visible without hover on touch screens");
     assert.equal(geometry.hittable, true, "permalink receives pointer hits");
     const href = await anchor.getAttribute("href");
@@ -44,7 +47,7 @@ test("mobile article headings align with prose while permalinks remain visible a
   }
 });
 
-test("desktop headings align with prose and gutter permalinks have visible keyboard focus", async () => {
+test("desktop headings align with prose and trailing permalinks have visible keyboard focus", async () => {
   const browser = await chromium.launch({ headless: true });
   try {
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
@@ -56,10 +59,12 @@ test("desktop headings align with prose and gutter permalinks have visible keybo
     const geometry = await link.evaluate((anchor) => {
       const box = anchor.getBoundingClientRect();
       const article = document.querySelector("#blog-article").getBoundingClientRect();
-      return { left: box.left, right: box.right, articleLeft: article.left, headingLeft: anchor.parentElement.getBoundingClientRect().left, proseLeft: document.querySelector("#blog-article p").getBoundingClientRect().left, width: box.width, height: box.height, opacity: getComputedStyle(anchor).opacity };
+      const heading = anchor.closest("h2");
+      return { left: box.left, right: box.right, articleLeft: article.left, articleRight: article.right, trailing: heading.lastElementChild.contains(anchor), headingLeft: heading.getBoundingClientRect().left, proseLeft: document.querySelector("#blog-article p").getBoundingClientRect().left, width: box.width, height: box.height, opacity: getComputedStyle(anchor).opacity };
     });
     assert.equal(geometry.headingLeft, geometry.proseLeft);
-    assert.ok(geometry.left >= 0 && geometry.right <= geometry.articleLeft);
+    assert.equal(geometry.trailing, true);
+    assert.ok(geometry.left > geometry.articleLeft && geometry.right <= geometry.articleRight);
     assert.ok(geometry.width >= 24 && geometry.height >= 24);
     assert.equal(geometry.opacity, "1");
 
@@ -70,7 +75,7 @@ test("desktop headings align with prose and gutter permalinks have visible keybo
         anchor.className = "anchor";
         anchor.href = `#deep-heading-${level}`;
         heading.id = `deep-heading-${level}`;
-        heading.append(anchor, `Deep heading ${level}`);
+        heading.append(`Deep heading ${level}`, anchor);
         document.getElementById("blog-article").append(heading);
       }
     });
@@ -80,7 +85,7 @@ test("desktop headings align with prose and gutter permalinks have visible keybo
       await page.waitForFunction((selector) => getComputedStyle(document.querySelector(selector)).opacity === "1", `#deep-heading-${level} a.anchor`);
       const box = await deepLink.boundingBox();
       assert.ok(box.width >= 24 && box.height >= 24, `H${level} permalink has a usable target`);
-      assert.ok(box.x >= 0 && box.x + box.width <= geometry.articleLeft, `H${level} permalink remains in the visible gutter`);
+      assert.ok(box.x > geometry.articleLeft && box.x + box.width <= geometry.articleRight, `H${level} permalink follows the title inside the article`);
     }
   } finally {
     await browser.close();

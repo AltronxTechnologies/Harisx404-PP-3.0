@@ -34,8 +34,8 @@ The article presentation and shared dependencies remain protected by
 5. **Share and heading controls:** Copy URL and More meet the 24px touch-target
    floor. Share options use labeled native button-group semantics, Tab order,
    Escape dismissal and focus return; copy status is announced and its timer is
-   cleaned up. H2-H6 text aligns with article prose while 24px permalinks sit
-   in the visible left gutter at phone and desktop sizes; focused links remain
+   cleaned up. H2-H6 text aligns with article prose while 24px permalinks follow
+   their titles on the right at phone and desktop sizes; focused links remain
    visible. Blog-only video embeds stay inside the reading column.
 6. **Reaction and loading labels:** the visible Love action now includes
    "Love" in its accessible name, without changing its heart reaction type or

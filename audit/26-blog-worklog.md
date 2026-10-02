@@ -1151,3 +1151,18 @@ browser QA; do not delete or reattribute the current development corpus.
   at 320px without article or document overflow. Docker TypeScript, focused
   ESLint, diff check and production build passed; after restarting web, the
   Blog/TOC/responsive smoke suite passed 16/16. Preview remains running.
+
+## Continuation: Right-side heading permalinks (2026-10-02)
+
+- Moved the H2-H6 `#` permalink after the heading content so article headings
+  retain their shared left edge with the prose. The 24px target stays visible
+  on touch screens, appears on hover/focus on desktop, and preserves the same
+  heading IDs and TOC hash behavior. The last word stays together with `#` so
+  it cannot become an orphan on a phone; unusually long unbroken words can
+  wrap before their final segment without pushing the link outside the article.
+- A 320px sweep of all 53 syndicated posts found no orphaned hashes or article
+  overflow. Mobile visual review, heading, TOC, responsive and Blog HTTP checks
+  passed; Docker TypeScript, focused ESLint, diff check and production build
+  passed. After restarting only web, Blog/TOC/responsive smoke checks passed
+  17/17. Preview remains running. Owner/content and live-host deployment gates
+  recorded above remain open.

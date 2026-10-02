@@ -157,3 +157,22 @@ test("article video embeds fit the reading column without clipping", async () =>
     await browser.close();
   }
 });
+
+test("long heading words keep their trailing permalink inside the phone reading column", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage({ viewport: { width: 320, height: 640 } });
+    await page.goto(`${baseUrl}/blog/how-to-use-signal-forms-in-angular`);
+    const heading = page.locator("#blog-article h2:has-text('ControlValueAccessor')");
+    await heading.waitFor();
+    const bounds = await heading.evaluate((node) => {
+      const article = document.querySelector("#blog-article");
+      const link = node.querySelector("a.anchor").getBoundingClientRect();
+      return { articleOverflow: article.scrollWidth - article.clientWidth, linkRight: link.right, articleRight: article.getBoundingClientRect().right };
+    });
+    assert.ok(bounds.articleOverflow <= 1);
+    assert.ok(bounds.linkRight <= bounds.articleRight + 1);
+  } finally {
+    await browser.close();
+  }
+});

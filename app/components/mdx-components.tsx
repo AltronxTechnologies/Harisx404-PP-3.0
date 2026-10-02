@@ -396,26 +396,35 @@ function createHeading(level) {
     if (level === 2) textSize = "text-2xl md:text-3xl";
     if (level === 3) textSize = "text-xl md:text-2xl";
     if (level === 4) textSize = "text-lg md:text-xl";
+    const anchor = React.createElement("a", {
+      href: `#${slug}`,
+      key: `link-${slug}`,
+      className: "anchor focus-visible:!opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary",
+      "aria-label": `Link to section: ${slug.replace(/-/g, " ")}`,
+    });
+    const content = React.Children.toArray(children);
+    const last = content.at(-1);
+    const trailingWord = typeof last === "string" && /^(.*?)(\S+)$/.exec(last);
+    if (trailingWord) {
+      const word = trailingWord[2];
+      const splitAt = word.length > 16 ? word.length - 8 : 0;
+      content[content.length - 1] = trailingWord[1] + word.slice(0, splitAt);
+      content.push(React.createElement("span", { key: `trailing-${slug}`, className: "whitespace-nowrap" }, word.slice(splitAt), "\u00a0", anchor));
+    } else {
+      content.push("\u00a0", anchor);
+    }
     return React.createElement(
       `h${level}`,
       {
         id: slug,
         className: `${textSize} text-text-primary font-medium leading-8 mb-6 ${level === 2 ? "mt-8" : "mt-3"} text-balance`,
       },
-      [
-        React.createElement("a", {
-          href: `#${slug}`,
-          key: `link-${slug}`,
-          className: "anchor focus-visible:!opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary",
-          "aria-label": `Link to section: ${slug.replace(/-/g, " ")}`,
-        }),
-      ],
       number && React.createElement("span", {
         key: `number-${slug}`,
         "aria-hidden": true,
         style: { marginRight: "0.35em", fontVariantNumeric: "tabular-nums" },
       }, `${number}.`),
-      children,
+      ...content,
     );
   };
 }
