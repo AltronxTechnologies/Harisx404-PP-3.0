@@ -2544,3 +2544,15 @@ and the optional Loops notification to the owner on testimonial submission
 remain separate features and disclosures. The legal page's layout, all other
 copy, dividers, typography, and the shared CTA remain locked and unchanged.
 Historical references above to an active newsletter describe earlier states.
+
+### 2026-10-02 owner-directed detail-page CTA spacing amendment
+
+The owner requested that all public pages use About's visible content-to-shared-
+CTA-kicker handoff. The other public pages already matched. In
+`app/blog/[slug]/page.tsx` and `app/projects/[slug]/ProjectDetail.tsx`, the
+related-card and no-related fallback branches now use local `mt-12` and `mt-14`
+respectively. Both branches measure 136px below `md` and 144px from `md` to the
+visible CTA kicker, matching About and the other public pages. Their related
+cards, fallback content, shared `CtaSection`, and 0px CTA-to-Footer handoff were
+not changed. This is a narrow spacing amendment, not an unlock of other Blog or
+Project detail presentation.

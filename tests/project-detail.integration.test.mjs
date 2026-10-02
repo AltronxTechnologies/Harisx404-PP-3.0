@@ -304,6 +304,7 @@ test("project tags, timeline, source name and optional sections remain owner-man
   assert.match(detail, /animate-gradient-x text-colorfull px-1 pb-1 italic \[text-shadow:none\]">projects<\/span>/);
   assert.match(detail, /mt-14 grid gap-4 sm:grid-cols-2/);
   assert.match(detail, /Browse all projects/);
+  assert.match(detail, /related\.length > 0 \? "mt-12" : "mt-14"/);
   for (const action of ["Copy URL", "View as Markdown", "Open in ChatGPT", "Open in Claude"]) {
     assert.ok(detail.includes(action), `share menu should include ${action}`);
   }

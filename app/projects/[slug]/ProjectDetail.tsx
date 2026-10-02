@@ -367,7 +367,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
         </div>
       )}
 
-      <div className="mt-10"><CtaSection /></div>
+      <div className={related.length > 0 ? "mt-12" : "mt-14"}><CtaSection /></div>
     </div>
   );
 }

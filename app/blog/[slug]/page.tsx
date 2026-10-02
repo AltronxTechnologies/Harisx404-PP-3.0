@@ -245,7 +245,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
       )}
 
       {/* Contact CTA — same section used across the site */}
-      <div className={similarPosts.length > 0 ? "relative mt-10" : "relative mt-6"}>
+      <div className={similarPosts.length > 0 ? "relative mt-12" : "relative mt-14"}>
         <CtaSection />
       </div>
     </div>

@@ -65,7 +65,7 @@ test("Admin-selected related Blog cards follow section rhythm and responsive vis
           assert.equal(state.theme, theme);
           assert.ok(state.overflow <= 1, `${theme} ${width}px page overflow`);
           assert.deepEqual(state.gaps, [112, 16, 56], `${theme} ${width}px section rhythm`);
-          assert.deepEqual(state.ctaHandoff, [64, 40, width >= 768 ? 136 : 128, 0], `${theme} ${width}px locked Project-detail CTA handoff`);
+          assert.deepEqual(state.ctaHandoff, [64, 48, width >= 768 ? 144 : 136, 0], `${theme} ${width}px About-page CTA handoff`);
           assert.deepEqual(state.kickerType, ["12px", "500", theme === "dark" ? "rgb(161, 161, 161)" : "rgb(94, 95, 110)"], `${theme} ${width}px shared kicker`);
           assert.equal(state.headingType[0], width >= 768 ? "56px" : "46px");
           assert.equal(state.headingType[1], "500");
@@ -110,10 +110,10 @@ test("article without related selections retains its CTA fallback spacing", asyn
         const kicker = wrapper.querySelector("section p");
         return {
           wrapper: wrapper.getBoundingClientRect().top - fallback.getBoundingClientRect().bottom,
-          kicker: kicker.getBoundingClientRect().top - fallback.getBoundingClientRect().bottom,
+          kicker: kicker.getBoundingClientRect().top - link.getBoundingClientRect().bottom,
         };
       });
-      assert.deepEqual(gap, { wrapper: 24, kicker: width >= 768 ? 56 : 48 });
+      assert.deepEqual(gap, { wrapper: 56, kicker: width >= 768 ? 144 : 136 });
     }
   } finally {
     await browser.close();
