@@ -39,6 +39,18 @@ Rotate the Admin password previously shared in chat when practical.
   Certifications, Community Wall, and qualified Resume work) need precise permission
   before any change. No new formal lock is requested; `AUDIT_TESTING.md` runs
   only after you explicitly trigger an audit target.
+- The read-only owner sweep found specific accessibility gaps in two locked
+  Admin modules: Testimonials has seven unnamed Edit icon links and seven
+  unassociated new-form fields; Experience has four unnamed Edit icon links and
+  14 unassociated new-form fields. If you want these fixed without touching
+  public pages, explicitly reply: "Unlock only
+  `app/components/admin/TestimonialForm.tsx`,
+  `app/admin/(dashboard)/testimonials/page.tsx`,
+  `app/components/admin/ExperienceForm.tsx`, and
+  `app/admin/(dashboard)/experience/page.tsx` for associated field labels and
+  accessible Edit-link names. Keep public Home/About and other locked files
+  unchanged." This is a new narrow request; the earlier Experience API unlock
+  did not include those four files.
 
 ## 3. Inspect connected policies without changing data
 
@@ -100,6 +112,17 @@ URLs, but links hard-coded outside tracked content cannot always be detected.
 Deletion across the database and Cloudinary is not atomic; an unexpected
 concurrent edit or failed restoration still needs manual review. Use test-only
 assets and a backup/restore plan for further workflows.
+
+Before asking for a valid Settings/About save-and-reopen test:
+
+1. Use a separate development Supabase project with the same schema, or open
+   Supabase Dashboard -> Database -> Backups and verify a restore point exists.
+2. If backups are unavailable, export the current `site_settings` and
+   `about_content` rows privately via the Table Editor before any save. Keep
+   that export on your machine; do not send rows or values in chat.
+3. Tell me only that the backup or disposable project is ready, and whether to
+   keep or retire the legacy About editor. I will then scope a restore-verified
+   test rather than changing existing content without a recovery path.
 
 Decide whether legacy `/admin/about` should remain editable (it does not feed
 the locked public About). You chose to retire the separate Changelog Admin

@@ -12,7 +12,8 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
 | Dashboard containment/layout | Observed before/after, selected widths | Before Admin-only fix: viewport 390 dark, main x15..375, internal right edge x566 hidden by root clip. Layout/dashboard min-width/minmax changes and new stats `md:2`/`xl:3`, actions mobile 1/`lg:2`, panels `xl:2`. A later 320px check found a recent Project edit control at x334; truncating the title and keeping the status/edit group in view removed it. Direct 320px and authenticated same-origin iframe 390/640/768/1024/1440px checks show zero measured dashboard-panel offenders. Root scroll width alone is not evidence of containment; not a full width/theme/function pass |
 | Sidebar mobile drawer | Observed read-only at 390; source-confirmed controls | 16 nav links measured min-44px, one active `aria-current="page"`, Escape/close restored focus to trigger; desktop/route focus behaviors not fully rechecked. No logout pressed |
 | About/Settings form geometry | Observed before latest shell/style changes | Legacy About originally had 14 unlabeled fields; IDs/labels and 44px minimum text input height added. Same-origin offscreen iframe at 320/390/768/1440: 14 labelled, no overflow; legacy warning retained. Settings: seven labelled fields, no overflow at 320/390/640/768/1024/1440 before latest visual alignment with About. No typing/save/reopen or field values recorded |
-| Sampled Admin route containment | Observed authenticated for Buildlog; remaining routes partial | Projects/Blogs/Media and FAQs/Analytics/Changelogs/Logs were sampled earlier. Before owner's specific unlock, `/admin/buildlog` measured 9/9/6 out-of-viewport cells at 320/390/768, largely within its intended horizontal table scroll container. Mobile cards now replace the table below `xl`; authenticated 320/390/768/1024/1280/1440 checks found no visible card/control overflow. Other locked Buildlog scopes remain frozen |
+| Sampled Admin route containment | Authenticated read-only sweep expanded | Owner-authorized Buildlog mobile cards passed sampled widths earlier. This pass loaded nine Testimonials/Certifications/Community Wall/Resume/Experience Admin list/new/settings routes at 320/390/768/1440: HTTP 200, no out-of-viewport controls or page errors, eight owner API GETs 200. Not CRUD or complete visual acceptance; locked accessibility issues below |
+| Locked Admin accessibility | Observed/name heuristic and source-confirmed; owner permission pending | Testimonials list: 7 unnamed Edit icon links; new form: 7 fields without associated labels. Experience list: 4 unnamed Edit icon links; new form: 14 unassociated fields. Counts stable across sampled widths. Sibling labels and icon-only links confirmed in source. No locked source changed; this is not a full accessibility audit |
 | Retired Changelog Admin UI/API | Owner-directed removal; data preserved | Sidebar/list/new/edit/forms/API removed. Authenticated old `/admin/changelogs` bookmarks including `/new` and `/[id]` redirect to `/admin/buildlog`; public `/changelog` still 308s to `/buildlog`. Tested GET/POST/PUT/DELETE against retired API return 404. Legacy tables/rows and unused locked-public-side helper/component were not deleted |
 | Inherited root chrome/metadata | Admin visual isolation observed; render-time decision pending | Owner authorized removing public chrome from Admin while preserving public pages. `app/admin/layout.tsx` styles hide inherited Navbar/Footer/chat/rails only on Admin; `noindex` remains and Admin canonical is absent. Browser checked Admin login at 320/390/768/1440 and public Home frame. Root components still mount invisibly and WebSite JSON-LD still inherits; true render-time omission would require a separate locked-root change |
 | Connected `site_settings` schema | Confirmed supplied read-only observation | GET 200, one row; columns `id`, `site_name`, `seo_description`, `seo_keywords`, `github_url`, `twitter_url`, `linkedin_url`, `email_address`, `created_at`, `updated_at`, `show_faq_section`; values omitted |
@@ -359,6 +360,32 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
   build **129 static pages**, post-build smoke **24/24**, public Home/About
   browser **1/1**, TypeScript, focused ESLint and `git diff --check` passed.
   Existing image lint/Edge notices remain; Compose preview retained.
+
+## 2026-10-03 Remaining Locked Admin Read-Only Sweep
+
+- In-memory owner browser sampled `/admin/testimonials`, `/new`,
+  `/admin/certifications`, `/new`, `/admin/community-wall`, `/settings`,
+  `/admin/resume`, `/admin/experience`, `/new` at 320/390/768/1440px.
+  All nine routes returned HTTP 200 with no visible out-of-viewport controls,
+  alert states or runtime errors. Owner GETs to Testimonials, Certifications,
+  Community Wall/settings, Resume, Experience and Buildlog/settings all
+  returned 200. No response bodies, existing row values, screenshots or
+  session material were recorded. No form submitted or destructive action
+  clicked. The one-off in-memory session helper was removed.
+- Limited DOM-name measurement found seven unnamed icon links in the locked
+  Testimonials list and seven unassociated fields in its new form; Experience
+  list had four unnamed icon links and its new form had 14 unassociated fields.
+  Source confirmed Edit links with only an SVG and sibling labels without
+  `htmlFor` or wrapping field. Other sampled routes had zero such results
+  under this heuristic, not a full screen-reader/contrast audit. Fixes require
+  owner permission specifically for these locked Admin form/list files;
+  public Home/About and unrelated locked scopes remain untouched.
+- Docker public Community Wall/Credentials/Resume integration **14/14** and
+  public Community Wall browser **1/1** passed, with no portfolio mutation.
+  No application source changed in this pass, so the previous isolated build
+  and broad regression remain the latest code verification; no production
+  sign-off. Settings/About singleton save/reopen still waits for a backup or
+  disposable environment.
 
 Representative Docker validation commands (one-off owner fixture helpers were removed after earlier tests):
 
