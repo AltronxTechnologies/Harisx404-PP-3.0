@@ -33,6 +33,8 @@ test("Admin settings use the observed singleton schema with a strict write bound
 test("unlocked privileged reads and log actions check Admin identity before service access", async () => {
   for (const path of [
     "app/admin/(dashboard)/page.tsx",
+    "app/admin/(dashboard)/blogs/page.tsx",
+    "app/admin/(dashboard)/analytics/page.tsx",
     "app/admin/(dashboard)/projects/page.tsx",
     "app/admin/(dashboard)/logs/page.tsx",
     "app/api/admin/faqs/route.ts",
@@ -42,6 +44,7 @@ test("unlocked privileged reads and log actions check Admin identity before serv
   ]) {
     const text = await source(path);
     assert.match(text, /requireAdmin\(\)/, `${path} verifies Admin identity`);
+    assert.ok(text.indexOf("requireAdmin()") < text.indexOf("createSupabaseAdminClient()") || !text.includes("createSupabaseAdminClient()"), `${path} verifies identity before creating service-role client`);
   }
   const actions = await source("app/admin/(dashboard)/logs/actions.ts");
   for (const name of ["resolveLog", "clearAllResolvedLogs", "testErrorLogger"]) {
@@ -94,7 +97,7 @@ test("Admin login is private and the unlocked routes retain their URLs", async (
   const login = await fetch(`${baseUrl}/admin/login`);
   assert.equal(login.status, 200);
   assert.match(await login.text(), /<meta name="robots" content="noindex, nofollow"/);
-  for (const path of ["about", "media", "settings"]) {
+  for (const path of ["about", "media", "settings", "blogs", "analytics"]) {
     const response = await fetch(`${baseUrl}/admin/${path}`, { redirect: "manual" });
     assert.equal(response.status, 307);
     assert.equal(new URL(response.headers.get("location"), baseUrl).pathname, "/admin/login");

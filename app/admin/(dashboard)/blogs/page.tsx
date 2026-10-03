@@ -1,5 +1,7 @@
 import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
+import { requireAdmin } from "@/app/lib/admin-auth";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Plus, Edit } from "lucide-react";
 import { BlogArchiveAction } from "./BlogArchiveAction";
 import { blogListStatus, blogListUrl, PAGE_SIZE, parseBlogListParams } from "./blogList";
@@ -9,6 +11,8 @@ export default async function AdminBlogsPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const auth = await requireAdmin();
+  if (auth.response) redirect(auth.response.status === 401 ? "/admin/login" : "/");
   const rawParams = await searchParams;
   const params = parseBlogListParams(rawParams);
   const now = new Date();

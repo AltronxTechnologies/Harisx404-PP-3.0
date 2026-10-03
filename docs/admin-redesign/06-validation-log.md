@@ -72,6 +72,27 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
   **10/10** and `git diff --check`. Neither a build nor source assertions prove
   connected write flows or production rollout.
 
+## 2026-10-03 Guard Continuation
+
+- The previously authenticated browser session expired. A direct read-only
+  navigation to `/admin/blogs` redirected to `/admin/login`; no owner UI or
+  connected write verification is claimed in this continuation.
+- Unlocked Blogs and Analytics pages now check `requireAdmin()` before
+  privileged reads instead of relying only on their layout. The source-order
+  security assertion and anonymous direct-URL redirect checks now cover these
+  pages. Docker Admin/login/Home/About focused checks passed **10/10**;
+  `npx tsc --noEmit`, focused ESLint, and `git diff --check` passed.
+- Full Docker regression after the guards: **39 pass, one existing Project
+  skip**; isolated production build: **132 static pages**, with the preexisting
+  `CurrentlyReadingBento` image warning and Edge-runtime notice. Post-build
+  smoke: **10/10**. The Docker Compose web service remains running on port 3000;
+  Playwright reached the login page through Alloy at port 8080, but owner UI
+  cannot be retested until the owner signs in again.
+- See `07-owner-actions.md` for the owner-only read-only catalog check, named
+  locked-scope decisions, nonproduction mutation authorization and deployment
+  gates. No migration, live mutation, locked source edit or credential handling
+  occurred in this continuation.
+
 Docker validation commands run during this session (no connected writes):
 
 ```bash

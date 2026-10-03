@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Activity, ArrowUpRight, BookOpen, Eye, Heart, MessageSquare, MousePointerClick } from "lucide-react";
+import { requireAdmin } from "@/app/lib/admin-auth";
 import { getBuildTimeStats } from "@/app/lib/stats/build-time-stats";
 import { getLighthouseStats } from "@/app/lib/stats/lighthouse-stats";
 import { getServerStats } from "@/app/lib/stats/server-stats";
@@ -25,6 +27,8 @@ async function attempt<T>(load: () => Promise<T>): Promise<{ data: T | null; fai
 }
 
 export default async function AdminAnalyticsPage() {
+  const auth = await requireAdmin();
+  if (auth.response) redirect(auth.response.status === 401 ? "/admin/login" : "/");
   const [serverResult, buildResult, lighthouseResult] = await Promise.all([
     attempt(() => getServerStats()),
     attempt(() => getBuildTimeStats()),
