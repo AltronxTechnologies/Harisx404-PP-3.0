@@ -47,7 +47,23 @@ export async function GET() {
       throw error;
     }
 
-    return NextResponse.json(data || {});
+    if (!data) return NextResponse.json({ error: 'About content is not configured' }, { status: 503 });
+    return NextResponse.json({
+      hero_title: data.hero_title ?? '',
+      hero_subtitle: data.hero_subtitle ?? '',
+      section1_title: data.section1_title ?? '',
+      section1_content: data.section1_content ?? '',
+      section1_image_url: data.section1_image_url ?? '',
+      section2_title: data.section2_title ?? '',
+      section2_content: data.section2_content ?? '',
+      section2_image_url: data.section2_image_url ?? '',
+      section3_title: data.section3_title ?? '',
+      section3_content: data.section3_content ?? '',
+      section3_image_url: data.section3_image_url ?? '',
+      section4_title: data.section4_title ?? '',
+      section4_content: data.section4_content ?? '',
+      section4_image_url: data.section4_image_url ?? '',
+    });
   } catch (error: any) {
     console.error('Error fetching about content:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });

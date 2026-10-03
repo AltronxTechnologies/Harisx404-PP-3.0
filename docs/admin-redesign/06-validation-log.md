@@ -29,6 +29,21 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
 | Connected write and release checks | Blocked | No connected saves, upload/delete or log actions; Settings/About valid save/reopen, FAQ authenticated CRUD, policy/catalog review and migration rollout still needed; no production-ready claim |
 | Documentation whitespace check | Passed for this update | `git diff --check` returned clean; `for file in docs/admin-redesign/*.md; do git diff --no-index --check /dev/null "$file" || exit; done` returned clean for all eight untracked docs. No application tests/builds/connected requests in this update |
 
+## 2026-10-03 Continuation
+
+- Read-only connected field-length/type checks (no values recorded) found the
+  current Settings fields within the new API limits. The legacy `about_content`
+  row has nullable subtitle/image fields; its Admin GET now returns empty strings
+  for those fields so an unchanged form is not rejected as `null`. No row was
+  modified, and public About still does not consume this table.
+- `tests/admin-error-states.test.tsx` mocked HTTP 503 responses for Settings,
+  About and Media. All three show a retryable error instead of an empty or
+  editable success state: 1/1 test passed via
+  `docker compose -f docker-compose.alloy.yaml exec -T web npx tsx --test tests/admin-error-states.test.tsx`.
+  TypeScript, focused ESLint and `git diff --check` passed after this source fix.
+- Authenticated save/reopen, non-owner role behavior, Media upload, owner visual
+  review, the connected RLS catalog and both staged migrations remain blocked.
+
 Docker validation commands run during this session (no connected writes):
 
 ```bash
