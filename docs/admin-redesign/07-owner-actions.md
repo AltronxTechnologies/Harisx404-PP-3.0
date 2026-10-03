@@ -11,19 +11,17 @@ session cookies, private content, or unredacted SQL results into chat or issues.
 Open `/admin/login` in the shared preview (`http://localhost:8080/admin/login`
 through Alloy, or `http://localhost:3000/admin/login` directly) and sign in
 yourself. Confirm `/admin`, `/admin/blogs`, and `/admin/analytics` render. Do not
-send the password here. You reported successfully signing in, but the separate
-automated browser context still redirects to login; its authenticated geometry
-and interaction checks cannot be claimed until it has an owner session. Your
-sign-in grants read-only inspection, not permission to save/delete data.
+send the password here. You reported successfully signing in. An isolated
+in-memory owner test session was used for scoped Buildlog/FAQ checks without
+saving credentials or cookies. It does not replace full owner review.
 Rotate the Admin password previously shared in chat when practical.
 
 ## 2. Approve or decline each locked-scope change
 
-- `/admin/buildlog` currently clips content at 320/390/768px. If you want it
-  corrected, explicitly say: "Unlock the Admin Buildlog files for a scoped
-  responsive overflow fix; leave the public Buildlog unchanged." Otherwise
-  accept and document the limitation. A general request to continue does not
-  unlock the entry in `LOCKED_PERFECT.md`.
+- You explicitly authorized a scoped Admin Buildlog mobile layout fix. Cards
+  now replace the wide table below `xl`, and the public Buildlog is unchanged.
+  Authenticated geometry and form controls passed at sampled widths. Other
+  locked Buildlog files remain outside this permission.
 - You authorized removing the public chrome from Admin while leaving public
   pages alone. Admin-only styles now hide the inherited Navbar, Footer, side
   rails and chat, and the Admin canonical is cleared. The public root remains
@@ -74,14 +72,16 @@ just because it exists: first review the catalog results, expected public
 SELECT behavior, a backup/rollback plan, and your intended target environment.
 If rollout is needed, authorize it separately.
 
-## 4. Authorize isolated lifecycle tests only when ready
+## 4. Scoped lifecycle tests and remaining acceptance
 
-Use a disposable nonproduction Supabase project or explicitly identified
-disposable records with a backup and cleanup plan. Specify which operations
-you authorize: Settings/About save-and-reopen, FAQ/Blog/Project CRUD, Media
-upload/delete, and/or Logs actions. These are distinct approvals, not covered
-by read-only login. Confirm who removes fixtures and how public/cache effects
-will be checked. Avoid using real portfolio rows as test fixtures.
+You authorized create/edit/delete testing and said you will replace database
+content before deployment. The assistant used uniquely named temporary draft
+Buildlog and hidden FAQ fixtures for authenticated API create/read/update/delete,
+then verified both were removed. Existing portfolio rows were not modified.
+The owner must still review the final Admin UI and approve any changes to
+singleton Settings/About values, uploaded Media or actions against real logs;
+these cannot be made disposable merely by deleting a test row. Use test-only
+assets and a backup/restore plan for those flows.
 
 Decide whether legacy `/admin/about` should remain editable (it does not feed
 the locked public About) and whether Admin Changelogs should be retained,

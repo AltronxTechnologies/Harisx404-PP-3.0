@@ -26,7 +26,7 @@ export function DeleteBuildlogButton({ id, name }: { id: string; name: string })
 
   return (
     <div className="inline-flex flex-col items-end">
-      <button type="button" onClick={remove} disabled={isDeleting} aria-label={`Delete ${name}`} className="rounded-lg p-2 text-ink-secondary transition-colors hover:bg-red-50 hover:text-red-500 disabled:opacity-50 dark:hover:bg-red-950/30">
+      <button type="button" onClick={remove} disabled={isDeleting} aria-label={`Delete ${name}`} className="inline-flex size-11 items-center justify-center rounded-lg text-ink-secondary transition-colors hover:bg-red-50 hover:text-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-current disabled:opacity-50 dark:hover:bg-red-950/30">
         {isDeleting ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
       </button>
       {error && <span role="alert" className="mt-1 text-xs text-red-500">{error}</span>}

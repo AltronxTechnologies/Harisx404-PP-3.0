@@ -1736,6 +1736,20 @@ metadata, responsive geometry, or public presentation without a new explicit
 owner unlock. Shared locked Navbar, Search, Reach Out, CTA, and Footer remain
 independently frozen under their existing entries.
 
+### 2026-10-03 owner-authorized Admin Buildlog mobile layout work
+
+The owner explicitly authorized fixing the Admin Buildlog mobile layout while
+leaving the public Buildlog unchanged. Scope: the list in
+`app/admin/(dashboard)/buildlog/page.tsx`, its delete control in
+`app/components/admin/DeleteBuildlogButton.tsx`, and the editor field grid in
+`app/components/admin/BuildlogForm.tsx`. The list now uses contained cards
+below `xl` and retains its desktop table; its actions have 44px targets. The
+editor's dense five-column row waits until `2xl`. No public Buildlog file,
+API, schema or settings was changed.
+Authenticated read-only geometry passed at 320/390/768/1024/1280/1440px and
+the public Buildlog regression passed. This records the narrow owner permission,
+not a new production lock or permission to change other Buildlog surfaces.
+
 ### 2026-09-22 owner-authorized Buildlog archive-toolbar amendment
 
 The owner temporarily unlocked only the Buildlog archive-toolbar typography and

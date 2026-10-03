@@ -1,18 +1,18 @@
 # Validation Log
 
-Current-worktree planning snapshot. **Source-confirmed** means inspected code, **observed** means supplied authenticated/anonymous read-only browser or REST evidence, **prior check** means an earlier test/build result, and **blocked** means separate owner approval is needed. Owner-session checks were read-only. No connected writes, locked public/Admin edits or migration applied by us; no deployment sign-off. Never add passwords, session material, settings/log values, secrets or private response bodies here.
+Current-worktree planning snapshot. **Source-confirmed** means inspected code, **observed** means authenticated/anonymous browser or REST evidence, **prior check** means an earlier test/build result, and **blocked** means separate owner approval is needed. Earlier owner-session checks were read-only; the latest scoped Buildlog/FAQ fixture cycles used authenticated APIs with verified cleanup. No public-source edit, unapproved locked Admin edit or migration applied by us; no deployment sign-off. Never add passwords, session material, settings/log values, secrets or private response bodies here.
 
 | Item | Status | Evidence / limitation |
 | --- | --- | --- |
 | Next/Admin structure | Confirmed in source | `package.json`, `app/layout.tsx`, `app/admin/(dashboard)/layout.tsx`, `app/components/admin/Sidebar.tsx`, `app/admin/(dashboard)/page.tsx`, route filesystem |
 | Media/About/Settings route move | Source-confirmed; partial owner UI observed | `app/admin/(dashboard)/{media,about,settings}/page.tsx`; anonymous URLs 307 to login, owner API GETs 200 by shape. Owner About/Settings form geometry and Media list sampled read-only before latest shell/style changes; no save/copy/upload or full UI acceptance. Inherited public chrome now hidden on Admin routes only |
-| Page access policy | Source-confirmed; partial runtime observation | `middleware.ts`, dashboard layout and `app/lib/admin-auth.ts` check user/`ADMIN_EMAIL`; owner `/admin` and `/admin/logs` rendered; five owner API GETs 200. Non-owner role and mutation authorization not tested |
+| Page access policy | Source-confirmed; partial runtime observation | `middleware.ts`, dashboard layout and `app/lib/admin-auth.ts` check user/`ADMIN_EMAIL`; owner `/admin` and `/admin/logs` rendered earlier. Authenticated Buildlog/FAQ mutation fixtures passed; non-owner role and other endpoint mutations not tested |
 | Login | Observed unauth layout; sign-in behavior unverified | `tests/admin-login.browser.test.mjs` reported 1/1 in Docker at 320/375/390/640/768/1024/1440 light/dark: no overflow, one `h1`, noindex, labelled email/password fields >=44px, submit >=48px, card fit and no page errors. `GET /admin/login` 200 with robots meta. Owner-provided session enabled read-only browsing; actual sign-in/error and non-owner sign-out flows were not exercised here |
 | Owner dashboard/Logs read-only render | Observed limited pass | `/admin` rendered in owner session, `/admin/logs` rendered a log list; no log values recorded, no actions clicked. Count/draft accuracy and CRUD unverified |
 | Dashboard containment/layout | Observed before/after, selected widths | Before Admin-only fix: viewport 390 dark, main x15..375, internal right edge x566 hidden by root clip. Layout/dashboard min-width/minmax changes and new stats `md:2`/`xl:3`, actions mobile 1/`lg:2`, panels `xl:2`. A later 320px check found a recent Project edit control at x334; truncating the title and keeping the status/edit group in view removed it. Direct 320px and authenticated same-origin iframe 390/640/768/1024/1440px checks show zero measured dashboard-panel offenders. Root scroll width alone is not evidence of containment; not a full width/theme/function pass |
 | Sidebar mobile drawer | Observed read-only at 390; source-confirmed controls | 16 nav links measured min-44px, one active `aria-current="page"`, Escape/close restored focus to trigger; desktop/route focus behaviors not fully rechecked. No logout pressed |
 | About/Settings form geometry | Observed before latest shell/style changes | Legacy About originally had 14 unlabeled fields; IDs/labels and 44px minimum text input height added. Same-origin offscreen iframe at 320/390/768/1440: 14 labelled, no overflow; legacy warning retained. Settings: seven labelled fields, no overflow at 320/390/640/768/1024/1440 before latest visual alignment with About. No typing/save/reopen or field values recorded |
-| Sampled Admin route containment | Observed read-only; locked blocker | Projects/Blogs/Media and FAQs/Analytics/Changelogs/Logs at sampled widths had no uncontained overflow after local Changelog header wrap. **Locked `/admin/buildlog`**: 9/9/6 out-of-viewport elements at 320/390/768; document scrollWidth appears zero because root clips. No locked Buildlog edit; named owner unlock required |
+| Sampled Admin route containment | Observed authenticated for Buildlog; remaining routes partial | Projects/Blogs/Media and FAQs/Analytics/Changelogs/Logs were sampled earlier. Before owner's specific unlock, `/admin/buildlog` measured 9/9/6 out-of-viewport cells at 320/390/768, largely within its intended horizontal table scroll container. Mobile cards now replace the table below `xl`; authenticated 320/390/768/1024/1280/1440 checks found no visible card/control overflow. Other locked Buildlog scopes remain frozen |
 | Changelog list source/UI | Source-confirmed; read-only sampled | `app/admin/(dashboard)/changelogs/page.tsx` locally wraps header, separates error from successful empty and names edit icon; no authenticated CRUD/public Changelog consumer verified |
 | Inherited root chrome/metadata | Admin visual isolation observed; render-time decision pending | Owner authorized removing public chrome from Admin while preserving public pages. `app/admin/layout.tsx` styles hide inherited Navbar/Footer/chat/rails only on Admin; `noindex` remains and Admin canonical is absent. Browser checked Admin login at 320/390/768/1440 and public Home frame. Root components still mount invisibly and WebSite JSON-LD still inherits; true render-time omission would require a separate locked-root change |
 | Connected `site_settings` schema | Confirmed supplied read-only observation | GET 200, one row; columns `id`, `site_name`, `seo_description`, `seo_keywords`, `github_url`, `twitter_url`, `linkedin_url`, `email_address`, `created_at`, `updated_at`, `show_faq_section`; values omitted |
@@ -24,16 +24,16 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
 | Media UI and upload boundary | Source-confirmed; UI/actions unverified | `app/admin/(dashboard)/media/page.tsx` maps `bytes`/`alt_text`/`secure_url`, distinguishes load failure from empty with retry, reports copy failure, has touch/keyboard copy and keyboard upload controls, restricted picker types. `app/api/admin/media/upload/route.ts` intentionally unchanged: historically owner-approved Cloudinary-supported non-SVG uploads with no new size cap. API GET is not an upload or page UI pass |
 | Legacy About / Changelog consumers | Source-confirmed; owner decision pending | `/admin/about` warns legacy saves will not appear on locked public About; `app/api/admin/about/route.ts` strict partial allowlist after Admin check; source search found no public About `about_content` consumer. `fetchAndSortChangelogEntrees` is used by `ChangelogBento`, but no live public component uses that bento; connected Changelog tables exist. No save or public change |
 | Logs schema and UI | Observed read-only change; provenance/policy unknown | Earlier REST `system_logs?select=id,resolved&limit=0` returned 400 / `42703`; latest identical probe returned **200**. Owner reported `system_logs_resolved_created_at_idx` exists on `(resolved, created_at DESC)`. Owner `/admin/logs` rendered a list earlier; no values recorded or actions clicked. We applied no migration. Column provenance, staged SQL application and effective RLS are unverified |
-| FAQ input/UI and authorization | Source-confirmed; authenticated CRUD unverified | `app/api/admin/faqs/route.ts` full strict POST, partial nonempty PUT with UUID id, strict boolean PATCH, UUID DELETE; verified Admin precedes service role for FAQ reads/writes and FAQ list/edit page reads. `FaqForm` labels/error associations; FAQ list now separates FAQ/settings read failures and withholds the section switch on failed Settings read. No connected FAQ write |
+| FAQ input/UI and authorization | Scoped authenticated lifecycle passed | `app/api/admin/faqs/route.ts` full strict POST, partial PUT with UUID id, boolean PATCH and UUID DELETE. One incomplete POST returned 400; a hidden disposable FAQ passed create/read/update/delete through the authenticated API and was verified absent afterward. FAQ list separates failures and withholds section switch on Settings error; PATCH/visibility/public effects and other role tests remain unverified |
 | FAQ/settings RLS | Source-confirmed; connected policy unknown | `migrations/2026_admin_content_rls_hardening.sql` stages removal of broad FAQ-manage and site-settings-update authenticated policies; **not applied by us**. Connected policy catalog not inspected; review read-only before owner-approved rollout |
 | Dashboard/Projects list | Source-confirmed; partial owner render | Both check Admin before service-role reads and show query errors instead of false zero/empty; `/admin` rendered and Projects list sampled for containment, but counts/drafts and list actions not validated |
-| Security integration | Observed passed, limited scope | Docker `tests/admin-security.integration.test.mjs`: **8/8**. Source and anonymous HTTP tests cover five GET 401s, auth/schema/FAQ/About/Media boundaries, login robots and five 307 redirects, with source assertions for grid, FAQ failure states and Settings controls. Static assertions are not owner CRUD or browser geometry tests |
+| Security integration | Observed passed, limited scope | Docker `tests/admin-security.integration.test.mjs`: **9/9**. Source and anonymous HTTP tests cover five GET 401s, auth/schema boundaries, login robots and five 307 redirects, with new Admin Buildlog card/target source assertions. This source test is distinct from authenticated geometry and fixture lifecycle evidence |
 | Login browser test | Observed passed, layout scope | Docker `tests/admin-login.browser.test.mjs`: **1/1**, seven widths x two themes; screenshot `/tmp/playwright/admin-login-mobile-review.png` is outside the repo. Owner Dashboard/Logs read-only UI observed separately, not by this test |
-| Combined Admin/public/locked regression | Observed passed, limited scope | Latest broad Docker Node run: **42 pass, one existing Project skip**, including Admin-only shell browser 1/1 at 320/390/768/1440 and public frame check. Earlier `.tsx` loader mistake was resolved with `tsx` 1/1. No locked public or named locked Admin source edited |
-| Post-build smoke | Observed passed, limited scope | **13/13** after final isolated build. Not an owner-authenticated write check |
+| Combined Admin/public/locked regression | Observed passed, limited scope | Latest broad Docker Node run: **43 pass, one existing Project skip**; Buildlog integration/versions/browser **11/11**. Public Buildlog source and visual baseline unchanged. Owner authorized narrow Admin Buildlog edit; no public Buildlog source edited |
+| Post-build smoke | Observed passed | **20/20** after final isolated Buildlog edit build; includes Admin/login/shell, public Home/About and public Buildlog integration. Not full owner CRUD acceptance |
 | Static checks | Observed passed | Docker `npx tsc --noEmit`, focused ESLint on latest Admin/test edits and `git diff --check` passed after the final Dashboard edit |
-| Isolated production build / preview | Observed passed; preview retained | Final Docker build command below succeeded with **132 static pages** after Admin-only shell/FAQ/Settings changes; one preexisting `CurrentlyReadingBento` img warning plus edge-runtime notice. `.next-build` mounted outside workspace; host-network preview port 3000 remains running |
-| Connected write and release checks | Blocked | No connected saves, upload/delete or log actions; Settings/About save/reopen, FAQ CRUD, policy/provenance, full root-component omission and locked Buildlog overflow remain; no production-ready claim |
+| Isolated production build / preview | Observed passed; preview retained | Final Docker build succeeded with **132 static pages** after Admin-only Buildlog list edit; one preexisting img warning plus edge-runtime notice. `.next-build` mounted outside workspace; host-network preview port 3000 remains running |
+| Connected write and release checks | Scoped pass; broader acceptance blocked | Authenticated draft/demo Buildlog and hidden FAQ create/read/update/delete passed, cleanup confirmed. Settings/About singleton save/reopen, Blog/Project/Media, log actions, policy/provenance, full root omission and other named locked Admin scopes remain; no production-ready claim |
 | Documentation whitespace check | Passed | `git diff --check` returned clean; no credentials or private response values recorded |
 
 ## 2026-10-03 Continuation
@@ -115,6 +115,39 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
   Admin/public regression **42 pass, one existing Project skip**, isolated
   build **132 static pages** (preexisting image lint warning and Edge notice),
   post-build smoke **13/13**, and `git diff --check` passed. Stack retained.
+
+## 2026-10-03 Owner-Authorized Admin Buildlog Pass
+
+- Owner explicitly unlocked only the Admin Buildlog mobile layout and authorized
+  disposable create/edit/delete tests. `LOCKED_PERFECT.md` records the limited
+  permission. The Admin list now displays contained cards below `xl` and its
+  existing table at desktop; project actions have 44px hit targets. No public
+  Buildlog source, schema, settings or API was edited.
+- A one-off in-memory owner session (no password, cookies or token recorded)
+  rendered Admin Buildlog at 320/390/768/1024/1280/1440. Visible mobile
+  cards/actions were within viewport, desktop table was present at `xl+`, and
+  no Admin page errors appeared. Buildlog new/settings forms, Settings and FAQ
+  controls fit at 320/390/768/1440. This is sampled geometry, not pixel-perfect
+  owner approval of all pages.
+- A subsequent source review found the Buildlog editor's five-column row could
+  become too narrow alongside the fixed Admin sidebar. Its layout now steps
+  through one/two/three/five columns rather than activating five at `lg`.
+  Authenticated editor controls fit at 320/390/640/768/1024/1280/1440/1536px.
+  The temporary in-memory session helper was removed after verification.
+- One uniquely named draft/demo Buildlog project passed authenticated API
+  create/read/update/delete. One hidden FAQ passed invalid-POST rejection and
+  authenticated create/read/partial-update/delete. Final service-role read-only
+  count checks confirmed zero fixtures remain. Existing portfolio rows were
+  not edited. The temporary session helper was removed; no credential/session
+  artifact remains in the repository.
+- Docker public Buildlog integration **6/6**, version **4/4**, browser **1/1**;
+  broader Admin/public regression **43 pass, one existing Project skip**;
+  TypeScript, focused ESLint, isolated build **132 static pages** (preexisting
+  image lint and Edge notices), post-build smoke **20/20** and whitespace checks
+  passed. No migration or production sign-off.
+- After the editor breakpoint change, focused Admin/Buildlog/Home checks
+  **18/18**, TypeScript, ESLint, final isolated build (132 static pages), and
+  post-build smoke **20/20** passed. Public Buildlog source remains untouched.
 
 Docker validation commands run during this session (no connected writes):
 

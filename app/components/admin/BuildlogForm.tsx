@@ -188,7 +188,7 @@ export function BuildlogForm({ initialData }: { initialData?: BuildlogProjectAdm
         </label>
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
         <label className="text-sm font-medium">
           Current version
           <input {...register("current_version")} className={inputClass} placeholder="v1.0" />

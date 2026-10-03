@@ -93,6 +93,21 @@ test("Settings editor keeps labelled, usable controls in the Admin visual langua
   assert.match(page, /inline-flex min-h-11 items-center justify-center rounded-full bg-text-primary/);
 });
 
+test("Admin Buildlog uses contained mobile cards and keeps the desktop table", async () => {
+  const [page, button, form] = await Promise.all([
+    source("app/admin/(dashboard)/buildlog/page.tsx"),
+    source("app/components/admin/DeleteBuildlogButton.tsx"),
+    source("app/components/admin/BuildlogForm.tsx"),
+  ]);
+  assert.match(page, /grid min-w-0 gap-3 xl:hidden/);
+  assert.match(page, /hidden overflow-hidden rounded-xl[^\n]*xl:block/);
+  assert.match(page, /<article key=\{project\.id\} className="min-w-0/);
+  assert.match(page, /<dl className=/);
+  assert.match(page, /aria-label=\{`Edit \$\{project\.name\}`\} className="inline-flex size-11/);
+  assert.match(button, /aria-label=\{`Delete \$\{name\}`\} className="inline-flex size-11/);
+  assert.match(form, /grid gap-6 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5/);
+});
+
 test("unlocked Admin presentation keeps narrow content contained and controls named", async () => {
   const [layout, dashboard, sidebar, about, changelog] = await Promise.all([
     source("app/admin/(dashboard)/layout.tsx"),
