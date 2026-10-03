@@ -30,6 +30,15 @@ test("Admin settings use the observed singleton schema with a strict write bound
   assert.match(logsMigration, /ADD COLUMN IF NOT EXISTS resolved boolean NOT NULL DEFAULT false/);
 });
 
+test("Admin top analytics links include only live published articles", async () => {
+  const stats = await source("app/lib/stats/server-stats.ts");
+  assert.match(stats, /\.eq\("status", "published"\)\s*\.lte\("published_at", new Date\(\)\.toISOString\(\)\)/);
+  assert.match(stats, /viewsData\s*\?\.filter\(\(item\) => livePosts\.has\(item\.slug\)\)/);
+  assert.match(stats, /Object\.entries\(reactionsPerArticle\)\s*\.filter\(\(\[slug\]\) => livePosts\.has\(slug\)\)/);
+  assert.match(stats, /const totalViews\s*=/);
+  assert.match(stats, /const totalReactions\s*=/);
+});
+
 test("unlocked privileged reads and log actions check Admin identity before service access", async () => {
   for (const path of [
     "app/admin/(dashboard)/page.tsx",

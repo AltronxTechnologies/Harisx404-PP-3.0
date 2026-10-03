@@ -16,7 +16,7 @@ Status legend: **source-confirmed** = present in the current worktree; **observe
 | --- | --- | --- |
 | `/admin/login` | Login form and server action; Admin `noindex, nofollow` metadata | Seven widths in both themes passed browser layout/field checks; authentication unverified |
 | `/admin` | Dashboard overview | Owner read-only render; 320/390/640 overflow rechecked, dark 390/1440 visually sampled |
-| `/admin/analytics`, `/admin/logs` | Analytics, system logs | Analytics/Logs sampled read-only for containment; Logs list rendered; data/actions unverified |
+| `/admin/analytics`, `/admin/logs` | Analytics, system logs | Analytics owner read-only layout passed four widths; top links now filter live published posts. Lighthouse requires deployed domain. A disposable log resolve passed and was cleaned; bulk clear remains untested |
 | `/admin/blogs`, `/admin/blogs/new`, `/admin/blogs/[id]`, `/admin/blogs/[id]/preview` | Blog list/create/edit/preview | Blogs list sampled read-only without uncontained overflow; editor/CRUD unverified |
 | `/admin/projects`, `/admin/projects/new`, `/admin/projects/[id]` | Project list/create/edit | Projects list sampled read-only without uncontained overflow; editor/CRUD unverified |
 | `/admin/resume`, `/admin/testimonials`, `/admin/testimonials/new`, `/admin/testimonials/[id]` | Resume document, testimonial moderation/editing | Confirmed source; authenticated UI unverified |
@@ -26,7 +26,7 @@ Status legend: **source-confirmed** = present in the current worktree; **observe
 | `/admin/faqs`, `/admin/faqs/new`, `/admin/faqs/[id]` | FAQ list/create/edit | FAQ list sampled read-only without uncontained overflow; strict API inputs; CRUD unverified |
 | `/admin/experience`, `/admin/experience/new`, `/admin/experience/[id]` | Experience management | Locked Admin scope (`LOCKED_PERFECT.md` entry 19). Non-owner page access denied, but its API write handlers lack a verified Admin-email gate; owner permission needed to fix |
 | `/admin/certifications`, `/admin/certifications/new`, `/admin/certifications/[id]` | Credential management | Confirmed source; locked Admin scope |
-| `/admin/media`, `/admin/about`, `/admin/settings` | Media, legacy About editor, site settings; inside dashboard group | Media read-only sampled, About 14 labels/fit and Settings seven labels/fit measured; save/reopen unverified |
+| `/admin/media`, `/admin/about`, `/admin/settings` | Media, legacy About editor, site settings; inside dashboard group | Media scoped upload/delete passed; About 14 labels/fit measured. Settings seven labelled fields rechecked at four widths; four invalid PUTs did not change values. Valid singleton save/reopen unverified |
 
 `docs/07_ADMIN_DASHBOARD.md` is an older specification (for example, it mentions `/admin/blog` and removed Toolbox); the route filesystem above is the planning baseline, not that older document.
 

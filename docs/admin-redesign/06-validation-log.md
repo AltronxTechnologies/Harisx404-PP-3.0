@@ -16,7 +16,7 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
 | Retired Changelog Admin UI/API | Owner-directed removal; data preserved | Sidebar/list/new/edit/forms/API removed. Authenticated old `/admin/changelogs` bookmarks including `/new` and `/[id]` redirect to `/admin/buildlog`; public `/changelog` still 308s to `/buildlog`. Tested GET/POST/PUT/DELETE against retired API return 404. Legacy tables/rows and unused locked-public-side helper/component were not deleted |
 | Inherited root chrome/metadata | Admin visual isolation observed; render-time decision pending | Owner authorized removing public chrome from Admin while preserving public pages. `app/admin/layout.tsx` styles hide inherited Navbar/Footer/chat/rails only on Admin; `noindex` remains and Admin canonical is absent. Browser checked Admin login at 320/390/768/1440 and public Home frame. Root components still mount invisibly and WebSite JSON-LD still inherits; true render-time omission would require a separate locked-root change |
 | Connected `site_settings` schema | Confirmed supplied read-only observation | GET 200, one row; columns `id`, `site_name`, `seo_description`, `seo_keywords`, `github_url`, `twitter_url`, `linkedin_url`, `email_address`, `created_at`, `updated_at`, `show_faq_section`; values omitted |
-| Settings API | Source-confirmed; anonymous and owner GET observed | `app/api/admin/settings/route.ts`: verified Admin then service role, singleton named columns, strict optional Zod PUT, private no-store GET/successful PUT. Anonymous GET 401 (previously 500); owner GET 200 with exactly seven named fields: `site_name`, `seo_description`, `seo_keywords`, `github_url`, `twitter_url`, `linkedin_url`, `email_address`. No values recorded; no PUT/save-reopen |
+| Settings API | Scoped validation-only owner checks passed | `app/api/admin/settings/route.ts`: verified Admin then service role, singleton named columns, strict optional Zod PUT, private no-store GET/successful PUT. Four malformed/empty/unknown-field/insecure-URL PUT requests returned 400; private before/after GET objects compared equal without logging values. Seven labelled fields fit at 320/390/768/1440; valid save/reopen remains untested |
 | Other anonymous API GETs | Observed status only | Current `GET /api/admin/{about,faqs,media}` plus Settings return 401; retired Changelog API GET returns 404. Earlier anonymous Experience 200 and current non-owner Experience 200 are separate observations; neither response body was recorded. Experience write boundary is confirmed unsafe by source and invalid non-owner method statuses |
 | Other owner API GETs | Historical shapes | About legacy fields, FAQs `data` array and Media `data`/`count` were observed. Former Changelog `data` array was observed before route retirement; it is no longer accessible through `/api/admin/changelogs` |
 | Connected content tables | Observed read-only | REST `?select=id&limit=0` returned 200 for `about_content`, `about_sections`, `changelogs`, `changelog_entries`, `faqs`. Further read-only `about_content` column inspection: `id`, `hero_title`, `hero_subtitle`, sections 1-4 `title`/`content`/`image_url`, `created_at`, `updated_at`; no values recorded |
@@ -27,12 +27,12 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
 | FAQ input/UI and authorization | Scoped authenticated lifecycle passed | `app/api/admin/faqs/route.ts` full strict POST, partial PUT with UUID id, boolean PATCH and UUID DELETE. One incomplete POST returned 400; a hidden disposable FAQ passed create/read/update/delete through the authenticated API and was verified absent afterward. FAQ list separates failures and withholds section switch on Settings error; PATCH/visibility/public effects and other role tests remain unverified |
 | FAQ/settings RLS | One connected denial observed; catalog unknown | `migrations/2026_admin_content_rls_hardening.sql` staged but not applied by us. Disposable non-owner direct FAQ INSERT denied with RLS 42501; no row created and account removed. Exact connected policies, Settings UPDATE and future-environment behavior remain unknown |
 | Dashboard/Projects list | Observed partial owner render | Dashboard and Projects check Admin before service-role reads and show query errors instead of false zero/empty. Authenticated Project list and draft row rendered at sampled widths after streamed table rows settled; list header wraps and edit/delete targets are 44px. Count accuracy and destructive UI confirmation unverified |
-| Security integration | Focused pass, limited scope | Docker `tests/admin-security.integration.test.mjs`: **11/11** after retirement. Tests cover four remaining GET 401s, Media DELETE 401, retired Changelog API 404 for GET/POST/PUT/DELETE, old Admin URLs 307 to login anonymously, source redirect and Logs mobile controls. Not a non-owner role test |
+| Security integration | Focused pass, limited scope | Docker `tests/admin-security.integration.test.mjs`: **12/12** after Analytics top-link guard. Tests cover four remaining GET 401s, Media DELETE 401, retired Changelog API 404, source Admin metrics live filtering and Logs mobile controls. Separate non-owner Experience finding remains open |
 | Login browser test | Observed passed, layout scope | Docker `tests/admin-login.browser.test.mjs`: **1/1**, seven widths x two themes; screenshot `/tmp/playwright/admin-login-mobile-review.png` is outside the repo. Owner Dashboard/Logs read-only UI observed separately, not by this test |
-| Combined Admin/public/locked regression | Observed pass after retirement | Broad Docker Node run **51 pass, one existing Project skip** after legacy Changelog retirement. Public Buildlog browser **1/1** also passed; public Blog/Project/Buildlog source unchanged |
-| Post-build smoke | Observed pass after retirement | **22/22** after isolated build; not full owner CRUD acceptance |
+| Combined Admin/public/locked regression | Observed pass after Analytics change | Broad Docker Node run **52 pass, one existing Project skip** after Admin top-link guard. Public Blog/Project/Buildlog source unchanged |
+| Post-build smoke | Observed pass after Analytics change | **23/23** after isolated build; not full owner CRUD acceptance |
 | Static checks | Observed passed | Docker `npx tsc --noEmit`, focused ESLint on latest Admin/test edits and `git diff --check` passed after the final Dashboard edit |
-| Isolated production build / preview | Observed pass after retirement | Docker build succeeded with **129 static pages** (three legacy Changelog editor routes removed); preexisting image lint warning and Edge notice. `.next-build` mounted outside workspace; preview on port 3000 remains running |
+| Isolated production build / preview | Observed pass after Analytics change | Docker build succeeded with **129 static pages**, preexisting image lint warning and Edge notice. `.next-build` mounted outside workspace; preview on port 3000 remains running |
 | Connected write and release checks | Scoped pass; high-priority locked blocker | Prior owner fixture lifecycles cleaned up. Disposable non-owner account was removed after status-only checks. Experience POST/PUT/DELETE lacked Admin-email denial before validation/service-role path; fix requires explicit locked Experience API unlock. Settings/About singleton save/reopen, publish/public effects, policy/provenance, bulk Logs and full root omission remain; no production-ready claim |
 | Documentation whitespace check | Passed | `git diff --check` returned clean; no credentials or private response values recorded |
 
@@ -306,6 +306,34 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
   confirmed no row was created. The account and any matching fixture row were
   removed in cleanup. This is evidence for FAQ INSERT only; it does not
   establish Settings UPDATE denial or the exact policy definitions.
+
+## 2026-10-03 Admin Analytics and Settings Read-Only Pass
+
+- Read-only connected counts found zero top-five view/reaction slugs without a
+  currently live article, and zero orphan view slugs in the sampled result.
+  `getServerStats()` previously selected published posts without a publication
+  date cutoff and sliced top metrics before excluding stale slugs. Admin
+  Dashboard/Analytics now filter only top links to published-and-due posts
+  before slicing; lifetime totals remain unchanged. No article data or slug
+  values were logged, and no public route/source was edited. Future archive/
+  schedule transitions and cache timing still need lifecycle acceptance.
+- Owner-scoped Settings GET was compared in memory before and after four
+  rejected PUTs: malformed JSON, empty object, unknown field and non-HTTPS
+  social URL each returned 400, with unchanged values. Analytics and Settings
+  rendered in an in-memory owner browser at 320/390/768/1440px; Analytics
+  overview/Lighthouse sections appeared, Settings had seven associated fields,
+  and no visible controls overflowed or triggered page errors. No valid
+  singleton write or public metadata change was made. The temporary session
+  helper was removed.
+- Lighthouse still points at the checked-in production origin rather than the
+  sandbox preview; Alloy intentionally displays unavailable scores. Actual
+  PageSpeed acceptance requires the owner's deployed domain to be reachable.
+  This does not resolve the locked Experience authorization blocker or the
+  connected policy-catalog gate. No migration applied.
+- Latest Docker broad regression **52 pass, one existing Project skip**,
+  isolated build **129 static pages**, post-build smoke **23/23**, TypeScript,
+  focused ESLint and `git diff --check` passed. Existing image lint warning
+  and Edge-runtime notice remain; preview service retained.
 
 Representative Docker validation commands (one-off owner fixture helpers were removed after earlier tests):
 

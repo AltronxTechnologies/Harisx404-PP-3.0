@@ -116,3 +116,14 @@ deployed domain, Auth redirect URLs, rotated keys, legal/content rights, and
 release rollback plan. `MANUAL_TASKS.md` contains the broader launch playbook;
 its older completed-state claims are not a substitute for this Admin acceptance
 gate. Local Docker tests and read-only renders do not certify production.
+
+For Admin Analytics Lighthouse scores after deployment:
+
+1. Choose the final public HTTPS domain and verify its home page loads outside
+   the sandbox; do not use the Alloy preview URL for PageSpeed.
+2. Share only that public URL (not keys). The current Analytics helper targets
+   the checked-in origin, so I can check whether its Admin-only target needs a
+   change. Public canonical/domain changes remain separately locked.
+3. In the deployment host, configure the production site URL and optional
+   `PAGESPEED_API_KEY` privately. Do not send the key in chat. Then confirm
+   Admin Analytics reports actual mobile/desktop scores rather than dashes.

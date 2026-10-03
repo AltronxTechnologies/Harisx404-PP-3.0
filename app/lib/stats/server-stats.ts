@@ -24,7 +24,8 @@ export const getServerStats = unstable_cache(
         supabase
           .from("blog_posts")
           .select("slug, title, cover_image_url")
-          .eq("status", "published"),
+          .eq("status", "published")
+          .lte("published_at", new Date().toISOString()),
         supabase.from("public_community_wall_messages").select("id", { count: "exact", head: true }),
       ]);
 
@@ -37,6 +38,7 @@ export const getServerStats = unstable_cache(
     const viewsData = viewsResult.data;
     const reactionsData = reactionsResult.data;
     const posts = postsResult.data;
+    const livePosts = new Map((posts ?? []).map((post) => [post.slug, post]));
 
     const totalViews =
       viewsData?.reduce((sum, row) => sum + row.view_count, 0) || 0;
@@ -62,10 +64,11 @@ export const getServerStats = unstable_cache(
     // Top 5 most viewed articles
     const topViewedRaw =
       viewsData
+        ?.filter((item) => livePosts.has(item.slug))
         ?.sort((a, b) => b.view_count - a.view_count)
         .slice(0, 5)
         .map((item) => {
-          const post = posts?.find((p) => p.slug === item.slug);
+          const post = livePosts.get(item.slug);
           return {
             slug: item.slug,
             title: post?.title || item.slug,
@@ -82,10 +85,11 @@ export const getServerStats = unstable_cache(
     });
 
     const topReactedRaw: ArticleMetric[] = Object.entries(reactionsPerArticle)
+      .filter(([slug]) => livePosts.has(slug))
       .sort(([, a], [, b]) => b - a)
       .slice(0, 5)
       .map(([slug, count]) => {
-        const post = posts?.find((p) => p.slug === slug);
+        const post = livePosts.get(slug);
         return {
           slug,
           title: post?.title || slug,
