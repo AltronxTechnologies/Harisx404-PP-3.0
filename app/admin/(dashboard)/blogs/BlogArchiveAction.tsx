@@ -74,7 +74,7 @@ export function BlogArchiveAction({ post }: { post: Post }) {
         onClick={handleAction}
         disabled={pending}
         aria-label={`${archived ? "Restore" : "Archive"} ${post.title}`}
-        className="rounded-lg p-2 text-ink-secondary transition-colors hover:bg-surface-base hover:text-accent-signal disabled:opacity-50"
+        className="inline-flex size-11 items-center justify-center rounded-lg text-ink-secondary transition-colors hover:bg-surface-base hover:text-accent-signal focus-visible:outline focus-visible:outline-2 focus-visible:outline-current disabled:opacity-50"
       >
         {archived ? <RotateCcw className="h-4 w-4" aria-hidden="true" /> : <Archive className="h-4 w-4" aria-hidden="true" />}
       </button>
@@ -84,7 +84,7 @@ export function BlogArchiveAction({ post }: { post: Post }) {
           onClick={handleDelete}
           disabled={pending}
           aria-label={`Permanently delete ${post.title}`}
-          className="rounded-lg p-2 text-ink-secondary transition-colors hover:bg-surface-base hover:text-red-500 disabled:opacity-50"
+          className="inline-flex size-11 items-center justify-center rounded-lg text-ink-secondary transition-colors hover:bg-surface-base hover:text-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-current disabled:opacity-50"
         >
           <Trash2 className="h-4 w-4" aria-hidden="true" />
         </button>

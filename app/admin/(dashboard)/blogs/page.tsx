@@ -41,14 +41,14 @@ export default async function AdminBlogsPage({
 
   return (
     <div className="flex min-w-0 flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Blog Posts</h1>
           <p className="text-sm text-ink-secondary">Manage your blog posts here.</p>
         </div>
         <Link
           href="/admin/blogs/new"
-          className="inline-flex items-center justify-center rounded-xl bg-accent-signal px-4 py-2 text-sm font-medium text-white shadow hover:bg-accent-signal/90 transition-all"
+          className="inline-flex min-h-11 items-center justify-center rounded-xl bg-accent-signal px-4 py-2 text-sm font-medium text-white shadow hover:bg-accent-signal/90 transition-all"
         >
           <Plus className="mr-2 h-4 w-4" />
           New Post
@@ -64,11 +64,11 @@ export default async function AdminBlogsPage({
       <form action="/admin/blogs" method="get" className="flex flex-wrap items-end gap-3 rounded-xl border border-border-hairline bg-surface-raised p-4 text-sm shadow-sm">
         <div className="min-w-48 flex-1">
           <label htmlFor="blog-search" className="mb-1 block font-medium text-ink-primary">Search titles</label>
-          <input id="blog-search" name="q" type="search" defaultValue={params.q} maxLength={100} placeholder="Search post titles" className="w-full rounded-lg border border-border-hairline bg-surface-base px-3 py-2 text-ink-primary" />
+          <input id="blog-search" name="q" type="search" defaultValue={params.q} maxLength={100} placeholder="Search post titles" className="min-h-11 w-full rounded-lg border border-border-hairline bg-surface-base px-3 py-2 text-ink-primary" />
         </div>
         <div>
           <label htmlFor="blog-status" className="mb-1 block font-medium text-ink-primary">Status</label>
-          <select id="blog-status" name="status" defaultValue={params.status} className="rounded-lg border border-border-hairline bg-surface-base px-3 py-2 text-ink-primary">
+          <select id="blog-status" name="status" defaultValue={params.status} className="min-h-11 rounded-lg border border-border-hairline bg-surface-base px-3 py-2 text-ink-primary">
             <option value="all">All statuses</option>
             <option value="draft">Draft</option>
             <option value="scheduled">Scheduled</option>
@@ -78,7 +78,7 @@ export default async function AdminBlogsPage({
         </div>
         <div>
           <label htmlFor="blog-sort" className="mb-1 block font-medium text-ink-primary">Sort by</label>
-          <select id="blog-sort" name="sort" defaultValue={params.sort} className="rounded-lg border border-border-hairline bg-surface-base px-3 py-2 text-ink-primary">
+          <select id="blog-sort" name="sort" defaultValue={params.sort} className="min-h-11 rounded-lg border border-border-hairline bg-surface-base px-3 py-2 text-ink-primary">
             <option value="created_at">Created date</option>
             <option value="updated_at">Updated date</option>
             <option value="published_at">Publication date</option>
@@ -87,13 +87,13 @@ export default async function AdminBlogsPage({
         </div>
         <div>
           <label htmlFor="blog-direction" className="mb-1 block font-medium text-ink-primary">Direction</label>
-          <select id="blog-direction" name="direction" defaultValue={params.direction} className="rounded-lg border border-border-hairline bg-surface-base px-3 py-2 text-ink-primary">
+          <select id="blog-direction" name="direction" defaultValue={params.direction} className="min-h-11 rounded-lg border border-border-hairline bg-surface-base px-3 py-2 text-ink-primary">
             <option value="desc">Descending</option>
             <option value="asc">Ascending</option>
           </select>
         </div>
-        <button type="submit" className="rounded-lg bg-accent-signal px-4 py-2 font-medium text-white hover:bg-accent-signal/90">Apply</button>
-        <Link href="/admin/blogs" className="rounded-lg px-3 py-2 text-ink-secondary underline hover:text-ink-primary">Clear</Link>
+        <button type="submit" className="min-h-11 rounded-lg bg-accent-signal px-4 py-2 font-medium text-white hover:bg-accent-signal/90">Apply</button>
+        <Link href="/admin/blogs" className="inline-flex min-h-11 items-center rounded-lg px-3 py-2 text-ink-secondary underline hover:text-ink-primary">Clear</Link>
       </form>
 
       {error && (
@@ -152,7 +152,7 @@ export default async function AdminBlogsPage({
                             <Link
                               href={`/admin/blogs/${blog.id}`}
                               aria-label={`Edit ${blog.title}`}
-                              className="p-2 text-ink-secondary hover:text-accent-signal hover:bg-surface-base rounded-lg transition-colors"
+                              className="inline-flex size-11 items-center justify-center rounded-lg text-ink-secondary transition-colors hover:bg-surface-base hover:text-accent-signal focus-visible:outline focus-visible:outline-2 focus-visible:outline-current"
                             >
                               <Edit className="h-4 w-4" />
                             </Link>

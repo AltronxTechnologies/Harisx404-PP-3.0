@@ -57,6 +57,17 @@ test("unlocked privileged reads and log actions check Admin identity before serv
   const projectList = await source("app/admin/(dashboard)/projects/page.tsx");
   assert.match(projectList, /createSupabaseAdminClient\(\)/);
   assert.match(projectList, /Projects could not be loaded/);
+  assert.match(projectList, /flex flex-wrap items-center justify-between gap-4/);
+  assert.match(projectList, /<DeleteProjectButton id=\{project\.id\} name=\{project\.title\} \/>/);
+  const projectDelete = await source("app/components/admin/DeleteProjectButton.tsx");
+  assert.match(projectDelete, /aria-label=\{`Delete \$\{name\}`\}/);
+  assert.match(projectDelete, /inline-flex size-11 items-center justify-center/);
+  const blogList = await source("app/admin/(dashboard)/blogs/page.tsx");
+  const blogActions = await source("app/admin/(dashboard)/blogs/BlogArchiveAction.tsx");
+  assert.match(blogList, /flex flex-wrap items-center justify-between gap-4/);
+  assert.match(blogList, /id="blog-search"[^\n]*className="min-h-11/);
+  assert.match(blogActions, /aria-label=\{`\$\{archived \? "Restore" : "Archive"\} \$\{post\.title\}`\}/);
+  assert.match(blogActions, /inline-flex size-11 items-center justify-center/);
 });
 
 test("Media library uses the connected row fields and keeps errors distinct from an empty library", async () => {

@@ -76,12 +76,13 @@ If rollout is needed, authorize it separately.
 
 You authorized create/edit/delete testing and said you will replace database
 content before deployment. The assistant used uniquely named temporary draft
-Buildlog and hidden FAQ fixtures for authenticated API create/read/update/delete,
-then verified both were removed. Existing portfolio rows were not modified.
+Buildlog, hidden FAQ, draft Blog and draft Project fixtures for authenticated
+Admin API lifecycle checks, then verified all were removed. Blog/Project stale
+edit conflicts were rejected. Existing portfolio rows were not modified.
 The owner must still review the final Admin UI and approve any changes to
-singleton Settings/About values, uploaded Media or actions against real logs;
-these cannot be made disposable merely by deleting a test row. Use test-only
-assets and a backup/restore plan for those flows.
+singleton Settings/About values, publication flows, uploaded Media or actions
+against real logs; these cannot be made disposable merely by deleting a test
+row. Use test-only assets and a backup/restore plan for those flows.
 
 Decide whether legacy `/admin/about` should remain editable (it does not feed
 the locked public About) and whether Admin Changelogs should be retained,

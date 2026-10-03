@@ -26,14 +26,14 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
 | Logs schema and UI | Observed read-only change; provenance/policy unknown | Earlier REST `system_logs?select=id,resolved&limit=0` returned 400 / `42703`; latest identical probe returned **200**. Owner reported `system_logs_resolved_created_at_idx` exists on `(resolved, created_at DESC)`. Owner `/admin/logs` rendered a list earlier; no values recorded or actions clicked. We applied no migration. Column provenance, staged SQL application and effective RLS are unverified |
 | FAQ input/UI and authorization | Scoped authenticated lifecycle passed | `app/api/admin/faqs/route.ts` full strict POST, partial PUT with UUID id, boolean PATCH and UUID DELETE. One incomplete POST returned 400; a hidden disposable FAQ passed create/read/update/delete through the authenticated API and was verified absent afterward. FAQ list separates failures and withholds section switch on Settings error; PATCH/visibility/public effects and other role tests remain unverified |
 | FAQ/settings RLS | Source-confirmed; connected policy unknown | `migrations/2026_admin_content_rls_hardening.sql` stages removal of broad FAQ-manage and site-settings-update authenticated policies; **not applied by us**. Connected policy catalog not inspected; review read-only before owner-approved rollout |
-| Dashboard/Projects list | Source-confirmed; partial owner render | Both check Admin before service-role reads and show query errors instead of false zero/empty; `/admin` rendered and Projects list sampled for containment, but counts/drafts and list actions not validated |
-| Security integration | Observed passed, limited scope | Docker `tests/admin-security.integration.test.mjs`: **9/9**. Source and anonymous HTTP tests cover five GET 401s, auth/schema boundaries, login robots and five 307 redirects, with new Admin Buildlog card/target source assertions. This source test is distinct from authenticated geometry and fixture lifecycle evidence |
+| Dashboard/Projects list | Observed partial owner render | Dashboard and Projects check Admin before service-role reads and show query errors instead of false zero/empty. Authenticated Project list and draft row rendered at sampled widths after streamed table rows settled; list header wraps and edit/delete targets are 44px. Count accuracy and destructive UI confirmation unverified |
+| Security integration | Observed passed, limited scope | Docker `tests/admin-security.integration.test.mjs`: **9/9**. Source and anonymous HTTP tests cover five GET 401s, auth/schema boundaries, login robots and five 307 redirects; source assertions now include Blog/Project list actions. This is distinct from authenticated fixture lifecycle evidence |
 | Login browser test | Observed passed, layout scope | Docker `tests/admin-login.browser.test.mjs`: **1/1**, seven widths x two themes; screenshot `/tmp/playwright/admin-login-mobile-review.png` is outside the repo. Owner Dashboard/Logs read-only UI observed separately, not by this test |
-| Combined Admin/public/locked regression | Observed passed, limited scope | Latest broad Docker Node run: **43 pass, one existing Project skip**; Buildlog integration/versions/browser **11/11**. Public Buildlog source and visual baseline unchanged. Owner authorized narrow Admin Buildlog edit; no public Buildlog source edited |
+| Combined Admin/public/locked regression | Observed passed, limited scope | Latest broad Docker Node run: **49 pass, one existing Project skip**, including public Blog/Project/Buildlog regressions. No public source was edited in the Blog/Project continuation |
 | Post-build smoke | Observed passed | **20/20** after final isolated Buildlog edit build; includes Admin/login/shell, public Home/About and public Buildlog integration. Not full owner CRUD acceptance |
 | Static checks | Observed passed | Docker `npx tsc --noEmit`, focused ESLint on latest Admin/test edits and `git diff --check` passed after the final Dashboard edit |
-| Isolated production build / preview | Observed passed; preview retained | Final Docker build succeeded with **132 static pages** after Admin-only Buildlog list edit; one preexisting img warning plus edge-runtime notice. `.next-build` mounted outside workspace; host-network preview port 3000 remains running |
-| Connected write and release checks | Scoped pass; broader acceptance blocked | Authenticated draft/demo Buildlog and hidden FAQ create/read/update/delete passed, cleanup confirmed. Settings/About singleton save/reopen, Blog/Project/Media, log actions, policy/provenance, full root omission and other named locked Admin scopes remain; no production-ready claim |
+| Isolated production build / preview | Observed passed; preview retained | Final Docker build succeeded with **132 static pages** after Admin Blog/Project list edits; one preexisting img warning plus edge-runtime notice. `.next-build` mounted outside workspace; host-network preview port 3000 remains running |
+| Connected write and release checks | Scoped pass; broader acceptance blocked | Authenticated draft/demo Buildlog, hidden FAQ, draft Blog and draft Project fixture lifecycles passed with verified cleanup. Settings/About singleton save/reopen, Media upload, publish/public effects, log actions, policy/provenance, full root omission and other named locked Admin scopes remain; no production-ready claim |
 | Documentation whitespace check | Passed | `git diff --check` returned clean; no credentials or private response values recorded |
 
 ## 2026-10-03 Continuation
@@ -148,6 +148,33 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
 - After the editor breakpoint change, focused Admin/Buildlog/Home checks
   **18/18**, TypeScript, ESLint, final isolated build (132 static pages), and
   post-build smoke **20/20** passed. Public Buildlog source remains untouched.
+
+## 2026-10-03 Admin Blog and Project Continuation
+
+- In-memory owner authentication exercised `/admin/blogs/new`, `/admin/projects/new`,
+  and their lists at 320/390/768/1024/1440px. Visible controls were contained.
+  A stale development response for the Project list initially omitted its
+  Admin wrapper and retained a canonical link; after a scoped Project-list
+  change forced that route to recompile, subsequent authenticated requests at
+  all sampled widths had the wrapper and no canonical. This is a dev-observed
+  recovery, not a claim about every deployed cache state. List rows are streamed;
+  assertions wait for the table rather than treating initial empty markup as a
+  missing record.
+- Temporary draft Blog: invalid create rejected 400; create, filtered-list
+  visibility, editor render, update, stale-edit rejection 409, archive and
+  archived delete passed. Temporary draft Project: invalid create rejected
+  400; create, list visibility, editor render, update, stale-edit rejection
+  409 and delete passed. Both were verified absent afterward by scoped
+  service-role count queries. Existing portfolio records were not changed,
+  neither draft was published, and the in-memory session helper was removed.
+- Blog filter controls and archive/edit/delete targets now have 44px minimum
+  targets; Blog and Project list headings wrap, and Project delete names its
+  associated record. Only Admin source was edited. No public Blog/Project
+  presentation, production data, schema or migrations were changed.
+- Docker broad regression **49 pass, one existing Project skip**, post-edit
+  isolated build **132 static pages**, post-build smoke **20/20**, TypeScript,
+  focused ESLint and whitespace checks passed. Existing image lint and Edge
+  notices remain; full Admin production acceptance is still open.
 
 Docker validation commands run during this session (no connected writes):
 

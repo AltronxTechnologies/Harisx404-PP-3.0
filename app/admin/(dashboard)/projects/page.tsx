@@ -15,8 +15,8 @@ export default async function AdminProjectsPage() {
     .order("created_at", { ascending: false });
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+    <div className="flex min-w-0 flex-col gap-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Projects</h1>
           <p className="text-sm text-ink-secondary">Manage your portfolio projects.</p>
@@ -76,11 +76,11 @@ export default async function AdminProjectsPage() {
                         <Link 
                           href={`/admin/projects/${project.id}`}
                           aria-label={`Edit ${project.title}`}
-                          className="p-2 text-ink-secondary hover:text-accent-signal hover:bg-surface-base rounded-lg transition-colors"
+                          className="inline-flex size-11 items-center justify-center rounded-lg text-ink-secondary transition-colors hover:bg-surface-base hover:text-accent-signal focus-visible:outline focus-visible:outline-2 focus-visible:outline-current"
                         >
                           <Edit className="h-4 w-4" />
                         </Link>
-                        <DeleteProjectButton id={project.id} />
+                        <DeleteProjectButton id={project.id} name={project.title} />
                       </div>
                     </td>
                   </tr>
