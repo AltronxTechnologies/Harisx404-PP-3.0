@@ -413,6 +413,38 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
   or committed to this repository. Settings/About valid save/reopen remains
   untested pending a verified backup or disposable development project.
 
+## 2026-10-03 Admin-Polishing Regression Review
+
+- Compared `3231400..HEAD`, the pre-Admin-polishing commit through the current
+  checkout. No public page/component, public root layout, global stylesheet,
+  public route, middleware or Next configuration file changed in that range.
+  The only application files outside Admin paths are `app/lib/admin-auth.ts`,
+  `app/lib/supabase/auth.ts` and `app/lib/stats/server-stats.ts`. The auth
+  helper's callers are Admin login/sidebar; the stats helper's callers are
+  Admin dashboard/analytics. The Admin-only nested layout uses selectors
+  conditional on `data-admin-root`; public root chrome is still mounted on
+  Admin routes, not removed at render time. Two staged migration files were
+  added in the range but were not applied by this review.
+- Read-only Docker regression across Admin security/shell/login, public Home,
+  About, Blog, Buildlog, Community Wall, Projects, Credentials, Resume,
+  Contact, Links, navigation, legal and preview routes: **77 passed, one
+  existing Project preview skip, zero failures**. Mocked Admin error-state
+  tests and Buildlog version tests: **7/7**. Docker `npx tsc --noEmit` and
+  `npx next lint` succeeded; lint retains the existing
+  `CurrentlyReadingBento.tsx` image warning.
+- Isolated production build using `NEXT_DIST_DIR=.next-build` succeeded with
+  **129 static pages**, the existing image lint warning and Edge-runtime
+  notice. Post-build Admin/public smoke: **29/29**. The port-3000 preview
+  service remained running. This review did not modify application code,
+  connected records, migrations, or portfolio assets.
+- No tested public rendering or route regression was found. This is not
+  pixel-perfect owner acceptance, exhaustive Admin workflow testing or a
+  deployment check. Valid Settings/About singleton saves still require a
+  verified backup or disposable project; authenticated owner CRUD and
+  production-domain behavior remain separate acceptance gates. Historical
+  `git diff --check 3231400..HEAD` reports two trailing-whitespace lines in
+  Admin About/Settings; neither is a runtime finding or a change in this review.
+
 Representative Docker validation commands (one-off owner fixture helpers were removed after earlier tests):
 
 ```bash
