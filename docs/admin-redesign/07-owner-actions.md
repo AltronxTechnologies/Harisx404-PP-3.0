@@ -78,11 +78,16 @@ You authorized create/edit/delete testing and said you will replace database
 content before deployment. The assistant used uniquely named temporary draft
 Buildlog, hidden FAQ, draft Blog and draft Project fixtures for authenticated
 Admin API lifecycle checks, then verified all were removed. Blog/Project stale
-edit conflicts were rejected. Existing portfolio rows were not modified.
+edit conflicts were rejected. A one-pixel test image was uploaded through the
+Media UI; its database row and Cloudinary asset were also verified removed.
+Existing portfolio rows were not modified.
 The owner must still review the final Admin UI and approve any changes to
-singleton Settings/About values, publication flows, uploaded Media or actions
-against real logs; these cannot be made disposable merely by deleting a test
-row. Use test-only assets and a backup/restore plan for those flows.
+singleton Settings/About values, publication flows or actions against real
+logs; these cannot be made disposable merely by deleting a test row. The Media
+library currently offers upload and copy, not owner-facing delete; if you want
+deletion, specify what should happen when an image is used by a Project or Blog
+and what confirmation you want before removing it from Cloudinary. Use test-only
+assets and a backup/restore plan for further upload workflows.
 
 Decide whether legacy `/admin/about` should remain editable (it does not feed
 the locked public About) and whether Admin Changelogs should be retained,
