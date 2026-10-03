@@ -70,6 +70,26 @@ test("Media library uses the connected row fields and keeps errors distinct from
   assert.match(mediaApi, /const limit = Math\.min\(requestedLimit, 100\)/);
 });
 
+test("unlocked Admin presentation keeps narrow content contained and controls named", async () => {
+  const [layout, dashboard, sidebar, about, changelog] = await Promise.all([
+    source("app/admin/(dashboard)/layout.tsx"),
+    source("app/admin/(dashboard)/page.tsx"),
+    source("app/components/admin/Sidebar.tsx"),
+    source("app/admin/(dashboard)/about/page.tsx"),
+    source("app/admin/(dashboard)/changelogs/page.tsx"),
+  ]);
+  assert.match(layout, /gridTemplateColumns: "minmax\(0, 1fr\)"/);
+  assert.match(dashboard, /grid-cols-\[minmax\(0,1fr\)\]/);
+  assert.match(dashboard, /md:grid-cols-2 xl:grid-cols-3/);
+  assert.match(dashboard, /<p className="truncate text-sm font-medium text-text-primary">\{project\.title\}<\/p>/);
+  assert.match(dashboard, /ml-3 flex shrink-0 items-center gap-2/);
+  assert.match(dashboard, /aria-label=\{`Edit \$\{project\.title\}`\}/);
+  assert.match(sidebar, /aria-current=\{active \? "page" : undefined\}/);
+  assert.match(sidebar, /min-h-11/);
+  assert.match(about, /htmlFor=\{`about-section-\$\{num\}-image`\}/);
+  assert.match(changelog, /flex flex-wrap items-center justify-between gap-4/);
+});
+
 test("Admin login is private and the unlocked routes retain their URLs", async () => {
   const login = await fetch(`${baseUrl}/admin/login`);
   assert.equal(login.status, 200);

@@ -54,7 +54,7 @@ export default async function AdminDashboard() {
   ];
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-8" style={{ minWidth: 0 }}>
       {/* Header */}
       <div className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold tracking-tight text-text-primary">Dashboard</h1>
@@ -62,7 +62,7 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {statCards.map((card) => {
           const Icon = card.icon;
           return (
@@ -83,13 +83,13 @@ export default async function AdminDashboard() {
         })}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-6 xl:grid-cols-2">
         {/* Quick Actions */}
         <div className="rounded-xl border border-border-primary/50 bg-bg-primary shadow-sm">
           <div className="border-b border-border-primary/50 px-6 py-4">
             <h2 className="font-semibold text-text-primary">Quick Actions</h2>
           </div>
-          <div className="grid grid-cols-2 gap-2 p-4">
+          <div className="grid grid-cols-1 gap-2 p-4 lg:grid-cols-2">
             {quickActions.map((action) => {
               const Icon = action.icon;
               if (action.external) {
@@ -99,7 +99,7 @@ export default async function AdminDashboard() {
                     href={action.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-text-secondary border border-border-primary/50 hover:bg-border-primary/30 hover:text-text-primary transition-all"
+                    className="flex min-h-11 items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-text-secondary border border-border-primary/50 hover:bg-border-primary/30 hover:text-text-primary transition-all"
                   >
                     <Icon className="h-4 w-4 shrink-0" />
                     {action.label}
@@ -110,7 +110,7 @@ export default async function AdminDashboard() {
                 <Link
                   key={action.label}
                   href={action.href}
-                  className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-text-secondary border border-border-primary/50 hover:bg-border-primary/30 hover:text-text-primary transition-all"
+                  className="flex min-h-11 items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-text-secondary border border-border-primary/50 hover:bg-border-primary/30 hover:text-text-primary transition-all"
                 >
                   <Icon className="h-4 w-4 shrink-0" />
                   {action.label}
@@ -157,7 +157,7 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Recent Projects */}
-        <div className="rounded-xl border border-border-primary/50 bg-bg-primary shadow-sm lg:col-span-2">
+        <div className="rounded-xl border border-border-primary/50 bg-bg-primary shadow-sm xl:col-span-2">
           <div className="flex items-center justify-between border-b border-border-primary/50 px-6 py-4">
             <h2 className="font-semibold text-text-primary">Recent Projects</h2>
             <Link href="/admin/projects" className="flex items-center gap-1 text-xs text-indigo-600 hover:underline">
@@ -172,17 +172,17 @@ export default async function AdminDashboard() {
             ) : (
               (recentProjects ?? []).map((project: any) => (
                 <div key={project.id} className="flex items-center justify-between px-6 py-3">
-                  <div className="flex items-center gap-3">
+                  <div className="flex min-w-0 items-center gap-3">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-950/30">
                       <Layers className="h-4 w-4 text-indigo-600" />
                     </div>
-                    <p className="text-sm font-medium text-text-primary">{project.title}</p>
+                    <p className="truncate text-sm font-medium text-text-primary">{project.title}</p>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="ml-3 flex shrink-0 items-center gap-2">
                     <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${project.status === "published" ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400" : "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400"}`}>
                       {project.status}
                     </span>
-                    <Link href={`/admin/projects/${project.id}`} className="text-indigo-600 hover:text-indigo-700">
+                    <Link href={`/admin/projects/${project.id}`} aria-label={`Edit ${project.title}`} className="inline-flex size-11 items-center justify-center rounded-lg text-indigo-600 hover:bg-border-primary/30 hover:text-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-current">
                       <ArrowUpRight className="h-4 w-4" />
                     </Link>
                   </div>

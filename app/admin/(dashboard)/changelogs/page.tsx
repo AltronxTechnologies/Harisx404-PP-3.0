@@ -5,21 +5,21 @@ import { DeleteChangelogButton } from "@/app/components/admin/DeleteChangelogBut
 
 export default async function AdminChangelogsPage() {
   const supabase = await createSupabaseServerClient();
-  const { data: changelogs } = await supabase
+  const { data: changelogs, error } = await supabase
     .from("changelogs")
     .select("id, title, slug, status, published_at")
     .order("published_at", { ascending: false });
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+    <div className="flex min-w-0 flex-col gap-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Changelogs</h1>
           <p className="text-sm text-ink-secondary">Manage your portfolio changelog entries.</p>
         </div>
         <Link
           href="/admin/changelogs/new"
-          className="inline-flex items-center justify-center rounded-xl bg-accent-signal px-4 py-2 text-sm font-medium text-white shadow hover:bg-accent-signal/90 transition-all"
+          className="inline-flex min-h-11 items-center justify-center rounded-xl bg-accent-signal px-4 py-2 text-sm font-medium text-white shadow hover:bg-accent-signal/90 transition-all"
         >
           <Plus className="mr-2 h-4 w-4" />
           New Changelog
@@ -38,7 +38,9 @@ export default async function AdminChangelogsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border-hairline">
-              {changelogs?.length === 0 ? (
+              {error ? (
+                <tr><td colSpan={4} role="alert" className="px-6 py-8 text-center text-text-secondary">Changelogs could not be loaded. Reload this page to retry.</td></tr>
+              ) : changelogs?.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="px-6 py-8 text-center text-ink-secondary">
                     No changelogs found. Create one to get started!
@@ -67,6 +69,7 @@ export default async function AdminChangelogsPage() {
                       <div className="flex items-center justify-end gap-2">
                         <Link 
                           href={`/admin/changelogs/${changelog.id}`}
+                          aria-label={`Edit ${changelog.title}`}
                           className="p-2 text-ink-secondary hover:text-accent-signal hover:bg-surface-base rounded-lg transition-colors"
                         >
                           <Edit className="h-4 w-4" />
