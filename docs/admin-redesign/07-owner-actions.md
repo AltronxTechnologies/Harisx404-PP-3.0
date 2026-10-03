@@ -6,14 +6,15 @@ Supabase dashboard access, production credentials, locked-file permission, and
 permission to mutate connected content. Do not paste passwords, service keys,
 session cookies, private content, or unredacted SQL results into chat or issues.
 
-## 1. Restore a read-only owner session
+## 1. Owner-session visibility
 
 Open `/admin/login` in the shared preview (`http://localhost:8080/admin/login`
 through Alloy, or `http://localhost:3000/admin/login` directly) and sign in
 yourself. Confirm `/admin`, `/admin/blogs`, and `/admin/analytics` render. Do not
-send the password here. The previous browser session expired, so further owner
-geometry and interaction checks cannot be claimed until a new session exists.
-This sign-in grants read-only inspection, not permission to save/delete data.
+send the password here. You reported successfully signing in, but the separate
+automated browser context still redirects to login; its authenticated geometry
+and interaction checks cannot be claimed until it has an owner session. Your
+sign-in grants read-only inspection, not permission to save/delete data.
 Rotate the Admin password previously shared in chat when practical.
 
 ## 2. Approve or decline each locked-scope change
@@ -23,11 +24,13 @@ Rotate the Admin password previously shared in chat when practical.
   responsive overflow fix; leave the public Buildlog unchanged." Otherwise
   accept and document the limitation. A general request to continue does not
   unlock the entry in `LOCKED_PERFECT.md`.
-- Admin inherits public Navbar, Footer, chat, canonical metadata and WebSite
-  JSON-LD from locked `app/layout.tsx`. Decide whether to unlock that file for
-  a narrowly scoped Admin isolation strategy with public regression checks,
-  or retain the inherited chrome/metadata as an accepted limitation. Do not
-  approve a public-page redesign by implication.
+- You authorized removing the public chrome from Admin while leaving public
+  pages alone. Admin-only styles now hide the inherited Navbar, Footer, side
+  rails and chat, and the Admin canonical is cleared. The public root remains
+  untouched: those components still mount on Admin routes, and its WebSite
+  JSON-LD remains in the document. Fully omitting them at render time would
+  require a separate explicit change to the locked shared root; do not treat
+  the visual isolation as that approval.
 - Named locked Admin scopes (Testimonials, Experience, Certifications,
   Community Wall, and qualified Resume work) need their own precise permission
   before any change. No new formal lock is requested; `AUDIT_TESTING.md` runs
@@ -61,8 +64,10 @@ where schemaname = 'public'
   and indexname = 'system_logs_resolved_created_at_idx';
 ```
 
-The `resolved` column is currently queryable, but its origin and index/policy
-state have not been established. The assistant did **not** apply
+The `resolved` column is currently queryable. You confirmed the named
+`system_logs_resolved_created_at_idx` index exists on `(resolved, created_at
+DESC)`, but the policy results and column details were not included in your
+reply. The assistant did **not** apply
 `migrations/2026_admin_content_rls_hardening.sql` or
 `migrations/2026_admin_system_logs_resolved.sql`. Do not run either migration
 just because it exists: first review the catalog results, expected public

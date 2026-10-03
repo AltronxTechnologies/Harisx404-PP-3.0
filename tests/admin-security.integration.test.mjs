@@ -73,6 +73,26 @@ test("Media library uses the connected row fields and keeps errors distinct from
   assert.match(mediaApi, /const limit = Math\.min\(requestedLimit, 100\)/);
 });
 
+test("FAQ list does not claim a failed read means the table is missing or visibility is enabled", async () => {
+  const page = await source("app/admin/(dashboard)/faqs/page.tsx");
+  assert.match(page, /error: settingError/);
+  assert.match(page, /\{settingError \? \(/);
+  assert.match(page, /\{faqsError \? \(/);
+  assert.match(page, /aria-label=\{`Edit \$\{faq\.question\}`\}/);
+  assert.doesNotMatch(page, /The <code className="font-mono">faqs<\/code> table doesn/);
+});
+
+test("Settings editor keeps labelled, usable controls in the Admin visual language", async () => {
+  const page = await source("app/admin/(dashboard)/settings/page.tsx");
+  for (const field of ["site_name", "seo_description", "seo_keywords", "github_url", "twitter_url", "linkedin_url", "email_address"]) {
+    assert.match(page, new RegExp(`htmlFor="${field}"`));
+    assert.match(page, new RegExp(`id="${field}"`));
+  }
+  assert.match(page, /rounded-2xl border border-border-primary bg-white p-6 dark:bg-white\/\[0\.03\]/);
+  assert.match(page, /min-h-11 w-full rounded-xl border border-border-primary bg-bg-primary/);
+  assert.match(page, /inline-flex min-h-11 items-center justify-center rounded-full bg-text-primary/);
+});
+
 test("unlocked Admin presentation keeps narrow content contained and controls named", async () => {
   const [layout, dashboard, sidebar, about, changelog] = await Promise.all([
     source("app/admin/(dashboard)/layout.tsx"),

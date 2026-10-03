@@ -13,7 +13,7 @@ export default async function AdminFaqsPage() {
   if (auth.response) redirect(auth.response.status === 401 ? "/admin/login" : "/");
   const supabase = await createSupabaseAdminClient();
 
-  const [{ data: faqs, error: faqsError }, { data: setting }] = await Promise.all([
+  const [{ data: faqs, error: faqsError }, { data: setting, error: settingError }] = await Promise.all([
     supabase
       .from("faqs")
       .select("id, question, answer, display_order, is_visible")
@@ -23,11 +23,9 @@ export default async function AdminFaqsPage() {
   ]);
 
   const sectionEnabled = setting?.show_faq_section !== false;
-  const tableMissing = Boolean(faqsError);
-
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+    <div className="flex min-w-0 flex-col gap-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">FAQs</h1>
           <p className="text-sm text-ink-secondary">
@@ -36,21 +34,25 @@ export default async function AdminFaqsPage() {
         </div>
         <Link
           href="/admin/faqs/new"
-          className="inline-flex items-center justify-center rounded-xl bg-accent-signal px-4 py-2 text-sm font-medium text-white shadow hover:bg-accent-signal/90 transition-all"
+          className="inline-flex min-h-11 items-center justify-center rounded-xl bg-accent-signal px-4 py-2 text-sm font-medium text-white shadow hover:bg-accent-signal/90 transition-all"
         >
           <Plus className="mr-2 h-4 w-4" />
           New FAQ
         </Link>
       </div>
 
-      <FaqSectionToggle enabled={sectionEnabled} />
+      {settingError ? (
+        <p role="alert" className="rounded-xl border border-border-primary bg-bg-primary p-4 text-sm text-text-secondary">
+          FAQ section visibility could not be loaded. Reload this page to retry before changing it.
+        </p>
+      ) : (
+        <FaqSectionToggle enabled={sectionEnabled} />
+      )}
 
-      {tableMissing ? (
-        <div className="rounded-xl border border-yellow-300/50 bg-yellow-50 p-5 text-sm text-yellow-800 dark:border-yellow-500/30 dark:bg-yellow-950/20 dark:text-yellow-400">
-          The <code className="font-mono">faqs</code> table doesn&apos;t exist yet. Run{" "}
-          <code className="font-mono">migrations/2026_faqs.sql</code> in the Supabase SQL editor,
-          then reload this page. Until then, the homepage shows the built-in default questions.
-        </div>
+      {faqsError ? (
+        <p role="alert" className="rounded-xl border border-border-primary bg-bg-primary p-4 text-sm text-text-secondary">
+          FAQs could not be loaded. Reload this page to retry.
+        </p>
       ) : (
         <div className="rounded-xl border border-border-hairline bg-surface-raised shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
@@ -87,7 +89,8 @@ export default async function AdminFaqsPage() {
                         <div className="flex items-center justify-end gap-2">
                           <Link
                             href={`/admin/faqs/${faq.id}`}
-                            className="p-2 text-ink-secondary hover:text-accent-signal hover:bg-surface-base rounded-lg transition-colors"
+                            aria-label={`Edit ${faq.question}`}
+                            className="inline-flex size-11 items-center justify-center rounded-lg text-ink-secondary transition-colors hover:bg-surface-base hover:text-accent-signal focus-visible:outline focus-visible:outline-2 focus-visible:outline-current"
                           >
                             <Edit className="h-4 w-4" />
                           </Link>
