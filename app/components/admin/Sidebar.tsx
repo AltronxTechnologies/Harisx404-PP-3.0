@@ -13,7 +13,6 @@ const navItems = [
   { name: "Blogs", href: "/admin/blogs", icon: FileText },
   { name: "Projects", href: "/admin/projects", icon: Briefcase },
   { name: "Resume", href: "/admin/resume", icon: FileText },
-  { name: "Changelogs", href: "/admin/changelogs", icon: List },
   { name: "Buildlog", href: "/admin/buildlog", icon: List },
   { name: "Community Wall", href: "/admin/community-wall", icon: MessageSquare },
   { name: "Testimonials", href: "/admin/testimonials", icon: Quote },

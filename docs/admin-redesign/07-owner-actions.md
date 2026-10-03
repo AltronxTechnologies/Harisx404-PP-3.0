@@ -78,8 +78,8 @@ You authorized create/edit/delete testing and said you will replace database
 content before deployment. The assistant used uniquely named temporary draft
 Buildlog, hidden FAQ, draft Blog and draft Project fixtures for authenticated
 Admin API lifecycle checks, then verified all were removed. A disposable draft
-Changelog also passed create/edit/delete; it is still separate from the public
-Buildlog. One unique test log was resolved through Admin and removed, without
+Changelog passed create/edit/delete **before its retirement**; it never powered
+the public Buildlog. One unique test log was resolved through Admin and removed, without
 using bulk clear. Blog/Project stale edit conflicts were rejected. A one-pixel
 test image was uploaded through the
 Media UI; its database row and Cloudinary asset were also verified removed.
@@ -95,10 +95,12 @@ concurrent edit or failed restoration still needs manual review. Use test-only
 assets and a backup/restore plan for further workflows.
 
 Decide whether legacy `/admin/about` should remain editable (it does not feed
-the locked public About) and whether Admin Changelogs should be retained,
-retired, or given a public destination (they are separate from Buildlog).
-Its private draft workflow works, but publishing there does not make a public
-page appear. Do not use either legacy editor to imply a public content change.
+the locked public About). You chose to retire the separate Changelog Admin
+editor: old Admin links now lead to Buildlog, and `/changelog` still leads to
+the public Buildlog. Connected legacy `changelogs` and `changelog_entries`
+tables/rows were **not deleted**. If you later want to drop them, first export
+and inspect their contents in Supabase, take a backup, and authorize a separate
+schema/data cleanup. There is no need to do that to use Buildlog.
 
 ## 5. Deployment-only checks
 

@@ -1,6 +1,6 @@
 # Validation Log
 
-Current-worktree planning snapshot. **Source-confirmed** means inspected code, **observed** means authenticated/anonymous browser or REST evidence, **prior check** means an earlier test/build result, and **blocked** means separate owner approval is needed. Earlier owner-session checks were read-only; later scoped Buildlog/FAQ/Blog/Project/Changelog, Media and one log fixture used authenticated APIs/UI with verified cleanup. No public-source edit, unapproved locked Admin edit or migration applied by us; no deployment sign-off. Never add passwords, session material, settings/log values, secrets or private response bodies here.
+Current-worktree planning snapshot. **Source-confirmed** means inspected code, **observed** means authenticated/anonymous browser or REST evidence, **prior check** means an earlier test/build result, and **blocked** means separate owner approval is needed. Earlier owner-session checks were read-only; later scoped Buildlog/FAQ/Blog/Project/Changelog, Media and one log fixture used authenticated APIs/UI with verified cleanup. Owner has now retired the separate Changelog Admin UI/API; historical entries below describe evidence before removal, not current functionality. No public-source edit, unapproved locked Admin edit or migration applied by us; no deployment sign-off. Never add passwords, session material, settings/log values, secrets or private response bodies here.
 
 | Item | Status | Evidence / limitation |
 | --- | --- | --- |
@@ -13,26 +13,26 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
 | Sidebar mobile drawer | Observed read-only at 390; source-confirmed controls | 16 nav links measured min-44px, one active `aria-current="page"`, Escape/close restored focus to trigger; desktop/route focus behaviors not fully rechecked. No logout pressed |
 | About/Settings form geometry | Observed before latest shell/style changes | Legacy About originally had 14 unlabeled fields; IDs/labels and 44px minimum text input height added. Same-origin offscreen iframe at 320/390/768/1440: 14 labelled, no overflow; legacy warning retained. Settings: seven labelled fields, no overflow at 320/390/640/768/1024/1440 before latest visual alignment with About. No typing/save/reopen or field values recorded |
 | Sampled Admin route containment | Observed authenticated for Buildlog; remaining routes partial | Projects/Blogs/Media and FAQs/Analytics/Changelogs/Logs were sampled earlier. Before owner's specific unlock, `/admin/buildlog` measured 9/9/6 out-of-viewport cells at 320/390/768, largely within its intended horizontal table scroll container. Mobile cards now replace the table below `xl`; authenticated 320/390/768/1024/1280/1440 checks found no visible card/control overflow. Other locked Buildlog scopes remain frozen |
-| Changelog list source/UI | Scoped authenticated draft lifecycle passed | `app/admin/(dashboard)/changelogs/page.tsx` wraps header, distinguishes error from empty and checks Admin before service-role reads. Authenticated list/new controls fit 320/390/768/1440. Malformed POST now 400 instead of 500; temporary draft create/read/partial update/delete passed and cleanup confirmed. Editor labels and 44px targets added after the geometry sample; no public consumer or owner disposition verified |
+| Retired Changelog Admin UI/API | Owner-directed removal; data preserved | Sidebar/list/new/edit/forms/API removed. Authenticated old `/admin/changelogs` bookmarks including `/new` and `/[id]` redirect to `/admin/buildlog`; public `/changelog` still 308s to `/buildlog`. Tested GET/POST/PUT/DELETE against retired API return 404. Legacy tables/rows and unused locked-public-side helper/component were not deleted |
 | Inherited root chrome/metadata | Admin visual isolation observed; render-time decision pending | Owner authorized removing public chrome from Admin while preserving public pages. `app/admin/layout.tsx` styles hide inherited Navbar/Footer/chat/rails only on Admin; `noindex` remains and Admin canonical is absent. Browser checked Admin login at 320/390/768/1440 and public Home frame. Root components still mount invisibly and WebSite JSON-LD still inherits; true render-time omission would require a separate locked-root change |
 | Connected `site_settings` schema | Confirmed supplied read-only observation | GET 200, one row; columns `id`, `site_name`, `seo_description`, `seo_keywords`, `github_url`, `twitter_url`, `linkedin_url`, `email_address`, `created_at`, `updated_at`, `show_faq_section`; values omitted |
 | Settings API | Source-confirmed; anonymous and owner GET observed | `app/api/admin/settings/route.ts`: verified Admin then service role, singleton named columns, strict optional Zod PUT, private no-store GET/successful PUT. Anonymous GET 401 (previously 500); owner GET 200 with exactly seven named fields: `site_name`, `seo_description`, `seo_keywords`, `github_url`, `twitter_url`, `linkedin_url`, `email_address`. No values recorded; no PUT/save-reopen |
-| Other anonymous API GETs | Observed status only | Current `GET /api/admin/{about,faqs,changelogs,media}` all 401, plus Settings 401; previous 200 about/faqs/changelogs/experience and 401 media/testimonials/resume/buildlog/community-wall, 405 blogs/projects. Experience has no new result; status alone does not prove exposure or other-method safety |
-| Other owner API GETs | Observed HTTP 200, shapes only | `GET /api/admin/about`: legacy fields; `/api/admin/faqs` and `/api/admin/changelogs`: `data` arrays; `/api/admin/media`: `data` array and `count`. No response values or contents recorded, no mutation or page UI acceptance implied |
+| Other anonymous API GETs | Observed status only | Current `GET /api/admin/{about,faqs,media}` plus Settings return 401; retired Changelog API GET returns 404. Previous 200s for About/FAQs/Changelogs/Experience are historical; Experience has no new result. Status alone does not prove past exposure or other-method safety |
+| Other owner API GETs | Historical shapes | About legacy fields, FAQs `data` array and Media `data`/`count` were observed. Former Changelog `data` array was observed before route retirement; it is no longer accessible through `/api/admin/changelogs` |
 | Connected content tables | Observed read-only | REST `?select=id&limit=0` returned 200 for `about_content`, `about_sections`, `changelogs`, `changelog_entries`, `faqs`. Further read-only `about_content` column inspection: `id`, `hero_title`, `hero_subtitle`, sections 1-4 `title`/`content`/`image_url`, `created_at`, `updated_at`; no values recorded |
 | Connected Media schema | Observed read-only plus scoped fixture | REST `media?select=*&limit=1` confirmed `id`, `public_id`, `url`, `secure_url`, `width`, `height`, `format`, `bytes`, `alt_text`, `folder`, `created_at`, `updated_at`; no private values recorded. Temporary UI-uploaded PNG row was found and later verified absent with Cloudinary cleanup |
 | Media UI and upload/deletion boundary | Scoped authenticated lifecycle passed; race/coverage gaps remain | Authenticated Media library loaded at 320/390/640/768/1024/1440. Invalid pagination 400, missing file 400, SVG 415. Test PNG uploaded via UI and displayed full name/dimensions/size; authenticated delete refused Blog cover ID/URL and Project gallery/URL uses (409), then removed both Media row and Cloudinary asset after references were removed. 44px delete button fits 320/390/768/1440. Count/Load more uses API total; mocked pagination and failed/successful delete tests 3/3. Only tracked rows managed; real >100 list, arbitrary URL references, concurrency and clipboard unverified |
-| Legacy About / Changelog consumers | Source-confirmed; owner decision pending | `/admin/about` warns legacy saves will not appear on locked public About; `app/api/admin/about/route.ts` strict partial allowlist after Admin check; source search found no public About `about_content` consumer. `fetchAndSortChangelogEntrees` is used by `ChangelogBento`, but no live public component uses that bento; connected Changelog tables exist. No save or public change |
+| Legacy About / retired Changelog consumers | Source-confirmed; Changelog owner decision implemented | `/admin/about` warns legacy saves will not appear on locked public About. `fetchAndSortChangelogEntrees` remains in `app/lib/utils.ts` only for unused public `ChangelogBento`, which was left untouched under public locks. Changelog Admin flow is retired; connected old tables are preserved pending export/backup and separate data cleanup approval |
 | Logs schema and UI | Single-fixture resolve passed; provenance/policy unknown | Earlier REST `system_logs?select=id,resolved&limit=0` returned 400 / `42703`; latest identical probe returned **200**. Owner reported named `(resolved, created_at DESC)` index. Logs action rows initially had 62 out-of-viewport controls at 320px; stacking actions until `lg` yielded zero measured control overflow at 320/390/768/1440. A unique disposable log was resolved via Admin UI, verified in DB and deleted. No bulk clear or migration. Column provenance and effective RLS remain unverified |
 | FAQ input/UI and authorization | Scoped authenticated lifecycle passed | `app/api/admin/faqs/route.ts` full strict POST, partial PUT with UUID id, boolean PATCH and UUID DELETE. One incomplete POST returned 400; a hidden disposable FAQ passed create/read/update/delete through the authenticated API and was verified absent afterward. FAQ list separates failures and withholds section switch on Settings error; PATCH/visibility/public effects and other role tests remain unverified |
 | FAQ/settings RLS | Source-confirmed; connected policy unknown | `migrations/2026_admin_content_rls_hardening.sql` stages removal of broad FAQ-manage and site-settings-update authenticated policies; **not applied by us**. Connected policy catalog not inspected; review read-only before owner-approved rollout |
 | Dashboard/Projects list | Observed partial owner render | Dashboard and Projects check Admin before service-role reads and show query errors instead of false zero/empty. Authenticated Project list and draft row rendered at sampled widths after streamed table rows settled; list header wraps and edit/delete targets are 44px. Count accuracy and destructive UI confirmation unverified |
-| Security integration | Observed passed, limited scope | Docker `tests/admin-security.integration.test.mjs`: **11/11**. Source and anonymous HTTP tests cover five GET 401s, Media DELETE 401, Changelog POST 401, auth/schema boundaries, login robots and five 307 redirects; source assertions cover Changelog validation/labels and Logs responsive classes. This is distinct from authenticated fixture lifecycle evidence |
+| Security integration | Focused pass, limited scope | Docker `tests/admin-security.integration.test.mjs`: **11/11** after retirement. Tests cover four remaining GET 401s, Media DELETE 401, retired Changelog API 404 for GET/POST/PUT/DELETE, old Admin URLs 307 to login anonymously, source redirect and Logs mobile controls. Not a non-owner role test |
 | Login browser test | Observed passed, layout scope | Docker `tests/admin-login.browser.test.mjs`: **1/1**, seven widths x two themes; screenshot `/tmp/playwright/admin-login-mobile-review.png` is outside the repo. Owner Dashboard/Logs read-only UI observed separately, not by this test |
-| Combined Admin/public/locked regression | Observed passed, limited scope | Latest broad Docker Node run: **51 pass, one existing Project skip**, including public Blog/Project/Buildlog regressions. No public source was edited in the Changelog/Logs continuation |
-| Post-build smoke | Observed passed | **22/22** after final isolated Changelog/Logs build; includes Admin/login/shell, public Home/About and public Buildlog integration. Not full owner CRUD acceptance |
+| Combined Admin/public/locked regression | Observed pass after retirement | Broad Docker Node run **51 pass, one existing Project skip** after legacy Changelog retirement. Public Buildlog browser **1/1** also passed; public Blog/Project/Buildlog source unchanged |
+| Post-build smoke | Observed pass after retirement | **22/22** after isolated build; not full owner CRUD acceptance |
 | Static checks | Observed passed | Docker `npx tsc --noEmit`, focused ESLint on latest Admin/test edits and `git diff --check` passed after the final Dashboard edit |
-| Isolated production build / preview | Observed passed; preview retained | Final Docker build succeeded with **132 static pages** after Changelog/Logs Admin edits; one preexisting img warning plus edge-runtime notice. `.next-build` mounted outside workspace; host-network preview port 3000 remains running |
+| Isolated production build / preview | Observed pass after retirement | Docker build succeeded with **129 static pages** (three legacy Changelog editor routes removed); preexisting image lint warning and Edge notice. `.next-build` mounted outside workspace; preview on port 3000 remains running |
 | Connected write and release checks | Scoped pass; broader acceptance blocked | Authenticated draft/demo Buildlog, hidden FAQ, draft Blog/Project/Changelog, UI Media upload/dependency-blocked/delete and single-log resolve fixtures passed with verified cleanup. Settings/About singleton save/reopen, publish/public effects, bulk Logs actions, policy/provenance, full root omission and other named locked Admin scopes remain; no production-ready claim |
 | Documentation whitespace check | Passed | `git diff --check` returned clean; no credentials or private response values recorded |
 
@@ -241,14 +241,12 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
   now stacks row actions below `lg`, wraps long messages/badges and gives action
   controls 44px minimum height; remeasurement found zero uncontained controls
   at those widths. No existing log values were recorded.
-- Changelog formerly accepted arbitrary POST JSON and returned 500 for bad
-  fields. It now checks Admin before service-role reads/writes, limits GET,
-  validates strict editor fields and UUIDs, returns 400 for malformed input,
-  and distinguishes missing rows from backend failures. Its editor gained
-  associated labels and 44px controls, and delete feedback is inline. A
-  disposable draft passed authenticated create/read/partial update/delete and
-  was verified absent. This is an Admin-only legacy workflow, **not** the
-  locked public Buildlog or a new public Changelog page.
+- Before retirement, Changelog accepted arbitrary POST JSON and returned 500
+  for bad fields. A scoped hardening pass then checked Admin before service-role
+  reads/writes and validated strict editor fields. A disposable draft passed
+  authenticated create/read/partial update/delete and was verified absent.
+  Owner subsequently chose to remove this unused workflow. None of this was
+  the locked public Buildlog or a new public Changelog page.
 - One uniquely named disposable log was inserted, marked Resolved via the
   Admin button, confirmed resolved in a scoped DB query, then deleted and
   verified absent. Clear Resolved and Simulate Error were **not** clicked;
@@ -259,7 +257,28 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
   ESLint and `git diff --check` passed. The preexisting image lint warning
   and Edge-runtime notice remain. No public or named locked source changed.
 
-Docker validation commands run during this session (no connected writes):
+## 2026-10-03 Legacy Changelog Retirement
+
+- Owner explicitly chose to remove the separate Changelog feature while
+  retaining public Buildlog. Removed the Sidebar Changelogs item, legacy Admin
+  list/new/edit pages, editor/delete components and `/api/admin/changelogs`
+  route. No new Changelog can be saved from Admin. An optional catch-all at
+  `/admin/changelogs/[[...slug]]` preserves old owner bookmarks by redirecting
+  them to `/admin/buildlog`; authenticated root/new/old-ID URL checks passed.
+  Anonymous visits still redirect to `/admin/login`. Retired API GET/POST/PUT/
+  DELETE each returned 404. Public `/changelog` still returns 308 to `/buildlog`.
+- Connected `changelogs` and `changelog_entries` tables/rows were **not**
+  deleted. Unused public `ChangelogBento` and its utility helpers remain
+  untouched under the public-source lock. A future owner-backed data/schema
+  cleanup is separate from making the Admin navigation truthful. No connected
+  mutation or migration was performed during this retirement.
+- Post-change Docker regression **51 pass, one existing Project skip**,
+  isolated build **129 static pages** (three legacy editor pages removed),
+  post-build smoke **22/22**, public Buildlog browser **1/1**, TypeScript,
+  focused ESLint and `git diff --check` passed. The earlier image lint and
+  Edge-runtime notices remain. Preview stack remains running.
+
+Representative Docker validation commands (one-off owner fixture helpers were removed after earlier tests):
 
 ```bash
 docker compose -f docker-compose.alloy.yaml exec -T web node --test --test-concurrency=1 tests/admin-login.browser.test.mjs tests/admin-security.integration.test.mjs tests/home-about-surfaces.integration.test.mjs tests/legal-pages.integration.test.mjs tests/blog.integration.test.mjs tests/project-detail.integration.test.mjs tests/navigation-coverage.integration.test.mjs tests/preview-runtime.integration.test.mjs

@@ -6,7 +6,7 @@ const baseUrl = process.env.ADMIN_BASE_URL || "http://localhost:3000";
 const source = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("anonymous callers cannot read unlocked Admin API endpoints", async () => {
-  for (const path of ["settings", "about", "faqs", "changelogs", "media"]) {
+  for (const path of ["settings", "about", "faqs", "media"]) {
     const response = await fetch(`${baseUrl}/api/admin/${path}`);
     assert.equal(response.status, 401, `/api/admin/${path} should fail closed`);
   }
@@ -36,13 +36,10 @@ test("unlocked privileged reads and log actions check Admin identity before serv
     "app/admin/(dashboard)/blogs/page.tsx",
     "app/admin/(dashboard)/analytics/page.tsx",
     "app/admin/(dashboard)/projects/page.tsx",
-    "app/admin/(dashboard)/changelogs/page.tsx",
-    "app/admin/(dashboard)/changelogs/[id]/page.tsx",
     "app/admin/(dashboard)/logs/page.tsx",
     "app/api/admin/faqs/route.ts",
     "app/api/admin/about/route.ts",
     "app/api/admin/media/route.ts",
-    "app/api/admin/changelogs/route.ts",
   ]) {
     const text = await source(path);
     assert.match(text, /requireAdmin\(\)/, `${path} verifies Admin identity`);
@@ -104,33 +101,27 @@ test("Media deletion checks protected references before Cloudinary and fails clo
   assert.equal(anonymous.status, 401);
 });
 
-test("Changelog Admin writes accept only editor fields and Logs controls fit phones", async () => {
-  const [route, form, list, button, logs] = await Promise.all([
-    source("app/api/admin/changelogs/route.ts"),
-    source("app/components/admin/ChangelogForm.tsx"),
-    source("app/admin/(dashboard)/changelogs/page.tsx"),
-    source("app/components/admin/DeleteChangelogButton.tsx"),
+test("Legacy Changelog Admin routes retire safely and Logs controls fit phones", async () => {
+  const [legacy, sidebar, logs, redirects] = await Promise.all([
+    source("app/admin/(dashboard)/changelogs/[[...slug]]/page.tsx"),
+    source("app/components/admin/Sidebar.tsx"),
     source("app/admin/(dashboard)/logs/client.tsx"),
+    source("next.config.mjs"),
   ]);
-  assert.match(route, /const updateSchema = changelogSchema\.partial\(\)/);
-  assert.match(route, /\}\)\.strict\(\)/);
-  assert.match(route, /Invalid Changelog fields/);
-  assert.match(route, /Number\.isSafeInteger\(requestedLimit\)/);
-  assert.match(route, /createSupabaseAdminClient\(\)/);
-  assert.match(route, /Changelog not found/);
-  for (const field of ["title", "slug", "status", "date", "image-url"]) {
-    assert.match(form, new RegExp(`htmlFor="changelog-${field}"`));
-    assert.match(form, new RegExp(`id="changelog-${field}"`));
-  }
-  assert.match(form, /label="Changelog content"/);
-  assert.match(form, /content: z\.string\(\)\.trim\(\)\.min\(1, "Content is required"\)\.max\(200000\)/);
-  assert.match(form, /slug: z\.string\(\)\.trim\(\)\.min\(1, "Slug is required"\)\.max\(200\)\.regex/);
-  assert.match(list, /<DeleteChangelogButton id=\{changelog\.id\} name=\{changelog\.title\} \/>/);
-  assert.match(button, /aria-label=\{`Delete \$\{name\}`\}/);
+  assert.match(legacy, /redirect\("\/admin\/buildlog"\)/);
+  assert.doesNotMatch(sidebar, /href: "\/admin\/changelogs"/);
+  assert.match(redirects, /source: "\/changelog"[\s\S]*?destination: "\/buildlog"/);
   assert.match(logs, /flex min-w-0 flex-col gap-3 lg:flex-row/);
   assert.match(logs, /style=\{\{ overflowWrap: "anywhere" \}\}/);
-  const denied = await fetch(`${baseUrl}/api/admin/changelogs`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
-  assert.equal(denied.status, 401);
+  for (const path of ["changelogs", "changelogs/new", "changelogs/example-id"]) {
+    const response = await fetch(`${baseUrl}/admin/${path}`, { redirect: "manual" });
+    assert.equal(response.status, 307);
+    assert.equal(new URL(response.headers.get("location"), baseUrl).pathname, "/admin/login");
+  }
+  for (const method of ["GET", "POST", "PUT", "DELETE"]) {
+    const response = await fetch(`${baseUrl}/api/admin/changelogs`, { method });
+    assert.equal(response.status, 404, `retired ${method} endpoint must not accept writes`);
+  }
 });
 
 test("FAQ list does not claim a failed read means the table is missing or visibility is enabled", async () => {
@@ -169,12 +160,11 @@ test("Admin Buildlog uses contained mobile cards and keeps the desktop table", a
 });
 
 test("unlocked Admin presentation keeps narrow content contained and controls named", async () => {
-  const [layout, dashboard, sidebar, about, changelog] = await Promise.all([
+  const [layout, dashboard, sidebar, about] = await Promise.all([
     source("app/admin/(dashboard)/layout.tsx"),
     source("app/admin/(dashboard)/page.tsx"),
     source("app/components/admin/Sidebar.tsx"),
     source("app/admin/(dashboard)/about/page.tsx"),
-    source("app/admin/(dashboard)/changelogs/page.tsx"),
   ]);
   assert.match(layout, /gridTemplateColumns: "minmax\(0, 1fr\)"/);
   assert.match(dashboard, /grid-cols-\[minmax\(0,1fr\)\]/);
@@ -185,7 +175,6 @@ test("unlocked Admin presentation keeps narrow content contained and controls na
   assert.match(sidebar, /aria-current=\{active \? "page" : undefined\}/);
   assert.match(sidebar, /min-h-11/);
   assert.match(about, /htmlFor=\{`about-section-\$\{num\}-image`\}/);
-  assert.match(changelog, /flex flex-wrap items-center justify-between gap-4/);
 });
 
 test("Admin login is private and the unlocked routes retain their URLs", async () => {
