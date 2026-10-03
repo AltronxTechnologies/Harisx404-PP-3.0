@@ -10,9 +10,9 @@ import { MediaPickerModal } from "./MediaPickerModal";
 import { Image as ImageIcon, Loader2 } from "lucide-react";
 
 const changelogSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  slug: z.string().min(1, "Slug is required"),
-  content: z.string().min(1, "Content is required"),
+  title: z.string().trim().min(1, "Title is required").max(200),
+  slug: z.string().trim().min(1, "Slug is required").max(200).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase letters, numbers, and hyphens"),
+  content: z.string().trim().min(1, "Content is required").max(200000),
   status: z.enum(["draft", "published", "archived"]),
   image_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   published_at: z.string().optional().or(z.literal("")),
@@ -73,29 +73,31 @@ export function ChangelogForm({ initialData }: ChangelogFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+    <form onSubmit={handleSubmit(onSubmit)} className="min-w-0 space-y-8">
       {errorMsg && (
-        <div className="rounded-lg bg-red-50 p-4 text-sm text-red-500 dark:bg-red-950/30">
+        <div role="alert" className="rounded-lg bg-red-50 p-4 text-sm text-red-500 dark:bg-red-950/30">
           {errorMsg}
         </div>
       )}
       
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Title</label>
+          <label htmlFor="changelog-title" className="text-sm font-medium">Title</label>
           <input
+            id="changelog-title"
             {...register("title")}
-            className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
+            className="min-h-11 w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
             placeholder="Changelog Title"
           />
           {errors.title && <p className="text-xs text-red-500">{errors.title.message}</p>}
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">Slug</label>
+          <label htmlFor="changelog-slug" className="text-sm font-medium">Slug</label>
           <input
+            id="changelog-slug"
             {...register("slug")}
-            className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
+            className="min-h-11 w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
             placeholder="changelog-slug"
           />
           {errors.slug && <p className="text-xs text-red-500">{errors.slug.message}</p>}
@@ -104,10 +106,11 @@ export function ChangelogForm({ initialData }: ChangelogFormProps) {
 
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Status</label>
+          <label htmlFor="changelog-status" className="text-sm font-medium">Status</label>
           <select
+            id="changelog-status"
             {...register("status")}
-            className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
+            className="min-h-11 w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
           >
             <option value="draft">Draft</option>
             <option value="published">Published</option>
@@ -116,28 +119,30 @@ export function ChangelogForm({ initialData }: ChangelogFormProps) {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">Publish Date</label>
+          <label htmlFor="changelog-date" className="text-sm font-medium">Publish Date</label>
           <input
+            id="changelog-date"
             type="date"
             {...register("published_at")}
-            className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
+            className="min-h-11 w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
           />
         </div>
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Image URL (Optional)</label>
-        <div className="flex gap-2">
+        <label htmlFor="changelog-image-url" className="text-sm font-medium">Image URL (Optional)</label>
+        <div className="flex min-w-0 gap-2">
           <input
+            id="changelog-image-url"
             {...register("image_url")}
-            className="flex-1 rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
+            className="min-h-11 min-w-0 flex-1 rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
             placeholder="https://..."
           />
           <button
             type="button"
             onClick={() => setIsMediaPickerOpen(true)}
-            className="rounded-xl border border-border-hairline bg-surface-base p-2 text-ink-secondary hover:text-accent-signal hover:bg-surface-raised transition-colors"
-            title="Choose from Media Library"
+            className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl border border-border-hairline bg-surface-base text-ink-secondary transition-colors hover:bg-surface-raised hover:text-accent-signal focus-visible:outline focus-visible:outline-2 focus-visible:outline-current"
+            aria-label="Choose from Media Library"
           >
             <ImageIcon className="h-5 w-5" />
           </button>
@@ -153,7 +158,7 @@ export function ChangelogForm({ initialData }: ChangelogFormProps) {
       />
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Content (HTML)</label>
+        <p className="text-sm font-medium">Content (HTML)</p>
         <Controller
           name="content"
           control={control}
@@ -162,6 +167,7 @@ export function ChangelogForm({ initialData }: ChangelogFormProps) {
               <TiptapEditor
                 value={field.value || ""}
                 onChange={(html) => field.onChange(html)}
+                label="Changelog content"
               />
             </div>
           )}
@@ -173,14 +179,14 @@ export function ChangelogForm({ initialData }: ChangelogFormProps) {
         <button
           type="button"
           onClick={() => router.back()}
-          className="rounded-xl px-4 py-2 text-sm font-medium text-ink-secondary hover:bg-surface-base transition-colors"
+          className="min-h-11 rounded-xl px-4 py-2 text-sm font-medium text-ink-secondary hover:bg-surface-base transition-colors"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={isSubmitting}
-          className="inline-flex items-center justify-center rounded-xl bg-accent-signal px-6 py-2 text-sm font-medium text-white shadow hover:bg-accent-signal/90 focus:outline-none disabled:opacity-50 transition-all"
+          className="inline-flex min-h-11 items-center justify-center rounded-xl bg-accent-signal px-6 py-2 text-sm font-medium text-white shadow hover:bg-accent-signal/90 focus:outline-none disabled:opacity-50 transition-all"
         >
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Save Changelog

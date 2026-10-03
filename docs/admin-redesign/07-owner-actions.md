@@ -77,8 +77,11 @@ If rollout is needed, authorize it separately.
 You authorized create/edit/delete testing and said you will replace database
 content before deployment. The assistant used uniquely named temporary draft
 Buildlog, hidden FAQ, draft Blog and draft Project fixtures for authenticated
-Admin API lifecycle checks, then verified all were removed. Blog/Project stale
-edit conflicts were rejected. A one-pixel test image was uploaded through the
+Admin API lifecycle checks, then verified all were removed. A disposable draft
+Changelog also passed create/edit/delete; it is still separate from the public
+Buildlog. One unique test log was resolved through Admin and removed, without
+using bulk clear. Blog/Project stale edit conflicts were rejected. A one-pixel
+test image was uploaded through the
 Media UI; its database row and Cloudinary asset were also verified removed.
 Existing portfolio rows were not modified.
 The owner must still review the final Admin UI and approve any changes to
@@ -94,7 +97,8 @@ assets and a backup/restore plan for further workflows.
 Decide whether legacy `/admin/about` should remain editable (it does not feed
 the locked public About) and whether Admin Changelogs should be retained,
 retired, or given a public destination (they are separate from Buildlog).
-Do not use either legacy editor to imply a public content change.
+Its private draft workflow works, but publishing there does not make a public
+page appear. Do not use either legacy editor to imply a public content change.
 
 ## 5. Deployment-only checks
 

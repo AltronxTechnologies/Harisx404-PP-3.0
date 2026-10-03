@@ -1,10 +1,14 @@
-import createSupabaseServerClient from "@/app/lib/supabase/server";
+import { redirect } from "next/navigation";
+import { requireAdmin } from "@/app/lib/admin-auth";
+import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 import Link from "next/link";
 import { Plus, Edit } from "lucide-react";
 import { DeleteChangelogButton } from "@/app/components/admin/DeleteChangelogButton";
 
 export default async function AdminChangelogsPage() {
-  const supabase = await createSupabaseServerClient();
+  const auth = await requireAdmin();
+  if (auth.response) redirect(auth.response.status === 401 ? "/admin/login" : "/");
+  const supabase = await createSupabaseAdminClient();
   const { data: changelogs, error } = await supabase
     .from("changelogs")
     .select("id, title, slug, status, published_at")
@@ -70,11 +74,11 @@ export default async function AdminChangelogsPage() {
                         <Link 
                           href={`/admin/changelogs/${changelog.id}`}
                           aria-label={`Edit ${changelog.title}`}
-                          className="p-2 text-ink-secondary hover:text-accent-signal hover:bg-surface-base rounded-lg transition-colors"
+                          className="inline-flex size-11 items-center justify-center rounded-lg text-ink-secondary transition-colors hover:bg-surface-base hover:text-accent-signal focus-visible:outline focus-visible:outline-2 focus-visible:outline-current"
                         >
                           <Edit className="h-4 w-4" />
                         </Link>
-                        <DeleteChangelogButton id={changelog.id} />
+                        <DeleteChangelogButton id={changelog.id} name={changelog.title} />
                       </div>
                     </td>
                   </tr>

@@ -84,7 +84,7 @@ export default function LogsDashboardClient({ initialLogs, loadError = "" }: { i
   };
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">System Logs</h1>
@@ -92,11 +92,11 @@ export default function LogsDashboardClient({ initialLogs, loadError = "" }: { i
             Monitor live errors, warnings, and system events.
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <button
             onClick={handleTestError}
             disabled={working || !!loadError}
-            className="flex items-center gap-2 rounded-lg border border-border-primary bg-bg-primary px-4 py-2 text-sm font-medium hover:bg-gray-50 dark:hover:bg-[#1A1F2B]"
+            className="flex min-h-11 items-center gap-2 rounded-lg border border-border-primary bg-bg-primary px-4 py-2 text-sm font-medium hover:bg-gray-50 dark:hover:bg-[#1A1F2B]"
           >
             <AlertCircle className="h-4 w-4" />
             Simulate Error
@@ -104,7 +104,7 @@ export default function LogsDashboardClient({ initialLogs, loadError = "" }: { i
           <button
             onClick={handleClearResolved}
             disabled={working || !!loadError || !logs.some(log => log.resolved)}
-            className="flex items-center gap-2 rounded-lg bg-red-50 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-100 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/50"
+            className="flex min-h-11 items-center gap-2 rounded-lg bg-red-50 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-100 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/50"
           >
             <Trash2 className="h-4 w-4" />
             Clear Resolved
@@ -125,11 +125,11 @@ export default function LogsDashboardClient({ initialLogs, loadError = "" }: { i
           <div className="divide-y divide-border-hairline">
             {logs.map((log) => (
               <div key={log.id} className={`flex flex-col p-4 transition-colors ${log.resolved ? "opacity-60 bg-gray-50 dark:bg-[#10131A]/50" : "hover:bg-gray-50 dark:hover:bg-[#1A1F2B]"}`}>
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-4">
-                    <div className="mt-1">{getLevelIcon(log.level)}</div>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-3">
+                <div className="flex min-w-0 flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="flex min-w-0 items-start gap-3">
+                    <div className="mt-1 shrink-0">{getLevelIcon(log.level)}</div>
+                    <div className="min-w-0 space-y-1">
+                      <div className="flex flex-wrap items-center gap-2">
                         <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${getLevelBadgeClass(log.level)}`}>
                           {log.level.toUpperCase()}
                         </span>
@@ -140,23 +140,24 @@ export default function LogsDashboardClient({ initialLogs, loadError = "" }: { i
                           <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">✓ Resolved</span>
                         )}
                       </div>
-                      <p className={`text-sm font-medium ${log.resolved ? "line-through text-text-secondary" : "text-text-primary"}`}>
+                      <p className={`text-sm font-medium ${log.resolved ? "line-through text-text-secondary" : "text-text-primary"}`} style={{ overflowWrap: "anywhere" }}>
                         {log.message}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2 lg:shrink-0 lg:justify-end">
                     <button
                       onClick={() => setExpandedLogId(expandedLogId === log.id ? null : log.id)}
-                      className="text-xs font-medium text-accent-signal hover:underline"
+                      aria-expanded={expandedLogId === log.id}
+                      className="inline-flex min-h-11 items-center rounded-lg px-2 text-xs font-medium text-accent-signal hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-current"
                     >
                       {expandedLogId === log.id ? "Hide Details" : "View Context"}
                     </button>
                     {!log.resolved && (
-                    <button
-                      onClick={() => handleResolve(log.id)}
-                      disabled={working}
-                        className="rounded-md border border-border-primary bg-bg-primary px-3 py-1.5 text-xs font-medium hover:bg-gray-50 dark:hover:bg-[#1A1F2B]"
+                      <button
+                        onClick={() => handleResolve(log.id)}
+                        disabled={working}
+                        className="min-h-11 rounded-lg border border-border-primary bg-bg-primary px-3 text-xs font-medium hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-current dark:hover:bg-[#1A1F2B]"
                       >
                         Mark Resolved
                       </button>
@@ -165,7 +166,7 @@ export default function LogsDashboardClient({ initialLogs, loadError = "" }: { i
                 </div>
 
                 {expandedLogId === log.id && (
-                  <div className="ml-9 mt-4 rounded-lg bg-gray-50 dark:bg-[#10131A] p-4 font-mono text-xs overflow-x-auto border border-border-hairline">
+                  <div id={`log-context-${log.id}`} className="mt-4 overflow-x-auto rounded-lg border border-border-hairline bg-gray-50 p-4 font-mono text-xs dark:bg-[#10131A] sm:ml-9">
                     <pre className="text-text-secondary whitespace-pre-wrap">
                       {JSON.stringify(log.context, null, 2)}
                     </pre>

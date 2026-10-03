@@ -1,19 +1,21 @@
 import { ChangelogForm } from "@/app/components/admin/ChangelogForm";
-import createSupabaseServerClient from "@/app/lib/supabase/server";
-import { notFound } from "next/navigation";
+import { requireAdmin } from "@/app/lib/admin-auth";
+import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
+import { notFound, redirect } from "next/navigation";
 
 export default async function EditChangelogPage({ params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireAdmin();
+  if (auth.response) redirect(auth.response.status === 401 ? "/admin/login" : "/");
   const { id } = await params;
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseAdminClient();
   const { data: changelog, error } = await supabase
     .from("changelogs")
     .select("*")
     .eq("id", id)
-    .single();
+    .maybeSingle();
 
-  if (error || !changelog) {
-    notFound();
-  }
+  if (error) throw new Error("Changelog could not be loaded");
+  if (!changelog) notFound();
 
   // Format date if present
   if (changelog.published_at) {

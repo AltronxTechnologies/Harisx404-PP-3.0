@@ -36,6 +36,8 @@ test("unlocked privileged reads and log actions check Admin identity before serv
     "app/admin/(dashboard)/blogs/page.tsx",
     "app/admin/(dashboard)/analytics/page.tsx",
     "app/admin/(dashboard)/projects/page.tsx",
+    "app/admin/(dashboard)/changelogs/page.tsx",
+    "app/admin/(dashboard)/changelogs/[id]/page.tsx",
     "app/admin/(dashboard)/logs/page.tsx",
     "app/api/admin/faqs/route.ts",
     "app/api/admin/about/route.ts",
@@ -100,6 +102,35 @@ test("Media deletion checks protected references before Cloudinary and fails clo
   assert.match(page, /Image deleted from the library and Cloudinary/);
   const anonymous = await fetch(`${baseUrl}/api/admin/media?id=00000000-0000-4000-8000-000000000001`, { method: "DELETE" });
   assert.equal(anonymous.status, 401);
+});
+
+test("Changelog Admin writes accept only editor fields and Logs controls fit phones", async () => {
+  const [route, form, list, button, logs] = await Promise.all([
+    source("app/api/admin/changelogs/route.ts"),
+    source("app/components/admin/ChangelogForm.tsx"),
+    source("app/admin/(dashboard)/changelogs/page.tsx"),
+    source("app/components/admin/DeleteChangelogButton.tsx"),
+    source("app/admin/(dashboard)/logs/client.tsx"),
+  ]);
+  assert.match(route, /const updateSchema = changelogSchema\.partial\(\)/);
+  assert.match(route, /\}\)\.strict\(\)/);
+  assert.match(route, /Invalid Changelog fields/);
+  assert.match(route, /Number\.isSafeInteger\(requestedLimit\)/);
+  assert.match(route, /createSupabaseAdminClient\(\)/);
+  assert.match(route, /Changelog not found/);
+  for (const field of ["title", "slug", "status", "date", "image-url"]) {
+    assert.match(form, new RegExp(`htmlFor="changelog-${field}"`));
+    assert.match(form, new RegExp(`id="changelog-${field}"`));
+  }
+  assert.match(form, /label="Changelog content"/);
+  assert.match(form, /content: z\.string\(\)\.trim\(\)\.min\(1, "Content is required"\)\.max\(200000\)/);
+  assert.match(form, /slug: z\.string\(\)\.trim\(\)\.min\(1, "Slug is required"\)\.max\(200\)\.regex/);
+  assert.match(list, /<DeleteChangelogButton id=\{changelog\.id\} name=\{changelog\.title\} \/>/);
+  assert.match(button, /aria-label=\{`Delete \$\{name\}`\}/);
+  assert.match(logs, /flex min-w-0 flex-col gap-3 lg:flex-row/);
+  assert.match(logs, /style=\{\{ overflowWrap: "anywhere" \}\}/);
+  const denied = await fetch(`${baseUrl}/api/admin/changelogs`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+  assert.equal(denied.status, 401);
 });
 
 test("FAQ list does not claim a failed read means the table is missing or visibility is enabled", async () => {
