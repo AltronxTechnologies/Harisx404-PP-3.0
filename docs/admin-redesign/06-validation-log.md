@@ -13,7 +13,7 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
 | Sidebar mobile drawer | Observed read-only at 390; source-confirmed controls | 16 nav links measured min-44px, one active `aria-current="page"`, Escape/close restored focus to trigger; desktop/route focus behaviors not fully rechecked. No logout pressed |
 | About/Settings form geometry | Observed before latest shell/style changes | Legacy About originally had 14 unlabeled fields; IDs/labels and 44px minimum text input height added. Same-origin offscreen iframe at 320/390/768/1440: 14 labelled, no overflow; legacy warning retained. Settings: seven labelled fields, no overflow at 320/390/640/768/1024/1440 before latest visual alignment with About. No typing/save/reopen or field values recorded |
 | Sampled Admin route containment | Authenticated read-only sweep expanded | Owner-authorized Buildlog mobile cards passed sampled widths earlier. This pass loaded nine Testimonials/Certifications/Community Wall/Resume/Experience Admin list/new/settings routes at 320/390/768/1440: HTTP 200, no out-of-viewport controls or page errors, eight owner API GETs 200. Not CRUD or complete visual acceptance; locked accessibility issues below |
-| Locked Admin accessibility | Observed/name heuristic and source-confirmed; owner permission pending | Testimonials list: 7 unnamed Edit icon links; new form: 7 fields without associated labels. Experience list: 4 unnamed Edit icon links; new form: 14 unassociated fields. Counts stable across sampled widths. Sibling labels and icon-only links confirmed in source. No locked source changed; this is not a full accessibility audit |
+| Owner-authorized Admin accessibility | Narrow four-file fix verified | Seven Testimonial and 14 Experience fields now have associated IDs/labels; icon-only Edit links have row-specific names. Authenticated browser recheck at 320/390/768/1440 found zero unassociated fields, unnamed Edit links or visible control overflow on these four pages. No public source or other locked files changed; not a full screen-reader/contrast audit |
 | Retired Changelog Admin UI/API | Owner-directed removal; data preserved | Sidebar/list/new/edit/forms/API removed. Authenticated old `/admin/changelogs` bookmarks including `/new` and `/[id]` redirect to `/admin/buildlog`; public `/changelog` still 308s to `/buildlog`. Tested GET/POST/PUT/DELETE against retired API return 404. Legacy tables/rows and unused locked-public-side helper/component were not deleted |
 | Inherited root chrome/metadata | Admin visual isolation observed; render-time decision pending | Owner authorized removing public chrome from Admin while preserving public pages. `app/admin/layout.tsx` styles hide inherited Navbar/Footer/chat/rails only on Admin; `noindex` remains and Admin canonical is absent. Browser checked Admin login at 320/390/768/1440 and public Home frame. Root components still mount invisibly and WebSite JSON-LD still inherits; true render-time omission would require a separate locked-root change |
 | Connected `site_settings` schema | Confirmed supplied read-only observation | GET 200, one row; columns `id`, `site_name`, `seo_description`, `seo_keywords`, `github_url`, `twitter_url`, `linkedin_url`, `email_address`, `created_at`, `updated_at`, `show_faq_section`; values omitted |
@@ -28,12 +28,12 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
 | FAQ input/UI and authorization | Scoped authenticated lifecycle passed | `app/api/admin/faqs/route.ts` full strict POST, partial PUT with UUID id, boolean PATCH and UUID DELETE. One incomplete POST returned 400; a hidden disposable FAQ passed create/read/update/delete through the authenticated API and was verified absent afterward. FAQ list separates failures and withholds section switch on Settings error; PATCH/visibility/public effects and other role tests remain unverified |
 | FAQ/settings RLS | Owner-supplied policy names plus one connected denial | FAQ visible SELECT `{public}`, site_settings SELECT `{public}`, system_logs INSERT `{anon,authenticated}` supplied by owner; no FAQ/Settings write policy in that result. Non-owner direct FAQ INSERT denied RLS 42501; Settings UPDATE/effective grants and future environment behavior unverified. Neither staged migration applied by us |
 | Dashboard/Projects list | Observed partial owner render | Dashboard and Projects check Admin before service-role reads and show query errors instead of false zero/empty. Authenticated Project list and draft row rendered at sampled widths after streamed table rows settled; list header wraps and edit/delete targets are 44px. Count accuracy and destructive UI confirmation unverified |
-| Security integration | Focused pass, limited scope | Docker `tests/admin-security.integration.test.mjs`: **13/13** after Experience API auth fix. Source checks ensure all four handlers gate before service role; anonymous GET/POST/PUT/DELETE each return 401. Disposable runtime non-owner check separately confirmed 403 for all verbs. Valid owner CRUD remains open |
+| Security integration | Focused pass, limited scope | Docker `tests/admin-security.integration.test.mjs`: **14/14** after owner-approved Admin label/name change. Source assertions cover all seven Testimonial and 14 Experience label pairs and row-specific Edit names, plus Experience API auth boundary. Valid locked CRUD and full screen-reader audit remain open |
 | Login browser test | Observed passed, layout scope | Docker `tests/admin-login.browser.test.mjs`: **1/1**, seven widths x two themes; screenshot `/tmp/playwright/admin-login-mobile-review.png` is outside the repo. Owner Dashboard/Logs read-only UI observed separately, not by this test |
-| Combined Admin/public/locked regression | Observed pass after Experience fix | Broad Docker Node run **53 pass, one existing Project skip**. Public Home/About browser **1/1** passed; public source unchanged |
-| Post-build smoke | Observed pass after Experience fix | **24/24** after isolated build; not full owner CRUD acceptance |
+| Combined Admin/public/locked regression | Observed pass after Admin label fix | Broad Docker Node run **68 pass, one existing Project skip** including Community Wall/Credentials/Resume integration. Public Home/About browser **1/1** passed; public source unchanged |
+| Post-build smoke | Observed pass after Admin label fix | **25/25** after isolated build; not full owner CRUD acceptance |
 | Static checks | Observed passed | Docker `npx tsc --noEmit`, focused ESLint on latest Admin/test edits and `git diff --check` passed after the final Dashboard edit |
-| Isolated production build / preview | Observed pass after Experience fix | Docker build succeeded with **129 static pages**, preexisting image lint warning and Edge notice. `.next-build` mounted outside workspace; preview on port 3000 remains running |
+| Isolated production build / preview | Observed pass after Admin label fix | Docker build succeeded with **129 static pages**, preexisting image lint warning and Edge notice. `.next-build` mounted outside workspace; preview on port 3000 remains running |
 | Connected write and release checks | Scoped pass; broader acceptance blocked | Experience gate fixed and locally retested across roles without valid mutation or changing row count. Settings/About singleton save/reopen, other locked Admin workflows, publish/public effects, Settings UPDATE effective grants, bulk Logs and full root omission remain; no production-ready claim |
 | Documentation whitespace check | Passed | `git diff --check` returned clean; no credentials or private response values recorded |
 
@@ -386,6 +386,32 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
   and broad regression remain the latest code verification; no production
   sign-off. Settings/About singleton save/reopen still waits for a backup or
   disposable environment.
+
+## 2026-10-03 Owner-Authorized Admin Labels and Backup Guidance
+
+- Owner explicitly unlocked only the Testimonial/Experience Admin form and
+  list files for associated labels and Edit-link names. Seven Testimonial and
+  14 Experience fields now have matching IDs/labels; the Experience checkbox
+  remained correctly wrapped by its label. Edit links are named with row
+  context. No values, submit handlers, mutation APIs or public Home/About
+  source changed. `LOCKED_PERFECT.md` records the narrow amendment.
+- In-memory authenticated browser check at 320/390/768/1440px for the two
+  lists and two new forms found zero remaining unassociated fields, unnamed
+  Edit links or out-of-viewport controls; no page errors. The temporary
+  session helper was removed without logging credentials or private content.
+- Docker focused security source test **14/14**, broad public/Admin regression
+  **68 pass, one existing Project skip**, isolated production build **129 static
+  pages**, post-build smoke **25/25**, public Home/About browser **1/1**,
+  TypeScript, focused ESLint and `git diff --check` passed. Existing image lint
+  and Edge-runtime notices remain; preview service retained. This is not a
+  full screen-reader/contrast audit or valid owner CRUD sign-off.
+- Owner requested complete database recovery guidance before singleton tests.
+  `08-backup-restore.md` documents Supabase paid-plan restore-to-new-project,
+  off-site CLI roles/schema/data exports and reviewed logical restore, plus
+  separately backed-up Storage bytes, Auth/project settings and Cloudinary
+  assets. No SQL export, backup file, data value or credential was created in
+  or committed to this repository. Settings/About valid save/reopen remains
+  untested pending a verified backup or disposable development project.
 
 Representative Docker validation commands (one-off owner fixture helpers were removed after earlier tests):
 

@@ -88,8 +88,9 @@ export function TestimonialForm({ initialData }: TestimonialFormProps) {
       )}
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Headline</label>
+        <label htmlFor="testimonial-headline" className="text-sm font-medium">Headline</label>
         <input
+          id="testimonial-headline"
           {...register("headline")}
           className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
           placeholder="He shipped in weeks what we scoped for months."
@@ -98,8 +99,9 @@ export function TestimonialForm({ initialData }: TestimonialFormProps) {
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Quote</label>
+        <label htmlFor="testimonial-quote" className="text-sm font-medium">Quote</label>
         <textarea
+          id="testimonial-quote"
           {...register("quote")}
           rows={4}
           className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
@@ -110,8 +112,9 @@ export function TestimonialForm({ initialData }: TestimonialFormProps) {
 
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Name</label>
+          <label htmlFor="testimonial-name" className="text-sm font-medium">Name</label>
           <input
+            id="testimonial-name"
             {...register("name")}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
             placeholder="Jane Doe"
@@ -120,8 +123,9 @@ export function TestimonialForm({ initialData }: TestimonialFormProps) {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">Role (Optional)</label>
+          <label htmlFor="testimonial-role" className="text-sm font-medium">Role (Optional)</label>
           <input
+            id="testimonial-role"
             {...register("role")}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
             placeholder="Founder, SaaS Startup"
@@ -130,9 +134,10 @@ export function TestimonialForm({ initialData }: TestimonialFormProps) {
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Avatar URL (Optional)</label>
+        <label htmlFor="testimonial-avatar-url" className="text-sm font-medium">Avatar URL (Optional)</label>
         <div className="flex gap-2">
           <input
+            id="testimonial-avatar-url"
             {...register("avatar_url")}
             className="flex-1 rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
             placeholder="https://..."
@@ -159,8 +164,9 @@ export function TestimonialForm({ initialData }: TestimonialFormProps) {
 
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Display Order</label>
+          <label htmlFor="testimonial-display-order" className="text-sm font-medium">Display Order</label>
           <input
+            id="testimonial-display-order"
             type="number"
             {...register("display_order")}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
@@ -169,8 +175,9 @@ export function TestimonialForm({ initialData }: TestimonialFormProps) {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">Status</label>
+          <label htmlFor="testimonial-status" className="text-sm font-medium">Status</label>
           <select
+            id="testimonial-status"
             {...register("status")}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
           >

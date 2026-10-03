@@ -88,6 +88,7 @@ export default async function AdminExperiencePage() {
                       <div className="flex items-center justify-end gap-2">
                         <Link
                           href={`/admin/experience/${entry.id}`}
+                          aria-label={`Edit experience entry: ${entry.role || entry.company || "Untitled"}`}
                           className="p-2 text-ink-secondary hover:text-accent-signal hover:bg-surface-base rounded-lg transition-colors"
                         >
                           <Edit className="h-4 w-4" />

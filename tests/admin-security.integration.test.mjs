@@ -94,6 +94,25 @@ test("Experience API verifies Admin identity before every read and service-role 
   }
 });
 
+test("locked-scope Admin form labels and Edit links use the owner-approved accessible names", async () => {
+  const [testimonialForm, experienceForm, testimonials, experience] = await Promise.all([
+    source("app/components/admin/TestimonialForm.tsx"),
+    source("app/components/admin/ExperienceForm.tsx"),
+    source("app/admin/(dashboard)/testimonials/page.tsx"),
+    source("app/admin/(dashboard)/experience/page.tsx"),
+  ]);
+  for (const field of ["headline", "quote", "name", "role", "avatar-url", "display-order", "status"]) {
+    assert.match(testimonialForm, new RegExp(`htmlFor="testimonial-${field}"`));
+    assert.match(testimonialForm, new RegExp(`id="testimonial-${field}"`));
+  }
+  for (const field of ["role", "company", "logo-url", "location", "location-type", "employment-type", "start-month", "start-year", "end-month", "end-year", "summary", "highlights", "display-order", "status"]) {
+    assert.match(experienceForm, new RegExp(`htmlFor="experience-${field}"`));
+    assert.match(experienceForm, new RegExp(`id="experience-${field}"`));
+  }
+  assert.equal((testimonials.match(/aria-label=\{`Edit testimonial from \$\{t\.name\}: \$\{t\.headline\}`\}/g) || []).length, 2);
+  assert.match(experience, /aria-label=\{`Edit experience entry: \$\{entry\.role \|\| entry\.company \|\| "Untitled"\}`\}/);
+});
+
 test("Media library uses the connected row fields and keeps errors distinct from an empty library", async () => {
   const [mediaPage, mediaApi] = await Promise.all([
     source("app/admin/(dashboard)/media/page.tsx"),

@@ -1219,6 +1219,21 @@ and public `/about` remains 200; no Experience row was changed. This records
 the narrow permission and test evidence, not a new visual lock or a blanket
 unlock of Experience files.
 
+### 2026-10-03 owner-authorized Admin-only label and Edit-link amendment
+
+The owner explicitly unlocked only `app/components/admin/TestimonialForm.tsx`,
+`app/admin/(dashboard)/testimonials/page.tsx`,
+`app/components/admin/ExperienceForm.tsx`, and
+`app/admin/(dashboard)/experience/page.tsx` to associate form labels and name
+Edit icon links. This narrow permission applies to the Admin portions of
+entries 13 and 19; public Home/About, the testimonial submission pipeline,
+Experience API and other locked files are unchanged. All seven Testimonial
+fields and 14 Experience fields now have associated labels (the Experience
+checkbox was already nested in its label), and Edit links have row-specific
+names. An owner-session DOM check passed four widths with zero unassociated
+fields, unnamed Edit links or visible control overflow. This records an
+amendment, not a new production lock or blanket scope unlock.
+
 ## 20. Site-wide section rhythm & heading system (REFERENCE — apply to ALL pages)
 
 - **Date locked:** 2026-08-23

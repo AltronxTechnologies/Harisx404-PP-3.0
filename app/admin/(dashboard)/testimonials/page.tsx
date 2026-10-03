@@ -130,6 +130,7 @@ export default async function AdminTestimonialsPage() {
                     <TestimonialModerationActions id={t.id} />
                     <Link
                       href={`/admin/testimonials/${t.id}`}
+                      aria-label={`Edit testimonial from ${t.name}: ${t.headline}`}
                       className="p-2 text-ink-secondary hover:text-accent-signal hover:bg-surface-base rounded-lg transition-colors"
                       title="Edit before approving"
                     >
@@ -206,6 +207,7 @@ export default async function AdminTestimonialsPage() {
                       <div className="flex items-center justify-end gap-2">
                         <Link
                           href={`/admin/testimonials/${t.id}`}
+                          aria-label={`Edit testimonial from ${t.name}: ${t.headline}`}
                           className="p-2 text-ink-secondary hover:text-accent-signal hover:bg-surface-base rounded-lg transition-colors"
                         >
                           <Edit className="h-4 w-4" />

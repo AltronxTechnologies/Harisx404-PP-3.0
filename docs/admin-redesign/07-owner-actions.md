@@ -39,18 +39,11 @@ Rotate the Admin password previously shared in chat when practical.
   Certifications, Community Wall, and qualified Resume work) need precise permission
   before any change. No new formal lock is requested; `AUDIT_TESTING.md` runs
   only after you explicitly trigger an audit target.
-- The read-only owner sweep found specific accessibility gaps in two locked
-  Admin modules: Testimonials has seven unnamed Edit icon links and seven
-  unassociated new-form fields; Experience has four unnamed Edit icon links and
-  14 unassociated new-form fields. If you want these fixed without touching
-  public pages, explicitly reply: "Unlock only
-  `app/components/admin/TestimonialForm.tsx`,
-  `app/admin/(dashboard)/testimonials/page.tsx`,
-  `app/components/admin/ExperienceForm.tsx`, and
-  `app/admin/(dashboard)/experience/page.tsx` for associated field labels and
-  accessible Edit-link names. Keep public Home/About and other locked files
-  unchanged." This is a new narrow request; the earlier Experience API unlock
-  did not include those four files.
+- You explicitly unlocked four Testimonial/Experience Admin form/list files
+  for labels and Edit-link names. The seven Testimonial and 14 Experience
+  fields now have associated labels, and Edit links announce their row.
+  Authenticated checks passed four widths; public Home/About and other locked
+  files were not changed. This authorization covered only those four files.
 
 ## 3. Inspect connected policies without changing data
 
@@ -114,6 +107,10 @@ concurrent edit or failed restoration still needs manual review. Use test-only
 assets and a backup/restore plan for further workflows.
 
 Before asking for a valid Settings/About save-and-reopen test:
+
+For a **complete** recovery plan, follow `08-backup-restore.md`. One SQL query
+cannot save Auth users, Storage file bytes, Cloudinary assets, project settings
+and database objects together. Do not restore over the source project for a test.
 
 1. Use a separate development Supabase project with the same schema, or open
    Supabase Dashboard -> Database -> Backups and verify a restore point exists.

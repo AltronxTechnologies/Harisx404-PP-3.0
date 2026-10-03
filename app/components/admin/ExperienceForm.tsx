@@ -198,21 +198,22 @@ export function ExperienceForm({ initialData }: ExperienceFormProps) {
 
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Job title *</label>
-          <input {...register("role")} className={inputCls} placeholder="Full-Stack Engineer" />
+          <label htmlFor="experience-role" className="text-sm font-medium">Job title *</label>
+          <input id="experience-role" {...register("role")} className={inputCls} placeholder="Full-Stack Engineer" />
           {errors.role && <p className="text-xs text-red-500">{errors.role.message}</p>}
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">Organization *</label>
-          <input {...register("company")} className={inputCls} placeholder="CodeAlpha" />
+          <label htmlFor="experience-company" className="text-sm font-medium">Organization *</label>
+          <input id="experience-company" {...register("company")} className={inputCls} placeholder="CodeAlpha" />
           {errors.company && <p className="text-xs text-red-500">{errors.company.message}</p>}
         </div>
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Organization logo URL (optional)</label>
+        <label htmlFor="experience-logo-url" className="text-sm font-medium">Organization logo URL (optional)</label>
         <input
+          id="experience-logo-url"
           {...register("logo_url")}
           className={inputCls}
           placeholder="https://... or /images/logos/codealpha.png"
@@ -224,13 +225,13 @@ export function ExperienceForm({ initialData }: ExperienceFormProps) {
 
       <div className="grid gap-6 md:grid-cols-3">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Location</label>
-          <input {...register("location")} className={inputCls} placeholder="Pakistan" />
+          <label htmlFor="experience-location" className="text-sm font-medium">Location</label>
+          <input id="experience-location" {...register("location")} className={inputCls} placeholder="Pakistan" />
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">Location type</label>
-          <select {...register("location_type")} className={inputCls}>
+          <label htmlFor="experience-location-type" className="text-sm font-medium">Location type</label>
+          <select id="experience-location-type" {...register("location_type")} className={inputCls}>
             <option value="">Please select (optional)</option>
             {LOCATION_TYPES.map((t) => (
               <option key={t} value={t}>
@@ -241,8 +242,8 @@ export function ExperienceForm({ initialData }: ExperienceFormProps) {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">Employment type</label>
-          <select {...register("employment_type")} className={inputCls}>
+          <label htmlFor="experience-employment-type" className="text-sm font-medium">Employment type</label>
+          <select id="experience-employment-type" {...register("employment_type")} className={inputCls}>
             <option value="">Please select (optional)</option>
             {EMPLOYMENT_TYPES.map((t) => (
               <option key={t} value={t}>
@@ -265,8 +266,8 @@ export function ExperienceForm({ initialData }: ExperienceFormProps) {
 
         <div className="grid gap-6 md:grid-cols-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Start month</label>
-            <select {...register("start_month")} className={inputCls}>
+            <label htmlFor="experience-start-month" className="text-sm font-medium">Start month</label>
+            <select id="experience-start-month" {...register("start_month")} className={inputCls}>
               <option value="">Month</option>
               {MONTHS.map((m, i) => (
                 <option key={m} value={i + 1}>
@@ -277,8 +278,9 @@ export function ExperienceForm({ initialData }: ExperienceFormProps) {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Start year *</label>
+            <label htmlFor="experience-start-year" className="text-sm font-medium">Start year *</label>
             <input
+              id="experience-start-year"
               {...register("start_year")}
               className={inputCls}
               placeholder="2026"
@@ -290,8 +292,8 @@ export function ExperienceForm({ initialData }: ExperienceFormProps) {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">End month</label>
-            <select {...register("end_month")} className={inputCls} disabled={isCurrent}>
+            <label htmlFor="experience-end-month" className="text-sm font-medium">End month</label>
+            <select id="experience-end-month" {...register("end_month")} className={inputCls} disabled={isCurrent}>
               <option value="">Month</option>
               {MONTHS.map((m, i) => (
                 <option key={m} value={i + 1}>
@@ -302,8 +304,9 @@ export function ExperienceForm({ initialData }: ExperienceFormProps) {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">End year (optional)</label>
+            <label htmlFor="experience-end-year" className="text-sm font-medium">End year (optional)</label>
             <input
+              id="experience-end-year"
               {...register("end_year")}
               className={inputCls}
               placeholder="2026"
@@ -323,8 +326,9 @@ export function ExperienceForm({ initialData }: ExperienceFormProps) {
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Summary (optional)</label>
+        <label htmlFor="experience-summary" className="text-sm font-medium">Summary (optional)</label>
         <textarea
+          id="experience-summary"
           {...register("summary")}
           rows={2}
           className={inputCls}
@@ -333,8 +337,9 @@ export function ExperienceForm({ initialData }: ExperienceFormProps) {
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Highlights (one per line)</label>
+        <label htmlFor="experience-highlights" className="text-sm font-medium">Highlights (one per line)</label>
         <textarea
+          id="experience-highlights"
           {...register("highlights")}
           rows={6}
           className={inputCls}
@@ -350,16 +355,16 @@ export function ExperienceForm({ initialData }: ExperienceFormProps) {
 
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Display Order</label>
-          <input type="number" {...register("display_order")} className={inputCls} />
+          <label htmlFor="experience-display-order" className="text-sm font-medium">Display Order</label>
+          <input id="experience-display-order" type="number" {...register("display_order")} className={inputCls} />
           {errors.display_order && (
             <p className="text-xs text-red-500">{errors.display_order.message}</p>
           )}
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">Status</label>
-          <select {...register("status")} className={inputCls}>
+          <label htmlFor="experience-status" className="text-sm font-medium">Status</label>
+          <select id="experience-status" {...register("status")} className={inputCls}>
             <option value="draft">Draft</option>
             <option value="published">Published</option>
             <option value="archived">Archived</option>
