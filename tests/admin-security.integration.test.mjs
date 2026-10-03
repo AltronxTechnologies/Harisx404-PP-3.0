@@ -49,6 +49,7 @@ test("unlocked privileged reads and log actions check Admin identity before serv
     "app/api/admin/faqs/route.ts",
     "app/api/admin/about/route.ts",
     "app/api/admin/media/route.ts",
+    "app/api/admin/experience/route.ts",
   ]) {
     const text = await source(path);
     assert.match(text, /requireAdmin\(\)/, `${path} verifies Admin identity`);
@@ -76,6 +77,21 @@ test("unlocked privileged reads and log actions check Admin identity before serv
   assert.match(blogList, /id="blog-search"[^\n]*className="min-h-11/);
   assert.match(blogActions, /aria-label=\{`\$\{archived \? "Restore" : "Archive"\} \$\{post\.title\}`\}/);
   assert.match(blogActions, /inline-flex size-11 items-center justify-center/);
+});
+
+test("Experience API verifies Admin identity before every read and service-role write", async () => {
+  const route = await source("app/api/admin/experience/route.ts");
+  assert.equal((route.match(/const auth = await requireAdmin\(\);/g) || []).length, 4);
+  assert.equal((route.match(/if \(auth\.response\) return auth\.response;/g) || []).length, 4);
+  assert.doesNotMatch(route, /auth\.getSession\(\)/);
+  for (const handler of ["POST", "PUT", "DELETE"]) {
+    const body = route.slice(route.indexOf(`export async function ${handler}(`));
+    assert.ok(body.indexOf("if (auth.response) return auth.response;") < body.indexOf("createSupabaseAdminClient()"), `${handler} must authorize before service role`);
+  }
+  for (const method of ["GET", "POST", "PUT", "DELETE"]) {
+    const response = await fetch(`${baseUrl}/api/admin/experience`, { method });
+    assert.equal(response.status, 401, `${method} must deny anonymous callers before data or payload processing`);
+  }
 });
 
 test("Media library uses the connected row fields and keeps errors distinct from an empty library", async () => {

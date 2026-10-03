@@ -1206,6 +1206,19 @@ Final spec (verified by measurement):
 Unlock note: Timeline/Resume geometry constants (33.333%+24px md, 352px xl,
 280px column, 96px corridor) are interdependent — change together only.
 
+### 2026-10-03 owner-authorized Experience Admin API security amendment
+
+The owner explicitly unlocked only `app/api/admin/experience/route.ts` to fix
+its Admin authorization boundary, without changing public About/Experience or
+other locked Admin presentation. All four methods now verify the user and
+normalized Admin email before reading through the session or creating a
+service-role client. The former session-only write gate could be reached by a
+regular authenticated account. A disposable non-owner now receives 403 for
+GET/POST/PUT/DELETE, anonymous callers receive 401, owner GET remains 200,
+and public `/about` remains 200; no Experience row was changed. This records
+the narrow permission and test evidence, not a new visual lock or a blanket
+unlock of Experience files.
+
 ## 20. Site-wide section rhythm & heading system (REFERENCE — apply to ALL pages)
 
 - **Date locked:** 2026-08-23

@@ -6,7 +6,7 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
 | --- | --- | --- |
 | Next/Admin structure | Confirmed in source | `package.json`, `app/layout.tsx`, `app/admin/(dashboard)/layout.tsx`, `app/components/admin/Sidebar.tsx`, `app/admin/(dashboard)/page.tsx`, route filesystem |
 | Media/About/Settings route move | Source-confirmed; partial owner UI observed | `app/admin/(dashboard)/{media,about,settings}/page.tsx`; anonymous URLs 307 to login, owner API GETs 200 by shape. Owner About/Settings form geometry and Media list sampled read-only before latest shell/style changes; no save/copy/upload or full UI acceptance. Inherited public chrome now hidden on Admin routes only |
-| Page access policy | Non-owner runtime partly observed; locked blocker | Disposable non-owner was redirected from `/admin`, Experience, Testimonials, Settings and Buildlog pages to `/`. Tested unlocked Admin API reads/writes denied 403 or 401; locked Experience GET returned 200 and invalid write requests reached 400/500 instead of rejecting non-owner. No valid Experience write attempted. Owner unlock of entry 19 required |
+| Page access policy | Experience API gate locally corrected | Original non-owner probe found Experience GET 200 and invalid writes reaching 400/500. Owner unlocked only its API route. New non-owner received 403 for Experience GET/POST/PUT/DELETE, anonymous callers 401, owner GET 200/invalid PUT 400. Public About 200 and Experience row count unchanged. No valid Experience write tested |
 | Login | Observed unauth layout; sign-in behavior unverified | `tests/admin-login.browser.test.mjs` reported 1/1 in Docker at 320/375/390/640/768/1024/1440 light/dark: no overflow, one `h1`, noindex, labelled email/password fields >=44px, submit >=48px, card fit and no page errors. `GET /admin/login` 200 with robots meta. Owner-provided session enabled read-only browsing; actual sign-in/error and non-owner sign-out flows were not exercised here |
 | Owner dashboard/Logs read-only render | Observed limited pass | `/admin` rendered in owner session, `/admin/logs` rendered a log list; no log values recorded, no actions clicked. Count/draft accuracy and CRUD unverified |
 | Dashboard containment/layout | Observed before/after, selected widths | Before Admin-only fix: viewport 390 dark, main x15..375, internal right edge x566 hidden by root clip. Layout/dashboard min-width/minmax changes and new stats `md:2`/`xl:3`, actions mobile 1/`lg:2`, panels `xl:2`. A later 320px check found a recent Project edit control at x334; truncating the title and keeping the status/edit group in view removed it. Direct 320px and authenticated same-origin iframe 390/640/768/1024/1440px checks show zero measured dashboard-panel offenders. Root scroll width alone is not evidence of containment; not a full width/theme/function pass |
@@ -25,15 +25,15 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
 | Legacy About / retired Changelog consumers | Source-confirmed; Changelog owner decision implemented | `/admin/about` warns legacy saves will not appear on locked public About. `fetchAndSortChangelogEntrees` remains in `app/lib/utils.ts` only for unused public `ChangelogBento`, which was left untouched under public locks. Changelog Admin flow is retired; connected old tables are preserved pending export/backup and separate data cleanup approval |
 | Logs schema and UI | Single-fixture resolve passed; provenance/policy unknown | Earlier REST `system_logs?select=id,resolved&limit=0` returned 400 / `42703`; latest identical probe returned **200**. Owner reported named `(resolved, created_at DESC)` index. Logs action rows initially had 62 out-of-viewport controls at 320px; stacking actions until `lg` yielded zero measured control overflow at 320/390/768/1440. A unique disposable log was resolved via Admin UI, verified in DB and deleted. No bulk clear or migration. Column provenance and effective RLS remain unverified |
 | FAQ input/UI and authorization | Scoped authenticated lifecycle passed | `app/api/admin/faqs/route.ts` full strict POST, partial PUT with UUID id, boolean PATCH and UUID DELETE. One incomplete POST returned 400; a hidden disposable FAQ passed create/read/update/delete through the authenticated API and was verified absent afterward. FAQ list separates failures and withholds section switch on Settings error; PATCH/visibility/public effects and other role tests remain unverified |
-| FAQ/settings RLS | One connected denial observed; catalog unknown | `migrations/2026_admin_content_rls_hardening.sql` staged but not applied by us. Disposable non-owner direct FAQ INSERT denied with RLS 42501; no row created and account removed. Exact connected policies, Settings UPDATE and future-environment behavior remain unknown |
+| FAQ/settings RLS | Owner-supplied policy names plus one connected denial | FAQ visible SELECT `{public}`, site_settings SELECT `{public}`, system_logs INSERT `{anon,authenticated}` supplied by owner; no FAQ/Settings write policy in that result. Non-owner direct FAQ INSERT denied RLS 42501; Settings UPDATE/effective grants and future environment behavior unverified. Neither staged migration applied by us |
 | Dashboard/Projects list | Observed partial owner render | Dashboard and Projects check Admin before service-role reads and show query errors instead of false zero/empty. Authenticated Project list and draft row rendered at sampled widths after streamed table rows settled; list header wraps and edit/delete targets are 44px. Count accuracy and destructive UI confirmation unverified |
-| Security integration | Focused pass, limited scope | Docker `tests/admin-security.integration.test.mjs`: **12/12** after Analytics top-link guard. Tests cover four remaining GET 401s, Media DELETE 401, retired Changelog API 404, source Admin metrics live filtering and Logs mobile controls. Separate non-owner Experience finding remains open |
+| Security integration | Focused pass, limited scope | Docker `tests/admin-security.integration.test.mjs`: **13/13** after Experience API auth fix. Source checks ensure all four handlers gate before service role; anonymous GET/POST/PUT/DELETE each return 401. Disposable runtime non-owner check separately confirmed 403 for all verbs. Valid owner CRUD remains open |
 | Login browser test | Observed passed, layout scope | Docker `tests/admin-login.browser.test.mjs`: **1/1**, seven widths x two themes; screenshot `/tmp/playwright/admin-login-mobile-review.png` is outside the repo. Owner Dashboard/Logs read-only UI observed separately, not by this test |
-| Combined Admin/public/locked regression | Observed pass after Analytics change | Broad Docker Node run **52 pass, one existing Project skip** after Admin top-link guard. Public Blog/Project/Buildlog source unchanged |
-| Post-build smoke | Observed pass after Analytics change | **23/23** after isolated build; not full owner CRUD acceptance |
+| Combined Admin/public/locked regression | Observed pass after Experience fix | Broad Docker Node run **53 pass, one existing Project skip**. Public Home/About browser **1/1** passed; public source unchanged |
+| Post-build smoke | Observed pass after Experience fix | **24/24** after isolated build; not full owner CRUD acceptance |
 | Static checks | Observed passed | Docker `npx tsc --noEmit`, focused ESLint on latest Admin/test edits and `git diff --check` passed after the final Dashboard edit |
-| Isolated production build / preview | Observed pass after Analytics change | Docker build succeeded with **129 static pages**, preexisting image lint warning and Edge notice. `.next-build` mounted outside workspace; preview on port 3000 remains running |
-| Connected write and release checks | Scoped pass; high-priority locked blocker | Prior owner fixture lifecycles cleaned up. Disposable non-owner account was removed after status-only checks. Experience POST/PUT/DELETE lacked Admin-email denial before validation/service-role path; fix requires explicit locked Experience API unlock. Settings/About singleton save/reopen, publish/public effects, policy/provenance, bulk Logs and full root omission remain; no production-ready claim |
+| Isolated production build / preview | Observed pass after Experience fix | Docker build succeeded with **129 static pages**, preexisting image lint warning and Edge notice. `.next-build` mounted outside workspace; preview on port 3000 remains running |
+| Connected write and release checks | Scoped pass; broader acceptance blocked | Experience gate fixed and locally retested across roles without valid mutation or changing row count. Settings/About singleton save/reopen, other locked Admin workflows, publish/public effects, Settings UPDATE effective grants, bulk Logs and full root omission remain; no production-ready claim |
 | Documentation whitespace check | Passed | `git diff --check` returned clean; no credentials or private response values recorded |
 
 ## 2026-10-03 Continuation
@@ -334,6 +334,31 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
   isolated build **129 static pages**, post-build smoke **23/23**, TypeScript,
   focused ESLint and `git diff --check` passed. Existing image lint warning
   and Edge-runtime notice remain; preview service retained.
+
+## 2026-10-03 Owner-Authorized Experience API Gate Fix
+
+- Owner supplied explicit permission limited to
+  `app/api/admin/experience/route.ts` authorization, with no public About/
+  Experience or other locked presentation change. Replaced GET's open read
+  and POST/PUT/DELETE `getSession()` checks with verified `requireAdmin()`;
+  service-role creation remains after the gate. Payloads, data access model
+  for the owner, revalidation and public Experience code are unchanged.
+- Anonymous GET/POST/PUT/DELETE now return 401 before payload processing. A
+  newly created disposable non-owner received 403 for all four methods;
+  owner GET remained 200 and an invalid owner PUT returned 400. Public `/about`
+  returned 200 and the Experience row count was identical before and after.
+  Neither a valid Experience mutation nor private response values were
+  exercised. Temporary non-owner account and in-memory test helper removed.
+- Owner supplied connected `pg_policies` names/roles/commands: FAQ public
+  visible SELECT, site_settings public SELECT, system_logs INSERT for anon and
+  authenticated. No broad FAQ/Settings write policy appeared in that list;
+  a prior disposable non-owner direct FAQ INSERT was denied 42501. Exact
+  effective grants, Settings UPDATE and Logs policy expressions/provenance
+  remain unverified. **No staged migration applied.**
+- Broad Docker regression **53 pass, one existing Project skip**, isolated
+  build **129 static pages**, post-build smoke **24/24**, public Home/About
+  browser **1/1**, TypeScript, focused ESLint and `git diff --check` passed.
+  Existing image lint/Edge notices remain; Compose preview retained.
 
 Representative Docker validation commands (one-off owner fixture helpers were removed after earlier tests):
 

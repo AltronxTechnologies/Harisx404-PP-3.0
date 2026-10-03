@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { revalidatePath, revalidateTag } from "next/cache";
-import createSupabaseServerClient, { createSupabaseAdminClient } from "@/app/lib/supabase/server";
+import { requireAdmin } from "@/app/lib/admin-auth";
+import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 
 // Best-effort ISR invalidation — must never fail the mutation itself.
 function revalidateExperiencePaths() {
@@ -47,7 +48,9 @@ function stripOptionalColumns(data: Record<string, unknown>) {
 
 export async function GET(request: Request) {
   try {
-    const supabase = await createSupabaseServerClient();
+    const auth = await requireAdmin();
+    if (auth.response) return auth.response;
+    const supabase = auth.client;
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get("limit") || "50");
 
@@ -66,12 +69,8 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createSupabaseServerClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    // RLS on this table only allows public SELECT; admin mutations must use
-    // the service-role client (session + middleware already gate access).
+    const auth = await requireAdmin();
+    if (auth.response) return auth.response;
     const db = await createSupabaseAdminClient();
 
     const data = await request.json();
@@ -100,12 +99,8 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    const supabase = await createSupabaseServerClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    // RLS on this table only allows public SELECT; admin mutations must use
-    // the service-role client (session + middleware already gate access).
+    const auth = await requireAdmin();
+    if (auth.response) return auth.response;
     const db = await createSupabaseAdminClient();
 
     const data = await request.json();
@@ -139,12 +134,8 @@ export async function PUT(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const supabase = await createSupabaseServerClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    // RLS on this table only allows public SELECT; admin mutations must use
-    // the service-role client (session + middleware already gate access).
+    const auth = await requireAdmin();
+    if (auth.response) return auth.response;
     const db = await createSupabaseAdminClient();
 
     const { searchParams } = new URL(request.url);

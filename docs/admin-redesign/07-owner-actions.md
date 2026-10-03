@@ -18,13 +18,12 @@ Rotate the Admin password previously shared in chat when practical.
 
 ## 2. Approve or decline each locked-scope change
 
-- **Urgent before deployment:** a disposable signed-in non-owner reached
-  validation in the locked Experience Admin write API instead of being denied.
-  Source confirms it uses the service-role client after a session-only check.
-  No existing record was modified. To let me fix this, explicitly say:
-  "Unlock `app/api/admin/experience/route.ts` for a narrow Admin authorization
-  fix; do not change the public About/Experience page or other locked Admin
-  presentation." I will then rerun anonymous, regular-user and owner tests.
+- You explicitly unlocked `app/api/admin/experience/route.ts` for a narrow
+  authorization fix. It now checks the verified Admin identity before every
+  read/write. Anonymous requests received 401, a disposable non-owner received
+  403 for all verbs, owner GET remained 200, and public About remained 200.
+  The temporary account was removed; no Experience row or public presentation
+  was changed. Other Experience files remain locked.
 - You explicitly authorized a scoped Admin Buildlog mobile layout fix. Cards
   now replace the wide table below `xl`, and the public Buildlog is unchanged.
   Authenticated geometry and form controls passed at sampled widths. Other
@@ -36,18 +35,19 @@ Rotate the Admin password previously shared in chat when practical.
   JSON-LD remains in the document. Fully omitting them at render time would
   require a separate explicit change to the locked shared root; do not treat
   the visual isolation as that approval.
-- Named locked Admin scopes (Testimonials, Experience, Certifications,
-  Community Wall, and qualified Resume work) need their own precise permission
+- Named locked Admin scopes (Testimonials, remaining Experience work,
+  Certifications, Community Wall, and qualified Resume work) need precise permission
   before any change. No new formal lock is requested; `AUDIT_TESTING.md` runs
   only after you explicitly trigger an audit target.
 
 ## 3. Inspect connected policies without changing data
 
-In Supabase Dashboard -> SQL Editor -> New query, select the intended project
-and run the following **read-only** queries. Confirm the project/environment
-first. Send only the policy names, roles and commands from the first result;
-do not send table rows, passwords or keys. A disposable non-owner FAQ INSERT
-was denied by RLS, but the exact FAQ/Settings policies still need inspection.
+You already ran the first read-only policy query and supplied its result:
+public SELECT policies for visible FAQs and site settings, plus an INSERT
+policy for system logs. You also confirmed the Logs index. A disposable
+non-owner FAQ INSERT was denied by RLS. **No migration is needed from this
+result alone; do not run either staged Admin migration blindly.** The query
+below is retained for future environments. Never send table rows or keys.
 
 ```sql
 select tablename, policyname, roles, cmd
@@ -71,8 +71,8 @@ where schemaname = 'public'
 
 The `resolved` column is currently queryable. You confirmed the named
 `system_logs_resolved_created_at_idx` index exists on `(resolved, created_at
-DESC)`, but the policy results and column details were not included in your
-reply. The assistant did **not** apply
+DESC)` and supplied the policy names/roles/commands; the column's provenance
+and effective grants are not fully established. The assistant did **not** apply
 `migrations/2026_admin_content_rls_hardening.sql` or
 `migrations/2026_admin_system_logs_resolved.sql`. Do not run either migration
 just because it exists: first review the catalog results, expected public
