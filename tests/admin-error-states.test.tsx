@@ -99,3 +99,50 @@ test("Media pagination preserves loaded images when a later page fails and can r
     globalThis.fetch = originalFetch;
   }
 });
+
+test("Media delete keeps an in-use image visible and removes it only after success", async () => {
+  const React = await import("react");
+  (globalThis as typeof globalThis & { React: typeof React }).React = React;
+  const [{ createRoot }, { act }, { default: Media }] = await Promise.all([
+    import("react-dom/client"),
+    import("react-dom/test-utils"),
+    import("../app/admin/(dashboard)/media/page"),
+  ]);
+  const originalFetch = globalThis.fetch;
+  const originalConfirm = window.confirm;
+  let calls = 0;
+  window.confirm = () => true;
+  globalThis.fetch = async (_input, init) => {
+    if (init?.method === "DELETE") {
+      calls++;
+      return calls === 1
+        ? Response.json({ error: "This image is in use by a Blog or Project." }, { status: 409 })
+        : Response.json({ success: true });
+    }
+    return Response.json({ data: [{
+      id: "test", url: "/brand/logo-wide.png", secure_url: "", public_id: "test/image",
+      alt_text: "Test image.png", format: "png", width: 1, height: 1, bytes: 128,
+      created_at: "2026-01-01T00:00:00Z",
+    }], count: 1 });
+  };
+  const host = document.createElement("div");
+  document.body.append(host);
+  const root = createRoot(host);
+  try {
+    await act(async () => { root.render(React.createElement(Media)); await new Promise((resolve) => setTimeout(resolve, 0)); });
+    const deleteButton = () => host.querySelector<HTMLButtonElement>('button[aria-label="Delete Test image.png"]');
+    assert.ok(deleteButton());
+    await act(async () => { deleteButton()?.click(); await new Promise((resolve) => setTimeout(resolve, 0)); });
+    assert.ok(deleteButton());
+    assert.match(host.querySelector('[role="alert"]')?.textContent || "", /in use by a Blog or Project/);
+    await act(async () => { deleteButton()?.click(); await new Promise((resolve) => setTimeout(resolve, 0)); });
+    assert.equal(deleteButton(), null);
+    assert.match(host.textContent || "", /No media yet/);
+    assert.match(host.querySelector('[role="status"]')?.textContent || "", /Image deleted/);
+  } finally {
+    await act(async () => root.unmount());
+    host.remove();
+    globalThis.fetch = originalFetch;
+    window.confirm = originalConfirm;
+  }
+});

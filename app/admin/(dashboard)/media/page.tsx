@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Upload, Copy, Loader2, Image as ImageIcon, Check, X } from "lucide-react";
+import { Upload, Copy, Loader2, Image as ImageIcon, Check, Trash2, X } from "lucide-react";
 import Image from "next/image";
 
 interface MediaItem {
@@ -24,6 +24,7 @@ export default function AdminMediaPage() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [loadFailed, setLoadFailed] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [message, setMessage] = useState({ type: "", text: "" });
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -100,6 +101,27 @@ export default function AdminMediaPage() {
     }
   };
 
+  const deleteMedia = async (item: MediaItem) => {
+    const name = item.alt_text || item.public_id.split("/").pop() || "this image";
+    if (!window.confirm(`Permanently delete ${name} from the library and Cloudinary? This cannot be undone. Images linked directly elsewhere may break.`)) return;
+    setDeletingId(item.id);
+    setMessage({ type: "", text: "" });
+    try {
+      const res = await fetch(`/api/admin/media?id=${encodeURIComponent(item.id)}`, { method: "DELETE" });
+      if (!res.ok) {
+        const result = await res.json().catch(() => ({}));
+        throw new Error(result.error || "Image could not be deleted.");
+      }
+      setMedia((current) => current.filter((image) => image.id !== item.id));
+      setTotalMedia((current) => Math.max(0, current - 1));
+      setMessage({ type: "success", text: "Image deleted from the library and Cloudinary." });
+    } catch (err) {
+      setMessage({ type: "error", text: err instanceof Error ? err.message : "Image could not be deleted." });
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   const formatBytes = (bytes: number) => {
     if (!bytes) return "Unknown";
     if (bytes < 1024) return `${bytes} B`;
@@ -108,9 +130,9 @@ export default function AdminMediaPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex min-w-0 flex-col gap-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-text-primary">Media Library</h1>
           <p className="text-sm text-text-secondary mt-1">{loadFailed ? "Library unavailable" : `Showing ${media.length} of ${totalMedia} file${totalMedia !== 1 ? "s" : ""} stored on Cloudinary`}</p>
@@ -171,7 +193,7 @@ export default function AdminMediaPage() {
             {media.map((item) => (
             <div
               key={item.id}
-              className="group relative overflow-hidden rounded-xl border border-border-primary/50 bg-bg-primary shadow-sm transition-all hover:shadow-md"
+              className="group relative flex min-w-0 flex-col overflow-hidden rounded-xl border border-border-primary/50 bg-bg-primary shadow-sm transition-all hover:shadow-md"
             >
               {/* Image */}
               <div className="relative aspect-square">
@@ -196,10 +218,14 @@ export default function AdminMediaPage() {
                 </button>
               </div>
 
-              {/* Filename */}
-              <div className="p-2">
-                <p className="truncate text-xs font-medium text-text-primary">{item.alt_text || item.public_id.split("/").pop() || "Image"}</p>
-                <p className="text-xs text-text-secondary">{formatBytes(item.bytes)}</p>
+              {/* Image details and permanent action. */}
+              <div className="flex flex-1 flex-col gap-1 p-3">
+                <p className="text-xs font-medium text-text-primary" style={{ overflowWrap: "anywhere" }}>{item.alt_text || item.public_id.split("/").pop() || "Image"}</p>
+                <p className="text-xs text-text-secondary">{item.width} x {item.height} | {formatBytes(item.bytes)}</p>
+                <button type="button" onClick={() => deleteMedia(item)} disabled={deletingId !== null || isUploading || isLoadingMore} aria-label={`Delete ${item.alt_text || item.public_id.split("/").pop() || "image"}`} className="mt-auto inline-flex min-h-11 items-center justify-center gap-2 rounded-lg text-xs font-medium text-red-700 transition-colors hover:bg-red-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-current disabled:opacity-50 dark:text-red-400 dark:hover:bg-red-950/30">
+                  {deletingId === item.id ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+                  {deletingId === item.id ? "Deleting..." : "Delete"}
+                </button>
               </div>
             </div>
             ))}

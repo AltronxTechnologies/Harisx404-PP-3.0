@@ -84,10 +84,12 @@ Existing portfolio rows were not modified.
 The owner must still review the final Admin UI and approve any changes to
 singleton Settings/About values, publication flows or actions against real
 logs; these cannot be made disposable merely by deleting a test row. The Media
-library currently offers upload and copy, not owner-facing delete; if you want
-deletion, specify what should happen when an image is used by a Project or Blog
-and what confirmation you want before removing it from Cloudinary. Use test-only
-assets and a backup/restore plan for further upload workflows.
+library now offers upload, copy, and confirmed delete for unused tracked images.
+Blog/Project uses are blocked, including managed IDs and matching Cloudinary
+URLs, but links hard-coded outside tracked content cannot always be detected.
+Deletion across the database and Cloudinary is not atomic; an unexpected
+concurrent edit or failed restoration still needs manual review. Use test-only
+assets and a backup/restore plan for further workflows.
 
 Decide whether legacy `/admin/about` should remain editable (it does not feed
 the locked public About) and whether Admin Changelogs should be retained,

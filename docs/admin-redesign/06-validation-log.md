@@ -1,6 +1,6 @@
 # Validation Log
 
-Current-worktree planning snapshot. **Source-confirmed** means inspected code, **observed** means authenticated/anonymous browser or REST evidence, **prior check** means an earlier test/build result, and **blocked** means separate owner approval is needed. Earlier owner-session checks were read-only; later scoped Buildlog/FAQ/Blog/Project fixtures and one Media upload used authenticated APIs with verified cleanup. No public-source edit, unapproved locked Admin edit or migration applied by us; no deployment sign-off. Never add passwords, session material, settings/log values, secrets or private response bodies here.
+Current-worktree planning snapshot. **Source-confirmed** means inspected code, **observed** means authenticated/anonymous browser or REST evidence, **prior check** means an earlier test/build result, and **blocked** means separate owner approval is needed. Earlier owner-session checks were read-only; later scoped Buildlog/FAQ/Blog/Project fixtures and Media upload/delete used authenticated APIs with verified cleanup. No public-source edit, unapproved locked Admin edit or migration applied by us; no deployment sign-off. Never add passwords, session material, settings/log values, secrets or private response bodies here.
 
 | Item | Status | Evidence / limitation |
 | --- | --- | --- |
@@ -21,19 +21,19 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
 | Other owner API GETs | Observed HTTP 200, shapes only | `GET /api/admin/about`: legacy fields; `/api/admin/faqs` and `/api/admin/changelogs`: `data` arrays; `/api/admin/media`: `data` array and `count`. No response values or contents recorded, no mutation or page UI acceptance implied |
 | Connected content tables | Observed read-only | REST `?select=id&limit=0` returned 200 for `about_content`, `about_sections`, `changelogs`, `changelog_entries`, `faqs`. Further read-only `about_content` column inspection: `id`, `hero_title`, `hero_subtitle`, sections 1-4 `title`/`content`/`image_url`, `created_at`, `updated_at`; no values recorded |
 | Connected Media schema | Observed read-only plus scoped fixture | REST `media?select=*&limit=1` confirmed `id`, `public_id`, `url`, `secure_url`, `width`, `height`, `format`, `bytes`, `alt_text`, `folder`, `created_at`, `updated_at`; no private values recorded. Temporary UI-uploaded PNG row was found and later verified absent with Cloudinary cleanup |
-| Media UI and upload boundary | Authenticated upload observed; deletion not implemented in Admin | Authenticated Media library loaded at 320/390/640/768/1024/1440 with no out-of-viewport actions. Invalid pagination 400, missing file 400, SVG 415. One PNG uploaded via hidden picker and appeared in library, then was removed from DB and Cloudinary by scoped cleanup. Upload API remains unchanged; no owner-facing delete exists. Count/Load more now uses API total; mocked later-page failure/retry preserves prior images, real >100 pagination and clipboard behavior unverified |
+| Media UI and upload/deletion boundary | Scoped authenticated lifecycle passed; race/coverage gaps remain | Authenticated Media library loaded at 320/390/640/768/1024/1440. Invalid pagination 400, missing file 400, SVG 415. Test PNG uploaded via UI and displayed full name/dimensions/size; authenticated delete refused Blog cover ID/URL and Project gallery/URL uses (409), then removed both Media row and Cloudinary asset after references were removed. 44px delete button fits 320/390/768/1440. Count/Load more uses API total; mocked pagination and failed/successful delete tests 3/3. Only tracked rows managed; real >100 list, arbitrary URL references, concurrency and clipboard unverified |
 | Legacy About / Changelog consumers | Source-confirmed; owner decision pending | `/admin/about` warns legacy saves will not appear on locked public About; `app/api/admin/about/route.ts` strict partial allowlist after Admin check; source search found no public About `about_content` consumer. `fetchAndSortChangelogEntrees` is used by `ChangelogBento`, but no live public component uses that bento; connected Changelog tables exist. No save or public change |
 | Logs schema and UI | Observed read-only change; provenance/policy unknown | Earlier REST `system_logs?select=id,resolved&limit=0` returned 400 / `42703`; latest identical probe returned **200**. Owner reported `system_logs_resolved_created_at_idx` exists on `(resolved, created_at DESC)`. Owner `/admin/logs` rendered a list earlier; no values recorded or actions clicked. We applied no migration. Column provenance, staged SQL application and effective RLS are unverified |
 | FAQ input/UI and authorization | Scoped authenticated lifecycle passed | `app/api/admin/faqs/route.ts` full strict POST, partial PUT with UUID id, boolean PATCH and UUID DELETE. One incomplete POST returned 400; a hidden disposable FAQ passed create/read/update/delete through the authenticated API and was verified absent afterward. FAQ list separates failures and withholds section switch on Settings error; PATCH/visibility/public effects and other role tests remain unverified |
 | FAQ/settings RLS | Source-confirmed; connected policy unknown | `migrations/2026_admin_content_rls_hardening.sql` stages removal of broad FAQ-manage and site-settings-update authenticated policies; **not applied by us**. Connected policy catalog not inspected; review read-only before owner-approved rollout |
 | Dashboard/Projects list | Observed partial owner render | Dashboard and Projects check Admin before service-role reads and show query errors instead of false zero/empty. Authenticated Project list and draft row rendered at sampled widths after streamed table rows settled; list header wraps and edit/delete targets are 44px. Count accuracy and destructive UI confirmation unverified |
-| Security integration | Observed passed, limited scope | Docker `tests/admin-security.integration.test.mjs`: **9/9**. Source and anonymous HTTP tests cover five GET 401s, auth/schema boundaries, login robots and five 307 redirects; source assertions now include Blog/Project list actions. This is distinct from authenticated fixture lifecycle evidence |
+| Security integration | Observed passed, limited scope | Docker `tests/admin-security.integration.test.mjs`: **10/10**. Source and anonymous HTTP tests cover five GET 401s, Media DELETE 401, auth/schema boundaries, login robots and five 307 redirects; source assertions cover Blog/Project actions and Media reference checks. This is distinct from authenticated fixture lifecycle evidence |
 | Login browser test | Observed passed, layout scope | Docker `tests/admin-login.browser.test.mjs`: **1/1**, seven widths x two themes; screenshot `/tmp/playwright/admin-login-mobile-review.png` is outside the repo. Owner Dashboard/Logs read-only UI observed separately, not by this test |
-| Combined Admin/public/locked regression | Observed passed, limited scope | Latest broad Docker Node run: **49 pass, one existing Project skip**, including public Blog/Project/Buildlog regressions. No public source was edited in the Media continuation |
-| Post-build smoke | Observed passed | **20/20** after final isolated Media update build; includes Admin/login/shell, public Home/About and public Buildlog integration. Not full owner CRUD acceptance |
+| Combined Admin/public/locked regression | Observed passed, limited scope | Latest broad Docker Node run: **50 pass, one existing Project skip**, including public Blog/Project/Buildlog regressions. No public source was edited in the Media continuation |
+| Post-build smoke | Observed passed | **21/21** after final isolated Media deletion build; includes Admin/login/shell, public Home/About and public Buildlog integration. Not full owner CRUD acceptance |
 | Static checks | Observed passed | Docker `npx tsc --noEmit`, focused ESLint on latest Admin/test edits and `git diff --check` passed after the final Dashboard edit |
-| Isolated production build / preview | Observed passed; preview retained | Final Docker build succeeded with **132 static pages** after Admin Media pagination edit; one preexisting img warning plus edge-runtime notice. `.next-build` mounted outside workspace; host-network preview port 3000 remains running |
-| Connected write and release checks | Scoped pass; broader acceptance blocked | Authenticated draft/demo Buildlog, hidden FAQ, draft Blog/Project and UI-uploaded Media fixtures passed with verified cleanup. Settings/About singleton save/reopen, Media delete workflow, publish/public effects, log actions, policy/provenance, full root omission and other named locked Admin scopes remain; no production-ready claim |
+| Isolated production build / preview | Observed passed; preview retained | Final Docker build succeeded with **132 static pages** after Admin Media deletion edit; one preexisting img warning plus edge-runtime notice. `.next-build` mounted outside workspace; host-network preview port 3000 remains running |
+| Connected write and release checks | Scoped pass; broader acceptance blocked | Authenticated draft/demo Buildlog, hidden FAQ, draft Blog/Project and UI Media upload/dependency-blocked/delete fixtures passed with verified cleanup. Settings/About singleton save/reopen, publish/public effects, logs actions, policy/provenance, full root omission and other named locked Admin scopes remain; no production-ready claim |
 | Documentation whitespace check | Passed | `git diff --check` returned clean; no credentials or private response values recorded |
 
 ## 2026-10-03 Continuation
@@ -202,6 +202,36 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
   **20/20**, TypeScript, focused ESLint and whitespace checks passed. Existing
   image lint and Edge-runtime notices remain. Stack retained; no public source
   or schema/migration change.
+
+## 2026-10-03 Owner-Authorized Media Delete Continuation
+
+- Owner requested tracked Media upload/delete management, image names, and
+  refusal when used by Blog/Project. The Admin library now shows full stored
+  names (existing uploads store their filename in `alt_text`), dimensions and
+  size. A named 44px Delete action requires confirmation and reports 409
+  in-use errors without removing the card. It removes the card only after an
+  authenticated API success.
+- DELETE verifies Admin before service-role lookup, validates UUID/configuration,
+  checks Blog cover/social IDs, Project cover IDs, gallery IDs, matching cover
+  URLs and content Cloudinary URL/public-ID references. Query failure blocks
+  removal. For unused tracked media it deletes the DB row, then asks Cloudinary
+  to destroy the stored public_id with CDN invalidation; if Cloudinary fails,
+  it attempts to restore the row and returns an error. DB/Cloudinary cannot be
+  made atomic here; a concurrent reference or failed compensation needs manual
+  review. Hard-coded external URL uses outside checked content are not fully
+  discoverable. No public source or migrations changed.
+- A temporary PNG uploaded via Admin UI was protected by a disposable Blog
+  cover (ID and URL) and Project gallery and URL-only cover (all 409), then
+  removed using the Admin delete button when unused. DB count and Cloudinary
+  404 verification found no fixture; temporary reference rows and in-memory
+  session helper were removed. No existing asset was touched. The first cleanup
+  test needed a correction for the Cloudinary SDK's nested 404 error shape;
+  the corrected end-to-end run passed.
+- Docker broad regression **50 pass, one existing Project skip**, final isolated
+  build **132 static pages**, post-build smoke **21/21**, mocked editor and
+  Media pagination/delete **3/3**, TypeScript, focused ESLint and whitespace
+  checks passed. Preexisting image lint and Edge notices remain. No full Admin
+  or production sign-off.
 
 Docker validation commands run during this session (no connected writes):
 
