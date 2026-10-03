@@ -52,3 +52,36 @@ test("Blog detail share controls use native keyboard behavior and accessible nam
     await browser.close();
   }
 });
+
+test("Blog detail Copy URL failure is visible and announced", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    for (const theme of ["light", "dark"]) {
+      const context = await browser.newContext({ viewport: { width: 375, height: 900 } });
+      await context.addInitScript((value) => localStorage.setItem("theme", value), theme);
+      const page = await context.newPage();
+      try {
+        await page.goto(`${baseUrl}/blog/the-only-nextjs-favicon-guide-youll-need`);
+        const copy = page.getByRole("button", { name: "Copy URL" });
+        await copy.waitFor();
+        await page.evaluate(() => {
+          Object.defineProperty(navigator.clipboard, "writeText", {
+            configurable: true,
+            value: async () => { throw new Error("Clipboard blocked"); },
+          });
+        });
+        await copy.click();
+        const failed = page.getByRole("button", { name: "Copy failed" });
+        await failed.waitFor();
+        assert.equal(await failed.innerText(), "Copy failed");
+        assert.ok((await failed.boundingBox()).height >= 24);
+        await page.getByRole("status").getByText("Could not copy URL").waitFor();
+        await page.getByRole("button", { name: "Copy URL" }).waitFor();
+      } finally {
+        await context.close();
+      }
+    }
+  } finally {
+    await browser.close();
+  }
+});

@@ -116,3 +116,31 @@ wrapper's bottom margin changed; both divider styles remained unchanged.
 The owner subsequently clarified that the **last article text to divider** gap
 should be 48px. The first text block still starts 32px after the metadata rule,
 and the "React to this article" heading remains 32px below the final rule.
+
+## 2026-10-03 Final Detail Recheck
+
+This is a checked-in-code and Docker-preview review, **not production sign-off**.
+The article-specific Copy URL action now shows a red `Copy failed` label and
+announces `Could not copy URL` when the clipboard rejects a write, then resets
+after two seconds. Successful copy, share-menu keyboard behavior and focus
+return are unchanged. The old code-copy accessibility test was corrected to
+assert the current heading-text permalink, rather than its retired aria-label.
+
+- Docker Blog/MDX/TOC/metadata/related/reaction browser and HTTP suite: 48/48
+  passed after the fix. Eleven Blog image/code/card component checks passed.
+  Home/About/legal/navigation/preview/Project checks: 25 passed, one existing
+  Project skip. TypeScript, focused ESLint and the isolated production build
+  passed; the build reported an existing unrelated image-element warning and
+  an Edge-runtime static-generation notice. The dev preview was left running.
+- Four representative article types at 320, 375, 390, 640, 768, 1024 and
+  1440px in both themes produced 56/56 no-overflow, no-page-error checks.
+  Related-card visibility/order, reaction rollback without a connected write,
+  keyboard/lightbox/TOC/touch behavior and section rhythm have focused tests.
+  This sample does not certify every browser or physical device.
+- Outstanding owner/deployment gates remain: imported copy and media rights,
+  attribution and meaningful image alt text; connected single-choice reaction
+  add/switch/remove acceptance; authenticated Admin save/reopen; and deployed
+  host metadata, asset and keyboard checks. `siteMetadata.siteUrl` is fixed to
+  `https://harisx404.vercel.app`; the documented `NEXT_PUBLIC_SITE_URL` does not
+  change canonical/OG/RSS/sitemap origins, so confirm the intended primary host
+  before launch. No connected mutation or editorial rewrite was performed.

@@ -8,5 +8,5 @@ test("published code blocks expose named copy buttons", async () => {
   assert.equal(response.status, 200);
   const html = await response.text();
   assert.match(html, /<button[^>]*aria-label="Copy code"/);
-  assert.match(html, /<a[^>]*href="#required-favicon-formats"[^>]*aria-label="Link to section: required favicon formats"/);
+  assert.match(html, /<h2 id="required-favicon-formats"[^>]*><a href="#required-favicon-formats"[^>]*>/);
 });

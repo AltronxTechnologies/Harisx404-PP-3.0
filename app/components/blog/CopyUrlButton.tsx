@@ -7,7 +7,7 @@ import { BrandGlyph } from "@/app/components/BrandGlyph";
 /** Copy-URL action in the article meta row — reference control: link icon +
  *  "Copy URL" + rotating chevron that opens a small share menu. */
 export function CopyUrlButton() {
-  const [copied, setCopied] = useState(false);
+  const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "error">("idle");
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const moreRef = useRef<HTMLButtonElement>(null);
@@ -18,17 +18,19 @@ export function CopyUrlButton() {
   }, []);
 
   const copy = async () => {
+    let result: "copied" | "error";
     try {
       await navigator.clipboard.writeText(window.location.href);
-      setCopied(true);
-      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
-      copyTimerRef.current = setTimeout(() => {
-        setCopied(false);
-        copyTimerRef.current = null;
-      }, 2000);
+      result = "copied";
     } catch {
-      /* clipboard unavailable */
+      result = "error";
     }
+    setCopyStatus(result);
+    if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+    copyTimerRef.current = setTimeout(() => {
+      setCopyStatus("idle");
+      copyTimerRef.current = null;
+    }, 2000);
   };
 
   useEffect(() => {
@@ -67,12 +69,12 @@ export function CopyUrlButton() {
       <button
         type="button"
         onClick={copy}
-        className="inline-flex min-h-6 cursor-pointer items-center gap-1.5 whitespace-nowrap transition-colors hover:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 dark:hover:text-blue-300"
+        className={`inline-flex min-h-6 cursor-pointer items-center gap-1.5 whitespace-nowrap transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 ${copyStatus === "error" ? "text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300" : "hover:text-blue-700 dark:hover:text-blue-300"}`}
       >
-        {copied ? <Check className="size-3.5 shrink-0" aria-hidden="true" /> : <LinkIcon className="size-3.5 shrink-0" aria-hidden="true" />}
-        {copied ? "Copied!" : "Copy URL"}
+        {copyStatus === "copied" ? <Check className="size-3.5 shrink-0" aria-hidden="true" /> : <LinkIcon className="size-3.5 shrink-0" aria-hidden="true" />}
+        {copyStatus === "copied" ? "Copied!" : copyStatus === "error" ? "Copy failed" : "Copy URL"}
       </button>
-      <span role="status" className="sr-only">{copied ? "Copied URL" : ""}</span>
+      <span role="status" className="sr-only">{copyStatus === "copied" ? "Copied URL" : copyStatus === "error" ? "Could not copy URL" : ""}</span>
       <button
         ref={moreRef}
         type="button"
