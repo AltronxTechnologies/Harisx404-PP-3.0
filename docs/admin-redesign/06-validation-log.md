@@ -6,7 +6,7 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
 | --- | --- | --- |
 | Next/Admin structure | Confirmed in source | `package.json`, `app/layout.tsx`, `app/admin/(dashboard)/layout.tsx`, `app/components/admin/Sidebar.tsx`, `app/admin/(dashboard)/page.tsx`, route filesystem |
 | Media/About/Settings route move | Source-confirmed; partial owner UI observed | `app/admin/(dashboard)/{media,about,settings}/page.tsx`; anonymous URLs 307 to login, owner API GETs 200 by shape. Owner About/Settings form geometry and Media list sampled read-only before latest shell/style changes; no save/copy/upload or full UI acceptance. Inherited public chrome now hidden on Admin routes only |
-| Page access policy | Source-confirmed; partial runtime observation | `middleware.ts`, dashboard layout and `app/lib/admin-auth.ts` check user/`ADMIN_EMAIL`; owner `/admin` and `/admin/logs` rendered earlier. Authenticated Buildlog/FAQ mutation fixtures passed; non-owner role and other endpoint mutations not tested |
+| Page access policy | Non-owner runtime partly observed; locked blocker | Disposable non-owner was redirected from `/admin`, Experience, Testimonials, Settings and Buildlog pages to `/`. Tested unlocked Admin API reads/writes denied 403 or 401; locked Experience GET returned 200 and invalid write requests reached 400/500 instead of rejecting non-owner. No valid Experience write attempted. Owner unlock of entry 19 required |
 | Login | Observed unauth layout; sign-in behavior unverified | `tests/admin-login.browser.test.mjs` reported 1/1 in Docker at 320/375/390/640/768/1024/1440 light/dark: no overflow, one `h1`, noindex, labelled email/password fields >=44px, submit >=48px, card fit and no page errors. `GET /admin/login` 200 with robots meta. Owner-provided session enabled read-only browsing; actual sign-in/error and non-owner sign-out flows were not exercised here |
 | Owner dashboard/Logs read-only render | Observed limited pass | `/admin` rendered in owner session, `/admin/logs` rendered a log list; no log values recorded, no actions clicked. Count/draft accuracy and CRUD unverified |
 | Dashboard containment/layout | Observed before/after, selected widths | Before Admin-only fix: viewport 390 dark, main x15..375, internal right edge x566 hidden by root clip. Layout/dashboard min-width/minmax changes and new stats `md:2`/`xl:3`, actions mobile 1/`lg:2`, panels `xl:2`. A later 320px check found a recent Project edit control at x334; truncating the title and keeping the status/edit group in view removed it. Direct 320px and authenticated same-origin iframe 390/640/768/1024/1440px checks show zero measured dashboard-panel offenders. Root scroll width alone is not evidence of containment; not a full width/theme/function pass |
@@ -17,7 +17,7 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
 | Inherited root chrome/metadata | Admin visual isolation observed; render-time decision pending | Owner authorized removing public chrome from Admin while preserving public pages. `app/admin/layout.tsx` styles hide inherited Navbar/Footer/chat/rails only on Admin; `noindex` remains and Admin canonical is absent. Browser checked Admin login at 320/390/768/1440 and public Home frame. Root components still mount invisibly and WebSite JSON-LD still inherits; true render-time omission would require a separate locked-root change |
 | Connected `site_settings` schema | Confirmed supplied read-only observation | GET 200, one row; columns `id`, `site_name`, `seo_description`, `seo_keywords`, `github_url`, `twitter_url`, `linkedin_url`, `email_address`, `created_at`, `updated_at`, `show_faq_section`; values omitted |
 | Settings API | Source-confirmed; anonymous and owner GET observed | `app/api/admin/settings/route.ts`: verified Admin then service role, singleton named columns, strict optional Zod PUT, private no-store GET/successful PUT. Anonymous GET 401 (previously 500); owner GET 200 with exactly seven named fields: `site_name`, `seo_description`, `seo_keywords`, `github_url`, `twitter_url`, `linkedin_url`, `email_address`. No values recorded; no PUT/save-reopen |
-| Other anonymous API GETs | Observed status only | Current `GET /api/admin/{about,faqs,media}` plus Settings return 401; retired Changelog API GET returns 404. Previous 200s for About/FAQs/Changelogs/Experience are historical; Experience has no new result. Status alone does not prove past exposure or other-method safety |
+| Other anonymous API GETs | Observed status only | Current `GET /api/admin/{about,faqs,media}` plus Settings return 401; retired Changelog API GET returns 404. Earlier anonymous Experience 200 and current non-owner Experience 200 are separate observations; neither response body was recorded. Experience write boundary is confirmed unsafe by source and invalid non-owner method statuses |
 | Other owner API GETs | Historical shapes | About legacy fields, FAQs `data` array and Media `data`/`count` were observed. Former Changelog `data` array was observed before route retirement; it is no longer accessible through `/api/admin/changelogs` |
 | Connected content tables | Observed read-only | REST `?select=id&limit=0` returned 200 for `about_content`, `about_sections`, `changelogs`, `changelog_entries`, `faqs`. Further read-only `about_content` column inspection: `id`, `hero_title`, `hero_subtitle`, sections 1-4 `title`/`content`/`image_url`, `created_at`, `updated_at`; no values recorded |
 | Connected Media schema | Observed read-only plus scoped fixture | REST `media?select=*&limit=1` confirmed `id`, `public_id`, `url`, `secure_url`, `width`, `height`, `format`, `bytes`, `alt_text`, `folder`, `created_at`, `updated_at`; no private values recorded. Temporary UI-uploaded PNG row was found and later verified absent with Cloudinary cleanup |
@@ -25,7 +25,7 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
 | Legacy About / retired Changelog consumers | Source-confirmed; Changelog owner decision implemented | `/admin/about` warns legacy saves will not appear on locked public About. `fetchAndSortChangelogEntrees` remains in `app/lib/utils.ts` only for unused public `ChangelogBento`, which was left untouched under public locks. Changelog Admin flow is retired; connected old tables are preserved pending export/backup and separate data cleanup approval |
 | Logs schema and UI | Single-fixture resolve passed; provenance/policy unknown | Earlier REST `system_logs?select=id,resolved&limit=0` returned 400 / `42703`; latest identical probe returned **200**. Owner reported named `(resolved, created_at DESC)` index. Logs action rows initially had 62 out-of-viewport controls at 320px; stacking actions until `lg` yielded zero measured control overflow at 320/390/768/1440. A unique disposable log was resolved via Admin UI, verified in DB and deleted. No bulk clear or migration. Column provenance and effective RLS remain unverified |
 | FAQ input/UI and authorization | Scoped authenticated lifecycle passed | `app/api/admin/faqs/route.ts` full strict POST, partial PUT with UUID id, boolean PATCH and UUID DELETE. One incomplete POST returned 400; a hidden disposable FAQ passed create/read/update/delete through the authenticated API and was verified absent afterward. FAQ list separates failures and withholds section switch on Settings error; PATCH/visibility/public effects and other role tests remain unverified |
-| FAQ/settings RLS | Source-confirmed; connected policy unknown | `migrations/2026_admin_content_rls_hardening.sql` stages removal of broad FAQ-manage and site-settings-update authenticated policies; **not applied by us**. Connected policy catalog not inspected; review read-only before owner-approved rollout |
+| FAQ/settings RLS | One connected denial observed; catalog unknown | `migrations/2026_admin_content_rls_hardening.sql` staged but not applied by us. Disposable non-owner direct FAQ INSERT denied with RLS 42501; no row created and account removed. Exact connected policies, Settings UPDATE and future-environment behavior remain unknown |
 | Dashboard/Projects list | Observed partial owner render | Dashboard and Projects check Admin before service-role reads and show query errors instead of false zero/empty. Authenticated Project list and draft row rendered at sampled widths after streamed table rows settled; list header wraps and edit/delete targets are 44px. Count accuracy and destructive UI confirmation unverified |
 | Security integration | Focused pass, limited scope | Docker `tests/admin-security.integration.test.mjs`: **11/11** after retirement. Tests cover four remaining GET 401s, Media DELETE 401, retired Changelog API 404 for GET/POST/PUT/DELETE, old Admin URLs 307 to login anonymously, source redirect and Logs mobile controls. Not a non-owner role test |
 | Login browser test | Observed passed, layout scope | Docker `tests/admin-login.browser.test.mjs`: **1/1**, seven widths x two themes; screenshot `/tmp/playwright/admin-login-mobile-review.png` is outside the repo. Owner Dashboard/Logs read-only UI observed separately, not by this test |
@@ -33,7 +33,7 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
 | Post-build smoke | Observed pass after retirement | **22/22** after isolated build; not full owner CRUD acceptance |
 | Static checks | Observed passed | Docker `npx tsc --noEmit`, focused ESLint on latest Admin/test edits and `git diff --check` passed after the final Dashboard edit |
 | Isolated production build / preview | Observed pass after retirement | Docker build succeeded with **129 static pages** (three legacy Changelog editor routes removed); preexisting image lint warning and Edge notice. `.next-build` mounted outside workspace; preview on port 3000 remains running |
-| Connected write and release checks | Scoped pass; broader acceptance blocked | Authenticated draft/demo Buildlog, hidden FAQ, draft Blog/Project/Changelog, UI Media upload/dependency-blocked/delete and single-log resolve fixtures passed with verified cleanup. Settings/About singleton save/reopen, publish/public effects, bulk Logs actions, policy/provenance, full root omission and other named locked Admin scopes remain; no production-ready claim |
+| Connected write and release checks | Scoped pass; high-priority locked blocker | Prior owner fixture lifecycles cleaned up. Disposable non-owner account was removed after status-only checks. Experience POST/PUT/DELETE lacked Admin-email denial before validation/service-role path; fix requires explicit locked Experience API unlock. Settings/About singleton save/reopen, publish/public effects, policy/provenance, bulk Logs and full root omission remain; no production-ready claim |
 | Documentation whitespace check | Passed | `git diff --check` returned clean; no credentials or private response values recorded |
 
 ## 2026-10-03 Continuation
@@ -277,6 +277,35 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
   post-build smoke **22/22**, public Buildlog browser **1/1**, TypeScript,
   focused ESLint and `git diff --check` passed. The earlier image lint and
   Edge-runtime notices remain. Preview stack remains running.
+
+## 2026-10-03 Non-Owner Authorization Probe
+
+- Created a disposable Supabase Auth account with a generated password held
+  only in process memory; signed in as a regular non-owner. GET requests to
+  five sampled Admin pages redirected outside Admin. Sampled unlocked Settings,
+  About, FAQ and Media API reads/writes returned 403; tested Testimonials,
+  Certifications, Resume, Community Wall and Buildlog reads/writes returned
+  401, as did their sampled nested routes. Blog and Project invalid POSTs
+  returned 403. No private response body or credential was recorded.
+- **High-priority locked finding:** `/api/admin/experience` GET returned 200.
+  PUT with an empty ID returned 400, POST with invalid JSON returned 500, and
+  DELETE without an ID returned 400, instead of denying the non-owner before
+  processing. Source in locked `app/api/admin/experience/route.ts` checks only
+  `auth.getSession()` and then creates a service-role client for writes without
+  checking `ADMIN_EMAIL`. This is a verified authorization gap in the request
+  path; a valid non-owner write was deliberately **not** attempted. No existing
+  Experience row or other portfolio record was changed.
+- The disposable Auth account was deleted successfully. No app source, locked
+  Experience scope or migration was changed in this pass. The earlier test/
+  build successes do not override this release blocker. An explicit owner
+  unlock limited to the Experience Admin API is required before code correction
+  and anonymous/non-owner/owner regression checks. Connected FAQ/site-settings
+  policies still require a separate read-only catalog result.
+- A separate disposable non-owner account attempted a direct Supabase FAQ INSERT
+  with `is_visible=false`. Connected RLS denied it with `42501`; scoped count
+  confirmed no row was created. The account and any matching fixture row were
+  removed in cleanup. This is evidence for FAQ INSERT only; it does not
+  establish Settings UPDATE denial or the exact policy definitions.
 
 Representative Docker validation commands (one-off owner fixture helpers were removed after earlier tests):
 

@@ -18,6 +18,13 @@ Rotate the Admin password previously shared in chat when practical.
 
 ## 2. Approve or decline each locked-scope change
 
+- **Urgent before deployment:** a disposable signed-in non-owner reached
+  validation in the locked Experience Admin write API instead of being denied.
+  Source confirms it uses the service-role client after a session-only check.
+  No existing record was modified. To let me fix this, explicitly say:
+  "Unlock `app/api/admin/experience/route.ts` for a narrow Admin authorization
+  fix; do not change the public About/Experience page or other locked Admin
+  presentation." I will then rerun anonymous, regular-user and owner tests.
 - You explicitly authorized a scoped Admin Buildlog mobile layout fix. Cards
   now replace the wide table below `xl`, and the public Buildlog is unchanged.
   Authenticated geometry and form controls passed at sampled widths. Other
@@ -37,13 +44,13 @@ Rotate the Admin password previously shared in chat when practical.
 ## 3. Inspect connected policies without changing data
 
 In Supabase Dashboard -> SQL Editor -> New query, select the intended project
-and run the following **read-only** query. Confirm the project/environment
-before running anything in the SQL Editor. Report policy names, roles, commands,
-and whether any broad `authenticated` write policies remain; you may redact
-policy expressions and must omit table rows and secrets.
+and run the following **read-only** queries. Confirm the project/environment
+first. Send only the policy names, roles and commands from the first result;
+do not send table rows, passwords or keys. A disposable non-owner FAQ INSERT
+was denied by RLS, but the exact FAQ/Settings policies still need inspection.
 
 ```sql
-select tablename, policyname, permissive, roles, cmd, qual, with_check
+select tablename, policyname, roles, cmd
 from pg_policies
 where schemaname = 'public'
   and tablename in ('faqs', 'site_settings', 'system_logs')
