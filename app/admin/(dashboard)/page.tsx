@@ -1,6 +1,8 @@
 import { FileText, Briefcase, Image, Settings, Plus, ExternalLink, ArrowUpRight, Layers, Eye, Heart, ChartNoAxesCombined } from "lucide-react";
 import Link from "next/link";
-import createSupabaseServerClient, { createSupabaseAdminClient } from "@/app/lib/supabase/server";
+import { redirect } from "next/navigation";
+import { requireAdmin } from "@/app/lib/admin-auth";
+import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 import { getServerStats } from "@/app/lib/stats/server-stats";
 import { blogListStatus } from "./blogs/blogList";
 
@@ -9,34 +11,35 @@ export const metadata = {
 };
 
 export default async function AdminDashboard() {
-  const supabase = await createSupabaseServerClient();
+  const auth = await requireAdmin();
+  if (auth.response) redirect(auth.response.status === 401 ? "/admin/login" : "/");
   const blogAdmin = await createSupabaseAdminClient();
   const now = new Date();
 
   // Fetch stats in parallel
   const [
-    { count: blogCount },
-    { count: publishedBlogCount },
-    { count: draftBlogCount },
-    { count: projectCount },
+    { count: blogCount, error: blogCountError },
+    { count: publishedBlogCount, error: publishedBlogCountError },
+    { count: draftBlogCount, error: draftBlogCountError },
+    { count: projectCount, error: projectCountError },
     { data: recentPosts, error: recentPostsError },
-    { data: recentProjects },
+    { data: recentProjects, error: recentProjectsError },
     serverStats,
   ] = await Promise.all([
     blogAdmin.from("blog_posts").select("id", { count: "exact", head: true }),
     blogAdmin.from("blog_posts").select("id", { count: "exact", head: true }).eq("status", "published").lte("published_at", now.toISOString()),
     blogAdmin.from("blog_posts").select("id", { count: "exact", head: true }).eq("status", "draft"),
-    supabase.from("projects").select("*", { count: "exact", head: true }),
+    blogAdmin.from("projects").select("id", { count: "exact", head: true }),
     blogAdmin.from("blog_posts").select("id, title, slug, status, published_at").order("created_at", { ascending: false }).limit(5),
-    supabase.from("projects").select("id, title, slug, status").order("created_at", { ascending: false }).limit(5),
+    blogAdmin.from("projects").select("id, title, slug, status").order("created_at", { ascending: false }).limit(5),
     getServerStats().catch(() => null),
   ]);
 
   const statCards = [
-    { label: "Total Blog Posts", value: blogCount ?? 0, icon: FileText, href: "/admin/blogs", color: "text-indigo-600", bg: "bg-indigo-50 dark:bg-indigo-950/30" },
-    { label: "Live Posts", value: publishedBlogCount ?? 0, icon: FileText, href: "/admin/blogs", color: "text-green-600", bg: "bg-green-50 dark:bg-green-950/30" },
-    { label: "Draft Posts", value: draftBlogCount ?? 0, icon: FileText, href: "/admin/blogs", color: "text-amber-600", bg: "bg-amber-50 dark:bg-amber-950/30" },
-    { label: "Total Projects", value: projectCount ?? 0, icon: Briefcase, href: "/admin/projects", color: "text-purple-600", bg: "bg-purple-50 dark:bg-purple-950/30" },
+    { label: "Total Blog Posts", value: blogCountError ? "—" : blogCount ?? 0, icon: FileText, href: "/admin/blogs", color: "text-indigo-600", bg: "bg-indigo-50 dark:bg-indigo-950/30" },
+    { label: "Live Posts", value: publishedBlogCountError ? "—" : publishedBlogCount ?? 0, icon: FileText, href: "/admin/blogs", color: "text-green-600", bg: "bg-green-50 dark:bg-green-950/30" },
+    { label: "Draft Posts", value: draftBlogCountError ? "—" : draftBlogCount ?? 0, icon: FileText, href: "/admin/blogs", color: "text-amber-600", bg: "bg-amber-50 dark:bg-amber-950/30" },
+    { label: "Total Projects", value: projectCountError ? "—" : projectCount ?? 0, icon: Briefcase, href: "/admin/projects", color: "text-purple-600", bg: "bg-purple-50 dark:bg-purple-950/30" },
     { label: "Article Views", value: serverStats ? serverStats.totalViews : "—", icon: Eye, href: "/admin/analytics", color: "text-sky-600", bg: "bg-sky-50 dark:bg-sky-950/30" },
     { label: "Reactions", value: serverStats ? serverStats.totalReactions : "—", icon: Heart, href: "/admin/analytics", color: "text-rose-600", bg: "bg-rose-50 dark:bg-rose-950/30" },
   ];
@@ -162,7 +165,9 @@ export default async function AdminDashboard() {
             </Link>
           </div>
           <div className="divide-y divide-border-primary/30">
-            {(recentProjects ?? []).length === 0 ? (
+            {recentProjectsError ? (
+              <p role="alert" className="px-6 py-8 text-center text-sm text-text-secondary">Recent projects could not be loaded. Try again later.</p>
+            ) : (recentProjects ?? []).length === 0 ? (
               <p className="px-6 py-8 text-center text-sm text-text-secondary">No projects yet. <Link href="/admin/projects/new" className="text-indigo-600 hover:underline">Add your first project.</Link></p>
             ) : (
               (recentProjects ?? []).map((project: any) => (

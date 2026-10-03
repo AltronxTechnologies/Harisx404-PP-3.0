@@ -23,6 +23,7 @@ type AboutContent = {
 
 export default function AdminAboutPage() {
   const [isLoading, setIsLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
 
@@ -30,13 +31,17 @@ export default function AdminAboutPage() {
 
   useEffect(() => {
     fetch("/api/admin/about")
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error("Unable to load About content");
+        return res.json();
+      })
       .then((data) => {
         reset(data);
         setIsLoading(false);
       })
       .catch((err) => {
         console.error(err);
+        setLoadFailed(true);
         setMessage({ type: "error", text: "Failed to load about content." });
         setIsLoading(false);
       });
@@ -70,14 +75,28 @@ export default function AdminAboutPage() {
     );
   }
 
+  if (loadFailed) {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-2xl font-medium text-text-primary">About content unavailable</h1>
+        <p role="alert" className="text-sm text-red-700 dark:text-red-400">About content could not be loaded. No changes have been made.</p>
+        <button type="button" onClick={() => window.location.reload()} className="inline-flex min-h-11 items-center rounded-full border border-border-primary px-5 text-sm font-medium text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current">Retry loading</button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-medium tracking-tight text-ink-primary">About Page CMS</h1>
+        <h1 className="text-3xl font-medium tracking-tight text-text-primary">Legacy About content</h1>
       </div>
 
+      <p role="note" className="rounded-xl border border-amber-300/50 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-950/30 dark:text-amber-200">
+        This editor saves legacy About content, but the locked public About page does not read it. Changes here will not appear on the public page.
+      </p>
+
       {message.text && (
-        <div className={`rounded-xl p-4 text-sm ${message.type === "success" ? "bg-green-50 text-green-700 dark:bg-green-950/30" : "bg-red-50 text-red-500 dark:bg-red-950/30"}`}>
+        <div role={message.type === "error" ? "alert" : "status"} className={`rounded-xl p-4 text-sm ${message.type === "success" ? "bg-green-50 text-green-700 dark:bg-green-950/30" : "bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-400"}`}>
           {message.text}
         </div>
       )}

@@ -18,11 +18,11 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="flex w-full justify-center rounded-xl bg-accent-signal px-3 py-3 text-sm font-semibold text-white shadow-sm hover:bg-accent-signal/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-signal disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+      className="flex min-h-12 w-full items-center justify-center rounded-full bg-text-primary px-5 py-3 text-sm font-medium text-bg-primary transition-colors hover:opacity-85 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary disabled:cursor-not-allowed disabled:opacity-50"
     >
       {pending ? (
         <>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          <Loader2 aria-hidden className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" />
           Signing in...
         </>
       ) : (
@@ -36,18 +36,19 @@ export default function AdminLogin() {
   const [state, formAction] = useActionStateCompat(login, null);
 
   return (
-    <div className="flex min-h-screen flex-1 flex-col justify-center px-6 py-12 lg:px-8 bg-surface-base text-ink-primary">
-      <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-        <h2 className="mt-10 text-center text-3xl font-bold leading-9 tracking-tight">
+    <div className="flex min-h-[70vh] flex-1 flex-col justify-center px-4 py-16 text-text-primary sm:px-6">
+      <div className="mx-auto w-full max-w-[420px] text-center">
+        <p className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">Private workspace</p>
+        <h1 className="mt-4 font-display text-[40px] font-medium leading-none sm:text-5xl">
           Admin Portal
-        </h2>
-        <p className="mt-2 text-center text-sm text-ink-secondary">
+        </h1>
+        <p className="mt-4 text-sm leading-6 text-text-secondary">
           Enter your credentials to manage your portfolio
         </p>
       </div>
 
-      <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-        <div className="bg-surface-raised px-6 py-8 shadow-sm sm:rounded-2xl border border-border-hairline">
+      <div className="mx-auto mt-10 w-full max-w-[420px]">
+        <div className="rounded-2xl border border-border-primary bg-white px-5 py-7 dark:bg-white/[0.03] sm:px-8 sm:py-8">
           <form action={formAction} className="space-y-6">
             <div>
               <label
@@ -63,7 +64,7 @@ export default function AdminLogin() {
                   type="email"
                   autoComplete="email"
                   required
-                  className="block w-full rounded-xl border-0 py-2.5 px-3 bg-surface-base text-ink-primary shadow-sm ring-1 ring-inset ring-border-hairline placeholder:text-ink-secondary focus:ring-2 focus:ring-inset focus:ring-accent-signal sm:text-sm sm:leading-6 transition-all"
+                  className="block min-h-11 w-full rounded-xl border border-border-primary bg-bg-primary px-4 py-2.5 text-base text-text-primary outline-none focus-visible:ring-2 focus-visible:ring-text-primary/40 sm:text-sm"
                 />
               </div>
             </div>
@@ -84,18 +85,18 @@ export default function AdminLogin() {
                   type="password"
                   autoComplete="current-password"
                   required
-                  className="block w-full rounded-xl border-0 py-2.5 px-3 bg-surface-base text-ink-primary shadow-sm ring-1 ring-inset ring-border-hairline placeholder:text-ink-secondary focus:ring-2 focus:ring-inset focus:ring-accent-signal sm:text-sm sm:leading-6 transition-all"
+                  className="block min-h-11 w-full rounded-xl border border-border-primary bg-bg-primary px-4 py-2.5 text-base text-text-primary outline-none focus-visible:ring-2 focus-visible:ring-text-primary/40 sm:text-sm"
                 />
               </div>
             </div>
 
             {state?.error && (
-              <div className="rounded-md bg-red-50 p-4 dark:bg-red-950/30">
+              <div role="alert" className="rounded-xl border border-red-300/40 bg-red-50 p-4 dark:border-red-500/30 dark:bg-red-950/30">
                 <div className="flex">
                   <div className="ml-3">
-                    <h3 className="text-sm font-medium text-red-800 dark:text-red-300">
+                    <h2 className="text-sm font-medium text-red-800 dark:text-red-300">
                       Authentication Failed
-                    </h3>
+                    </h2>
                     <div className="mt-2 text-sm text-red-700 dark:text-red-400">
                       <p>{state.error}</p>
                     </div>

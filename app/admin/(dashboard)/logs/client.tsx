@@ -14,23 +14,53 @@ type LogEntry = {
   created_at: string;
 };
 
-export default function LogsDashboardClient({ initialLogs }: { initialLogs: LogEntry[] }) {
+export default function LogsDashboardClient({ initialLogs, loadError = "" }: { initialLogs: LogEntry[]; loadError?: string }) {
   const [logs, setLogs] = useState<LogEntry[]>(initialLogs);
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState("");
+  const [working, setWorking] = useState(false);
 
   const handleResolve = async (id: string) => {
-    setLogs(logs.map(log => log.id === id ? { ...log, resolved: true } : log));
-    await resolveLog(id);
+    setWorking(true);
+    setActionError("");
+    try {
+      const result = await resolveLog(id);
+      if (!result.success) setActionError(result.error || "Unable to resolve log");
+      else setLogs(current => current.map(log => log.id === id ? { ...log, resolved: true } : log));
+    } catch {
+      setActionError("Unable to resolve log. Try again.");
+    } finally {
+      setWorking(false);
+    }
   };
 
   const handleClearResolved = async () => {
-    setLogs(logs.filter(log => !log.resolved));
-    await clearAllResolvedLogs();
+    if (!window.confirm("Permanently delete all resolved logs?")) return;
+    setWorking(true);
+    setActionError("");
+    try {
+      const result = await clearAllResolvedLogs();
+      if (!result.success) setActionError(result.error || "Unable to clear logs");
+      else setLogs(current => current.filter(log => !log.resolved));
+    } catch {
+      setActionError("Unable to clear logs. Try again.");
+    } finally {
+      setWorking(false);
+    }
   };
 
   const handleTestError = async () => {
-    await testErrorLogger();
-    window.location.reload(); // Quick refresh to show new log
+    setWorking(true);
+    setActionError("");
+    try {
+      const result = await testErrorLogger();
+      if (!result.success) setActionError(result.error || "Unable to create test log");
+      else window.location.reload();
+    } catch {
+      setActionError("Unable to create test log. Try again.");
+    } finally {
+      setWorking(false);
+    }
   };
 
   const getLevelIcon = (level: string) => {
@@ -65,6 +95,7 @@ export default function LogsDashboardClient({ initialLogs }: { initialLogs: LogE
         <div className="flex gap-3">
           <button
             onClick={handleTestError}
+            disabled={working || !!loadError}
             className="flex items-center gap-2 rounded-lg border border-border-primary bg-bg-primary px-4 py-2 text-sm font-medium hover:bg-gray-50 dark:hover:bg-[#1A1F2B]"
           >
             <AlertCircle className="h-4 w-4" />
@@ -72,6 +103,7 @@ export default function LogsDashboardClient({ initialLogs }: { initialLogs: LogE
           </button>
           <button
             onClick={handleClearResolved}
+            disabled={working || !!loadError || !logs.some(log => log.resolved)}
             className="flex items-center gap-2 rounded-lg bg-red-50 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-100 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/50"
           >
             <Trash2 className="h-4 w-4" />
@@ -80,8 +112,10 @@ export default function LogsDashboardClient({ initialLogs }: { initialLogs: LogE
         </div>
       </div>
 
+      {(loadError || actionError) && <div role="alert" className="rounded-xl border border-red-300/50 bg-red-50 p-4 text-sm text-red-800 dark:border-red-500/30 dark:bg-red-950/30 dark:text-red-300">{loadError || actionError} <button type="button" onClick={() => window.location.reload()} className="ml-2 underline underline-offset-2">Retry loading</button></div>}
+
       <div className="rounded-xl border border-border-primary bg-surface-raised overflow-hidden shadow-sm">
-        {logs.length === 0 ? (
+        {loadError ? null : logs.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 text-center">
             <Check className="h-12 w-12 text-emerald-500 mb-4" />
             <h3 className="text-lg font-medium text-text-primary">System is healthy</h3>
@@ -119,8 +153,9 @@ export default function LogsDashboardClient({ initialLogs }: { initialLogs: LogE
                       {expandedLogId === log.id ? "Hide Details" : "View Context"}
                     </button>
                     {!log.resolved && (
-                      <button
-                        onClick={() => handleResolve(log.id)}
+                    <button
+                      onClick={() => handleResolve(log.id)}
+                      disabled={working}
                         className="rounded-md border border-border-primary bg-bg-primary px-3 py-1.5 text-xs font-medium hover:bg-gray-50 dark:hover:bg-[#1A1F2B]"
                       >
                         Mark Resolved

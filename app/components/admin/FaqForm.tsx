@@ -66,43 +66,52 @@ export function FaqForm({ initialData }: FaqFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       {errorMsg && (
-        <div className="rounded-lg bg-red-50 p-4 text-sm text-red-500 dark:bg-red-950/30">
+        <div role="alert" className="rounded-lg bg-red-50 p-4 text-sm text-red-700 dark:bg-red-950/30 dark:text-red-400">
           {errorMsg}
         </div>
       )}
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Question</label>
+        <label htmlFor="faq-question" className="text-sm font-medium">Question</label>
         <input
+          id="faq-question"
           {...register("question")}
+          aria-invalid={!!errors.question}
+          aria-describedby={errors.question ? "faq-question-error" : undefined}
           className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
           placeholder="What kind of work are you available for?"
         />
-        {errors.question && <p className="text-xs text-red-500">{errors.question.message}</p>}
+        {errors.question && <p id="faq-question-error" className="text-xs text-red-700 dark:text-red-400">{errors.question.message}</p>}
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Answer</label>
+        <label htmlFor="faq-answer" className="text-sm font-medium">Answer</label>
         <textarea
+          id="faq-answer"
           {...register("answer")}
+          aria-invalid={!!errors.answer}
+          aria-describedby={errors.answer ? "faq-answer-error" : undefined}
           rows={5}
           className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
           placeholder="The answer shown when the question is expanded. Line breaks are preserved on the homepage."
         />
-        {errors.answer && <p className="text-xs text-red-500">{errors.answer.message}</p>}
+        {errors.answer && <p id="faq-answer-error" className="text-xs text-red-700 dark:text-red-400">{errors.answer.message}</p>}
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Display order</label>
+          <label htmlFor="faq-order" className="text-sm font-medium">Display order</label>
           <input
+            id="faq-order"
             type="number"
             {...register("display_order")}
+            aria-invalid={!!errors.display_order}
+            aria-describedby={errors.display_order ? "faq-order-error" : undefined}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
           />
           <p className="text-xs text-ink-secondary">Lower numbers appear first.</p>
           {errors.display_order && (
-            <p className="text-xs text-red-500">{errors.display_order.message}</p>
+            <p id="faq-order-error" className="text-xs text-red-700 dark:text-red-400">{errors.display_order.message}</p>
           )}
         </div>
 

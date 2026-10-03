@@ -1,4 +1,6 @@
-import createSupabaseServerClient from "@/app/lib/supabase/server";
+import { redirect } from "next/navigation";
+import { requireAdmin } from "@/app/lib/admin-auth";
+import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 import LogsDashboardClient from "./client";
 
 export const metadata = {
@@ -7,19 +9,20 @@ export const metadata = {
 };
 
 export default async function LogsPage() {
-  const supabase = await createSupabaseServerClient();
+  const auth = await requireAdmin();
+  if (auth.response) redirect("/admin/login");
+  const supabase = await createSupabaseAdminClient();
   
   // Fetch logs sorted by newest first
   const { data: logs, error } = await supabase
     .from("system_logs")
-    .select("*")
+    .select("id, level, message, context, resolved, created_at")
     .order("created_at", { ascending: false })
     .limit(100);
 
   if (error) {
     console.error("Failed to fetch logs:", error);
-    // Even if it fails, render the client with empty logs so they can at least see the UI
   }
 
-  return <LogsDashboardClient initialLogs={logs || []} />;
+  return <LogsDashboardClient initialLogs={logs || []} loadError={error ? "Logs could not be loaded. Apply the Admin system logs migration if it is not installed, then retry." : ""} />;
 }

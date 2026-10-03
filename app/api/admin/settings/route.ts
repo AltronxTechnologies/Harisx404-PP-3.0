@@ -1,81 +1,94 @@
-import { NextResponse } from 'next/server';
-import createSupabaseServerClient from '@/app/lib/supabase/server';
-import { revalidatePath } from 'next/cache';
+import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
+import { requireAdmin } from "@/app/lib/admin-auth";
+import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 
-// Keys that live in the site_settings key-value table
-const SETTINGS_KEYS = [
-  'site_name',
-  'seo_description',
-  'seo_keywords',
-  'github_url',
-  'twitter_url',
-  'linkedin_url',
-  'email_address',
-];
+const SETTINGS_COLUMNS = "id, site_name, seo_description, seo_keywords, github_url, twitter_url, linkedin_url, email_address";
+const secureUrl = z.string().trim().max(2048).refine((value) => {
+  if (!value) return true;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && !!url.hostname && !url.username && !url.password;
+  } catch {
+    return false;
+  }
+}, "Use a valid HTTPS URL without embedded credentials");
+
+const settingsSchema = z.object({
+  site_name: z.string().trim().min(1).max(120).optional(),
+  seo_description: z.string().trim().max(500).optional(),
+  seo_keywords: z.string().trim().max(500).optional(),
+  github_url: secureUrl.optional(),
+  twitter_url: secureUrl.optional(),
+  linkedin_url: secureUrl.optional(),
+  email_address: z.union([z.literal(""), z.string().trim().email().max(320)]).optional(),
+}).strict().refine((value) => Object.keys(value).length > 0, "Provide at least one setting");
+
+async function settingsRow() {
+  const db = await createSupabaseAdminClient();
+  const { data, error } = await db.from("site_settings").select(SETTINGS_COLUMNS).limit(2);
+  if (error) throw error;
+  if (data?.length !== 1) return null;
+  return { db, row: data[0] };
+}
 
 export async function GET() {
   try {
-    const supabase = await createSupabaseServerClient();
-
-    const { data, error } = await supabase
-      .from('site_settings')
-      .select('key, value')
-      .in('key', SETTINGS_KEYS);
-
-    if (error && error.code !== 'PGRST116') {
-      throw error;
-    }
-
-    // Transform the key-value rows into a flat object: { site_name: 'Haris', ... }
-    const result: Record<string, string> = {};
-    (data || []).forEach((row: { key: string; value: string }) => {
-      result[row.key] = row.value;
-    });
-
-    return NextResponse.json(result);
-  } catch (error: any) {
-    console.error('Error fetching site settings:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const auth = await requireAdmin();
+    if (auth.response) return auth.response;
+    const result = await settingsRow();
+    if (!result) return NextResponse.json({ error: "Site settings are not configured" }, { status: 503 });
+    const row = result.row;
+    return NextResponse.json({
+      site_name: row.site_name ?? "",
+      seo_description: row.seo_description ?? "",
+      seo_keywords: row.seo_keywords ?? "",
+      github_url: row.github_url ?? "",
+      twitter_url: row.twitter_url ?? "",
+      linkedin_url: row.linkedin_url ?? "",
+      email_address: row.email_address ?? "",
+    }, { headers: { "Cache-Control": "private, no-store" } });
+  } catch (error) {
+    console.error("Unable to read Admin settings:", error);
+    return NextResponse.json({ error: "Site settings could not be loaded" }, { status: 503 });
   }
 }
 
 export async function PUT(request: Request) {
   try {
-    const supabase = await createSupabaseServerClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const payload: Record<string, string> = await request.json();
-
-    // Upsert each key-value pair individually
-    const upserts = Object.entries(payload)
-      .filter(([key]) => SETTINGS_KEYS.includes(key))
-      .map(([key, value]) => ({ key, value: value ?? '' }));
-
-    if (upserts.length === 0) {
-      return NextResponse.json({ message: 'No valid settings keys provided' });
-    }
-
-    const { error } = await supabase
-      .from('site_settings')
-      .upsert(upserts, { onConflict: 'key' });
-
-    if (error) throw error;
-
-    // Best-effort ISR invalidation (layout-level: metadata lives in the root layout).
+    const auth = await requireAdmin();
+    if (auth.response) return auth.response;
+    let body: unknown;
     try {
-      revalidatePath('/', 'layout');
-      revalidatePath('/about');
-    } catch (e) {
-      console.error('Revalidation failed:', e);
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    }
+    const parsed = settingsSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid settings", fields: parsed.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    return NextResponse.json({ success: true });
-  } catch (error: any) {
-    console.error('Error updating site settings:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const result = await settingsRow();
+    if (!result) return NextResponse.json({ error: "Site settings are not configured" }, { status: 503 });
+    const { data, error } = await result.db.from("site_settings")
+      .update(parsed.data)
+      .eq("id", result.row.id)
+      .select("id")
+      .maybeSingle();
+    if (error) throw error;
+    if (!data) return NextResponse.json({ error: "Site settings changed; reload before saving" }, { status: 409 });
+    try {
+      revalidatePath("/", "layout");
+      revalidatePath("/about");
+    } catch (revalidationError) {
+      console.error("Admin settings saved, but cache revalidation failed:", revalidationError);
+      return NextResponse.json({ success: true, warning: "Changes saved, but public pages may need a refresh" }, { headers: { "Cache-Control": "private, no-store" } });
+    }
+    return NextResponse.json({ success: true }, { headers: { "Cache-Control": "private, no-store" } });
+  } catch (error) {
+    console.error("Unable to save Admin settings:", error);
+    return NextResponse.json({ error: "Site settings could not be saved" }, { status: 503 });
   }
 }

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import createSupabaseServerClient from "@/app/lib/supabase/server";
+import { requireAdmin } from "@/app/lib/admin-auth";
 
 // Best-effort ISR invalidation — must never fail the mutation itself.
 function revalidateChangelogPaths() {
@@ -15,7 +15,9 @@ function revalidateChangelogPaths() {
 
 export async function GET(request: Request) {
   try {
-    const supabase = await createSupabaseServerClient();
+    const auth = await requireAdmin();
+    if (auth.response) return auth.response;
+    const supabase = auth.client;
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get("limit") || "50");
 
@@ -34,9 +36,9 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createSupabaseServerClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const auth = await requireAdmin();
+    if (auth.response) return auth.response;
+    const supabase = auth.client;
 
     const data = await request.json();
 
@@ -56,9 +58,9 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    const supabase = await createSupabaseServerClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const auth = await requireAdmin();
+    if (auth.response) return auth.response;
+    const supabase = auth.client;
 
     const data = await request.json();
     const { id, ...updateData } = data;
@@ -82,9 +84,9 @@ export async function PUT(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const supabase = await createSupabaseServerClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const auth = await requireAdmin();
+    if (auth.response) return auth.response;
+    const supabase = auth.client;
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");

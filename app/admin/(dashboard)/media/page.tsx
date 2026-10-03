@@ -1,24 +1,26 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Upload, Copy, Trash2, Loader2, Image as ImageIcon, Check, X } from "lucide-react";
+import { Upload, Copy, Loader2, Image as ImageIcon, Check, X } from "lucide-react";
 import Image from "next/image";
 
 interface MediaItem {
   id: string;
   url: string;
+  secure_url?: string;
   public_id: string;
-  filename: string;
+  alt_text: string | null;
   format: string;
   width: number;
   height: number;
-  size: number;
+  bytes: number;
   created_at: string;
 }
 
 export default function AdminMediaPage() {
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [message, setMessage] = useState({ type: "", text: "" });
@@ -27,10 +29,16 @@ export default function AdminMediaPage() {
   const fetchMedia = async () => {
     try {
       const res = await fetch("/api/admin/media?limit=100");
+      if (!res.ok) throw new Error("Media could not be loaded");
       const json = await res.json();
-      setMedia(json.data || []);
+      if (!Array.isArray(json.data)) throw new Error("Invalid media response");
+      setMedia(json.data);
+      setLoadFailed(false);
+      return true;
     } catch (err) {
       console.error("Failed to fetch media:", err);
+      setLoadFailed(true);
+      return false;
     } finally {
       setIsLoading(false);
     }
@@ -61,8 +69,10 @@ export default function AdminMediaPage() {
         throw new Error(err.error || "Upload failed");
       }
 
-      setMessage({ type: "success", text: "Image uploaded successfully!" });
-      fetchMedia();
+      const refreshed = await fetchMedia();
+      setMessage(refreshed
+        ? { type: "success", text: "Image uploaded successfully!" }
+        : { type: "warning", text: "Image uploaded, but the library could not refresh. Retry loading to find it." });
     } catch (err: any) {
       setMessage({ type: "error", text: err.message });
     } finally {
@@ -72,9 +82,13 @@ export default function AdminMediaPage() {
   };
 
   const copyUrl = async (item: MediaItem) => {
-    await navigator.clipboard.writeText(item.url);
-    setCopiedId(item.id);
-    setTimeout(() => setCopiedId(null), 2000);
+    try {
+      await navigator.clipboard.writeText(item.secure_url || item.url);
+      setCopiedId(item.id);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch {
+      setMessage({ type: "error", text: "Could not copy the image URL. Try again." });
+    }
   };
 
   const formatBytes = (bytes: number) => {
@@ -90,35 +104,37 @@ export default function AdminMediaPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-text-primary">Media Library</h1>
-          <p className="text-sm text-text-secondary mt-1">{media.length} file{media.length !== 1 ? "s" : ""} stored on Cloudinary</p>
+          <p className="text-sm text-text-secondary mt-1">{loadFailed ? "Library unavailable" : `${media.length} file${media.length !== 1 ? "s" : ""} stored on Cloudinary`}</p>
         </div>
         <div>
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept="image/jpeg,image/png,image/webp,image/gif,image/avif,image/heic,image/heif,image/tiff,image/bmp,image/x-icon"
             onChange={handleUpload}
             className="hidden"
             id="upload-input"
           />
-          <label
-            htmlFor="upload-input"
-            className={`inline-flex cursor-pointer items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-indigo-700 transition-all ${isUploading ? "opacity-60 cursor-not-allowed" : ""}`}
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+            className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow transition-colors hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isUploading ? (
               <><Loader2 className="h-4 w-4 animate-spin" /> Uploading...</>
             ) : (
               <><Upload className="h-4 w-4" /> Upload Image</>
             )}
-          </label>
+          </button>
         </div>
       </div>
 
       {/* Message */}
       {message.text && (
-        <div className={`flex items-center justify-between rounded-xl p-4 text-sm ${message.type === "success" ? "bg-green-50 text-green-700 dark:bg-green-950/30" : "bg-red-50 text-red-500 dark:bg-red-950/30"}`}>
+        <div role={message.type === "error" ? "alert" : "status"} className={`flex items-center justify-between rounded-xl p-4 text-sm ${message.type === "success" ? "bg-green-50 text-green-700 dark:bg-green-950/30" : message.type === "warning" ? "bg-amber-50 text-amber-800 dark:bg-amber-950/30 dark:text-amber-300" : "bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-400"}`}>
           <span>{message.text}</span>
-          <button onClick={() => setMessage({ type: "", text: "" })}><X className="h-4 w-4" /></button>
+          <button type="button" onClick={() => setMessage({ type: "", text: "" })} aria-label="Dismiss notification" className="flex size-9 shrink-0 items-center justify-center rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-current"><X className="h-4 w-4" /></button>
         </div>
       )}
 
@@ -126,6 +142,11 @@ export default function AdminMediaPage() {
       {isLoading ? (
         <div className="flex h-64 items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+        </div>
+      ) : loadFailed ? (
+        <div role="alert" className="flex min-h-44 flex-col items-center justify-center gap-3 rounded-xl border border-border-primary p-5 text-center text-sm text-text-secondary">
+          Media could not be loaded. No files have been removed.
+          <button type="button" onClick={() => { setIsLoading(true); fetchMedia(); }} className="inline-flex min-h-11 items-center rounded-full border border-border-primary px-5 font-medium text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current">Retry loading</button>
         </div>
       ) : media.length === 0 ? (
         <div className="flex h-64 flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed border-border-primary/50 text-text-secondary">
@@ -145,20 +166,21 @@ export default function AdminMediaPage() {
               {/* Image */}
               <div className="relative aspect-square">
                 <Image
-                  src={item.url}
-                  alt={item.filename || "Media"}
+                  src={item.secure_url || item.url}
+                  alt={item.alt_text || "Uploaded image"}
                   fill
                   className="object-cover"
                   sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
                 />
               </div>
 
-              {/* Hover Overlay */}
-              <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/60 opacity-0 transition-opacity group-hover:opacity-100">
+              {/* Keep the action available on touch and keyboard, not only on hover. */}
+              <div className="absolute right-2 top-2 opacity-100 transition-opacity [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 group-focus-within:opacity-100">
                 <button
+                  type="button"
                   onClick={() => copyUrl(item)}
-                  title="Copy URL"
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-gray-900 hover:bg-gray-100 transition-colors"
+                  aria-label={`Copy URL for ${item.alt_text || "image"}`}
+                  className="flex size-11 items-center justify-center rounded-full bg-white text-gray-900 shadow-md transition-colors hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary"
                 >
                   {copiedId === item.id ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
                 </button>
@@ -166,8 +188,8 @@ export default function AdminMediaPage() {
 
               {/* Filename */}
               <div className="p-2">
-                <p className="truncate text-xs font-medium text-text-primary">{item.filename || "image"}</p>
-                <p className="text-xs text-text-secondary">{formatBytes(item.size)}</p>
+                <p className="truncate text-xs font-medium text-text-primary">{item.alt_text || item.public_id.split("/").pop() || "Image"}</p>
+                <p className="text-xs text-text-secondary">{formatBytes(item.bytes)}</p>
               </div>
             </div>
           ))}

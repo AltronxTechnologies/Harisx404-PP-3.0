@@ -16,6 +16,7 @@ type SiteSettings = {
 
 export default function AdminSettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
 
@@ -23,13 +24,17 @@ export default function AdminSettingsPage() {
 
   useEffect(() => {
     fetch("/api/admin/settings")
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error("Unable to load site settings");
+        return res.json();
+      })
       .then((data) => {
         reset(data);
         setIsLoading(false);
       })
       .catch((err) => {
         console.error(err);
+        setLoadFailed(true);
         setMessage({ type: "error", text: "Failed to load site settings." });
         setIsLoading(false);
       });
@@ -45,9 +50,10 @@ export default function AdminSettingsPage() {
         body: JSON.stringify(data),
       });
 
-      if (!res.ok) throw new Error("Failed to save changes");
-      
-      setMessage({ type: "success", text: "Settings saved successfully!" });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Failed to save changes");
+
+      setMessage(result.warning ? { type: "warning", text: result.warning } : { type: "success", text: "Settings saved successfully!" });
     } catch (err: any) {
       setMessage({ type: "error", text: err.message });
     } finally {
@@ -63,6 +69,16 @@ export default function AdminSettingsPage() {
     );
   }
 
+  if (loadFailed) {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-2xl font-medium text-text-primary">Site settings unavailable</h1>
+        <p role="alert" className="text-sm text-red-700 dark:text-red-400">Settings could not be loaded. No changes have been made.</p>
+        <button type="button" onClick={() => window.location.reload()} className="inline-flex min-h-11 items-center rounded-full border border-border-primary px-5 text-sm font-medium text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current">Retry loading</button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -70,7 +86,7 @@ export default function AdminSettingsPage() {
       </div>
 
       {message.text && (
-        <div className={`rounded-xl p-4 text-sm ${message.type === "success" ? "bg-green-50 text-green-700 dark:bg-green-950/30" : "bg-red-50 text-red-500 dark:bg-red-950/30"}`}>
+        <div role={message.type === "error" ? "alert" : "status"} className={`rounded-xl p-4 text-sm ${message.type === "success" ? "bg-green-50 text-green-700 dark:bg-green-950/30" : message.type === "warning" ? "bg-amber-50 text-amber-800 dark:bg-amber-950/30 dark:text-amber-300" : "bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-400"}`}>
           {message.text}
         </div>
       )}
@@ -81,23 +97,26 @@ export default function AdminSettingsPage() {
           <h2 className="text-lg font-medium text-ink-primary">General Settings</h2>
           <div className="space-y-4">
             <div>
-              <label className="mb-2 block text-sm font-medium">Site Name</label>
+              <label htmlFor="site_name" className="mb-2 block text-sm font-medium">Site Name</label>
               <input
+                id="site_name"
                 {...register("site_name")}
                 className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
               />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium">SEO Description (Meta)</label>
+              <label htmlFor="seo_description" className="mb-2 block text-sm font-medium">SEO Description (Meta)</label>
               <textarea
+                id="seo_description"
                 {...register("seo_description")}
                 rows={3}
                 className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
               />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium">SEO Keywords</label>
+              <label htmlFor="seo_keywords" className="mb-2 block text-sm font-medium">SEO Keywords</label>
               <input
+                id="seo_keywords"
                 {...register("seo_keywords")}
                 placeholder="Comma separated..."
                 className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
@@ -111,29 +130,33 @@ export default function AdminSettingsPage() {
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="mb-2 block text-sm font-medium">GitHub URL</label>
+                <label htmlFor="github_url" className="mb-2 block text-sm font-medium">GitHub URL</label>
                 <input
+                  id="github_url"
                   {...register("github_url")}
                   className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-medium">X / Twitter URL</label>
+                <label htmlFor="twitter_url" className="mb-2 block text-sm font-medium">X / Twitter URL</label>
                 <input
+                  id="twitter_url"
                   {...register("twitter_url")}
                   className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-medium">LinkedIn URL</label>
+                <label htmlFor="linkedin_url" className="mb-2 block text-sm font-medium">LinkedIn URL</label>
                 <input
+                  id="linkedin_url"
                   {...register("linkedin_url")}
                   className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-medium">Contact Email</label>
+                <label htmlFor="email_address" className="mb-2 block text-sm font-medium">Contact Email</label>
                 <input
+                  id="email_address"
                   {...register("email_address")}
                   type="email"
                   className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"

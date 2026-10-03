@@ -1,4 +1,6 @@
-import createSupabaseServerClient from "@/app/lib/supabase/server";
+import { requireAdmin } from "@/app/lib/admin-auth";
+import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Plus, Edit } from "lucide-react";
 import { DeleteRowButton } from "@/app/components/admin/DeleteRowButton";
@@ -7,7 +9,9 @@ import { FaqVisibilityToggle, FaqSectionToggle } from "@/app/components/admin/Fa
 export const dynamic = "force-dynamic";
 
 export default async function AdminFaqsPage() {
-  const supabase = await createSupabaseServerClient();
+  const auth = await requireAdmin();
+  if (auth.response) redirect(auth.response.status === 401 ? "/admin/login" : "/");
+  const supabase = await createSupabaseAdminClient();
 
   const [{ data: faqs, error: faqsError }, { data: setting }] = await Promise.all([
     supabase

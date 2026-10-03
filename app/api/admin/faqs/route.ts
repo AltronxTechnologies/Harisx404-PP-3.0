@@ -1,6 +1,17 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import createSupabaseServerClient from "@/app/lib/supabase/server";
+import { requireAdmin } from "@/app/lib/admin-auth";
+import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
+import { z } from "zod";
+
+const faqSchema = z.object({
+  question: z.string().trim().min(1).max(200),
+  answer: z.string().trim().min(1).max(1000),
+  display_order: z.number().int(),
+  is_visible: z.boolean(),
+}).strict();
+const updateSchema = faqSchema.partial().extend({ id: z.string().uuid() }).strict()
+  .refine((value) => Object.keys(value).length > 1, "Provide at least one change");
 
 // Best-effort ISR invalidation — must never fail the mutation itself.
 function revalidateFaqPaths() {
@@ -13,7 +24,9 @@ function revalidateFaqPaths() {
 
 export async function GET() {
   try {
-    const supabase = await createSupabaseServerClient();
+    const auth = await requireAdmin();
+    if (auth.response) return auth.response;
+    const supabase = await createSupabaseAdminClient();
 
     const { data, error } = await supabase
       .from("faqs")
@@ -30,15 +43,16 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createSupabaseServerClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const auth = await requireAdmin();
+    if (auth.response) return auth.response;
+    const supabase = await createSupabaseAdminClient();
 
-    const data = await request.json();
+    const parsed = faqSchema.safeParse(await request.json().catch(() => null));
+    if (!parsed.success) return NextResponse.json({ error: "Invalid FAQ fields" }, { status: 400 });
 
     const { data: faq, error } = await supabase
       .from("faqs")
-      .insert([data])
+      .insert([parsed.data])
       .select()
       .single();
 
@@ -52,14 +66,13 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    const supabase = await createSupabaseServerClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const auth = await requireAdmin();
+    if (auth.response) return auth.response;
+    const supabase = await createSupabaseAdminClient();
 
-    const data = await request.json();
-    const { id, ...updateData } = data;
-
-    if (!id) return NextResponse.json({ error: "Missing FAQ ID" }, { status: 400 });
+    const parsed = updateSchema.safeParse(await request.json().catch(() => null));
+    if (!parsed.success) return NextResponse.json({ error: "Invalid FAQ fields or missing ID" }, { status: 400 });
+    const { id, ...updateData } = parsed.data;
 
     const { data: faq, error } = await supabase
       .from("faqs")
@@ -82,18 +95,18 @@ export async function PUT(request: Request) {
  */
 export async function PATCH(request: Request) {
   try {
-    const supabase = await createSupabaseServerClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const auth = await requireAdmin();
+    if (auth.response) return auth.response;
+    const supabase = await createSupabaseAdminClient();
 
-    const { show_faq_section } = await request.json();
-    if (typeof show_faq_section !== "boolean") {
+    const parsed = z.object({ show_faq_section: z.boolean() }).strict().safeParse(await request.json().catch(() => null));
+    if (!parsed.success) {
       return NextResponse.json({ error: "show_faq_section must be a boolean" }, { status: 400 });
     }
 
     const { error } = await supabase
       .from("site_settings")
-      .update({ show_faq_section })
+      .update(parsed.data)
       .not("id", "is", null);
 
     if (error) throw error;
@@ -106,14 +119,14 @@ export async function PATCH(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const supabase = await createSupabaseServerClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const auth = await requireAdmin();
+    if (auth.response) return auth.response;
+    const supabase = await createSupabaseAdminClient();
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 
-    if (!id) return NextResponse.json({ error: "Missing FAQ ID" }, { status: 400 });
+    if (!id || !z.string().uuid().safeParse(id).success) return NextResponse.json({ error: "Invalid FAQ ID" }, { status: 400 });
 
     const { error } = await supabase
       .from("faqs")

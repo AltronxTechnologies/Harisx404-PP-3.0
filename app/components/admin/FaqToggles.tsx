@@ -88,6 +88,7 @@ export function FaqSectionToggle({ enabled }: { enabled: boolean }) {
         onClick={toggle}
         disabled={busy}
         role="switch"
+        aria-label="Show FAQ section on homepage"
         aria-checked={enabled}
         className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors disabled:opacity-50 ${
           enabled ? "bg-green-500" : "bg-neutral-300 dark:bg-neutral-700"

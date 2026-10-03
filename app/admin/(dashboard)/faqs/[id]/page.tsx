@@ -1,10 +1,13 @@
 import { FaqForm } from "@/app/components/admin/FaqForm";
-import createSupabaseServerClient from "@/app/lib/supabase/server";
-import { notFound } from "next/navigation";
+import { requireAdmin } from "@/app/lib/admin-auth";
+import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
+import { notFound, redirect } from "next/navigation";
 
 export default async function EditFaqPage({ params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireAdmin();
+  if (auth.response) redirect(auth.response.status === 401 ? "/admin/login" : "/");
   const { id } = await params;
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseAdminClient();
   const { data: faq, error } = await supabase
     .from("faqs")
     .select("*")
