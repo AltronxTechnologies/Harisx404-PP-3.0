@@ -826,6 +826,50 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
   cannot be restyled; other Admin/public confirmation flows were deliberately
   left for their own page passes.
 
+## 2026-10-04 Blog Editor and MDX Switch
+
+- Owner requested both writing modes on new and existing Admin Blog forms.
+  Added an accessible Editor/MDX tablist and panel. Switching from Editor to
+  MDX shows the canonical source without a save or reserialization; Markdown
+  source can be switched back to the visual editor. The form preserves the
+  original stored bytes on an unedited metadata save. If source contains MDX
+  JSX/expressions that the current Tiptap editor cannot represent, switching
+  into Editor is blocked with an inline alert instead of silently stripping
+  content; such posts stay editable as MDX. Fenced/inline code is excluded from
+  that conservative detection. No locked public Blog renderer or content was
+  modified.
+- The existing database save RPC hard-codes new `editor_mode='rich'` and does
+  not update mode on edits. **The selected writing mode is for the current
+  editing session, not a persisted preference.** On reopen, stored source
+  posts default to MDX; rich posts default to Editor unless their content has
+  MDX-only syntax, in which case the UI fails safe to MDX. A new source-authored
+  plain-Markdown post may reopen in Editor. Persistent per-post mode would
+  require a separately reviewed atomic Blog RPC/schema migration, not a
+  non-atomic post-save update. No migration was applied here.
+- Authenticated read-only browser checks at 320/390/768/1440px verified two
+  44px tabs without overflow, new-post MDX-to-Editor-to-MDX switching without
+  changing pasted Markdown, protection of custom MDX on an attempted visual
+  switch, and an existing source-mode post reopening with unchanged source.
+  No existing rich-mode row was available in the sampled connected records;
+  its unchanged-editor behavior remains covered by component tests rather
+  than a connected owner browser sample. No Blog API mutation was sent.
+- The web container had restarted and lost its installed Chromium. The first
+  one-off browser runner created a Supabase Auth session **before** its browser
+  launch failed, so that process did not execute local sign-out. Its token was
+  not printed or stored, but individual revocation cannot be confirmed after
+  process exit without risking the owner's other sessions. The runner was
+  corrected to cover browser launch in `finally`; Chromium was installed
+  inside Docker; the successful repeat session was locally revoked and its
+  helper removed. Owner may review account sessions in Supabase and revoke
+  the earlier short-lived session if it is listed. No existing content changed.
+- Docker broad Admin/public/Blog regression **96 pass, one existing Project
+  skip**, mocked editor/Admin/Buildlog/PageSpeed checks **21/21**, TypeScript,
+  lint (pre-existing image warning), isolated build **129 static pages**,
+  post-build smoke **35/35** and whitespace checks passed. This is not a
+  conversion of custom MDX into rich content or a production-ready persisted
+  writing-mode workflow; owner visual acceptance and a safe Blog schema
+  decision remain open.
+
 Representative Docker validation commands (one-off owner fixture helpers were removed after earlier tests):
 
 ```bash

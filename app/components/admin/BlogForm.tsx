@@ -45,6 +45,11 @@ const blogSchema = z.object({
 
 type BlogFormValues = z.infer<typeof blogSchema>;
 
+function containsMdxOnlySyntax(content: string) {
+  const prose = content.replace(/```[\s\S]*?```|~~~[\s\S]*?~~~/g, "").replace(/`[^`\n]*`/g, "");
+  return /<\/?[A-Za-z][^>]*>|^\s*(?:import|export)\s|\{[^}\n]*\}/m.test(prose);
+}
+
 interface BlogFormProps {
   initialData?: BlogFormValues & { id?: string; updated_at?: string; editor_mode?: "source" | "rich" };
   availablePosts: Array<{ id: string; title: string; slug: string; status: string; published_at: string | null }>;
@@ -59,9 +64,13 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
   const [confirmation, setConfirmation] = useState<{ title: string; description: string; label: string; data: BlogFormValues; publishedAt: string; content: string } | null>(null);
   const [leaveTarget, setLeaveTarget] = useState<"list" | "preview" | null>(null);
+  const [editorMode, setEditorMode] = useState<"rich" | "source">(
+    initialData?.id && (initialData.editor_mode !== "rich" || containsMdxOnlySyntax(initialData.content)) ? "source" : "rich"
+  );
+  const [modeError, setModeError] = useState("");
   const slugEdited = useRef(Boolean(initialData?.id));
   const richContentEdited = useRef(false);
-  const richEditor = !initialData?.id || initialData.editor_mode === "rich";
+  const richEditor = editorMode === "rich";
 
   const {
     register,
@@ -69,6 +78,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
     control,
     watch,
     setValue,
+    getValues,
     setError,
     clearErrors,
     formState: { errors, isDirty },
@@ -103,6 +113,16 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
   const relatedOptions = availablePosts.filter((item) => item.id !== initialData?.id && `${item.title} ${item.slug}`.toLowerCase().includes(relatedSearch.trim().toLowerCase()));
   const scheduled = status === "published" && Date.parse(watch("published_at") || "") > Date.now();
   const publishingNow = status === "published" && initialData?.status === "published" && !watch("published_at") && Date.parse(initialData.published_at || "") > Date.now();
+
+  const switchMode = (next: "rich" | "source") => {
+    if (next === editorMode) return;
+    if (next === "rich" && containsMdxOnlySyntax(getValues("content") || "")) {
+      setModeError("This MDX contains components or expressions the visual editor cannot preserve. Continue editing in MDX mode to keep the article intact.");
+      return;
+    }
+    setModeError("");
+    setEditorMode(next);
+  };
 
   useEffect(() => {
     if (!isDirty && !tagInput.trim()) return;
@@ -185,7 +205,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
     const publishedAt = data.status === "published" && !data.published_at
       ? new Date().toISOString()
       : serializeBlogPublishDate(data.published_at, initialData?.published_at);
-    const content = richEditor && initialData?.id && !richContentEdited.current ? initialData.content : data.content;
+    const content = richEditor && initialData?.id && !richContentEdited.current && data.content === initialData.content ? initialData.content : data.content;
     const publicationChanged = Boolean(initialData?.id && initialData.status === "published" && publishedAt !== initialData.published_at);
     if ((data.status !== initialData?.status || publicationChanged) && (data.status === "published" || initialData?.status === "published")) {
       setConfirmation(data.status === "draft"
@@ -399,26 +419,39 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
       </fieldset>
 
       <div className="space-y-2">
-        {richEditor ? <p className="text-sm font-medium">Content</p> : <label htmlFor="blog-content-source" className="text-sm font-medium">Content</label>}
-        {!richEditor && (
-          <p className="text-sm text-ink-secondary">
-            Edit the original Markdown/MDX directly. The rich editor can remove embeds and custom formatting from existing articles.
-          </p>
-        )}
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="text-sm font-medium">Content</p>
+            <p className="mt-1 text-xs text-ink-secondary">Use the visual editor for formatting or MDX to paste and edit source code.</p>
+          </div>
+          <div role="tablist" aria-label="Blog writing mode" className="inline-flex gap-1 rounded-2xl border border-border-hairline bg-surface-base p-1">
+            {(["rich", "source"] as const).map((mode) => (
+              <button key={mode} type="button" id={`blog-mode-${mode}`} role="tab" aria-selected={editorMode === mode} aria-controls="blog-editor-panel" onClick={() => switchMode(mode)} className={`min-h-11 rounded-xl px-4 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${editorMode === mode ? "bg-white text-[#101013]" : "text-ink-secondary hover:bg-white/10 hover:text-white"}`}>
+                {mode === "rich" ? "Editor" : "MDX"}
+              </button>
+            ))}
+          </div>
+        </div>
+        {modeError && <p role="alert" className="rounded-xl border border-amber-500/30 bg-amber-950/20 p-3 text-sm text-amber-200">{modeError}</p>}
+        <p className="text-xs text-ink-secondary">{richEditor ? "Switch to MDX to inspect the exact source before saving." : "MDX mode keeps custom components and original formatting intact. Switching to Editor is blocked if it would remove MDX components."} The writing mode selection is for this session; your content is not changed until you save.</p>
+        <div id="blog-editor-panel" role="tabpanel" aria-labelledby={`blog-mode-${editorMode}`} className="min-w-0">
         <Controller
           name="content"
           control={control}
           render={({ field }) => (
             !richEditor ? (
-              <textarea
-                {...field}
-                id="blog-content-source"
-                aria-invalid={Boolean(errors.content)}
-                aria-describedby={errors.content ? "blog-content-error" : undefined}
-                spellCheck={false}
-                rows={22}
-                className="w-full rounded-xl border border-border-hairline bg-surface-base p-4 font-mono text-sm leading-6 text-ink-primary focus:outline-none focus:ring-2 focus:ring-accent-signal"
-              />
+              <>
+                <label htmlFor="blog-content-source" className="sr-only">Blog article MDX source</label>
+                <textarea
+                  {...field}
+                  id="blog-content-source"
+                  aria-invalid={Boolean(errors.content)}
+                  aria-describedby={errors.content ? "blog-content-error" : undefined}
+                  spellCheck={false}
+                  rows={22}
+                  className="w-full rounded-xl border border-border-hairline bg-surface-base p-4 font-mono text-sm leading-6 text-ink-primary focus:outline-none focus:ring-2 focus:ring-accent-signal"
+                />
+              </>
             ) : (
               <TiptapEditor value={field.value} errorId={errors.content ? "blog-content-error" : undefined} onChange={(value) => {
                 richContentEdited.current = true;
@@ -427,6 +460,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
             )
           )}
         />
+        </div>
         {errors.content && <p id="blog-content-error" role="alert" className="text-xs text-red-500">{errors.content.message}</p>}
       </div>
 

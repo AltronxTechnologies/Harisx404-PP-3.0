@@ -129,6 +129,16 @@ tables/rows were **not deleted**. If you later want to drop them, first export
 and inspect their contents in Supabase, take a backup, and authorize a separate
 schema/data cleanup. There is no need to do that to use Buildlog.
 
+For the Blog Editor/MDX toggle, choose whether the selected mode must persist
+per post across browsers. The current connected save RPC does not persist mode
+changes; source content remains editable now, and MDX-only syntax is protected
+from a lossy visual conversion. A persisted preference requires a reviewed,
+atomic Blog RPC migration and isolated rollback testing before application.
+Also review the owner's Supabase Auth sessions if available: one temporary
+review session created immediately before a missing-browser failure could not
+be individually confirmed revoked. Do not share session tokens or revoke all
+of your other active sessions without planning to sign in again.
+
 ## 5. Deployment-only checks
 
 After an approved migration and isolated CRUD pass, the owner must review the

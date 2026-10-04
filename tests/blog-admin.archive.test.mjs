@@ -59,16 +59,19 @@ test("archive and restore retain posts with guarded state transitions", async ()
   assert.match(publicRead, /\.eq\('status', 'published'\)/);
 });
 
-test("legacy Blog posts stay in source mode while rich-authored posts can reopen in the editor", async () => {
+test("Blog form offers Editor and MDX modes without silently converting custom MDX", async () => {
   const [form, api] = await Promise.all([
     readFile(new URL("../app/components/admin/BlogForm.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/api/admin/blogs/route.ts", import.meta.url), "utf8"),
   ]);
-  assert.match(form, /!initialData\?\.id \|\| initialData\.editor_mode === "rich"/);
-  assert.match(form, /!richEditor \? \(\s*<textarea/);
-  assert.match(form, /richContentEdited\.current \? initialData\.content : data\.content/);
+  assert.match(form, /initialData\.editor_mode !== "rich" \|\| containsMdxOnlySyntax\(initialData\.content\)/);
+  assert.match(form, /!richEditor \? \(\s*<>\s*<label[\s\S]*?<textarea/);
+  assert.match(form, /!richContentEdited\.current && data\.content === initialData\.content \? initialData\.content : data\.content/);
+  assert.match(form, /role="tablist" aria-label="Blog writing mode"/);
+  assert.match(form, /role="tabpanel" aria-labelledby=\{`blog-mode-\$\{editorMode\}`\}/);
+  assert.match(form, /containsMdxOnlySyntax\(getValues\("content"\) \|\| ""\)/);
   assert.match(form, /\{\.\.\.field\}\s+id="blog-content-source"/);
-  assert.match(form, /rich editor can remove embeds and custom formatting/);
+  assert.match(form, /MDX mode keeps custom components and original formatting intact/);
   assert.match(api, /refine\(\(value\) => value\.trim\(\)\.length > 0, "Content is required"\)/);
   assert.doesNotMatch(api, /replace\(\/\\r\\n\?\/g, "\\n"\)\.trim\(\)/);
   assert.match(form, /cover_image_url: initialData\.cover_image_url \|\| ""/);
