@@ -1,9 +1,8 @@
-import { fetchAndSortBlogPosts } from "@/app/lib/utils";
+import { fetchBlogIndexPosts } from "@/app/blog/data";
 import type { BuildTimeStats, CategoryCount } from "./types";
 
 export async function getBuildTimeStats(): Promise<BuildTimeStats> {
-  const posts = await fetchAndSortBlogPosts();
-  const publishedPosts = posts.filter((post) => !post.draft);
+  const publishedPosts = await fetchBlogIndexPosts();
   const categoryMap = new Map<string, number>();
   publishedPosts.forEach((post) => {
     post.categories.forEach((category) => {

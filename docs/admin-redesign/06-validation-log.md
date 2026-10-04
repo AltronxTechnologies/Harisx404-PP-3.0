@@ -636,6 +636,40 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
   the preceding Dashboard edit; a new isolated build was not needed for this
   single responsive-class correction.
 
+## 2026-10-04 Analytics Page Pass
+
+- Owner moved to Analytics for Admin-only polishing. Overview metrics, top
+  article lists, reaction/category breakdown and PageSpeed score panels now
+  use the same restrained dark surface hierarchy as the Dashboard, clearer
+  group spacing, long-category wrapping and keyboard-visible article-link
+  hover/focus without layout movement. Article links opening in new tabs now
+  specify `noopener noreferrer`. Score bars are decorative; visible scores
+  include the `/ 100` context. When the sandbox intentionally has no PageSpeed
+  scores, a status note explains the dashes rather than implying zero or
+  silently leaving empty panels.
+- `getBuildTimeStats()` now reads the existing cached public Blog index instead
+  of only local MDX files, so Published articles and category distribution
+  describe the same visibility-filtered collection as the public Blog. An
+  owner-session comparison confirmed the displayed Published articles value
+  matches public RSS count; it does **not** match the raw published-and-due DB
+  count, which does not apply all public visibility filters. No Blog public
+  source, database record, schema or migration was changed.
+- Authenticated read-only browser checks at 320/390/768/1024/1280/1440px:
+  HTTP 200, active Analytics navigation, six sections, eight score tiles,
+  zero visible control overflow, document overflow, page errors or unexpected
+  alert states. The sandbox PageSpeed note appeared at all widths. All nine
+  top-article links explicitly had `noopener` and reached HTTP 200. Sampled
+  link hover changed the surface without moving its target, keyboard focus
+  was visible, and the article destination returned 200. No private values,
+  credentials, response bodies or screenshot were stored; temporary owner
+  sessions were locally revoked and the runner removed.
+- Docker full regression **81 pass, one existing Project skip**, TypeScript,
+  lint (pre-existing image warning), isolated build **129 static pages**, and
+  post-build smoke **32/32** passed. Actual PageSpeed scores still require an
+  owner-confirmed reachable production URL and API availability. This is a
+  scoped read-only Analytics pass, not deployed-domain Lighthouse acceptance,
+  owner visual sign-off, or certification of every Admin workflow.
+
 Representative Docker validation commands (one-off owner fixture helpers were removed after earlier tests):
 
 ```bash

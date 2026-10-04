@@ -39,6 +39,21 @@ test("Admin top analytics links include only live published articles", async () 
   assert.match(stats, /const totalReactions\s*=/);
 });
 
+test("Analytics reflects the public published collection and explains missing scores", async () => {
+  const [page, stats, theme] = await Promise.all([
+    source("app/admin/(dashboard)/analytics/page.tsx"),
+    source("app/lib/stats/build-time-stats.ts"),
+    source("app/admin/admin-theme.css"),
+  ]);
+  assert.match(stats, /fetchBlogIndexPosts\(\)/);
+  assert.doesNotMatch(stats, /fetchAndSortBlogPosts/);
+  assert.match(page, /target="_blank" rel="noopener noreferrer"/);
+  assert.match(page, /data-admin-analytics/);
+  assert.match(page, /PageSpeed scores are unavailable in the sandbox preview/);
+  assert.match(page, /score != null && <span className="text-xs font-normal text-ink-secondary"> \/ 100<\/span>/);
+  assert.match(theme, /\[data-admin-analytics\] a\[href\^="\/blog\/"\]:focus-visible/);
+});
+
 test("Admin-only theme and collapsible navigation share the public design tokens", async () => {
   const [theme, layout, sidebar] = await Promise.all([
     source("app/admin/admin-theme.css"),
