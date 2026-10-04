@@ -105,7 +105,7 @@ test("GitHub activity and credential cards use real bounded data contracts", asy
   assert.match(adminAnalytics, /Article view analytics are temporarily unavailable/);
   assert.match(adminSidebar, /Open admin navigation/);
   assert.match(adminSidebar, /mobile-admin-navigation/);
-  assert.match(adminLayout, /pt-14 sm:gap-4/);
+  assert.match(adminLayout, /admin-content.*pt-14 sm:py-6/);
   assert.match(adminDashboard, /serverStats \? serverStats\.totalViews : "—"/);
   assert.match(serverStats, /Unable to load one or more analytics data sources/);
   assert.match(lighthouse, /throw new Error\(`PageSpeed/);

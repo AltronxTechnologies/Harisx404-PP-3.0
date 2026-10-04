@@ -445,6 +445,34 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
   `git diff --check 3231400..HEAD` reports two trailing-whitespace lines in
   Admin About/Settings; neither is a runtime finding or a change in this review.
 
+## 2026-10-04 Admin Visual-System Iteration
+
+- Owner authorized an Admin-wide visual consistency pass and desktop sidebar
+  expand/collapse, explicitly leaving public pages unchanged. An Admin-scoped
+  stylesheet now defines the previously unconfigured `ink`, `surface`, and
+  `accent-signal` utilities used by Admin lists/forms against the public site
+  tokens. The dashboard uses the same neutral surfaces and typography; the
+  desktop sidebar switches between 256px navigation and an 80px labelled icon
+  rail, with its preference stored locally. Mobile keeps its full drawer.
+  Blog saved-preview article typography is excluded from the Admin page-title
+  rule. No public layout, global CSS, Tailwind config, page or component was
+  edited. These are source and limited browser observations, not owner visual
+  acceptance of all authenticated pages.
+- Docker typecheck and lint passed (the pre-existing `CurrentlyReadingBento`
+  image warning remains). Admin/public full regression **78 pass, one existing
+  Project skip**, mocked error/version checks **7/7**, isolated production build
+  **129 static pages**, and post-build smoke **29/29** passed. At 390px, the
+  anonymous Admin login had no document overflow; a browser confirmed both
+  light/dark Admin token values and the scoped stylesheet loaded through the
+  Alloy preview. The owner browser context was anonymous and redirected from
+  `/admin` to `/admin/login`. A source-contract test checks sidebar widths,
+  labels, persistence and layout selectors, but does not replace authenticated
+  interaction or visual testing.
+- **Still pending:** owner-authenticated desktop/mobile visual review of every
+  Admin route in both themes, interactive expand/collapse and persistence,
+  full keyboard/contrast review and connected workflow acceptance. Existing
+  Settings/About singleton backup and deployed-domain gates remain unchanged.
+
 Representative Docker validation commands (one-off owner fixture helpers were removed after earlier tests):
 
 ```bash

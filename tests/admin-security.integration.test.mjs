@@ -39,6 +39,25 @@ test("Admin top analytics links include only live published articles", async () 
   assert.match(stats, /const totalReactions\s*=/);
 });
 
+test("Admin-only theme and collapsible navigation share the public design tokens", async () => {
+  const [theme, layout, sidebar] = await Promise.all([
+    source("app/admin/admin-theme.css"),
+    source("app/admin/(dashboard)/layout.tsx"),
+    source("app/components/admin/Sidebar.tsx"),
+  ]);
+  assert.match(theme, /\[data-admin-root\]/);
+  assert.match(theme, /--admin-canvas: var\(--bg-primary\)/);
+  assert.match(theme, /--admin-ink: var\(--text-primary\)/);
+  assert.match(theme, /--admin-line: var\(--border-primary\)/);
+  assert.match(theme, /\.admin-dashboard:has\(\.admin-sidebar\[data-admin-sidebar="collapsed"\]\) \.admin-content \{ padding-left: 5rem/);
+  assert.match(layout, /admin-dashboard/);
+  assert.match(layout, /admin-content/);
+  assert.match(sidebar, /admin-sidebar-collapsed/);
+  assert.match(sidebar, /aria-label="Collapse navigation"/);
+  assert.match(sidebar, /aria-label="Expand navigation"/);
+  assert.match(sidebar, /width: collapsed \? 80 : 256/);
+});
+
 test("unlocked privileged reads and log actions check Admin identity before service access", async () => {
   for (const path of [
     "app/admin/(dashboard)/page.tsx",

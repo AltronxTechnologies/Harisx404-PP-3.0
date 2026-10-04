@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import "./admin-theme.css";
 
 export const metadata: Metadata = {
   title: "Admin Portal",

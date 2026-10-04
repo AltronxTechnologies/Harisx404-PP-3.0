@@ -1,0 +1,166 @@
+/* The public theme owns the tokens; these rules apply only to the Admin subtree. */
+[data-admin-root] {
+  --admin-canvas: var(--bg-primary);
+  --admin-surface: #fff;
+  --admin-field: #f7f7f8;
+  --admin-ink: var(--text-primary);
+  --admin-muted: var(--text-secondary);
+  --admin-line: var(--border-primary);
+  color: var(--admin-ink);
+  font-family: var(--font-outfit), system-ui, sans-serif;
+}
+
+.dark [data-admin-root] {
+  --admin-surface: #19191c;
+  --admin-field: #111113;
+}
+
+[data-admin-root] .admin-dashboard,
+[data-admin-root] [class~="bg-surface-base"] {
+  background-color: var(--admin-canvas);
+}
+
+[data-admin-root] [class~="bg-surface-raised"] {
+  background-color: var(--admin-surface);
+}
+
+[data-admin-root] [class~="text-ink-primary"],
+[data-admin-root] [class~="text-accent-signal"] {
+  color: var(--admin-ink);
+}
+
+[data-admin-root] [class~="text-ink-secondary"] {
+  color: var(--admin-muted);
+}
+
+[data-admin-root] [class~="border-border-hairline"],
+[data-admin-root] [class~="border-border-primary/50"] {
+  border-color: var(--admin-line);
+}
+
+[data-admin-root] [class~="divide-border-hairline"] > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--admin-line);
+}
+
+[data-admin-root] [class~="bg-border-hairline"] {
+  background-color: var(--admin-line);
+}
+
+[data-admin-root] [class~="bg-accent-signal/10"] {
+  background-color: color-mix(in srgb, var(--admin-ink) 7%, transparent);
+}
+
+[data-admin-root] [class~="bg-accent-signal"] {
+  background-color: var(--admin-ink);
+  color: var(--admin-canvas);
+}
+
+[data-admin-root] :is(a, button, label)[class~="bg-accent-signal"] {
+  min-height: 44px;
+  border-radius: 9999px;
+  box-shadow: none;
+}
+
+[data-admin-root] [class~="border-accent-signal"],
+[data-admin-root] [class~="focus:border-accent-signal"]:focus {
+  border-color: var(--admin-ink);
+}
+
+[data-admin-root] [class~="focus:ring-accent-signal"]:focus,
+[data-admin-root] [class~="focus:ring-accent-signal/20"]:focus {
+  --tw-ring-color: color-mix(in srgb, var(--admin-ink) 25%, transparent);
+}
+
+[data-admin-root] [class~="hover:bg-surface-base"]:hover,
+[data-admin-root] [class~="hover:bg-surface-base/50"]:hover {
+  background-color: var(--admin-field);
+}
+
+[data-admin-root] [class~="hover:bg-surface-raised"]:hover {
+  background-color: var(--admin-surface);
+}
+
+[data-admin-root] [class~="hover:bg-accent-signal/20"]:hover {
+  background-color: color-mix(in srgb, var(--admin-ink) 12%, transparent);
+}
+
+[data-admin-root] [class~="hover:bg-accent-signal/90"]:hover {
+  background-color: color-mix(in srgb, var(--admin-ink) 85%, var(--admin-canvas));
+}
+
+[data-admin-root] [class~="hover:text-accent-signal"]:hover,
+[data-admin-root] [class~="hover:text-accent-signal/80"]:hover,
+[data-admin-root] [class~="hover:text-ink-primary"]:hover {
+  color: var(--admin-ink);
+}
+
+[data-admin-root] .admin-content h1:not(.font-display):not(.blog-article-shell h1) {
+  font-family: var(--font-instrument-serif), Georgia, serif;
+  font-size: clamp(2rem, 3vw, 2.75rem);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+}
+
+[data-admin-root] .admin-content :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea):not(.blog-article-shell *) {
+  min-height: 44px;
+  max-width: 100%;
+  border-color: var(--admin-line);
+  color: var(--admin-ink);
+  background-color: var(--admin-field);
+}
+
+[data-admin-root] .admin-content :is(input, select, textarea):focus-visible,
+[data-admin-root] .admin-content :is(a, button):focus-visible,
+[data-admin-root] .admin-sidebar :is(a, button):focus-visible {
+  outline: 2px solid var(--admin-ink);
+  outline-offset: 2px;
+}
+
+[data-admin-root] .admin-content [class~="rounded-xl"][class~="border"][class~="shadow-sm"] {
+  border-radius: 1rem;
+  border-color: var(--admin-line);
+  background-color: var(--admin-surface);
+  box-shadow: none;
+}
+
+[data-admin-root] .admin-content :is([class~="text-indigo-600"], [class~="text-indigo-700"], [class~="text-purple-600"], [class~="text-sky-600"], [class~="text-rose-600"]) {
+  color: var(--admin-ink);
+}
+
+[data-admin-root] .admin-content :is([class~="bg-indigo-50"], [class~="bg-purple-50"], [class~="bg-sky-50"], [class~="bg-rose-50"]) {
+  background-color: var(--admin-field);
+}
+
+[data-admin-root] .admin-content :is([class~="bg-indigo-600"], [class~="bg-purple-600"]) {
+  background-color: var(--admin-ink);
+  color: var(--admin-canvas);
+}
+
+[data-admin-root] .admin-content table {
+  border-collapse: collapse;
+}
+
+[data-admin-root] .admin-content th {
+  font-family: ui-monospace, monospace;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+[data-admin-root] .admin-content > div {
+  width: 100%;
+  max-width: 95rem;
+  margin-inline: auto;
+}
+
+@media (min-width: 640px) {
+  [data-admin-root] .admin-content { padding-left: 16rem; }
+  [data-admin-root] .admin-dashboard:has(.admin-sidebar[data-admin-sidebar="collapsed"]) .admin-content { padding-left: 5rem; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-admin-root] .admin-content,
+  [data-admin-root] .admin-sidebar { transition: padding-left 180ms ease, width 180ms ease; }
+}

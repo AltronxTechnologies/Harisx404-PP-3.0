@@ -24,11 +24,10 @@ export default async function AdminLayout({
   if (!adminEmail || user.email?.toLowerCase() !== adminEmail) redirect("/");
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-muted/40 md:flex-row bg-[#F6F7F9] dark:bg-[#10131A] text-ink-primary" style={{ minWidth: 0 }}>
+    <div className="admin-dashboard flex min-h-screen w-full flex-col bg-bg-primary text-text-primary" style={{ minWidth: 0 }}>
       <Sidebar />
-      <div className="flex w-full flex-col pt-14 sm:gap-4 sm:py-4 sm:pl-64" style={{ minWidth: 0 }}>
-        {/* We can add a top header here if needed */}
-        <div className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8" style={{ minWidth: 0, gridTemplateColumns: "minmax(0, 1fr)" }}>
+      <div className="admin-content flex w-full flex-col pt-14 sm:py-6" style={{ minWidth: 0 }}>
+        <div className="grid flex-1 items-start gap-6 px-4 py-6 sm:px-8 sm:py-0 xl:px-10" style={{ minWidth: 0, gridTemplateColumns: "minmax(0, 1fr)" }}>
           {children}
         </div>
       </div>

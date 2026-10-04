@@ -36,12 +36,12 @@ export default async function AdminDashboard() {
   ]);
 
   const statCards = [
-    { label: "Total Blog Posts", value: blogCountError ? "—" : blogCount ?? 0, icon: FileText, href: "/admin/blogs", color: "text-indigo-600", bg: "bg-indigo-50 dark:bg-indigo-950/30" },
-    { label: "Live Posts", value: publishedBlogCountError ? "—" : publishedBlogCount ?? 0, icon: FileText, href: "/admin/blogs", color: "text-green-600", bg: "bg-green-50 dark:bg-green-950/30" },
-    { label: "Draft Posts", value: draftBlogCountError ? "—" : draftBlogCount ?? 0, icon: FileText, href: "/admin/blogs", color: "text-amber-600", bg: "bg-amber-50 dark:bg-amber-950/30" },
-    { label: "Total Projects", value: projectCountError ? "—" : projectCount ?? 0, icon: Briefcase, href: "/admin/projects", color: "text-purple-600", bg: "bg-purple-50 dark:bg-purple-950/30" },
-    { label: "Article Views", value: serverStats ? serverStats.totalViews : "—", icon: Eye, href: "/admin/analytics", color: "text-sky-600", bg: "bg-sky-50 dark:bg-sky-950/30" },
-    { label: "Reactions", value: serverStats ? serverStats.totalReactions : "—", icon: Heart, href: "/admin/analytics", color: "text-rose-600", bg: "bg-rose-50 dark:bg-rose-950/30" },
+    { label: "Total Blog Posts", value: blogCountError ? "—" : blogCount ?? 0, icon: FileText, href: "/admin/blogs" },
+    { label: "Live Posts", value: publishedBlogCountError ? "—" : publishedBlogCount ?? 0, icon: FileText, href: "/admin/blogs" },
+    { label: "Draft Posts", value: draftBlogCountError ? "—" : draftBlogCount ?? 0, icon: FileText, href: "/admin/blogs" },
+    { label: "Total Projects", value: projectCountError ? "—" : projectCount ?? 0, icon: Briefcase, href: "/admin/projects" },
+    { label: "Article Views", value: serverStats ? serverStats.totalViews : "—", icon: Eye, href: "/admin/analytics" },
+    { label: "Reactions", value: serverStats ? serverStats.totalReactions : "—", icon: Heart, href: "/admin/analytics" },
   ];
 
   const quickActions = [
@@ -69,12 +69,12 @@ export default async function AdminDashboard() {
             <Link
               key={card.label}
               href={card.href}
-              className="group rounded-xl border border-border-primary/50 bg-bg-primary p-5 shadow-sm transition-all hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-700"
+              className="group rounded-2xl border border-border-primary bg-white p-5 transition-colors hover:border-text-secondary/50 dark:bg-white/[0.03]"
             >
               <div className="flex items-center justify-between mb-3">
                 <p className="text-sm font-medium text-text-secondary">{card.label}</p>
-                <div className={`rounded-lg p-2 ${card.bg}`}>
-                  <Icon className={`h-4 w-4 ${card.color}`} />
+                 <div className="rounded-xl border border-border-primary bg-bg-primary p-2.5 text-text-primary">
+                   <Icon className="size-5" />
                 </div>
               </div>
               <p className="text-3xl font-bold text-text-primary">{card.value}</p>
@@ -85,7 +85,7 @@ export default async function AdminDashboard() {
 
       <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-6 xl:grid-cols-2">
         {/* Quick Actions */}
-        <div className="rounded-xl border border-border-primary/50 bg-bg-primary shadow-sm">
+         <div className="rounded-2xl border border-border-primary bg-white dark:bg-white/[0.03]">
           <div className="border-b border-border-primary/50 px-6 py-4">
             <h2 className="font-semibold text-text-primary">Quick Actions</h2>
           </div>
@@ -121,10 +121,10 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Recent Blog Posts */}
-        <div className="rounded-xl border border-border-primary/50 bg-bg-primary shadow-sm">
+         <div className="rounded-2xl border border-border-primary bg-white dark:bg-white/[0.03]">
           <div className="flex items-center justify-between border-b border-border-primary/50 px-6 py-4">
             <h2 className="font-semibold text-text-primary">Recent Blog Posts</h2>
-            <Link href="/admin/blogs" className="flex items-center gap-1 text-xs text-indigo-600 hover:underline">
+             <Link href="/admin/blogs" className="flex items-center gap-1 text-xs font-medium text-text-primary hover:underline">
               View all <ArrowUpRight className="h-3 w-3" />
             </Link>
           </div>
@@ -132,7 +132,7 @@ export default async function AdminDashboard() {
             {recentPostsError ? (
               <p role="alert" className="px-6 py-8 text-center text-sm text-text-secondary">Recent blog posts could not be loaded. Try again later.</p>
             ) : (recentPosts ?? []).length === 0 ? (
-              <p className="px-6 py-8 text-center text-sm text-text-secondary">No posts yet. <Link href="/admin/blogs/new" className="text-indigo-600 hover:underline">Create your first one.</Link></p>
+               <p className="px-6 py-8 text-center text-sm text-text-secondary">No posts yet. <Link href="/admin/blogs/new" className="text-text-primary underline">Create your first one.</Link></p>
             ) : (
               (recentPosts ?? []).map((post: any) => (
                 <div key={post.id} className="flex items-center justify-between px-6 py-3">
@@ -146,7 +146,7 @@ export default async function AdminDashboard() {
                     <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${blogListStatus(post.status, post.published_at, now.getTime()) === "Live" ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400" : post.status === "archived" ? "bg-surface-base text-ink-secondary" : "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400"}`}>
                       {blogListStatus(post.status, post.published_at, now.getTime())}
                     </span>
-                    <Link href={post.status === "archived" ? "/admin/blogs?status=archived" : `/admin/blogs/${post.id}`} aria-label={post.status === "archived" ? "View archived posts" : `Edit ${post.title}`} className="text-indigo-600 hover:text-indigo-700">
+                     <Link href={post.status === "archived" ? "/admin/blogs?status=archived" : `/admin/blogs/${post.id}`} aria-label={post.status === "archived" ? "View archived posts" : `Edit ${post.title}`} className="inline-flex size-11 items-center justify-center rounded-xl text-text-primary hover:bg-bg-primary">
                       <ArrowUpRight className="h-4 w-4" />
                     </Link>
                   </div>
@@ -157,10 +157,10 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Recent Projects */}
-        <div className="rounded-xl border border-border-primary/50 bg-bg-primary shadow-sm xl:col-span-2">
+         <div className="rounded-2xl border border-border-primary bg-white dark:bg-white/[0.03] xl:col-span-2">
           <div className="flex items-center justify-between border-b border-border-primary/50 px-6 py-4">
             <h2 className="font-semibold text-text-primary">Recent Projects</h2>
-            <Link href="/admin/projects" className="flex items-center gap-1 text-xs text-indigo-600 hover:underline">
+             <Link href="/admin/projects" className="flex items-center gap-1 text-xs font-medium text-text-primary hover:underline">
               View all <ArrowUpRight className="h-3 w-3" />
             </Link>
           </div>
@@ -168,13 +168,13 @@ export default async function AdminDashboard() {
             {recentProjectsError ? (
               <p role="alert" className="px-6 py-8 text-center text-sm text-text-secondary">Recent projects could not be loaded. Try again later.</p>
             ) : (recentProjects ?? []).length === 0 ? (
-              <p className="px-6 py-8 text-center text-sm text-text-secondary">No projects yet. <Link href="/admin/projects/new" className="text-indigo-600 hover:underline">Add your first project.</Link></p>
+               <p className="px-6 py-8 text-center text-sm text-text-secondary">No projects yet. <Link href="/admin/projects/new" className="text-text-primary underline">Add your first project.</Link></p>
             ) : (
               (recentProjects ?? []).map((project: any) => (
                 <div key={project.id} className="flex items-center justify-between px-6 py-3">
                   <div className="flex min-w-0 items-center gap-3">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-950/30">
-                      <Layers className="h-4 w-4 text-indigo-600" />
+                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-bg-primary">
+                       <Layers className="h-4 w-4 text-text-primary" />
                     </div>
                     <p className="truncate text-sm font-medium text-text-primary">{project.title}</p>
                   </div>
@@ -182,7 +182,7 @@ export default async function AdminDashboard() {
                     <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${project.status === "published" ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400" : "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400"}`}>
                       {project.status}
                     </span>
-                    <Link href={`/admin/projects/${project.id}`} aria-label={`Edit ${project.title}`} className="inline-flex size-11 items-center justify-center rounded-lg text-indigo-600 hover:bg-border-primary/30 hover:text-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-current">
+                     <Link href={`/admin/projects/${project.id}`} aria-label={`Edit ${project.title}`} className="inline-flex size-11 items-center justify-center rounded-xl text-text-primary hover:bg-bg-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-current">
                       <ArrowUpRight className="h-4 w-4" />
                     </Link>
                   </div>
