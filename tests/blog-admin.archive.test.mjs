@@ -59,19 +59,28 @@ test("archive and restore retain posts with guarded state transitions", async ()
   assert.match(publicRead, /\.eq\('status', 'published'\)/);
 });
 
-test("Blog form offers Editor and MDX modes without silently converting custom MDX", async () => {
-  const [form, api] = await Promise.all([
+test("Blog form offers Editor, MDX and unsaved Preview without silently converting custom MDX", async () => {
+  const [form, codeEditor, unsavedPreview, api] = await Promise.all([
     readFile(new URL("../app/components/admin/BlogForm.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/admin/BlogCodeEditor.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/admin/BlogUnsavedPreview.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/api/admin/blogs/route.ts", import.meta.url), "utf8"),
   ]);
-  assert.match(form, /initialData\.editor_mode !== "rich" \|\| containsMdxOnlySyntax\(initialData\.content\)/);
-  assert.match(form, /!richEditor \? \(\s*<>\s*<label[\s\S]*?<textarea/);
+  assert.match(form, /initialData\.editor_mode !== "rich" \|\| !canUseVisualBlogEditor\(initialData\.content\)/);
+  assert.match(form, /editorMode === "source" \? \(\s*<BlogCodeEditor/);
   assert.match(form, /!richContentEdited\.current && data\.content === initialData\.content \? initialData\.content : data\.content/);
   assert.match(form, /role="tablist" aria-label="Blog writing mode"/);
   assert.match(form, /role="tabpanel" aria-labelledby=\{`blog-mode-\$\{editorMode\}`\}/);
-  assert.match(form, /containsMdxOnlySyntax\(getValues\("content"\) \|\| ""\)/);
-  assert.match(form, /\{\.\.\.field\}\s+id="blog-content-source"/);
-  assert.match(form, /MDX mode keeps custom components and original formatting intact/);
+  assert.match(form, /!canUseVisualBlogEditor\(getValues\("content"\) \|\| ""\)/);
+  assert.match(form, /<BlogUnsavedPreview snapshot=\{previewSnapshot\}/);
+  assert.match(form, /if \(switchMode\(next\)\) document\.getElementById/);
+  assert.match(unsavedPreview, /validateBlogMdx\(post\.content\)/);
+  assert.match(unsavedPreview, /\.\.\.sharedComponents, img: BlogArticleImage, Image: BlogArticleImage/);
+  assert.match(unsavedPreview, /Article content cannot be safely previewed/);
+  assert.match(form, /Visual Editor.*MDX \/ Code.*Preview/);
+  assert.match(codeEditor, /preview="edit"/);
+  assert.match(codeEditor, /Blog article MDX source/);
+  assert.match(form, /MDX \/ Code preserves custom components/);
   assert.match(api, /refine\(\(value\) => value\.trim\(\)\.length > 0, "Content is required"\)/);
   assert.doesNotMatch(api, /replace\(\/\\r\\n\?\/g, "\\n"\)\.trim\(\)/);
   assert.match(form, /cover_image_url: initialData\.cover_image_url \|\| ""/);
@@ -98,8 +107,9 @@ test("manual cover URL edits clear their media ID and saves validate the pair", 
   assert.match(form, /beforeunload/);
   assert.match(form, /formState: \{ errors, isDirty \}/);
   assert.doesNotMatch(form, /window\.confirm|window\.prompt/);
-  for (const [field, name] of [["title", "title"], ["slug", "slug"], ["summary", "summary"], ["status", "status"], ["published-at", "published_at"], ["cover-url", "cover_image_url"], ["canonical-url", "canonical_url"], ["tags", "tags"], ["content", "content"]]) {
+  for (const [field, name] of [["title", "title"], ["slug", "slug"], ["summary", "summary"], ["status", "status"], ["published-at", "published_at"], ["cover-url", "cover_image_url"], ["canonical-url", "canonical_url"], ["tags", "tags"]]) {
     assert.match(form, new RegExp(`id="blog-${field}-error"`));
     assert.match(form, new RegExp(`aria-describedby=\\{errors\\.${name}`));
   }
+  assert.match(form, /errorId=\{errors\.content \? "blog-content-error" : undefined\}/);
 });

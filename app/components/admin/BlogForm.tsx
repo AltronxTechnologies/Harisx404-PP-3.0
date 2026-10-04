@@ -10,10 +10,13 @@ import * as z from "zod";
 import { Loader2, Plus, X, Image as ImageIcon } from "lucide-react";
 import { MediaPickerModal } from "./MediaPickerModal";
 import { AdminConfirmDialog } from "./AdminConfirmDialog";
+import { canUseVisualBlogEditor } from "@/app/lib/admin/blog-visual-eligibility";
 import { normalizeBlogSlug, serializeBlogPublishDate, toLocalBlogDateTime } from "@/app/lib/blog-defaults";
 import { isAllowedBlogImageUrl } from "@/app/components/blog/blogImage";
 
 const TiptapEditor = dynamic(() => import("./TiptapEditor").then((module) => module.TiptapEditor), { ssr: false });
+const BlogCodeEditor = dynamic(() => import("./BlogCodeEditor").then((module) => module.BlogCodeEditor), { ssr: false });
+const BlogUnsavedPreview = dynamic(() => import("./BlogUnsavedPreview").then((module) => module.BlogUnsavedPreview), { ssr: false, loading: () => <p role="status" className="p-6 text-center text-sm text-ink-secondary">Loading preview...</p> });
 
 const blogSchema = z.object({
   title: z.string().min(1, "Title is required").max(200, "Title must be 200 characters or fewer"),
@@ -45,11 +48,6 @@ const blogSchema = z.object({
 
 type BlogFormValues = z.infer<typeof blogSchema>;
 
-function containsMdxOnlySyntax(content: string) {
-  const prose = content.replace(/```[\s\S]*?```|~~~[\s\S]*?~~~/g, "").replace(/`[^`\n]*`/g, "");
-  return /<\/?[A-Za-z][^>]*>|^\s*(?:import|export)\s|\{[^}\n]*\}/m.test(prose);
-}
-
 interface BlogFormProps {
   initialData?: BlogFormValues & { id?: string; updated_at?: string; editor_mode?: "source" | "rich" };
   availablePosts: Array<{ id: string; title: string; slug: string; status: string; published_at: string | null }>;
@@ -64,10 +62,11 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
   const [confirmation, setConfirmation] = useState<{ title: string; description: string; label: string; data: BlogFormValues; publishedAt: string; content: string } | null>(null);
   const [leaveTarget, setLeaveTarget] = useState<"list" | "preview" | null>(null);
-  const [editorMode, setEditorMode] = useState<"rich" | "source">(
-    initialData?.id && (initialData.editor_mode !== "rich" || containsMdxOnlySyntax(initialData.content)) ? "source" : "rich"
+  const [editorMode, setEditorMode] = useState<"rich" | "source" | "preview">(
+    initialData?.id && (initialData.editor_mode !== "rich" || !canUseVisualBlogEditor(initialData.content)) ? "source" : "rich"
   );
   const [modeError, setModeError] = useState("");
+  const [previewSnapshot, setPreviewSnapshot] = useState<Pick<BlogFormValues, "title" | "summary" | "content" | "cover_image_url" | "published_at" | "status"> | null>(null);
   const slugEdited = useRef(Boolean(initialData?.id));
   const richContentEdited = useRef(false);
   const richEditor = editorMode === "rich";
@@ -114,14 +113,28 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
   const scheduled = status === "published" && Date.parse(watch("published_at") || "") > Date.now();
   const publishingNow = status === "published" && initialData?.status === "published" && !watch("published_at") && Date.parse(initialData.published_at || "") > Date.now();
 
-  const switchMode = (next: "rich" | "source") => {
-    if (next === editorMode) return;
-    if (next === "rich" && containsMdxOnlySyntax(getValues("content") || "")) {
-      setModeError("This MDX contains components or expressions the visual editor cannot preserve. Continue editing in MDX mode to keep the article intact.");
-      return;
+  const refreshPreview = () => {
+    const data = getValues();
+    setPreviewSnapshot({
+      title: data.title,
+      summary: data.summary,
+      content: data.content,
+      cover_image_url: data.cover_image_url,
+      published_at: data.published_at ? serializeBlogPublishDate(data.published_at, initialData?.published_at) : "",
+      status: data.status,
+    });
+  };
+
+  const switchMode = (next: "rich" | "source" | "preview") => {
+    if (next === editorMode) return true;
+    if (next === "rich" && !canUseVisualBlogEditor(getValues("content") || "")) {
+      setModeError("This MDX uses syntax the visual editor cannot preserve safely. Edit it in MDX / Code or use Preview to inspect the rendered article.");
+      return false;
     }
     setModeError("");
     setEditorMode(next);
+    if (next === "preview") refreshPreview();
+    return true;
   };
 
   useEffect(() => {
@@ -422,36 +435,39 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="text-sm font-medium">Content</p>
-            <p className="mt-1 text-xs text-ink-secondary">Use the visual editor for formatting or MDX to paste and edit source code.</p>
+            <p className="mt-1 text-xs text-ink-secondary">Write visually, edit MDX directly, or inspect an unsaved article preview.</p>
           </div>
-          <div role="tablist" aria-label="Blog writing mode" className="inline-flex gap-1 rounded-2xl border border-border-hairline bg-surface-base p-1">
-            {(["rich", "source"] as const).map((mode) => (
-              <button key={mode} type="button" id={`blog-mode-${mode}`} role="tab" aria-selected={editorMode === mode} aria-controls="blog-editor-panel" onClick={() => switchMode(mode)} className={`min-h-11 rounded-xl px-4 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${editorMode === mode ? "bg-white text-[#101013]" : "text-ink-secondary hover:bg-white/10 hover:text-white"}`}>
-                {mode === "rich" ? "Editor" : "MDX"}
+          <div role="tablist" aria-label="Blog writing mode" className="inline-flex flex-wrap gap-1 rounded-2xl border border-border-hairline bg-surface-base p-1">
+            {(["rich", "source", "preview"] as const).map((mode) => (
+              <button key={mode} type="button" id={`blog-mode-${mode}`} role="tab" tabIndex={editorMode === mode ? 0 : -1} aria-selected={editorMode === mode} aria-controls="blog-editor-panel" onClick={() => switchMode(mode)} onKeyDown={(event) => {
+                if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+                event.preventDefault();
+                const tabs = ["rich", "source", "preview"] as const;
+                const next = tabs[(tabs.indexOf(editorMode) + (event.key === "ArrowRight" ? 1 : 2)) % tabs.length];
+                if (switchMode(next)) document.getElementById(`blog-mode-${next}`)?.focus();
+              }} className={`min-h-11 rounded-xl px-4 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${editorMode === mode ? "bg-white text-[#101013]" : "text-ink-secondary hover:bg-white/10 hover:text-white"}`}>
+                {mode === "rich" ? "Visual Editor" : mode === "source" ? "MDX / Code" : "Preview"}
               </button>
             ))}
           </div>
         </div>
         {modeError && <p role="alert" className="rounded-xl border border-amber-500/30 bg-amber-950/20 p-3 text-sm text-amber-200">{modeError}</p>}
-        <p className="text-xs text-ink-secondary">{richEditor ? "Switch to MDX to inspect the exact source before saving." : "MDX mode keeps custom components and original formatting intact. Switching to Editor is blocked if it would remove MDX components."} The writing mode selection is for this session; your content is not changed until you save.</p>
+        <p className="text-xs text-ink-secondary">{editorMode === "preview" ? "This is a snapshot of the unsaved article. Refresh after changing fields." : richEditor ? "Switch to MDX / Code to inspect the exact source before saving." : "MDX / Code preserves custom components. Visual editing is available only when the source can be safely represented."} Switching tabs never saves or publishes content.</p>
         <div id="blog-editor-panel" role="tabpanel" aria-labelledby={`blog-mode-${editorMode}`} className="min-w-0">
-        <Controller
+        {editorMode === "preview" ? (
+          <div className="min-w-0 rounded-2xl border border-border-primary bg-bg-primary p-3 sm:p-5">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-border-primary pb-4">
+              <p className="text-sm text-ink-secondary">Unsaved preview using the public article renderer.</p>
+              <button type="button" onClick={refreshPreview} className="min-h-11 rounded-full border border-border-primary px-4 text-sm font-medium text-ink-primary transition-colors hover:bg-white/10">Refresh preview</button>
+            </div>
+            {previewSnapshot && <BlogUnsavedPreview snapshot={previewSnapshot} isNew={!initialData?.id} />}
+          </div>
+        ) : <Controller
           name="content"
           control={control}
           render={({ field }) => (
-            !richEditor ? (
-              <>
-                <label htmlFor="blog-content-source" className="sr-only">Blog article MDX source</label>
-                <textarea
-                  {...field}
-                  id="blog-content-source"
-                  aria-invalid={Boolean(errors.content)}
-                  aria-describedby={errors.content ? "blog-content-error" : undefined}
-                  spellCheck={false}
-                  rows={22}
-                  className="w-full rounded-xl border border-border-hairline bg-surface-base p-4 font-mono text-sm leading-6 text-ink-primary focus:outline-none focus:ring-2 focus:ring-accent-signal"
-                />
-              </>
+            editorMode === "source" ? (
+              <BlogCodeEditor value={field.value || ""} onChange={field.onChange} errorId={errors.content ? "blog-content-error" : undefined} />
             ) : (
               <TiptapEditor value={field.value} errorId={errors.content ? "blog-content-error" : undefined} onChange={(value) => {
                 richContentEdited.current = true;
@@ -459,7 +475,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
               }} label="Blog article content" blogTools />
             )
           )}
-        />
+        />}
         </div>
         {errors.content && <p id="blog-content-error" role="alert" className="text-xs text-red-500">{errors.content.message}</p>}
       </div>

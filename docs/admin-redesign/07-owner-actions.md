@@ -134,6 +134,11 @@ per post across browsers. The current connected save RPC does not persist mode
 changes; source content remains editable now, and MDX-only syntax is protected
 from a lossy visual conversion. A persisted preference requires a reviewed,
 atomic Blog RPC migration and isolated rollback testing before application.
+Please also review the new unsaved Preview tab in Admin: it shows the public
+article hero/body styling and custom MDX, not the complete public route with
+navigation, reactions, related posts and footer. Confirm whether article-only
+preview is sufficient before treating it as accepted. No existing post was
+saved or published during its read-only browser verification.
 Also review the owner's Supabase Auth sessions if available: one temporary
 review session created immediately before a missing-browser failure could not
 be individually confirmed revoked. Do not share session tokens or revoke all

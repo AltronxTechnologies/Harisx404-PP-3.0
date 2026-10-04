@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import "@uiw/react-md-editor/markdown-editor.css";
 import "./admin-theme.css";
 
 export const metadata: Metadata = {

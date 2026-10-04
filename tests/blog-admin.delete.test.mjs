@@ -29,7 +29,8 @@ test("archived delete requires exact slug and a guarded service-role transaction
   assert.ok(deletion.indexOf("await authorizeAdmin()") < deletion.indexOf("request.json()"));
   assert.match(deletion, /confirm_slug !== post\.slug/);
   assert.match(deletion, /admin\.rpc\("delete_archived_blog_post"/);
-  assert.match(action, /window\.prompt\(/);
+  assert.match(action, /confirmText=\{dialog === "delete" \? post\.slug : undefined\}/);
+  assert.doesNotMatch(action, /window\.prompt\(/);
   assert.match(action, /confirmation !== post\.slug/);
   assert.match(action, /method: "DELETE"/);
   assert.match(action, /\{archived && \(/);

@@ -143,7 +143,7 @@ html:has([data-admin-root])::-webkit-scrollbar-thumb:hover {
   outline-offset: 2px;
 }
 
-[data-admin-root] .admin-content :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea):not(.blog-article-shell *) {
+[data-admin-root] .admin-content :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea):not(.blog-article-shell *):not(.admin-mdx-editor *) {
   min-height: 44px;
   max-width: 100%;
   border-color: var(--admin-control-line);
@@ -156,6 +156,35 @@ html:has([data-admin-root])::-webkit-scrollbar-thumb:hover {
 [data-admin-root] .admin-content :is(input, textarea)::placeholder {
   color: #858792;
   opacity: 1;
+}
+
+[data-admin-root] .admin-mdx-editor .w-md-editor {
+  border: 0;
+  background: #131316;
+  box-shadow: none;
+}
+
+[data-admin-root] .admin-mdx-editor .w-md-editor-toolbar {
+  display: none;
+}
+
+[data-admin-root] .admin-mdx-editor .w-md-editor-text-input {
+  border: 0;
+  background: transparent;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  caret-color: #fafafa;
+}
+
+[data-admin-root] .admin-mdx-editor :is(.w-md-editor-text-input, .w-md-editor-text-pre) {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+[data-admin-root] .admin-mdx-editor:focus-within {
+  outline: 2px solid var(--admin-ink);
+  outline-offset: 2px;
 }
 
 [data-admin-root] .admin-content select:not([multiple]):not(.blog-article-shell *) {
