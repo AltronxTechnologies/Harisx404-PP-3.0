@@ -18,6 +18,29 @@
   min-height: 100vh;
 }
 
+html:has([data-admin-root]) {
+  scrollbar-width: thin;
+  scrollbar-color: #555660 #111114;
+}
+
+html:has([data-admin-root])::-webkit-scrollbar {
+  width: 10px;
+}
+
+html:has([data-admin-root])::-webkit-scrollbar-track {
+  background: #111114;
+}
+
+html:has([data-admin-root])::-webkit-scrollbar-thumb {
+  border: 2px solid #111114;
+  border-radius: 999px;
+  background: #555660;
+}
+
+html:has([data-admin-root])::-webkit-scrollbar-thumb:hover {
+  background: #73747e;
+}
+
 [data-admin-root] .admin-dashboard,
 [data-admin-root] [class~="bg-surface-base"] {
   background-color: var(--admin-canvas);
@@ -226,6 +249,60 @@
 [data-admin-root] .admin-action-table td:first-child {
   max-width: 24rem;
   overflow-wrap: anywhere;
+}
+
+[data-admin-root] [data-admin-dashboard-overview] {
+  --admin-divider: #303036;
+}
+
+[data-admin-root] [data-admin-dashboard-overview] :is([class~="border-b"], [class~="border-t"]) {
+  border-color: var(--admin-divider);
+}
+
+[data-admin-root] [data-admin-dashboard-overview] [class~="divide-y"] > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--admin-divider);
+}
+
+[data-admin-root] .admin-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  border: 1px solid;
+  border-radius: 999px;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+[data-admin-root] .admin-status::before {
+  content: "";
+  width: 0.35rem;
+  height: 0.35rem;
+  flex: none;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+[data-admin-root] .admin-status--live {
+  border-color: #315543;
+  background: #18271e;
+  color: #a9e2bc;
+}
+
+[data-admin-root] .admin-status--pending {
+  border-color: #594728;
+  background: #292215;
+  color: #f1d29d;
+}
+
+[data-admin-root] .admin-status--neutral {
+  border-color: #45454d;
+  background: #252529;
+  color: #c4c4cb;
 }
 
 [data-admin-root] .admin-content > div {

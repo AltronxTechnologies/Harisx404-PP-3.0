@@ -569,6 +569,32 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
   exhaustive editor writes, every visual pixel, all screen-reader behavior or
   production deployment. Owner visual acceptance remains separate.
 
+## 2026-10-04 Dashboard Status and Scrollbar Pass
+
+- Owner requested quieter Live/Published/etc. tags, subtler gray Dashboard
+  dividers and a designed right-edge page scrollbar. The recent Blog and
+  Project rows now use shared Admin-only semantic status pills with a small
+  colored dot: live/published, draft/scheduled and neutral/archived/unavailable.
+  Dashboard separators are explicitly soft gray. The document scrollbar has
+  a thin dark track and muted rounded thumb only while an Admin route exists;
+  public pages and the separately hidden-but-scrollable sidebar scrollbar are
+  unchanged. Recent rows stack their title and action group on phones so badges
+  remain readable without clipping.
+- Authenticated read-only browser checks at 320/390/768/1280/1440 found ten
+  current badges, no page errors, no persistent horizontal overflow, all
+  badges within the viewport after the responsive sidebar transition, a gray
+  divider, and the Admin-only scrollbar colors. Public Home did not inherit
+  those scrollbar colors. A temporary style probe for all three badge variants
+  (removed immediately) measured normal-text contrast of 10.60:1, 10.83:1
+  and 8.80:1. Only the live/published variant appeared in current connected
+  rows, so other variants were style-probed rather than tested against actual
+  records. The temporary owner session was locally revoked; no data values,
+  credentials, screenshots or connected mutations were retained.
+- Docker full regression **80 pass, one existing Project skip**, TypeScript,
+  lint (pre-existing image warning), isolated build **129 static pages** and
+  post-build smoke **31/31** passed. No public source was changed. This is a
+  measured UI pass, not owner visual approval or production deployment sign-off.
+
 Representative Docker validation commands (one-off owner fixture helpers were removed after earlier tests):
 
 ```bash

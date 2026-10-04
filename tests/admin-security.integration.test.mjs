@@ -78,6 +78,11 @@ test("Dashboard uses the site logo and the requested action/recent layout", asyn
   assert.match(sidebar, /section: "Operations"/);
   assert.match(dashboard, /data-admin-dashboard-actions/);
   assert.match(dashboard, /data-admin-dashboard-recent/);
+  assert.match(dashboard, /admin-status--live/);
+  assert.match(dashboard, /admin-status--pending/);
+  assert.match(dashboard, /flex flex-col gap-2 px-6 py-3 sm:flex-row/);
+  assert.match(theme, /html:has\(\[data-admin-root\]\)::-webkit-scrollbar-thumb/);
+  assert.match(theme, /--admin-divider: #303036/);
 });
 
 test("Admin editors and mobile lists keep labelled controls and reachable actions", async () => {
@@ -277,7 +282,7 @@ test("unlocked Admin presentation keeps narrow content contained and controls na
   assert.match(dashboard, /grid-cols-\[minmax\(0,1fr\)\]/);
   assert.match(dashboard, /md:grid-cols-2 xl:grid-cols-3/);
   assert.match(dashboard, /<p className="truncate text-sm font-medium text-text-primary">\{project\.title\}<\/p>/);
-  assert.match(dashboard, /ml-3 flex shrink-0 items-center gap-2/);
+  assert.match(dashboard, /flex shrink-0 items-center gap-2 sm:ml-3/);
   assert.match(dashboard, /aria-label=\{`Edit \$\{project\.title\}`\}/);
   assert.match(sidebar, /aria-current=\{active \? "page" : undefined\}/);
   assert.match(sidebar, /min-h-11/);
