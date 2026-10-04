@@ -59,6 +59,28 @@ test("Admin-only theme and collapsible navigation share the public design tokens
   assert.match(sidebar, /width: collapsed \? 80 : 256/);
 });
 
+test("Admin editors and mobile lists keep labelled controls and reachable actions", async () => {
+  const [project, theme, editor, media] = await Promise.all([
+    source("app/components/admin/ProjectForm.tsx"),
+    source("app/admin/admin-theme.css"),
+    source("app/components/admin/TiptapEditor.tsx"),
+    source("app/components/admin/MediaPickerModal.tsx"),
+  ]);
+  for (const field of ["title", "slug", "description", "tagline", "category", "tech-stack", "latest-update", "tags", "features", "status", "start-date", "end-date"]) {
+    assert.match(project, new RegExp(`htmlFor="project-${field}"`));
+    assert.match(project, new RegExp(`id="project-${field}"`));
+  }
+  assert.match(editor, /"aria-label": label/);
+  assert.match(theme, /\.ProseMirror:focus-visible/);
+  assert.match(theme, /\.admin-action-table \{ min-width: 680px/);
+  assert.match(media, /sm:min-h-80/);
+  for (const path of ["blogs", "projects", "faqs", "experience", "certifications", "testimonials"]) {
+    const page = await source(`app/admin/(dashboard)/${path}/page.tsx`);
+    assert.match(page, /admin-action-table/);
+    assert.match(page, /role="region"[^>]*tabIndex=\{0\}/);
+  }
+});
+
 test("unlocked privileged reads and log actions check Admin identity before service access", async () => {
   for (const path of [
     "app/admin/(dashboard)/page.tsx",

@@ -234,8 +234,9 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
       
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Title</label>
+          <label htmlFor="project-title" className="text-sm font-medium">Title</label>
           <input
+            id="project-title"
             {...register("title")}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
             placeholder="Project Title"
@@ -244,8 +245,9 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">Slug</label>
+          <label htmlFor="project-slug" className="text-sm font-medium">Slug</label>
           <input
+            id="project-slug"
             {...register("slug")}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
             placeholder="project-slug"
@@ -255,8 +257,9 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Short Description</label>
+        <label htmlFor="project-description" className="text-sm font-medium">Short Description</label>
         <textarea
+          id="project-description"
           {...register("description")}
           rows={2}
           className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
@@ -265,8 +268,9 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
       </div>
 
         <div className="space-y-2">
-          <div className="flex justify-between gap-3"><label className="text-sm font-medium">Card / page summary (Optional)</label><span className="text-xs text-ink-secondary">{watch("tagline")?.length ?? 0}/160</span></div>
+          <div className="flex justify-between gap-3"><label htmlFor="project-tagline" className="text-sm font-medium">Card / page summary (Optional)</label><span className="text-xs text-ink-secondary">{watch("tagline")?.length ?? 0}/160</span></div>
           <input
+            id="project-tagline"
             {...register("tagline")}
             maxLength={160}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
@@ -286,8 +290,9 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
 
       <div className="grid gap-6 md:grid-cols-3">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Categories</label>
+          <label htmlFor="project-category" className="text-sm font-medium">Categories</label>
           <input
+            id="project-category"
             {...register("category")}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
             maxLength={60}
@@ -307,8 +312,9 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
         </div>}
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">Tech stack (one per line)</label>
+          <label htmlFor="project-tech-stack" className="text-sm font-medium">Tech stack (one per line)</label>
           <textarea
+            id="project-tech-stack"
             {...register("tech_stack")}
             rows={3}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
@@ -318,14 +324,15 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
       </div>
 
       {completed && <div className="space-y-2">
-        <label className="text-sm font-medium">Latest project update (Optional)</label>
-        <input {...register("latest_update_label")} maxLength={32} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="Q3 2026" />
+        <label htmlFor="project-latest-update" className="text-sm font-medium">Latest project update (Optional)</label>
+        <input id="project-latest-update" {...register("latest_update_label")} maxLength={32} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="Q3 2026" />
         <p className="text-xs text-ink-secondary">Set this when you update the project itself, not when you edit this page.</p>
       </div>}
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Tags (comma-separated)</label>
+        <label htmlFor="project-tags" className="text-sm font-medium">Tags (comma-separated)</label>
         <textarea
+          id="project-tags"
           {...register("tags")}
           rows={3}
           className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
@@ -337,8 +344,9 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Key features / highlights (one per line)</label>
+        <label htmlFor="project-features" className="text-sm font-medium">Key features / highlights (one per line)</label>
         <textarea
+          id="project-features"
           {...register("features")}
           rows={4}
           className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
@@ -378,8 +386,9 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
 
       <div className="grid gap-6 md:grid-cols-3">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Publication status</label>
+          <label htmlFor="project-status" className="text-sm font-medium">Publication status</label>
           <select
+            id="project-status"
             {...register("status")}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
           >
@@ -443,8 +452,9 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
       
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Start Date (Optional)</label>
+          <label htmlFor="project-start-date" className="text-sm font-medium">Start Date (Optional)</label>
           <input
+            id="project-start-date"
             type="date"
             {...register("start_date")}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
@@ -452,8 +462,9 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">End Date (Optional)</label>
+          <label htmlFor="project-end-date" className="text-sm font-medium">End Date (Optional)</label>
           <input
+            id="project-end-date"
             type="date"
             {...register("end_date")}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
@@ -493,7 +504,7 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
       </div>
 
       <div className="space-y-3">
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <h3 className="text-sm font-medium">More carousel images</h3>
           <button
             type="button"
@@ -525,7 +536,7 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
                 <input id={`gallery-alt-${image.mediaId}`} value={image.altText} maxLength={160} onChange={(event) => setGalleryImages((images) => images.map((item) => item.mediaId === image.mediaId ? { ...item, altText: event.target.value } : item))} className="w-full rounded-lg border border-border-hairline bg-surface-raised px-3 py-2 text-sm" placeholder="Describe what this image shows" />
                 <button type="button" onClick={() => { setValue("cover_image_url", image.url, { shouldDirty: true, shouldValidate: true }); setValue("cover_image_id", image.mediaId, { shouldDirty: true }); setValue("case_study_sections.cover_caption", image.caption, { shouldDirty: true, shouldValidate: true }); setValue("case_study_sections.cover_alt", image.altText, { shouldDirty: true, shouldValidate: true }); setGalleryImages((images) => images.filter((item) => item.mediaId !== image.mediaId)); }} className="text-left text-xs text-accent-signal underline underline-offset-2">Make cover (first image)</button>
               </div>
-              <div className="flex gap-1">
+               <div className="flex flex-wrap gap-1">
                 <button type="button" aria-label={`Replace image ${index + 2}`} onClick={() => { setReplacingIndex(index); setMediaPickerTarget("replace-gallery"); setMediaPickerTab("upload"); setIsMediaPickerOpen(true); }} className="rounded-lg p-2 hover:bg-surface-raised"><UploadCloud className="h-4 w-4" /></button>
                 <button type="button" aria-label={`Move image ${index + 1} up`} disabled={index === 0} onClick={() => setGalleryImages((images) => { const next = [...images]; [next[index - 1], next[index]] = [next[index], next[index - 1]]; return next; })} className="rounded-lg p-2 hover:bg-surface-raised disabled:opacity-40"><ArrowUp className="h-4 w-4" /></button>
                 <button type="button" aria-label={`Move image ${index + 1} down`} disabled={index === galleryImages.length - 1} onClick={() => setGalleryImages((images) => { const next = [...images]; [next[index], next[index + 1]] = [next[index + 1], next[index]]; return next; })} className="rounded-lg p-2 hover:bg-surface-raised disabled:opacity-40"><ArrowDown className="h-4 w-4" /></button>
@@ -562,7 +573,7 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
       />
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Content / Case Study (Markdown)</label>
+        <p className="text-sm font-medium">Content / Case Study (Markdown)</p>
         <p className="text-xs text-ink-secondary">Optional overview. The focused sections below appear only when filled in; do not fabricate details.</p>
         <Controller
           name="content"
@@ -594,7 +605,7 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
         ))}
       </div>
 
-      <div className="flex justify-end gap-4">
+      <div className="flex flex-wrap justify-end gap-4">
         <button
           type="button"
           onClick={() => router.back()}

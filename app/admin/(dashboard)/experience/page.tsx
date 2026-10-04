@@ -13,7 +13,7 @@ export default async function AdminExperiencePage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Experience</h1>
           <p className="text-sm text-ink-secondary">Manage the experience timeline on the about page.</p>
@@ -28,8 +28,8 @@ export default async function AdminExperiencePage() {
       </div>
 
       <div className="rounded-xl border border-border-hairline bg-surface-raised shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
+        <div className="overflow-x-auto" role="region" aria-label="Experience table" tabIndex={0}>
+          <table className="admin-action-table w-full text-sm text-left">
             <thead className="bg-surface-base border-b border-border-hairline text-ink-secondary">
               <tr>
                 <th className="px-6 py-4 font-medium">Role</th>

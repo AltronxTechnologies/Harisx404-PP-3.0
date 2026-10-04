@@ -55,8 +55,8 @@ export default async function AdminFaqsPage() {
         </p>
       ) : (
         <div className="rounded-xl border border-border-hairline bg-surface-raised shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
+          <div className="overflow-x-auto" role="region" aria-label="FAQs table" tabIndex={0}>
+            <table className="admin-action-table w-full text-sm text-left">
               <thead className="bg-surface-base border-b border-border-hairline text-ink-secondary">
                 <tr>
                   <th className="px-6 py-4 font-medium w-16">Order</th>

@@ -109,10 +109,6 @@
   letter-spacing: -0.015em;
 }
 
-[data-admin-root] .admin-content label:not([class~="bg-accent-signal"]):not([class~="bg-indigo-600"]):not(.blog-article-shell *) {
-  color: var(--admin-ink);
-}
-
 [data-admin-root] .admin-login :is(input[type="email"], input[type="password"]) {
   border-color: var(--admin-control-line);
   color: var(--admin-ink);
@@ -168,6 +164,24 @@
   outline-offset: 2px;
 }
 
+[data-admin-root] .admin-content .ProseMirror:focus-visible,
+[data-admin-mobile-nav="panel"] :is(a, button):focus-visible {
+  outline: 2px solid #fafafa;
+  outline-offset: -2px;
+}
+
+[data-admin-root] .admin-content :is(a, button)[aria-label]:has(> svg:only-child):not(.blog-article-shell *) {
+  display: inline-flex;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-admin-root] .admin-content [class~="hover:bg-indigo-700"]:hover {
+  background-color: #dedee2;
+}
+
 [data-admin-root] .admin-content [class~="rounded-xl"][class~="border"][class~="shadow-sm"] {
   border-radius: 1rem;
   border-color: var(--admin-line);
@@ -209,10 +223,26 @@
   text-transform: uppercase;
 }
 
+[data-admin-root] .admin-action-table td:first-child {
+  max-width: 24rem;
+  overflow-wrap: anywhere;
+}
+
 [data-admin-root] .admin-content > div {
   width: 100%;
   max-width: 95rem;
   margin-inline: auto;
+}
+
+@media (max-width: 767px) {
+  [data-admin-root] .admin-action-table { min-width: 680px; }
+  [data-admin-root] .admin-action-table :is(th:last-child, td:last-child:not([colspan])) {
+    position: sticky;
+    right: 0;
+    z-index: 1;
+    background: var(--admin-surface);
+    box-shadow: -8px 0 16px rgba(0, 0, 0, 0.22);
+  }
 }
 
 [data-admin-root] .admin-sidebar,

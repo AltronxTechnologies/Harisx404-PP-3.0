@@ -105,8 +105,8 @@ export default async function AdminBlogsPage({
         <p className="border-b border-border-hairline px-6 py-3 text-sm text-ink-secondary">
           Page {params.page}: Showing {posts.length} {posts.length === 1 ? "post" : "posts"}{hasNext ? " (more available)" : ""}
         </p>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
+         <div className="overflow-x-auto" role="region" aria-label="Blog posts table" tabIndex={0}>
+           <table className="admin-action-table w-full text-sm text-left">
             <caption className="sr-only">Blog posts matching the selected search and status</caption>
             <thead className="bg-surface-base border-b border-border-hairline text-ink-secondary">
               <tr>

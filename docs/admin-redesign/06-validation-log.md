@@ -503,6 +503,44 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
   expand/collapse interaction, full keyboard/contrast testing and singleton
   backup/restore checks remain open; no pixel-perfect or production sign-off.
 
+## 2026-10-04 Authenticated Admin Read-Only Sweep
+
+- Owner asked for an all-page check and offered to temporarily disable login.
+  Login, middleware and API authorization were **not** bypassed: a one-off
+  in-memory Supabase owner magic-link session was established only after
+  confirming the configured owner Auth account already existed. The temporary
+  test runner made read-only page visits, closed its browser, locally revoked
+  its session, and was removed. No password, token, cookie, private row value,
+  response body, screenshot or test asset was saved. No Save/Delete/Publish,
+  moderation, bulk-log or file-upload action was clicked.
+- First pass: 32 Admin routes (24 primary/list/new/settings routes, seven
+  available edit routes, and one saved Blog preview) rendered at
+  320/390/768/1440 with no page errors or out-of-viewport controls. The
+  Project new/edit forms each exposed 12 fields without associated labels.
+  An immediate sidebar width read occurred before its CSS transition ended;
+  it was a test-timing issue, not evidence of a permanent width defect.
+- Owner-approved Admin-only corrections associated those 12 Project fields,
+  made rich-editor keyboard focus visible, kept table actions sticky within
+  labelled keyboard-scrollable regions on narrow screens, enlarged icon-only
+  targets, wrapped dense heading/action groups and long table/queue text, and
+  improved the short-screen media picker upload area and selected-image badge.
+  Saved article-preview text/table styling and public pages were left alone.
+- Second authenticated sweep: **32/32 routes**, four widths each, zero
+  measured document/control overflow, unassociated visible form fields,
+  page errors or alert states. Desktop 256px/80px sidebar switching and
+  80px content offset, mobile drawer open/Escape/focus return, six list-table
+  sticky actions, the Project editor focus ring and media picker at 320x640
+  passed. The temporary session was locally revoked after the run.
+- Docker full regression **79 pass, one existing Project skip**, TypeScript,
+  lint (pre-existing `CurrentlyReadingBento` image warning), isolated build
+  **129 static pages**, and post-build smoke **30/30** passed. No migration,
+  connected content or portfolio asset was modified. This is measured
+  read-only geometry/interaction coverage, not a pixel-perfect screenshot
+  audit, screen-reader/contrast certification, valid write-flow acceptance,
+  owner taste approval or production deployment sign-off. Settings/About
+  singleton recovery and broader workflow gates still require their
+  separate approvals and safeguards.
+
 Representative Docker validation commands (one-off owner fixture helpers were removed after earlier tests):
 
 ```bash

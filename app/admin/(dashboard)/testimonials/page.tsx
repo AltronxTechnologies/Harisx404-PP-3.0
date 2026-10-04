@@ -60,7 +60,7 @@ export default async function AdminTestimonialsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Testimonials</h1>
           <p className="text-sm text-ink-secondary">
@@ -97,7 +97,7 @@ export default async function AdminTestimonialsPage() {
             {pending.map((t) => (
               <li key={t.id} className="px-6 py-5">
                 <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div className="min-w-0 flex-1">
+                  <div className="min-w-0 flex-1 break-words" style={{ overflowWrap: "anywhere" }}>
                     <p className="font-medium text-ink-primary">
                       &ldquo;{t.headline}&rdquo;
                     </p>
@@ -151,8 +151,8 @@ export default async function AdminTestimonialsPage() {
 
       {/* ---------- All testimonials ---------- */}
       <div className="rounded-xl border border-border-hairline bg-surface-raised shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
+        <div className="overflow-x-auto" role="region" aria-label="Testimonials table" tabIndex={0}>
+          <table className="admin-action-table w-full text-sm text-left">
             <thead className="bg-surface-base border-b border-border-hairline text-ink-secondary">
               <tr>
                 <th className="px-6 py-4 font-medium">Headline</th>

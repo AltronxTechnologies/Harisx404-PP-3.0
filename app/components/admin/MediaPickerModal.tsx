@@ -205,8 +205,8 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
                       sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 20vw"
                     />
                     {selectedId === item.id && (
-                      <div className="absolute top-2 right-2 bg-accent-signal text-white p-1 rounded-full shadow-sm">
-                        <Check className="h-3 w-3" />
+                      <div className="absolute top-2 right-2 flex size-8 items-center justify-center rounded-full bg-accent-signal text-white shadow-sm">
+                        <Check className="size-5" />
                       </div>
                     )}
                   </button>
@@ -216,7 +216,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
               </div>
             )
           ) : (
-            <div className="flex flex-col items-center justify-center h-[400px] border-2 border-dashed border-border-hairline rounded-2xl bg-surface-raised">
+            <div className="flex min-h-64 flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border-hairline bg-surface-raised px-4 py-8 sm:min-h-80">
               {isUploading ? (
                 <div className="flex flex-col items-center gap-4 text-accent-signal">
                   <Loader2 className="h-10 w-10 animate-spin" />
