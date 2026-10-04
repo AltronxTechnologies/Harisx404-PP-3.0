@@ -8,6 +8,11 @@ export function normalizeBlogSlug(value: string) {
     .replace(/^-+|-+$/g, "");
 }
 
+export function blogCanonicalUrl(slug: string, siteUrl: string) {
+  const normalized = normalizeBlogSlug(slug);
+  return normalized ? new URL(`/blog/${normalized}`, siteUrl).href : "";
+}
+
 export function toLocalBlogDateTime(value?: string) {
   if (!value) return "";
   const date = new Date(value);

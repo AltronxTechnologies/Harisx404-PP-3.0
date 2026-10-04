@@ -9,10 +9,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Loader2, Plus, X, Image as ImageIcon } from "lucide-react";
 import { MediaPickerModal } from "./MediaPickerModal";
+import { BlogImageManager, type BlogMediaItem } from "./BlogImageManager";
 import { AdminConfirmDialog } from "./AdminConfirmDialog";
 import { canUseVisualBlogEditor } from "@/app/lib/admin/blog-visual-eligibility";
-import { normalizeBlogSlug, serializeBlogPublishDate, toLocalBlogDateTime } from "@/app/lib/blog-defaults";
+import { blogCanonicalUrl, normalizeBlogSlug, serializeBlogPublishDate, toLocalBlogDateTime } from "@/app/lib/blog-defaults";
 import { isAllowedBlogImageUrl } from "@/app/components/blog/blogImage";
+import { siteMetadata } from "@/app/data/siteMetadata";
 
 const TiptapEditor = dynamic(() => import("./TiptapEditor").then((module) => module.TiptapEditor), { ssr: false });
 const BlogCodeEditor = dynamic(() => import("./BlogCodeEditor").then((module) => module.BlogCodeEditor), { ssr: false });
@@ -32,6 +34,7 @@ const blogSchema = z.object({
     )
     .optional(),
   cover_image_id: z.string().optional(),
+  image_ids: z.array(z.string().uuid()).max(40).optional(),
   canonical_url: z.string().url("Must be a valid URL").refine((value) => {
     if (!value) return true;
     try {
@@ -60,6 +63,9 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
   const [tagInput, setTagInput] = useState("");
   const [relatedSearch, setRelatedSearch] = useState("");
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
+  const [blogImages, setBlogImages] = useState<BlogMediaItem[]>([]);
+  const [imageManagerAvailable, setImageManagerAvailable] = useState(false);
+  const [customCanonical, setCustomCanonical] = useState(Boolean(initialData?.canonical_url && initialData.canonical_url !== blogCanonicalUrl(initialData.slug, siteMetadata.siteUrl)));
   const [confirmation, setConfirmation] = useState<{ title: string; description: string; label: string; data: BlogFormValues; publishedAt: string; content: string } | null>(null);
   const [leaveTarget, setLeaveTarget] = useState<"list" | "preview" | null>(null);
   const [editorMode, setEditorMode] = useState<"rich" | "source" | "preview">(
@@ -91,6 +97,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
       canonical_url: initialData.canonical_url || "",
       published_at: toLocalBlogDateTime(initialData.published_at),
       related_blog_post_ids: initialData.related_blog_post_ids ?? [],
+      image_ids: [],
     } : {
       title: "",
       slug: "",
@@ -103,11 +110,16 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
       published_at: "",
       tags: [],
       related_blog_post_ids: [],
+      image_ids: [],
     },
   });
 
   const tags = watch("tags") || [];
   const status = watch("status");
+  const slug = watch("slug");
+  const coverUrl = watch("cover_image_url") || "";
+  const content = watch("content") || "";
+  const ownCanonical = blogCanonicalUrl(slug || "", siteMetadata.siteUrl);
   const selectedRelatedIds = watch("related_blog_post_ids") || [];
   const relatedOptions = availablePosts.filter((item) => item.id !== initialData?.id && `${item.title} ${item.slug}`.toLowerCase().includes(relatedSearch.trim().toLowerCase()));
   const scheduled = status === "published" && Date.parse(watch("published_at") || "") > Date.now();
@@ -181,12 +193,14 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
             ? {
                 id: initialData.id,
                  updated_at: initialData.updated_at,
-                 ...data,
-                 content,
+                  ...data,
+                  image_ids: imageManagerAvailable ? data.image_ids : undefined,
+                  content,
                  published_at: publishedAt,
               }
             : {
                  ...data,
+                 image_ids: imageManagerAvailable ? data.image_ids : undefined,
                  content,
                  published_at: publishedAt,
               },
@@ -215,6 +229,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
   };
 
   const onSubmit = async (data: BlogFormValues) => {
+    data = { ...data, canonical_url: customCanonical ? data.canonical_url : blogCanonicalUrl(data.slug, siteMetadata.siteUrl) };
     const publishedAt = data.status === "published" && !data.published_at
       ? new Date().toISOString()
       : serializeBlogPublishDate(data.published_at, initialData?.published_at);
@@ -346,23 +361,43 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
             onSelect={(media) => {
               setValue("cover_image_url", media.secure_url || media.url, { shouldDirty: true, shouldValidate: true });
               setValue("cover_image_id", media.id, { shouldDirty: true });
+              if (imageManagerAvailable && !blogImages.some((image) => image.id === media.id)) {
+                const next = [...blogImages, media];
+                setBlogImages(next);
+                setValue("image_ids", next.map((image) => image.id), { shouldDirty: true });
+              }
             }}
           />
         </div>
 
         <div className="min-w-0 space-y-2">
           <label htmlFor="blog-canonical-url" className="text-sm font-medium">Canonical URL (SEO)</label>
-          <input
+          {customCanonical ? <input
             {...register("canonical_url")}
             id="blog-canonical-url"
             aria-invalid={Boolean(errors.canonical_url)}
-            aria-describedby={errors.canonical_url ? "blog-canonical-url-error" : undefined}
+            aria-describedby={errors.canonical_url ? "blog-canonical-url-error" : "blog-canonical-hint"}
             className="min-w-0 w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
-            placeholder="https://..."
-          />
+            placeholder="https://original-publisher.example/article"
+          /> : <input id="blog-canonical-url" value={ownCanonical} readOnly aria-describedby="blog-canonical-hint" className="min-w-0 w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm text-ink-secondary" placeholder="Enter a slug to see your canonical URL" />}
+          <p id="blog-canonical-hint" className="text-xs text-ink-secondary">{customCanonical ? "Only use an external canonical if this article was originally published elsewhere. External canonicals exclude this post from your sitemap and RSS feed." : "Automatically generated from your site domain and slug. It updates when the slug changes."}</p>
+          <button type="button" onClick={() => setCustomCanonical((value) => !value)} className="min-h-11 text-sm text-ink-primary underline underline-offset-2">{customCanonical ? "Use automatic site canonical" : "Use a custom external canonical"}</button>
           {errors.canonical_url && <p id="blog-canonical-url-error" role="alert" className="text-xs text-red-500">{errors.canonical_url.message}</p>}
         </div>
       </div>
+
+      <BlogImageManager postId={initialData?.id} images={blogImages} onImagesChange={(images, dirty = true) => {
+        setBlogImages(images);
+        setValue("image_ids", images.map((image) => image.id), { shouldDirty: dirty, shouldValidate: true });
+      }} onAvailabilityChange={setImageManagerAvailable} coverUrl={coverUrl} content={content} onCoverChange={(image) => {
+        const url = image ? ("secure_url" in image ? image.secure_url || image.url : image.url) : "";
+        setValue("cover_image_url", url, { shouldDirty: true, shouldValidate: true });
+        setValue("cover_image_id", image && "id" in image ? image.id : "", { shouldDirty: true });
+      }} onAppendImage={(image) => {
+        const url = image.secure_url || image.url;
+        const alt = (image.alt_text || "Blog image").replace(/[\[\]\\\r\n]/g, " ");
+        setValue("content", `${getValues("content").trimEnd()}\n\n![${alt}](${url})\n`, { shouldDirty: true, shouldValidate: true });
+      }} onEditSource={() => switchMode("source")} />
 
       <div className="space-y-2">
         <label htmlFor="blog-tag-input" className="text-sm font-medium">Tags</label>

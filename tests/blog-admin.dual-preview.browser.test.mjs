@@ -260,6 +260,98 @@ test(
         }
         await existing.close();
       }
+      const ui = await context.newPage();
+      ui.on("pageerror", () => {
+        errors++;
+      });
+      ui.on("request", (request) => {
+        if (
+          request.method() !== "GET" &&
+          new URL(request.url()).pathname === "/api/admin/blogs"
+        )
+          writes++;
+      });
+      const image = {
+        id: "00000000-0000-4000-8000-000000000123",
+        url: "/blog/blogfolio_v5.jpg",
+        secure_url: "/blog/blogfolio_v5.jpg",
+        alt_text: "Fixture art",
+      };
+      let mockedDeletes = 0;
+      await ui.route("**/api/admin/blogs/images**", (route) =>
+        route.fulfill({ json: { data: [], available: true } }),
+      );
+      await ui.route("**/api/admin/media?*", (route) => {
+        if (route.request().method() === "DELETE") {
+          mockedDeletes++;
+          return route.fulfill({ json: { success: true } });
+        }
+        return route.fulfill({ json: { data: [image], count: 1 } });
+      });
+      await ui.goto("http://localhost:3000/admin/blogs/new", {
+        waitUntil: "domcontentloaded",
+      });
+      await ui.getByRole("button", { name: "Add from library" }).waitFor();
+      await ui
+        .getByRole("textbox", { name: "Title" })
+        .fill("Image workflow fixture");
+      const canonical = ui.locator("#blog-canonical-url");
+      if (
+        (await canonical.inputValue()) !==
+        "https://harisx404.vercel.app/blog/image-workflow-fixture"
+      )
+        failures.push({ kind: "automatic-canonical" });
+      await ui.getByRole("textbox", { name: "Slug" }).fill("changed-fixture");
+      if (
+        (await canonical.inputValue()) !==
+        "https://harisx404.vercel.app/blog/changed-fixture"
+      )
+        failures.push({ kind: "renamed-canonical" });
+      await ui
+        .getByRole("button", { name: "Use a custom external canonical" })
+        .click();
+      await canonical.fill("https://publisher.example.com/original");
+      if (
+        (await canonical.inputValue()) !==
+        "https://publisher.example.com/original"
+      )
+        failures.push({ kind: "external-canonical" });
+      await ui
+        .getByRole("button", { name: "Use automatic site canonical" })
+        .click();
+      if (
+        (await canonical.inputValue()) !==
+        "https://harisx404.vercel.app/blog/changed-fixture"
+      )
+        failures.push({ kind: "canonical-reset" });
+      await ui.getByRole("button", { name: "Add from library" }).click();
+      await ui
+        .getByRole("dialog", { name: "Choose an image" })
+        .getByRole("button", { name: "Fixture art" })
+        .click();
+      await ui.getByRole("button", { name: "Select Image" }).click();
+      await ui.getByRole("button", { name: "Make cover" }).click();
+      if ((await ui.locator("#blog-cover-url").inputValue()) !== image.url)
+        failures.push({ kind: "cover-from-collection" });
+      await ui.getByRole("button", { name: "Clear thumbnail cover" }).click();
+      await ui.getByRole("button", { name: "Delete file" }).click();
+      await ui
+        .getByRole("dialog", { name: "Delete this Cloudinary image?" })
+        .getByRole("button", { name: "Delete file permanently" })
+        .click();
+      await ui
+        .getByText("No managed images attached yet.", { exact: false })
+        .waitFor();
+      if (mockedDeletes !== 1)
+        failures.push({ kind: "confirmed-delete-not-called" });
+      await ui.setViewportSize({ width: 320, height: 900 });
+      if (
+        await ui.evaluate(
+          () => document.documentElement.scrollWidth > innerWidth + 1,
+        )
+      )
+        failures.push({ kind: "image-workspace-mobile" });
+      await ui.close();
       console.log(JSON.stringify({ widths: 4, errors, writes, failures }));
       if (failures.length || errors || writes)
         throw new Error("Blog read-only preview checks failed");

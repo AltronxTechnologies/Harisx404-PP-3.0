@@ -5,7 +5,9 @@ import createSupabaseServerClient, { createSupabaseAdminClient } from "@/app/lib
 import { saveBlogPostWithTags } from "@/app/lib/tag-sync";
 import { isAllowedBlogImageUrl } from "@/app/components/blog/blogImage";
 import { estimateReadingMinutes } from "@/app/lib/reading-time";
-import { defaultBlogSummary, normalizeBlogSlug } from "@/app/lib/blog-defaults";
+import { blogCanonicalUrl, defaultBlogSummary, normalizeBlogSlug } from "@/app/lib/blog-defaults";
+import { blogImageUrls } from "@/app/lib/admin/blog-image-urls";
+import { siteMetadata } from "@/app/data/siteMetadata";
 import { BlogMdxValidationError, validateBlogMdx } from "@/app/lib/blog-mdx-policy.mjs";
 
 const normalizeTagSlug = (value: string) =>
@@ -92,6 +94,7 @@ const blogSchema = z
       .union([z.string().uuid(), z.literal(""), z.null()])
       .optional()
       .transform((value) => value || null),
+    image_ids: z.array(z.string().uuid()).max(40).refine((ids) => new Set(ids).size === ids.length, "Choose different images").optional(),
     canonical_url: optionalCanonicalUrl,
     published_at: optionalDate,
     tags: tagsSchema.optional().default([]),
@@ -152,6 +155,36 @@ async function validateCoverMedia(coverId: string | null, coverUrl: string | nul
     return NextResponse.json({ error: "Choose a matching cover image from the media library." }, { status: 400 });
   }
   return null;
+}
+
+async function resolveBlogImages(data: z.infer<typeof blogSchema>, existingId?: string) {
+  const admin = await createSupabaseAdminClient();
+  const probe = await admin.from("blog_post_media").select("media_id").limit(0);
+  if (probe.error) {
+    if (["42P01", "PGRST205"].includes(probe.error.code)) return data.image_ids
+      ? { ids: undefined, error: NextResponse.json({ error: "Apply migration 2026_blog_post_media.sql before saving Blog images." }, { status: 503 }) }
+      : { ids: undefined, error: null };
+    throw probe.error;
+  }
+  const ids = new Set(data.image_ids);
+  if (!data.image_ids && existingId) {
+    const { data: associated, error } = await admin.from("blog_post_media").select("media_id").eq("blog_post_id", existingId).order("display_order");
+    if (error) throw error;
+    for (const image of associated ?? []) ids.add(image.media_id);
+  }
+  if (data.cover_image_id) ids.add(data.cover_image_id);
+  const urls = [...new Set([...blogImageUrls(data.content), data.cover_image_url || ""].filter(Boolean))];
+  if (urls.length > 100) return { ids: undefined, error: NextResponse.json({ error: "Use at most 100 article image URLs." }, { status: 400 }) };
+  if (urls.length) {
+    const [secure, legacy] = await Promise.all([
+      admin.from("media").select("id").in("secure_url", urls),
+      admin.from("media").select("id").in("url", urls),
+    ]);
+    if (secure.error || legacy.error) throw secure.error || legacy.error;
+    for (const image of [...(secure.data ?? []), ...(legacy.data ?? [])]) ids.add(image.id);
+  }
+  if (ids.size > 40) return { ids: undefined, error: NextResponse.json({ error: "Choose no more than 40 Blog images." }, { status: 400 }) };
+  return { ids: [...ids], error: null };
 }
 
 async function validateRelatedPosts(ids: string[], currentId?: string) {
@@ -230,6 +263,9 @@ function errorResponse(error: unknown, fallback = "Unable to save blog post. Ple
   if (message.includes("BLOG_RELATED_INVALID")) {
     return NextResponse.json({ error: message.replace(/^.*BLOG_RELATED_INVALID: /, "Invalid related posts: ") }, { status: 400 });
   }
+  if (message.includes("BLOG_MEDIA_INVALID")) {
+    return NextResponse.json({ error: "A selected Blog image is missing or invalid. Reload the form and try again." }, { status: 400 });
+  }
   const code = error && typeof error === "object" && "code" in error ? error.code : null;
   if (code === "PGRST202") {
     return NextResponse.json({ error: "The Blog database update is required for this action." }, { status: 503 });
@@ -262,10 +298,14 @@ export async function POST(request: Request) {
     if (coverError) return coverError;
     const relatedError = await validateRelatedPosts(data.related_blog_post_ids);
     if (relatedError) return relatedError;
-    const { tags, ...post } = data;
+    const images = await resolveBlogImages(data);
+    if (images.error) return images.error;
+    const { tags, image_ids: _imageIds, ...post } = data;
     const result = await saveBlogPostWithTags({
       post: {
         ...post,
+        ...(images.ids ? { image_ids: images.ids } : {}),
+        canonical_url: post.canonical_url || blogCanonicalUrl(post.slug, siteMetadata.siteUrl),
         summary: post.summary ?? defaultBlogSummary(post.content, post.title),
         reading_time_minutes: estimateReadingMinutes(post.content),
       },
@@ -290,11 +330,13 @@ export async function PUT(request: Request) {
     if (coverError) return coverError;
     const relatedError = await validateRelatedPosts(data.related_blog_post_ids, data.id);
     if (relatedError) return relatedError;
-    const { id, updated_at, tags, ...post } = data;
+    const images = await resolveBlogImages(data, data.id);
+    if (images.error) return images.error;
+    const { id, updated_at, tags, image_ids: _imageIds, ...post } = data;
     const admin = await createSupabaseAdminClient();
     const { data: current, error: lookupError } = await admin
       .from("blog_posts")
-      .select("status")
+      .select("status, slug, canonical_url")
       .eq("id", id)
       .maybeSingle();
     if (lookupError) throw lookupError;
@@ -302,10 +344,13 @@ export async function PUT(request: Request) {
     if (current.status === "archived") {
       return NextResponse.json({ error: "Restore this post before editing it." }, { status: 409 });
     }
+    const canonicalUrl = !post.canonical_url || post.canonical_url === blogCanonicalUrl(current.slug, siteMetadata.siteUrl)
+      ? blogCanonicalUrl(post.slug, siteMetadata.siteUrl)
+      : post.canonical_url;
     const result = await saveBlogPostWithTags({
       id,
       expectedUpdatedAt: updated_at,
-      post: { ...post, reading_time_minutes: estimateReadingMinutes(post.content) },
+      post: { ...post, ...(images.ids ? { image_ids: images.ids } : {}), canonical_url: canonicalUrl, reading_time_minutes: estimateReadingMinutes(post.content) },
       tags,
     });
 

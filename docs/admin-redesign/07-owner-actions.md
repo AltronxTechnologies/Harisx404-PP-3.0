@@ -139,6 +139,19 @@ article hero/body styling and custom MDX, not the complete public route with
 navigation, reactions, related posts and footer. Confirm whether article-only
 preview is sufficient before treating it as accepted. No existing post was
 saved or published during its read-only browser verification.
+The new Blog image collection requires a reviewed additive database rollout.
+First test `migrations/2026_blog_post_media.sql` and
+`tests/blog-post-media.database.test.sql` against an isolated, backed-up copy
+of the schema; verify the installed `save_blog_post_with_tags` signature matches
+`2026_blog_related_selections.sql`, check service-role permissions and a
+rollback, then authorize application to the connected project. The assistant
+has **not** applied it or deleted any existing media. Until then the form
+reports that the collection is unavailable; existing cover and MDX images
+continue to work. A later disposable post/image fixture must verify upload,
+save, reuse, detach, Cloudinary deletion and cleanup. Do not use a real Blog
+or Project image for that test. Confirm the production domain too: configured
+`siteMetadata.siteUrl` previously returned HTTP 404, and generated canonical
+URLs must point to a live site before SEO sign-off.
 Also review the owner's Supabase Auth sessions if available: one temporary
 review session created immediately before a missing-browser failure could not
 be individually confirmed revoked. Do not share session tokens or revoke all
