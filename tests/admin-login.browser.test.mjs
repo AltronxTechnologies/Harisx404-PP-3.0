@@ -26,6 +26,10 @@ test("Admin login retains readable controls at phone, tablet and desktop widths"
             const box = card.getBoundingClientRect();
             return {
               dark: document.documentElement.classList.contains("dark"),
+              adminDark: document.querySelector("[data-admin-root]").classList.contains("dark"),
+              adminBackground: getComputedStyle(document.querySelector("[data-admin-root]")).backgroundColor,
+              adminText: getComputedStyle(document.querySelector("[data-admin-root]")).color,
+              buttonBackground: getComputedStyle(button).backgroundColor,
               overflow: document.documentElement.scrollWidth - innerWidth,
               headingCount: document.querySelectorAll("main h1").length,
               namedFields: fields.map((field) => field.labels?.[0]?.textContent?.trim()),
@@ -36,6 +40,10 @@ test("Admin login retains readable controls at phone, tablet and desktop widths"
             };
           });
           assert.equal(state.dark, theme === "dark", `${theme} ${width}px theme`);
+          assert.equal(state.adminDark, true, `${theme} ${width}px fixed Admin theme`);
+          assert.equal(state.adminBackground, "rgb(13, 13, 15)");
+          assert.equal(state.adminText, "rgb(250, 250, 250)");
+          assert.equal(state.buttonBackground, "rgb(250, 250, 250)");
           assert.ok(state.overflow <= 1, `${theme} ${width}px overflow`);
           assert.equal(state.headingCount, 1);
           assert.deepEqual(state.namedFields, ["Email address", "Password"]);
@@ -44,6 +52,31 @@ test("Admin login retains readable controls at phone, tablet and desktop widths"
           assert.equal(state.cardFits, true);
           assert.match(state.noindex, /noindex/);
         }
+        const controls = await page.evaluate(() => {
+          const probe = document.createElement("div");
+          probe.className = "admin-content";
+          probe.innerHTML = '<section class="rounded-xl border border-border-hairline bg-surface-raised shadow-sm"><input aria-label="Sample title"><select aria-label="Sample status"><option>Draft</option></select><button class="bg-accent-signal text-white">Save</button></section>';
+          document.querySelector("[data-admin-root]").append(probe);
+          const [card, input, select, button] = [probe.querySelector("section"), probe.querySelector("input"), probe.querySelector("select"), probe.querySelector("button")];
+          const result = {
+            card: getComputedStyle(card).backgroundColor,
+            input: getComputedStyle(input).backgroundColor,
+            inputBorder: getComputedStyle(input).borderColor,
+            selectHeight: select.getBoundingClientRect().height,
+            selectArrow: getComputedStyle(select).backgroundImage,
+            button: getComputedStyle(button).backgroundColor,
+            buttonText: getComputedStyle(button).color,
+          };
+          probe.remove();
+          return result;
+        });
+        assert.equal(controls.card, "rgb(27, 27, 31)");
+        assert.equal(controls.input, "rgb(19, 19, 22)");
+        assert.equal(controls.inputBorder, "rgb(114, 116, 126)");
+        assert.ok(controls.selectHeight >= 44);
+        assert.match(controls.selectArrow, /data:image\/svg/);
+        assert.equal(controls.button, "rgb(250, 250, 250)");
+        assert.equal(controls.buttonText, "rgb(13, 13, 15)");
         assert.deepEqual(errors, [], `${theme} runtime errors`);
       } finally {
         await context.close();

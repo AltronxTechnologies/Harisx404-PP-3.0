@@ -46,9 +46,10 @@ test("Admin-only theme and collapsible navigation share the public design tokens
     source("app/components/admin/Sidebar.tsx"),
   ]);
   assert.match(theme, /\[data-admin-root\]/);
-  assert.match(theme, /--admin-canvas: var\(--bg-primary\)/);
-  assert.match(theme, /--admin-ink: var\(--text-primary\)/);
-  assert.match(theme, /--admin-line: var\(--border-primary\)/);
+  assert.match(theme, /\[data-admin-root\]\.dark/);
+  assert.match(theme, /--admin-canvas: #0d0d0f/);
+  assert.match(theme, /--admin-ink: #fafafa/);
+  assert.match(theme, /--admin-line: #34343b/);
   assert.match(theme, /\.admin-dashboard:has\(\.admin-sidebar\[data-admin-sidebar="collapsed"\]\) \.admin-content \{ padding-left: 5rem/);
   assert.match(layout, /admin-dashboard/);
   assert.match(layout, /admin-content/);

@@ -1,18 +1,21 @@
-/* The public theme owns the tokens; these rules apply only to the Admin subtree. */
-[data-admin-root] {
-  --admin-canvas: var(--bg-primary);
-  --admin-surface: #fff;
-  --admin-field: #f7f7f8;
-  --admin-ink: var(--text-primary);
-  --admin-muted: var(--text-secondary);
-  --admin-line: var(--border-primary);
+/* A fixed dark workspace; the public theme and its pages remain independent. */
+[data-admin-root].dark {
+  --bg-primary: #0d0d0f;
+  --text-primary: #fafafa;
+  --text-secondary: #aeb0b7;
+  --border-primary: #34343b;
+  --admin-canvas: #0d0d0f;
+  --admin-surface: #1b1b1f;
+  --admin-field: #131316;
+  --admin-ink: #fafafa;
+  --admin-muted: #aeb0b7;
+  --admin-line: #34343b;
+  --admin-control-line: #72747e;
   color: var(--admin-ink);
+  background: var(--admin-canvas);
+  color-scheme: dark;
   font-family: var(--font-outfit), system-ui, sans-serif;
-}
-
-.dark [data-admin-root] {
-  --admin-surface: #19191c;
-  --admin-field: #111113;
+  min-height: 100vh;
 }
 
 [data-admin-root] .admin-dashboard,
@@ -102,12 +105,60 @@
   letter-spacing: -0.025em;
 }
 
+[data-admin-root] .admin-content h2:not(.blog-article-shell h2) {
+  letter-spacing: -0.015em;
+}
+
+[data-admin-root] .admin-content label:not([class~="bg-accent-signal"]):not([class~="bg-indigo-600"]):not(.blog-article-shell *) {
+  color: var(--admin-ink);
+}
+
+[data-admin-root] .admin-login :is(input[type="email"], input[type="password"]) {
+  border-color: var(--admin-control-line);
+  color: var(--admin-ink);
+  background: var(--admin-field);
+}
+
+[data-admin-root] .admin-login :is(input[type="email"], input[type="password"]):focus-visible {
+  outline: 2px solid var(--admin-ink);
+  outline-offset: 2px;
+}
+
 [data-admin-root] .admin-content :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea):not(.blog-article-shell *) {
   min-height: 44px;
   max-width: 100%;
-  border-color: var(--admin-line);
+  border-color: var(--admin-control-line);
   color: var(--admin-ink);
   background-color: var(--admin-field);
+  border-radius: 0.75rem;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+[data-admin-root] .admin-content :is(input, textarea)::placeholder {
+  color: #858792;
+  opacity: 1;
+}
+
+[data-admin-root] .admin-content select:not([multiple]):not(.blog-article-shell *) {
+  appearance: none;
+  padding-right: 2.5rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23aeb0b7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-position: right 0.875rem center;
+  background-repeat: no-repeat;
+}
+
+[data-admin-root] .admin-content :is(input[type="checkbox"], input[type="radio"]) {
+  accent-color: var(--admin-ink);
+}
+
+[data-admin-root] .admin-content :is(button, a, label):is([class~="border-border-hairline"], [class~="border-border-primary"]):not(.blog-article-shell *) {
+  border-color: var(--admin-control-line);
+}
+
+[data-admin-root] .admin-content :is(input, textarea, select):disabled,
+[data-admin-root] .admin-content button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 [data-admin-root] .admin-content :is(input, select, textarea):focus-visible,
@@ -137,11 +188,20 @@
   color: var(--admin-canvas);
 }
 
-[data-admin-root] .admin-content table {
+[data-admin-root] .admin-content table:not(.blog-article-shell table) {
   border-collapse: collapse;
 }
 
-[data-admin-root] .admin-content th {
+[data-admin-root] .admin-content thead:not(.blog-article-shell thead) {
+  background: var(--admin-field);
+  color: var(--admin-muted);
+}
+
+[data-admin-root] .admin-content tbody tr[class~="hover:bg-surface-base/50"]:hover {
+  background: #232328;
+}
+
+[data-admin-root] .admin-content th:not(.blog-article-shell th) {
   font-family: ui-monospace, monospace;
   font-size: 0.7rem;
   font-weight: 500;
@@ -153,6 +213,29 @@
   width: 100%;
   max-width: 95rem;
   margin-inline: auto;
+}
+
+[data-admin-root] .admin-sidebar,
+[data-admin-mobile-nav="panel"] {
+  background: var(--admin-surface);
+  border-color: var(--admin-line);
+}
+
+[data-admin-root] .admin-sidebar nav a[aria-current="page"],
+[data-admin-mobile-nav="panel"] nav a[aria-current="page"] {
+  background: #303036;
+  box-shadow: inset 2px 0 0 var(--admin-ink);
+}
+
+[data-admin-root] .admin-sidebar nav a:hover,
+[data-admin-mobile-nav="panel"] nav a:hover {
+  background: #29292e;
+}
+
+[data-admin-mobile-nav="panel"] {
+  --admin-surface: #1b1b1f;
+  --admin-line: #34343b;
+  --admin-ink: #fafafa;
 }
 
 @media (min-width: 640px) {

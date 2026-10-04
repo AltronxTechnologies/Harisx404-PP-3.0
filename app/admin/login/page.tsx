@@ -36,7 +36,7 @@ export default function AdminLogin() {
   const [state, formAction] = useActionStateCompat(login, null);
 
   return (
-    <div className="flex min-h-[70vh] flex-1 flex-col justify-center px-4 py-16 text-text-primary sm:px-6">
+    <div className="admin-login flex min-h-[70vh] flex-1 flex-col justify-center px-4 py-16 text-text-primary sm:px-6">
       <div className="mx-auto w-full max-w-[420px] text-center">
         <p className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">Private workspace</p>
         <h1 className="mt-4 font-display text-[40px] font-medium leading-none sm:text-5xl">

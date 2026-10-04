@@ -9,8 +9,9 @@ export const metadata: Metadata = {
 
 export default function AdminRootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div data-admin-root>
+    <div data-admin-root className="dark">
       <style>{`
+        html:has([data-admin-root]), body:has([data-admin-root]) { background: #0d0d0f; }
         body:has([data-admin-root]) { max-width: none; margin: 0; }
         body:has([data-admin-root]) > div:has(> div > #main-content) { border: 0; overflow: visible; }
         body:has([data-admin-root]) > div:has(> div > #main-content) > header,

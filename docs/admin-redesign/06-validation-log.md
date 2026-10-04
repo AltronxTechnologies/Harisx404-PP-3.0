@@ -473,6 +473,36 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
   full keyboard/contrast review and connected workflow acceptance. Existing
   Settings/About singleton backup and deployed-domain gates remain unchanged.
 
+## 2026-10-04 Fixed Admin Theme Continuation
+
+- Owner asked for one Admin theme rather than mirroring the public site's
+  light/dark preference. The Admin root is now a fixed dark workspace with
+  local canvas, surface, ink, muted-text and border colors; it supplies its
+  own `dark` scope for existing Admin dark-variant utilities. The mobile
+  navigation portal receives the same dark scope. Admin-only CSS refines form
+  labels, inputs, placeholders, selects and their arrow, checkboxes/radios,
+  outlined and primary actions, panels, tables, focus and disabled states.
+  The saved Blog preview excludes Admin overrides for its article headings,
+  tables and controls. No public page, shared root, theme setting, global
+  stylesheet or public component was edited.
+- Browser login checks at 320/375/390/640/768/1024/1440 with **both public
+  theme preferences** confirmed the Admin root remained dark, labelled fields
+  and submit control fit, no horizontal overflow, and no page errors. A
+  temporary DOM style probe (removed immediately) confirmed identical dark
+  card/field/select/button colors under both public preferences, 44px select
+  and primary button, and a discernible field border. This is stylesheet
+  evidence, not an authenticated page-by-page pixel audit. Initial dev-server
+  requests served a stale compiled Admin layout; restarting the existing
+  Compose web service cleared that stale response before validation. The
+  service remains running.
+- Docker full regression **78 pass, one existing Project skip**, mocked Admin
+  error-state/Buildlog version checks **7/7**, TypeScript and lint pass (the
+  existing `CurrentlyReadingBento` image warning remains), isolated build
+  **129 static pages**, post-build smoke **29/29**. No connected content was
+  modified. Owner-authenticated visual review of all Admin routes, sidebar
+  expand/collapse interaction, full keyboard/contrast testing and singleton
+  backup/restore checks remain open; no pixel-perfect or production sign-off.
+
 Representative Docker validation commands (one-off owner fixture helpers were removed after earlier tests):
 
 ```bash
