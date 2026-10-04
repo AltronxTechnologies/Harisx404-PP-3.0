@@ -88,7 +88,7 @@ export default async function AdminDashboard() {
           <div className="border-b border-border-primary/50 px-6 py-4">
             <h2 className="font-semibold text-text-primary">Quick Actions</h2>
           </div>
-          <div className="flex flex-col gap-2 p-4">
+          <div className="grid grid-cols-1 gap-2 p-4 md:grid-cols-2 lg:grid-cols-3">
             {quickActions.map((action) => {
               const Icon = action.icon;
               if (action.external) {

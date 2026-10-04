@@ -620,6 +620,22 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
   read-only hover/layout/function pass, not owner visual approval, all Admin
   workflows, pixel-perfect certification or deployment sign-off.
 
+## 2026-10-04 Quick Actions Column Correction
+
+- Owner corrected the earlier one-column instruction: Quick Actions should
+  have **three columns on desktop**. The six actions now form one column below
+  `md`, two columns from `md`, and three from `lg`; the Recent Blog Posts and
+  Recent Projects panels remain below. No public source or connected data was
+  changed.
+- An in-memory authenticated browser check at 320/390/768/1024/1280/1440px
+  observed the expected 1/1/2/3/3/3 columns, all six links fully within the
+  viewport, no document overflow or page errors, and the recent panels below
+  the actions. The temporary session was locally revoked and its runner
+  removed. Focused Admin/public checks **21/21**, TypeScript, focused ESLint
+  and whitespace checks passed. The prior full regression/build belongs to
+  the preceding Dashboard edit; a new isolated build was not needed for this
+  single responsive-class correction.
+
 Representative Docker validation commands (one-off owner fixture helpers were removed after earlier tests):
 
 ```bash
