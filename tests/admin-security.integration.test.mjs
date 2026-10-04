@@ -50,8 +50,19 @@ test("Analytics reflects the public published collection and explains missing sc
   assert.match(page, /target="_blank" rel="noopener noreferrer"/);
   assert.match(page, /data-admin-analytics/);
   assert.match(page, /PageSpeed scores are unavailable in the sandbox preview/);
+  assert.match(page, /export const maxDuration = 60/);
+  assert.match(page, /<Suspense fallback=/);
+  assert.match(page, /<LighthouseHealth \/>/);
   assert.match(page, /score != null && <span className="text-xs font-normal text-ink-secondary"> \/ 100<\/span>/);
+  assert.match(page, /role="img" aria-label=\{`\$\{share\}% of top five \$\{unit\}`\}/);
+  assert.match(page, /ownerSignals\.map/);
+  assert.match(page, /\.from\("messages"\).*?\.eq\("status", "pending"\)/);
+  assert.match(page, /\.from\("faqs"\).*?\.eq\("is_visible", true\)/);
+  assert.match(page, /\.from\("media"\).*?head: true/);
   assert.match(theme, /\[data-admin-analytics\] a\[href\^="\/blog\/"\]:focus-visible/);
+  assert.match(page, /Owner signals/);
+  assert.match(page, /share of the five articles listed/);
+  for (const table of ["blog_posts", "projects", "messages", "faqs", "media"]) assert.match(page, new RegExp(`\\.from\\("${table}"\\)`));
 });
 
 test("Admin-only theme and collapsible navigation share the public design tokens", async () => {

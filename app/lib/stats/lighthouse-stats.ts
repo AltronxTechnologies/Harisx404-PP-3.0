@@ -1,9 +1,6 @@
-"use server";
-
 import { unstable_cache } from "next/cache";
 import type { LighthouseScores, LighthouseStats } from "./types";
 
-// TODO: Update to your real production domain when you have one
 const SITE_URL = "https://harisx404.vercel.app";
 
 interface PageSpeedResponse {
@@ -18,11 +15,12 @@ interface PageSpeedResponse {
   };
 }
 
-const requestTimeoutMs = process.env.NODE_ENV === "production" ? 15000 : 3000;
+const requestTimeoutMs = process.env.NODE_ENV === "production" ? 25000 : 3000;
+const targetTimeoutMs = process.env.NODE_ENV === "production" ? 5000 : 3000;
 
 async function fetchLighthouseScores(
   strategy: "mobile" | "desktop"
-): Promise<LighthouseScores | null> {
+): Promise<LighthouseScores> {
   const apiUrl = new URL(
     "https://www.googleapis.com/pagespeedonline/v5/runPagespeed"
   );
@@ -45,13 +43,12 @@ async function fetchLighthouseScores(
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
       if (response.status === 429) {
         console.warn(
           `PageSpeed API quota exceeded (${strategy}). Set PAGESPEED_API_KEY for higher limits.`
         );
       } else {
-        console.error(`PageSpeed API error (${strategy}):`, response.status, errorText);
+        console.warn(`PageSpeed API error (${strategy}): ${response.status}`);
       }
       throw new Error(`PageSpeed ${strategy} request failed with ${response.status}.`);
     }
@@ -69,8 +66,8 @@ async function fetchLighthouseScores(
       categories["best-practices"]?.score,
       categories.seo?.score,
     ];
-    if (scores.some((score) => typeof score !== "number")) {
-      throw new Error(`PageSpeed ${strategy} response omitted one or more category scores.`);
+    if (scores.some((score) => typeof score !== "number" || !Number.isFinite(score) || score < 0 || score > 1)) {
+      throw new Error(`PageSpeed ${strategy} response contained invalid category scores.`);
     }
 
     return {
@@ -78,32 +75,46 @@ async function fetchLighthouseScores(
       accessibility: Math.round(categories.accessibility!.score * 100),
       bestPractices: Math.round(categories["best-practices"]!.score * 100),
       seo: Math.round(categories.seo!.score * 100),
-      fetchedAt: data.lighthouseResult?.fetchTime ?? new Date().toISOString(),
+      fetchedAt: data.lighthouseResult?.fetchTime && Number.isFinite(Date.parse(data.lighthouseResult.fetchTime))
+        ? data.lighthouseResult.fetchTime : new Date().toISOString(),
     };
-  } catch (error) {
-    console.error(`Error fetching Lighthouse scores (${strategy}):`, error);
-    throw error;
+  } catch {
+    console.warn(`PageSpeed ${strategy} check unavailable.`);
+    throw new Error(`PageSpeed ${strategy} check unavailable.`);
   }
 }
 
-export const getLighthouseStats = unstable_cache(
-  async (): Promise<LighthouseStats> => {
-    if (process.env.IS_ALLOY === "true") {
-      return { mobile: null, desktop: null, partialFailure: false };
+export async function loadLighthouseStats(): Promise<LighthouseStats> {
+  if (process.env.IS_ALLOY === "true") {
+    return { mobile: null, desktop: null, partialFailure: false };
+  }
+
+  try {
+    const response = await fetch(SITE_URL, { signal: AbortSignal.timeout(targetTimeoutMs), cache: "no-store" });
+    await response.body?.cancel();
+    if (!response.ok || (response.url && new URL(response.url).origin !== new URL(SITE_URL).origin)) {
+      console.warn(`PageSpeed production target is not serving the site (${response.status}).`);
+      return { mobile: null, desktop: null, partialFailure: true };
     }
+  } catch {
+    console.warn("PageSpeed production target is unavailable.");
+    return { mobile: null, desktop: null, partialFailure: true };
+  }
 
-    // Fetch both mobile and desktop scores in parallel
-    const [mobileResult, desktopResult] = await Promise.allSettled([
-      fetchLighthouseScores("mobile"),
-      fetchLighthouseScores("desktop"),
-    ]);
+  const [mobileResult, desktopResult] = await Promise.allSettled([
+    fetchLighthouseScores("mobile"),
+    fetchLighthouseScores("desktop"),
+  ]);
 
-    return {
-      mobile: mobileResult.status === "fulfilled" ? mobileResult.value : null,
-      desktop: desktopResult.status === "fulfilled" ? desktopResult.value : null,
-      partialFailure: mobileResult.status === "rejected" || desktopResult.status === "rejected",
-    };
-  },
+  return {
+    mobile: mobileResult.status === "fulfilled" ? mobileResult.value : null,
+    desktop: desktopResult.status === "fulfilled" ? desktopResult.value : null,
+    partialFailure: mobileResult.status === "rejected" || desktopResult.status === "rejected",
+  };
+}
+
+export const getLighthouseStats = unstable_cache(
+  loadLighthouseStats,
   ["lighthouse-stats"],
   { revalidate: 3600 }
 );

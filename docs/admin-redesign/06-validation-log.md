@@ -670,6 +670,72 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
   scoped read-only Analytics pass, not deployed-domain Lighthouse acceptance,
   owner visual sign-off, or certification of every Admin workflow.
 
+## 2026-10-04 Analytics Insight and PageSpeed Continuation
+
+- Owner confirmed `https://harisx404.vercel.app` as the intended production
+  URL and delegated the circular-chart and extra-metric design. Top viewed and
+  most reacted panels now show ranked article rows with a neutral circular
+  share graphic, raw count and an explicit explanation that the denominator is
+  the **five articles shown**, not all site traffic. Six linked Owner signals
+  show draft/scheduled articles, published projects, pending notes, visible
+  FAQs and tracked images, with missing query values shown as `—` instead of
+  false zeros. These are bounded count-only queries after verified Admin auth;
+  no invented traffic trend or unique-visitor rate was added.
+- Authenticated read-only browser review at 320/390/768/1024/1280/1440px
+  found nine linked article rings and six signal cards: every shown percentage
+  matched its raw count within its top-five panel; all six count cards matched
+  connected count-only queries; all nine article links and six signal
+  destinations returned 200. Zero measured control/document overflow, page
+  errors, unknown counts or unexpected alerts. Sampled article hover/focus
+  remained visible without shifting the link. Sandbox Lighthouse continued
+  to explain the unavailable scores. The temporary owner session was locally
+  revoked and its runner removed; no credential, response value, screenshot,
+  content mutation or migration was retained.
+- The PageSpeed integration checks the production target before requesting
+  mobile/desktop reports, rejects off-origin redirects and malformed/out-of-
+  range category scores, keeps a valid device report when the other fails,
+  normalizes missing fetch times, and reports failures without logging API
+  response bodies. It is not a publicly callable server action. Mocked tests
+  covered preview bypass, healthy reports, target 404, off-origin redirect,
+  API quota/partial result, invalid scores and target timeout: **7/7**.
+  Successful scores show their UTC check time and `/100` context.
+- The confirmed production homepage returned **HTTP 404** on two sandbox
+  checks. Real PageSpeed success therefore **cannot be verified yet** and the
+  deployment must be corrected before sign-off; the Admin intentionally shows
+  unavailable rather than scores for an error page. The hourly cache may take
+  up to an hour to refresh after that correction. A production PageSpeed API
+  key may be needed for quota; never put it in the repository or chat.
+- Docker full regression **81 pass, one existing Project skip**, mocked
+  Admin/Buildlog/PageSpeed tests **14/14**, TypeScript, lint (pre-existing image
+  warning), isolated build **129 static pages**, and post-build smoke **32/32**
+  passed. Public source remained unchanged. Owner visual acceptance and live
+  production Lighthouse checks remain open.
+
+## 2026-10-04 Lighthouse Streaming Follow-Up
+
+- Moved the Lighthouse check behind a server-rendered Suspense boundary after
+  the parent page's Admin authorization gate. Content and engagement panels no
+  longer wait for a slow external PageSpeed response before rendering; the
+  Lighthouse section shows a bounded checking state until its own result or
+  failure arrives. Production target preflight is capped at five seconds,
+  each parallel device API call at 25 seconds, and the Analytics route declares
+  a 60-second maximum duration. The sandbox bypass remains immediate.
+- A fresh authenticated read-only browser pass at
+  320/390/768/1024/1280/1440px waited for the streamed preview status and
+  found all nine article rings, six signal links, eight score tiles, zero
+  document/control overflow, page errors or unexpected alerts. The temporary
+  owner session was locally revoked and its runner removed; no content or
+  private artifact was retained.
+- The first broad Docker run saw a pending third-party Unsplash image request
+  in the unrelated public Projects preview browser test; its isolated rerun
+  passed. An older source assertion expecting the former 15-second PageSpeed
+  timeout was updated to the new 25-second API/five-second target contract.
+  The final full regression then passed **81 tests, one existing Project
+  skip**, with TypeScript, lint (pre-existing image warning), isolated build
+  **129 static pages**, post-build smoke **32/32**, and PageSpeed branch tests
+  **7/7**. The confirmed production homepage still returned **HTTP 404**;
+  live scores and production sign-off remain blocked until deployment works.
+
 Representative Docker validation commands (one-off owner fixture helpers were removed after earlier tests):
 
 ```bash

@@ -304,6 +304,12 @@ html:has([data-admin-root])::-webkit-scrollbar-thumb:hover {
   background: #28282d;
 }
 
+[data-admin-root] [data-admin-analytics] a.group:hover,
+[data-admin-root] [data-admin-analytics] a.group:focus-visible {
+  border-color: #676770;
+  background: #232328;
+}
+
 [data-admin-root] .admin-status {
   display: inline-flex;
   align-items: center;

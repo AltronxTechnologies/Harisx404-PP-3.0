@@ -139,11 +139,14 @@ gate. Local Docker tests and read-only renders do not certify production.
 
 For Admin Analytics Lighthouse scores after deployment:
 
-1. Choose the final public HTTPS domain and verify its home page loads outside
-   the sandbox; do not use the Alloy preview URL for PageSpeed.
-2. Share only that public URL (not keys). The current Analytics helper targets
-   the checked-in origin, so I can check whether its Admin-only target needs a
-   change. Public canonical/domain changes remain separately locked.
-3. In the deployment host, configure the production site URL and optional
-   `PAGESPEED_API_KEY` privately. Do not send the key in chat. Then confirm
-   Admin Analytics reports actual mobile/desktop scores rather than dashes.
+1. You confirmed `https://harisx404.vercel.app` as the intended target. It
+   currently returned **HTTP 404** from the sandbox, so make its homepage
+   publicly reachable with HTTP 200 before requesting live scores. Do not use
+   the Alloy preview URL for PageSpeed.
+2. The Admin-only Analytics helper targets that exact origin and refuses to
+   score a 404 or redirect to another origin. Public canonical/domain changes
+   remain separately locked.
+3. Deploy the site at that URL and configure `PAGESPEED_API_KEY` privately if
+   API quota requires it. Do not send the key
+   in chat. After the hourly cache refresh, confirm Admin Analytics reports
+   actual mobile/desktop scores and timestamps rather than dashes.

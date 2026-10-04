@@ -26,7 +26,8 @@ test("preview data paths are bounded and route-specific", async () => {
   assert.match(buildlogData, /process\.env\.NODE_ENV === "production"/);
   assert.match(serverStats, /Promise\.all/);
   assert.match(lighthouseStats, /requestTimeoutMs/);
-  assert.match(lighthouseStats, /15000/);
+  assert.match(lighthouseStats, /requestTimeoutMs = process\.env\.NODE_ENV === "production" \? 25000 : 3000/);
+  assert.match(lighthouseStats, /targetTimeoutMs = process\.env\.NODE_ENV === "production" \? 5000 : 3000/);
   assert.match(lighthouseStats, /revalidate: 3600/);
   assert.match(lighthouseStats, /process\.env\.IS_ALLOY === "true"/);
   assert.match(installer, /\.alloy-package-lock\.sha256/);
