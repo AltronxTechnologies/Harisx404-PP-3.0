@@ -1,5 +1,4 @@
-export const PAGE_SIZE = 20;
-const MAX_PAGE = 1000;
+export const PAGE_SIZE = 10;
 
 export type BlogListParams = {
   q: string;
@@ -26,7 +25,7 @@ export function parseBlogListParams(params: RawParams): BlogListParams {
     status: status === "draft" || status === "scheduled" || status === "live" || status === "not-live" || status === "archived" ? status : "all",
     sort: sort === "updated_at" || sort === "published_at" || sort === "title" ? sort : "created_at",
     direction: direction === "asc" ? "asc" : "desc",
-    page: page && /^[1-9]\d*$/.test(page) ? Math.min(Number(page), MAX_PAGE) : 1,
+    page: page && /^[1-9]\d*$/.test(page) && Number.isSafeInteger(Number(page)) ? Number(page) : 1,
   };
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -9,6 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Loader2, Plus, X, Image as ImageIcon } from "lucide-react";
 import { MediaPickerModal } from "./MediaPickerModal";
+import { AdminConfirmDialog } from "./AdminConfirmDialog";
 import { normalizeBlogSlug, serializeBlogPublishDate, toLocalBlogDateTime } from "@/app/lib/blog-defaults";
 import { isAllowedBlogImageUrl } from "@/app/components/blog/blogImage";
 
@@ -56,6 +57,8 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
   const [tagInput, setTagInput] = useState("");
   const [relatedSearch, setRelatedSearch] = useState("");
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
+  const [confirmation, setConfirmation] = useState<{ title: string; description: string; label: string; data: BlogFormValues; publishedAt: string; content: string } | null>(null);
+  const [leaveTarget, setLeaveTarget] = useState<"list" | "preview" | null>(null);
   const slugEdited = useRef(Boolean(initialData?.id));
   const richContentEdited = useRef(false);
   const richEditor = !initialData?.id || initialData.editor_mode === "rich";
@@ -68,7 +71,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
     setValue,
     setError,
     clearErrors,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<BlogFormValues>({
     resolver: zodResolver(blogSchema),
     defaultValues: initialData ? {
@@ -101,6 +104,22 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
   const scheduled = status === "published" && Date.parse(watch("published_at") || "") > Date.now();
   const publishingNow = status === "published" && initialData?.status === "published" && !watch("published_at") && Date.parse(initialData.published_at || "") > Date.now();
 
+  useEffect(() => {
+    if (!isDirty && !tagInput.trim()) return;
+    const warn = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [isDirty, tagInput]);
+
+  const leave = (target: "list" | "preview") => {
+    if (isSubmitting) return;
+    if (isDirty || tagInput.trim()) setLeaveTarget(target);
+    else router.push(target === "list" ? "/admin/blogs" : `/admin/blogs/${initialData?.id}/preview`);
+  };
+
   const addTag = () => {
     const value = tagInput.trim();
     if (!value || tags.includes(value)) return;
@@ -109,28 +128,15 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
       return;
     }
     clearErrors("tags");
-    setValue("tags", [...tags, value]);
+    setValue("tags", [...tags, value], { shouldDirty: true });
     setTagInput("");
   };
 
   const removeTag = (tagToRemove: string) => {
-    setValue("tags", tags.filter(tag => tag !== tagToRemove));
+    setValue("tags", tags.filter(tag => tag !== tagToRemove), { shouldDirty: true });
   };
 
-  const onSubmit = async (data: BlogFormValues) => {
-    const publishedAt = data.status === "published" && !data.published_at
-      ? new Date().toISOString()
-      : serializeBlogPublishDate(data.published_at, initialData?.published_at);
-    const content = richEditor && initialData?.id && !richContentEdited.current ? initialData.content : data.content;
-    const publicationChanged = Boolean(initialData?.id && initialData.status === "published" && publishedAt !== initialData.published_at);
-    if ((data.status !== initialData?.status || publicationChanged) && (data.status === "published" || initialData?.status === "published")) {
-      const action = data.status === "draft"
-        ? "Unpublish this post? It will disappear from the public Blog and return to drafts."
-        : publishedAt && Date.parse(publishedAt) > Date.now()
-          ? "Schedule this post? It will become public automatically at the selected time."
-          : "Publish this post now? It will become public as soon as it is saved.";
-      if (!window.confirm(action)) return;
-    }
+  const savePost = async (data: BlogFormValues, publishedAt: string, content: string) => {
     setIsSubmitting(true);
     setErrorMsg("");
     try {
@@ -175,10 +181,28 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
     }
   };
 
+  const onSubmit = async (data: BlogFormValues) => {
+    const publishedAt = data.status === "published" && !data.published_at
+      ? new Date().toISOString()
+      : serializeBlogPublishDate(data.published_at, initialData?.published_at);
+    const content = richEditor && initialData?.id && !richContentEdited.current ? initialData.content : data.content;
+    const publicationChanged = Boolean(initialData?.id && initialData.status === "published" && publishedAt !== initialData.published_at);
+    if ((data.status !== initialData?.status || publicationChanged) && (data.status === "published" || initialData?.status === "published")) {
+      setConfirmation(data.status === "draft"
+        ? { title: "Unpublish this post?", description: "It will leave the public Blog and return to drafts. You can publish it again later.", label: "Move to draft", data, publishedAt, content }
+        : publishedAt && Date.parse(publishedAt) > Date.now()
+          ? { title: "Schedule this post?", description: "It will become public automatically at the selected time.", label: "Schedule post", data, publishedAt, content }
+          : { title: "Publish this post?", description: "It will become visible on the public Blog as soon as it is saved.", label: "Publish now", data, publishedAt, content });
+      return;
+    }
+    await savePost(data, publishedAt, content);
+  };
+
   return (
+    <>
     <form onSubmit={handleSubmit(onSubmit)} className="min-w-0 space-y-8">
       {errorMsg && (
-        <div role="alert" className="rounded-lg bg-red-50 p-4 text-sm text-red-500 dark:bg-red-950/30">
+        <div role="alert" className="rounded-2xl border border-red-500/30 bg-red-950/30 p-4 text-sm text-red-300">
           {errorMsg}
         </div>
       )}
@@ -189,7 +213,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
           <input
             {...register("title", {
               onChange: (event) => {
-                if (!slugEdited.current) setValue("slug", normalizeBlogSlug(event.target.value));
+                if (!slugEdited.current) setValue("slug", normalizeBlogSlug(event.target.value), { shouldDirty: true });
               },
             })}
             id="blog-title"
@@ -266,7 +290,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
           <label htmlFor="blog-cover-url" className="text-sm font-medium">Cover Image</label>
           <div className="flex gap-2">
             <input
-              {...register("cover_image_url", { onChange: () => setValue("cover_image_id", "") })}
+              {...register("cover_image_url", { onChange: () => setValue("cover_image_id", "", { shouldDirty: true }) })}
               id="blog-cover-url"
               aria-invalid={Boolean(errors.cover_image_url)}
               aria-describedby={errors.cover_image_url ? "blog-cover-url-error" : undefined}
@@ -287,8 +311,8 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
             isOpen={isMediaPickerOpen}
             onClose={() => setIsMediaPickerOpen(false)}
             onSelect={(media) => {
-              setValue("cover_image_url", media.secure_url || media.url);
-              setValue("cover_image_id", media.id);
+              setValue("cover_image_url", media.secure_url || media.url, { shouldDirty: true, shouldValidate: true });
+              setValue("cover_image_id", media.id, { shouldDirty: true });
             }}
           />
         </div>
@@ -408,8 +432,9 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
 
       <div className="flex flex-wrap justify-end gap-4">
         {initialData?.id && (
-          <Link
-            href={`/admin/blogs/${initialData.id}/preview`}
+            <Link
+              href={`/admin/blogs/${initialData.id}/preview`}
+              onClick={(event) => { if (isDirty || tagInput.trim()) { event.preventDefault(); leave("preview"); } }}
             className="inline-flex min-h-11 items-center rounded-xl px-4 py-2 text-sm font-medium text-accent-signal underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-signal"
           >
             Preview saved post
@@ -417,7 +442,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
         )}
         <button
           type="button"
-          onClick={() => router.back()}
+          onClick={() => leave("list")}
           className="min-h-11 rounded-xl px-4 py-2 text-sm font-medium text-ink-secondary hover:bg-surface-base transition-colors"
         >
           Cancel
@@ -436,5 +461,34 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
         </button>
       </div>
     </form>
+    <AdminConfirmDialog
+      open={confirmation !== null}
+      title={confirmation?.title || "Confirm publication"}
+      description={confirmation?.description || ""}
+      confirmLabel={confirmation?.label || "Confirm"}
+      cancelLabel="Keep editing"
+      pending={isSubmitting}
+      onClose={() => setConfirmation(null)}
+      onConfirm={() => {
+        if (!confirmation) return;
+        setConfirmation(null);
+        void savePost(confirmation.data, confirmation.publishedAt, confirmation.content);
+      }}
+    />
+    <AdminConfirmDialog
+      open={leaveTarget !== null}
+      title={leaveTarget === "preview" ? "Open saved preview?" : "Discard unsaved changes?"}
+      description={leaveTarget === "preview" ? "The preview shows only the last saved version. Unsaved edits will not appear there." : "Your changes on this page have not been saved and will be lost."}
+      confirmLabel={leaveTarget === "preview" ? "Open saved preview" : "Discard changes"}
+      cancelLabel="Keep editing"
+      destructive={leaveTarget === "list"}
+      onClose={() => setLeaveTarget(null)}
+      onConfirm={() => {
+        const target = leaveTarget;
+        setLeaveTarget(null);
+        if (target) router.push(target === "list" ? "/admin/blogs" : `/admin/blogs/${initialData?.id}/preview`);
+      }}
+    />
+    </>
   );
 }

@@ -2,7 +2,8 @@ import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 import { requireAdmin } from "@/app/lib/admin-auth";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Plus, Edit } from "lucide-react";
+import { Plus, Edit, ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react";
+import { BlogFilters } from "@/app/components/admin/BlogFilters";
 import { BlogArchiveAction } from "./BlogArchiveAction";
 import { blogListStatus, blogListUrl, PAGE_SIZE, parseBlogListParams } from "./blogList";
 
@@ -18,28 +19,43 @@ export default async function AdminBlogsPage({
   const now = new Date();
   const nowIso = now.toISOString();
   const supabase = await createSupabaseAdminClient();
-  let query = supabase
-    .from("blog_posts")
-    .select("id, title, slug, status, published_at, updated_at")
-    .order(params.sort, { ascending: params.direction === "asc", nullsFirst: false })
-    .order("id", { ascending: true });
+  const filteredQuery = (head: boolean) => {
+    let query = supabase.from("blog_posts")
+      .select("id, title, slug, status, published_at, updated_at", head ? { count: "exact", head: true } : undefined);
 
-  if (params.q) query = query.ilike("title", `%${params.q.replace(/[\\%_]/g, "\\$&")}%`);
-  if (params.status === "draft" || params.status === "archived") {
-    query = query.eq("status", params.status);
-  } else if (params.status === "scheduled") {
-    query = query.eq("status", "published").gt("published_at", nowIso);
-  } else if (params.status === "live") {
-    query = query.eq("status", "published").lte("published_at", nowIso);
-  } else if (params.status === "not-live") {
-    query = query.eq("status", "published").is("published_at", null);
+    if (params.q) query = query.ilike("title", `%${params.q.replace(/[\\%_]/g, "\\$&")}%`);
+    if (params.status === "draft" || params.status === "archived") {
+      query = query.eq("status", params.status);
+    } else if (params.status === "scheduled") {
+      query = query.eq("status", "published").gt("published_at", nowIso);
+    } else if (params.status === "live") {
+      query = query.eq("status", "published").lte("published_at", nowIso);
+    } else if (params.status === "not-live") {
+      query = query.eq("status", "published").is("published_at", null);
+    }
+    return query;
+  };
+
+  const { count, error: countError } = await filteredQuery(true);
+  const totalPages = count === null ? 0 : Math.max(1, Math.ceil(count / PAGE_SIZE));
+  if (!countError && count !== null && params.page > totalPages) {
+    redirect(blogListUrl(params, totalPages));
   }
-
   const start = (params.page - 1) * PAGE_SIZE;
-  const { data: blogs, error } = await query.range(start, start + PAGE_SIZE);
-  const posts = blogs?.slice(0, PAGE_SIZE) ?? [];
-  const hasNext = (blogs?.length ?? 0) > PAGE_SIZE && params.page < 1000;
+  const { data: blogs, error: postsError } = countError || count === null
+    ? { data: null, error: countError }
+    : await filteredQuery(false)
+      .order(params.sort, { ascending: params.direction === "asc", nullsFirst: false })
+      .order("id", { ascending: true })
+      .range(start, start + PAGE_SIZE - 1);
+  const error = countError || count === null || postsError;
+  const posts = blogs ?? [];
   const filtered = Boolean(params.q || params.status !== "all");
+  const successMessage = rawParams.saved === "1" ? "Post saved successfully."
+    : rawParams.notice === "archived" ? "Post archived and unpublished."
+    : rawParams.notice === "restored" ? "Post restored as a draft."
+    : rawParams.notice === "deleted" ? "Post permanently deleted."
+    : null;
 
   return (
     <div className="flex min-w-0 flex-col gap-6">
@@ -57,56 +73,22 @@ export default async function AdminBlogsPage({
         </Link>
       </div>
 
-      {rawParams.saved === "1" && (
-        <p role="status" className="rounded-xl border border-border-hairline bg-surface-raised p-4 text-sm text-ink-primary">
-          Post saved successfully.
+      {successMessage && (
+        <p role="status" className="flex items-center gap-3 rounded-2xl border border-[#315543] bg-[#18271e] px-4 py-3 text-sm text-[#a9e2bc]">
+          <CheckCircle2 aria-hidden className="size-5 shrink-0" />{successMessage}
         </p>
       )}
 
-      <form action="/admin/blogs" method="get" className="flex flex-wrap items-end gap-3 rounded-xl border border-border-hairline bg-surface-raised p-4 text-sm shadow-sm">
-        <div className="min-w-48 flex-1">
-          <label htmlFor="blog-search" className="mb-1 block font-medium text-ink-primary">Search titles</label>
-          <input id="blog-search" name="q" type="search" defaultValue={params.q} maxLength={100} placeholder="Search post titles" className="min-h-11 w-full rounded-lg border border-border-hairline bg-surface-base px-3 py-2 text-ink-primary" />
-        </div>
-        <div>
-          <label htmlFor="blog-status" className="mb-1 block font-medium text-ink-primary">Status</label>
-          <select id="blog-status" name="status" defaultValue={params.status} className="min-h-11 rounded-lg border border-border-hairline bg-surface-base px-3 py-2 text-ink-primary">
-            <option value="all">All statuses</option>
-            <option value="draft">Draft</option>
-            <option value="scheduled">Scheduled</option>
-            <option value="live">Live</option>
-            <option value="not-live">Not live</option>
-            <option value="archived">Archived</option>
-          </select>
-        </div>
-        <div>
-          <label htmlFor="blog-sort" className="mb-1 block font-medium text-ink-primary">Sort by</label>
-          <select id="blog-sort" name="sort" defaultValue={params.sort} className="min-h-11 rounded-lg border border-border-hairline bg-surface-base px-3 py-2 text-ink-primary">
-            <option value="created_at">Created date</option>
-            <option value="updated_at">Updated date</option>
-            <option value="published_at">Publication date</option>
-            <option value="title">Title</option>
-          </select>
-        </div>
-        <div>
-          <label htmlFor="blog-direction" className="mb-1 block font-medium text-ink-primary">Direction</label>
-          <select id="blog-direction" name="direction" defaultValue={params.direction} className="min-h-11 rounded-lg border border-border-hairline bg-surface-base px-3 py-2 text-ink-primary">
-            <option value="desc">Descending</option>
-            <option value="asc">Ascending</option>
-          </select>
-        </div>
-        <button type="submit" className="min-h-11 rounded-lg bg-accent-signal px-4 py-2 font-medium text-white hover:bg-accent-signal/90">Apply</button>
-        <Link href="/admin/blogs" className="inline-flex min-h-11 items-center rounded-lg px-3 py-2 text-ink-secondary underline hover:text-ink-primary">Clear</Link>
-      </form>
+      <BlogFilters key={blogListUrl(params, params.page)} params={params} />
 
       {error && (
-        <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-400">
+        <div role="alert" className="rounded-2xl border border-red-500/30 bg-red-950/30 p-4 text-sm text-red-300">
           Blog posts could not be loaded. Please try again later or clear the filters.
         </div>
       )}
       {!error && <div className="rounded-xl border border-border-hairline bg-surface-raised shadow-sm overflow-hidden">
-        <p className="border-b border-border-hairline px-6 py-3 text-sm text-ink-secondary">
-          Page {params.page}: Showing {posts.length} {posts.length === 1 ? "post" : "posts"}{hasNext ? " (more available)" : ""}
+        <p role="status" className="border-b border-border-hairline px-6 py-3 text-sm text-ink-secondary">
+          {count === 0 ? "Showing 0 posts" : `Showing ${start + 1}-${start + posts.length} of ${count} posts`}
         </p>
          <div className="overflow-x-auto" role="region" aria-label="Blog posts table" tabIndex={0}>
            <table className="admin-action-table w-full text-sm text-left">
@@ -123,7 +105,7 @@ export default async function AdminBlogsPage({
               {posts.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="px-6 py-8 text-center text-ink-secondary">
-                    {params.page > 1 ? "No posts on this page. Go to the previous page." : filtered ? "No posts match these filters. Try another search or clear the filters." : "No blog posts yet. Create one to get started!"}
+                    {filtered ? "No posts match these filters. Try another search or clear the filters." : "No blog posts yet. Create one to get started!"}
                   </td>
                 </tr>
               ) : (
@@ -164,12 +146,17 @@ export default async function AdminBlogsPage({
             </tbody>
           </table>
         </div>
-        {(params.page > 1 || hasNext) && (
-          <nav aria-label="Blog post pages" className="flex items-center justify-between border-t border-border-hairline px-6 py-4 text-sm">
-            {params.page > 1 ? <Link href={blogListUrl(params, params.page - 1)} className="text-accent-signal underline">Previous page</Link> : <span />}
-            {hasNext && <Link href={blogListUrl(params, params.page + 1)} className="text-accent-signal underline">Next page</Link>}
-          </nav>
-        )}
+         <nav aria-label="Blog post pages" className="flex flex-wrap items-center justify-between gap-3 border-t border-border-hairline px-6 py-3 text-sm">
+           <span className="text-ink-secondary">Page <strong className="font-medium text-ink-primary">{params.page}</strong> of {totalPages}</span>
+           <div className="flex items-center gap-2">
+             {params.page > 1 ? (
+               <Link href={blogListUrl(params, params.page - 1)} rel="prev" className="inline-flex min-h-10 items-center gap-1 rounded-lg border border-border-hairline px-3 text-ink-primary transition-colors hover:bg-surface-base"><ChevronLeft aria-hidden className="size-4" /> Previous</Link>
+             ) : <span aria-disabled="true" className="inline-flex min-h-10 items-center gap-1 rounded-lg border border-border-hairline px-3 text-ink-secondary opacity-50"><ChevronLeft aria-hidden className="size-4" /> Previous</span>}
+             {params.page < totalPages ? (
+               <Link href={blogListUrl(params, params.page + 1)} rel="next" className="inline-flex min-h-10 items-center gap-1 rounded-lg border border-border-hairline px-3 text-ink-primary transition-colors hover:bg-surface-base">Next <ChevronRight aria-hidden className="size-4" /></Link>
+             ) : <span aria-disabled="true" className="inline-flex min-h-10 items-center gap-1 rounded-lg border border-border-hairline px-3 text-ink-secondary opacity-50">Next <ChevronRight aria-hidden className="size-4" /></span>}
+           </div>
+         </nav>
       </div>}
     </div>
   );

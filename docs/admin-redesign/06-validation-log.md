@@ -788,6 +788,44 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
   post-build smoke **31/31** and whitespace checks passed. This is a scoped
   read-only and invalid-input pass, not production or owner visual sign-off.
 
+## 2026-10-04 Blog Filters, Pagination and Confirmation Pass
+
+- Owner requested more compact search/filter controls, designed dropdown
+  options, an accurate list count and pagination, and professional Blog Admin
+  confirmations. The Admin Blog list now uses 40px filters with keyboard-
+  accessible dark Headless UI option menus; GET-based search/status/sort/order,
+  Apply and Clear remain intact. An exact filtered count and 10-row bounded
+  page query replace the old extra-row guess. The list reports the visible
+  result range and total, provides Previous/Next with page count, and redirects
+  an out-of-range page to the last valid page. Count/query failure is not
+  misrepresented as an empty collection.
+- Added an Admin-only Headless UI confirmation dialog with accessible title,
+  description, focus management, Cancel/Escape and optional exact-slug guard.
+  Blog publish/schedule/unpublish, archive and permanent delete use this dialog
+  instead of browser confirm/prompt. Blog editor Cancel and saved-preview
+  navigation warn on dirty edits, with a native beforeunload safeguard for
+  reload/close. Programmatic tag, slug and cover selections now mark the form
+  dirty. Success notices for save/archive/restore/delete are visible above the
+  Blog list; errors remain inline and announced. Public modal components and
+  locked public Blog pages were not edited.
+- A short-lived owner browser at 320/390/768/1024/1440 verified compact
+  filter heights and visible popup options, Draft filter/filtered count,
+  Apply/Clear, accurate total and Next/Previous navigation. Archive Cancel,
+  unsaved Cancel and saved-preview warnings, and publish confirmation were
+  exercised **without** submitting an Admin Blog mutation. The currently
+  connected catalog had no archived row for a real delete-dialog probe, so a
+  separate Happy DOM test verified exact-slug gating and a mocked successful
+  DELETE followed by the list notice. The temporary session was locally
+  revoked and runner removed; no existing post or asset was modified.
+- Docker broad Admin/public/Blog regression **96 pass, one existing Project
+  skip**, mocked Blog/Admin component checks **10/10**, TypeScript, lint
+  (pre-existing image warning), isolated build **129 static pages**, post-build
+  smoke **35/35** and whitespace checks passed. A scoped disposable live
+  publish/restore/delete lifecycle and owner visual acceptance still precede
+  production sign-off. Browser reload/close prompts are browser-owned and
+  cannot be restyled; other Admin/public confirmation flows were deliberately
+  left for their own page passes.
+
 Representative Docker validation commands (one-off owner fixture helpers were removed after earlier tests):
 
 ```bash

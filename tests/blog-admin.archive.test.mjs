@@ -47,11 +47,14 @@ test("archive and restore retain posts with guarded state transitions", async ()
   assert.match(api, /revalidatePath\("\/admin\/blogs"\)/);
   assert.match(api, /current\.status === "archived"/);
   assert.match(edit, /blog\.status === "archived"\) notFound\(\)/);
-  assert.match(list, /\{ data: blogs, error \}/);
+  assert.match(list, /\{ data: blogs, error: postsError \}/);
   assert.match(list, /role="alert"/);
-  assert.match(action, /window\.confirm\(/);
-  assert.match(action, /Archive and unpublish/);
-  assert.match(action, /role="status"/);
+  assert.match(action, /setDialog\("archive"\)/);
+  assert.match(action, /confirmText=\{dialog === "delete" \? post\.slug : undefined\}/);
+  assert.doesNotMatch(action, /window\.confirm|window\.prompt/);
+  assert.match(action, /role="alert"/);
+  assert.match(list, /rawParams\.notice === "archived"/);
+  assert.match(list, /role="status"/);
   assert.match(policy, /status = 'published'/);
   assert.match(publicRead, /\.eq\('status', 'published'\)/);
 });
@@ -78,7 +81,7 @@ test("manual cover URL edits clear their media ID and saves validate the pair", 
     readFile(new URL("../app/api/admin/blogs/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/lib/tag-sync.ts", import.meta.url), "utf8"),
   ]);
-  assert.match(form, /register\("cover_image_url", \{ onChange: \(\) => setValue\("cover_image_id", ""\) \}\)/);
+  assert.match(form, /register\("cover_image_url", \{ onChange: \(\) => setValue\("cover_image_id", "", \{ shouldDirty: true \}\) \}\)/);
   assert.match(api, /coverUrl !== media\.secure_url && coverUrl !== media\.url/);
   assert.equal((api.match(/await validateCoverMedia\(data\.cover_image_id, data\.cover_image_url\)/g) || []).length, 2);
   assert.match(api, /code === "23505"/);
@@ -88,6 +91,10 @@ test("manual cover URL edits clear their media ID and saves validate the pair", 
   assert.match(form, /new Date\(\)\.toISOString\(\)/);
   assert.match(form, /Clear this field to publish immediately/);
   assert.match(form, /publishingNow \? "Publish Now"/);
+  assert.match(form, /<AdminConfirmDialog/);
+  assert.match(form, /beforeunload/);
+  assert.match(form, /formState: \{ errors, isDirty \}/);
+  assert.doesNotMatch(form, /window\.confirm|window\.prompt/);
   for (const [field, name] of [["title", "title"], ["slug", "slug"], ["summary", "summary"], ["status", "status"], ["published-at", "published_at"], ["cover-url", "cover_image_url"], ["canonical-url", "canonical_url"], ["tags", "tags"], ["content", "content"]]) {
     assert.match(form, new RegExp(`id="blog-${field}-error"`));
     assert.match(form, new RegExp(`aria-describedby=\\{errors\\.${name}`));

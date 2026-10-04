@@ -175,9 +175,11 @@ test("unlocked privileged reads and log actions check Admin identity before serv
   assert.match(projectDelete, /aria-label=\{`Delete \$\{name\}`\}/);
   assert.match(projectDelete, /inline-flex size-11 items-center justify-center/);
   const blogList = await source("app/admin/(dashboard)/blogs/page.tsx");
+  const blogFilters = await source("app/components/admin/BlogFilters.tsx");
   const blogActions = await source("app/admin/(dashboard)/blogs/BlogArchiveAction.tsx");
   assert.match(blogList, /flex flex-wrap items-center justify-between gap-4/);
-  assert.match(blogList, /id="blog-search"[^\n]*className="min-h-11/);
+  assert.match(blogList, /<BlogFilters /);
+  assert.match(blogFilters, /id="blog-search"[^\n]*style=\{\{ minHeight: 40, height: 40 \}\}/);
   assert.match(blogActions, /aria-label=\{`\$\{archived \? "Restore" : "Archive"\} \$\{post\.title\}`\}/);
   assert.match(blogActions, /inline-flex size-11 items-center justify-center/);
 });

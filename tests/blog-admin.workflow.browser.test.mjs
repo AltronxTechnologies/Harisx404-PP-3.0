@@ -103,8 +103,8 @@ test("authenticated Admin Blog flow creates, reopens, publishes and permanently 
 
     await page.goto(`${site}/admin/blogs/${postId}`);
     await page.getByRole("combobox", { name: "Status" }).selectOption("published");
-    page.once("dialog", (dialog) => dialog.accept());
     await page.getByRole("button", { name: "Publish Post" }).click();
+    await page.getByRole("dialog", { name: "Publish this post?" }).getByRole("button", { name: "Publish now" }).click();
     await page.waitForURL(/\/admin\/blogs\?saved=1/);
     assert.equal((await fetch(`${site}/blog/${slug}`)).status, 200);
 
@@ -118,20 +118,23 @@ test("authenticated Admin Blog flow creates, reopens, publishes and permanently 
 
     await page.goto(`${site}/admin/blogs?q=${encodeURIComponent(title)}`);
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), "Archived list overflows on a small phone");
-    page.once("dialog", (dialog) => dialog.accept());
     await page.getByRole("button", { name: `Archive ${title}` }).click();
+    await page.getByRole("dialog", { name: "Archive this post?" }).getByRole("button", { name: "Archive post" }).click();
     await page.getByRole("button", { name: `Permanently delete ${title}` }).waitFor();
     await page.getByRole("button", { name: `Restore ${title}` }).click();
     await page.getByRole("button", { name: `Archive ${title}` }).waitFor();
-    page.once("dialog", (dialog) => dialog.accept());
     await page.getByRole("button", { name: `Archive ${title}` }).click();
+    await page.getByRole("dialog", { name: "Archive this post?" }).getByRole("button", { name: "Archive post" }).click();
     const remove = page.getByRole("button", { name: `Permanently delete ${title}` });
     await remove.waitFor();
-    page.once("dialog", (dialog) => dialog.accept("wrong-slug"));
     await remove.click();
-    await page.getByText("Deletion cancelled. The slug did not match.").waitFor();
-    page.once("dialog", (dialog) => dialog.accept(renamed));
+    const deleteDialog = page.getByRole("dialog", { name: "Permanently delete post?" });
+    await deleteDialog.getByLabel(/Type .* to confirm/).fill("wrong-slug");
+    assert.equal(await deleteDialog.getByRole("button", { name: "Delete permanently" }).isEnabled(), false);
+    await deleteDialog.getByRole("button", { name: "Cancel" }).click();
     await remove.click();
+    await page.getByRole("dialog", { name: "Permanently delete post?" }).getByLabel(/Type .* to confirm/).fill(renamed);
+    await page.getByRole("dialog", { name: "Permanently delete post?" }).getByRole("button", { name: "Delete permanently" }).click();
     await page.getByText("No posts match these filters.").waitFor();
     assert.equal((await fetch(`${site}/blog/${slug}`, { redirect: "manual" })).status, 410);
     assert.equal((await rest(`blog_posts?select=id&id=eq.${postId}`)).length, 0);

@@ -13,6 +13,86 @@ Object.assign(globalThis, {
 Object.defineProperty(globalThis, "navigator", { configurable: true, value: browser.navigator });
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
+test("Admin delete dialog requires an exact slug before confirming", async () => {
+  const React = await import("react");
+  (globalThis as typeof globalThis & { React: typeof React }).React = React;
+  const [{ createRoot }, { act }, { AdminConfirmDialog }] = await Promise.all([
+    import("react-dom/client"), import("react-dom/test-utils"), import("../app/components/admin/AdminConfirmDialog"),
+  ]);
+  const host = document.createElement("div");
+  document.body.append(host);
+  const root = createRoot(host);
+  let confirmed = "";
+  try {
+    await act(async () => root.render(React.createElement(AdminConfirmDialog, {
+      open: true, title: "Permanently delete post?", description: "This cannot be undone.", confirmLabel: "Delete permanently",
+      confirmText: "example-post", destructive: true, onClose: () => {}, onConfirm: (value) => { confirmed = value; },
+    })));
+    const dialog = document.querySelector('[role="dialog"]');
+    assert.ok(dialog);
+    const submit = [...dialog.querySelectorAll("button")].find((button) => button.textContent === "Delete permanently")!;
+    assert.equal(submit.disabled, true);
+    const input = dialog.querySelector("input")!;
+    const setValue = async (value: string) => act(async () => {
+      Object.getOwnPropertyDescriptor(browser.HTMLInputElement.prototype, "value")!.set!.call(input, value);
+      input.dispatchEvent(new browser.Event("input", { bubbles: true }) as unknown as Event);
+    });
+    await setValue("wrong-slug");
+    assert.equal(submit.disabled, true);
+    await setValue("example-post");
+    assert.equal(submit.disabled, false);
+    await act(async () => submit.click());
+    assert.equal(confirmed, "example-post");
+  } finally {
+    await act(async () => root.unmount());
+    host.remove();
+  }
+});
+
+test("Blog deletion announces success only after an authenticated API success", async () => {
+  const React = await import("react");
+  (globalThis as typeof globalThis & { React: typeof React }).React = React;
+  const [{ createRoot }, { act }, { AppRouterContext }, { BlogArchiveAction }] = await Promise.all([
+    import("react-dom/client"), import("react-dom/test-utils"),
+    import("next/dist/shared/lib/app-router-context.shared-runtime"),
+    import("../app/admin/(dashboard)/blogs/BlogArchiveAction"),
+  ]);
+  browser.history.replaceState(null, "", "/admin/blogs");
+  const originalFetch = globalThis.fetch;
+  const destinations: string[] = [];
+  let requests = 0;
+  globalThis.fetch = async (_input, init) => {
+    requests++;
+    assert.equal(init?.method, "DELETE");
+    assert.equal(JSON.parse(String(init?.body)).confirm_slug, "review-post");
+    return Response.json({ deleted: true });
+  };
+  const host = document.createElement("div");
+  document.body.append(host);
+  const root = createRoot(host);
+  try {
+    const router = { replace: (href: string) => destinations.push(href), refresh: () => {} };
+    await act(async () => root.render(React.createElement(AppRouterContext.Provider, { value: router as any },
+      React.createElement(BlogArchiveAction, { post: { id: "00000000-0000-4000-8000-000000000000", slug: "review-post", title: "Review post", status: "archived", updated_at: "2026-01-01T00:00:00.000Z" } }))));
+    await act(async () => host.querySelector<HTMLButtonElement>('[aria-label="Permanently delete Review post"]')!.click());
+    const input = document.querySelector<HTMLInputElement>("#admin-confirm-text")!;
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(browser.HTMLInputElement.prototype, "value")!.set!.call(input, "review-post");
+      input.dispatchEvent(new browser.Event("input", { bubbles: true }) as unknown as Event);
+    });
+    await act(async () => {
+      [...document.querySelectorAll<HTMLButtonElement>("button")].find((button) => button.textContent === "Delete permanently")!.click();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    assert.equal(requests, 1);
+    assert.deepEqual(destinations, ["/admin/blogs?notice=deleted"]);
+  } finally {
+    await act(async () => root.unmount());
+    host.remove();
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("Admin editors do not mistake failed reads for empty data", async () => {
   const React = await import("react");
   (globalThis as typeof globalThis & { React: typeof React }).React = React;
