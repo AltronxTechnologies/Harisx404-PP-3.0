@@ -541,6 +541,34 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
   singleton recovery and broader workflow gates still require their
   separate approvals and safeguards.
 
+## 2026-10-04 Dashboard and Sidebar Polish
+
+- Owner requested the site's own mark in place of the Admin `H`, hidden sidebar
+  scrollbars, and a full-width one-column Quick Actions panel above side-by-side
+  Recent Blog Posts and Recent Projects on desktop. Reused the existing public
+  dark-navigation logo asset without changing it. Grouped sidebar links under
+  Overview, Content and Operations; desktop and mobile navigation still scroll
+  by wheel, touch and keyboard even though their scrollbar is visually hidden.
+  The 256px/80px expanded/collapsed widths, URL destinations and real auth
+  boundary remain unchanged. No public source, data row or migration changed.
+- A one-off in-memory owner browser session verified Dashboard at
+  320/390/768/1024/1280/1440px: logo asset loaded, six Quick Actions occupied
+  one column above the recent section, both recent panels aligned in two
+  columns at `xl`, no measured document or visible-control overflow, and no
+  browser page errors. Desktop collapse retained an 80px content offset;
+  at 390x620 the mobile drawer was scrollable with no visible scrollbar and
+  Escape restored focus. All six Quick Action destinations and two sampled
+  recent edit links returned 200 with the owner session. Four database-backed
+  Dashboard counts matched read-only connected counts in memory, without
+  recording any values. The temporary session was locally revoked, and its
+  runner removed; no content mutation or private artifact was made.
+- Docker full regression **80 pass, one existing Project skip**, TypeScript,
+  lint (the pre-existing `CurrentlyReadingBento` image warning), isolated build
+  **129 static pages**, post-build smoke **31/31**, and whitespace check passed.
+  This verifies the requested layout and sampled read-only functions, not
+  exhaustive editor writes, every visual pixel, all screen-reader behavior or
+  production deployment. Owner visual acceptance remains separate.
+
 Representative Docker validation commands (one-off owner fixture helpers were removed after earlier tests):
 
 ```bash

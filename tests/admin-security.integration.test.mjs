@@ -59,6 +59,27 @@ test("Admin-only theme and collapsible navigation share the public design tokens
   assert.match(sidebar, /width: collapsed \? 80 : 256/);
 });
 
+test("Dashboard uses the site logo and the requested action/recent layout", async () => {
+  const [dashboard, sidebar, theme] = await Promise.all([
+    source("app/admin/(dashboard)/page.tsx"),
+    source("app/components/admin/Sidebar.tsx"),
+    source("app/admin/admin-theme.css"),
+  ]);
+  assert.equal((sidebar.match(/src="\/brand\/harisx404 white transparent\.png"/g) || []).length, 2);
+  assert.doesNotMatch(sidebar, />\s*H\s*</);
+  assert.match(sidebar, /admin-sidebar-scroll flex-1 overflow-y-auto/);
+  assert.match(theme, /\.admin-sidebar-scroll::-webkit-scrollbar/);
+  assert.match(theme, /scrollbar-width: none/);
+  assert.match(dashboard, /data-admin-dashboard-actions[^>]*>[\s\S]*?className="flex flex-col gap-2 p-4"/);
+  assert.match(dashboard, /data-admin-dashboard-recent className="grid min-w-0 grid-cols-\[minmax\(0,1fr\)\] gap-6 xl:grid-cols-2"/);
+  assert.doesNotMatch(dashboard, /xl:col-span-2/);
+  assert.match(sidebar, /section: "Overview"/);
+  assert.match(sidebar, /section: "Content"/);
+  assert.match(sidebar, /section: "Operations"/);
+  assert.match(dashboard, /data-admin-dashboard-actions/);
+  assert.match(dashboard, /data-admin-dashboard-recent/);
+});
+
 test("Admin editors and mobile lists keep labelled controls and reachable actions", async () => {
   const [project, theme, editor, media] = await Promise.all([
     source("app/components/admin/ProjectForm.tsx"),

@@ -83,13 +83,13 @@ export default async function AdminDashboard() {
         })}
       </div>
 
-      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-6 xl:grid-cols-2">
-        {/* Quick Actions */}
-         <div className="rounded-2xl border border-border-primary bg-white dark:bg-white/[0.03]">
+       <div className="flex min-w-0 flex-col gap-6">
+         {/* Quick Actions */}
+          <div data-admin-dashboard-actions className="rounded-2xl border border-border-primary bg-white dark:bg-white/[0.03]">
           <div className="border-b border-border-primary/50 px-6 py-4">
             <h2 className="font-semibold text-text-primary">Quick Actions</h2>
           </div>
-          <div className="grid grid-cols-1 gap-2 p-4 lg:grid-cols-2">
+           <div className="flex flex-col gap-2 p-4">
             {quickActions.map((action) => {
               const Icon = action.icon;
               if (action.external) {
@@ -99,7 +99,7 @@ export default async function AdminDashboard() {
                     href={action.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex min-h-11 items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-text-secondary border border-border-primary/50 hover:bg-border-primary/30 hover:text-text-primary transition-all"
+                     className="flex min-h-11 items-center gap-3 rounded-xl border border-border-primary/50 bg-bg-primary px-4 py-2.5 text-sm font-medium text-text-secondary transition-colors hover:bg-border-primary/30 hover:text-text-primary"
                   >
                     <Icon className="h-4 w-4 shrink-0" />
                     {action.label}
@@ -110,7 +110,7 @@ export default async function AdminDashboard() {
                 <Link
                   key={action.label}
                   href={action.href}
-                  className="flex min-h-11 items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-text-secondary border border-border-primary/50 hover:bg-border-primary/30 hover:text-text-primary transition-all"
+                   className="flex min-h-11 items-center gap-3 rounded-xl border border-border-primary/50 bg-bg-primary px-4 py-2.5 text-sm font-medium text-text-secondary transition-colors hover:bg-border-primary/30 hover:text-text-primary"
                 >
                   <Icon className="h-4 w-4 shrink-0" />
                   {action.label}
@@ -118,9 +118,10 @@ export default async function AdminDashboard() {
               );
             })}
           </div>
-        </div>
+         </div>
 
-        {/* Recent Blog Posts */}
+         <div data-admin-dashboard-recent className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-6 xl:grid-cols-2">
+         {/* Recent Blog Posts */}
          <div className="rounded-2xl border border-border-primary bg-white dark:bg-white/[0.03]">
           <div className="flex items-center justify-between border-b border-border-primary/50 px-6 py-4">
             <h2 className="font-semibold text-text-primary">Recent Blog Posts</h2>
@@ -157,7 +158,7 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Recent Projects */}
-         <div className="rounded-2xl border border-border-primary bg-white dark:bg-white/[0.03] xl:col-span-2">
+          <div className="rounded-2xl border border-border-primary bg-white dark:bg-white/[0.03]">
           <div className="flex items-center justify-between border-b border-border-primary/50 px-6 py-4">
             <h2 className="font-semibold text-text-primary">Recent Projects</h2>
              <Link href="/admin/projects" className="flex items-center gap-1 text-xs font-medium text-text-primary hover:underline">
@@ -183,15 +184,16 @@ export default async function AdminDashboard() {
                       {project.status}
                     </span>
                      <Link href={`/admin/projects/${project.id}`} aria-label={`Edit ${project.title}`} className="inline-flex size-11 items-center justify-center rounded-xl text-text-primary hover:bg-bg-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-current">
-                      <ArrowUpRight className="h-4 w-4" />
-                    </Link>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
+                       <ArrowUpRight className="h-4 w-4" />
+                     </Link>
+                   </div>
+                 </div>
+               ))
+             )}
+           </div>
+         </div>
+         </div>
+       </div>
+     </div>
   );
 }

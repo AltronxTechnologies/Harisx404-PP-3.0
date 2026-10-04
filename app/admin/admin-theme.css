@@ -268,6 +268,17 @@
   --admin-ink: #fafafa;
 }
 
+[data-admin-root] .admin-sidebar-scroll,
+[data-admin-mobile-nav="panel"] .admin-sidebar-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+[data-admin-root] .admin-sidebar-scroll::-webkit-scrollbar,
+[data-admin-mobile-nav="panel"] .admin-sidebar-scroll::-webkit-scrollbar {
+  display: none;
+}
+
 @media (min-width: 640px) {
   [data-admin-root] .admin-content { padding-left: 16rem; }
   [data-admin-root] .admin-dashboard:has(.admin-sidebar[data-admin-sidebar="collapsed"]) .admin-content { padding-left: 5rem; }
