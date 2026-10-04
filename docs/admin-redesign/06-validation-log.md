@@ -736,6 +736,23 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
   **7/7**. The confirmed production homepage still returned **HTTP 404**;
   live scores and production sign-off remain blocked until deployment works.
 
+## 2026-10-04 Compact Content Distribution
+
+- Owner found Content distribution too long. Analytics now shows only the five
+  most common categories initially; an accessible native `details` disclosure
+  exposes the remaining categories without dropping data or adding client-side
+  state. The summary changes from Show more to Show fewer when expanded and
+  retains a 44px keyboard target. No public page, metric source or database
+  behavior changed.
+- An authenticated browser check at 320/390/768/1440px confirmed exactly five
+  visible rows by default, the remaining rows behind the disclosure, mouse
+  expansion and Enter-key collapse, no horizontal overflow or page errors.
+  The temporary session was locally revoked and its runner removed without
+  recording private category values. Docker focused security checks **18/18**,
+  TypeScript, focused ESLint, isolated build **129 static pages**, post-build
+  Admin/public smoke **23/23**, and whitespace checks passed. Production
+  PageSpeed remains blocked by the confirmed homepage HTTP 404.
+
 Representative Docker validation commands (one-off owner fixture helpers were removed after earlier tests):
 
 ```bash

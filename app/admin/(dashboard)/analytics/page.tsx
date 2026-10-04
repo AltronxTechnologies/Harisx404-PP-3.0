@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { Activity, ArrowUpRight, BookOpen, Briefcase, CalendarDays, Eye, FileText, Heart, HelpCircle, Image, MessageSquare, MousePointerClick } from "lucide-react";
+import { Activity, ArrowUpRight, BookOpen, Briefcase, CalendarDays, ChevronDown, Eye, FileText, Heart, HelpCircle, Image, MessageSquare, MousePointerClick } from "lucide-react";
 import { requireAdmin } from "@/app/lib/admin-auth";
 import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 import { getBuildTimeStats } from "@/app/lib/stats/build-time-stats";
 import { getLighthouseStats } from "@/app/lib/stats/lighthouse-stats";
 import { getServerStats } from "@/app/lib/stats/server-stats";
-import type { ArticleMetric } from "@/app/lib/stats/types";
+import type { ArticleMetric, CategoryCount } from "@/app/lib/stats/types";
 
 export const metadata: Metadata = { title: "Analytics | Admin" };
 export const maxDuration = 60;
@@ -66,6 +66,15 @@ function TopArticles({ title, articles, unit, unavailable }: { title: string; ar
         </ol>
       ) : <p className="px-5 py-6 text-sm text-ink-secondary">{unavailable ? unavailableMessage : emptyMessage}</p>}
     </section>
+  );
+}
+
+function CategoryRow({ category }: { category: CategoryCount }) {
+  return (
+    <div className="flex min-w-0 items-center justify-between gap-3 rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm">
+      <span className="min-w-0 break-words text-ink-secondary" style={{ overflowWrap: "anywhere" }}>{category.name}</span>
+      <span className="shrink-0 font-mono text-xs font-semibold text-ink-primary">{category.count}</span>
+    </div>
   );
 }
 
@@ -223,13 +232,25 @@ export default async function AdminAnalyticsPage() {
 
         <section className="rounded-2xl border border-border-primary bg-white/[0.03] p-5">
           <div className="flex items-center gap-2"><Activity aria-hidden className="size-4 text-ink-secondary" /><h2 className="font-semibold text-ink-primary">Content distribution</h2></div>
+          <p className="mt-1 text-xs text-ink-secondary">Most common categories across published articles.</p>
           <div className="mt-5 space-y-3">
-            {build?.categoryBreakdown.length ? build.categoryBreakdown.map((category) => (
-              <div key={category.name} className="flex min-w-0 items-center justify-between gap-3 rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm">
-                <span className="min-w-0 break-words text-ink-secondary" style={{ overflowWrap: "anywhere" }}>{category.name}</span>
-                <span className="shrink-0 font-mono text-xs font-semibold text-ink-primary">{category.count}</span>
-              </div>
-            )) : <p className="text-sm text-ink-secondary">{buildResult.failed ? "Content analytics are temporarily unavailable." : "No category data yet."}</p>}
+            {build?.categoryBreakdown.length ? (
+              <>
+                {build.categoryBreakdown.slice(0, 5).map((category) => <CategoryRow key={category.name} category={category} />)}
+                {build.categoryBreakdown.length > 5 && (
+                  <details className="group">
+                    <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between rounded-xl border border-border-hairline bg-surface-base px-3 text-sm font-medium text-ink-secondary transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary">
+                      <span className="group-open:hidden">Show {build.categoryBreakdown.length - 5} more categories</span>
+                      <span className="hidden group-open:inline">Show fewer categories</span>
+                      <ChevronDown aria-hidden className="size-4 transition-transform group-open:rotate-180" />
+                    </summary>
+                    <div className="mt-3 space-y-3">
+                      {build.categoryBreakdown.slice(5).map((category) => <CategoryRow key={category.name} category={category} />)}
+                    </div>
+                  </details>
+                )}
+              </>
+            ) : <p className="text-sm text-ink-secondary">{buildResult.failed ? "Content analytics are temporarily unavailable." : "No category data yet."}</p>}
           </div>
         </section>
       </div>

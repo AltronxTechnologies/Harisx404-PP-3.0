@@ -310,6 +310,20 @@ html:has([data-admin-root])::-webkit-scrollbar-thumb:hover {
   background: #232328;
 }
 
+[data-admin-root] [data-admin-analytics] summary::-webkit-details-marker {
+  display: none;
+}
+
+[data-admin-root] [data-admin-analytics] summary::marker {
+  content: "";
+}
+
+[data-admin-root] [data-admin-analytics] summary:hover,
+[data-admin-root] [data-admin-analytics] summary:focus-visible {
+  border-color: #676770;
+  background: #232328;
+}
+
 [data-admin-root] .admin-status {
   display: inline-flex;
   align-items: center;

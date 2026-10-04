@@ -62,6 +62,10 @@ test("Analytics reflects the public published collection and explains missing sc
   assert.match(theme, /\[data-admin-analytics\] a\[href\^="\/blog\/"\]:focus-visible/);
   assert.match(page, /Owner signals/);
   assert.match(page, /share of the five articles listed/);
+  assert.match(page, /categoryBreakdown\.slice\(0, 5\)/);
+  assert.match(page, /categoryBreakdown\.slice\(5\)/);
+  assert.match(page, /<details className="group">/);
+  assert.match(page, /Show fewer categories/);
   for (const table of ["blog_posts", "projects", "messages", "faqs", "media"]) assert.match(page, new RegExp(`\\.from\\("${table}"\\)`));
 });
 
