@@ -69,11 +69,11 @@ export default async function AdminDashboard() {
             <Link
               key={card.label}
               href={card.href}
-              className="group rounded-2xl border border-border-primary bg-white p-5 transition-colors hover:border-text-secondary/50 dark:bg-white/[0.03]"
+              className="group rounded-2xl border border-border-primary bg-white p-5 transition-colors dark:bg-white/[0.03]"
             >
               <div className="flex items-center justify-between mb-3">
                 <p className="text-sm font-medium text-text-secondary">{card.label}</p>
-                 <div className="rounded-xl border border-border-primary bg-bg-primary p-2.5 text-text-primary">
+                  <div className="rounded-xl border border-border-primary bg-bg-primary p-2.5 text-text-primary transition-colors">
                    <Icon className="size-5" />
                 </div>
               </div>
@@ -113,7 +113,7 @@ export default async function AdminDashboard() {
           <div className="rounded-2xl border border-border-primary bg-white dark:bg-white/[0.03]">
             <div className="flex items-center justify-between border-b border-border-primary/50 px-6 py-4">
               <h2 className="font-semibold text-text-primary">Recent Blog Posts</h2>
-              <Link href="/admin/blogs" className="flex items-center gap-1 text-xs font-medium text-text-primary hover:underline">
+              <Link href="/admin/blogs" className="inline-flex min-h-11 items-center gap-1 rounded-lg px-2 text-xs font-medium text-text-primary transition-colors">
                 View all <ArrowUpRight className="h-3 w-3" />
               </Link>
             </div>
@@ -137,7 +137,7 @@ export default async function AdminDashboard() {
                         <span className={`admin-status ${status === "Live" ? "admin-status--live" : status === "Archived" || status === "Not live" ? "admin-status--neutral" : "admin-status--pending"}`}>
                           {status}
                         </span>
-                        <Link href={post.status === "archived" ? "/admin/blogs?status=archived" : `/admin/blogs/${post.id}`} aria-label={post.status === "archived" ? "View archived posts" : `Edit ${post.title}`} className="inline-flex size-11 items-center justify-center rounded-xl text-text-primary hover:bg-bg-primary">
+                        <Link href={post.status === "archived" ? "/admin/blogs?status=archived" : `/admin/blogs/${post.id}`} aria-label={post.status === "archived" ? "View archived posts" : `Edit ${post.title}`} className="inline-flex size-11 items-center justify-center rounded-xl text-text-primary transition-colors">
                           <ArrowUpRight className="h-4 w-4" />
                         </Link>
                       </div>
@@ -151,7 +151,7 @@ export default async function AdminDashboard() {
           <div className="rounded-2xl border border-border-primary bg-white dark:bg-white/[0.03]">
             <div className="flex items-center justify-between border-b border-border-primary/50 px-6 py-4">
               <h2 className="font-semibold text-text-primary">Recent Projects</h2>
-              <Link href="/admin/projects" className="flex items-center gap-1 text-xs font-medium text-text-primary hover:underline">
+              <Link href="/admin/projects" className="inline-flex min-h-11 items-center gap-1 rounded-lg px-2 text-xs font-medium text-text-primary transition-colors">
                 View all <ArrowUpRight className="h-3 w-3" />
               </Link>
             </div>
@@ -175,7 +175,7 @@ export default async function AdminDashboard() {
                         <span className={`admin-status ${status === "Published" ? "admin-status--live" : status === "Draft" ? "admin-status--pending" : "admin-status--neutral"}`}>
                           {status}
                         </span>
-                        <Link href={`/admin/projects/${project.id}`} aria-label={`Edit ${project.title}`} className="inline-flex size-11 items-center justify-center rounded-xl text-text-primary hover:bg-bg-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-current">
+                        <Link href={`/admin/projects/${project.id}`} aria-label={`Edit ${project.title}`} className="inline-flex size-11 items-center justify-center rounded-xl text-text-primary transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-current">
                           <ArrowUpRight className="h-4 w-4" />
                         </Link>
                       </div>

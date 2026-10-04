@@ -595,6 +595,31 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
   post-build smoke **31/31** passed. No public source was changed. This is a
   measured UI pass, not owner visual approval or production deployment sign-off.
 
+## 2026-10-04 Dashboard Hover and Final Read-Only Check
+
+- Refined only the Admin Dashboard's stat-card, icon, Quick Action, View all
+  and row-edit hover/focus styles, with restrained surface/border changes and
+  no scaling or position transitions. View all links have 44px-high targets;
+  active sidebar links retain a distinct state under hover. Reduced-motion
+  preference removes Dashboard color transitions. Public source and the other
+  Admin routes were not edited.
+- A short-lived in-memory owner session measured the Dashboard at
+  320/390/768/1280/1440px: no out-of-viewport links, status badges or page
+  errors; six Quick Actions and two recent panels remained present. Browser
+  hovered four representative targets (stat, action, View all and edit),
+  confirmed visible color/border feedback and unchanged target dimensions,
+  verified View all underline and keyboard-visible focus, and checked active/
+  inactive sidebar hover colors. Reduced-motion computation returned zero
+  transition duration. All six Quick Action GET destinations returned 200;
+  four DB-backed displayed counts matched read-only connected queries without
+  recording their values. No mutation or private screenshot was made; the
+  temporary runner was removed and its session locally revoked.
+- Docker full regression **80 pass, one existing Project skip**, TypeScript,
+  lint (pre-existing image warning), isolated build **129 static pages** and
+  post-build smoke **31/31** passed. This completes the scoped Dashboard
+  read-only hover/layout/function pass, not owner visual approval, all Admin
+  workflows, pixel-perfect certification or deployment sign-off.
+
 Representative Docker validation commands (one-off owner fixture helpers were removed after earlier tests):
 
 ```bash

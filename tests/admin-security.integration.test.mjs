@@ -83,6 +83,11 @@ test("Dashboard uses the site logo and the requested action/recent layout", asyn
   assert.match(dashboard, /flex flex-col gap-2 px-6 py-3 sm:flex-row/);
   assert.match(theme, /html:has\(\[data-admin-root\]\)::-webkit-scrollbar-thumb/);
   assert.match(theme, /--admin-divider: #303036/);
+  assert.match(theme, /\[data-admin-dashboard-overview\] a\.group:hover/);
+  assert.match(theme, /\[data-admin-dashboard-actions\] a:focus-visible/);
+  assert.match(theme, /\[data-admin-dashboard-recent\] a:hover/);
+  assert.match(theme, /prefers-reduced-motion: reduce/);
+  assert.match(dashboard, /inline-flex min-h-11 items-center gap-1 rounded-lg px-2/);
 });
 
 test("Admin editors and mobile lists keep labelled controls and reachable actions", async () => {
