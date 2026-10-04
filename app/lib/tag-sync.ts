@@ -30,7 +30,7 @@ export async function saveBlogPostWithTags({
     p_tags: tags,
   });
 
-  if (error) throw new Error(error.message);
+  if (error) throw error;
   if (!data || typeof data !== "object" || Array.isArray(data)) {
     throw new Error("Blog save returned an invalid response");
   }

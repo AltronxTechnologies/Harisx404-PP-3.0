@@ -31,6 +31,8 @@ export default async function AdminBlogsPage({
     query = query.eq("status", "published").gt("published_at", nowIso);
   } else if (params.status === "live") {
     query = query.eq("status", "published").lte("published_at", nowIso);
+  } else if (params.status === "not-live") {
+    query = query.eq("status", "published").is("published_at", null);
   }
 
   const start = (params.page - 1) * PAGE_SIZE;
@@ -73,6 +75,7 @@ export default async function AdminBlogsPage({
             <option value="draft">Draft</option>
             <option value="scheduled">Scheduled</option>
             <option value="live">Live</option>
+            <option value="not-live">Not live</option>
             <option value="archived">Archived</option>
           </select>
         </div>
@@ -133,13 +136,7 @@ export default async function AdminBlogsPage({
                         <div className="text-xs text-ink-secondary font-normal mt-1">{blog.slug}</div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                          label === "Live"
-                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                            : label === "Archived"
-                              ? "bg-surface-base text-ink-secondary"
-                              : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
-                        }`}>
+                        <span className={`admin-status ${label === "Live" ? "admin-status--live" : label === "Archived" || label === "Not live" ? "admin-status--neutral" : "admin-status--pending"}`}>
                           {label}
                         </span>
                       </td>

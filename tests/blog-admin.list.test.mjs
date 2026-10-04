@@ -12,6 +12,7 @@ test("list params whitelist status, sort, direction and cap page/search", () => 
   });
   assert.equal(parseBlogListParams({ page: "2.5", status: ["live", "archived"] }).page, 1);
   assert.equal(parseBlogListParams({ page: "2.5", status: ["live", "archived"] }).status, "all");
+  assert.equal(parseBlogListParams({ status: "not-live" }).status, "not-live");
   assert.equal(PAGE_SIZE, 20);
 });
 
@@ -38,6 +39,9 @@ test("server list filters before bounded fetch, retains archive control and repo
   assert.match(page, /\.ilike\("title",/);
   assert.match(page, /\.eq\("status", "published"\)\.gt\("published_at", nowIso\)/);
   assert.match(page, /\.eq\("status", "published"\)\.lte\("published_at", nowIso\)/);
+  assert.match(page, /\.eq\("status", "published"\)\.is\("published_at", null\)/);
+  assert.match(page, /<option value="not-live">Not live<\/option>/);
+  assert.match(page, /admin-status--live/);
   assert.match(page, /\.range\(start, start \+ PAGE_SIZE\)/);
   assert.match(page, /blogs\?\.slice\(0, PAGE_SIZE\)/);
   assert.match(page, /\.order\("id", \{ ascending: true \}\)/);

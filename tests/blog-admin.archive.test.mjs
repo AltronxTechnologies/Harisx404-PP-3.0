@@ -73,13 +73,23 @@ test("legacy Blog posts stay in source mode while rich-authored posts can reopen
 });
 
 test("manual cover URL edits clear their media ID and saves validate the pair", async () => {
-  const [form, api] = await Promise.all([
+  const [form, api, tagSync] = await Promise.all([
     readFile(new URL("../app/components/admin/BlogForm.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/api/admin/blogs/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/lib/tag-sync.ts", import.meta.url), "utf8"),
   ]);
   assert.match(form, /register\("cover_image_url", \{ onChange: \(\) => setValue\("cover_image_id", ""\) \}\)/);
   assert.match(api, /coverUrl !== media\.secure_url && coverUrl !== media\.url/);
   assert.equal((api.match(/await validateCoverMedia\(data\.cover_image_id, data\.cover_image_url\)/g) || []).length, 2);
   assert.match(api, /code === "23505"/);
   assert.match(api, /Unable to save blog post\. Please try again\./);
+  assert.match(tagSync, /if \(error\) throw error;/);
+  assert.match(form, /data\.status === "published" && !data\.published_at/);
+  assert.match(form, /new Date\(\)\.toISOString\(\)/);
+  assert.match(form, /Clear this field to publish immediately/);
+  assert.match(form, /publishingNow \? "Publish Now"/);
+  for (const [field, name] of [["title", "title"], ["slug", "slug"], ["summary", "summary"], ["status", "status"], ["published-at", "published_at"], ["cover-url", "cover_image_url"], ["canonical-url", "canonical_url"], ["tags", "tags"], ["content", "content"]]) {
+    assert.match(form, new RegExp(`id="blog-${field}-error"`));
+    assert.match(form, new RegExp(`aria-describedby=\\{errors\\.${name}`));
+  }
 });

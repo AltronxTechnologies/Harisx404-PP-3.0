@@ -13,6 +13,7 @@ interface TiptapEditorProps {
   value: string;
   onChange: (value: string) => void;
   label?: string;
+  errorId?: string;
   story?: boolean;
   blogTools?: boolean;
 }
@@ -395,7 +396,7 @@ const MenuBar = ({ editor, story, blogTools }: { editor: Editor | null; story: b
     {blogTools && imageUrl && (
       <div role="group" aria-label="Image details" className="flex flex-wrap items-end gap-2 border-b border-border-hairline bg-surface-base p-3">
         <label className="flex flex-col gap-1 text-sm text-ink-primary">Alt text (required)
-          <input required value={imageAlt} onChange={(event) => setImageAlt(event.target.value)}
+          <input aria-required="true" value={imageAlt} onChange={(event) => setImageAlt(event.target.value)}
             onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); insertImage(); } }}
             className="rounded border border-border-hairline bg-surface-raised p-2" />
           <span className="text-xs text-ink-secondary">Describe the image, not its filename.</span>
@@ -420,7 +421,7 @@ const MenuBar = ({ editor, story, blogTools }: { editor: Editor | null; story: b
   );
 };
 
-export function TiptapEditor({ value, onChange, label = "Case study", story = false, blogTools = false }: TiptapEditorProps) {
+export function TiptapEditor({ value, onChange, label = "Case study", errorId, story = false, blogTools = false }: TiptapEditorProps) {
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -433,6 +434,7 @@ export function TiptapEditor({ value, onChange, label = "Case study", story = fa
       attributes: {
         class: `prose prose-sm dark:prose-invert max-w-none focus:outline-none ${story ? "min-h-36" : "min-h-[400px]"} p-4 text-ink-primary`,
         "aria-label": label,
+        ...(errorId ? { "aria-invalid": "true", "aria-describedby": errorId } : {}),
       },
     },
     onUpdate: ({ editor }) => {

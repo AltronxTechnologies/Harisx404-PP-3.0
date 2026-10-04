@@ -753,6 +753,41 @@ Current-worktree planning snapshot. **Source-confirmed** means inspected code, *
   Admin/public smoke **23/23**, and whitespace checks passed. Production
   PageSpeed remains blocked by the confirmed homepage HTTP 404.
 
+## 2026-10-04 Admin Blog List and Editor Pass
+
+- Owner moved to the Admin Blog workflow. An in-memory owner session sampled
+  list/new/edit/saved-preview plus Draft, Scheduled, Live, Archived and now
+  Not live filters at 320/390/768/1440px. Nine route variants returned 200
+  with zero measured page errors, out-of-viewport controls, document overflow
+  or unexpected form alerts. The current connected post count is below the
+  related-post choice query's 1,000-row limit; a future larger catalog needs
+  server-side related-post search rather than silently claiming this search is
+  unlimited.
+- Admin-only fixes: the Not live filter now isolates published posts without a
+  publication date; list badges match the Admin status language. Clearing the
+  date while status is Published now sends an explicit current timestamp to
+  the save transaction instead of accidentally retaining a future schedule;
+  the scheduled-post button says Publish Now and the form explains local-time
+  behavior. The save helper preserves Supabase error codes so the existing API
+  can map conflict/schema errors accurately. All Blog form validation errors
+  gained associated IDs, field invalid states and descriptions; the rich
+  editor announces its content error. The image staging alt input remains
+  required for insertion but no longer uses native `required` to block an
+  otherwise valid Blog form submit. Save/cancel/preview targets have minimum
+  usable heights.
+- Authenticated empty New Post submission showed linked Title/Content errors
+  without issuing a Blog API write. The temporary owner session was locally
+  revoked and its runner removed. No existing post, schema, migration, asset
+  or locked public Blog source was modified. A real scheduled-to-live save,
+  new publication, slug collision and archive/delete across roles were **not**
+  performed in this pass; those require an explicitly planned disposable
+  publication fixture and cleanup verification before release sign-off.
+- Docker broad Admin/public/Blog regression **92 pass, one existing Project
+  skip**; mocked editor/Admin/Buildlog/PageSpeed checks **19/19**; TypeScript,
+  lint (pre-existing image warning), isolated build **129 static pages**,
+  post-build smoke **31/31** and whitespace checks passed. This is a scoped
+  read-only and invalid-input pass, not production or owner visual sign-off.
+
 Representative Docker validation commands (one-off owner fixture helpers were removed after earlier tests):
 
 ```bash

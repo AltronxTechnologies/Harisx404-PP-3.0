@@ -99,6 +99,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
   const selectedRelatedIds = watch("related_blog_post_ids") || [];
   const relatedOptions = availablePosts.filter((item) => item.id !== initialData?.id && `${item.title} ${item.slug}`.toLowerCase().includes(relatedSearch.trim().toLowerCase()));
   const scheduled = status === "published" && Date.parse(watch("published_at") || "") > Date.now();
+  const publishingNow = status === "published" && initialData?.status === "published" && !watch("published_at") && Date.parse(initialData.published_at || "") > Date.now();
 
   const addTag = () => {
     const value = tagInput.trim();
@@ -117,7 +118,9 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
   };
 
   const onSubmit = async (data: BlogFormValues) => {
-    const publishedAt = serializeBlogPublishDate(data.published_at, initialData?.published_at);
+    const publishedAt = data.status === "published" && !data.published_at
+      ? new Date().toISOString()
+      : serializeBlogPublishDate(data.published_at, initialData?.published_at);
     const content = richEditor && initialData?.id && !richContentEdited.current ? initialData.content : data.content;
     const publicationChanged = Boolean(initialData?.id && initialData.status === "published" && publishedAt !== initialData.published_at);
     if ((data.status !== initialData?.status || publicationChanged) && (data.status === "published" || initialData?.status === "published")) {
@@ -190,10 +193,12 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
               },
             })}
             id="blog-title"
+            aria-invalid={Boolean(errors.title)}
+            aria-describedby={errors.title ? "blog-title-error" : undefined}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
             placeholder="Post Title"
           />
-          {errors.title && <p className="text-xs text-red-500">{errors.title.message}</p>}
+          {errors.title && <p id="blog-title-error" role="alert" className="text-xs text-red-500">{errors.title.message}</p>}
         </div>
 
         <div className="space-y-2">
@@ -201,10 +206,12 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
           <input
             {...register("slug", { onChange: () => { slugEdited.current = true; } })}
             id="blog-slug"
+            aria-invalid={Boolean(errors.slug)}
+            aria-describedby={errors.slug ? "blog-slug-error" : undefined}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
             placeholder="post-slug"
           />
-          {errors.slug && <p className="text-xs text-red-500">{errors.slug.message}</p>}
+          {errors.slug && <p id="blog-slug-error" role="alert" className="text-xs text-red-500">{errors.slug.message}</p>}
         </div>
       </div>
 
@@ -213,11 +220,13 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
         <textarea
           {...register("summary")}
           id="blog-summary"
+          aria-invalid={Boolean(errors.summary)}
+          aria-describedby={errors.summary ? "blog-summary-error" : undefined}
           rows={3}
           className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
           placeholder="Optional: generated from the article on first save"
         />
-        {errors.summary && <p className="text-xs text-red-500">{errors.summary.message}</p>}
+        {errors.summary && <p id="blog-summary-error" role="alert" className="text-xs text-red-500">{errors.summary.message}</p>}
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -226,12 +235,15 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
           <select
             {...register("status")}
             id="blog-status"
+            aria-invalid={Boolean(errors.status)}
+            aria-describedby={errors.status ? "blog-status-error" : undefined}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
           >
             <option value="draft">Draft</option>
             <option value="published">Published</option>
           </select>
           <p className="text-xs text-ink-secondary">Publishing without a future date makes this post public when saved.</p>
+          {errors.status && <p id="blog-status-error" role="alert" className="text-xs text-red-500">{errors.status.message}</p>}
         </div>
 
         <div className="space-y-2">
@@ -240,9 +252,12 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
             type="datetime-local"
             {...register("published_at")}
             id="blog-published-at"
+            aria-invalid={Boolean(errors.published_at)}
+            aria-describedby={errors.published_at ? "blog-published-at-error" : "blog-published-at-hint"}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
           />
-          {errors.published_at && <p className="text-xs text-red-500">{errors.published_at.message}</p>}
+          <p id="blog-published-at-hint" className="text-xs text-ink-secondary">Times use your local timezone. Clear this field to publish immediately when the status is Published.</p>
+          {errors.published_at && <p id="blog-published-at-error" role="alert" className="text-xs text-red-500">{errors.published_at.message}</p>}
         </div>
       </div>
 
@@ -253,6 +268,8 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
             <input
               {...register("cover_image_url", { onChange: () => setValue("cover_image_id", "") })}
               id="blog-cover-url"
+              aria-invalid={Boolean(errors.cover_image_url)}
+              aria-describedby={errors.cover_image_url ? "blog-cover-url-error" : undefined}
               className="min-w-0 flex-1 rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
               placeholder="https://... or choose from library"
             />
@@ -264,7 +281,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
               <ImageIcon className="h-4 w-4" /> Pick
             </button>
           </div>
-          {errors.cover_image_url && <p className="text-xs text-red-500">{errors.cover_image_url.message}</p>}
+          {errors.cover_image_url && <p id="blog-cover-url-error" role="alert" className="text-xs text-red-500">{errors.cover_image_url.message}</p>}
           
           <MediaPickerModal
             isOpen={isMediaPickerOpen}
@@ -281,10 +298,12 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
           <input
             {...register("canonical_url")}
             id="blog-canonical-url"
+            aria-invalid={Boolean(errors.canonical_url)}
+            aria-describedby={errors.canonical_url ? "blog-canonical-url-error" : undefined}
             className="min-w-0 w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
             placeholder="https://..."
           />
-          {errors.canonical_url && <p className="text-xs text-red-500">{errors.canonical_url.message}</p>}
+          {errors.canonical_url && <p id="blog-canonical-url-error" role="alert" className="text-xs text-red-500">{errors.canonical_url.message}</p>}
         </div>
       </div>
 
@@ -304,6 +323,8 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
           <input
             type="text"
             id="blog-tag-input"
+            aria-invalid={Boolean(errors.tags)}
+            aria-describedby={errors.tags ? "blog-tags-error" : undefined}
             value={tagInput}
             onChange={e => setTagInput(e.target.value)}
             onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addTag())}
@@ -319,10 +340,10 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
             <Plus className="h-4 w-4" />
           </button>
         </div>
-        {errors.tags && <p className="text-xs text-red-500">{errors.tags.message}</p>}
+        {errors.tags && <p id="blog-tags-error" role="alert" className="text-xs text-red-500">{errors.tags.message}</p>}
       </div>
 
-      <fieldset className="space-y-3 rounded-xl border border-border-hairline p-4">
+      <fieldset aria-describedby={errors.related_blog_post_ids ? "blog-related-error" : undefined} className="space-y-3 rounded-xl border border-border-hairline p-4">
         <legend className="px-1 text-sm font-medium">Related posts</legend>
         <p className="text-xs text-ink-secondary">Choose up to three live published posts. They appear in the order selected. Leave empty to hide the section.</p>
         <p className="text-xs font-medium text-ink-secondary">Selected {selectedRelatedIds.length} / 3</p>
@@ -350,11 +371,11 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
           })}
           {relatedOptions.length === 0 && <p className="px-3 py-4 text-sm text-ink-secondary">No matching posts.</p>}
         </div>
-        {errors.related_blog_post_ids && <p className="text-xs text-red-500">{errors.related_blog_post_ids.message}</p>}
+        {errors.related_blog_post_ids && <p id="blog-related-error" role="alert" className="text-xs text-red-500">{errors.related_blog_post_ids.message}</p>}
       </fieldset>
 
       <div className="space-y-2">
-        <label htmlFor={!richEditor ? "blog-content-source" : undefined} className="text-sm font-medium">Content</label>
+        {richEditor ? <p className="text-sm font-medium">Content</p> : <label htmlFor="blog-content-source" className="text-sm font-medium">Content</label>}
         {!richEditor && (
           <p className="text-sm text-ink-secondary">
             Edit the original Markdown/MDX directly. The rich editor can remove embeds and custom formatting from existing articles.
@@ -368,26 +389,28 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
               <textarea
                 {...field}
                 id="blog-content-source"
+                aria-invalid={Boolean(errors.content)}
+                aria-describedby={errors.content ? "blog-content-error" : undefined}
                 spellCheck={false}
                 rows={22}
                 className="w-full rounded-xl border border-border-hairline bg-surface-base p-4 font-mono text-sm leading-6 text-ink-primary focus:outline-none focus:ring-2 focus:ring-accent-signal"
               />
             ) : (
-              <TiptapEditor value={field.value} onChange={(value) => {
+              <TiptapEditor value={field.value} errorId={errors.content ? "blog-content-error" : undefined} onChange={(value) => {
                 richContentEdited.current = true;
                 field.onChange(value);
               }} label="Blog article content" blogTools />
             )
           )}
         />
-        {errors.content && <p className="text-xs text-red-500">{errors.content.message}</p>}
+        {errors.content && <p id="blog-content-error" role="alert" className="text-xs text-red-500">{errors.content.message}</p>}
       </div>
 
       <div className="flex flex-wrap justify-end gap-4">
         {initialData?.id && (
           <Link
             href={`/admin/blogs/${initialData.id}/preview`}
-            className="rounded-xl px-4 py-2 text-sm font-medium text-accent-signal underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-signal"
+            className="inline-flex min-h-11 items-center rounded-xl px-4 py-2 text-sm font-medium text-accent-signal underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-signal"
           >
             Preview saved post
           </Link>
@@ -395,7 +418,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
         <button
           type="button"
           onClick={() => router.back()}
-          className="rounded-xl px-4 py-2 text-sm font-medium text-ink-secondary hover:bg-surface-base transition-colors"
+          className="min-h-11 rounded-xl px-4 py-2 text-sm font-medium text-ink-secondary hover:bg-surface-base transition-colors"
         >
           Cancel
         </button>
@@ -405,7 +428,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
           className="inline-flex items-center justify-center rounded-xl bg-accent-signal px-6 py-2 text-sm font-medium text-white shadow hover:bg-accent-signal/90 focus:outline-none disabled:opacity-50 transition-all"
         >
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {status === "published" && initialData?.status !== "published"
+          {publishingNow ? "Publish Now" : status === "published" && initialData?.status !== "published"
             ? scheduled ? "Schedule Post" : "Publish Post"
             : status === "draft" && initialData?.status === "published"
               ? "Unpublish Post"

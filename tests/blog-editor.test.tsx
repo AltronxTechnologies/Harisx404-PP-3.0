@@ -229,8 +229,10 @@ test("Blog-only toolbar controls do not appear in Project/Changelog editors", as
       assert.ok(document.querySelector('[role="dialog"][aria-label="Choose an image"]'));
        await act(async () => document.querySelector<HTMLButtonElement>('[aria-label="IMG_1234.png"]')!.click());
       await act(async () => [...document.querySelectorAll<HTMLButtonElement>("button")].find((button) => button.textContent === "Select Image")!.click());
-      assert.ok(host.querySelector('[role="group"][aria-label="Image details"]'));
-      assert.equal(host.querySelector<HTMLInputElement>('[role="group"][aria-label="Image details"] input')!.value, "");
+       assert.ok(host.querySelector('[role="group"][aria-label="Image details"]'));
+       assert.equal(host.querySelector<HTMLInputElement>('[role="group"][aria-label="Image details"] input')!.value, "");
+       assert.equal(host.querySelector<HTMLInputElement>('[role="group"][aria-label="Image details"] input')!.required, false);
+       assert.equal(host.querySelector<HTMLInputElement>('[role="group"][aria-label="Image details"] input')!.getAttribute("aria-required"), "true");
       assert.equal(host.querySelector<HTMLButtonElement>('[role="group"][aria-label="Image details"] button')!.disabled, true);
       await setInput(host.querySelector<HTMLInputElement>('[role="group"][aria-label="Image details"] input')!, "A photo");
       await setInput(host.querySelectorAll<HTMLInputElement>('[role="group"][aria-label="Image details"] input')[1], "Photo caption");

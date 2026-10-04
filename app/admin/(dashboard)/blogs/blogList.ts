@@ -3,7 +3,7 @@ const MAX_PAGE = 1000;
 
 export type BlogListParams = {
   q: string;
-  status: "all" | "draft" | "scheduled" | "live" | "archived";
+  status: "all" | "draft" | "scheduled" | "live" | "not-live" | "archived";
   sort: "created_at" | "updated_at" | "published_at" | "title";
   direction: "asc" | "desc";
   page: number;
@@ -23,7 +23,7 @@ export function parseBlogListParams(params: RawParams): BlogListParams {
 
   return {
     q: (value("q") ?? "").trim().slice(0, 100),
-    status: status === "draft" || status === "scheduled" || status === "live" || status === "archived" ? status : "all",
+    status: status === "draft" || status === "scheduled" || status === "live" || status === "not-live" || status === "archived" ? status : "all",
     sort: sort === "updated_at" || sort === "published_at" || sort === "title" ? sort : "created_at",
     direction: direction === "asc" ? "asc" : "desc",
     page: page && /^[1-9]\d*$/.test(page) ? Math.min(Number(page), MAX_PAGE) : 1,
