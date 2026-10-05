@@ -164,6 +164,17 @@ Blog's dedicated Cloudinary folder are eligible for automatic cleanup on its
 permanent deletion. Generic uploads, including uploads during creation of an
 unsaved post, and shared assets remain in the Media Library for manual review:
 the database cannot prove a generic URL is not hard-coded elsewhere.
+For the Projects Admin pass, test
+`migrations/2026_project_admin_atomic_delete_with_token.sql` and
+`tests/project-atomic-delete.database.test.sql` against an isolated copy of the
+full application schema, verify a rollback/backup, then approve application to
+the connected project. **The migration has not been applied here.** Until then
+Project deletion intentionally returns a setup error instead of proceeding
+without an optimistic-lock check. Use only a disposable Project for a later
+connected publish/edit/delete acceptance run; shared media files remain in the
+library. The locked public Projects index's fallback cards can misrepresent an
+all-draft collection. A change to that public page requires a separate,
+explicit unlock; this Admin pass did not modify it.
 Also review the owner's Supabase Auth sessions if available: one temporary
 review session created immediately before a missing-browser failure could not
 be individually confirmed revoked. Do not share session tokens or revoke all

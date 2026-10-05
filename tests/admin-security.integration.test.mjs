@@ -170,7 +170,7 @@ test("unlocked privileged reads and log actions check Admin identity before serv
   assert.match(projectList, /createSupabaseAdminClient\(\)/);
   assert.match(projectList, /Projects could not be loaded/);
   assert.match(projectList, /flex flex-wrap items-center justify-between gap-4/);
-  assert.match(projectList, /<DeleteProjectButton id=\{project\.id\} name=\{project\.title\} \/>/);
+  assert.match(projectList, /<DeleteProjectButton id=\{project\.id\} name=\{project\.title\} slug=\{project\.slug\} updatedAt=\{project\.updated_at\} \/>/);
   const projectDelete = await source("app/components/admin/DeleteProjectButton.tsx");
   assert.match(projectDelete, /aria-label=\{`Delete \$\{name\}`\}/);
   assert.match(projectDelete, /inline-flex size-11 items-center justify-center/);

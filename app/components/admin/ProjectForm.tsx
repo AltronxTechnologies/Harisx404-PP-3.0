@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useForm, Controller } from "react-hook-form";
@@ -8,8 +8,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { TiptapEditor } from "./TiptapEditor";
 import { MediaPickerModal } from "./MediaPickerModal";
+import { AdminConfirmDialog } from "./AdminConfirmDialog";
 import { captionWordCount } from "@/app/lib/project-captions";
 import { projectStages, projectStageLabels } from "@/app/lib/project-stage";
+import { normalizeBlogSlug, isValidBlogDate } from "@/app/lib/blog-defaults";
 import { Image as ImageIcon, Loader2, Sparkles, ArrowUp, ArrowDown, Trash2, UploadCloud } from "lucide-react";
 
 type GalleryImage = { mediaId: string; url: string; caption: string; altText: string };
@@ -25,9 +27,9 @@ type CaseStudySections = Record<(typeof sectionFields)[number]["key"], string>;
 const emptySections: CaseStudySections = { why_built: "", key_decisions: "", results: "", lessons_learned: "" };
 
 const projectSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  slug: z.string().min(1, "Slug is required"),
-  description: z.string().optional(),
+  title: z.string().trim().min(1, "Title is required").max(200, "Title must be 200 characters or fewer"),
+  slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase letters, numbers and hyphens").max(200),
+  description: z.string().max(10000).optional(),
   tagline: z.string().max(160, "Keep the short description within 160 characters").optional(),
   category: z.string().trim().min(1, "At least one category is required").max(60),
   year: z.string().optional().or(z.literal("")),
@@ -43,18 +45,18 @@ const projectSchema = z.object({
     results: z.string().max(10000),
     lessons_learned: z.string().max(10000),
   }),
-  tech_stack: z.string().optional().or(z.literal("")),
-  tags: z.string().optional().or(z.literal("")),
-  features: z.string().optional().or(z.literal("")),
+  tech_stack: z.string().refine((value) => value.split(/\r?\n/).filter((item) => item.trim()).every((item) => item.trim().length <= 100), "Each technology must be 100 characters or fewer").optional(),
+  tags: z.string().refine((value) => value.split(",").filter((item) => item.trim()).every((item) => item.trim().length <= 100), "Each tag must be 100 characters or fewer").optional(),
+  features: z.string().refine((value) => { const items = value.split(/\r?\n/).filter((item) => item.trim()); return items.length <= 100 && items.every((item) => item.trim().length <= 500); }, "Use at most 100 features, each within 500 characters").optional(),
   related_project_ids: z.array(z.string().uuid()).max(2, "Choose no more than two projects").refine((ids) => new Set(ids).size === ids.length, "Choose two different projects"),
-  content: z.string().optional(),
+  content: z.string().max(200000, "Case study must be 200,000 characters or fewer").optional(),
   status: z.enum(["draft", "published", "archived"]),
   cover_image_url: z.string().url("At least one image is required; choose a cover").refine((url) => /^https?:\/\//i.test(url), "Use an HTTP or HTTPS image URL"),
   cover_image_id: z.string().uuid().optional().or(z.literal("")),
   live_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   github_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
-  start_date: z.string().optional().or(z.literal("")),
-  end_date: z.string().optional().or(z.literal("")),
+  start_date: z.string().refine((date) => !date || isValidBlogDate(date), "Choose a valid start date").optional(),
+  end_date: z.string().refine((date) => !date || isValidBlogDate(date), "Choose a valid end date").optional(),
   featured: z.boolean().optional(),
 });
 
@@ -88,6 +90,9 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>(initialData?.galleryImages ?? []);
   const [isGenerating, setIsGenerating] = useState(false);
   const [relatedSearch, setRelatedSearch] = useState("");
+  const slugEdited = useRef(Boolean(initialData?.id));
+  const [saveConfirmation, setSaveConfirmation] = useState<{ title: string; description: string; label: string; data: ProjectFormValues } | null>(null);
+  const [leaveConfirmation, setLeaveConfirmation] = useState(false);
 
   const {
     register,
@@ -96,7 +101,8 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
     setValue,
     getValues,
     watch,
-    formState: { errors },
+    setError,
+    formState: { errors, isDirty },
   } = useForm<ProjectFormValues>({
     resolver: zodResolver(projectSchema),
     defaultValues: {
@@ -138,8 +144,38 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
   const relatedOptions = availableProjects.filter((item) => item.id !== initialData?.id && `${item.title} ${item.slug}`.toLowerCase().includes(relatedSearch.trim().toLowerCase()));
   const coverCaption = watch("case_study_sections.cover_caption") || "";
   const coverField = register("cover_image_url");
+  const galleryDirty = JSON.stringify(galleryImages) !== JSON.stringify(initialData?.galleryImages ?? []);
 
-  const onSubmit = async (data: ProjectFormValues) => {
+  useEffect(() => {
+    if (!isDirty && !galleryDirty) return;
+    const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [isDirty, galleryDirty]);
+
+  const chooseCover = (image: GalleryImage) => {
+    const oldUrl = getValues("cover_image_url");
+    const oldId = getValues("cover_image_id");
+    if (oldUrl && !oldId && oldUrl !== image.url) {
+      setErrorMsg("The current cover uses a manual URL. Remove it explicitly before promoting a gallery image, or choose a managed cover from the library.");
+      return;
+    }
+    const oldCaption = getValues("case_study_sections.cover_caption") || "";
+    const oldAlt = getValues("case_study_sections.cover_alt") || "";
+    setGalleryImages((images) => {
+      const remaining = images.filter((item) => item.mediaId !== image.mediaId);
+      return oldId && oldId !== image.mediaId && !remaining.some((item) => item.mediaId === oldId)
+        ? [{ mediaId: oldId, url: oldUrl, caption: oldCaption, altText: oldAlt }, ...remaining]
+        : remaining;
+    });
+    setValue("cover_image_url", image.url, { shouldDirty: true, shouldValidate: true });
+    setValue("cover_image_id", image.mediaId, { shouldDirty: true });
+    setValue("case_study_sections.cover_caption", image.caption, { shouldDirty: true, shouldValidate: true });
+    setValue("case_study_sections.cover_alt", image.altText, { shouldDirty: true, shouldValidate: true });
+    setErrorMsg("");
+  };
+
+  const saveProject = async (data: ProjectFormValues) => {
     setIsSubmitting(true);
     setErrorMsg("");
     try {
@@ -170,6 +206,13 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
 
       if (!res.ok) {
         const err = await res.json();
+        if (err.issues?.fieldErrors) {
+          for (const [name, messages] of Object.entries(err.issues.fieldErrors)) {
+            if (name in projectSchema.shape && Array.isArray(messages) && typeof messages[0] === "string") {
+              setError(name as keyof ProjectFormValues, { message: messages[0] });
+            }
+          }
+        }
         throw new Error(err.error || "Failed to save project");
       }
 
@@ -180,6 +223,21 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const onSubmit = (data: ProjectFormValues) => {
+    if (data.start_date && data.end_date && data.end_date < data.start_date) {
+      setError("end_date", { message: "End date must be on or after the start date" });
+      setErrorMsg("Check the project dates before saving.");
+      return;
+    }
+    if (data.status !== initialData?.status && (data.status === "published" || initialData?.status === "published")) {
+      setSaveConfirmation(data.status === "published"
+        ? { title: "Publish this project?", description: "This project will become visible on the public portfolio when saved.", label: "Publish project", data }
+        : { title: "Unpublish this project?", description: "It will leave the public portfolio and remain in Admin.", label: "Unpublish project", data });
+      return;
+    }
+    void saveProject(data);
   };
 
   const handleGenerateFromGithub = async () => {
@@ -205,8 +263,8 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
       
       const { result } = await res.json();
       
-      if (result.summary) setValue("description", result.summary, { shouldValidate: true });
-      if (result.description) setValue("content", result.description, { shouldValidate: true });
+      if (result.summary) setValue("description", result.summary, { shouldDirty: true, shouldValidate: true });
+      if (result.description) setValue("content", result.description, { shouldDirty: true, shouldValidate: true });
       if (result.tags && result.tags.length > 0) {
         // Merge AI-suggested tags into the tags field (deduped).
         const existing = (getValues("tags") || "")
@@ -214,10 +272,9 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
           .map((t: string) => t.trim())
           .filter(Boolean);
         const merged = Array.from(new Set([...existing, ...result.tags]));
-        setValue("tags", merged.join(", "), { shouldValidate: true });
+        setValue("tags", merged.join(", "), { shouldDirty: true, shouldValidate: true });
       }
     } catch (err: any) {
-      console.error(err);
       setErrorMsg(`AI Generation Failed: ${err.message}`);
     } finally {
       setIsGenerating(false);
@@ -225,34 +282,35 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-      {errorMsg && (
-        <div className="rounded-lg bg-red-50 p-4 text-sm text-red-500 dark:bg-red-950/30">
-          {errorMsg}
-        </div>
-      )}
+    <>
+    <form onSubmit={handleSubmit(onSubmit, () => { setErrorMsg("Check the highlighted fields before saving."); })} className="min-w-0 space-y-8">
+      {errorMsg && <div role="alert" className="rounded-xl border border-red-500/30 bg-red-950/30 p-4 text-sm text-red-300">{errorMsg}</div>}
       
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-2">
           <label htmlFor="project-title" className="text-sm font-medium">Title</label>
           <input
             id="project-title"
-            {...register("title")}
+            {...register("title", { onChange: (event) => { if (!slugEdited.current) setValue("slug", normalizeBlogSlug(event.target.value), { shouldDirty: true, shouldValidate: true }); } })}
+            aria-invalid={Boolean(errors.title)}
+            aria-describedby={errors.title ? "project-title-error" : undefined}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
             placeholder="Project Title"
           />
-          {errors.title && <p className="text-xs text-red-500">{errors.title.message}</p>}
+          {errors.title && <p id="project-title-error" role="alert" className="text-xs text-red-300">{errors.title.message}</p>}
         </div>
 
         <div className="space-y-2">
           <label htmlFor="project-slug" className="text-sm font-medium">Slug</label>
           <input
             id="project-slug"
-            {...register("slug")}
+            {...register("slug", { onChange: () => { slugEdited.current = true; } })}
+            aria-invalid={Boolean(errors.slug)}
+            aria-describedby={errors.slug ? "project-slug-error" : undefined}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
             placeholder="project-slug"
           />
-          {errors.slug && <p className="text-xs text-red-500">{errors.slug.message}</p>}
+          {errors.slug && <p id="project-slug-error" role="alert" className="text-xs text-red-300">{errors.slug.message}</p>}
         </div>
       </div>
 
@@ -265,6 +323,7 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
           className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
           placeholder="A brief 1-2 sentence description..."
         />
+        {errors.description && <p role="alert" className="text-xs text-red-300">{errors.description.message}</p>}
       </div>
 
         <div className="space-y-2">
@@ -320,6 +379,7 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
             placeholder={"Next.js\nTypeScript\nSupabase"}
           />
+          {errors.tech_stack && <p role="alert" className="text-xs text-red-300">{errors.tech_stack.message}</p>}
         </div>
       </div>
 
@@ -338,6 +398,7 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
           className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
           placeholder="Web, Cybersecurity, AI/ML, Networking, SaaS..."
         />
+        {errors.tags && <p role="alert" className="text-xs text-red-300">{errors.tags.message}</p>}
         <p className="text-xs text-ink-secondary">
           Add as many comma-separated tags as you need. All are searchable and filterable; project cards show up to three.
         </p>
@@ -352,6 +413,7 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
           className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
           placeholder={"Realtime dashboard with live charts\nRole-based access control"}
         />
+        {errors.features && <p role="alert" className="text-xs text-red-300">{errors.features.message}</p>}
       </div>
 
       <fieldset className="space-y-3 rounded-xl border border-border-hairline p-4">
@@ -459,6 +521,7 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
             {...register("start_date")}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
           />
+          {errors.start_date && <p role="alert" className="text-xs text-red-300">{errors.start_date.message}</p>}
         </div>
 
         <div className="space-y-2">
@@ -469,6 +532,7 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
             {...register("end_date")}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
           />
+          {errors.end_date && <p role="alert" className="text-xs text-red-300">{errors.end_date.message}</p>}
         </div>
       </div>
 
@@ -534,13 +598,13 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
                 <p className={`text-xs ${captionWordCount(image.caption) > 30 ? "text-red-600 dark:text-red-400" : "text-ink-secondary"}`}>{image.caption.length} / 200 characters, {captionWordCount(image.caption)} / 30 words</p>
                 <label htmlFor={`gallery-alt-${image.mediaId}`} className="block text-xs text-ink-secondary">Image description for screen readers (optional, up to 160 characters)</label>
                 <input id={`gallery-alt-${image.mediaId}`} value={image.altText} maxLength={160} onChange={(event) => setGalleryImages((images) => images.map((item) => item.mediaId === image.mediaId ? { ...item, altText: event.target.value } : item))} className="w-full rounded-lg border border-border-hairline bg-surface-raised px-3 py-2 text-sm" placeholder="Describe what this image shows" />
-                <button type="button" onClick={() => { setValue("cover_image_url", image.url, { shouldDirty: true, shouldValidate: true }); setValue("cover_image_id", image.mediaId, { shouldDirty: true }); setValue("case_study_sections.cover_caption", image.caption, { shouldDirty: true, shouldValidate: true }); setValue("case_study_sections.cover_alt", image.altText, { shouldDirty: true, shouldValidate: true }); setGalleryImages((images) => images.filter((item) => item.mediaId !== image.mediaId)); }} className="text-left text-xs text-accent-signal underline underline-offset-2">Make cover (first image)</button>
+                <button type="button" onClick={() => chooseCover(image)} className="min-h-11 text-left text-xs text-accent-signal underline underline-offset-2">Make cover (first image)</button>
               </div>
                <div className="flex flex-wrap gap-1">
-                <button type="button" aria-label={`Replace image ${index + 2}`} onClick={() => { setReplacingIndex(index); setMediaPickerTarget("replace-gallery"); setMediaPickerTab("upload"); setIsMediaPickerOpen(true); }} className="rounded-lg p-2 hover:bg-surface-raised"><UploadCloud className="h-4 w-4" /></button>
-                <button type="button" aria-label={`Move image ${index + 1} up`} disabled={index === 0} onClick={() => setGalleryImages((images) => { const next = [...images]; [next[index - 1], next[index]] = [next[index], next[index - 1]]; return next; })} className="rounded-lg p-2 hover:bg-surface-raised disabled:opacity-40"><ArrowUp className="h-4 w-4" /></button>
-                <button type="button" aria-label={`Move image ${index + 1} down`} disabled={index === galleryImages.length - 1} onClick={() => setGalleryImages((images) => { const next = [...images]; [next[index], next[index + 1]] = [next[index + 1], next[index]]; return next; })} className="rounded-lg p-2 hover:bg-surface-raised disabled:opacity-40"><ArrowDown className="h-4 w-4" /></button>
-                <button type="button" aria-label={`Remove image ${index + 1}`} onClick={() => setGalleryImages((images) => images.filter((item) => item.mediaId !== image.mediaId))} className="rounded-lg p-2 text-red-500 hover:bg-surface-raised"><Trash2 className="h-4 w-4" /></button>
+                <button type="button" aria-label={`Replace image ${index + 2}`} onClick={() => { setReplacingIndex(index); setMediaPickerTarget("replace-gallery"); setMediaPickerTab("upload"); setIsMediaPickerOpen(true); }} className="flex size-11 items-center justify-center rounded-lg hover:bg-surface-raised"><UploadCloud className="h-4 w-4" /></button>
+                <button type="button" aria-label={`Move image ${index + 1} up`} disabled={index === 0} onClick={() => setGalleryImages((images) => { const next = [...images]; [next[index - 1], next[index]] = [next[index], next[index - 1]]; return next; })} className="flex size-11 items-center justify-center rounded-lg hover:bg-surface-raised disabled:opacity-40"><ArrowUp className="h-4 w-4" /></button>
+                <button type="button" aria-label={`Move image ${index + 1} down`} disabled={index === galleryImages.length - 1} onClick={() => setGalleryImages((images) => { const next = [...images]; [next[index], next[index + 1]] = [next[index + 1], next[index]]; return next; })} className="flex size-11 items-center justify-center rounded-lg hover:bg-surface-raised disabled:opacity-40"><ArrowDown className="h-4 w-4" /></button>
+                <button type="button" aria-label={`Remove image ${index + 1}`} onClick={() => setGalleryImages((images) => images.filter((item) => item.mediaId !== image.mediaId))} className="flex size-11 items-center justify-center rounded-lg text-red-400 hover:bg-surface-raised"><Trash2 className="h-4 w-4" /></button>
               </div>
             </div>
           ))}
@@ -551,13 +615,22 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
         isOpen={isMediaPickerOpen}
         initialTab={mediaPickerTab}
         onClose={() => setIsMediaPickerOpen(false)}
-        onSelect={(media) => {
-          if (mediaPickerTarget === "cover") {
-            setValue("cover_image_url", media.secure_url || media.url, { shouldDirty: true, shouldValidate: true });
-            setValue("cover_image_id", media.id, { shouldDirty: true });
-            setValue("case_study_sections.cover_caption", "", { shouldDirty: true, shouldValidate: true });
-            setValue("case_study_sections.cover_alt", "", { shouldDirty: true, shouldValidate: true });
-            setGalleryImages((images) => images.filter((image) => image.mediaId !== media.id));
+          onSelect={(media) => {
+            if (mediaPickerTarget === "cover") {
+              const oldUrl = getValues("cover_image_url");
+              const oldId = getValues("cover_image_id");
+              const oldCaption = getValues("case_study_sections.cover_caption") || "";
+              const oldAlt = getValues("case_study_sections.cover_alt") || "";
+              setValue("cover_image_url", media.secure_url || media.url, { shouldDirty: true, shouldValidate: true });
+              setValue("cover_image_id", media.id, { shouldDirty: true });
+              setValue("case_study_sections.cover_caption", "", { shouldDirty: true, shouldValidate: true });
+              setValue("case_study_sections.cover_alt", "", { shouldDirty: true, shouldValidate: true });
+              setGalleryImages((images) => {
+                const remaining = images.filter((image) => image.mediaId !== media.id);
+                return oldId && oldId !== media.id && !remaining.some((image) => image.mediaId === oldId)
+                  ? [{ mediaId: oldId, url: oldUrl, caption: oldCaption, altText: oldAlt }, ...remaining]
+                  : remaining;
+              });
           } else if (mediaPickerTarget === "replace-gallery") {
             if (media.id === getValues("cover_image_id")) return;
             setGalleryImages((images) => images.some((image, index) => image.mediaId === media.id && index !== replacingIndex)
@@ -587,6 +660,7 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
             </div>
           )}
         />
+        {errors.content && <p role="alert" className="text-xs text-red-300">{errors.content.message}</p>}
       </div>
 
       <div className="space-y-5 border-t border-border-hairline pt-6">
@@ -608,8 +682,8 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
       <div className="flex flex-wrap justify-end gap-4">
         <button
           type="button"
-          onClick={() => router.back()}
-          className="rounded-xl px-4 py-2 text-sm font-medium text-ink-secondary hover:bg-surface-base transition-colors"
+          onClick={() => { if (isSubmitting) return; if (isDirty || galleryDirty) setLeaveConfirmation(true); else router.push("/admin/projects"); }}
+          className="min-h-11 rounded-xl px-4 py-2 text-sm font-medium text-ink-secondary hover:bg-surface-base transition-colors"
         >
           Cancel
         </button>
@@ -623,5 +697,8 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
         </button>
       </div>
     </form>
+    <AdminConfirmDialog open={saveConfirmation !== null} title={saveConfirmation?.title || "Confirm publication"} description={saveConfirmation?.description || ""} confirmLabel={saveConfirmation?.label || "Confirm"} pending={isSubmitting} onClose={() => setSaveConfirmation(null)} onConfirm={() => { const pending = saveConfirmation; setSaveConfirmation(null); if (pending) void saveProject(pending.data); }} />
+    <AdminConfirmDialog open={leaveConfirmation} title="Discard unsaved project changes?" description="Project details and gallery changes on this page have not been saved." confirmLabel="Discard changes" destructive onClose={() => setLeaveConfirmation(false)} onConfirm={() => { setLeaveConfirmation(false); router.push("/admin/projects"); }} />
+    </>
   );
 }

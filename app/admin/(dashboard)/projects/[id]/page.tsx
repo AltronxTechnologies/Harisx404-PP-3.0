@@ -1,17 +1,20 @@
 import { ProjectForm } from "@/app/components/admin/ProjectForm";
 import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 import { notFound } from "next/navigation";
+import { z } from "zod";
+import Link from "next/link";
 
 export default async function EditProjectPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  if (!z.string().uuid().safeParse(id).success) notFound();
   const supabase = await createSupabaseAdminClient();
   const loadProject = (withAlt: boolean) => supabase.from("projects")
       .select(withAlt
         ? "*, project_tags ( tags ( name ) ), project_images ( media_id, caption, alt_text, display_order, media ( secure_url, url, alt_text ) )"
         : "*, project_tags ( tags ( name ) ), project_images ( media_id, caption, display_order, media ( secure_url, url, alt_text ) )")
       .eq("id", id)
-      .single();
-  let [{ data: project, error }, { data: availableProjects }] = await Promise.all([
+      .maybeSingle();
+  let [{ data: project, error }, { data: availableProjects, error: optionsError }] = await Promise.all([
     loadProject(true),
     supabase.from("projects").select("id, title, slug, status").order("title"),
   ]);
@@ -19,9 +22,8 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
     ({ data: project, error } = await loadProject(false));
   }
 
-  if (error || !project) {
-    notFound();
-  }
+  if (error || optionsError) return <div role="alert" className="rounded-xl border border-red-500/30 bg-red-950/30 p-5 text-sm text-red-300">Project editor could not be loaded. No changes were made. <Link prefetch={false} href={`/admin/projects/${id}?retry=${Date.now()}`} className="font-medium underline underline-offset-2">Retry</Link> or return to <Link href="/admin/projects" className="font-medium underline underline-offset-2">Projects</Link>.</div>;
+  if (!project) notFound();
 
   // Flatten the join rows into a simple string[] for the form.
   const tags: string[] =

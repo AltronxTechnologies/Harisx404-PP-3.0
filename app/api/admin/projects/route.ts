@@ -4,11 +4,12 @@ import * as z from "zod";
 import createSupabaseServerClient, { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 import { captionWordCount } from "@/app/lib/project-captions";
 import { projectStages } from "@/app/lib/project-stage";
+import { isValidBlogDate } from "@/app/lib/blog-defaults";
 
 const idSchema = z.string().uuid();
 const optionalText = z.string().max(10000).optional().default("");
 const optionalUrl = z.union([z.literal(""), z.string().url().refine((url) => /^https?:\/\//i.test(url))]).optional().default("");
-const optionalDate = z.union([z.literal(""), z.string().regex(/^\d{4}-\d{2}-\d{2}$/)]).optional().default("");
+const optionalDate = z.string().refine((value) => !value || isValidBlogDate(value), "Choose a valid calendar date").optional().default("");
 const projectFieldsSchema = z.object({
   title: z.string().trim().min(1).max(200),
   slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(200),
@@ -190,6 +191,7 @@ export async function POST(request: Request) {
     if (!parsed.success) return NextResponse.json({ error: "Invalid project data", issues: parsed.error.flatten() }, { status: 400 });
 
     const data = parsed.data;
+    if (data.start_date && data.end_date && data.end_date < data.start_date) return NextResponse.json({ error: "End date must be on or after the start date" }, { status: 400 });
     const db = await createSupabaseAdminClient();
     const relatedError = await validateRelatedProjects(db, data.related_project_ids);
     if (relatedError) return NextResponse.json({ error: relatedError }, { status: 400 });
@@ -211,6 +213,7 @@ export async function PUT(request: Request) {
     if (!parsed.success) return NextResponse.json({ error: "Invalid project data", issues: parsed.error.flatten() }, { status: 400 });
 
     const { id, updated_at, ...data } = parsed.data;
+    if (data.start_date && data.end_date && data.end_date < data.start_date) return NextResponse.json({ error: "End date must be on or after the start date" }, { status: 400 });
     const db = await createSupabaseAdminClient();
     const relatedError = await validateRelatedProjects(db, data.related_project_ids, id);
     if (relatedError) return NextResponse.json({ error: relatedError }, { status: 400 });
@@ -230,9 +233,12 @@ export async function DELETE(request: Request) {
     if (denied) return denied;
     const id = new URL(request.url).searchParams.get("id");
     if (!idSchema.safeParse(id).success) return NextResponse.json({ error: "Invalid project ID" }, { status: 400 });
+    const updatedAt = new URL(request.url).searchParams.get("updated_at");
+    if (!z.string().datetime({ offset: true }).safeParse(updatedAt).success) return NextResponse.json({ error: "Reload the project list before deleting." }, { status: 400 });
 
     const db = await createSupabaseAdminClient();
-    const { data: deleted, error } = await db.rpc("delete_project_and_unlink_related", { p_id: id });
+    const { data: deleted, error } = await db.rpc("delete_project_and_unlink_related", { p_id: id, p_expected_updated_at: updatedAt });
+    if (error && ["PGRST202", "42883"].includes(error.code)) return NextResponse.json({ error: "Apply migration 2026_project_admin_atomic_delete_with_token.sql before deleting projects." }, { status: 503 });
     if (error) return projectWriteError(error);
     if (!deleted?.slug || !Array.isArray(deleted.referring_slugs)) throw new Error("Project deletion returned no result");
     revalidateProjectPaths(deleted.slug, ...deleted.referring_slugs);
