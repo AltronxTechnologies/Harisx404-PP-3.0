@@ -101,6 +101,7 @@ test(
         failures.push(`blocked-${method}-${path}`);
         return route.abort();
       });
+      stage = "list-navigation";
 
       const checkWidths = async (page, surface) => {
         for (const width of [320, 390, 768, 1440]) {
@@ -178,6 +179,17 @@ test(
         0,
         "Filtered list load failed",
       );
+      await list.locator("#buildlog-list-status").click();
+      const listOption = list.getByRole("option", { name: "Draft" });
+      await listOption.waitFor();
+      if (await listOption.evaluate((element) => element.getBoundingClientRect().height < 44)) failures.push("list-dropdown-target");
+      await listOption.click();
+      const submittedStatus = await list.locator('input[name="status"]').inputValue();
+      if (submittedStatus !== "draft") failures.push("list-hidden-status-not-draft");
+      await list.getByRole("button", { name: "Apply" }).click();
+      stage = "list-filter-submit";
+      await list.waitForURL(/status=draft/, { waitUntil: "commit" });
+      await list.getByRole("status").filter({ hasText: "Showing 0 projects" }).waitFor({ timeout: 10000 }).catch(() => failures.push("list-dropdown-filter"));
       await checkWidths(list, "filtered-list");
 
       const unfiltered = await list.goto(`${base}/admin/buildlog`, {
@@ -232,6 +244,7 @@ test(
         editReviewed = true;
       }
 
+      stage = "new-form-navigation";
       const form = await context.newPage();
       const newResponse = await form.goto(`${base}/admin/buildlog/new`, {
         waitUntil: "domcontentloaded",
@@ -248,6 +261,26 @@ test(
       await form.locator("#buildlog-name-error").waitFor();
       await form.locator("#buildlog-item-0-title-error").waitFor();
       assert.equal(attemptedWrites, 0, "Invalid form attempted a write");
+      await form.locator("#buildlog-status").click();
+      await form.getByRole("option", { name: /^Published/ }).click();
+      if (!(await form.locator("#buildlog-status").textContent())?.includes("Published")) failures.push("form-visibility-dropdown");
+      await form.locator("#buildlog-status").click();
+      await form.getByRole("option", { name: /^Draft/ }).click();
+      await form.locator("#buildlog-lifecycle").click();
+      await form.getByRole("option", { name: /^Live/ }).click();
+      if (!(await form.locator("#buildlog-lifecycle").textContent())?.includes("Live")) failures.push("form-lifecycle-dropdown");
+      await form.locator("#buildlog-lifecycle").click();
+      await form.getByRole("option", { name: /^In progress/ }).click();
+      stage = "lifecycle-keyboard";
+      await form.locator("#buildlog-lifecycle").focus();
+      await form.keyboard.press("ArrowDown");
+      await form.getByRole("option", { name: /^In progress/ }).waitFor();
+      await form.keyboard.press("ArrowDown");
+      await form.locator('[role="option"][data-focus]').filter({ hasText: "Live" }).waitFor({ timeout: 5000 }).catch(() => failures.push("keyboard-lifecycle-focus"));
+      await form.keyboard.press("Enter");
+      if (!(await form.locator("#buildlog-lifecycle").textContent())?.includes("Live")) failures.push("keyboard-lifecycle-selection");
+      await form.locator("#buildlog-lifecycle").click();
+      await form.getByRole("option", { name: /^In progress/ }).click();
       await form
         .getByRole("textbox", { name: "Project name" })
         .fill("Review only project");
@@ -348,6 +381,7 @@ test(
       else {
         stage = "history-cancel";
         await historyDiscard.getByRole("button", { name: "Cancel" }).click();
+        await historyDiscard.waitFor({ state: "hidden" });
         assert.equal(new URL(historyPage.url()).pathname, "/admin/buildlog/new", "Browser Back discarded unsaved project edits");
         await historyPage.evaluate(() => window.history.back()).catch(() => {});
         await historyDiscard.waitFor({ timeout: 10000 });

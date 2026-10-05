@@ -4,12 +4,13 @@ import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowDown, ArrowUp, Loader2, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useFieldArray, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import * as z from "zod";
 import type { BuildlogProjectAdmin } from "@/app/buildlog/types";
 import { parseSemanticVersion } from "@/app/buildlog/version";
 import { AdminConfirmDialog } from "./AdminConfirmDialog";
 import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
+import { BuildlogSelect } from "./BuildlogSelect";
 import { useBuildlogNavigationGuard } from "./useBuildlogNavigationGuard";
 
 const itemSchema = z.object({
@@ -80,6 +81,17 @@ const emptyItem = (order: number): FormValues["items"][number] => ({
   done: false,
   display_order: order,
 });
+
+const visibilityOptions = [
+  { value: "draft", label: "Draft", hint: "Only visible in Admin" },
+  { value: "published", label: "Published", hint: "Visible on the public Buildlog" },
+  { value: "archived", label: "Archived", hint: "Hidden from visitors, retained in Admin" },
+] as const;
+const lifecycleOptions = [
+  { value: "in_progress", label: "In progress", hint: "Work and planned updates continue" },
+  { value: "live", label: "Live", hint: "A running product" },
+  { value: "completed", label: "Completed", hint: "Every release item is shipped" },
+] as const;
 
 export function BuildlogForm({ initialData }: { initialData?: BuildlogProjectAdmin & { updated_at: string } }) {
   const router = useRouter();
@@ -234,25 +246,15 @@ export function BuildlogForm({ initialData }: { initialData?: BuildlogProjectAdm
           <input type="number" {...register("display_order", { setValueAs: (value: string) => value === "" ? NaN : Number(value) })} aria-invalid={Boolean(errors.display_order)} aria-describedby={errors.display_order ? "buildlog-display-order-error" : undefined} className={inputClass} />
           {errors.display_order && <span id="buildlog-display-order-error" role="alert" className="mt-1.5 block text-xs text-red-500">{errors.display_order.message}</span>}
         </label>
-        <label className="text-sm font-medium">
-          Status
-          <select {...register("status")} aria-invalid={Boolean(errors.status)} aria-describedby={errors.status ? "buildlog-status-error" : undefined} className={inputClass}>
-            <option value="draft">Draft</option>
-            <option value="published">Published</option>
-            <option value="archived">Archived</option>
-          </select>
+        <div className="min-w-0">
+          <Controller name="status" control={control} render={({ field }) => <BuildlogSelect id="buildlog-status" label="Visibility" value={field.value} onChange={field.onChange} options={visibilityOptions} errorId={errors.status ? "buildlog-status-error" : undefined} />} />
           {errors.status && <span id="buildlog-status-error" role="alert" className="mt-1.5 block text-xs text-red-500">{errors.status.message}</span>}
-        </label>
-        <label className="text-sm font-medium">
-          Project lifecycle
-          <select {...register("project_status")} className={inputClass}>
-            <option value="in_progress">In progress</option>
-            <option value="live">Live</option>
-            <option value="completed">Completed</option>
-          </select>
-          {errors.project_status && <span role="alert" className="mt-1.5 block text-xs text-red-500">{errors.project_status.message}</span>}
-        </label>
-        <label className="mt-7 flex items-center gap-3 rounded-xl border border-border-hairline bg-surface-base px-3 py-2.5 text-sm font-medium">
+        </div>
+        <div className="min-w-0">
+          <Controller name="project_status" control={control} render={({ field }) => <BuildlogSelect id="buildlog-lifecycle" label="Project lifecycle" value={field.value} onChange={field.onChange} options={lifecycleOptions} errorId={errors.project_status ? "buildlog-lifecycle-error" : undefined} />} />
+          {errors.project_status && <span id="buildlog-lifecycle-error" role="alert" className="mt-1.5 block text-xs text-red-500">{errors.project_status.message}</span>}
+        </div>
+        <label className="flex min-h-11 items-center gap-3 rounded-xl border border-border-hairline bg-surface-base px-3 py-2.5 text-sm font-medium md:mt-7">
           <input type="checkbox" {...register("is_demo")} className="size-4 rounded border-border-hairline" />
           Demo record
         </label>

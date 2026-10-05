@@ -3,13 +3,14 @@ import { Edit, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { redirect } from "next/navigation";
 import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 import { DeleteBuildlogButton } from "@/app/components/admin/DeleteBuildlogButton";
+import { BuildlogListFilters } from "@/app/components/admin/BuildlogListFilters";
 
 const PAGE_SIZE = 10;
 
 export default async function AdminBuildlogPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const params = await searchParams;
   const q = typeof params.q === "string" ? params.q.trim().slice(0, 100) : "";
-  const status = typeof params.status === "string" && ["draft", "published", "archived"].includes(params.status) ? params.status : "all";
+  const status: "all" | "draft" | "published" | "archived" = typeof params.status === "string" && ["draft", "published", "archived"].includes(params.status) ? params.status as "draft" | "published" | "archived" : "all";
   const page = typeof params.page === "string" && /^[1-9]\d*$/.test(params.page) ? Math.min(Number(params.page), 10000) : 1;
   const pageHref = (target: number) => {
     const query = new URLSearchParams();
@@ -56,11 +57,7 @@ export default async function AdminBuildlogPage({ searchParams }: { searchParams
       {params.notice === "deleted" && <p role="status" className="rounded-xl border border-emerald-500/40 bg-emerald-950/20 p-4 text-sm text-emerald-200">Buildlog project deleted.</p>}
       {params.cache === "stale" && <p role="alert" className="rounded-xl border border-amber-500/40 bg-amber-950/20 p-4 text-sm text-amber-200">The database change completed, but the public Buildlog cache could not be refreshed. Visitors may see the previous version for up to an hour.</p>}
 
-      <form action="/admin/buildlog" method="get" className="grid gap-3 rounded-xl border border-border-hairline bg-surface-raised p-4 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-end">
-        <div className="min-w-0 space-y-1"><label htmlFor="buildlog-search" className="text-sm font-medium">Search projects</label><input id="buildlog-search" name="q" type="search" defaultValue={q} maxLength={100} placeholder="Find a Buildlog project" className="min-h-11 w-full rounded-xl border border-border-hairline bg-surface-base px-3 text-sm" /></div>
-        <div className="space-y-1"><label htmlFor="buildlog-list-status" className="text-sm font-medium">Visibility</label><select id="buildlog-list-status" name="status" defaultValue={status} className="min-h-11 w-full rounded-xl border border-border-hairline bg-surface-base px-3 text-sm"><option value="all">All statuses</option><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select></div>
-        <button type="submit" className="min-h-11 rounded-xl bg-accent-signal px-5 text-sm font-medium text-white">Apply</button>
-      </form>
+      <BuildlogListFilters key={`${q}:${status}`} q={q} status={status} />
       {error ? <div role="alert" className="rounded-xl border border-red-500/30 bg-red-950/30 p-4 text-sm text-red-300">Buildlog projects could not be loaded. <Link prefetch={false} href={`${pageHref(page)}${pageHref(page).includes("?") ? "&" : "?"}retry=${Date.now()}`} className="font-medium underline underline-offset-2">Retry</Link>.</div> : <p role="status" className="text-sm text-ink-secondary">{count === 0 ? "Showing 0 projects" : `Showing ${(page - 1) * PAGE_SIZE + 1}-${(page - 1) * PAGE_SIZE + (projects?.length ?? 0)} of ${count} projects`}</p>}
 
       <div className="grid min-w-0 gap-3 xl:hidden">
