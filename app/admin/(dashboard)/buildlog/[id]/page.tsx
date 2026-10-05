@@ -2,16 +2,20 @@ import { notFound } from "next/navigation";
 import { BuildlogForm } from "@/app/components/admin/BuildlogForm";
 import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 import type { BuildlogProjectAdmin } from "@/app/buildlog/types";
+import Link from "next/link";
+import { z } from "zod";
 
 export default async function EditBuildlogProjectPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  if (!z.string().uuid().safeParse(id).success) notFound();
   const supabase = await createSupabaseAdminClient();
-  const { data, error } = await supabase.from("buildlog_projects").select("*").eq("id", id).single();
-  if (error?.code === "PGRST116" || !data) notFound();
-  if (error) throw new Error(`Unable to load Buildlog project: ${error.message}`);
+  const { data, error } = await supabase.from("buildlog_projects").select("*").eq("id", id).maybeSingle();
+  if (error) return <div role="alert" className="rounded-xl border border-red-500/30 bg-red-950/30 p-5 text-sm text-red-300">Buildlog project could not be loaded. No changes were made. <Link prefetch={false} href={`/admin/buildlog/${id}?retry=${Date.now()}`} className="font-medium underline underline-offset-2">Retry</Link>.</div>;
+  if (!data) notFound();
 
-  const project: BuildlogProjectAdmin = {
+  const project: BuildlogProjectAdmin & { updated_at: string } = {
     id: data.id,
+    updated_at: data.updated_at,
     name: data.name,
     tagline: data.tagline,
     info: data.info,

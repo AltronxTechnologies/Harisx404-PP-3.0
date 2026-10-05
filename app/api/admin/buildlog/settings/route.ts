@@ -14,6 +14,7 @@ const settingsSchema = z.object({
   seo_title: z.string().trim().min(2).max(100),
   seo_description: z.string().trim().min(10).max(300),
 }).strict();
+const updateSchema = settingsSchema.extend({ updated_at: z.string().datetime({ offset: true }) });
 
 async function requireAdmin(
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
@@ -40,7 +41,7 @@ export async function GET() {
     const db = await createSupabaseAdminClient();
     const { data, error } = await db
       .from("buildlog_settings")
-      .select("kicker, heading, heading_accent, description, archive_label, seo_title, seo_description")
+      .select("kicker, heading, heading_accent, description, archive_label, seo_title, seo_description, updated_at")
       .eq("id", true)
       .single();
     if (error) throw error;
@@ -62,7 +63,7 @@ export async function PUT(request: Request) {
     } catch {
       return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
     }
-    const parsed = settingsSchema.safeParse(body);
+    const parsed = updateSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
         { error: parsed.error.issues[0]?.message || "Invalid Buildlog settings." },
@@ -70,15 +71,29 @@ export async function PUT(request: Request) {
       );
     }
     const db = await createSupabaseAdminClient();
+    const { updated_at, ...fields } = parsed.data;
     const { data, error } = await db
       .from("buildlog_settings")
-      .upsert({ id: true, ...parsed.data }, { onConflict: "id" })
+      .update(fields)
+      .eq("id", true)
+      .eq("updated_at", updated_at)
       .select()
-      .single();
+      .maybeSingle();
     if (error) throw error;
-    revalidatePath("/buildlog");
-    revalidateTag("buildlog");
-    return NextResponse.json({ data });
+    if (!data) {
+      const { data: existing, error: lookupError } = await db.from("buildlog_settings").select("id").eq("id", true).maybeSingle();
+      if (lookupError) throw lookupError;
+      return NextResponse.json({ error: existing ? "Buildlog settings changed in another tab. Reload before saving." : "Buildlog settings are unavailable." }, { status: existing ? 409 : 404 });
+    }
+    let refreshed = true;
+    try {
+      revalidatePath("/buildlog");
+      revalidateTag("buildlog");
+    } catch (error) {
+      console.error("Buildlog settings cache revalidation failed", error);
+      refreshed = false;
+    }
+    return NextResponse.json({ data, ...(refreshed ? {} : { warning: "Settings saved, but the public Buildlog cache could not be refreshed. It may take up to an hour to update." }) });
   } catch (error) {
     return fail(error);
   }

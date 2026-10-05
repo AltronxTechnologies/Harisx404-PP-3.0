@@ -71,7 +71,7 @@ async function requireAdmin(
 function parseProject(value: unknown) {
   const parsed = projectSchema.safeParse(value);
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message || "Invalid Buildlog data." } as const;
+    return { error: parsed.error.issues[0]?.message || "Invalid Buildlog data.", issues: parsed.error.flatten() } as const;
   }
   return {
     data: {
@@ -88,8 +88,14 @@ function parseProject(value: unknown) {
 }
 
 function revalidateBuildlog() {
-  revalidatePath("/buildlog");
-  revalidateTag("buildlog");
+  try {
+    revalidatePath("/buildlog");
+    revalidateTag("buildlog");
+    return true;
+  } catch (error) {
+    console.error("Buildlog cache revalidation failed", error);
+    return false;
+  }
 }
 
 function serverError(error: unknown) {
@@ -132,12 +138,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
     }
     const parsed = parseProject(body);
-    if ("error" in parsed) return NextResponse.json({ error: parsed.error }, { status: 400 });
+    if ("error" in parsed) return NextResponse.json({ error: parsed.error, issues: parsed.issues }, { status: 400 });
     const db = await createSupabaseAdminClient();
     const { data, error } = await db.from("buildlog_projects").insert(parsed.data).select().single();
+    if (error?.code === "23505") return NextResponse.json({ error: "A Buildlog project with this name already exists." }, { status: 409 });
     if (error) throw error;
-    revalidateBuildlog();
-    return NextResponse.json({ data });
+    const refreshed = revalidateBuildlog();
+    return NextResponse.json({ data, ...(refreshed ? {} : { warning: "Project saved, but the public Buildlog cache could not be refreshed. It may take up to an hour to update." }) });
   } catch (error) {
     return serverError(error);
   }
@@ -156,26 +163,33 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
     }
     const id = typeof body === "object" && body && "id" in body ? String(body.id) : "";
+    const updatedAt = typeof body === "object" && body && "updated_at" in body ? String(body.updated_at) : "";
     if (!z.string().uuid().safeParse(id).success) {
       return NextResponse.json({ error: "Invalid Buildlog project ID." }, { status: 400 });
     }
+    if (!z.string().datetime({ offset: true }).safeParse(updatedAt).success) return NextResponse.json({ error: "Reload the project before saving changes." }, { status: 400 });
     const data = typeof body === "object" && body ? { ...body } as Record<string, unknown> : {};
     delete data.id;
+    delete data.updated_at;
     const parsed = parseProject(data);
-    if ("error" in parsed) return NextResponse.json({ error: parsed.error }, { status: 400 });
+    if ("error" in parsed) return NextResponse.json({ error: parsed.error, issues: parsed.issues }, { status: 400 });
     const db = await createSupabaseAdminClient();
     const { data: updated, error } = await db
       .from("buildlog_projects")
       .update(parsed.data)
       .eq("id", id)
+      .eq("updated_at", updatedAt)
       .select()
-      .single();
-    if (error?.code === "PGRST116") {
-      return NextResponse.json({ error: "Buildlog project not found." }, { status: 404 });
-    }
+      .maybeSingle();
+    if (error?.code === "23505") return NextResponse.json({ error: "A Buildlog project with this name already exists." }, { status: 409 });
     if (error) throw error;
-    revalidateBuildlog();
-    return NextResponse.json({ data: updated });
+    if (!updated) {
+      const { data: existing, error: lookupError } = await db.from("buildlog_projects").select("id").eq("id", id).maybeSingle();
+      if (lookupError) throw lookupError;
+      return NextResponse.json({ error: existing ? "This Buildlog project changed in another tab. Reload before saving." : "Buildlog project not found." }, { status: existing ? 409 : 404 });
+    }
+    const refreshed = revalidateBuildlog();
+    return NextResponse.json({ data: updated, ...(refreshed ? {} : { warning: "Project saved, but the public Buildlog cache could not be refreshed. It may take up to an hour to update." }) });
   } catch (error) {
     return serverError(error);
   }
@@ -188,22 +202,27 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     const id = new URL(request.url).searchParams.get("id") || "";
+    const updatedAt = new URL(request.url).searchParams.get("updated_at") || "";
     if (!z.string().uuid().safeParse(id).success) {
       return NextResponse.json({ error: "Invalid Buildlog project ID." }, { status: 400 });
     }
+    if (!z.string().datetime({ offset: true }).safeParse(updatedAt).success) return NextResponse.json({ error: "Reload the Buildlog list before deleting." }, { status: 400 });
     const db = await createSupabaseAdminClient();
     const { data, error } = await db
       .from("buildlog_projects")
       .delete()
       .eq("id", id)
+      .eq("updated_at", updatedAt)
       .select("id")
       .maybeSingle();
     if (error) throw error;
     if (!data) {
-      return NextResponse.json({ error: "Buildlog project not found." }, { status: 404 });
+      const { data: existing, error: lookupError } = await db.from("buildlog_projects").select("id").eq("id", id).maybeSingle();
+      if (lookupError) throw lookupError;
+      return NextResponse.json({ error: existing ? "This Buildlog project changed in another tab. Reload before deleting." : "Buildlog project not found." }, { status: existing ? 409 : 404 });
     }
-    revalidateBuildlog();
-    return NextResponse.json({ success: true });
+    const refreshed = revalidateBuildlog();
+    return NextResponse.json({ success: true, ...(refreshed ? {} : { warning: "Project deleted, but the public Buildlog cache could not be refreshed. It may take up to an hour to update." }) });
   } catch (error) {
     return serverError(error);
   }

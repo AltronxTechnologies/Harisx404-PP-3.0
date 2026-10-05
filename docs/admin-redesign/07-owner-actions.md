@@ -175,6 +175,15 @@ connected publish/edit/delete acceptance run; shared media files remain in the
 library. The locked public Projects index's fallback cards can misrepresent an
 all-draft collection. A change to that public page requires a separate,
 explicit unlock; this Admin pass did not modify it.
+The owner has now unlocked the **Admin Buildlog** list, editor, settings and
+related controls for a scoped quality pass; the public `/buildlog` page remains
+locked. The existing `2026_buildlog_zzzzz_item_validation.sql` contains
+content-matched deletion of historical preview text. Before any replay or
+connected rollout, inspect its exact affected rows privately, verify a backup,
+and authorize a narrowly identified cleanup or amendment separately. Do not
+apply that migration merely to enable the Admin UI. Project and settings
+optimistic locking use existing timestamps and require a disposable connected
+fixture plus verified cleanup before claiming production acceptance.
 Also review the owner's Supabase Auth sessions if available: one temporary
 review session created immediately before a missing-browser failure could not
 be individually confirmed revoked. Do not share session tokens or revoke all

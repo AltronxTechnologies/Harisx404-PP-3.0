@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowDown, ArrowUp, Loader2, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -8,6 +8,8 @@ import { useFieldArray, useForm } from "react-hook-form";
 import * as z from "zod";
 import type { BuildlogProjectAdmin } from "@/app/buildlog/types";
 import { parseSemanticVersion } from "@/app/buildlog/version";
+import { AdminConfirmDialog } from "./AdminConfirmDialog";
+import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
 
 const itemSchema = z.object({
   id: z.string().optional(),
@@ -78,15 +80,18 @@ const emptyItem = (order: number): FormValues["items"][number] => ({
   display_order: order,
 });
 
-export function BuildlogForm({ initialData }: { initialData?: BuildlogProjectAdmin }) {
+export function BuildlogForm({ initialData }: { initialData?: BuildlogProjectAdmin & { updated_at: string } }) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState("");
+  const [confirmation, setConfirmation] = useState<{ title: string; description: string; label: string; data: FormValues } | null>(null);
+  const [leaveOpen, setLeaveOpen] = useState(false);
   const {
     register,
     control,
     handleSubmit,
-    formState: { errors },
+    setError,
+    formState: { errors, isDirty },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData
@@ -115,7 +120,14 @@ export function BuildlogForm({ initialData }: { initialData?: BuildlogProjectAdm
   });
   const { fields, append, remove, swap } = useFieldArray({ control, name: "items" });
 
-  const onSubmit = async (values: FormValues) => {
+  useEffect(() => {
+    if (!isDirty) return;
+    const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [isDirty]);
+
+  const save = async (values: FormValues) => {
     setIsSubmitting(true);
     setServerError("");
     try {
@@ -133,11 +145,20 @@ export function BuildlogForm({ initialData }: { initialData?: BuildlogProjectAdm
       const response = await fetch("/api/admin/buildlog", {
         method: initialData?.id ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(initialData?.id ? { id: initialData.id, ...project } : project),
+        body: JSON.stringify(initialData?.id ? { id: initialData.id, updated_at: initialData.updated_at, ...project } : project),
       });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Failed to save Buildlog project.");
-      router.push("/admin/buildlog");
+      const result = await readAdminResponse(response, "Buildlog project");
+      if (!response.ok) {
+        if (result.issues?.fieldErrors) {
+          for (const [name, messages] of Object.entries(result.issues.fieldErrors)) {
+            if (name in formSchema.innerType().shape && Array.isArray(messages) && typeof messages[0] === "string") {
+              setError(name as keyof FormValues, { message: messages[0] });
+            }
+          }
+        }
+        throw new Error(result.error || "Failed to save Buildlog project.");
+      }
+      router.push(result.warning ? "/admin/buildlog?saved=1&cache=stale" : "/admin/buildlog?saved=1");
       router.refresh();
     } catch (error) {
       setServerError(error instanceof Error ? error.message : "Failed to save Buildlog project.");
@@ -146,31 +167,44 @@ export function BuildlogForm({ initialData }: { initialData?: BuildlogProjectAdm
     }
   };
 
+  const onSubmit = (values: FormValues) => {
+    if (values.status !== initialData?.status && (values.status === "published" || initialData?.status === "published")) {
+      setConfirmation(values.status === "published"
+        ? { title: "Publish Buildlog project?", description: "Its release information will be visible on the public Buildlog as soon as it is saved.", label: "Publish project", data: values }
+        : { title: "Unpublish Buildlog project?", description: "This project will leave the public Buildlog but remain editable in Admin.", label: "Unpublish project", data: values });
+      return;
+    }
+    void save(values);
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+    <>
+    <form onSubmit={handleSubmit(onSubmit, () => setServerError("Check the highlighted fields before saving."))} className="min-w-0 space-y-8">
       {serverError && (
         <div role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-600 dark:bg-red-950/30 dark:text-red-300">
           {serverError}
         </div>
       )}
 
+      <fieldset disabled={isSubmitting} className="min-w-0 space-y-8 border-0 p-0 disabled:opacity-80">
+
       <div className="grid gap-6 md:grid-cols-2">
         <label className="text-sm font-medium">
           Project name
-          <input {...register("name")} className={inputClass} placeholder="This Website" />
-          {errors.name && <span role="alert" className="mt-1.5 block text-xs text-red-500">{errors.name.message}</span>}
+          <input {...register("name")} aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? "buildlog-name-error" : undefined} className={inputClass} placeholder="This Website" />
+          {errors.name && <span id="buildlog-name-error" role="alert" className="mt-1.5 block text-xs text-red-500">{errors.name.message}</span>}
         </label>
         <label className="text-sm font-medium">
           Tagline
-          <input {...register("tagline")} className={inputClass} placeholder="Portfolio & blog." />
-          {errors.tagline && <span role="alert" className="mt-1.5 block text-xs text-red-500">{errors.tagline.message}</span>}
+          <input {...register("tagline")} aria-invalid={Boolean(errors.tagline)} aria-describedby={errors.tagline ? "buildlog-tagline-error" : undefined} className={inputClass} placeholder="Portfolio & blog." />
+          {errors.tagline && <span id="buildlog-tagline-error" role="alert" className="mt-1.5 block text-xs text-red-500">{errors.tagline.message}</span>}
         </label>
       </div>
 
       <label className="block text-sm font-medium">
         Project summary
-        <textarea {...register("info")} rows={3} maxLength={360} className={`${inputClass} resize-y`} />
-        {errors.info && <span role="alert" className="mt-1.5 block text-xs text-red-500">{errors.info.message}</span>}
+        <textarea {...register("info")} aria-invalid={Boolean(errors.info)} aria-describedby={errors.info ? "buildlog-info-error" : undefined} rows={3} maxLength={360} className={`${inputClass} resize-y`} />
+        {errors.info && <span id="buildlog-info-error" role="alert" className="mt-1.5 block text-xs text-red-500">{errors.info.message}</span>}
       </label>
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -201,11 +235,12 @@ export function BuildlogForm({ initialData }: { initialData?: BuildlogProjectAdm
         </label>
         <label className="text-sm font-medium">
           Status
-          <select {...register("status")} className={inputClass}>
+          <select {...register("status")} aria-invalid={Boolean(errors.status)} aria-describedby={errors.status ? "buildlog-status-error" : undefined} className={inputClass}>
             <option value="draft">Draft</option>
             <option value="published">Published</option>
             <option value="archived">Archived</option>
           </select>
+          {errors.status && <span id="buildlog-status-error" role="alert" className="mt-1.5 block text-xs text-red-500">{errors.status.message}</span>}
         </label>
         <label className="text-sm font-medium">
           Project lifecycle
@@ -231,7 +266,8 @@ export function BuildlogForm({ initialData }: { initialData?: BuildlogProjectAdm
           <button
             type="button"
             onClick={() => append(emptyItem(fields.length))}
-            className="inline-flex items-center rounded-xl border border-border-hairline px-3 py-2 text-sm font-medium text-ink-secondary hover:bg-surface-base hover:text-ink-primary"
+            disabled={fields.length >= 50}
+            className="inline-flex min-h-11 items-center rounded-xl border border-border-hairline px-3 py-2 text-sm font-medium text-ink-secondary hover:bg-surface-base hover:text-ink-primary disabled:opacity-50"
           >
             <Plus className="mr-2 size-4" /> Add item
           </button>
@@ -244,27 +280,27 @@ export function BuildlogForm({ initialData }: { initialData?: BuildlogProjectAdm
             <div className="mb-4 flex items-center justify-between gap-3">
               <span className="font-mono text-xs text-ink-secondary">ITEM {String(index + 1).padStart(2, "0")}</span>
               <div className="flex items-center gap-1">
-                <button type="button" disabled={index === 0} onClick={() => swap(index, index - 1)} aria-label={`Move item ${index + 1} up`} className="rounded-lg p-2 text-ink-secondary hover:bg-surface-raised disabled:opacity-30"><ArrowUp className="size-4" /></button>
-                <button type="button" disabled={index === fields.length - 1} onClick={() => swap(index, index + 1)} aria-label={`Move item ${index + 1} down`} className="rounded-lg p-2 text-ink-secondary hover:bg-surface-raised disabled:opacity-30"><ArrowDown className="size-4" /></button>
-                <button type="button" disabled={fields.length === 1} onClick={() => remove(index)} aria-label={`Remove item ${index + 1}`} className="rounded-lg p-2 text-ink-secondary hover:bg-red-50 hover:text-red-500 disabled:opacity-30 dark:hover:bg-red-950/30"><Trash2 className="size-4" /></button>
+                 <button type="button" disabled={index === 0} onClick={() => swap(index, index - 1)} aria-label={`Move item ${index + 1} up`} className="flex size-11 items-center justify-center rounded-lg text-ink-secondary hover:bg-surface-raised disabled:opacity-30"><ArrowUp className="size-4" /></button>
+                 <button type="button" disabled={index === fields.length - 1} onClick={() => swap(index, index + 1)} aria-label={`Move item ${index + 1} down`} className="flex size-11 items-center justify-center rounded-lg text-ink-secondary hover:bg-surface-raised disabled:opacity-30"><ArrowDown className="size-4" /></button>
+                 <button type="button" disabled={fields.length === 1} onClick={() => remove(index)} aria-label={`Remove item ${index + 1}`} className="flex size-11 items-center justify-center rounded-lg text-ink-secondary hover:bg-red-50 hover:text-red-500 disabled:opacity-30 dark:hover:bg-red-950/30"><Trash2 className="size-4" /></button>
               </div>
             </div>
             <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_140px]">
               <label className="text-sm font-medium">
                 Title
-                <input {...register(`items.${index}.title`)} className={inputClass} />
-                {errors.items?.[index]?.title && <span role="alert" className="mt-1.5 block text-xs text-red-500">{errors.items[index]?.title?.message}</span>}
+                <input {...register(`items.${index}.title`)} aria-invalid={Boolean(errors.items?.[index]?.title)} aria-describedby={errors.items?.[index]?.title ? `buildlog-item-${index}-title-error` : undefined} className={inputClass} />
+                {errors.items?.[index]?.title && <span id={`buildlog-item-${index}-title-error`} role="alert" className="mt-1.5 block text-xs text-red-500">{errors.items[index]?.title?.message}</span>}
               </label>
               <label className="text-sm font-medium">
                 Badge
-                <input {...register(`items.${index}.badge`)} className={inputClass} placeholder="v1.0" />
-                {errors.items?.[index]?.badge && <span role="alert" className="mt-1.5 block text-xs text-red-500">{errors.items[index]?.badge?.message}</span>}
+                <input {...register(`items.${index}.badge`)} aria-invalid={Boolean(errors.items?.[index]?.badge)} aria-describedby={errors.items?.[index]?.badge ? `buildlog-item-${index}-badge-error` : undefined} className={inputClass} placeholder="v1.0" />
+                {errors.items?.[index]?.badge && <span id={`buildlog-item-${index}-badge-error`} role="alert" className="mt-1.5 block text-xs text-red-500">{errors.items[index]?.badge?.message}</span>}
               </label>
             </div>
             <label className="mt-4 block text-sm font-medium">
               Description
-              <textarea {...register(`items.${index}.description`)} rows={2} maxLength={400} className={`${inputClass} resize-y`} />
-              {errors.items?.[index]?.description && <span role="alert" className="mt-1.5 block text-xs text-red-500">{errors.items[index]?.description?.message}</span>}
+              <textarea {...register(`items.${index}.description`)} aria-invalid={Boolean(errors.items?.[index]?.description)} aria-describedby={errors.items?.[index]?.description ? `buildlog-item-${index}-description-error` : undefined} rows={2} maxLength={400} className={`${inputClass} resize-y`} />
+              {errors.items?.[index]?.description && <span id={`buildlog-item-${index}-description-error`} role="alert" className="mt-1.5 block text-xs text-red-500">{errors.items[index]?.description?.message}</span>}
             </label>
             <label className="mt-4 flex items-center gap-3 text-sm font-medium">
               <input type="checkbox" {...register(`items.${index}.done`)} className="size-4 rounded border-border-hairline" />
@@ -276,12 +312,16 @@ export function BuildlogForm({ initialData }: { initialData?: BuildlogProjectAdm
       </fieldset>
 
       <div className="flex justify-end gap-3 border-t border-border-hairline pt-6">
-        <button type="button" onClick={() => router.back()} className="rounded-xl px-4 py-2.5 text-sm font-medium text-ink-secondary hover:bg-surface-base">Cancel</button>
+        <button type="button" onClick={() => { if (isSubmitting) return; if (isDirty) setLeaveOpen(true); else router.push("/admin/buildlog"); }} className="min-h-11 rounded-xl px-4 py-2.5 text-sm font-medium text-ink-secondary hover:bg-surface-base">Cancel</button>
         <button type="submit" disabled={isSubmitting} className="inline-flex min-w-40 items-center justify-center rounded-xl bg-accent-signal px-6 py-2.5 text-sm font-medium text-white shadow hover:opacity-90 disabled:cursor-wait disabled:opacity-50">
           {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}
           {initialData?.id ? "Update project" : "Create project"}
         </button>
       </div>
+      </fieldset>
     </form>
+    <AdminConfirmDialog open={confirmation !== null} title={confirmation?.title || "Confirm publication"} description={confirmation?.description || ""} confirmLabel={confirmation?.label || "Confirm"} pending={isSubmitting} onClose={() => setConfirmation(null)} onConfirm={() => { const pending = confirmation; setConfirmation(null); if (pending) void save(pending.data); }} />
+    <AdminConfirmDialog open={leaveOpen} title="Discard unsaved Buildlog changes?" description="Project details and release-item changes on this page have not been saved." confirmLabel="Discard changes" destructive onClose={() => setLeaveOpen(false)} onConfirm={() => { setLeaveOpen(false); router.push("/admin/buildlog"); }} />
+    </>
   );
 }
