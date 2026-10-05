@@ -5,6 +5,8 @@ import { Download, ExternalLink, FileText, Loader2, RotateCcw, Trash2, Upload } 
 import { AdminConfirmDialog } from "./AdminConfirmDialog";
 import { FALLBACK_RESUME, RESUME_DOWNLOAD_ROUTE, RESUME_FILE_ROUTE, RESUME_MAX_BYTES } from "@/app/data/resume";
 import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
+import { getPublicSupabase } from "@/app/lib/supabase/safe";
+import { RESUME_STORAGE_BUCKET } from "@/app/data/resume";
 
 type ResumeStatus = {
   isConfigured: boolean;
@@ -72,9 +74,24 @@ export function ResumeManager() {
     setUploading(true);
     setMessage(null);
     try {
-      const formData = new FormData();
-      formData.append("file", pendingFile);
-      const response = await fetch("/api/admin/resume", { method: "POST", body: formData });
+      const prepared = await fetch("/api/admin/resume/prepare", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filename: pendingFile.name, sizeBytes: pendingFile.size }),
+      });
+      const grant = await readAdminResponse(prepared, "Resume");
+      if (!prepared.ok) throw new Error(grant.error || "Resume upload could not be prepared.");
+      const supabase = getPublicSupabase();
+      if (!supabase) throw new Error("Private Storage is unavailable. Check the Resume environment configuration.");
+      const pdf = pendingFile.type === "application/pdf" ? pendingFile : new File([pendingFile], pendingFile.name, { type: "application/pdf" });
+      const { error: transferError } = await supabase.storage.from(RESUME_STORAGE_BUCKET)
+        .uploadToSignedUrl(grant.path, grant.token, pdf, { contentType: "application/pdf", cacheControl: "0", upsert: false });
+      if (transferError) {
+        throw new Error("PDF transfer failed. Refresh Resume status before retrying. A partial file may remain in private Storage for manual cleanup; the live Resume was not changed.");
+      }
+      const response = await fetch("/api/admin/resume/finish", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: grant.path, filename: grant.filename, sizeBytes: grant.sizeBytes, expectedPath: grant.expectedPath, expectedUpdatedAt: grant.expectedUpdatedAt, expiresAt: grant.expiresAt, proof: grant.proof }),
+      });
       const body = await readAdminResponse(response, "Resume");
       if (!response.ok) throw new Error(body.error || "Resume upload failed.");
       setStatus(body.data);
@@ -170,7 +187,7 @@ export function ResumeManager() {
         <input ref={inputRef} id="resume-upload" type="file" accept="application/pdf,.pdf" aria-label="Choose Resume PDF" onChange={(event) => chooseFile(event.target.files?.[0])} disabled={!status || loading || busy} className="peer sr-only" />
         <label htmlFor="resume-upload" className={`mt-4 inline-flex min-h-11 items-center justify-center rounded-xl border border-border-hairline bg-white px-5 text-sm font-medium text-[#101013] peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-white ${!status || loading || busy ? "pointer-events-none opacity-50" : "cursor-pointer hover:bg-[#dedee2]"}`}>{uploading ? "Uploading..." : status?.isActive ? "Choose replacement PDF" : "Choose PDF"}</label>
       </div>
-      <p className="text-xs text-ink-secondary">Uploads to private storage. If you cancel before confirmation, the live Resume remains unchanged.</p>
+      <p className="text-xs text-ink-secondary">The PDF transfers directly to private Storage and is verified before publication. If you cancel before confirmation, the live Resume remains unchanged.</p>
     </section>
 
     <AdminConfirmDialog open={pendingFile !== null} title={status?.isActive ? "Replace the live Resume?" : "Publish this Resume?"} description={pendingFile ? `${pendingFile.name} (${formatBytes(pendingFile.size)}) will become the only public Resume. ${status?.isActive ? "The previous file will be removed after the new one is saved." : "Visitors will be able to open and download it."}` : ""} confirmLabel={status?.isActive ? "Replace PDF" : "Publish PDF"} pending={uploading} onClose={() => { if (!uploading) setPendingFile(null); }} onConfirm={() => void upload()} />

@@ -112,16 +112,56 @@ test(
         });
         uploadProbes.push({ port, size: "invalid-media-over-10mb", status: media.status(), json: media.headers()["content-type"]?.includes("application/json") ?? false });
       }
+      const prepared = await context.request.post("http://localhost:3000/api/admin/resume/prepare", {
+        data: { filename: "review-not-uploaded.pdf", sizeBytes: 9 },
+      });
+      if (prepared.status() !== 200) failures.push({ kind: "signed-upload-grant-unavailable", status: prepared.status() });
+      else {
+        const grant = await prepared.json();
+        if (!grant.token || !grant.path || !grant.proof) failures.push("signed-upload-grant-invalid");
+        else {
+          const storageUrl = new URL(`${url}/storage/v1/object/upload/sign/resume-documents/${grant.path}`);
+          storageUrl.searchParams.set("token", grant.token);
+          for (const origin of ["http://localhost:3000", "http://localhost:8080"]) {
+            const cors = await context.request.fetch(storageUrl.toString(), { method: "OPTIONS", headers: {
+              Origin: origin, "Access-Control-Request-Method": "PUT",
+              "Access-Control-Request-Headers": "apikey,authorization,content-type,x-upsert",
+            }, timeout: 15000 }).catch(() => null);
+            if (!cors?.ok() || !cors.headers()["access-control-allow-origin"]) failures.push({ kind: "storage-preflight-unavailable", origin: new URL(origin).port, status: cors?.status() ?? 0 });
+          }
+          const { token: _token, ...proof } = grant;
+          const forged = await context.request.post("http://localhost:3000/api/admin/resume/finish", { data: { ...proof, proof: proof.proof === "0".repeat(64) ? "1".repeat(64) : "0".repeat(64) } });
+          if (forged.status() !== 400) failures.push("forged-grant-accepted");
+          const missing = await context.request.post("http://localhost:3000/api/admin/resume/finish", { data: proof });
+          if (missing.status() !== 400) failures.push("missing-upload-was-published");
+        }
+      }
       const mock = await context.newPage();
+      let signedTransfers = 0;
       mock.on("pageerror", () => {
         errors++;
       });
       mock.on("request", (request) => {
         if (
           request.method() !== "GET" &&
-          new URL(request.url()).pathname === "/api/admin/resume"
+          new URL(request.url()).pathname.startsWith("/api/admin/resume")
         )
           writes++;
+      });
+      await mock.route("**/api/admin/resume/prepare", (route) => {
+        mockedWrites++;
+        uploadAttempts++;
+        return uploadAttempts === 1
+          ? route.fulfill({ status: 503, json: { error: "Review upload unavailable" } })
+          : uploadAttempts === 2
+            ? route.fulfill({ status: 413, contentType: "text/html", body: "<html><body>Request too large</body></html>" })
+            : route.fulfill({ json: { path: "documents/00000000-0000-4000-8000-000000000123.pdf", token: "review-only-token", filename: "review.pdf", sizeBytes: 9, expectedPath: null, expectedUpdatedAt: "2026-10-05T00:00:00.000Z", expiresAt: Date.now() + 60_000, proof: "f".repeat(64) } });
+      });
+      await mock.route("**/api/admin/resume/finish", (route) => { mockedWrites++; return route.fulfill({ json: { data: { isConfigured: true, isActive: true, filename: "review-updated.pdf", mimeType: "application/pdf", sizeBytes: 9, updatedAt: "2026-10-05T00:01:00.000Z" } } }); });
+      await mock.route("**/storage/v1/**", (route) => {
+        if (!route.request().url().includes("/object/upload/sign/")) return route.abort();
+        signedTransfers++;
+        return route.fulfill({ json: { Key: "review-only" } });
       });
       await mock.route("**/api/admin/resume", (route) => {
         if (route.request().method() === "GET")
@@ -137,13 +177,6 @@ test(
               },
             },
           });
-        if (route.request().method() === "POST") {
-          mockedWrites++;
-          uploadAttempts++;
-          return uploadAttempts === 1
-            ? route.fulfill({ status: 503, json: { error: "Review upload unavailable" } })
-            : route.fulfill({ status: 413, contentType: "text/html", body: "<html><body>Request too large</body></html>" });
-        }
         if (route.request().method() === "DELETE") {
           mockedWrites++;
           return route.fulfill({
@@ -198,6 +231,10 @@ test(
       await mock.getByRole("alert").filter({ hasText: "request-size limit" }).waitFor();
       if (!(await mock.getByText("review-fixture.pdf", { exact: true }).count())) failures.push("html-upload-lost-current-file");
       if (!(await mock.getByRole("button", { name: "Refresh status" }).count())) failures.push("missing-upload-status-recovery");
+      await mock.locator("#resume-upload").setInputFiles({ name: "review.pdf", mimeType: "application/pdf", buffer: Buffer.from("%PDF-1.4\n") });
+      await mock.getByRole("dialog", { name: "Replace the live Resume?" }).getByRole("button", { name: "Replace PDF" }).click();
+      await mock.getByText("review-updated.pdf", { exact: true }).waitFor({ timeout: 10000 }).catch(() => failures.push("signed-upload-workflow"));
+      if (signedTransfers !== 1) failures.push("signed-transfer-not-called");
       await mock.getByRole("button", { name: "Delete live PDF" }).click();
       await mock.locator("#admin-confirm-text").fill("DELETE");
       await mock
@@ -209,7 +246,7 @@ test(
         .filter({ hasText: "Review delete unavailable" })
         .waitFor();
       if (
-        !(await mock.getByText("review-fixture.pdf", { exact: true }).count())
+        !(await mock.getByText("review-updated.pdf", { exact: true }).count())
       )
         failures.push("failed-delete-lost-current-file");
       for (const width of [320, 390, 768, 1440]) {

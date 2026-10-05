@@ -188,6 +188,12 @@ backup or disposable Supabase project and apply the pending
 disposable PDF to test publish, replacement, download bytes, rejection,
 deletion and private Storage cleanup. No existing Resume was overwritten or
 deleted during the Admin visual pass; its PDF interactions used mocked writes.
+The Admin form now sends the PDF directly to private Supabase Storage using a
+short-lived signed token to avoid the sandbox upload gateway. Before release,
+verify browser-to-Storage CORS and the actual accepted-file flow with only a
+disposable PDF; inspect private Storage for unreferenced pending files after a
+failed transfer or interrupted finalization. Never remove a pending path that
+has become the active Resume. No real PDF transfer was made in this iteration.
 The public `/resume` page remains locked.
 
 After an approved migration and isolated CRUD pass, the owner must review the
