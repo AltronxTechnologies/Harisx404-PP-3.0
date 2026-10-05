@@ -10,6 +10,7 @@ import type { BuildlogProjectAdmin } from "@/app/buildlog/types";
 import { parseSemanticVersion } from "@/app/buildlog/version";
 import { AdminConfirmDialog } from "./AdminConfirmDialog";
 import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
+import { useBuildlogNavigationGuard } from "./useBuildlogNavigationGuard";
 
 const itemSchema = z.object({
   id: z.string().optional(),
@@ -37,7 +38,7 @@ const formSchema = z.object({
   github_url: optionalHttpsUrl,
   live_url: optionalHttpsUrl,
   project_status: z.enum(["in_progress", "live", "completed"]),
-  display_order: z.coerce.number().int().min(0).max(10000),
+  display_order: z.coerce.number({ invalid_type_error: "Display order is required." }).int().min(0).max(10000),
   status: z.enum(["draft", "published", "archived"]),
   is_demo: z.boolean(),
   items: z.array(itemSchema).min(1, "Add at least one release item.").max(50),
@@ -85,7 +86,6 @@ export function BuildlogForm({ initialData }: { initialData?: BuildlogProjectAdm
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState("");
   const [confirmation, setConfirmation] = useState<{ title: string; description: string; label: string; data: FormValues } | null>(null);
-  const [leaveOpen, setLeaveOpen] = useState(false);
   const {
     register,
     control,
@@ -119,6 +119,7 @@ export function BuildlogForm({ initialData }: { initialData?: BuildlogProjectAdm
         },
   });
   const { fields, append, remove, swap } = useFieldArray({ control, name: "items" });
+  const { leaveTarget, setLeaveTarget, confirmLeave } = useBuildlogNavigationGuard(isDirty);
 
   useEffect(() => {
     if (!isDirty) return;
@@ -230,8 +231,8 @@ export function BuildlogForm({ initialData }: { initialData?: BuildlogProjectAdm
         </label>
         <label className="text-sm font-medium">
           Display order
-          <input type="number" {...register("display_order")} className={inputClass} />
-          {errors.display_order && <span role="alert" className="mt-1.5 block text-xs text-red-500">{errors.display_order.message}</span>}
+          <input type="number" {...register("display_order", { setValueAs: (value: string) => value === "" ? NaN : Number(value) })} aria-invalid={Boolean(errors.display_order)} aria-describedby={errors.display_order ? "buildlog-display-order-error" : undefined} className={inputClass} />
+          {errors.display_order && <span id="buildlog-display-order-error" role="alert" className="mt-1.5 block text-xs text-red-500">{errors.display_order.message}</span>}
         </label>
         <label className="text-sm font-medium">
           Status
@@ -312,7 +313,7 @@ export function BuildlogForm({ initialData }: { initialData?: BuildlogProjectAdm
       </fieldset>
 
       <div className="flex justify-end gap-3 border-t border-border-hairline pt-6">
-        <button type="button" onClick={() => { if (isSubmitting) return; if (isDirty) setLeaveOpen(true); else router.push("/admin/buildlog"); }} className="min-h-11 rounded-xl px-4 py-2.5 text-sm font-medium text-ink-secondary hover:bg-surface-base">Cancel</button>
+        <button type="button" onClick={() => { if (isSubmitting) return; if (isDirty) setLeaveTarget("/admin/buildlog"); else router.push("/admin/buildlog"); }} className="min-h-11 rounded-xl px-4 py-2.5 text-sm font-medium text-ink-secondary hover:bg-surface-base">Cancel</button>
         <button type="submit" disabled={isSubmitting} className="inline-flex min-w-40 items-center justify-center rounded-xl bg-accent-signal px-6 py-2.5 text-sm font-medium text-white shadow hover:opacity-90 disabled:cursor-wait disabled:opacity-50">
           {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}
           {initialData?.id ? "Update project" : "Create project"}
@@ -321,7 +322,7 @@ export function BuildlogForm({ initialData }: { initialData?: BuildlogProjectAdm
       </fieldset>
     </form>
     <AdminConfirmDialog open={confirmation !== null} title={confirmation?.title || "Confirm publication"} description={confirmation?.description || ""} confirmLabel={confirmation?.label || "Confirm"} pending={isSubmitting} onClose={() => setConfirmation(null)} onConfirm={() => { const pending = confirmation; setConfirmation(null); if (pending) void save(pending.data); }} />
-    <AdminConfirmDialog open={leaveOpen} title="Discard unsaved Buildlog changes?" description="Project details and release-item changes on this page have not been saved." confirmLabel="Discard changes" destructive onClose={() => setLeaveOpen(false)} onConfirm={() => { setLeaveOpen(false); router.push("/admin/buildlog"); }} />
+    <AdminConfirmDialog open={leaveTarget !== null} title="Discard unsaved Buildlog changes?" description="Project details and release-item changes on this page have not been saved." confirmLabel="Discard changes" destructive onClose={() => setLeaveTarget(null)} onConfirm={() => confirmLeave((target) => router.push(target))} />
     </>
   );
 }

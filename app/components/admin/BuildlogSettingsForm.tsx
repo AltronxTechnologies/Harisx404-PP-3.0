@@ -9,6 +9,7 @@ import * as z from "zod";
 import type { BuildlogSettings } from "@/app/buildlog/types";
 import { AdminConfirmDialog } from "./AdminConfirmDialog";
 import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
+import { useBuildlogNavigationGuard } from "./useBuildlogNavigationGuard";
 
 const schema = z.object({
   updated_at: z.string().datetime({ offset: true }),
@@ -31,7 +32,6 @@ export function BuildlogSettingsForm({ initialData }: { initialData: BuildlogSet
   const [saved, setSaved] = useState(false);
   const [warning, setWarning] = useState("");
   const [confirmation, setConfirmation] = useState<(BuildlogSettings & { updated_at: string }) | null>(null);
-  const [leaveOpen, setLeaveOpen] = useState(false);
   const {
     register,
     handleSubmit,
@@ -41,6 +41,7 @@ export function BuildlogSettingsForm({ initialData }: { initialData: BuildlogSet
     resolver: zodResolver(schema),
     defaultValues: initialData,
   });
+  const { leaveTarget, setLeaveTarget, confirmLeave } = useBuildlogNavigationGuard(isDirty);
 
   useEffect(() => {
     if (!isDirty) return;
@@ -147,7 +148,7 @@ export function BuildlogSettingsForm({ initialData }: { initialData: BuildlogSet
       </div>
 
       <div className="flex flex-wrap justify-end gap-2 border-t border-border-hairline pt-6">
-        <button type="button" onClick={() => { if (isSubmitting) return; if (isDirty) setLeaveOpen(true); else router.push("/admin/buildlog"); }} className="min-h-11 rounded-xl px-4 text-sm font-medium text-ink-secondary hover:bg-surface-base">Back to Buildlog</button>
+        <button type="button" onClick={() => { if (isSubmitting) return; if (isDirty) setLeaveTarget("/admin/buildlog"); else router.push("/admin/buildlog"); }} className="min-h-11 rounded-xl px-4 text-sm font-medium text-ink-secondary hover:bg-surface-base">Back to Buildlog</button>
         <button type="submit" disabled={isSubmitting} className="inline-flex min-w-40 items-center justify-center rounded-xl bg-accent-signal px-6 py-2.5 text-sm font-medium text-white shadow transition-opacity hover:opacity-90 disabled:cursor-wait disabled:opacity-50">
           {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}
           Save page settings
@@ -156,7 +157,7 @@ export function BuildlogSettingsForm({ initialData }: { initialData: BuildlogSet
       </fieldset>
     </form>
     <AdminConfirmDialog open={confirmation !== null} title="Update the public Buildlog page?" description="These heading, archive and search metadata changes will appear on the public Buildlog after saving." confirmLabel="Save page settings" pending={isSubmitting} onClose={() => setConfirmation(null)} onConfirm={() => { const pending = confirmation; setConfirmation(null); if (pending) void save(pending); }} />
-    <AdminConfirmDialog open={leaveOpen} title="Discard unsaved Buildlog settings?" description="Your changes to public page copy and search metadata have not been saved." confirmLabel="Discard changes" destructive onClose={() => setLeaveOpen(false)} onConfirm={() => { setLeaveOpen(false); router.push("/admin/buildlog"); }} />
+    <AdminConfirmDialog open={leaveTarget !== null} title="Discard unsaved Buildlog settings?" description="Your changes to public page copy and search metadata have not been saved." confirmLabel="Discard changes" destructive onClose={() => setLeaveTarget(null)} onConfirm={() => confirmLeave((target) => router.push(target))} />
     </>
   );
 }

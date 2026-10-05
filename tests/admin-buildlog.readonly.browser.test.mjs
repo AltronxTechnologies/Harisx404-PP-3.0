@@ -25,8 +25,10 @@ test(
     let pageErrors = 0;
     let attemptedWrites = 0;
     let mockedWrites = 0;
+    let settingsWriteCount = 0;
     let blockedWrites = 0;
     let editReviewed = false;
+    let stage = "load";
     const failures = [];
     const base = "http://localhost:3000";
     try {
@@ -73,8 +75,9 @@ test(
         const method = route.request().method();
         if (["GET", "HEAD", "OPTIONS"].includes(method))
           return route.continue();
-        attemptedWrites++;
         const path = new URL(route.request().url()).pathname;
+        if (path === "/__nextjs_original-stack-frames") return route.continue();
+        attemptedWrites++;
         if (path === "/api/admin/buildlog" && method === "POST") {
           mockedWrites++;
           return route.fulfill({
@@ -87,10 +90,10 @@ test(
         }
         if (path === "/api/admin/buildlog/settings" && method === "PUT") {
           mockedWrites++;
-          return route.fulfill({
-            status: 503,
-            json: { error: "Review settings save unavailable" },
-          });
+          settingsWriteCount++;
+          return settingsWriteCount === 1
+            ? route.fulfill({ status: 503, json: { error: "Review settings save unavailable" } })
+            : route.fulfill({ json: { data: { updated_at: "2026-10-05T18:00:00.000Z" }, warning: "Public Buildlog cache could not be refreshed." } });
         }
         if (
           path === "/api/admin/buildlog" &&
@@ -103,6 +106,7 @@ test(
           });
         }
         blockedWrites++;
+        failures.push(`blocked-${method}-${path}`);
         return route.abort();
       });
 
@@ -125,6 +129,8 @@ test(
             });
             return {
               overflow: document.documentElement.scrollWidth > innerWidth + 1,
+              darkTheme: document.querySelector("[data-admin-root].dark") !== null && getComputedStyle(document.querySelector("[data-admin-root]")).backgroundColor === "rgb(13, 13, 15)",
+              uniqueIds: (() => { const ids = [...document.querySelectorAll(".admin-content [id]")].filter((element) => element.getClientRects().length > 0).map((element) => element.id); return ids.length === new Set(ids).size; })(),
               formWidths: [
                 ...document.querySelectorAll(".admin-content form"),
               ].map((form) => Math.round(form.getBoundingClientRect().width)),
@@ -142,6 +148,8 @@ test(
             };
           });
           if (metrics.overflow) failures.push(`${surface}-overflow-${width}`);
+          if (!metrics.darkTheme) failures.push(`${surface}-theme-${width}`);
+          if (!metrics.uniqueIds) failures.push(`${surface}-duplicate-ids-${width}`);
           if (!metrics.formWidths.some((formWidth) => formWidth > 100))
             failures.push(
               `${surface}-missing-visible-form-${width}:${metrics.formWidths.join(",")}`,
@@ -274,6 +282,11 @@ test(
         await form.getByRole("textbox", { name: "Title" }).nth(1).inputValue(),
         "First review item",
       );
+      await form.getByRole("spinbutton", { name: "Display order" }).fill("");
+      await form.getByRole("button", { name: "Create project" }).click();
+      await form.locator("#buildlog-display-order-error").waitFor();
+      assert.equal(mockedWrites, 0, "Blank display order attempted a write");
+      await form.getByRole("spinbutton", { name: "Display order" }).fill("0");
       await checkWidths(form, "new");
       await form.getByRole("button", { name: "Create project" }).click();
       await form
@@ -301,6 +314,10 @@ test(
           .count(),
         1,
       );
+      await form.locator('a[href="/admin"]:visible').first().click();
+      await discard.waitFor();
+      await discard.getByRole("button", { name: "Cancel" }).click();
+      assert.equal(new URL(form.url()).pathname, "/admin/buildlog/new", "Sidebar navigation discarded unsaved project edits");
 
       const settings = await context.newPage();
       const settingsResponse = await settings.goto(
@@ -350,6 +367,41 @@ test(
         2,
         "Mocked settings save not attempted exactly once",
       );
+      await settings.locator('a[href="/admin"]:visible').first().click();
+      const settingsDiscard = settings.getByRole("dialog", { name: "Discard unsaved Buildlog settings?" });
+      await settingsDiscard.waitFor();
+      await settingsDiscard.getByRole("button", { name: "Cancel" }).click();
+      assert.equal(new URL(settings.url()).pathname, "/admin/buildlog/settings", "Sidebar navigation discarded unsaved settings");
+      await settings.locator('button:has-text("Sign Out"):visible').first().click();
+      await settingsDiscard.waitFor();
+      await settingsDiscard.getByRole("button", { name: "Cancel" }).click();
+      assert.equal(new URL(settings.url()).pathname, "/admin/buildlog/settings", "Sign out bypassed unsaved settings warning");
+      await settings.getByRole("button", { name: "Save page settings" }).click();
+      await confirm.waitFor();
+      await confirm.getByRole("button", { name: "Save page settings" }).click();
+      await settings.getByRole("status").filter({ hasText: "Public Buildlog cache could not be refreshed." }).waitFor();
+      assert.equal(mockedWrites, 3, "Mocked settings warning was not surfaced");
+      stage = "history-open";
+      const historyPage = await context.newPage();
+      await historyPage.goto(`${base}/admin/buildlog`, { waitUntil: "domcontentloaded" });
+      await historyPage.getByRole("link", { name: "New project" }).click();
+      await historyPage.getByRole("heading", { name: "Create Buildlog project" }).waitFor();
+      await historyPage.getByRole("textbox", { name: "Project name" }).fill("Review history guard");
+      stage = "history-back";
+      await historyPage.evaluate(() => window.history.back()).catch(() => {});
+      await historyPage.waitForTimeout(600);
+      const historyDiscard = historyPage.getByRole("dialog", { name: "Discard unsaved Buildlog changes?" });
+      if (!(await historyDiscard.count())) failures.push(`history-back-unprotected-${new URL(historyPage.url()).pathname}`);
+      else {
+        stage = "history-cancel";
+        await historyDiscard.getByRole("button", { name: "Cancel" }).click();
+        assert.equal(new URL(historyPage.url()).pathname, "/admin/buildlog/new", "Browser Back discarded unsaved project edits");
+        await historyPage.evaluate(() => window.history.back()).catch(() => {});
+        await historyDiscard.waitFor({ timeout: 10000 });
+        await historyDiscard.getByRole("button", { name: "Discard changes" }).click();
+        await historyPage.getByRole("heading", { name: "Buildlog", exact: true }).waitFor({ timeout: 10000 });
+        assert.equal(new URL(historyPage.url()).pathname, "/admin/buildlog", "Confirmed Back did not leave the form");
+      }
 
       assert.equal(pageErrors, 0, "Browser page errors");
       assert.equal(blockedWrites, 0, "Unexpected browser writes were blocked");
@@ -364,6 +416,7 @@ test(
         "Buildlog responsive/control checks failed",
       );
     } catch {
+      failures.push(`exception-${stage}`);
       // Playwright errors can include rendered project names or URLs; only report safe metrics.
       throw new Error(
         "Admin Buildlog connected review failed; see safe metrics",

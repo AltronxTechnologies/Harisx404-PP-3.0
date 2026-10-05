@@ -27,7 +27,13 @@ export default async function AdminBuildlogPage({ searchParams }: { searchParams
   };
   const { count, error: countError } = await filtered(true);
   const pages = count === null ? 1 : Math.max(1, Math.ceil(count / PAGE_SIZE));
-  if (!countError && page > pages) redirect(pageHref(pages));
+  if (!countError && page > pages) {
+    const corrected = new URL(pageHref(pages), "http://admin.local");
+    if (params.saved === "1") corrected.searchParams.set("saved", "1");
+    if (params.notice === "deleted") corrected.searchParams.set("notice", "deleted");
+    if (params.cache === "stale") corrected.searchParams.set("cache", "stale");
+    redirect(`${corrected.pathname}${corrected.search}`);
+  }
   const { data: projects, error: projectsError } = countError || count === null
     ? { data: null, error: countError }
     : await filtered(false).order("display_order", { ascending: true }).order("name", { ascending: true }).order("id").range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
