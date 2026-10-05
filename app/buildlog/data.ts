@@ -5,7 +5,7 @@ import { buildlogProjects as fallbackProjects } from "@/app/data/buildlog";
 import { getPublicSupabase } from "@/app/lib/supabase/safe";
 import type { BuildlogItem, BuildlogProject, BuildlogSettings } from "./types";
 
-export const fallbackBuildlogSettings: BuildlogSettings = {
+export const buildlogPageSettings: BuildlogSettings = {
   kicker: "The build never stops",
   heading: "Build. Ship.",
   heading_accent: "Evolve.",
@@ -96,34 +96,5 @@ const loadBuildlogProjects = async (): Promise<BuildlogProject[]> => {
 export const fetchBuildlogProjects = unstable_cache(
   loadBuildlogProjects,
   ["buildlog-projects-v7"],
-  { revalidate: 3600, tags: ["buildlog"] },
-);
-
-const loadBuildlogSettings = async (): Promise<BuildlogSettings> => {
-  const supabase = getPublicSupabase();
-  if (!supabase) {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error("Buildlog settings configuration is unavailable.");
-    }
-    return fallbackBuildlogSettings;
-  }
-
-  const { data, error } = await supabase
-    .from("public_buildlog_settings")
-    .select("kicker, heading, heading_accent, description, archive_label, seo_title, seo_description")
-    .single();
-  if (error && /relation|column|does not exist|schema cache|not find|no rows/i.test(error.message)) {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error("Buildlog settings schema is unavailable.");
-    }
-    return fallbackBuildlogSettings;
-  }
-  if (error || !data) throw new Error("Unable to load Buildlog settings.");
-  return data;
-};
-
-export const fetchBuildlogSettings = unstable_cache(
-  loadBuildlogSettings,
-  ["buildlog-settings-v1"],
   { revalidate: 3600, tags: ["buildlog"] },
 );

@@ -15,19 +15,19 @@ test("Community Wall renders managed production states", async () => {
   assert.doesNotMatch(html, /Community Wall route error/i);
 });
 
-test("Community Wall moderation and settings APIs are fail-closed", async () => {
+test("Community Wall moderation API is fail-closed and the per-page settings API is retired", async () => {
   for (const method of ["GET", "PATCH", "DELETE"]) {
     const response = await fetch(`${baseUrl}/api/admin/community-wall`, { method });
     assert.equal(response.status, 401, `${method} should require Admin authorization`);
   }
   for (const method of ["GET", "PUT"]) {
     const response = await fetch(`${baseUrl}/api/admin/community-wall/settings`, { method });
-    assert.equal(response.status, 401, `${method} settings should require Admin authorization`);
+    assert.equal(response.status, 404, `${method} retired settings API should not exist`);
   }
 });
 
-test("Community Wall source enforces moderation, bounded reads, and managed copy", async () => {
-  const [page, entry, avatar, scallop, data, action, migration, adminApi, settingsApi, adminPage, form, loading, error] = await Promise.all([
+test("Community Wall source enforces moderation, bounded reads, and static page copy", async () => {
+  const [page, entry, avatar, scallop, data, action, migration, adminApi, adminPage, redirect, loading, error] = await Promise.all([
     readFile(new URL("../app/community-wall/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/components/guestbook/GuestbookEntryCard.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/components/guestbook/CommunityWallAvatar.tsx", import.meta.url), "utf8"),
@@ -36,9 +36,8 @@ test("Community Wall source enforces moderation, bounded reads, and managed copy
     readFile(new URL("../app/community-wall/actions.ts", import.meta.url), "utf8"),
     readFile(new URL("../migrations/2026_community_wall_messages.sql", import.meta.url), "utf8"),
     readFile(new URL("../app/api/admin/community-wall/route.ts", import.meta.url), "utf8"),
-    readFile(new URL("../app/api/admin/community-wall/settings/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/admin/(dashboard)/community-wall/page.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../app/components/admin/CommunityWallSettingsForm.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/admin/(dashboard)/community-wall/settings/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/community-wall/loading.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/community-wall/error.tsx", import.meta.url), "utf8"),
   ]);
@@ -72,10 +71,13 @@ test("Community Wall source enforces moderation, bounded reads, and managed copy
   assert.match(adminApi, /auth\.getUser\(\)/);
   assert.match(adminApi, /ADMIN_EMAIL/);
   assert.match(adminApi, /Community Wall note not found/);
-  assert.match(settingsApi, /community_wall_settings/);
+  assert.match(data, /export const communityWallPageSettings/);
+  assert.doesNotMatch(data, /public_community_wall_settings|fetchCommunityWallSettings/);
   assert.match(adminPage, /Pending review/);
   assert.match(adminPage, /CommunityWallModerationActions/);
   assert.match(adminPage, /\.range\(/);
+  assert.doesNotMatch(adminPage, /Page settings|\/admin\/community-wall\/settings/);
+  assert.match(redirect, /redirect\("\/admin\/community-wall"\)/);
   assert.match(loading, /Loading Community Wall/);
   assert.match(error, /role="alert"/);
 
@@ -83,8 +85,6 @@ test("Community Wall source enforces moderation, bounded reads, and managed copy
     const pattern = new RegExp(field);
     assert.match(migration, pattern);
     assert.match(data, pattern);
-    assert.match(settingsApi, pattern);
-    assert.match(form, pattern);
   }
 });
 

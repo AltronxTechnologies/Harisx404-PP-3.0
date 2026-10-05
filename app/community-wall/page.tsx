@@ -12,17 +12,16 @@ import createSupabaseServerClient, { createSupabaseAdminClient } from "@/app/lib
 import { createGuestbookEntry } from "./actions";
 import {
   COMMUNITY_WALL_PAGE_SIZE,
+  communityWallPageSettings,
   fetchCommunityWall,
-  fetchCommunityWallSettings,
   safeCommunityAvatar,
 } from "./data";
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const settings = await fetchCommunityWallSettings();
-  const image = `${siteMetadata.siteUrl}/brand/logo-wide.png`;
-  return {
+const settings = communityWallPageSettings;
+const image = `${siteMetadata.siteUrl}/brand/logo-wide.png`;
+export const metadata: Metadata = {
     title: settings.seo_title,
     description: settings.seo_description,
     openGraph: {
@@ -38,8 +37,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description: settings.seo_description,
       images: [image],
     },
-  };
-}
+};
 
 export default async function CommunityWallPage({
   searchParams,
@@ -49,10 +47,7 @@ export default async function CommunityWallPage({
   const query = await searchParams;
   const pageValue = query.page || "1";
   const requestedPage = /^\d{1,4}$/.test(pageValue) ? Number(pageValue) : 1;
-  const [{ messages, count, page }, settings] = await Promise.all([
-    fetchCommunityWall(requestedPage),
-    fetchCommunityWallSettings(),
-  ]);
+  const { messages, count, page } = await fetchCommunityWall(requestedPage);
   if (page !== requestedPage) {
     redirect(page === 1 ? "/community-wall" : `/community-wall?page=${page}`);
   }

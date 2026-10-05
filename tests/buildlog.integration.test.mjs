@@ -41,7 +41,7 @@ test("Buildlog source has valid hero semantics and explicit route states", async
 
   assert.doesNotMatch(layout, /<h1[^>]*>\s*<p/);
   assert.match(layout, /PaperHeroTexture/);
-  assert.match(layout, /fetchBuildlogSettings/);
+  assert.match(layout, /buildlogPageSettings/);
   assert.match(page, /border-border-primary/);
   assert.match(page, /data-release-summary/);
   assert.match(page, /tabular-nums/);
@@ -110,7 +110,7 @@ test("Buildlog admin API is fail-closed for every method", async () => {
   }
   for (const method of ["GET", "PUT"]) {
     const response = await fetch(`${baseUrl}/api/admin/buildlog/settings`, { method });
-    assert.equal(response.status, 401, `${method} settings should require administrator authorization`);
+    assert.equal(response.status, 404, `${method} retired settings API should not exist`);
   }
 });
 
@@ -186,31 +186,31 @@ test("Buildlog schema, seed, lifecycle, links, API, admin form, and cache contra
   assert.doesNotMatch(collection, /Filter Buildlog projects/);
 });
 
-test("Buildlog page copy is managed through restricted settings", async () => {
-  const [migration, route, form, dataSource, layout, page] = await Promise.all([
+test("Buildlog page copy and metadata are static without a per-page Admin editor", async () => {
+  const [migration, dataSource, layout, page, adminPage, redirect] = await Promise.all([
     readFile(new URL("../migrations/2026_buildlog_zzzz_settings.sql", import.meta.url), "utf8"),
-    readFile(new URL("../app/api/admin/buildlog/settings/route.ts", import.meta.url), "utf8"),
-    readFile(new URL("../app/components/admin/BuildlogSettingsForm.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/buildlog/data.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/buildlog/layout.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/buildlog/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/admin/(dashboard)/buildlog/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/admin/(dashboard)/buildlog/settings/page.tsx", import.meta.url), "utf8"),
   ]);
   for (const field of ["kicker", "heading", "heading_accent", "description", "archive_label", "seo_title", "seo_description"]) {
     const pattern = new RegExp(field);
     assert.match(migration, pattern);
-    assert.match(route, pattern);
-    assert.match(form, pattern);
     assert.match(dataSource, pattern);
   }
   assert.match(migration, /REVOKE ALL ON TABLE public\.buildlog_settings FROM anon, authenticated/);
   assert.match(migration, /public_buildlog_settings/);
-  assert.match(route, /auth\.getUser\(\)/);
-  assert.match(route, /revalidateTag\("buildlog"\)/);
+  assert.match(dataSource, /export const buildlogPageSettings/);
+  assert.doesNotMatch(dataSource, /public_buildlog_settings|fetchBuildlogSettings/);
   assert.match(layout, /settings\.kicker/);
   assert.match(layout, /settings\.heading_accent/);
   assert.match(page, /settings\.seo_title/);
   assert.match(page, /openGraph:/);
   assert.match(page, /twitter:/);
+  assert.doesNotMatch(adminPage, /Page settings|\/admin\/buildlog\/settings/);
+  assert.match(redirect, /redirect\("\/admin\/buildlog"\)/);
 });
 
 test("Legacy changelog admin routes redirect to Buildlog", async () => {

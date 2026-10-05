@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Edit, Plus, Settings, ChevronLeft, ChevronRight } from "lucide-react";
+import { Edit, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { redirect } from "next/navigation";
 import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 import { DeleteBuildlogButton } from "@/app/components/admin/DeleteBuildlogButton";
@@ -47,9 +47,6 @@ export default async function AdminBuildlogPage({ searchParams }: { searchParams
           <p className="text-sm text-ink-secondary">Manage projects and release items shown on the public Buildlog.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Link href="/admin/buildlog/settings" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border-hairline bg-surface-raised px-4 py-2 text-sm font-medium text-ink-secondary transition-colors hover:bg-surface-base hover:text-ink-primary">
-            <Settings className="mr-2 size-4" /> Page settings
-          </Link>
           <Link href="/admin/buildlog/new" className="inline-flex min-h-11 items-center justify-center rounded-xl bg-accent-signal px-4 py-2 text-sm font-medium text-white shadow transition-opacity hover:opacity-90">
             <Plus className="mr-2 size-4" /> New project
           </Link>

@@ -1,23 +1,14 @@
 import type { ReactNode } from "react";
 import { GridWrapper } from "@/app/components/GridWrapper";
 import { PaperHeroTexture } from "@/app/components/PaperHeroTexture";
-import { fallbackBuildlogSettings, fetchBuildlogSettings } from "./data";
-import type { BuildlogSettings } from "./types";
+import { buildlogPageSettings } from "./data";
 
 export default async function BuildlogLayout({ children }: { children: ReactNode }) {
-  let settings: BuildlogSettings | null = null;
-  try {
-    settings = await fetchBuildlogSettings();
-  } catch {
-    if (process.env.NODE_ENV !== "production") {
-      settings = fallbackBuildlogSettings;
-    }
-  }
+  const settings = buildlogPageSettings;
 
   return (
     <div className="relative mt-14">
-      {settings ? (
-        <GridWrapper>
+      <GridWrapper>
           <div className="relative px-4 xl:px-0">
             <PaperHeroTexture className="-inset-x-2 bottom-0 top-[-128px] sm:-inset-x-3 sm:top-[-144px] md:top-[-176px] lg:inset-x-0" />
             <header className="relative mx-auto max-w-3xl text-center">
@@ -35,10 +26,7 @@ export default async function BuildlogLayout({ children }: { children: ReactNode
               </p>
             </header>
           </div>
-        </GridWrapper>
-      ) : (
-        <h1 className="sr-only">Buildlog</h1>
-      )}
+      </GridWrapper>
       {children}
     </div>
   );

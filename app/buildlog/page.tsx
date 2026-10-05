@@ -3,15 +3,14 @@ import Link from "next/link";
 import { BlogStatePanel } from "@/app/components/blog/BlogStatePanel";
 import { CtaSection } from "@/app/components/home/CtaSection";
 import { siteMetadata } from "@/app/data/siteMetadata";
-import { fetchBuildlogProjects, fetchBuildlogSettings } from "./data";
+import { buildlogPageSettings, fetchBuildlogProjects } from "./data";
 import { BuildlogCollection } from "./BuildlogCollection";
 
 export const revalidate = 3600;
 
-export async function generateMetadata(): Promise<Metadata> {
-  const settings = await fetchBuildlogSettings();
-  const socialImage = `${siteMetadata.siteUrl}/brand/logo-wide.png`;
-  return {
+const settings = buildlogPageSettings;
+const socialImage = `${siteMetadata.siteUrl}/brand/logo-wide.png`;
+export const metadata: Metadata = {
     title: settings.seo_title,
     description: settings.seo_description,
     openGraph: {
@@ -34,18 +33,14 @@ export async function generateMetadata(): Promise<Metadata> {
       description: settings.seo_description,
       images: [socialImage],
     },
-  };
-}
+};
 
 export default async function BuildlogPage({
   searchParams,
 }: {
   searchParams: Promise<{ open?: string }>;
 }) {
-  const [projects, settings] = await Promise.all([
-    fetchBuildlogProjects(),
-    fetchBuildlogSettings(),
-  ]);
+  const projects = await fetchBuildlogProjects();
   const query = await searchParams;
   const initialOpen = query.open && projects.some((project) => project.id === query.open)
     ? query.open

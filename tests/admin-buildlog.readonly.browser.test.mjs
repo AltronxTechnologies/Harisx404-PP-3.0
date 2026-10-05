@@ -25,7 +25,6 @@ test(
     let pageErrors = 0;
     let attemptedWrites = 0;
     let mockedWrites = 0;
-    let settingsWriteCount = 0;
     let blockedWrites = 0;
     let editReviewed = false;
     let stage = "load";
@@ -87,13 +86,6 @@ test(
               issues: { fieldErrors: { name: ["Review name feedback"] } },
             },
           });
-        }
-        if (path === "/api/admin/buildlog/settings" && method === "PUT") {
-          mockedWrites++;
-          settingsWriteCount++;
-          return settingsWriteCount === 1
-            ? route.fulfill({ status: 503, json: { error: "Review settings save unavailable" } })
-            : route.fulfill({ json: { data: { updated_at: "2026-10-05T18:00:00.000Z" }, warning: "Public Buildlog cache could not be refreshed." } });
         }
         if (
           path === "/api/admin/buildlog" &&
@@ -318,6 +310,10 @@ test(
       await discard.waitFor();
       await discard.getByRole("button", { name: "Cancel" }).click();
       assert.equal(new URL(form.url()).pathname, "/admin/buildlog/new", "Sidebar navigation discarded unsaved project edits");
+      await form.locator('button:has-text("Sign Out"):visible').first().click();
+      await discard.waitFor();
+      await discard.getByRole("button", { name: "Cancel" }).click();
+      assert.equal(new URL(form.url()).pathname, "/admin/buildlog/new", "Sign Out bypassed unsaved project warning");
 
       const settings = await context.newPage();
       const settingsResponse = await settings.goto(
@@ -327,60 +323,17 @@ test(
       assert.equal(
         settingsResponse?.status(),
         200,
-        "Buildlog settings unavailable",
+        "Retired Buildlog settings did not redirect to the list",
       );
-      await settings
-        .getByRole("heading", { name: "Buildlog page settings" })
-        .waitFor();
-      assert.equal(
-        await settings
-          .getByRole("alert")
-          .filter({ hasText: "Buildlog settings could not be loaded" })
-          .count(),
-        0,
-        "Buildlog settings load failed",
-      );
-      await checkWidths(settings, "settings");
-      const kicker = settings.getByRole("textbox", { name: "Hero kicker" });
-      await kicker.fill("R");
-      await settings
-        .getByRole("button", { name: "Save page settings" })
-        .click();
-      await settings.locator("#buildlog-settings-kicker-error").waitFor();
-      assert.equal(mockedWrites, 1, "Invalid settings attempted a write");
-      await kicker.fill("Review only kicker");
-      await settings
-        .getByRole("button", { name: "Save page settings" })
-        .click();
-      const confirm = settings.getByRole("dialog", {
-        name: "Update the public Buildlog page?",
-      });
-      await confirm.waitFor();
-      assert.equal(mockedWrites, 1, "Settings wrote before confirmation");
-      await confirm.getByRole("button", { name: "Save page settings" }).click();
-      await settings
-        .getByRole("alert")
-        .filter({ hasText: "Review settings save unavailable" })
-        .waitFor();
-      assert.equal(
-        mockedWrites,
-        2,
-        "Mocked settings save not attempted exactly once",
-      );
-      await settings.locator('a[href="/admin"]:visible').first().click();
-      const settingsDiscard = settings.getByRole("dialog", { name: "Discard unsaved Buildlog settings?" });
-      await settingsDiscard.waitFor();
-      await settingsDiscard.getByRole("button", { name: "Cancel" }).click();
-      assert.equal(new URL(settings.url()).pathname, "/admin/buildlog/settings", "Sidebar navigation discarded unsaved settings");
-      await settings.locator('button:has-text("Sign Out"):visible').first().click();
-      await settingsDiscard.waitFor();
-      await settingsDiscard.getByRole("button", { name: "Cancel" }).click();
-      assert.equal(new URL(settings.url()).pathname, "/admin/buildlog/settings", "Sign out bypassed unsaved settings warning");
-      await settings.getByRole("button", { name: "Save page settings" }).click();
-      await confirm.waitFor();
-      await confirm.getByRole("button", { name: "Save page settings" }).click();
-      await settings.getByRole("status").filter({ hasText: "Public Buildlog cache could not be refreshed." }).waitFor();
-      assert.equal(mockedWrites, 3, "Mocked settings warning was not surfaced");
+      await settings.getByRole("heading", { name: "Buildlog", exact: true }).waitFor();
+      assert.equal(new URL(settings.url()).pathname, "/admin/buildlog");
+      if (await settings.getByRole("link", { name: "Page settings" }).count()) failures.push("retired-settings-link-still-present");
+      await checkWidths(settings, "retired-settings-redirect");
+      const wall = await context.newPage();
+      await wall.goto(`${base}/admin/community-wall/settings`, { waitUntil: "domcontentloaded" });
+      await wall.getByRole("heading", { name: "Community Wall", exact: true }).waitFor();
+      if (new URL(wall.url()).pathname !== "/admin/community-wall") failures.push("community-settings-not-retired");
+      if (await wall.getByRole("link", { name: "Page settings" }).count()) failures.push("community-settings-link-still-present");
       stage = "history-open";
       const historyPage = await context.newPage();
       await historyPage.goto(`${base}/admin/buildlog`, { waitUntil: "domcontentloaded" });

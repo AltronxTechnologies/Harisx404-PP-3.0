@@ -5,7 +5,7 @@ import type { CommunityWallMessage, CommunityWallSettings } from "./types";
 
 export const COMMUNITY_WALL_PAGE_SIZE = 24;
 
-export const fallbackCommunityWallSettings: CommunityWallSettings = {
+export const communityWallPageSettings: CommunityWallSettings = {
   kicker: "The wall remembers",
   heading: "Words that echo",
   heading_accent: "always.",
@@ -86,27 +86,4 @@ export async function fetchCommunityWall(page: number) {
       patternindex: Number.isInteger(message.patternindex) ? message.patternindex : 0,
     })) as CommunityWallMessage[],
   };
-}
-
-export async function fetchCommunityWallSettings() {
-  const supabase = getPublicSupabase();
-  if (!supabase) {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error("Community Wall settings configuration is unavailable.");
-    }
-    return fallbackCommunityWallSettings;
-  }
-
-  const { data, error } = await supabase
-    .from("public_community_wall_settings")
-    .select("kicker, heading, heading_accent, description, collection_label, sign_in_title, sign_in_description, composer_title, composer_description, empty_title, empty_description, seo_title, seo_description")
-    .single();
-  if (error && /relation|schema cache|not find|no rows/i.test(error.message)) {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error("Community Wall settings schema is unavailable.");
-    }
-    return fallbackCommunityWallSettings;
-  }
-  if (error || !data) throw new Error("Unable to load Community Wall settings.");
-  return data as CommunityWallSettings;
 }

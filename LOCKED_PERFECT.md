@@ -1778,6 +1778,17 @@ Authenticated read-only geometry passed at 320/390/768/1024/1280/1440px and
 the public Buildlog regression passed. This records the narrow owner permission,
 not a new production lock or permission to change other Buildlog surfaces.
 
+### 2026-10-05 owner-authorized static Buildlog page copy
+
+The owner requested removal of per-page Admin settings editors and approved
+freezing the current public kicker, hero, archive and SEO/social copy in code.
+`app/buildlog/data.ts`, its layout/page settings consumption, and the Admin
+Buildlog Page settings link/form/API were temporarily unlocked for this
+limited change. Current saved public values matched the checked-in fallback
+exactly; no visible copy, public geometry, project records or settings table
+were changed. Former settings URLs redirect to the Admin list; existing table
+rows remain for rollback. This is not a new formal audit or public re-lock.
+
 ### 2026-09-22 owner-authorized Buildlog archive-toolbar amendment
 
 The owner temporarily unlocked only the Buildlog archive-toolbar typography and
@@ -1891,6 +1902,17 @@ Do not modify Community Wall, its dialog, cards, Admin controls, schema, data
 source, migrations, metadata, responsive geometry, or public presentation without
 a new explicit owner unlock. Shared locked Navbar, Search, Reach Out, CTA, and
 Footer remain independently frozen under their existing entries.
+
+### 2026-10-05 owner-authorized static Community Wall page copy
+
+The owner requested removal of per-page Admin settings editors and approved
+freezing the current hero, collection, sign-in/composer/empty and SEO/social
+copy in code. `app/community-wall/data.ts`, its page settings consumption and
+the Admin Community Wall Page settings link/form/API were temporarily unlocked
+for this limited change. Current saved public values matched the checked-in
+fallback exactly; note moderation, public layout, message data and settings
+table rows were unchanged. Former settings URLs redirect to the Admin list.
+This is not a new formal audit or public re-lock.
 
 ### 2026-09-22 owner-authorized Community Wall hero-rhythm amendment
 

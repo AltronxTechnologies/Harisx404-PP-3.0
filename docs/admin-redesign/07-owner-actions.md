@@ -184,6 +184,13 @@ and authorize a narrowly identified cleanup or amendment separately. Do not
 apply that migration merely to enable the Admin UI. Project and settings
 optimistic locking use existing timestamps and require a disposable connected
 fixture plus verified cleanup before claiming production acceptance.
+The owner subsequently chose to retire **per-page Page settings** for Buildlog
+and Community Wall. Their public copy/SEO now uses identical static values in
+code; Admin editing links/forms/APIs were removed, former URLs redirect, and
+the connected settings tables remain untouched for rollback. The global
+`/admin/settings` page is separate and still controls operational/site values.
+Future copy changes to the two public pages require an explicitly reviewed
+source edit and deployment; a database dashboard change will not affect them.
 Also review the owner's Supabase Auth sessions if available: one temporary
 review session created immediately before a missing-browser failure could not
 be individually confirmed revoked. Do not share session tokens or revoke all
