@@ -233,17 +233,18 @@ test("Media library uses the connected row fields and keeps errors distinct from
 });
 
 test("Media deletion checks protected references before Cloudinary and fails closed", async () => {
-  const [route, page] = await Promise.all([
+  const [route, guard, page] = await Promise.all([
     source("app/api/admin/media/route.ts"),
+    source("app/lib/admin/delete-media.ts"),
     source("app/admin/(dashboard)/media/page.tsx"),
   ]);
   assert.match(route, /export async function DELETE\(request: Request\)/);
+  assert.match(route, /const auth = await requireAdmin\(\);[\s\S]*?deleteManagedMedia\(await createSupabaseAdminClient\(\), id!, detachPostId\)/);
   for (const field of ["cover_image_id", "og_image_id", "media_id", "cover_image_url", "content"]) {
-    assert.match(route, new RegExp(field));
+    assert.match(guard, new RegExp(field));
   }
-  assert.ok(route.indexOf("const auth = await requireAdmin();", route.indexOf("export async function DELETE")) < route.indexOf('db.from("media").delete()', route.indexOf("export async function DELETE")));
-  assert.ok(route.indexOf('db.from("media").delete()') < route.indexOf("cloudinary.uploader.destroy"));
-  assert.match(route, /db\.from\("media"\)\.insert\(item\)/);
+  assert.ok(guard.indexOf('db.from("media").delete()') < guard.indexOf("cloudinary.uploader.destroy"));
+  assert.match(guard, /db\.from\("media"\)\.insert\(item\)/);
   assert.match(page, /aria-label=\{`Delete \$\{item\.alt_text/);
   assert.match(page, /Image deleted from the library and Cloudinary/);
   const anonymous = await fetch(`${baseUrl}/api/admin/media?id=00000000-0000-4000-8000-000000000001`, { method: "DELETE" });

@@ -79,8 +79,8 @@ BEGIN
     IF jsonb_typeof(p_post->'image_ids') <> 'array' THEN
       RAISE EXCEPTION 'BLOG_MEDIA_INVALID: expected an array';
     END IF;
-    IF jsonb_array_length(p_post->'image_ids') > 40 THEN
-      RAISE EXCEPTION 'BLOG_MEDIA_INVALID: choose up to 40 images';
+    IF jsonb_array_length(p_post->'image_ids') > 20 THEN
+      RAISE EXCEPTION 'BLOG_MEDIA_INVALID: choose up to 20 images';
     END IF;
     IF EXISTS (
       SELECT 1 FROM jsonb_array_elements(p_post->'image_ids') AS item(value)

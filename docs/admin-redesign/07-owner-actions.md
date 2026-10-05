@@ -135,8 +135,8 @@ changes; source content remains editable now, and MDX-only syntax is protected
 from a lossy visual conversion. A persisted preference requires a reviewed,
 atomic Blog RPC migration and isolated rollback testing before application.
 Please also review the new unsaved Preview tab in Admin: it shows the public
-article hero/body styling and custom MDX, not the complete public route with
-navigation, reactions, related posts and footer. Confirm whether article-only
+article hero/body styling, custom MDX, tags, and selected related titles, not
+the complete public route with navigation, live reactions, full cards and footer. Confirm whether this editorial
 preview is sufficient before treating it as accepted. No existing post was
 saved or published during its read-only browser verification.
 The new Blog image collection requires a reviewed additive database rollout.
@@ -152,6 +152,18 @@ save, reuse, detach, Cloudinary deletion and cleanup. Do not use a real Blog
 or Project image for that test. Confirm the production domain too: configured
 `siteMetadata.siteUrl` previously returned HTTP 404, and generated canonical
 URLs must point to a live site before SEO sign-off.
+The date-only Admin calendar now schedules a future post at 00:00 UTC and
+keeps drafts private. The public Blog index displays UTC dates, but the locked
+public article formatter currently uses the visitor's local timezone; a
+midnight UTC scheduled post may show the previous calendar day west of UTC.
+Changing that locked public formatter requires a separate explicit unlock.
+Also review the 20-image/10-tag caps against existing posts before applying
+the migration. Unchanged legacy tags/images are preserved when editing; adding
+new ones requires meeting the new limits. Only files uploaded into a saved
+Blog's dedicated Cloudinary folder are eligible for automatic cleanup on its
+permanent deletion. Generic uploads, including uploads during creation of an
+unsaved post, and shared assets remain in the Media Library for manual review:
+the database cannot prove a generic URL is not hard-coded elsewhere.
 Also review the owner's Supabase Auth sessions if available: one temporary
 review session created immediately before a missing-browser failure could not
 be individually confirmed revoked. Do not share session tokens or revoke all

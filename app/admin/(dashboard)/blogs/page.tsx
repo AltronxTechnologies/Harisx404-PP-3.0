@@ -78,6 +78,7 @@ export default async function AdminBlogsPage({
           <CheckCircle2 aria-hidden className="size-5 shrink-0" />{successMessage}
         </p>
       )}
+      {rawParams.notice === "deleted" && rawParams.cleanup === "images" && <p role="alert" className="rounded-xl border border-amber-500/40 bg-amber-950/20 p-4 text-sm text-amber-200">Post deleted. Some image files were retained or could not be removed safely. Review them in the Media Library.</p>}
 
       <BlogFilters key={blogListUrl(params, params.page)} params={params} />
 

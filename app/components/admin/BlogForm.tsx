@@ -4,15 +4,17 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headlessui/react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Loader2, Plus, X, Image as ImageIcon } from "lucide-react";
+import { Check, ChevronDown, Loader2, Plus, X, Image as ImageIcon } from "lucide-react";
 import { MediaPickerModal } from "./MediaPickerModal";
 import { BlogImageManager, type BlogMediaItem } from "./BlogImageManager";
+import { BlogDatePicker } from "./BlogDatePicker";
 import { AdminConfirmDialog } from "./AdminConfirmDialog";
 import { canUseVisualBlogEditor } from "@/app/lib/admin/blog-visual-eligibility";
-import { blogCanonicalUrl, normalizeBlogSlug, serializeBlogPublishDate, toLocalBlogDateTime } from "@/app/lib/blog-defaults";
+import { blogCanonicalUrl, isValidBlogDate, normalizeBlogSlug, resolveBlogPublishDate, todayUtcDate } from "@/app/lib/blog-defaults";
 import { isAllowedBlogImageUrl } from "@/app/components/blog/blogImage";
 import { siteMetadata } from "@/app/data/siteMetadata";
 
@@ -44,7 +46,7 @@ const blogSchema = z.object({
       return false;
     }
   }, "Use an HTTP(S) URL without credentials").optional().or(z.literal("")),
-  published_at: z.string().refine((value) => !value || !Number.isNaN(Date.parse(value)), "Choose a valid publish date").optional(),
+  published_at: z.string().refine((value) => !value || isValidBlogDate(value), "Choose a valid calendar date").optional(),
   tags: z.array(z.string().trim().min(1).max(50)).max(25).optional(),
   related_blog_post_ids: z.array(z.string().uuid()).max(3, "Choose no more than three posts").refine((ids) => new Set(ids).size === ids.length, "Choose different posts"),
 });
@@ -65,15 +67,16 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
   const [blogImages, setBlogImages] = useState<BlogMediaItem[]>([]);
   const [imageManagerAvailable, setImageManagerAvailable] = useState(false);
-  const [customCanonical, setCustomCanonical] = useState(Boolean(initialData?.canonical_url && initialData.canonical_url !== blogCanonicalUrl(initialData.slug, siteMetadata.siteUrl)));
   const [confirmation, setConfirmation] = useState<{ title: string; description: string; label: string; data: BlogFormValues; publishedAt: string; content: string } | null>(null);
   const [leaveTarget, setLeaveTarget] = useState<"list" | "preview" | null>(null);
   const [editorMode, setEditorMode] = useState<"rich" | "source" | "preview">(
     initialData?.id && (initialData.editor_mode !== "rich" || !canUseVisualBlogEditor(initialData.content)) ? "source" : "rich"
   );
   const [modeError, setModeError] = useState("");
-  const [previewSnapshot, setPreviewSnapshot] = useState<Pick<BlogFormValues, "title" | "summary" | "content" | "cover_image_url" | "published_at" | "status"> | null>(null);
+  const [previewSnapshot, setPreviewSnapshot] = useState<Pick<BlogFormValues, "title" | "slug" | "summary" | "content" | "cover_image_url" | "published_at" | "status" | "tags" | "related_blog_post_ids" | "canonical_url"> | null>(null);
   const slugEdited = useRef(Boolean(initialData?.id));
+  const canonicalEdited = useRef(Boolean(initialData?.canonical_url && initialData.canonical_url !== blogCanonicalUrl(initialData.slug, siteMetadata.siteUrl)));
+  const publishDateEdited = useRef(false);
   const richContentEdited = useRef(false);
   const richEditor = editorMode === "rich";
 
@@ -94,8 +97,8 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
       summary: initialData.summary || "",
       cover_image_url: initialData.cover_image_url || "",
       cover_image_id: initialData.cover_image_id || "",
-      canonical_url: initialData.canonical_url || "",
-      published_at: toLocalBlogDateTime(initialData.published_at),
+      canonical_url: initialData.canonical_url || blogCanonicalUrl(initialData.slug, siteMetadata.siteUrl),
+      published_at: initialData.published_at?.slice(0, 10) || todayUtcDate(),
       related_blog_post_ids: initialData.related_blog_post_ids ?? [],
       image_ids: [],
     } : {
@@ -107,7 +110,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
       cover_image_url: "",
       cover_image_id: "",
       canonical_url: "",
-      published_at: "",
+      published_at: todayUtcDate(),
       tags: [],
       related_blog_post_ids: [],
       image_ids: [],
@@ -122,18 +125,29 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
   const ownCanonical = blogCanonicalUrl(slug || "", siteMetadata.siteUrl);
   const selectedRelatedIds = watch("related_blog_post_ids") || [];
   const relatedOptions = availablePosts.filter((item) => item.id !== initialData?.id && `${item.title} ${item.slug}`.toLowerCase().includes(relatedSearch.trim().toLowerCase()));
-  const scheduled = status === "published" && Date.parse(watch("published_at") || "") > Date.now();
-  const publishingNow = status === "published" && initialData?.status === "published" && !watch("published_at") && Date.parse(initialData.published_at || "") > Date.now();
+  const pickedDate = watch("published_at") || "";
+  const scheduled = status === "published" && (publishDateEdited.current ? pickedDate > todayUtcDate() : Boolean(initialData?.published_at && Date.parse(initialData.published_at) > Date.now()));
+  const publishingNow = status === "published" && initialData?.status === "published" && Boolean(initialData.published_at && Date.parse(initialData.published_at) > Date.now()) && !scheduled;
+
+  useEffect(() => {
+    if (!canonicalEdited.current && getValues("canonical_url") !== ownCanonical) {
+      setValue("canonical_url", ownCanonical, { shouldDirty: Boolean(isDirty) });
+    }
+  }, [getValues, ownCanonical, setValue, isDirty]);
 
   const refreshPreview = () => {
     const data = getValues();
     setPreviewSnapshot({
       title: data.title,
+      slug: data.slug,
       summary: data.summary,
       content: data.content,
       cover_image_url: data.cover_image_url,
-      published_at: data.published_at ? serializeBlogPublishDate(data.published_at, initialData?.published_at) : "",
+      published_at: resolveBlogPublishDate({ date: data.published_at || "", edited: publishDateEdited.current, status: data.status, previous: initialData?.published_at, previousStatus: initialData?.status }),
       status: data.status,
+      canonical_url: data.canonical_url || ownCanonical,
+      tags: data.tags,
+      related_blog_post_ids: data.related_blog_post_ids,
     });
   };
 
@@ -165,16 +179,24 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
     else router.push(target === "list" ? "/admin/blogs" : `/admin/blogs/${initialData?.id}/preview`);
   };
 
-  const addTag = () => {
-    const value = tagInput.trim();
-    if (!value || tags.includes(value)) return;
-    if (value.length > 50 || !/[\p{L}\p{N}]/u.test(value) || tags.length >= 25) {
-      setError("tags", { message: "Use up to 25 tags of at most 50 characters, each with a letter or number." });
-      return;
+  const addTag = (raw = tagInput, current = tags) => {
+    const additions = raw.split(",").map((tag) => tag.trim()).filter(Boolean);
+    const next = [...current];
+    for (const value of additions) {
+      if (!/[\p{L}\p{N}]/u.test(value) || value.length > 50) {
+        setError("tags", { message: "Each tag needs a letter or number and must be 50 characters or fewer." });
+        return null;
+      }
+      if (!next.some((tag) => tag.toLocaleLowerCase() === value.toLocaleLowerCase())) next.push(value);
+    }
+    if (next.length > 10) {
+      setError("tags", { message: "Choose no more than 10 tags." });
+      return null;
     }
     clearErrors("tags");
-    setValue("tags", [...tags, value], { shouldDirty: true });
+    setValue("tags", next, { shouldDirty: true, shouldValidate: true });
     setTagInput("");
+    return next;
   };
 
   const removeTag = (tagToRemove: string) => {
@@ -229,18 +251,27 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
   };
 
   const onSubmit = async (data: BlogFormValues) => {
-    data = { ...data, canonical_url: customCanonical ? data.canonical_url : blogCanonicalUrl(data.slug, siteMetadata.siteUrl) };
-    const publishedAt = data.status === "published" && !data.published_at
-      ? new Date().toISOString()
-      : serializeBlogPublishDate(data.published_at, initialData?.published_at);
+    if (data.status === "published" && !data.cover_image_url && !(initialData?.status === "published" && !initialData.cover_image_url)) {
+      setError("cover_image_url", { message: "Choose a cover image before publishing." });
+      return;
+    }
+    if (tagInput.trim()) {
+      const next = addTag(tagInput, data.tags || []);
+      if (!next) return;
+      data = { ...data, tags: next };
+    }
+    data = { ...data, canonical_url: data.canonical_url || blogCanonicalUrl(data.slug, siteMetadata.siteUrl) };
+    const publishedAt = resolveBlogPublishDate({ date: data.published_at || "", edited: publishDateEdited.current, status: data.status, previous: initialData?.published_at, previousStatus: initialData?.status });
     const content = richEditor && initialData?.id && !richContentEdited.current && data.content === initialData.content ? initialData.content : data.content;
     const publicationChanged = Boolean(initialData?.id && initialData.status === "published" && publishedAt !== initialData.published_at);
     if ((data.status !== initialData?.status || publicationChanged) && (data.status === "published" || initialData?.status === "published")) {
       setConfirmation(data.status === "draft"
         ? { title: "Unpublish this post?", description: "It will leave the public Blog and return to drafts. You can publish it again later.", label: "Move to draft", data, publishedAt, content }
         : publishedAt && Date.parse(publishedAt) > Date.now()
-          ? { title: "Schedule this post?", description: "It will become public automatically at the selected time.", label: "Schedule post", data, publishedAt, content }
-          : { title: "Publish this post?", description: "It will become visible on the public Blog as soon as it is saved.", label: "Publish now", data, publishedAt, content });
+          ? { title: initialData?.status === "published" ? "Reschedule this post?" : "Schedule this post?", description: "It will become public automatically at the selected UTC date. Until then, it will not appear on the Blog.", label: "Schedule post", data, publishedAt, content }
+          : initialData?.status === "published" && !publishingNow
+            ? { title: "Update the publication date?", description: "This changes the date displayed on the live article. The post remains public.", label: "Update date", data, publishedAt, content }
+            : { title: "Publish this post?", description: "It will become visible on the public Blog as soon as it is saved.", label: "Publish now", data, publishedAt, content });
       return;
     }
     await savePost(data, publishedAt, content);
@@ -303,32 +334,27 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
 
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-2">
-          <label htmlFor="blog-status" className="text-sm font-medium">Status</label>
-          <select
-            {...register("status")}
-            id="blog-status"
-            aria-invalid={Boolean(errors.status)}
-            aria-describedby={errors.status ? "blog-status-error" : undefined}
-            className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
-          >
-            <option value="draft">Draft</option>
-            <option value="published">Published</option>
-          </select>
-          <p className="text-xs text-ink-secondary">Publishing without a future date makes this post public when saved.</p>
+          <p id="blog-status-label" className="text-sm font-medium">Status</p>
+          <Controller name="status" control={control} render={({ field }) => <Listbox value={field.value} onChange={field.onChange}>
+            <div className="relative">
+              <ListboxButton id="blog-status" aria-labelledby="blog-status-label blog-status" aria-invalid={Boolean(errors.status)} aria-describedby={errors.status ? "blog-status-error" : "blog-status-hint"} className="flex min-h-11 w-full items-center justify-between rounded-xl border border-border-hairline bg-surface-base px-3 text-left text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">
+                <span>{field.value === "draft" ? "Draft / Private" : scheduled ? "Scheduled" : "Published / Public"}</span><ChevronDown className="size-4" aria-hidden />
+              </ListboxButton>
+              <ListboxOptions anchor="bottom" modal={false} className="z-50 w-[var(--button-width)] rounded-xl border border-[#55555e] bg-[#1b1b1f] p-1.5 shadow-2xl [--anchor-gap:6px] focus:outline-none">
+                {(["draft", "published"] as const).map((choice) => <ListboxOption key={choice} value={choice} className="group flex min-h-11 cursor-pointer items-center justify-between rounded-lg px-3 text-sm text-white data-[focus]:bg-white/10">
+                  <span>{choice === "draft" ? "Draft / Private" : "Published / Public"}</span><Check className="size-4 opacity-0 group-data-[selected]:opacity-100" aria-hidden />
+                </ListboxOption>)}
+              </ListboxOptions>
+            </div>
+          </Listbox>} />
+          <p id="blog-status-hint" className="text-xs text-ink-secondary">Drafts are never shown publicly. Published posts appear immediately or on the selected future date.</p>
           {errors.status && <p id="blog-status-error" role="alert" className="text-xs text-red-500">{errors.status.message}</p>}
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="blog-published-at" className="text-sm font-medium">Publish Date (Optional)</label>
-          <input
-            type="datetime-local"
-            {...register("published_at")}
-            id="blog-published-at"
-            aria-invalid={Boolean(errors.published_at)}
-            aria-describedby={errors.published_at ? "blog-published-at-error" : "blog-published-at-hint"}
-            className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
-          />
-          <p id="blog-published-at-hint" className="text-xs text-ink-secondary">Times use your local timezone. Clear this field to publish immediately when the status is Published.</p>
+          <p id="blog-published-at-label" className="text-sm font-medium">Publish Date (Optional)</p>
+          <Controller name="published_at" control={control} render={({ field }) => <BlogDatePicker value={field.value || ""} onChange={(value) => { publishDateEdited.current = true; field.onChange(value); }} errorId={errors.published_at ? "blog-published-at-error" : undefined} />} />
+          <p id="blog-published-at-hint" className="text-xs text-ink-secondary">Defaults to today. Publishing without changing it uses the current instant; a future date goes live at 00:00 UTC. Drafts stay private.</p>
           {errors.published_at && <p id="blog-published-at-error" role="alert" className="text-xs text-red-500">{errors.published_at.message}</p>}
         </div>
       </div>
@@ -357,8 +383,13 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
           
           <MediaPickerModal
             isOpen={isMediaPickerOpen}
+            blogPostId={initialData?.id}
             onClose={() => setIsMediaPickerOpen(false)}
             onSelect={(media) => {
+              if (imageManagerAvailable && blogImages.length >= 20 && !blogImages.some((image) => image.id === media.id)) {
+                setError("image_ids", { message: "Choose no more than 20 images." });
+                return;
+              }
               setValue("cover_image_url", media.secure_url || media.url, { shouldDirty: true, shouldValidate: true });
               setValue("cover_image_id", media.id, { shouldDirty: true });
               if (imageManagerAvailable && !blogImages.some((image) => image.id === media.id)) {
@@ -372,16 +403,16 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
 
         <div className="min-w-0 space-y-2">
           <label htmlFor="blog-canonical-url" className="text-sm font-medium">Canonical URL (SEO)</label>
-          {customCanonical ? <input
-            {...register("canonical_url")}
+          <input
+            {...register("canonical_url", { onChange: (event) => { canonicalEdited.current = event.target.value !== ownCanonical; } })}
             id="blog-canonical-url"
             aria-invalid={Boolean(errors.canonical_url)}
             aria-describedby={errors.canonical_url ? "blog-canonical-url-error" : "blog-canonical-hint"}
             className="min-w-0 w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
-            placeholder="https://original-publisher.example/article"
-          /> : <input id="blog-canonical-url" value={ownCanonical} readOnly aria-describedby="blog-canonical-hint" className="min-w-0 w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm text-ink-secondary" placeholder="Enter a slug to see your canonical URL" />}
-          <p id="blog-canonical-hint" className="text-xs text-ink-secondary">{customCanonical ? "Only use an external canonical if this article was originally published elsewhere. External canonicals exclude this post from your sitemap and RSS feed." : "Automatically generated from your site domain and slug. It updates when the slug changes."}</p>
-          <button type="button" onClick={() => setCustomCanonical((value) => !value)} className="min-h-11 text-sm text-ink-primary underline underline-offset-2">{customCanonical ? "Use automatic site canonical" : "Use a custom external canonical"}</button>
+            placeholder="Enter a slug to create the canonical URL"
+          />
+          <p id="blog-canonical-hint" className="text-xs text-ink-secondary">Prefilled from your site domain and slug. Edit only when this article was first published elsewhere; an external canonical excludes it from sitemap and RSS.</p>
+          <button type="button" onClick={() => { canonicalEdited.current = false; setValue("canonical_url", ownCanonical, { shouldDirty: true, shouldValidate: true }); }} className="min-h-11 text-sm text-ink-primary underline underline-offset-2">Reset to site URL</button>
           {errors.canonical_url && <p id="blog-canonical-url-error" role="alert" className="text-xs text-red-500">{errors.canonical_url.message}</p>}
         </div>
       </div>
@@ -398,14 +429,16 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
         const alt = (image.alt_text || "Blog image").replace(/[\[\]\\\r\n]/g, " ");
         setValue("content", `${getValues("content").trimEnd()}\n\n![${alt}](${url})\n`, { shouldDirty: true, shouldValidate: true });
       }} onEditSource={() => switchMode("source")} />
+      {errors.image_ids && <p role="alert" className="text-sm text-red-300">{errors.image_ids.message}</p>}
 
       <div className="space-y-2">
         <label htmlFor="blog-tag-input" className="text-sm font-medium">Tags</label>
-        <div className="flex flex-wrap gap-2 mb-2">
-          {tags.map(tag => (
-            <span key={tag} className="inline-flex items-center gap-1 px-3 py-1 bg-surface-base border border-border-hairline rounded-full text-xs">
-              {tag}
-              <button type="button" onClick={() => removeTag(tag)} aria-label={`Remove ${tag} tag`} className="text-ink-secondary hover:text-red-500">
+          <p className="text-xs text-ink-secondary">{tags.length} / 10 tags. Separate multiple tags with commas; they power Blog filters. {tags.length > 10 ? "This legacy post exceeds the new limit; existing tags are preserved, but reduce them to add new ones." : ""}</p>
+          <div className="mb-2 flex flex-wrap gap-2">
+            {tags.map(tag => (
+            <span key={tag} className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-border-hairline bg-surface-base py-1 pl-3 pr-1 text-xs">
+              <span className="min-w-0 break-words">{tag}</span>
+              <button type="button" onClick={() => removeTag(tag)} aria-label={`Remove ${tag} tag`} className="flex size-9 shrink-0 items-center justify-center rounded-full text-ink-secondary hover:bg-white/10 hover:text-white">
                 <X className="h-3 w-3" />
               </button>
             </span>
@@ -418,14 +451,14 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
             aria-invalid={Boolean(errors.tags)}
             aria-describedby={errors.tags ? "blog-tags-error" : undefined}
             value={tagInput}
-            onChange={e => setTagInput(e.target.value)}
+            onChange={e => { const text = e.target.value; if (text.includes(",")) { setTagInput(text); addTag(text); } else setTagInput(text); }}
             onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addTag())}
             className="min-w-0 flex-1 rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
-            placeholder="Add a tag and press Enter"
+            placeholder="Add tags, separated by commas"
           />
           <button
             type="button"
-            onClick={addTag}
+            onClick={() => addTag()}
             aria-label="Add tag"
             className="shrink-0 rounded-xl border border-border-hairline bg-surface-raised px-4 py-2 transition-colors hover:bg-surface-base"
           >
@@ -438,7 +471,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
       <fieldset aria-describedby={errors.related_blog_post_ids ? "blog-related-error" : undefined} className="space-y-3 rounded-xl border border-border-hairline p-4">
         <legend className="px-1 text-sm font-medium">Related posts</legend>
         <p className="text-xs text-ink-secondary">Choose up to three live published posts. They appear in the order selected. Leave empty to hide the section.</p>
-        <p className="text-xs font-medium text-ink-secondary">Selected {selectedRelatedIds.length} / 3</p>
+        <p className="text-xs font-medium text-ink-secondary">Selected {selectedRelatedIds.length} / 3. The first two appear on phones and tablets; all three appear on laptops.</p>
         {selectedRelatedIds.length > 0 && <ol className="space-y-1">
           {selectedRelatedIds.map((id, index) => {
             const chosen = availablePosts.find((item) => item.id === id);
@@ -495,7 +528,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
               <p className="text-sm text-ink-secondary">Unsaved preview using the public article renderer.</p>
               <button type="button" onClick={refreshPreview} className="min-h-11 rounded-full border border-border-primary px-4 text-sm font-medium text-ink-primary transition-colors hover:bg-white/10">Refresh preview</button>
             </div>
-            {previewSnapshot && <BlogUnsavedPreview snapshot={previewSnapshot} isNew={!initialData?.id} />}
+            {previewSnapshot && <BlogUnsavedPreview snapshot={previewSnapshot} isNew={!initialData?.id} relatedPosts={availablePosts} />}
           </div>
         ) : <Controller
           name="content"
@@ -538,11 +571,9 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
           className="inline-flex items-center justify-center rounded-xl bg-accent-signal px-6 py-2 text-sm font-medium text-white shadow hover:bg-accent-signal/90 focus:outline-none disabled:opacity-50 transition-all"
         >
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {publishingNow ? "Publish Now" : status === "published" && initialData?.status !== "published"
-            ? scheduled ? "Schedule Post" : "Publish Post"
-            : status === "draft" && initialData?.status === "published"
-              ? "Unpublish Post"
-              : status === "draft" && !initialData?.id ? "Save Draft" : "Save Post"}
+          {publishingNow ? "Publish Now" : status === "draft" ? initialData?.status === "published" ? "Unpublish Post" : initialData?.id ? "Save Post" : "Save Draft"
+            : scheduled ? "Schedule Post"
+              : initialData?.status === "published" ? "Save Post" : "Publish Post"}
         </button>
       </div>
     </form>

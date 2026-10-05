@@ -84,7 +84,7 @@ test("Blog form offers Editor, MDX and unsaved Preview without silently converti
   assert.match(api, /refine\(\(value\) => value\.trim\(\)\.length > 0, "Content is required"\)/);
   assert.doesNotMatch(api, /replace\(\/\\r\\n\?\/g, "\\n"\)\.trim\(\)/);
   assert.match(form, /cover_image_url: initialData\.cover_image_url \|\| ""/);
-  assert.match(form, /canonical_url: initialData\.canonical_url \|\| ""/);
+  assert.match(form, /canonical_url: initialData\.canonical_url \|\| blogCanonicalUrl/);
 });
 
 test("manual cover URL edits clear their media ID and saves validate the pair", async () => {
@@ -99,17 +99,19 @@ test("manual cover URL edits clear their media ID and saves validate the pair", 
   assert.match(api, /code === "23505"/);
   assert.match(api, /Unable to save blog post\. Please try again\./);
   assert.match(tagSync, /if \(error\) throw error;/);
-  assert.match(form, /data\.status === "published" && !data\.published_at/);
-  assert.match(form, /new Date\(\)\.toISOString\(\)/);
-  assert.match(form, /Clear this field to publish immediately/);
-  assert.match(form, /publishingNow \? "Publish Now"/);
+  assert.match(form, /resolveBlogPublishDate\(/);
+  assert.match(form, /<BlogDatePicker/);
+  assert.match(form, /Defaults to today/);
+  assert.match(form, /Choose a cover image before publishing/);
   assert.match(form, /<AdminConfirmDialog/);
   assert.match(form, /beforeunload/);
   assert.match(form, /formState: \{ errors, isDirty \}/);
   assert.doesNotMatch(form, /window\.confirm|window\.prompt/);
-  for (const [field, name] of [["title", "title"], ["slug", "slug"], ["summary", "summary"], ["status", "status"], ["published-at", "published_at"], ["cover-url", "cover_image_url"], ["canonical-url", "canonical_url"], ["tags", "tags"]]) {
+  for (const [field, name] of [["title", "title"], ["slug", "slug"], ["summary", "summary"], ["cover-url", "cover_image_url"], ["canonical-url", "canonical_url"], ["tags", "tags"]]) {
     assert.match(form, new RegExp(`id="blog-${field}-error"`));
     assert.match(form, new RegExp(`aria-describedby=\\{errors\\.${name}`));
   }
+  assert.match(form, /id="blog-status" aria-labelledby="blog-status-label blog-status" aria-invalid=\{Boolean\(errors\.status\)\} aria-describedby=\{errors\.status/);
+  assert.match(form, /id="blog-published-at-error"/);
   assert.match(form, /errorId=\{errors\.content \? "blog-content-error" : undefined\}/);
 });

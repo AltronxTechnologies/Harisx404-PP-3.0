@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
+import { z } from "zod";
 import createSupabaseServerClient, { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 
 cloudinary.config({
@@ -27,6 +28,16 @@ export async function POST(request: Request) {
 
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
+    const scopedPost = formData.get("blog_post_id");
+    let folder = "portfolio";
+    if (scopedPost !== null) {
+      if (typeof scopedPost !== "string" || !z.string().uuid().safeParse(scopedPost).success) return NextResponse.json({ error: "Invalid Blog post ID" }, { status: 400 });
+      const admin = await createSupabaseAdminClient();
+      const { data: post, error } = await admin.from("blog_posts").select("id").eq("id", scopedPost).neq("status", "archived").maybeSingle();
+      if (error) throw error;
+      if (!post) return NextResponse.json({ error: "Save the Blog post before uploading an image scoped to it." }, { status: 404 });
+      folder = `portfolio/blog/${scopedPost}`;
+    }
     
     if (!(file instanceof File)) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
@@ -38,6 +49,9 @@ export async function POST(request: Request) {
     if (!file.size) {
       return NextResponse.json({ error: "Image is empty" }, { status: 400 });
     }
+    if (file.size > 20 * 1024 * 1024) {
+      return NextResponse.json({ error: "Choose an image smaller than 20 MB" }, { status: 413 });
+    }
 
     // Convert the file to a buffer
     const arrayBuffer = await file.arrayBuffer();
@@ -46,7 +60,7 @@ export async function POST(request: Request) {
     // Upload to Cloudinary using a stream
     const uploadResult = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
-        { folder: "portfolio", resource_type: "image" },
+        { folder, resource_type: "image" },
         (error, result) => {
           if (error) return reject(error);
           resolve(result);
@@ -69,7 +83,7 @@ export async function POST(request: Request) {
           format: uploadResult.format,
           bytes: uploadResult.bytes,
           alt_text: file.name,
-          folder: "portfolio",
+          folder,
         }
       ])
       .select()

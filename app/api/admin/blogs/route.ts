@@ -7,6 +7,7 @@ import { isAllowedBlogImageUrl } from "@/app/components/blog/blogImage";
 import { estimateReadingMinutes } from "@/app/lib/reading-time";
 import { blogCanonicalUrl, defaultBlogSummary, normalizeBlogSlug } from "@/app/lib/blog-defaults";
 import { blogImageUrls } from "@/app/lib/admin/blog-image-urls";
+import { deleteManagedMedia } from "@/app/lib/admin/delete-media";
 import { siteMetadata } from "@/app/data/siteMetadata";
 import { BlogMdxValidationError, validateBlogMdx } from "@/app/lib/blog-mdx-policy.mjs";
 
@@ -60,8 +61,8 @@ const tagsSchema = z
   .transform((tags) => {
     const seen = new Set<string>();
     return tags.flatMap((tag) => {
-      if (seen.has(tag)) return [];
-      seen.add(tag);
+        if (seen.has(tag)) return [];
+        seen.add(tag);
       return [{ name: tag, slug: normalizeTagSlug(tag) }];
     });
   });
@@ -183,7 +184,16 @@ async function resolveBlogImages(data: z.infer<typeof blogSchema>, existingId?: 
     if (secure.error || legacy.error) throw secure.error || legacy.error;
     for (const image of [...(secure.data ?? []), ...(legacy.data ?? [])]) ids.add(image.id);
   }
-  if (ids.size > 40) return { ids: undefined, error: NextResponse.json({ error: "Choose no more than 40 Blog images." }, { status: 400 }) };
+  if (ids.size > 20) {
+    const existingIds: string[] = [];
+    if (existingId) {
+      const { data: existing, error } = await admin.from("blog_post_media").select("media_id").eq("blog_post_id", existingId);
+      if (error) throw error;
+      for (const item of existing ?? []) existingIds.push(item.media_id);
+    }
+    if (existingIds.length === ids.size && existingIds.every((mediaId) => ids.has(mediaId))) return { ids: undefined, error: null };
+    return { ids: undefined, error: NextResponse.json({ error: "Choose no more than 20 Blog images. An unchanged legacy collection can still be saved." }, { status: 400 }) };
+  }
   return { ids: [...ids], error: null };
 }
 
@@ -293,6 +303,8 @@ export async function POST(request: Request) {
     if (authorizationError) return authorizationError;
 
     const data = blogSchema.parse(await request.json());
+    if (data.tags.length > 10) return NextResponse.json({ error: "Choose no more than 10 tags." }, { status: 400 });
+    if (data.status === "published" && !data.cover_image_url) return NextResponse.json({ error: "Choose a cover image before publishing." }, { status: 400 });
     validateBlogMdx(data.content);
     const coverError = await validateCoverMedia(data.cover_image_id, data.cover_image_url);
     if (coverError) return coverError;
@@ -336,13 +348,18 @@ export async function PUT(request: Request) {
     const admin = await createSupabaseAdminClient();
     const { data: current, error: lookupError } = await admin
       .from("blog_posts")
-      .select("status, slug, canonical_url")
+      .select("status, slug, canonical_url, cover_image_url, blog_post_tags(tags(name))")
       .eq("id", id)
       .maybeSingle();
     if (lookupError) throw lookupError;
     if (!current) return NextResponse.json({ error: "Blog post not found" }, { status: 404 });
     if (current.status === "archived") {
       return NextResponse.json({ error: "Restore this post before editing it." }, { status: 409 });
+    }
+    if (data.status === "published" && !data.cover_image_url && !(current.status === "published" && !current.cover_image_url)) return NextResponse.json({ error: "Choose a cover image before publishing." }, { status: 400 });
+    if (data.tags.length > 10) {
+      const names = current.blog_post_tags?.map((item: any) => item.tags?.name).filter((value: unknown): value is string => typeof value === "string") ?? [];
+      if (names.length !== data.tags.length || !data.tags.every((tag) => names.includes(tag.name))) return NextResponse.json({ error: "Choose no more than 10 tags. Unchanged legacy tags can still be saved." }, { status: 400 });
     }
     const canonicalUrl = !post.canonical_url || post.canonical_url === blogCanonicalUrl(current.slug, siteMetadata.siteUrl)
       ? blogCanonicalUrl(post.slug, siteMetadata.siteUrl)
@@ -420,13 +437,32 @@ export async function DELETE(request: Request) {
     const admin = await createSupabaseAdminClient();
     const { data: post, error: lookupError } = await admin
       .from("blog_posts")
-      .select("slug")
+      .select("slug, content, cover_image_id, og_image_id, cover_image_url")
       .eq("id", id)
       .maybeSingle();
     if (lookupError) throw lookupError;
     if (!post) return NextResponse.json({ error: "Blog post not found" }, { status: 404 });
     if (confirm_slug !== post.slug) {
       return NextResponse.json({ error: "Type the exact post slug to confirm permanent deletion." }, { status: 400 });
+    }
+
+    // Snapshot only tracked library IDs; the RPC still decides whether this post can be deleted.
+    const candidates = new Set<string>();
+    if (post.cover_image_id) candidates.add(post.cover_image_id);
+    if (post.og_image_id) candidates.add(post.og_image_id);
+    const { data: attached, error: associationError } = await admin.from("blog_post_media")
+      .select("media_id").eq("blog_post_id", id);
+    if (associationError && !["42P01", "PGRST205"].includes(associationError.code)) throw associationError;
+    for (const image of attached ?? []) candidates.add(image.media_id);
+    const urls = [...new Set([...blogImageUrls(post.content ?? ""), post.cover_image_url].filter((url): url is string => Boolean(url)))];
+    for (let offset = 0; offset < urls.length; offset += 100) {
+      const chunk = urls.slice(offset, offset + 100);
+      const [secure, legacy] = await Promise.all([
+        admin.from("media").select("id").in("secure_url", chunk),
+        admin.from("media").select("id").in("url", chunk),
+      ]);
+      if (secure.error || legacy.error) throw secure.error || legacy.error;
+      for (const image of [...(secure.data ?? []), ...(legacy.data ?? [])]) candidates.add(image.id);
     }
 
     const referringSlugs = await referringBlogSlugs(id);
@@ -443,7 +479,22 @@ export async function DELETE(request: Request) {
     for (const alias of data.aliases) {
       if (typeof alias === "string") revalidateBlogPaths(alias);
     }
-    return NextResponse.json({ deleted: true });
+    let failedCount = 0;
+    let retainedCount = 0;
+    for (const mediaId of candidates) {
+      try {
+        const { data: asset, error: assetError } = await admin.from("media").select("folder").eq("id", mediaId).maybeSingle();
+        if (assetError) { failedCount++; continue; }
+        if (!asset || asset.folder !== `portfolio/blog/${id}`) { retainedCount++; continue; }
+        const result = await deleteManagedMedia(admin, mediaId);
+        if (result.kind === "error") failedCount++;
+      } catch {
+        failedCount++;
+      }
+    }
+    return NextResponse.json(failedCount || retainedCount
+      ? { deleted: true, cleanup_warning: { failed_count: failedCount, retained_count: retainedCount, message: "Post deleted. Some images remain in the Media Library for review." } }
+      : { deleted: true });
   } catch (error) {
     return errorResponse(error, "Unable to permanently delete post.");
   }

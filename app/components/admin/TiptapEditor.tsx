@@ -432,7 +432,9 @@ export function TiptapEditor({ value, onChange, label = "Case study", errorId, s
     content: value,
     editorProps: {
       attributes: {
-        class: `prose prose-sm dark:prose-invert max-w-none focus:outline-none ${story ? "min-h-36" : "min-h-[400px]"} p-4 text-ink-primary`,
+        class: blogTools
+          ? "blog-article-shell prose prose-neutral dark:prose-invert mx-auto min-h-[400px] w-full max-w-[680px] break-words px-4 py-6 text-ink-primary focus:outline-none"
+          : `prose prose-sm dark:prose-invert max-w-none focus:outline-none ${story ? "min-h-36" : "min-h-[400px]"} p-4 text-ink-primary`,
         "aria-label": label,
         ...(errorId ? { "aria-invalid": "true", "aria-describedby": errorId } : {}),
       },

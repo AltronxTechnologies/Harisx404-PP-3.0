@@ -17,9 +17,10 @@ interface MediaPickerModalProps {
   onClose: () => void;
   onSelect: (media: MediaItem) => void;
   initialTab?: "library" | "upload";
+  blogPostId?: string;
 }
 
-export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "library" }: MediaPickerModalProps) {
+export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "library", blogPostId }: MediaPickerModalProps) {
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [totalMedia, setTotalMedia] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -108,6 +109,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
 
     const formData = new FormData();
     formData.append("file", file);
+    if (blogPostId) formData.append("blog_post_id", blogPostId);
 
     try {
       const res = await fetch("/api/admin/media/upload", {
@@ -226,7 +228,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
                 <div className="flex flex-col items-center max-w-sm text-center">
                   <UploadCloud className="h-12 w-12 text-ink-secondary mb-4" />
                   <h3 className="text-lg font-medium text-text-primary mb-2">Upload New Image</h3>
-                  <p className="text-sm text-text-secondary mb-6">Select an image from your computer to upload to the media library.</p>
+                    <p className="text-sm text-text-secondary mb-6">Select an image from your computer to upload to the media library (20 MB maximum).</p>
                   
                   {uploadError && (
                     <div className="mb-4 text-sm text-red-500 bg-red-500/10 px-4 py-2 rounded-lg w-full">

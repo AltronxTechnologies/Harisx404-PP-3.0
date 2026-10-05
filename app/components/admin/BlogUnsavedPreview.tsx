@@ -22,14 +22,18 @@ import { validateBlogMdx } from "@/app/lib/blog-mdx-policy.mjs";
 
 type Snapshot = {
   title: string;
+  slug?: string;
   summary?: string;
   content: string;
   cover_image_url?: string;
   published_at?: string;
   status: "draft" | "published";
+  canonical_url?: string;
+  tags?: string[];
+  related_blog_post_ids?: string[];
 };
 
-export function BlogUnsavedPreview({ snapshot: post, isNew }: { snapshot: Snapshot; isNew: boolean }) {
+export function BlogUnsavedPreview({ snapshot: post, isNew, relatedPosts = [] }: { snapshot: Snapshot; isNew: boolean; relatedPosts?: Array<{ id: string; title: string; slug: string; status: string; published_at: string | null }> }) {
   const [rendered, setRendered] = useState<{ content: ComponentType<{ components: Record<string, ComponentType<any>> }> | null; error: string; loading: boolean }>({ content: null, error: "", loading: true });
 
   useEffect(() => {
@@ -66,11 +70,12 @@ export function BlogUnsavedPreview({ snapshot: post, isNew }: { snapshot: Snapsh
   const status = post.status === "draft" ? "Draft" : publicationDate && publicationDate.getTime() > Date.now() ? "Scheduled" : "Live when saved";
   const coverSrc = getBlogImageSrc(optimizeImageUrl(post.cover_image_url || "", 1600));
   const summary = post.summary?.trim() || (isNew ? defaultBlogSummary(post.content, post.title) : "");
+  const related = (post.related_blog_post_ids || []).map((id) => relatedPosts.find((item) => item.id === id)).filter((item): item is NonNullable<typeof item> => Boolean(item && item.status === "published" && item.published_at && Date.parse(item.published_at) <= Date.now()));
 
   return (
     <div className="blog-detail relative min-w-0 pb-12">
       <p className="mx-auto mb-8 max-w-3xl rounded-lg border border-border-hairline bg-surface-raised px-4 py-3 text-sm text-ink-secondary">
-        {status} / Unsaved preview. This is how the article body and hero may look; nothing has been published or saved.
+        {status} / Unsaved editorial preview. Article visuals are shared with the public Blog; site navigation and live interactions are not included. Nothing has been published or saved.
       </p>
       {coverSrc && <div className="relative mx-auto mb-10 h-48 w-full max-w-3xl overflow-hidden rounded-xl bg-surface-raised sm:h-72">
         <Image src={coverSrc} alt="" fill sizes="(max-width: 768px) 100vw, 768px" className="object-cover" />
@@ -88,7 +93,7 @@ export function BlogUnsavedPreview({ snapshot: post, isNew }: { snapshot: Snapsh
       <div className="relative mt-14 px-4 md:px-6">
         <div className="mx-auto flex w-full max-w-3xl flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-border-primary pb-4 text-sm text-text-secondary" style={{ maxWidth: "680px" }}>
           <span>{formatReadingTime(post.content)}</span>
-          {publicationDate && <time dateTime={publicationDate.toISOString()}>{new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", year: "numeric" }).format(publicationDate)}</time>}
+          {publicationDate && <time dateTime={publicationDate.toISOString()}>{new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" }).format(publicationDate)}</time>}
         </div>
       </div>
       <div className="relative mb-12 mt-8 px-4 md:px-6">
@@ -97,6 +102,15 @@ export function BlogUnsavedPreview({ snapshot: post, isNew }: { snapshot: Snapsh
         </article>
       </div>
       <TableOfContents headings={extractHeadingsFromMdx(post.content)} />
+      {(post.tags?.length || related.length) ? <div className="mx-auto max-w-3xl space-y-6 border-t border-border-primary px-4 pt-6" style={{ maxWidth: "680px" }}>
+        <p className="text-xs uppercase tracking-wide text-text-secondary">Admin-only publishing summary, not part of the public article</p>
+        {!!post.tags?.length && <div aria-label="Tags used for public Blog filters" className="flex flex-wrap gap-2">{post.tags.map((tag) => <span key={tag} className="rounded-full border border-border-primary px-3 py-1 text-xs text-text-secondary">{tag}</span>)}</div>}
+        {related.length > 0 && <section aria-label="Selected related posts" className="space-y-3 border-t border-border-primary pt-6">
+          <h2 className="font-display text-2xl text-text-primary">Selected related posts</h2>
+          <p className="text-xs text-text-secondary">Public cards use a different design. The first two selections appear on phones and tablets; all three appear on laptops.</p>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{related.map((item, index) => <div key={item.id} className={`rounded-xl border border-border-primary p-4 text-sm text-text-primary ${index >= 2 ? "hidden lg:block" : ""}`}>{item.title}</div>)}</div>
+        </section>}
+      </div> : null}
       <ImageLightbox />
     </div>
   );

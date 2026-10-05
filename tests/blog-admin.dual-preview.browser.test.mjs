@@ -278,6 +278,7 @@ test(
         alt_text: "Fixture art",
       };
       let mockedDeletes = 0;
+      let mockedSaves = 0;
       await ui.route("**/api/admin/blogs/images**", (route) =>
         route.fulfill({ json: { data: [], available: true } }),
       );
@@ -307,23 +308,40 @@ test(
         "https://harisx404.vercel.app/blog/changed-fixture"
       )
         failures.push({ kind: "renamed-canonical" });
-      await ui
-        .getByRole("button", { name: "Use a custom external canonical" })
-        .click();
       await canonical.fill("https://publisher.example.com/original");
       if (
         (await canonical.inputValue()) !==
         "https://publisher.example.com/original"
       )
         failures.push({ kind: "external-canonical" });
-      await ui
-        .getByRole("button", { name: "Use automatic site canonical" })
-        .click();
+      await ui.getByRole("button", { name: "Reset to site URL" }).click();
       if (
         (await canonical.inputValue()) !==
         "https://harisx404.vercel.app/blog/changed-fixture"
       )
         failures.push({ kind: "canonical-reset" });
+      await ui.locator("#blog-status").click();
+      await ui.getByRole("option", { name: "Published / Public" }).click();
+      if (
+        !(await ui.locator("#blog-status").textContent())?.includes(
+          "Published / Public",
+        )
+      )
+        failures.push({ kind: "status-published" });
+      await ui.locator("#blog-status").click();
+      await ui.getByRole("option", { name: "Draft / Private" }).click();
+      await ui.locator("#blog-tag-input").fill("Security, AI, Testing,");
+      if (
+        (await ui
+          .getByRole("button", { name: /^Remove (Security|AI|Testing) tag$/ })
+          .count()) !== 3
+      )
+        failures.push({ kind: "comma-separated-tags" });
+      await ui.getByRole("button", { name: "Publish date" }).click();
+      await ui.getByRole("button", { name: "Next month" }).click();
+      await ui.getByRole("button", { name: "Clear date" }).click();
+      if (!(await ui.getByRole("button", { name: "Publish date" }).count()))
+        failures.push({ kind: "calendar-closed" });
       await ui.getByRole("button", { name: "Add from library" }).click();
       await ui
         .getByRole("dialog", { name: "Choose an image" })
@@ -351,9 +369,72 @@ test(
         )
       )
         failures.push({ kind: "image-workspace-mobile" });
+      await ui.getByRole("tab", { name: "MDX / Code" }).click();
+      await ui
+        .getByRole("textbox", { name: "Blog article MDX source" })
+        .fill("# Draft check\n\nArticle content.");
+      await ui.locator("#blog-status").click();
+      await ui.getByRole("option", { name: "Published / Public" }).click();
+      await ui.getByRole("button", { name: "Publish Post" }).click();
+      if (
+        !(await ui
+          .getByRole("alert")
+          .filter({ hasText: "Choose a cover image" })
+          .count())
+      )
+        failures.push({ kind: "publish-cover-required" });
+      await ui.locator("#blog-status").click();
+      await ui.getByRole("option", { name: "Draft / Private" }).click();
+      await ui.route("**/api/admin/blogs", (route) => {
+        mockedSaves++;
+        const body = route.request().postDataJSON();
+        if (
+          body.status !== "draft" ||
+          body.published_at ||
+          body.tags?.length !== 3 ||
+          body.canonical_url !==
+            "https://harisx404.vercel.app/blog/changed-fixture"
+        )
+          failures.push({ kind: "draft-payload" });
+        return mockedSaves === 1
+          ? route.fulfill({
+              status: 503,
+              json: { error: "Review save unavailable" },
+            })
+          : route.fulfill({
+              json: {
+                id: "00000000-0000-4000-8000-000000000123",
+                slug: "changed-fixture",
+              },
+            });
+      });
+      await ui.getByRole("button", { name: "Save Draft" }).click();
+      await ui
+        .getByRole("alert")
+        .filter({ hasText: "Review save unavailable" })
+        .waitFor();
+      if (
+        !(
+          await ui
+            .getByRole("textbox", { name: "Blog article MDX source" })
+            .inputValue()
+        ).includes("Draft check")
+      )
+        failures.push({ kind: "failed-save-lost-content" });
+      await ui.getByRole("button", { name: "Save Draft" }).click();
+      await ui.waitForTimeout(350);
+      if (mockedSaves !== 2) failures.push({ kind: "draft-not-retried" });
       await ui.close();
-      console.log(JSON.stringify({ widths: 4, errors, writes, failures }));
-      if (failures.length || errors || writes)
+      console.log(
+        JSON.stringify({
+          widths: 4,
+          errors,
+          writes: writes - mockedSaves,
+          mockedSaves,
+          failures,
+        }),
+      );
+      if (failures.length || errors || writes !== mockedSaves)
         throw new Error("Blog read-only preview checks failed");
       await context.close();
     } finally {

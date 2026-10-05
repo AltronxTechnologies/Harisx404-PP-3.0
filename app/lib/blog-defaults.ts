@@ -20,6 +20,35 @@ export function toLocalBlogDateTime(value?: string) {
   return new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
 }
 
+export function todayUtcDate(now = new Date()) {
+  return now.toISOString().slice(0, 10);
+}
+
+export function isValidBlogDate(value: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00.000Z`);
+  return !Number.isNaN(date.getTime()) && todayUtcDate(date) === value;
+}
+
+export function resolveBlogPublishDate({ date, edited, status, previous, previousStatus, now = new Date() }: {
+  date: string;
+  edited: boolean;
+  status: "draft" | "published";
+  previous?: string | null;
+  previousStatus?: "draft" | "published";
+  now?: Date;
+}) {
+  if (edited && date && !isValidBlogDate(date)) throw new Error("Invalid publish date");
+  if (status === "draft") {
+    if (!edited) return previous || "";
+    return date ? `${date}T00:00:00.000Z` : "";
+  }
+  if (edited && date && date !== todayUtcDate(now)) return `${date}T00:00:00.000Z`;
+  if (!edited && previousStatus === "published" && previous) return previous;
+  if (!edited && previous && Date.parse(previous) > now.getTime()) return previous;
+  return now.toISOString();
+}
+
 export function serializeBlogPublishDate(value?: string, previous?: string) {
   if (!value) return "";
   return previous && value === toLocalBlogDateTime(previous) ? previous : new Date(value).toISOString();

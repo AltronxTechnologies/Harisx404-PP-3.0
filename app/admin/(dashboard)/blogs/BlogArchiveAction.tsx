@@ -23,6 +23,7 @@ export function BlogArchiveAction({ post }: { post: Post }) {
   function showNotice(notice: "archived" | "restored" | "deleted") {
     const url = new URL(window.location.href);
     url.searchParams.delete("saved");
+    url.searchParams.delete("cleanup");
     url.searchParams.set("notice", notice);
     router.replace(`${url.pathname}${url.search}`);
     router.refresh();
@@ -67,6 +68,15 @@ export function BlogArchiveAction({ post }: { post: Post }) {
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Could not permanently delete post");
+      if (result.cleanup_warning) {
+        const url = new URL(window.location.href);
+        url.searchParams.delete("saved");
+        url.searchParams.set("notice", "deleted");
+        url.searchParams.set("cleanup", "images");
+        router.replace(`${url.pathname}${url.search}`);
+        router.refresh();
+        return;
+      }
       showNotice("deleted");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Could not permanently delete post");

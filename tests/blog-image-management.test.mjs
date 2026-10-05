@@ -34,13 +34,21 @@ test("canonical URL follows the normalized slug on the configured site, not the 
 });
 
 test("post images are guarded by an atomic save and a referenced-media delete boundary", async () => {
-  const [save, deletion, migration] = await Promise.all([
+  const [save, deletion, helper, upload, migration] = await Promise.all([
     readFile(
       new URL("../app/api/admin/blogs/route.ts", import.meta.url),
       "utf8",
     ),
     readFile(
       new URL("../app/api/admin/media/route.ts", import.meta.url),
+      "utf8",
+    ),
+    readFile(
+      new URL("../app/lib/admin/delete-media.ts", import.meta.url),
+      "utf8",
+    ),
+    readFile(
+      new URL("../app/api/admin/media/upload/route.ts", import.meta.url),
       "utf8",
     ),
     readFile(
@@ -63,13 +71,20 @@ test("post images are guarded by an atomic save and a referenced-media delete bo
   );
   assert.match(migration, /REFERENCES public\.media\(id\) ON DELETE RESTRICT/);
   assert.match(deletion, /detach_blog_post_id/);
-  assert.match(deletion, /cloudinary\.uploader\.destroy/);
+  assert.match(deletion, /deleteManagedMedia/);
+  assert.match(helper, /cloudinary\.uploader\.destroy/);
+  assert.match(helper, /blog_post_media/);
+  assert.match(helper, /project_images/);
+  assert.match(helper, /db\.from\("media"\)\.insert\(item\)/);
+  assert.match(upload, /folder = `portfolio\/blog\/\$\{scopedPost\}`/);
+  assert.match(save, /asset\.folder !== `portfolio\/blog\/\$\{id\}`/);
 });
 
 test("Blog image reads and media edits/deletes reject anonymous callers", async () => {
   const base = process.env.BLOG_BASE_URL || "http://localhost:3000";
   for (const [path, method, body] of [
     ["/api/admin/blogs/images", "GET", undefined],
+    ["/api/admin/media/upload", "POST", undefined],
     [
       "/api/admin/media",
       "PATCH",
