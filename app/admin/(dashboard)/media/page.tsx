@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Upload, Copy, Loader2, Image as ImageIcon, Check, Trash2, X } from "lucide-react";
 import Image from "next/image";
+import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
 
 interface MediaItem {
   id: string;
@@ -37,7 +38,7 @@ export default function AdminMediaPage() {
     try {
       const res = await fetch(`/api/admin/media?limit=100&offset=${offset}`);
       if (!res.ok) throw new Error("Media could not be loaded");
-      const json = await res.json();
+      const json = await readAdminResponse(res, "Media library");
       if (!Array.isArray(json.data)) throw new Error("Invalid media response");
       setMedia((current) => offset ? [...current, ...json.data] : json.data);
       setTotalMedia(Number.isSafeInteger(json.count) && json.count >= 0 ? json.count : json.data.length);
@@ -74,10 +75,8 @@ export default function AdminMediaPage() {
         body: formData,
       });
 
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Upload failed");
-      }
+      const result = await readAdminResponse(res, "Image upload");
+      if (!res.ok) throw new Error(result.error || "Upload failed");
 
       const refreshed = await fetchMedia();
       setMessage(refreshed

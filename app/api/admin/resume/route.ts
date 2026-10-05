@@ -80,7 +80,16 @@ export async function POST(request: Request) {
   if (!(await isAdmin())) return unauthorized();
 
   try {
-    const formData = await request.formData();
+    const length = Number(request.headers.get("content-length"));
+    if (Number.isFinite(length) && length > RESUME_MAX_BYTES + 64 * 1024) {
+      return NextResponse.json({ error: "The PDF must be 10 MB or smaller." }, { status: 413 });
+    }
+    let formData: FormData;
+    try {
+      formData = await request.formData();
+    } catch {
+      return NextResponse.json({ error: "Upload request was incomplete or too large. Choose a PDF of 10 MB or less and try again." }, { status: 400 });
+    }
     const file = formData.get("file");
     if (!(file instanceof File)) {
       return NextResponse.json({ error: "Choose a PDF file to upload." }, { status: 400 });

@@ -253,8 +253,9 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - Admin upload APIs, which authorize independently and must receive full multipart bodies
      * Feel free to modify this pattern to include more paths.
      */
-    "/((?!_next/static|_next/image|favicon.ico).*)",
+    "/((?!_next/static|_next/image|favicon.ico|api/admin/resume(?:/|$)|api/admin/media/upload(?:/|$)).*)",
   ],
 };

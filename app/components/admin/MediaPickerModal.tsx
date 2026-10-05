@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { X, Image as ImageIcon, Check, Loader2, UploadCloud } from "lucide-react";
 import Image from "next/image";
+import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
 
 interface MediaItem {
   id: string;
@@ -81,7 +82,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
     try {
       const res = await fetch(`/api/admin/media?limit=50&offset=${offset}`);
       if (!res.ok) throw new Error("Failed to fetch media");
-      const { data, count } = await res.json();
+      const { data, count } = await readAdminResponse(res, "Media library");
       setMedia((current) => offset ? [...current, ...(data || [])] : data || []);
       setTotalMedia(count ?? 0);
     } catch (err: any) {
@@ -117,12 +118,8 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
         body: formData,
       });
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to upload image");
-      }
-
-      const { data } = await res.json();
+      const { data, error } = await readAdminResponse(res, "Image upload");
+      if (!res.ok) throw new Error(error || "Failed to upload image");
       
       // Add the new image to the library and select it
       setMedia((current) => [data, ...current]);

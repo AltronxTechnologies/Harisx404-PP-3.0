@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type DragEvent } from "react";
 import { Download, ExternalLink, FileText, Loader2, RotateCcw, Trash2, Upload } from "lucide-react";
 import { AdminConfirmDialog } from "./AdminConfirmDialog";
 import { FALLBACK_RESUME, RESUME_DOWNLOAD_ROUTE, RESUME_FILE_ROUTE, RESUME_MAX_BYTES } from "@/app/data/resume";
+import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
 
 type ResumeStatus = {
   isConfigured: boolean;
@@ -35,7 +36,7 @@ export function ResumeManager() {
     setMessage(null);
     try {
       const response = await fetch("/api/admin/resume", { cache: "no-store", signal });
-      const body = await response.json();
+      const body = await readAdminResponse(response, "Resume");
       if (!response.ok) throw new Error(body.error || "Unable to load Resume settings.");
       if (!signal?.aborted) setStatus(body.data);
     } catch (error) {
@@ -74,7 +75,7 @@ export function ResumeManager() {
       const formData = new FormData();
       formData.append("file", pendingFile);
       const response = await fetch("/api/admin/resume", { method: "POST", body: formData });
-      const body = await response.json();
+      const body = await readAdminResponse(response, "Resume");
       if (!response.ok) throw new Error(body.error || "Resume upload failed.");
       setStatus(body.data);
       setPendingFile(null);
@@ -96,7 +97,7 @@ export function ResumeManager() {
     setMessage(null);
     try {
       const response = await fetch("/api/admin/resume", { method: "DELETE" });
-      const body = await response.json();
+      const body = await readAdminResponse(response, "Resume");
       if (!response.ok) throw new Error(body.error || "Resume deletion failed.");
       setStatus(body.data);
       setPreviewOpen(false);
@@ -148,7 +149,7 @@ export function ResumeManager() {
         </div>
         <span className={`inline-flex w-fit shrink-0 items-center rounded-full border px-3 py-1 font-mono text-xs uppercase ${hasDocument ? "border-emerald-500/40 text-emerald-200" : "border-border-hairline text-ink-secondary"}`}>{loading ? "Checking" : !status ? "Unavailable" : fallback ? "Legacy fallback" : status.isActive ? "Live PDF" : "No document"}</span>
       </div>
-      {!status && !loading && <button type="button" onClick={() => void loadStatus()} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border-hairline px-4 text-sm font-medium hover:bg-surface-base"><RotateCcw className="size-4" aria-hidden />Retry status</button>}
+      {!loading && (!status || message?.type === "error" || message?.type === "warning") && <button type="button" onClick={() => void loadStatus()} disabled={busy} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border-hairline px-4 text-sm font-medium hover:bg-surface-base disabled:opacity-50"><RotateCcw className="size-4" aria-hidden />{status ? "Refresh status" : "Retry status"}</button>}
       {status && hasDocument && <div className="flex flex-wrap gap-2 border-t border-border-hairline pt-4">
         <button type="button" aria-expanded={previewOpen} aria-controls="resume-pdf-panel" onClick={() => setPreviewOpen((open) => !open)} className="min-h-11 rounded-xl border border-border-hairline px-4 text-sm font-medium hover:bg-surface-base">{previewOpen ? "Hide PDF preview" : "Show PDF preview"}</button>
         <a href={RESUME_FILE_ROUTE} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border-hairline px-4 text-sm font-medium hover:bg-surface-base"><ExternalLink className="size-4" aria-hidden />Open original PDF<span className="sr-only"> in a new tab</span></a>

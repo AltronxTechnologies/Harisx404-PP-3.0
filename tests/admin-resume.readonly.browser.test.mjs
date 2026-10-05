@@ -58,7 +58,8 @@ test(
       const failures = [];
       let errors = 0,
         writes = 0,
-        mockedWrites = 0;
+        mockedWrites = 0,
+        uploadAttempts = 0;
       page.on("pageerror", () => {
         errors++;
       });
@@ -96,6 +97,21 @@ test(
         await page.getByRole("button", { name: "Hide PDF preview" }).click();
         if (await frame.count()) failures.push("preview-not-closed");
       }
+      const uploadProbes = [];
+      for (const port of [3000, 8080]) {
+        for (const size of [8, 10 * 1024 * 1024 + 1]) {
+          const result = await context.request.post(`http://localhost:${port}/api/admin/resume`, {
+            multipart: { file: { name: "review-invalid.pdf", mimeType: "application/pdf", buffer: Buffer.alloc(size, 65) } },
+            timeout: 45000,
+          });
+          uploadProbes.push({ port, size: size === 8 ? "invalid-signature" : "over-limit", status: result.status(), json: result.headers()["content-type"]?.includes("application/json") ?? false });
+        }
+        const media = await context.request.post(`http://localhost:${port}/api/admin/media/upload`, {
+          multipart: { file: { name: "review-invalid.txt", mimeType: "text/plain", buffer: Buffer.alloc(11 * 1024 * 1024, 65) } },
+          timeout: 45000,
+        });
+        uploadProbes.push({ port, size: "invalid-media-over-10mb", status: media.status(), json: media.headers()["content-type"]?.includes("application/json") ?? false });
+      }
       const mock = await context.newPage();
       mock.on("pageerror", () => {
         errors++;
@@ -123,10 +139,10 @@ test(
           });
         if (route.request().method() === "POST") {
           mockedWrites++;
-          return route.fulfill({
-            status: 503,
-            json: { error: "Review upload unavailable" },
-          });
+          uploadAttempts++;
+          return uploadAttempts === 1
+            ? route.fulfill({ status: 503, json: { error: "Review upload unavailable" } })
+            : route.fulfill({ status: 413, contentType: "text/html", body: "<html><body>Request too large</body></html>" });
         }
         if (route.request().method() === "DELETE") {
           mockedWrites++;
@@ -177,6 +193,11 @@ test(
         !(await mock.getByText("review-fixture.pdf", { exact: true }).count())
       )
         failures.push("failed-upload-lost-current-file");
+      await mock.locator("#resume-upload").setInputFiles({ name: "review.pdf", mimeType: "application/pdf", buffer: Buffer.from("%PDF-1.4\n") });
+      await mock.getByRole("dialog", { name: "Replace the live Resume?" }).getByRole("button", { name: "Replace PDF" }).click();
+      await mock.getByRole("alert").filter({ hasText: "request-size limit" }).waitFor();
+      if (!(await mock.getByText("review-fixture.pdf", { exact: true }).count())) failures.push("html-upload-lost-current-file");
+      if (!(await mock.getByRole("button", { name: "Refresh status" }).count())) failures.push("missing-upload-status-recovery");
       await mock.getByRole("button", { name: "Delete live PDF" }).click();
       await mock.locator("#admin-confirm-text").fill("DELETE");
       await mock
@@ -243,6 +264,7 @@ test(
           errors,
           writes: writes - mockedWrites,
           mockedWrites,
+          uploadProbes,
           failures,
         }),
       );
