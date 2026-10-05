@@ -182,6 +182,14 @@ of your other active sessions without planning to sign in again.
 
 ## 5. Deployment-only checks
 
+Before accepting the Admin Resume manager as a live PDF lifecycle, review a
+backup or disposable Supabase project and apply the pending
+`migrations/2026_resume_document_hardening.sql` there first. Use only a
+disposable PDF to test publish, replacement, download bytes, rejection,
+deletion and private Storage cleanup. No existing Resume was overwritten or
+deleted during the Admin visual pass; its PDF interactions used mocked writes.
+The public `/resume` page remains locked.
+
 After an approved migration and isolated CRUD pass, the owner must review the
 deployed domain, Auth redirect URLs, rotated keys, legal/content rights, and
 release rollback plan. `MANUAL_TASKS.md` contains the broader launch playbook;

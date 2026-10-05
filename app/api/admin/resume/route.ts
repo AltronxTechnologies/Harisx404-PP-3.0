@@ -31,9 +31,14 @@ function safeFilename(value: string) {
 }
 
 function invalidateResume() {
-  revalidateTag("resume");
-  revalidatePath("/resume");
-  revalidatePath("/resume/file");
+  try {
+    revalidateTag("resume");
+    revalidatePath("/resume");
+    revalidatePath("/resume/file");
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function failure(error: unknown) {
@@ -132,19 +137,21 @@ export async function POST(request: Request) {
       .maybeSingle();
 
     if (updateError || !data) {
-      await db.storage.from(RESUME_STORAGE_BUCKET).remove([storagePath]);
+      const { error: rollbackError } = await db.storage.from(RESUME_STORAGE_BUCKET).remove([storagePath]);
+      if (rollbackError) return NextResponse.json({ error: "Resume was not changed, but the rejected upload could not be cleaned up from private storage. Contact the administrator." }, { status: 500 });
       if (updateError) throw updateError;
       return NextResponse.json({ error: "Resume changed during upload. Please retry." }, { status: 409 });
     }
 
+    let cleanupWarning = false;
     if (current.storage_path && current.storage_path !== storagePath) {
       const { error: cleanupError } = await db.storage
         .from(RESUME_STORAGE_BUCKET)
         .remove([current.storage_path]);
-      if (cleanupError) console.error("Old Resume cleanup failed", cleanupError);
+      if (cleanupError) cleanupWarning = true;
     }
 
-    invalidateResume();
+    const refreshed = invalidateResume();
     return NextResponse.json({
       data: {
         isConfigured: true,
@@ -154,6 +161,7 @@ export async function POST(request: Request) {
         sizeBytes: Number(data.size_bytes),
         updatedAt: data.updated_at,
       },
+      ...(!refreshed || cleanupWarning ? { warning: [!refreshed && "New Resume is saved, but the public page may take up to an hour to refresh.", cleanupWarning && "The previous private file could not be removed; review storage cleanup."].filter(Boolean).join(" ") } : {}),
     });
   } catch (error) {
     return failure(error);
@@ -193,14 +201,15 @@ export async function DELETE() {
       return NextResponse.json({ error: "Resume changed during deletion. Please retry." }, { status: 409 });
     }
 
+    let cleanupWarning = false;
     if (current.storage_path) {
       const { error: storageError } = await db.storage
         .from(RESUME_STORAGE_BUCKET)
         .remove([current.storage_path]);
-      if (storageError) console.error("Deleted Resume cleanup failed", storageError);
+      if (storageError) cleanupWarning = true;
     }
 
-    invalidateResume();
+    const refreshed = invalidateResume();
     return NextResponse.json({
       data: {
         isConfigured: true,
@@ -210,6 +219,7 @@ export async function DELETE() {
         sizeBytes: null,
         updatedAt: data.updated_at,
       },
+      ...(!refreshed || cleanupWarning ? { warning: [!refreshed && "Resume is unpublished, but the public page may take up to an hour to refresh.", cleanupWarning && "The old private file could not be removed; review storage cleanup."].filter(Boolean).join(" ") } : {}),
     });
   } catch (error) {
     return failure(error);
