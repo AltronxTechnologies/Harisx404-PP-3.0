@@ -109,7 +109,8 @@ test("manual cover URL edits clear their media ID and saves validate the pair", 
   assert.doesNotMatch(form, /window\.confirm|window\.prompt/);
   for (const [field, name] of [["title", "title"], ["slug", "slug"], ["summary", "summary"], ["cover-url", "cover_image_url"], ["canonical-url", "canonical_url"], ["tags", "tags"]]) {
     assert.match(form, new RegExp(`id="blog-${field}-error"`));
-    assert.match(form, new RegExp(`aria-describedby=\\{errors\\.${name}`));
+    if (name === "tags") assert.match(form, /aria-describedby=\{`blog-tags-hint\$\{errors\.tags/);
+    else assert.match(form, new RegExp(`aria-describedby=\\{errors\\.${name}`));
   }
   assert.match(form, /id="blog-status" aria-labelledby="blog-status-label blog-status" aria-invalid=\{Boolean\(errors\.status\)\} aria-describedby=\{errors\.status/);
   assert.match(form, /id="blog-published-at-error"/);

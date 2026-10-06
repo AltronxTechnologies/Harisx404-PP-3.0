@@ -8,8 +8,7 @@ import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headless
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Check, ChevronDown, Loader2, Plus, X, Image as ImageIcon } from "lucide-react";
-import { MediaPickerModal } from "./MediaPickerModal";
+import { Check, ChevronDown, Loader2, Plus, X } from "lucide-react";
 import { BlogImageManager, type BlogMediaItem } from "./BlogImageManager";
 import { BlogDatePicker } from "./BlogDatePicker";
 import { AdminConfirmDialog } from "./AdminConfirmDialog";
@@ -66,7 +65,6 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
   const [errorMsg, setErrorMsg] = useState("");
   const [tagInput, setTagInput] = useState("");
   const [relatedSearch, setRelatedSearch] = useState("");
-  const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
   const [blogImages, setBlogImages] = useState<BlogMediaItem[]>([]);
   const [imageManagerAvailable, setImageManagerAvailable] = useState(false);
   const [confirmation, setConfirmation] = useState<{ title: string; description: string; label: string; data: BlogFormValues; publishedAt: string; content: string } | null>(null);
@@ -203,7 +201,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
   };
 
   const removeTag = (tagToRemove: string) => {
-    setValue("tags", tags.filter(tag => tag !== tagToRemove), { shouldDirty: true });
+    setValue("tags", tags.filter(tag => tag !== tagToRemove), { shouldDirty: true, shouldValidate: true });
   };
 
   const savePost = async (data: BlogFormValues, publishedAt: string, content: string) => {
@@ -366,45 +364,19 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
 
       <div className="grid grid-cols-[minmax(0,1fr)] gap-6 md:grid-cols-2">
         <div className="min-w-0 space-y-2">
-          <label htmlFor="blog-cover-url" className="text-sm font-medium">Cover Image</label>
-          <div className="flex gap-2">
+          <label htmlFor="blog-cover-url" className="text-sm font-medium">Cover image URL</label>
+          <p className="text-xs text-ink-secondary">Choose a managed image below for the Blog card cover, or keep an existing external URL here.</p>
+          <div>
             <input
               {...register("cover_image_url", { onChange: () => setValue("cover_image_id", "", { shouldDirty: true }) })}
               id="blog-cover-url"
               aria-invalid={Boolean(errors.cover_image_url)}
               aria-describedby={errors.cover_image_url ? "blog-cover-url-error" : undefined}
-              className="min-w-0 flex-1 rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
+                className="min-h-11 w-full min-w-0 rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
               placeholder="https://... or choose from library"
             />
-            <button
-              type="button"
-              onClick={() => setIsMediaPickerOpen(true)}
-              className="flex shrink-0 items-center gap-2 rounded-xl border border-border-hairline bg-surface-raised px-3 py-2 text-sm font-medium transition-colors hover:bg-surface-base"
-            >
-              <ImageIcon className="h-4 w-4" /> Pick
-            </button>
           </div>
           {errors.cover_image_url && <p id="blog-cover-url-error" role="alert" className="text-xs text-red-500">{errors.cover_image_url.message}</p>}
-          
-          <MediaPickerModal
-            isOpen={isMediaPickerOpen}
-            blogPostId={initialData?.id}
-            onClose={() => setIsMediaPickerOpen(false)}
-            onSelect={(media) => {
-              if (imageManagerAvailable && blogImages.length >= 20 && !blogImages.some((image) => image.id === media.id)) {
-                setError("image_ids", { message: "Choose no more than 20 images." });
-                return false;
-              }
-              setValue("cover_image_url", media.secure_url || media.url, { shouldDirty: true, shouldValidate: true });
-              setValue("cover_image_id", media.id, { shouldDirty: true });
-              if (imageManagerAvailable && !blogImages.some((image) => image.id === media.id)) {
-                const next = [...blogImages, media];
-                setBlogImages(next);
-                setValue("image_ids", next.map((image) => image.id), { shouldDirty: true });
-              }
-              return true;
-            }}
-          />
         </div>
 
         <div className="min-w-0 space-y-2">
@@ -427,25 +399,21 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
         setBlogImages(images);
         setValue("image_ids", images.map((image) => image.id), { shouldDirty: dirty, shouldValidate: true });
       }} onAvailabilityChange={setImageManagerAvailable} coverUrl={coverUrl} content={content} onCoverChange={(image) => {
-        const url = image ? ("secure_url" in image ? image.secure_url || image.url : image.url) : "";
+        const url = image?.secure_url || image?.url || "";
         setValue("cover_image_url", url, { shouldDirty: true, shouldValidate: true });
-        setValue("cover_image_id", image && "id" in image ? image.id : "", { shouldDirty: true });
-      }} onAppendImage={(image) => {
-        const url = image.secure_url || image.url;
-        const alt = (image.alt_text || "Blog image").replace(/[\[\]\\\r\n]/g, " ");
-        setValue("content", `${getValues("content").trimEnd()}\n\n![${alt}](${url})\n`, { shouldDirty: true, shouldValidate: true });
-      }} onEditSource={() => switchMode("source")} />
+        setValue("cover_image_id", image?.id || "", { shouldDirty: true });
+      }} />
       {errors.image_ids && <p role="alert" className="text-sm text-red-300">{errors.image_ids.message}</p>}
 
       <div className="space-y-2">
         <label htmlFor="blog-tag-input" className="text-sm font-medium">Tags</label>
-          <p className="text-xs text-ink-secondary">{tags.length} / 10 tags. Separate multiple tags with commas; they power Blog filters. {tags.length > 10 ? "This legacy post exceeds the new limit; existing tags are preserved, but reduce them to add new ones." : ""}</p>
+          <p id="blog-tags-hint" className="text-xs text-ink-secondary">{tags.length} / 10 tags. Separate multiple tags with commas; they power Blog filters. {tags.length > 10 ? "This legacy post exceeds the new limit; existing tags are preserved, but reduce them to add new ones." : ""}</p>
           <div className="mb-2 flex flex-wrap gap-2">
             {tags.map(tag => (
-            <span key={tag} className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-border-hairline bg-surface-base py-1 pl-3 pr-1 text-xs">
-              <span className="min-w-0 break-words">{tag}</span>
-              <button type="button" onClick={() => removeTag(tag)} aria-label={`Remove ${tag} tag`} className="flex size-11 shrink-0 items-center justify-center rounded-full text-ink-secondary hover:bg-white/10 hover:text-white">
-                <X className="h-3 w-3" />
+             <span key={tag} className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-border-hairline bg-surface-raised py-1 pl-3 pr-1 text-sm text-ink-primary">
+               <span className="min-w-0 break-words">{tag}</span>
+               <button type="button" onClick={() => removeTag(tag)} aria-label={`Remove ${tag} tag`} className="flex size-11 shrink-0 items-center justify-center rounded-full text-ink-secondary hover:bg-surface-base hover:text-ink-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-current">
+                 <X aria-hidden className="size-4" />
               </button>
             </span>
           ))}
@@ -455,18 +423,18 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
             type="text"
             id="blog-tag-input"
             aria-invalid={Boolean(errors.tags)}
-            aria-describedby={errors.tags ? "blog-tags-error" : undefined}
+            aria-describedby={`blog-tags-hint${errors.tags ? " blog-tags-error" : ""}`}
             value={tagInput}
             onChange={e => { const text = e.target.value; if (text.includes(",")) { setTagInput(text); addTag(text); } else setTagInput(text); }}
             onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addTag())}
-            className="min-w-0 flex-1 rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
+                className="min-h-11 min-w-0 flex-1 rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
             placeholder="Add tags, separated by commas"
           />
           <button
             type="button"
             onClick={() => addTag()}
             aria-label="Add tag"
-            className="shrink-0 rounded-xl border border-border-hairline bg-surface-raised px-4 py-2 transition-colors hover:bg-surface-base"
+            className="min-h-11 shrink-0 rounded-xl border border-border-hairline bg-surface-raised px-4 py-2 transition-colors hover:bg-surface-base focus-visible:outline focus-visible:outline-2 focus-visible:outline-current"
           >
             <Plus className="h-4 w-4" />
           </button>

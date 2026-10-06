@@ -19,9 +19,10 @@ interface MediaPickerModalProps {
   onSelect: (media: MediaItem) => boolean | void;
   initialTab?: "library" | "upload";
   blogPostId?: string;
+  libraryOnly?: boolean;
 }
 
-export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "library", blogPostId }: MediaPickerModalProps) {
+export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "library", blogPostId, libraryOnly = false }: MediaPickerModalProps) {
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [totalMedia, setTotalMedia] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -44,7 +45,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
     const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    const frame = requestAnimationFrame(() => (initialTab === "upload" ? uploadTabRef : libraryTabRef).current?.focus());
+    const frame = requestAnimationFrame(() => (initialTab === "upload" && !libraryOnly ? uploadTabRef : libraryTabRef).current?.focus());
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
@@ -66,18 +67,18 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
       document.body.style.overflow = previousOverflow;
       if (previousFocus?.isConnected) previousFocus.focus();
     };
-  }, [isOpen, initialTab]);
+  }, [isOpen, initialTab, libraryOnly]);
 
   useEffect(() => {
     if (isOpen) {
       setSelectedId(null);
       setSelectionError("");
-      setActiveTab(initialTab);
+      setActiveTab(libraryOnly ? "library" : initialTab);
       setUploadError("");
       setUploadWarning("");
       fetchMedia(0);
     }
-  }, [isOpen, initialTab]);
+  }, [isOpen, initialTab, libraryOnly]);
 
   const fetchMedia = async (offset: number) => {
     if (offset) setIsLoadingMore(true);
@@ -161,7 +162,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
             >
               <ImageIcon className="h-5 w-5" /> Library
             </button>
-            <button
+            {!libraryOnly && <button
               ref={uploadTabRef}
               type="button"
               onClick={() => setActiveTab("upload")}
@@ -170,7 +171,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
               }`}
             >
               <UploadCloud className="h-5 w-5" /> Upload
-            </button>
+            </button>}
           </div>
           <button type="button" aria-label="Close media picker" onClick={onClose} className="flex size-11 items-center justify-center hover:bg-surface-base rounded-lg transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary">
             <X className="h-5 w-5" />
@@ -191,7 +192,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
               <div className="flex flex-col items-center justify-center h-48 text-ink-secondary">
                 <ImageIcon className="h-12 w-12 mb-2 opacity-50" />
                 <p>No media found.</p>
-                <p className="text-sm opacity-70">Upload an image to get started.</p>
+                <p className="text-sm opacity-70">{libraryOnly ? "Upload images in the post workspace first." : "Upload an image to get started."}</p>
               </div>
             ) : (
               <div className="space-y-4">

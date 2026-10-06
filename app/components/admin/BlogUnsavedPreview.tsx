@@ -18,7 +18,7 @@ import { GridWrapper } from "@/app/components/GridWrapper";
 import { PaperHeroTexture } from "@/app/components/PaperHeroTexture";
 import { formatReadingTime } from "@/app/lib/reading-time";
 import { addHeadingIds, extractHeadingsFromMdx } from "@/app/lib/toc-utils";
-import { validateBlogMdx } from "@/app/lib/blog-mdx-policy.mjs";
+import { BlogMdxValidationError, validateBlogMdx } from "@/app/lib/blog-mdx-policy.mjs";
 
 type Snapshot = {
   title: string;
@@ -55,8 +55,8 @@ export function BlogUnsavedPreview({ snapshot: post, isNew, relatedPosts = [] }:
           remarkPlugins: [remarkGfm, () => addHeadingIds],
         } as any);
         if (!cancelled) setRendered({ content, error: "", loading: false });
-      } catch {
-        if (!cancelled) setRendered({ content: null, error: "Article content cannot be safely previewed. Check its MDX formatting.", loading: false });
+      } catch (error) {
+        if (!cancelled) setRendered({ content: null, error: `Article content cannot be safely previewed. ${error instanceof BlogMdxValidationError ? error.message : "Check its MDX formatting and supported components."}`, loading: false });
       }
     })();
     return () => { cancelled = true; };

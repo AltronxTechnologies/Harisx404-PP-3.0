@@ -195,6 +195,7 @@ test(
         .filter({ hasText: "cannot be safely previewed" })
         .waitFor({ timeout: 10000 })
         .catch(() => failures.push({ kind: "invalid-preview-error" }));
+      if (!(await page.getByRole("alert").filter({ hasText: "unsupported JSX element <UnknownComponent>" }).count())) failures.push({ kind: "preview-reason-missing" });
       if (await article.count())
         failures.push({ kind: "invalid-preview-rendered" });
       await code.click();
@@ -279,6 +280,7 @@ test(
       };
       let mockedDeletes = 0;
       let mockedSaves = 0;
+      let mockedUploads = 0;
       await ui.route("**/api/admin/blogs/images**", (route) =>
         route.fulfill({ json: { data: [], available: true } }),
       );
@@ -288,6 +290,10 @@ test(
           return route.fulfill({ json: { success: true } });
         }
         return route.fulfill({ json: { data: [image], count: 1 } });
+      });
+      await ui.route("**/api/admin/media/upload", (route) => {
+        mockedUploads++;
+        return route.fulfill({ json: { data: { id: `00000000-0000-4000-8000-00000000012${mockedUploads}`, url: "/blog/blogfolio_v5.jpg", secure_url: "/blog/blogfolio_v5.jpg", alt_text: `Uploaded ${mockedUploads}` } } });
       });
       await ui.goto("http://localhost:3000/admin/blogs/new", {
         waitUntil: "domcontentloaded",
@@ -342,8 +348,9 @@ test(
       await ui.getByRole("button", { name: "Clear date" }).click();
       if (!(await ui.getByRole("button", { name: "Publish date" }).count()))
         failures.push({ kind: "calendar-closed" });
-      await ui.getByRole("button", { name: "Add from library" }).click();
-      await ui
+       await ui.getByRole("button", { name: "Add from library" }).click();
+       if (await ui.getByRole("dialog", { name: "Choose an image" }).getByRole("button", { name: "Upload", exact: true }).count()) failures.push({ kind: "duplicate-upload-tab" });
+       await ui
         .getByRole("dialog", { name: "Choose an image" })
         .getByRole("button", { name: "Fixture art" })
         .click();
@@ -351,17 +358,31 @@ test(
       await ui.getByRole("button", { name: "Make cover" }).click();
       if ((await ui.locator("#blog-cover-url").inputValue()) !== image.url)
         failures.push({ kind: "cover-from-collection" });
-      await ui.getByRole("button", { name: "Clear thumbnail cover" }).click();
-      await ui.getByRole("button", { name: "Delete file" }).click();
-      await ui
-        .getByRole("dialog", { name: "Delete this Cloudinary image?" })
-        .getByRole("button", { name: "Delete file permanently" })
-        .click();
-      await ui
-        .getByText("No managed images attached yet.", { exact: false })
+       await ui.locator("#blog-cover-url").fill("");
+       await ui.getByRole("button", { name: "Remove", exact: true }).click();
+       const removeDialog = ui.getByRole("dialog", { name: "Permanently remove image?" });
+       if (!(await removeDialog.getByRole("button", { name: "Remove permanently" }).isDisabled())) failures.push({ kind: "unguarded-image-delete" });
+       await removeDialog.getByRole("textbox").fill("DELETE");
+       await removeDialog.getByRole("button", { name: "Remove permanently" }).click();
+       await ui
+         .getByText("No managed images selected.", { exact: false })
         .waitFor();
       if (mockedDeletes !== 1)
         failures.push({ kind: "confirmed-delete-not-called" });
+      const smallPng = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLttAAAAABJRU5ErkJggg==", "base64");
+      await ui.locator('section[aria-labelledby="blog-images-heading"] input[type="file"]').setInputFiles([
+        { name: "review-one.png", mimeType: "image/png", buffer: smallPng },
+        { name: "review-two.png", mimeType: "image/png", buffer: smallPng },
+      ]);
+      await ui.getByRole("region", { name: "Post image thumbnails" }).locator("img").nth(1).waitFor();
+      if (mockedUploads !== 2) failures.push({ kind: "batch-upload-count" });
+      for (const width of [320, 1440]) {
+        await ui.setViewportSize({ width, height: 900 });
+        const cards = ui.getByRole("region", { name: "Post image thumbnails" });
+        const short = await cards.locator("button").evaluateAll((buttons) => buttons.filter((button) => button.getBoundingClientRect().height < 44 || button.getBoundingClientRect().right > innerWidth + 1).length);
+        if (short) failures.push({ kind: "image-actions-geometry", width, short });
+        if (process.env.RUN_BLOG_IMAGE_SCREENSHOT === "1") await ui.locator('section[aria-labelledby="blog-images-heading"]').screenshot({ path: `/tmp/opencode/blog-images-${width}.png` });
+      }
       await ui.setViewportSize({ width: 320, height: 900 });
       if (
         await ui.evaluate(
@@ -431,6 +452,7 @@ test(
           errors,
           writes: writes - mockedSaves,
           mockedSaves,
+          mockedUploads,
           failures,
         }),
       );
