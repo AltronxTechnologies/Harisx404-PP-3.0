@@ -1,19 +1,24 @@
 import { ExperienceForm } from "@/app/components/admin/ExperienceForm";
-import createSupabaseServerClient from "@/app/lib/supabase/server";
-import { notFound } from "next/navigation";
+import { requireAdmin } from "@/app/lib/admin-auth";
+import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
+import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
+import { z } from "zod";
 
 export default async function EditExperiencePage({ params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireAdmin();
+  if (auth.response) redirect(auth.response.status === 401 ? "/admin/login" : "/");
   const { id } = await params;
-  const supabase = await createSupabaseServerClient();
+  if (!z.string().uuid().safeParse(id).success) notFound();
+  const supabase = await createSupabaseAdminClient();
   const { data: entry, error } = await supabase
     .from("experience")
     .select("*")
     .eq("id", id)
-    .single();
+    .maybeSingle();
 
-  if (error || !entry) {
-    notFound();
-  }
+  if (error) return <div role="alert" className="rounded-xl border border-red-500/30 bg-red-950/20 p-5 text-sm text-red-200">Experience entry could not be loaded. <Link prefetch={false} href={`/admin/experience/${id}?retry=${Date.now()}`} className="inline-flex min-h-11 items-center font-medium underline underline-offset-2">Retry loading</Link></div>;
+  if (!entry) notFound();
 
   return (
     <div className="flex flex-col gap-6">

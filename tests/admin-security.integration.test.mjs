@@ -208,8 +208,12 @@ test("locked-scope Admin form labels and Edit links use the owner-approved acces
     assert.match(testimonialForm, new RegExp(`id="testimonial-${field}"`));
   }
   for (const field of ["role", "company", "logo-url", "location", "location-type", "employment-type", "start-month", "start-year", "end-month", "end-year", "summary", "highlights", "display-order", "status"]) {
-    assert.match(experienceForm, new RegExp(`htmlFor="experience-${field}"`));
-    assert.match(experienceForm, new RegExp(`id="experience-${field}"`));
+    if (field === "status") {
+      assert.match(experienceForm, /<BuildlogSelect id="experience-status" label="Visibility"/);
+    } else {
+      assert.match(experienceForm, new RegExp(`htmlFor="experience-${field}"`));
+      assert.match(experienceForm, new RegExp(`id="experience-${field}"`));
+    }
   }
   assert.equal((testimonials.match(/aria-label=\{`Edit testimonial from \$\{t\.name\}: \$\{t\.headline\}`\}/g) || []).length, 3);
   assert.match(experience, /aria-label=\{`Edit experience entry: \$\{entry\.role \|\| entry\.company \|\| "Untitled"\}`\}/);

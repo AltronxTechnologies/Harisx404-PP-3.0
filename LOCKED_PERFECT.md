@@ -1244,6 +1244,15 @@ names. An owner-session DOM check passed four widths with zero unassociated
 fields, unnamed Edit links or visible control overflow. This records an
 amendment, not a new production lock or blanket scope unlock.
 
+### 2026-10-06 owner-authorized Experience Admin follow-up
+
+The owner requested the next Admin quality pass for Experience. Only the Admin
+list, edit/new form, API and related controls were opened. Public About/Timeline,
+Resume types, the existing migration, and connected authored rows remain frozen.
+Admin reads now include hidden entries after verified authorization; saves no
+longer silently discard optional fields. This is not a new audit or production
+re-lock. Connected CRUD and owner visual sign-off remain separate gates.
+
 ## 20. Site-wide section rhythm & heading system (REFERENCE — apply to ALL pages)
 
 - **Date locked:** 2026-08-23
