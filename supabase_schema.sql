@@ -638,7 +638,7 @@ CREATE TABLE IF NOT EXISTS public.messages (
   user_id uuid REFERENCES auth.users (id) ON DELETE SET NULL,
   creator_name text NOT NULL DEFAULT 'Anonymous' CHECK (char_length(btrim(creator_name)) BETWEEN 1 AND 80),
   creator_avatar_url text CHECK (creator_avatar_url IS NULL OR creator_avatar_url ~ '^https://'),
-  status text NOT NULL DEFAULT 'published' CHECK (status IN ('pending', 'published', 'archived')),
+  status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'published', 'archived')),
   moderated_at timestamptz,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
@@ -677,7 +677,7 @@ BEGIN
     RAISE EXCEPTION 'already_submitted' USING ERRCODE = 'P0001';
   END IF;
   INSERT INTO public.messages (message, patternindex, rotation, user_id, creator_name, creator_avatar_url, status, moderated_at)
-  VALUES (p_message, p_patternindex, p_rotation, p_user_id, p_creator_name, p_creator_avatar_url, 'published', clock_timestamp())
+  VALUES (p_message, p_patternindex, p_rotation, p_user_id, p_creator_name, p_creator_avatar_url, 'pending', NULL)
   RETURNING id INTO submitted_id;
   RETURN submitted_id;
 END;
@@ -709,7 +709,7 @@ CREATE TABLE IF NOT EXISTS public.community_wall_settings (
 ALTER TABLE public.community_wall_settings ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON TABLE public.community_wall_settings FROM anon, authenticated;
 INSERT INTO public.community_wall_settings (id, kicker, heading, heading_accent, description, collection_label, sign_in_title, sign_in_description, composer_title, composer_description, empty_title, empty_description, seo_title, seo_description)
-VALUES (true, 'The wall remembers', 'Words that echo', 'always.', 'A collection of notes, hellos, and thoughtful messages left by visitors.', 'Visitor notes', 'Join the wall', 'Continue with GitHub or Google to leave one note on the wall.', 'Leave your mark', 'Share one thoughtful note. It appears immediately and can be managed by the site Admin.', 'The first note is waiting', 'Visitor messages will appear here.', 'Community Wall | Leave Your Mark', 'Read notes from visitors and leave one thoughtful message on Muhammad Haris''s community wall.') ON CONFLICT (id) DO NOTHING;
+VALUES (true, 'The wall remembers', 'Words that echo', 'always.', 'A collection of notes, hellos, and thoughtful messages left by visitors.', 'Visitor notes', 'Join the wall', 'Continue with GitHub or Google to leave one note on the wall.', 'Leave your mark', 'Share one thoughtful note. It will appear after Admin approval.', 'The first note is waiting', 'Visitor messages will appear here.', 'Community Wall | Leave Your Mark', 'Read notes from visitors and leave one thoughtful message on Muhammad Haris''s community wall.') ON CONFLICT (id) DO NOTHING;
 DROP VIEW IF EXISTS public.public_community_wall_settings;
 CREATE VIEW public.public_community_wall_settings WITH (security_barrier = true) AS
 SELECT kicker, heading, heading_accent, description, collection_label, sign_in_title, sign_in_description, composer_title, composer_description, empty_title, empty_description, seo_title, seo_description FROM public.community_wall_settings WHERE id = true;

@@ -2,70 +2,44 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Loader2, XCircle } from "lucide-react";
+import { Check, Archive } from "lucide-react";
+import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
+import { AdminConfirmDialog } from "./AdminConfirmDialog";
 
-/**
- * Approve / Reject controls for the testimonial moderation queue.
- * Approve → status 'published' (goes live, homepage revalidated).
- * Reject  → status 'archived' (kept for the record, never shown publicly).
- */
 export function TestimonialModerationActions({ id }: { id: string }) {
   const router = useRouter();
-  const [busy, setBusy] = useState<"approve" | "reject" | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [confirming, setConfirming] = useState<"published" | "archived" | null>(null);
+  const [error, setError] = useState("");
 
-  const setStatus = async (
-    action: "approve" | "reject",
-    status: "published" | "archived",
-  ) => {
-    setBusy(action);
+  const setStatus = async (status: "published" | "archived") => {
+    if (busy) return;
+    setBusy(true);
+    setError("");
     try {
-      const res = await fetch("/api/admin/testimonials", {
+      const response = await fetch("/api/admin/testimonials", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, status }),
       });
-      if (res.ok) {
-        router.refresh();
-      } else {
-        const body = await res.json().catch(() => null);
-        alert(body?.error || `Failed to ${action} testimonial`);
-      }
-    } catch (err) {
-      console.error(err);
-      alert(`Error trying to ${action} testimonial`);
+      const result = await readAdminResponse(response, "Testimonial moderation");
+      if (!response.ok) throw new Error(result.error || "Could not moderate this testimonial.");
+      setConfirming(null);
+      router.refresh();
+    } catch (cause) {
+      setConfirming(null);
+      setError(cause instanceof Error ? cause.message : "Could not moderate this testimonial.");
     } finally {
-      setBusy(null);
+      setBusy(false);
     }
   };
 
-  return (
-    <div className="flex items-center gap-2">
-      <button
-        type="button"
-        onClick={() => setStatus("approve", "published")}
-        disabled={busy !== null}
-        className="inline-flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-green-700 disabled:opacity-50"
-      >
-        {busy === "approve" ? (
-          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-        ) : (
-          <Check className="h-3.5 w-3.5" />
-        )}
-        Approve
-      </button>
-      <button
-        type="button"
-        onClick={() => setStatus("reject", "archived")}
-        disabled={busy !== null}
-        className="inline-flex items-center gap-1.5 rounded-lg border border-border-hairline px-3 py-1.5 text-xs font-semibold text-ink-secondary transition-colors hover:border-red-400 hover:text-red-500 disabled:opacity-50"
-      >
-        {busy === "reject" ? (
-          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-        ) : (
-          <XCircle className="h-3.5 w-3.5" />
-        )}
-        Reject
-      </button>
+  return <div className="flex min-w-0 flex-col gap-2">
+    <div className="flex flex-wrap gap-2">
+      <button type="button" onClick={() => setConfirming("published")} disabled={busy} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-accent-signal px-4 text-sm font-medium text-white hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:opacity-50"><Check aria-hidden className="size-4" />Approve</button>
+      <button type="button" onClick={() => setConfirming("archived")} disabled={busy} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border-hairline px-4 text-sm font-medium text-ink-primary hover:bg-surface-base focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:opacity-50"><Archive aria-hidden className="size-4" />Reject</button>
     </div>
-  );
+    {error && <p role="alert" className="max-w-sm break-words text-sm text-red-300">{error} <button type="button" onClick={() => router.refresh()} className="min-h-11 font-medium underline underline-offset-2">Refresh list</button></p>}
+    <AdminConfirmDialog open={confirming !== null} title={confirming === "archived" ? "Reject testimonial?" : "Publish testimonial?"} description={confirming === "archived" ? "This submission will be archived and remain hidden from the public homepage." : "This submission will become visible in the public homepage carousel."} confirmLabel={confirming === "archived" ? "Reject submission" : "Publish testimonial"} pending={busy} onClose={() => setConfirming(null)} onConfirm={() => { if (confirming) void setStatus(confirming); }} />
+  </div>;
 }

@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS public.messages (
   user_id UUID REFERENCES auth.users (id) ON DELETE SET NULL,
   creator_name TEXT NOT NULL DEFAULT 'Anonymous',
   creator_avatar_url TEXT,
-  status TEXT NOT NULL DEFAULT 'published',
+  status TEXT NOT NULL DEFAULT 'pending',
   moderated_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -24,7 +24,7 @@ BEGIN
   ) INTO status_was_missing;
 
   ALTER TABLE public.messages
-    ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'published',
+    ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'pending',
     ADD COLUMN IF NOT EXISTS moderated_at TIMESTAMPTZ,
     ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT now();
 
@@ -52,7 +52,7 @@ SET
     ELSE status
   END;
 
-ALTER TABLE public.messages ALTER COLUMN status SET DEFAULT 'published';
+ALTER TABLE public.messages ALTER COLUMN status SET DEFAULT 'pending';
 
 WITH ranked_accounts AS (
   SELECT id, row_number() OVER (
@@ -142,7 +142,7 @@ BEGIN
     creator_avatar_url, status, moderated_at
   ) VALUES (
     p_message, p_patternindex, p_rotation, p_user_id, p_creator_name,
-    p_creator_avatar_url, 'published', clock_timestamp()
+    p_creator_avatar_url, 'pending', NULL
   ) RETURNING id INTO submitted_id;
   RETURN submitted_id;
 END;
@@ -223,7 +223,7 @@ INSERT INTO public.community_wall_settings (
   'Join the wall',
   'Continue with GitHub or Google to leave one note on the wall.',
   'Leave your mark',
-  'Share one thoughtful note. It appears immediately and can be managed by the site Admin.',
+  'Share one thoughtful note. It will appear after Admin approval.',
   'The first note is waiting',
   'Visitor messages will appear here.',
   'Community Wall | Leave Your Mark',
@@ -238,7 +238,7 @@ SET
   sign_in_description = CASE WHEN sign_in_description = 'Sign in with GitHub to leave a note for review.'
     THEN 'Continue with GitHub or Google to leave one note on the wall.' ELSE sign_in_description END,
   composer_description = CASE WHEN composer_description = 'Share a thoughtful note. Submissions are reviewed before they appear.'
-    THEN 'Share one thoughtful note. It appears immediately and can be managed by the site Admin.' ELSE composer_description END,
+    THEN 'Share one thoughtful note. It will appear after Admin approval.' ELSE composer_description END,
   empty_description = CASE WHEN empty_description = 'Approved visitor messages will appear here after moderation.'
     THEN 'Visitor messages will appear here.' ELSE empty_description END,
   seo_description = CASE WHEN seo_description = 'Read moderated notes from visitors and leave a thoughtful message on Muhammad Haris''s community wall.'

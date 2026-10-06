@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { revalidatePath, revalidateTag } from "next/cache";
-import createSupabaseServerClient, { createSupabaseAdminClient } from "@/app/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
+import { requireAdmin } from "@/app/lib/admin-auth";
 
 // Best-effort ISR invalidation — must never fail the mutation itself.
 function revalidateTestimonialPaths() {
@@ -10,24 +11,6 @@ function revalidateTestimonialPaths() {
   } catch (e) {
     console.error("Revalidation failed:", e);
   }
-}
-
-/**
- * Admin gate for every handler in this route:
- * - auth.getUser() verifies the JWT server-side (getSession() does not)
- * - the ADMIN_EMAIL allowlist matches the middleware rule for /admin pages,
- *   so a random authenticated Supabase user can never hit these endpoints.
- */
-async function requireAdmin(
-  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
-) {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return false;
-  const adminEmail = process.env.ADMIN_EMAIL;
-  if (adminEmail && user.email !== adminEmail) return false;
-  return true;
 }
 
 // Whitelist of writable columns — raw request JSON is never passed to the
@@ -54,11 +37,9 @@ function pickWritable(data: Record<string, unknown>) {
 
 export async function GET(request: Request) {
   try {
-    const supabase = await createSupabaseServerClient();
+    const auth = await requireAdmin();
     // The rows include the private submitter email column — admin only.
-    if (!(await requireAdmin(supabase))) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    if (auth.response) return auth.response;
     // Service-role client for the actual DB ops: RLS only exposes
     // status='published' rows to the session client, so reading/approving/
     // rejecting/deleting pending submissions requires bypassing RLS
@@ -84,10 +65,8 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createSupabaseServerClient();
-    if (!(await requireAdmin(supabase))) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireAdmin();
+    if (auth.response) return auth.response;
     // Service-role client for the actual DB ops: RLS only exposes
     // status='published' rows to the session client, so reading/approving/
     // rejecting/deleting pending submissions requires bypassing RLS
@@ -112,10 +91,8 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    const supabase = await createSupabaseServerClient();
-    if (!(await requireAdmin(supabase))) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireAdmin();
+    if (auth.response) return auth.response;
     // Service-role client for the actual DB ops: RLS only exposes
     // status='published' rows to the session client, so reading/approving/
     // rejecting/deleting pending submissions requires bypassing RLS
@@ -144,10 +121,8 @@ export async function PUT(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const supabase = await createSupabaseServerClient();
-    if (!(await requireAdmin(supabase))) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireAdmin();
+    if (auth.response) return auth.response;
     // Service-role client for the actual DB ops: RLS only exposes
     // status='published' rows to the session client, so reading/approving/
     // rejecting/deleting pending submissions requires bypassing RLS
@@ -159,12 +134,15 @@ export async function DELETE(request: Request) {
 
     if (!id) return NextResponse.json({ error: "Missing testimonial ID" }, { status: 400 });
 
-    const { error } = await db
+    const { data: deleted, error } = await db
       .from("testimonials")
       .delete()
-      .eq("id", id);
+      .eq("id", id)
+      .select("id")
+      .maybeSingle();
 
     if (error) throw error;
+    if (!deleted) return NextResponse.json({ error: "Testimonial not found. Refresh the list before retrying." }, { status: 404 });
     revalidateTestimonialPaths();
     return NextResponse.json({ success: true });
   } catch (err: any) {

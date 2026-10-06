@@ -27,14 +27,16 @@ test("Community Wall moderation API is fail-closed and the per-page settings API
 });
 
 test("Community Wall source enforces moderation, bounded reads, and static page copy", async () => {
-  const [page, entry, avatar, scallop, data, action, migration, adminApi, adminPage, redirect, loading, error] = await Promise.all([
+  const [page, entry, avatar, composer, scallop, data, action, migration, pendingMigration, adminApi, adminPage, redirect, loading, error] = await Promise.all([
     readFile(new URL("../app/community-wall/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/components/guestbook/GuestbookEntryCard.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/components/guestbook/CommunityWallAvatar.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/guestbook/GuestbookActionCard.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/components/guestbook/ScallopDivider.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/community-wall/data.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/community-wall/actions.ts", import.meta.url), "utf8"),
     readFile(new URL("../migrations/2026_community_wall_messages.sql", import.meta.url), "utf8"),
+    readFile(new URL("../migrations/2026_community_wall_pending_review.sql", import.meta.url), "utf8"),
     readFile(new URL("../app/api/admin/community-wall/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/admin/(dashboard)/community-wall/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/admin/(dashboard)/community-wall/settings/page.tsx", import.meta.url), "utf8"),
@@ -57,7 +59,17 @@ test("Community Wall source enforces moderation, bounded reads, and static page 
   assert.match(page, /COMMUNITY_WALL_PAGE_SIZE/);
   assert.match(data, /public_community_wall_messages/);
   assert.match(data, /\.range\(start, end\)/);
-  assert.match(action, /submit_community_wall_message/);
+  assert.match(action, /\.from\("messages"\)\.insert\(\{/);
+  assert.match(action, /status: "pending"/);
+  assert.match(action, /moderated_at: null/);
+  assert.match(action, /awaiting Admin approval/);
+  assert.match(migration, /ALTER COLUMN status SET DEFAULT 'pending'/);
+  assert.match(migration, /p_creator_avatar_url, 'pending', NULL/);
+  assert.match(pendingMigration, /ALTER COLUMN status SET DEFAULT 'pending'/);
+  assert.match(pendingMigration, /p_creator_avatar_url, 'pending', NULL/);
+  assert.match(data, /It will appear after Admin approval/);
+  assert.match(composer, /Notes appear only after Admin approval/);
+  assert.doesNotMatch(composer, /Published instantly/);
   assert.match(action, /createSupabaseAdminClient/);
   assert.match(migration, /REVOKE ALL ON TABLE public\.messages FROM anon, authenticated/);
   assert.match(migration, /WHERE status = 'published'/);

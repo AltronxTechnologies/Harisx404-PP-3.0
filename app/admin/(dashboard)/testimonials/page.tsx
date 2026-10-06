@@ -1,7 +1,9 @@
 import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
+import { requireAdmin } from "@/app/lib/admin-auth";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Plus, Edit, Inbox } from "lucide-react";
-import { DeleteRowButton } from "@/app/components/admin/DeleteRowButton";
+import { DeleteTestimonialButton } from "@/app/components/admin/DeleteTestimonialButton";
 import { TestimonialModerationActions } from "@/app/components/admin/TestimonialModerationActions";
 
 type TestimonialRow = {
@@ -42,13 +44,12 @@ function formatDate(value: string | null) {
 }
 
 export default async function AdminTestimonialsPage() {
-  // Service-role client: RLS only exposes status='published' to the
-  // session/anon client, so the pending moderation queue would be
-  // invisible otherwise. This page is admin-gated by middleware.
+  const auth = await requireAdmin();
+  if (auth.response) redirect(auth.response.status === 401 ? "/admin/login" : "/");
   const supabase = await createSupabaseAdminClient();
   // select("*") so the page keeps working whether or not the optional
   // email/source columns from the submissions migration exist yet.
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("testimonials")
     .select("*")
     .order("display_order", { ascending: true })
@@ -69,13 +70,14 @@ export default async function AdminTestimonialsPage() {
         </div>
         <Link
           href="/admin/testimonials/new"
-          className="inline-flex items-center justify-center rounded-xl bg-accent-signal px-4 py-2 text-sm font-medium text-white shadow hover:bg-accent-signal/90 transition-all"
+          className="inline-flex min-h-11 items-center justify-center rounded-xl bg-accent-signal px-4 py-2 text-sm font-medium text-white shadow hover:bg-accent-signal/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
           <Plus className="mr-2 h-4 w-4" />
           New Testimonial
         </Link>
       </div>
 
+      {error ? <div role="alert" className="rounded-2xl border border-red-500/30 bg-red-950/20 p-6 text-sm text-red-200">Testimonials could not be loaded. No submissions are displayed. <Link prefetch={false} href={`/admin/testimonials?retry=${Date.now()}`} className="inline-flex min-h-11 items-center font-medium underline underline-offset-2">Retry loading</Link></div> : <>
       {/* ---------- Pending review queue ---------- */}
       <div className="rounded-xl border border-amber-300/60 bg-amber-50/40 dark:border-amber-500/30 dark:bg-amber-900/10">
         <div className="flex items-center gap-2 border-b border-amber-300/60 px-6 py-4 dark:border-amber-500/30">
@@ -126,21 +128,17 @@ export default async function AdminTestimonialsPage() {
                       submitted {formatDate(t.created_at)}
                     </p>
                   </div>
-                  <div className="flex shrink-0 items-center gap-2">
+                   <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
                     <TestimonialModerationActions id={t.id} />
                     <Link
                       href={`/admin/testimonials/${t.id}`}
                       aria-label={`Edit testimonial from ${t.name}: ${t.headline}`}
-                      className="p-2 text-ink-secondary hover:text-accent-signal hover:bg-surface-base rounded-lg transition-colors"
+                       className="inline-flex size-11 items-center justify-center rounded-lg text-ink-secondary hover:text-accent-signal hover:bg-surface-base focus-visible:outline focus-visible:outline-2 focus-visible:outline-current"
                       title="Edit before approving"
                     >
                       <Edit className="h-4 w-4" />
                     </Link>
-                    <DeleteRowButton
-                      id={t.id}
-                      endpoint="/api/admin/testimonials"
-                      label="testimonial"
-                    />
+                     <DeleteTestimonialButton id={t.id} name={t.name} />
                   </div>
                 </div>
               </li>
@@ -150,7 +148,25 @@ export default async function AdminTestimonialsPage() {
       </div>
 
       {/* ---------- All testimonials ---------- */}
-      <div className="rounded-xl border border-border-hairline bg-surface-raised shadow-sm overflow-hidden">
+      <div className="grid min-w-0 gap-3 xl:hidden">
+        {rest.length === 0 ? <p className="rounded-2xl border border-border-hairline bg-surface-raised p-5 text-sm text-ink-secondary">No reviewed or curated testimonials yet.</p> : rest.map((t) => <article key={t.id} className="min-w-0 rounded-2xl border border-border-hairline bg-surface-raised p-4 shadow-sm">
+          <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
+            <h3 className="min-w-0 flex-1 break-words font-semibold text-ink-primary" style={{ overflowWrap: "anywhere" }}>{t.headline}</h3>
+            <span className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${statusBadge[t.status] ?? statusBadge.draft}`}>{t.status}</span>
+          </div>
+          <p className="mt-2 break-words text-sm leading-6 text-ink-secondary" style={{ overflowWrap: "anywhere" }}>{t.quote}</p>
+          <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-border-hairline pt-3 text-sm">
+            <div className="min-w-0"><dt className="text-xs text-ink-secondary">Author</dt><dd className="break-words font-medium text-ink-primary">{t.name}{t.role ? ` · ${t.role}` : ""}</dd></div>
+            <div><dt className="text-xs text-ink-secondary">Source</dt><dd className="font-medium text-ink-primary">{t.source === "public" ? "Visitor" : "Admin"}</dd></div>
+            <div><dt className="text-xs text-ink-secondary">Order</dt><dd className="font-medium text-ink-primary">{t.display_order}</dd></div>
+          </dl>
+          <div className="mt-3 flex items-center justify-end gap-2 border-t border-border-hairline pt-3">
+            <Link href={`/admin/testimonials/${t.id}`} aria-label={`Edit testimonial from ${t.name}: ${t.headline}`} className="inline-flex size-11 items-center justify-center rounded-lg text-ink-secondary hover:bg-surface-base hover:text-accent-signal focus-visible:outline focus-visible:outline-2 focus-visible:outline-current"><Edit aria-hidden className="size-4" /></Link>
+            <DeleteTestimonialButton id={t.id} name={t.name} />
+          </div>
+        </article>)}
+      </div>
+      <div className="hidden overflow-hidden rounded-xl border border-border-hairline bg-surface-raised shadow-sm xl:block">
         <div className="overflow-x-auto" role="region" aria-label="Testimonials table" tabIndex={0}>
           <table className="admin-action-table w-full text-sm text-left">
             <thead className="bg-surface-base border-b border-border-hairline text-ink-secondary">
@@ -208,15 +224,11 @@ export default async function AdminTestimonialsPage() {
                         <Link
                           href={`/admin/testimonials/${t.id}`}
                           aria-label={`Edit testimonial from ${t.name}: ${t.headline}`}
-                          className="p-2 text-ink-secondary hover:text-accent-signal hover:bg-surface-base rounded-lg transition-colors"
+                           className="inline-flex size-11 items-center justify-center rounded-lg text-ink-secondary hover:text-accent-signal hover:bg-surface-base focus-visible:outline focus-visible:outline-2 focus-visible:outline-current"
                         >
                           <Edit className="h-4 w-4" />
                         </Link>
-                        <DeleteRowButton
-                          id={t.id}
-                          endpoint="/api/admin/testimonials"
-                          label="testimonial"
-                        />
+                         <DeleteTestimonialButton id={t.id} name={t.name} />
                       </div>
                     </td>
                   </tr>
@@ -226,6 +238,7 @@ export default async function AdminTestimonialsPage() {
           </table>
         </div>
       </div>
+      </>}
     </div>
   );
 }

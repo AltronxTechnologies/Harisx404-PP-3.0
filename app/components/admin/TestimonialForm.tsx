@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { MediaPickerModal } from "./MediaPickerModal";
 import { Image as ImageIcon, Loader2 } from "lucide-react";
+import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
 
 const testimonialSchema = z.object({
   // Length caps match the homepage card zones (headline ≤ 2 lines,
@@ -65,15 +66,13 @@ export function TestimonialForm({ initialData }: TestimonialFormProps) {
         body: JSON.stringify(initialData?.id ? { id: initialData.id, ...payload } : payload),
       });
 
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Failed to save testimonial");
-      }
+      const result = await readAdminResponse(res, "Testimonial");
+      if (!res.ok) throw new Error(result.error || "Failed to save testimonial");
 
       router.push("/admin/testimonials");
       router.refresh();
-    } catch (err: any) {
-      setErrorMsg(err.message);
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : "Failed to save testimonial");
     } finally {
       setIsSubmitting(false);
     }
@@ -82,7 +81,7 @@ export function TestimonialForm({ initialData }: TestimonialFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       {errorMsg && (
-        <div className="rounded-lg bg-red-50 p-4 text-sm text-red-500 dark:bg-red-950/30">
+        <div role="alert" className="rounded-lg bg-red-50 p-4 text-sm text-red-500 dark:bg-red-950/30">
           {errorMsg}
         </div>
       )}
@@ -92,7 +91,7 @@ export function TestimonialForm({ initialData }: TestimonialFormProps) {
         <input
           id="testimonial-headline"
           {...register("headline")}
-          className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
+          className="min-h-11 w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
           placeholder="He shipped in weeks what we scoped for months."
         />
         {errors.headline && <p className="text-xs text-red-500">{errors.headline.message}</p>}
@@ -104,7 +103,7 @@ export function TestimonialForm({ initialData }: TestimonialFormProps) {
           id="testimonial-quote"
           {...register("quote")}
           rows={4}
-          className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
+          className="min-h-11 w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
           placeholder="The full testimonial quote..."
         />
         {errors.quote && <p className="text-xs text-red-500">{errors.quote.message}</p>}
@@ -116,7 +115,7 @@ export function TestimonialForm({ initialData }: TestimonialFormProps) {
           <input
             id="testimonial-name"
             {...register("name")}
-            className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
+            className="min-h-11 w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
             placeholder="Jane Doe"
           />
           {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
@@ -127,7 +126,7 @@ export function TestimonialForm({ initialData }: TestimonialFormProps) {
           <input
             id="testimonial-role"
             {...register("role")}
-            className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
+            className="min-h-11 w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
             placeholder="Founder, SaaS Startup"
           />
         </div>
@@ -139,13 +138,14 @@ export function TestimonialForm({ initialData }: TestimonialFormProps) {
           <input
             id="testimonial-avatar-url"
             {...register("avatar_url")}
-            className="flex-1 rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
+            className="min-h-11 min-w-0 flex-1 rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
             placeholder="https://..."
           />
           <button
             type="button"
             onClick={() => setIsMediaPickerOpen(true)}
-            className="rounded-xl border border-border-hairline bg-surface-base p-2 text-ink-secondary hover:text-accent-signal hover:bg-surface-raised transition-colors"
+            aria-label="Choose avatar from Media Library"
+            className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl border border-border-hairline bg-surface-base text-ink-secondary hover:text-accent-signal hover:bg-surface-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current"
             title="Choose from Media Library"
           >
             <ImageIcon className="h-5 w-5" />
@@ -169,7 +169,7 @@ export function TestimonialForm({ initialData }: TestimonialFormProps) {
             id="testimonial-display-order"
             type="number"
             {...register("display_order")}
-            className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
+            className="min-h-11 w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
           />
           {errors.display_order && <p className="text-xs text-red-500">{errors.display_order.message}</p>}
         </div>
@@ -179,7 +179,7 @@ export function TestimonialForm({ initialData }: TestimonialFormProps) {
           <select
             id="testimonial-status"
             {...register("status")}
-            className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
+            className="min-h-11 w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
           >
             <option value="pending">Pending review</option>
             <option value="draft">Draft</option>
@@ -193,14 +193,14 @@ export function TestimonialForm({ initialData }: TestimonialFormProps) {
         <button
           type="button"
           onClick={() => router.back()}
-          className="rounded-xl px-4 py-2 text-sm font-medium text-ink-secondary hover:bg-surface-base transition-colors"
+          className="min-h-11 rounded-xl px-4 py-2 text-sm font-medium text-ink-secondary hover:bg-surface-base transition-colors"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={isSubmitting}
-          className="inline-flex items-center justify-center rounded-xl bg-accent-signal px-6 py-2 text-sm font-medium text-white shadow hover:bg-accent-signal/90 focus:outline-none disabled:opacity-50 transition-all"
+          className="inline-flex min-h-11 items-center justify-center rounded-xl bg-accent-signal px-6 py-2 text-sm font-medium text-white shadow hover:bg-accent-signal/90 focus:outline-none disabled:opacity-50 transition-all"
         >
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Save Testimonial

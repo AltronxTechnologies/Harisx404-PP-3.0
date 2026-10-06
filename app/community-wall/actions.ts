@@ -29,7 +29,7 @@ export async function createGuestbookEntry(
   formData: FormData,
 ): Promise<CommunityWallActionState> {
   if (String(formData.get("website") || "").trim()) {
-    return { status: "success", message: "Your note is now live on the wall." };
+    return { status: "success", message: "Your note has been submitted for review." };
   }
 
   const message = String(formData.get("message") || "").trim();
@@ -48,13 +48,15 @@ export async function createGuestbookEntry(
     user.user_metadata?.full_name || user.user_metadata?.user_name || user.email?.split("@")[0] || "Visitor",
   ).trim();
   const creatorName = rawName.slice(0, 80) || "Visitor";
-  const { error } = await db.rpc("submit_community_wall_message", {
-    p_user_id: user.id,
-    p_message: message,
-    p_patternindex: Math.floor(Math.random() * 24),
-    p_rotation: Math.floor(Math.random() * 7) - 3,
-    p_creator_name: creatorName,
-    p_creator_avatar_url: safeProviderAvatar(user.user_metadata?.avatar_url || user.user_metadata?.picture),
+  const { error } = await db.from("messages").insert({
+    user_id: user.id,
+    message,
+    patternindex: Math.floor(Math.random() * 24),
+    rotation: Math.floor(Math.random() * 7) - 3,
+    creator_name: creatorName,
+    creator_avatar_url: safeProviderAvatar(user.user_metadata?.avatar_url || user.user_metadata?.picture),
+    status: "pending",
+    moderated_at: null,
   });
   if (error) {
     if (error.message === "already_submitted" || error.code === "23505") {
@@ -66,5 +68,5 @@ export async function createGuestbookEntry(
 
   revalidatePath("/admin/community-wall");
   revalidatePath("/community-wall");
-  return { status: "success", message: "Your note is now live on the wall." };
+  return { status: "success", message: "Your note is awaiting Admin approval. It will appear on the wall once approved." };
 }

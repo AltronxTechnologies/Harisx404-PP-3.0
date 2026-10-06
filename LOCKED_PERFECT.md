@@ -666,6 +666,16 @@
     390×700 modal fully visible above navbar; dark+light; tsc/ESLint
     clean; zero console errors.
 
+#### 2026-10-06 owner-authorized Admin Testimonials follow-up
+
+The owner asked to move to Testimonials after the Community Wall approval change.
+Only the Admin list, form, moderation/delete controls and Admin API were opened
+for an initial quality pass: fail-closed owner checks, retryable reads, contained
+phone/tablet cards, usable controls and confirmed actions. The public carousel,
+submission modal/action, approved rows and existing migration remain frozen.
+Connected CRUD and a full owner visual audit are separate gates; this is not a
+new lock or production sign-off.
+
 ### 14. MySiteGrid — "Explore, experiment && say hello" — LOCKED ✅
 - **Date locked:** 2026-08-20
 - **Locked at commit:** _(commit containing this entry)_
@@ -1902,6 +1912,16 @@ Do not modify Community Wall, its dialog, cards, Admin controls, schema, data
 source, migrations, metadata, responsive geometry, or public presentation without
 a new explicit owner unlock. Shared locked Navbar, Search, Reach Out, CTA, and
 Footer remain independently frozen under their existing entries.
+
+### 2026-10-06 owner-authorized pending review
+
+The owner explicitly required new Community Wall messages to await Admin approval
+instead of publishing immediately. This narrowly unlocks the submission action,
+public submission/confirmation copy, wall schema defaults and submission function,
+and corresponding tests. The public wall's published-only view, cards, layout and
+existing rows remain unchanged. A separate additive migration is checked in for
+existing databases; its application needs an owner-reviewed backup and rollout.
+This is not a new formal audit or production re-lock.
 
 ### 2026-10-05 owner-authorized static Community Wall page copy
 

@@ -16,7 +16,7 @@ export const communityWallPageSettings: CommunityWallSettings = {
   sign_in_description: "Continue with GitHub or Google to leave one note on the wall.",
   composer_title: "Leave your mark",
   composer_description:
-    "Share one thoughtful note. It appears immediately and can be managed by the site Admin.",
+    "Share one thoughtful note. It will appear after Admin approval.",
   empty_title: "The first note is waiting",
   empty_description: "Visitor messages will appear here.",
   seo_title: "Community Wall | Leave Your Mark",

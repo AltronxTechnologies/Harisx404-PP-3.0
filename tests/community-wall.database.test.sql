@@ -8,6 +8,9 @@ DECLARE
   original_updated_at timestamptz;
   changed_updated_at timestamptz;
   submitted_id uuid;
+  submitted_status text;
+  submitted_moderated_at timestamptz;
+  default_status text;
 BEGIN
   INSERT INTO auth.users (id) VALUES ('00000000-0000-4000-8000-000000000001')
   ON CONFLICT (id) DO NOTHING;
@@ -19,6 +22,10 @@ BEGIN
   VALUES ('Pending database fixture', 2, 1, 'Test Visitor', 'pending');
   INSERT INTO public.messages (message, patternindex, rotation, creator_name, status)
   VALUES ('Archived database fixture', 3, -1, 'Test Visitor', 'archived');
+  INSERT INTO public.messages (message, creator_name)
+  VALUES ('Default pending fixture', 'Test Visitor')
+  RETURNING status INTO default_status;
+  IF default_status <> 'pending' THEN RAISE EXCEPTION 'default Community Wall status is not pending'; END IF;
 
   SELECT count(*) INTO public_count FROM public.public_community_wall_messages;
   IF public_count <> 1 THEN RAISE EXCEPTION 'expected one public note, got %', public_count; END IF;
@@ -63,7 +70,7 @@ BEGIN
   SELECT count(*) INTO public_count FROM public.public_community_wall_messages;
   IF public_count <> 0 THEN RAISE EXCEPTION 'archived note remains in public view'; END IF;
 
-  DELETE FROM public.messages WHERE message IN ('Published database fixture', 'Pending database fixture', 'Archived database fixture');
+  DELETE FROM public.messages WHERE message IN ('Published database fixture', 'Pending database fixture', 'Archived database fixture', 'Default pending fixture');
   DELETE FROM auth.users WHERE id = '00000000-0000-4000-8000-000000000001';
 
   INSERT INTO auth.users (id) VALUES ('00000000-0000-4000-8000-000000000003');
@@ -71,8 +78,17 @@ BEGIN
     '00000000-0000-4000-8000-000000000003', 'Atomic submission one', 0, 0,
     'Rate Test', NULL
   );
+  SELECT status, moderated_at INTO submitted_status, submitted_moderated_at
+  FROM public.messages WHERE id = submitted_id;
+  IF submitted_status <> 'pending' OR submitted_moderated_at IS NOT NULL THEN
+    RAISE EXCEPTION 'new Community Wall note was not queued for review';
+  END IF;
+  IF EXISTS (SELECT 1 FROM public.public_community_wall_messages WHERE id = submitted_id) THEN
+    RAISE EXCEPTION 'unapproved Community Wall note appeared in public view';
+  END IF;
+  UPDATE public.messages SET status = 'published', moderated_at = clock_timestamp() WHERE id = submitted_id;
   IF NOT EXISTS (SELECT 1 FROM public.public_community_wall_messages WHERE id = submitted_id) THEN
-    RAISE EXCEPTION 'automatic Community Wall publication failed';
+    RAISE EXCEPTION 'approved Community Wall note is missing from public view';
   END IF;
   BEGIN
     PERFORM public.submit_community_wall_message(
