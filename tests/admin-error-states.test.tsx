@@ -96,11 +96,10 @@ test("Blog deletion announces success only after an authenticated API success", 
 test("Admin editors do not mistake failed reads for empty data", async () => {
   const React = await import("react");
   (globalThis as typeof globalThis & { React: typeof React }).React = React;
-  const [{ createRoot }, { act }, { default: Settings }, { default: About }, { default: Media }] = await Promise.all([
+  const [{ createRoot }, { act }, { default: Settings }, { default: Media }] = await Promise.all([
     import("react-dom/client"),
     import("react-dom/test-utils"),
     import("../app/admin/(dashboard)/settings/page"),
-    import("../app/admin/(dashboard)/about/page"),
     import("../app/admin/(dashboard)/media/page"),
   ]);
   const originalFetch = globalThis.fetch;
@@ -108,7 +107,6 @@ test("Admin editors do not mistake failed reads for empty data", async () => {
   try {
     for (const [Component, errorText] of [
       [Settings, "Site settings unavailable"],
-      [About, "About content unavailable"],
       [Media, "Media could not be loaded"],
     ] as const) {
       const host = document.createElement("div");
@@ -122,7 +120,7 @@ test("Admin editors do not mistake failed reads for empty data", async () => {
         assert.match(host.textContent || "", new RegExp(errorText));
         assert.ok(host.querySelector('[role="alert"]'));
         assert.ok([...host.querySelectorAll("button")].some((button) => button.textContent?.includes("Retry loading")));
-        assert.doesNotMatch(host.textContent || "", /No media yet|Save Settings|Save About/);
+        assert.doesNotMatch(host.textContent || "", /No media yet|Save Settings/);
       } finally {
         await act(async () => root.unmount());
         host.remove();

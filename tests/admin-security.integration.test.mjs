@@ -6,7 +6,7 @@ const baseUrl = process.env.ADMIN_BASE_URL || "http://localhost:3000";
 const source = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("anonymous callers cannot read unlocked Admin API endpoints", async () => {
-  for (const path of ["settings", "about", "faqs", "media"]) {
+  for (const path of ["settings", "faqs", "media"]) {
     const response = await fetch(`${baseUrl}/api/admin/${path}`);
     assert.equal(response.status, 401, `/api/admin/${path} should fail closed`);
   }
@@ -150,7 +150,6 @@ test("unlocked privileged reads and log actions check Admin identity before serv
     "app/admin/(dashboard)/projects/page.tsx",
     "app/admin/(dashboard)/logs/page.tsx",
     "app/api/admin/faqs/route.ts",
-    "app/api/admin/about/route.ts",
     "app/api/admin/media/route.ts",
     "app/api/admin/experience/route.ts",
   ]) {
@@ -164,8 +163,6 @@ test("unlocked privileged reads and log actions check Admin identity before serv
   }
   const faq = await source("app/api/admin/faqs/route.ts");
   assert.match(faq, /faqSchema = z\.object\([\s\S]*?\)\.strict\(\)/);
-  const about = await source("app/api/admin/about/route.ts");
-  assert.match(about, /aboutSchema = z\.object\([\s\S]*?\)\.partial\(\)\.strict\(\)/);
   const projectList = await source("app/admin/(dashboard)/projects/page.tsx");
   assert.match(projectList, /createSupabaseAdminClient\(\)/);
   assert.match(projectList, /Projects could not be loaded/);
@@ -310,11 +307,10 @@ test("Admin Buildlog uses contained mobile cards and keeps the desktop table", a
 });
 
 test("unlocked Admin presentation keeps narrow content contained and controls named", async () => {
-  const [layout, dashboard, sidebar, about] = await Promise.all([
+  const [layout, dashboard, sidebar] = await Promise.all([
     source("app/admin/(dashboard)/layout.tsx"),
     source("app/admin/(dashboard)/page.tsx"),
     source("app/components/admin/Sidebar.tsx"),
-    source("app/admin/(dashboard)/about/page.tsx"),
   ]);
   assert.match(layout, /gridTemplateColumns: "minmax\(0, 1fr\)"/);
   assert.match(dashboard, /grid-cols-\[minmax\(0,1fr\)\]/);
@@ -324,16 +320,25 @@ test("unlocked Admin presentation keeps narrow content contained and controls na
   assert.match(dashboard, /aria-label=\{`Edit \$\{project\.title\}`\}/);
   assert.match(sidebar, /aria-current=\{active \? "page" : undefined\}/);
   assert.match(sidebar, /min-h-11/);
-  assert.match(about, /htmlFor=\{`about-section-\$\{num\}-image`\}/);
+  assert.doesNotMatch(sidebar, /href: "\/admin\/about"/);
 });
 
 test("Admin login is private and the unlocked routes retain their URLs", async () => {
   const login = await fetch(`${baseUrl}/admin/login`);
   assert.equal(login.status, 200);
   assert.match(await login.text(), /<meta name="robots" content="noindex, nofollow"/);
-  for (const path of ["about", "media", "settings", "blogs", "analytics"]) {
+  for (const path of ["media", "settings", "blogs", "analytics"]) {
     const response = await fetch(`${baseUrl}/admin/${path}`, { redirect: "manual" });
     assert.equal(response.status, 307);
     assert.equal(new URL(response.headers.get("location"), baseUrl).pathname, "/admin/login");
   }
+});
+
+test("retired Admin About API is unavailable while public About remains", async () => {
+  for (const method of ["GET", "PUT"]) {
+    const response = await fetch(`${baseUrl}/api/admin/about`, { method });
+    assert.equal(response.status, 404, `retired ${method} endpoint must not accept writes`);
+  }
+  const response = await fetch(`${baseUrl}/about`);
+  assert.equal(response.status, 200);
 });

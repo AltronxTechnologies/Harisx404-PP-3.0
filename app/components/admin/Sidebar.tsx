@@ -5,7 +5,7 @@ import NextImage from "next/image";
 import { usePathname } from "next/navigation";
 import { createPortal } from "react-dom";
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
-import { LayoutDashboard, FileText, Briefcase, Settings, LogOut, Activity, Image, User, List, Quote, History, Award, HelpCircle, MessageSquare, ChartNoAxesCombined, Menu, X, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { LayoutDashboard, FileText, Briefcase, Settings, LogOut, Activity, Image, List, Quote, History, Award, HelpCircle, MessageSquare, ChartNoAxesCombined, Menu, X, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { logout } from "@/app/lib/supabase/auth";
 
 const navItems = [
@@ -21,7 +21,6 @@ const navItems = [
   { name: "Experience", href: "/admin/experience", icon: History, section: "Content" },
   { name: "Certifications", href: "/admin/certifications", icon: Award, section: "Content" },
   { name: "Media", href: "/admin/media", icon: Image, section: "Content" },
-  { name: "About", href: "/admin/about", icon: User, section: "Content" },
   { name: "System Logs", href: "/admin/logs", icon: Activity, section: "Operations" },
   { name: "Settings", href: "/admin/settings", icon: Settings, section: "Operations" },
 ];

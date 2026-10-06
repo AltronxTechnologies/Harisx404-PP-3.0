@@ -106,7 +106,7 @@ Deletion across the database and Cloudinary is not atomic; an unexpected
 concurrent edit or failed restoration still needs manual review. Use test-only
 assets and a backup/restore plan for further workflows.
 
-Before asking for a valid Settings/About save-and-reopen test:
+Before asking for a valid Settings save-and-reopen test:
 
 For a **complete** recovery plan, follow `08-backup-restore.md`. One SQL query
 cannot save Auth users, Storage file bytes, Cloudinary assets, project settings
@@ -114,17 +114,18 @@ and database objects together. Do not restore over the source project for a test
 
 1. Use a separate development Supabase project with the same schema, or open
    Supabase Dashboard -> Database -> Backups and verify a restore point exists.
-2. If backups are unavailable, export the current `site_settings` and
-   `about_content` rows privately via the Table Editor before any save. Keep
-   that export on your machine; do not send rows or values in chat.
-3. Tell me only that the backup or disposable project is ready, and whether to
-   keep or retire the legacy About editor. I will then scope a restore-verified
-   test rather than changing existing content without a recovery path.
+2. If backups are unavailable, export the current `site_settings` row privately
+   via the Table Editor before any save. Keep that export on your machine; do
+   not send rows or values in chat.
+3. Tell me only that the backup or disposable project is ready. I will then
+   scope a restore-verified test rather than changing existing content without
+   a recovery path.
 
-Decide whether legacy `/admin/about` should remain editable (it does not feed
-the locked public About). You chose to retire the separate Changelog Admin
-editor: old Admin links now lead to Buildlog, and `/changelog` still leads to
-the public Buildlog. Connected legacy `changelogs` and `changelog_entries`
+You chose to retire the legacy `/admin/about` editor and its API; the editor's
+data did not feed locked public About. The `about_content` and `about_sections` tables/rows
+remain for separate export/cleanup approval. You also chose to retire the
+separate Changelog Admin editor: old Admin links now lead to Buildlog, and
+`/changelog` still leads to the public Buildlog. Connected legacy `changelogs` and `changelog_entries`
 tables/rows were **not deleted**. If you later want to drop them, first export
 and inspect their contents in Supabase, take a backup, and authorize a separate
 schema/data cleanup. There is no need to do that to use Buildlog.
