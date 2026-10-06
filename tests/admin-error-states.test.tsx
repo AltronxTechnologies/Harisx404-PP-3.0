@@ -132,6 +132,33 @@ test("Admin editors do not mistake failed reads for empty data", async () => {
   }
 });
 
+test("Settings rejects an incomplete successful response before enabling edits", async () => {
+  const React = await import("react");
+  (globalThis as typeof globalThis & { React: typeof React }).React = React;
+  const [{ createRoot }, { act }, { AppRouterContext }, { default: Settings }] = await Promise.all([
+    import("react-dom/client"), import("react-dom/test-utils"),
+    import("next/dist/shared/lib/app-router-context.shared-runtime"),
+    import("../app/admin/(dashboard)/settings/page"),
+  ]);
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => Response.json({ site_name: "Incomplete" });
+  const host = document.createElement("div");
+  document.body.append(host);
+  const root = createRoot(host);
+  try {
+    await act(async () => {
+      root.render(React.createElement(AppRouterContext.Provider, { value: { push: () => {}, refresh: () => {} } as any }, React.createElement(Settings)));
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    assert.match(host.textContent || "", /Site settings unavailable/);
+    assert.equal(host.querySelector("form"), null);
+  } finally {
+    await act(async () => root.unmount());
+    host.remove();
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("Media page navigation retries a failed page without calling it empty", async () => {
   const React = await import("react");
   (globalThis as typeof globalThis & { React: typeof React }).React = React;

@@ -18,6 +18,8 @@ test("Admin Settings and Testimonials validation and navigation review", { skip:
   let pageErrors = 0;
   let blockedWrites = 0;
   let mockedWrites = 0;
+  let mockSettingsSuccess = false;
+  let submittedUnusedKeywords = false;
   let stage = "auth";
   const failures = [];
   try {
@@ -44,7 +46,9 @@ test("Admin Settings and Testimonials validation and navigation review", { skip:
       if (path === "/__nextjs_original-stack-frames") return route.continue();
       if (path === "/api/admin/settings" && method === "PUT") {
         mockedWrites++;
-        return route.fulfill({ status: 400, json: { error: "Review settings unavailable", fields: { seo_keywords: ["Review field feedback"] } } });
+        submittedUnusedKeywords ||= Object.hasOwn(JSON.parse(route.request().postData() || "{}"), "seo_keywords");
+        if (mockSettingsSuccess) return route.fulfill({ status: 200, json: { success: true } });
+        return route.fulfill({ status: 400, json: { error: "Review settings unavailable", fields: { seo_description: ["Review field feedback"] } } });
       }
       if (path === "/api/admin/testimonials" && method === "POST") {
         mockedWrites++;
@@ -74,9 +78,10 @@ test("Admin Settings and Testimonials validation and navigation review", { skip:
     assert.equal(mockedWrites + blockedWrites, 0, "Invalid Settings attempted a write");
     await siteName.fill(originalName);
     await github.fill(originalGithub);
-    await settings.getByRole("textbox", { name: "SEO Keywords" }).fill("review-only-unsaved-keyword");
+    await settings.getByRole("textbox", { name: /SEO Description/ }).fill("Review-only unsaved description");
+    await settings.getByText(/31\/500 characters/).waitFor();
     await settings.getByRole("button", { name: "Save Settings" }).click();
-    await settings.locator("#seo_keywords-error").filter({ hasText: "Review field feedback" }).waitFor();
+    await settings.locator("#seo_description-error").filter({ hasText: "Review field feedback" }).waitFor();
     assert.equal(mockedWrites, 1, "Settings field response not mapped");
     await settings.locator('a[href="/admin"]:visible').first().click();
     stage = "settings-sidebar";
@@ -89,6 +94,19 @@ test("Admin Settings and Testimonials validation and navigation review", { skip:
     await settingsDialog.waitFor();
     await settingsDialog.getByRole("button", { name: "Cancel" }).click();
 
+    stage = "settings-discard";
+    await settings.getByRole("button", { name: "Discard changes" }).click();
+    assert.equal(await settings.getByRole("button", { name: "Save Settings" }).isDisabled(), true);
+    assert.equal(await settings.getByRole("textbox", { name: /SEO Description/ }).inputValue() === "Review-only unsaved description", false);
+    stage = "settings-mocked-save";
+    mockSettingsSuccess = true;
+    await settings.getByRole("textbox", { name: /SEO Description/ }).fill("Review-only unsaved description");
+    await settings.getByRole("button", { name: "Save Settings" }).click();
+    await settings.getByRole("status").filter({ hasText: "Settings saved." }).waitFor();
+    assert.equal(await settings.getByRole("button", { name: "Save Settings" }).isDisabled(), true);
+    assert.equal(submittedUnusedKeywords, false, "Unused keyword field was overwritten");
+    assert.equal(mockedWrites, 2);
+
     stage = "testimonial";
     const form = await context.newPage();
     assert.equal((await form.goto("http://localhost:3000/admin/testimonials/new", { waitUntil: "domcontentloaded" }))?.status(), 200);
@@ -100,7 +118,7 @@ test("Admin Settings and Testimonials validation and navigation review", { skip:
     await form.getByRole("button", { name: "Save Testimonial" }).click();
     await form.locator("#testimonial-headline-error").waitFor();
     await form.locator("#testimonial-display_order-error").waitFor();
-    assert.equal(mockedWrites + blockedWrites, 1, "Invalid Testimonial attempted a write");
+    assert.equal(mockedWrites + blockedWrites, 2, "Invalid Testimonial attempted a write");
     await form.getByRole("textbox", { name: "Headline" }).fill("Review only headline");
     await form.getByRole("textbox", { name: "Quote" }).fill("Review only testimonial quote.");
     await form.getByRole("textbox", { name: "Name" }).fill("Review visitor");
@@ -111,12 +129,12 @@ test("Admin Settings and Testimonials validation and navigation review", { skip:
     const publish = form.getByRole("dialog", { name: "Publish testimonial?" });
     await publish.waitFor();
     await publish.getByRole("button", { name: "Cancel" }).click();
-    assert.equal(mockedWrites, 1);
+    assert.equal(mockedWrites, 2);
     await form.locator("#testimonial-status").click();
     await form.getByRole("option", { name: /^Draft/ }).click();
     await form.getByRole("button", { name: "Save Testimonial" }).click();
     await form.getByRole("alert").filter({ hasText: "Review save unavailable" }).waitFor();
-    assert.equal(mockedWrites, 2);
+    assert.equal(mockedWrites, 3);
     await form.locator('a[href="/admin"]:visible').first().click();
     const discard = form.getByRole("dialog", { name: "Discard unsaved testimonial changes?" });
     await discard.waitFor();
@@ -132,6 +150,10 @@ test("Admin Settings and Testimonials validation and navigation review", { skip:
           return { overflow: document.documentElement.scrollWidth > innerWidth + 1, short: controls.filter((element) => element.getBoundingClientRect().height < 44 || element.getBoundingClientRect().width < 44).length, outside: controls.filter((element) => element.getBoundingClientRect().right > innerWidth + 1).length };
         });
         if (metrics.overflow || metrics.short || metrics.outside) failures.push(`${surface}-${width}:${JSON.stringify(metrics)}`);
+        if (surface === "settings" && process.env.RUN_REDACTED_SETTINGS_SCREENSHOT === "1" && (width === 320 || width === 1440)) {
+          await page.evaluate(() => scrollTo(0, 0));
+          await page.screenshot({ path: `/tmp/opencode/admin-settings-${width}-redacted.png`, maskColor: "#303036", mask: [page.locator(".admin-content input"), page.locator(".admin-content textarea")] });
+        }
       }
     }
     assert.equal(pageErrors, 0);
