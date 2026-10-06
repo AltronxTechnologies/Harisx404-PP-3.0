@@ -14,15 +14,14 @@ export default async function LogsPage() {
   const supabase = await createSupabaseAdminClient();
   
   // Fetch logs sorted by newest first
-  const { data: logs, error } = await supabase
-    .from("system_logs")
-    .select("id, level, message, context, resolved, created_at")
-    .order("created_at", { ascending: false })
-    .limit(100);
+  const [{ data: logs, error }, { count: unresolvedCount, error: countError }] = await Promise.all([
+    supabase.from("system_logs").select("id, level, message, context, resolved, created_at").order("created_at", { ascending: false }).limit(100),
+    supabase.from("system_logs").select("id", { count: "exact", head: true }).eq("resolved", false),
+  ]);
 
-  if (error) {
-    console.error("Failed to fetch logs:", error);
+  if (error || countError) {
+    console.error("Failed to fetch log status:", error?.code || countError?.code || "unknown");
   }
 
-  return <LogsDashboardClient initialLogs={logs || []} loadError={error ? "Logs could not be loaded. Apply the Admin system logs migration if it is not installed, then retry." : ""} />;
+  return <LogsDashboardClient initialLogs={logs || []} unresolvedCount={unresolvedCount ?? 0} loadError={error || countError || unresolvedCount === null ? "Logs or unresolved counts could not be loaded. Reload to retry before acting." : ""} />;
 }

@@ -17,6 +17,8 @@ import { canUseVisualBlogEditor } from "@/app/lib/admin/blog-visual-eligibility"
 import { blogCanonicalUrl, isValidBlogDate, normalizeBlogSlug, resolveBlogPublishDate, todayUtcDate } from "@/app/lib/blog-defaults";
 import { isAllowedBlogImageUrl } from "@/app/components/blog/blogImage";
 import { siteMetadata } from "@/app/data/siteMetadata";
+import { useAdminNavigationGuard } from "./useAdminNavigationGuard";
+import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
 
 const TiptapEditor = dynamic(() => import("./TiptapEditor").then((module) => module.TiptapEditor), { ssr: false });
 const BlogCodeEditor = dynamic(() => import("./BlogCodeEditor").then((module) => module.BlogCodeEditor), { ssr: false });
@@ -116,6 +118,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
       image_ids: [],
     },
   });
+  const { leaveTarget: navigationTarget, setLeaveTarget: setNavigationTarget, confirmLeave } = useAdminNavigationGuard(isDirty || Boolean(tagInput.trim()));
 
   const tags = watch("tags") || [];
   const status = watch("status");
@@ -229,8 +232,9 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
         ),
       });
 
+      const result = await readAdminResponse(res, "Blog post");
       if (!res.ok) {
-        const err = await res.json();
+        const err = result;
         if (err.issues?.fieldErrors) {
           for (const [name, messages] of Object.entries(err.issues.fieldErrors)) {
             if (name in blogSchema.shape && Array.isArray(messages) && typeof messages[0] === "string") {
@@ -240,6 +244,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
         }
         throw new Error(err.error || "Failed to save blog post");
       }
+      if (!result?.id) throw new Error("Blog save could not be confirmed. Refresh the list before retrying.");
 
       router.push("/admin/blogs?saved=1");
       router.refresh();
@@ -388,7 +393,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
             onSelect={(media) => {
               if (imageManagerAvailable && blogImages.length >= 20 && !blogImages.some((image) => image.id === media.id)) {
                 setError("image_ids", { message: "Choose no more than 20 images." });
-                return;
+                return false;
               }
               setValue("cover_image_url", media.secure_url || media.url, { shouldDirty: true, shouldValidate: true });
               setValue("cover_image_id", media.id, { shouldDirty: true });
@@ -397,6 +402,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
                 setBlogImages(next);
                 setValue("image_ids", next.map((image) => image.id), { shouldDirty: true });
               }
+              return true;
             }}
           />
         </div>
@@ -438,7 +444,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
             {tags.map(tag => (
             <span key={tag} className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-border-hairline bg-surface-base py-1 pl-3 pr-1 text-xs">
               <span className="min-w-0 break-words">{tag}</span>
-              <button type="button" onClick={() => removeTag(tag)} aria-label={`Remove ${tag} tag`} className="flex size-9 shrink-0 items-center justify-center rounded-full text-ink-secondary hover:bg-white/10 hover:text-white">
+              <button type="button" onClick={() => removeTag(tag)} aria-label={`Remove ${tag} tag`} className="flex size-11 shrink-0 items-center justify-center rounded-full text-ink-secondary hover:bg-white/10 hover:text-white">
                 <X className="h-3 w-3" />
               </button>
             </span>
@@ -477,7 +483,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
             const chosen = availablePosts.find((item) => item.id === id);
             return <li key={id} className="flex items-center justify-between gap-3 rounded-lg bg-surface-base px-3 py-2 text-sm text-ink-primary">
               <span className="min-w-0 break-words">{index + 1}. {chosen?.title || "Post no longer available"}</span>
-              <button type="button" onClick={() => setValue("related_blog_post_ids", selectedRelatedIds.filter((value) => value !== id), { shouldDirty: true, shouldValidate: true })} className="shrink-0 text-xs text-ink-secondary underline underline-offset-2 hover:text-ink-primary">Remove</button>
+              <button type="button" onClick={() => setValue("related_blog_post_ids", selectedRelatedIds.filter((value) => value !== id), { shouldDirty: true, shouldValidate: true })} className="min-h-11 shrink-0 text-xs text-ink-secondary underline underline-offset-2 hover:text-ink-primary">Remove</button>
             </li>;
           })}
         </ol>}
@@ -488,7 +494,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
             const selected = selectedRelatedIds.includes(item.id);
             const live = item.status === "published" && !!item.published_at && Date.parse(item.published_at) <= Date.now();
             const disabled = !selected && (!live || selectedRelatedIds.length >= 3);
-            return <label key={item.id} className={`flex items-center gap-3 rounded-lg border border-border-hairline px-3 py-2 text-sm ${disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-surface-base"}`}>
+              return <label key={item.id} className={`flex min-h-11 items-center gap-3 rounded-lg border border-border-hairline px-3 py-2 text-sm ${disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-surface-base"}`}>
               <input type="checkbox" checked={selected} disabled={disabled} onChange={() => setValue("related_blog_post_ids", selected ? selectedRelatedIds.filter((id) => id !== item.id) : [...selectedRelatedIds, item.id], { shouldDirty: true, shouldValidate: true })} className="size-4 shrink-0 rounded border-border-hairline text-accent-signal focus:ring-accent-signal" />
               <span className="min-w-0 flex-1 break-words text-ink-primary">{item.title}</span>
               <span className="shrink-0 text-xs text-ink-secondary">{selected ? `#${selectedRelatedIds.indexOf(item.id) + 1}` : live ? "published" : item.status === "published" ? "scheduled" : item.status}</span>
@@ -552,6 +558,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
         {initialData?.id && (
             <Link
               href={`/admin/blogs/${initialData.id}/preview`}
+              data-admin-unguarded
               onClick={(event) => { if (isDirty || tagInput.trim()) { event.preventDefault(); leave("preview"); } }}
             className="inline-flex min-h-11 items-center rounded-xl px-4 py-2 text-sm font-medium text-accent-signal underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-signal"
           >
@@ -605,6 +612,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
         if (target) router.push(target === "list" ? "/admin/blogs" : `/admin/blogs/${initialData?.id}/preview`);
       }}
     />
+    <AdminConfirmDialog open={navigationTarget !== null} title="Discard unsaved Blog changes?" description="Your article, tags and image selections have not been saved." confirmLabel="Discard changes" cancelLabel="Keep editing" destructive onClose={() => setNavigationTarget(null)} onConfirm={() => confirmLeave(router.push)} />
     </>
   );
 }

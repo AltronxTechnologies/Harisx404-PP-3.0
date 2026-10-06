@@ -20,6 +20,7 @@ export function DeleteCertificationButton({ id, title }: { id: string; title: st
       const response = await fetch(`/api/admin/certifications?${new URLSearchParams({ id })}`, { method: "DELETE" });
       const result = await readAdminResponse(response, "Certification deletion");
       if (!response.ok) throw new Error(result.error || "Could not delete this certification.");
+      if (result.success !== true) throw new Error("Certification deletion could not be confirmed. Refresh the list before retrying.");
       setConfirming(false);
       const url = new URL(window.location.href);
       url.searchParams.set("notice", "deleted");

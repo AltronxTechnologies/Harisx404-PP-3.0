@@ -38,7 +38,7 @@ export function AdminConfirmDialog({ open, title, description, confirmLabel, can
             <div className="mt-5 space-y-2">
               <label htmlFor="admin-confirm-text" className="block text-sm font-medium">Type <code className="break-all font-mono text-white">{confirmText}</code> to confirm</label>
               <input id="admin-confirm-text" type="text" value={typed} onChange={(event) => setTyped(event.target.value)} autoComplete="off" spellCheck={false} className="min-h-11 w-full rounded-xl border border-white/30 bg-[#101013] px-3 text-sm text-white outline-none focus-visible:ring-2 focus-visible:ring-white/70" />
-              {typed && typed !== confirmText && <p role="alert" className="text-xs text-red-300">The slug does not match. No changes have been made.</p>}
+               {typed && typed !== confirmText && <p role="alert" className="text-xs text-red-300">The confirmation text does not match. No changes have been made.</p>}
             </div>
           )}
           <div className="mt-6 flex flex-wrap justify-end gap-2">

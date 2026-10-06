@@ -28,6 +28,7 @@ export function CommunityWallModerationActions({ id, status, updatedAt, creatorN
           });
       const result = await readAdminResponse(response, "Community Wall moderation");
       if (!response.ok) throw new Error(result.error || "Moderation could not be completed. Refresh this note before retrying.");
+      if (decision === "delete" ? result.success !== true : result.data?.id !== id) throw new Error("Moderation could not be confirmed. Refresh this note before retrying.");
       setConfirming(null);
       const url = new URL(window.location.href);
       url.searchParams.set("notice", decision === "delete" ? "deleted" : decision);

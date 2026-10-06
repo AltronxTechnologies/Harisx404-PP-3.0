@@ -60,6 +60,7 @@ export default async function AdminDashboard() {
         <h1 className="text-2xl font-bold tracking-tight text-text-primary">Dashboard</h1>
         <p className="text-sm text-text-secondary">Welcome back, Haris. Here&apos;s an overview of your portfolio.</p>
       </div>
+      {(blogCountError || publishedBlogCountError || draftBlogCountError || projectCountError || !serverStats) && <p role="alert" className="rounded-xl border border-amber-500/30 bg-amber-950/20 p-4 text-sm text-amber-200">Some dashboard totals are unavailable. A dash means the value could not be confirmed; it does not mean zero. Refresh the page to retry.</p>}
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

@@ -1,21 +1,32 @@
 import { TestimonialForm } from "@/app/components/admin/TestimonialForm";
+import { requireAdmin } from "@/app/lib/admin-auth";
 import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
-import { notFound } from "next/navigation";
+import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
+import { z } from "zod";
 
 export default async function EditTestimonialPage({ params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireAdmin();
+  if (auth.response) redirect(auth.response.status === 401 ? "/admin/login" : "/");
   const { id } = await params;
-  // Service-role client so pending/archived rows (hidden from the
-  // session client by RLS) can be edited. Page is admin-gated by middleware.
-  const supabase = await createSupabaseAdminClient();
-  const { data: testimonial, error } = await supabase
-    .from("testimonials")
-    .select("*")
-    .eq("id", id)
-    .single();
-
-  if (error || !testimonial) {
-    notFound();
+  if (!z.string().uuid().safeParse(id).success) notFound();
+  // Pending and archived rows require the service role after the admin gate.
+  let testimonial;
+  try {
+    const supabase = await createSupabaseAdminClient();
+    const { data, error } = await supabase
+      .from("testimonials")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+    if (error) throw error;
+    testimonial = data;
+  } catch (error) {
+    console.error("Admin Testimonial read failed", error);
+    return <div role="alert" className="rounded-xl border border-red-500/30 bg-red-950/20 p-5 text-sm text-red-200">Testimonial could not be loaded. <Link prefetch={false} href={`/admin/testimonials/${id}?retry=${Date.now()}`} className="inline-flex min-h-11 items-center font-medium underline underline-offset-2">Retry loading</Link></div>;
   }
+
+  if (!testimonial) notFound();
 
   return (
     <div className="flex flex-col gap-6">

@@ -38,11 +38,11 @@ const projectFieldsSchema = z.object({
     results: z.string().max(10000).optional().default(""),
     lessons_learned: z.string().max(10000).optional().default(""),
   }).strict().optional().default({}),
-  tech_stack: z.array(z.string().trim().min(1).max(100)).optional().default([]),
+  tech_stack: z.array(z.string().trim().min(1).max(100)).max(32).optional().default([]),
   features: z.array(z.string().trim().min(1).max(500)).max(100).optional().default([]),
-  tags: z.array(z.string().trim().min(1).max(100)).optional().default([]),
+  tags: z.array(z.string().trim().min(1).max(100)).max(32).optional().default([]),
   related_project_ids: z.array(idSchema).max(2).refine((ids) => new Set(ids).size === ids.length, "Choose two different projects").optional().default([]),
-  gallery: z.array(z.object({ mediaId: idSchema, caption: z.string().max(200).refine((value) => captionWordCount(value) <= 30, "Use 30 words or fewer"), altText: z.string().trim().max(160).optional().default("") }).strict()).optional().default([]),
+  gallery: z.array(z.object({ mediaId: idSchema, caption: z.string().max(200).refine((value) => captionWordCount(value) <= 30, "Use 30 words or fewer"), altText: z.string().trim().max(160).optional().default("") }).strict()).max(20).optional().default([]),
 }).strict();
 const uniqueGallery = (data: z.infer<typeof projectFieldsSchema>) => new Set(data.gallery.map((image) => image.mediaId)).size === data.gallery.length;
 const projectSchema = projectFieldsSchema.refine(uniqueGallery, {
@@ -136,6 +136,21 @@ async function validateGalleryMedia(db: Awaited<ReturnType<typeof createSupabase
   }
 }
 
+async function validateCoverMedia(db: Awaited<ReturnType<typeof createSupabaseAdminClient>>, coverId: string, coverUrl: string) {
+  if (!coverId) return null;
+  try {
+    const { data: media, error } = await db.from("media").select("url, secure_url").eq("id", coverId).maybeSingle();
+    if (error) throw error;
+    if (!media || (coverUrl !== media.url && coverUrl !== media.secure_url)) {
+      return NextResponse.json({ error: "Choose a matching cover image from the media library." }, { status: 400 });
+    }
+    return null;
+  } catch (error) {
+    console.error("Could not verify project cover image:", error);
+    return NextResponse.json({ error: "Could not verify the cover image. Try again later." }, { status: 503 });
+  }
+}
+
 function fail(error: unknown) {
   if (error instanceof SyntaxError) return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   if (error instanceof Error && error.message === "Gallery contains an unknown media ID") {
@@ -195,6 +210,8 @@ export async function POST(request: Request) {
     const db = await createSupabaseAdminClient();
     const relatedError = await validateRelatedProjects(db, data.related_project_ids);
     if (relatedError) return NextResponse.json({ error: relatedError }, { status: 400 });
+    const coverError = await validateCoverMedia(db, data.cover_image_id, data.cover_image_url);
+    if (coverError) return coverError;
     await validateGalleryMedia(db, data.gallery);
     const saved = await saveProject(db, data);
     if (saved.error) return saved.error;
@@ -217,6 +234,8 @@ export async function PUT(request: Request) {
     const db = await createSupabaseAdminClient();
     const relatedError = await validateRelatedProjects(db, data.related_project_ids, id);
     if (relatedError) return NextResponse.json({ error: relatedError }, { status: 400 });
+    const coverError = await validateCoverMedia(db, data.cover_image_id, data.cover_image_url);
+    if (coverError) return coverError;
     await validateGalleryMedia(db, data.gallery);
     const saved = await saveProject(db, data, id, updated_at);
     if (saved.error) return saved.error;

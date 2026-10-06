@@ -9,6 +9,7 @@ import { Loader2 } from "lucide-react";
 import { AdminConfirmDialog } from "./AdminConfirmDialog";
 import { BuildlogSelect } from "./BuildlogSelect";
 import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
+import { useAdminNavigationGuard } from "./useAdminNavigationGuard";
 
 const optionalUrl = z.string().trim().max(2048).refine((value) => {
   if (!value) return true;
@@ -103,6 +104,7 @@ export function CertificationForm({ initialData }: { initialData?: InitialCertif
       status: initialData?.status || "published",
     },
   });
+  const { leaveTarget, setLeaveTarget, confirmLeave } = useAdminNavigationGuard(isDirty);
   const doesNotExpire = watch("does_not_expire");
 
   useEffect(() => {
@@ -134,6 +136,7 @@ export function CertificationForm({ initialData }: { initialData?: InitialCertif
       });
       const result = await readAdminResponse(response, "Certification");
       if (!response.ok) throw new Error(result.error || "Failed to save certification.");
+      if (!result.data?.id) throw new Error("Certification save could not be confirmed. Refresh the list before retrying.");
       router.push(result.warning ? "/admin/certifications?notice=saved&cache=stale" : "/admin/certifications?notice=saved");
       router.refresh();
     } catch (error) {
@@ -182,7 +185,8 @@ export function CertificationForm({ initialData }: { initialData?: InitialCertif
       <div className="grid gap-6 md:grid-cols-3">
         <div className="min-w-0"><Controller name="category" control={control} render={({ field }) => <BuildlogSelect id="certification-category" label="Category" value={field.value} onChange={field.onChange} options={categoryOptions} />} /></div>
         <label className="text-sm font-medium">Issue date
-          <input type="date" {...register("issue_date")} className={`mt-2 ${inputClass}`} />
+          <input type="date" {...register("issue_date")} {...errorProps("issue_date")} className={`mt-2 ${inputClass}`} />
+          <FieldError name="issue_date" />
         </label>
         <label className="text-sm font-medium">Expiration date
           <input type="date" disabled={doesNotExpire} {...register("expiration_date")} {...errorProps("expiration_date")} className={`mt-2 disabled:cursor-not-allowed disabled:opacity-50 ${inputClass}`} />
@@ -244,6 +248,7 @@ export function CertificationForm({ initialData }: { initialData?: InitialCertif
       </div>
     </form>
     <AdminConfirmDialog open={confirmingLeave} title="Discard unsaved certification changes?" description="Your credential details and visibility edits will be lost." confirmLabel="Discard changes" destructive onClose={() => setConfirmingLeave(false)} onConfirm={() => { setConfirmingLeave(false); router.push("/admin/certifications"); }} />
+    <AdminConfirmDialog open={leaveTarget !== null} title="Discard unsaved certification changes?" description="Your credential details and visibility edits will be lost." confirmLabel="Discard changes" destructive onClose={() => setLeaveTarget(null)} onConfirm={() => confirmLeave(router.push)} />
     <AdminConfirmDialog open={pendingPublication !== null} title={pendingPublication?.status === "published" ? "Publish certification?" : "Hide certification?"} description={pendingPublication?.status === "published" ? "This credential will become visible on the public Credentials page." : "This credential will leave the public Credentials page but remain editable in Admin."} confirmLabel={pendingPublication?.status === "published" ? "Publish credential" : "Hide credential"} pending={isSubmitting} onClose={() => setPendingPublication(null)} onConfirm={() => { if (pendingPublication) { const values = pendingPublication; setPendingPublication(null); void save(values); } }} />
     </>
   );

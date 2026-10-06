@@ -267,7 +267,7 @@ test("project tags, timeline, source name and optional sections remain owner-man
   assert.match(api, /2026_project_case_studies\.sql before changes can be saved/);
   assert.match(api, /case_study_sections: data\.case_study_sections/);
   assert.match(form, /register\("latest_update_label"\)/);
-  assert.match(form, /register\("project_stage"\)/);
+  assert.match(form, /<Controller name="project_stage" control=\{control\}/);
   assert.doesNotMatch(form, /register\("live_note"\)/);
   assert.match(form, /register\("source_note"\)/);
   assert.match(form, /name=\{`case_study_sections\.\$\{key\}`\}/);
@@ -288,7 +288,7 @@ test("project tags, timeline, source name and optional sections remain owner-man
   assert.match(detail, /<h2 className="font-mono text-xs font-semibold uppercase tracking-widest text-text-secondary">Tech stack<\/h2>/);
   assert.ok((detail.match(/font-mono text-xs font-semibold uppercase tracking-widest/g) || []).length >= 4);
   assert.match(detail, /domainTags\.map/);
-  assert.match(api, /tags: z\.array\(z\.string\(\)\.trim\(\)\.min\(1\)\.max\(100\)\)\.optional/);
+  assert.match(api, /tags: z\.array\(z\.string\(\)\.trim\(\)\.min\(1\)\.max\(100\)\)\.max\(32\)\.optional/);
   assert.match(index, /tags: Array\.isArray\(p\.tags\) \? p\.tags : \[\]/);
   assert.match(filters, /filterTags\(p\)\.includes\(activeTag\)/);
   assert.match(filters, /\.\.\.filterTags\(p\)/);

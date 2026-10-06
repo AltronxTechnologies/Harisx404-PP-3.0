@@ -151,11 +151,11 @@ export default async function AdminBlogsPage({
            <span className="text-ink-secondary">Page <strong className="font-medium text-ink-primary">{params.page}</strong> of {totalPages}</span>
            <div className="flex items-center gap-2">
              {params.page > 1 ? (
-               <Link href={blogListUrl(params, params.page - 1)} rel="prev" className="inline-flex min-h-10 items-center gap-1 rounded-lg border border-border-hairline px-3 text-ink-primary transition-colors hover:bg-surface-base"><ChevronLeft aria-hidden className="size-4" /> Previous</Link>
-             ) : <span aria-disabled="true" className="inline-flex min-h-10 items-center gap-1 rounded-lg border border-border-hairline px-3 text-ink-secondary opacity-50"><ChevronLeft aria-hidden className="size-4" /> Previous</span>}
+                <Link href={blogListUrl(params, params.page - 1)} rel="prev" className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-border-hairline px-3 text-ink-primary transition-colors hover:bg-surface-base"><ChevronLeft aria-hidden className="size-4" /> Previous</Link>
+              ) : <span aria-disabled="true" className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-border-hairline px-3 text-ink-secondary opacity-50"><ChevronLeft aria-hidden className="size-4" /> Previous</span>}
              {params.page < totalPages ? (
-               <Link href={blogListUrl(params, params.page + 1)} rel="next" className="inline-flex min-h-10 items-center gap-1 rounded-lg border border-border-hairline px-3 text-ink-primary transition-colors hover:bg-surface-base">Next <ChevronRight aria-hidden className="size-4" /></Link>
-             ) : <span aria-disabled="true" className="inline-flex min-h-10 items-center gap-1 rounded-lg border border-border-hairline px-3 text-ink-secondary opacity-50">Next <ChevronRight aria-hidden className="size-4" /></span>}
+                <Link href={blogListUrl(params, params.page + 1)} rel="next" className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-border-hairline px-3 text-ink-primary transition-colors hover:bg-surface-base">Next <ChevronRight aria-hidden className="size-4" /></Link>
+              ) : <span aria-disabled="true" className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-border-hairline px-3 text-ink-secondary opacity-50">Next <ChevronRight aria-hidden className="size-4" /></span>}
            </div>
          </nav>
       </div>}

@@ -38,7 +38,7 @@ test("Buildlog Admin edits fail on stale timestamps and per-page settings are st
     source("app/api/admin/buildlog/route.ts"),
     source("app/components/admin/BuildlogForm.tsx"),
     source("app/components/admin/DeleteBuildlogButton.tsx"),
-    source("app/components/admin/useBuildlogNavigationGuard.ts"),
+    source("app/components/admin/useAdminNavigationGuard.ts"),
     source("app/buildlog/data.ts"),
     source("app/admin/(dashboard)/buildlog/settings/page.tsx"),
   ]);
@@ -48,7 +48,7 @@ test("Buildlog Admin edits fail on stale timestamps and per-page settings are st
   assert.match(form, /updated_at: initialData\.updated_at/);
   assert.match(form, /beforeunload/);
   assert.match(form, /setValueAs: \(value: string\) => value === "" \? NaN : Number\(value\)/);
-  assert.match(form, /useBuildlogNavigationGuard\(isDirty\)/);
+  assert.match(form, /useAdminNavigationGuard\(isDirty\)/);
   assert.match(form, /<BuildlogSelect id="buildlog-status"/);
   assert.match(form, /<BuildlogSelect id="buildlog-lifecycle"/);
   assert.doesNotMatch(form, /<select/);

@@ -16,7 +16,7 @@ interface MediaItem {
 interface MediaPickerModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelect: (media: MediaItem) => void;
+  onSelect: (media: MediaItem) => boolean | void;
   initialTab?: "library" | "upload";
   blogPostId?: string;
 }
@@ -28,6 +28,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectionError, setSelectionError] = useState("");
   const [activeTab, setActiveTab] = useState<"library" | "upload">("library");
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
@@ -69,6 +70,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
   useEffect(() => {
     if (isOpen) {
       setSelectedId(null);
+      setSelectionError("");
       setActiveTab(initialTab);
       setUploadError("");
       fetchMedia(0);
@@ -96,7 +98,11 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
   const handleSelect = () => {
     const selected = media.find((m) => m.id === selectedId);
     if (selected) {
-      onSelect(selected);
+      if (onSelect(selected) === false) {
+        setSelectionError("This image cannot be selected here. Choose another or review the image limit.");
+        return;
+      }
+      setSelectionError("");
       onClose();
     }
   };
@@ -144,7 +150,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
               ref={libraryTabRef}
               type="button"
               onClick={() => setActiveTab("library")}
-              className={`text-lg font-semibold flex items-center gap-2 transition-colors ${
+              className={`text-lg font-semibold flex min-h-11 items-center gap-2 transition-colors ${
                 activeTab === "library" ? "text-text-primary" : "text-text-secondary hover:text-text-primary"
               }`}
             >
@@ -154,14 +160,14 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
               ref={uploadTabRef}
               type="button"
               onClick={() => setActiveTab("upload")}
-              className={`text-lg font-semibold flex items-center gap-2 transition-colors ${
+              className={`text-lg font-semibold flex min-h-11 items-center gap-2 transition-colors ${
                 activeTab === "upload" ? "text-text-primary" : "text-text-secondary hover:text-text-primary"
               }`}
             >
               <UploadCloud className="h-5 w-5" /> Upload
             </button>
           </div>
-          <button type="button" aria-label="Close media picker" onClick={onClose} className="p-2 hover:bg-surface-base rounded-lg transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary">
+          <button type="button" aria-label="Close media picker" onClick={onClose} className="flex size-11 items-center justify-center hover:bg-surface-base rounded-lg transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -191,7 +197,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
                     type="button"
                     aria-label={item.alt_text || "Select media image"}
                     aria-pressed={selectedId === item.id}
-                    onClick={() => setSelectedId(item.id)}
+                     onClick={() => { setSelectedId(item.id); setSelectionError(""); }}
                     className={`relative aspect-square rounded-xl overflow-hidden border-2 cursor-pointer transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-signal ${
                       selectedId === item.id ? "border-accent-signal" : "border-transparent hover:border-border-hairline"
                     }`}
@@ -233,7 +239,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
                     </div>
                   )}
 
-                  <label className="cursor-pointer px-6 py-3 bg-accent-signal text-white rounded-xl text-sm font-medium shadow-sm hover:bg-accent-signal/90 transition-colors focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-text-primary">
+                  <label className="inline-flex min-h-11 cursor-pointer items-center px-6 py-3 bg-accent-signal text-white rounded-xl text-sm font-medium shadow-sm hover:bg-accent-signal/90 transition-colors focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-text-primary">
                     Choose File
                     <input type="file" className="sr-only" accept="image/*,.heic,.heif,.tif,.tiff,.bmp" onChange={handleUpload} />
                   </label>
@@ -243,11 +249,12 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
           )}
         </div>
 
+        {selectionError && <p role="alert" className="border-t border-border-hairline px-4 py-2 text-sm text-red-300">{selectionError}</p>}
         <div className="p-4 border-t border-border-hairline bg-surface-raised flex justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl text-sm font-medium hover:bg-surface-base transition-colors"
+            className="min-h-11 px-4 py-2 rounded-xl text-sm font-medium hover:bg-surface-base transition-colors"
           >
             Cancel
           </button>
@@ -255,7 +262,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
             type="button"
             onClick={handleSelect}
             disabled={!selectedId}
-            className="px-6 py-2 bg-accent-signal text-white rounded-xl text-sm font-medium shadow-sm hover:bg-accent-signal/90 disabled:opacity-50 transition-colors"
+            className="min-h-11 px-6 py-2 bg-accent-signal text-white rounded-xl text-sm font-medium shadow-sm hover:bg-accent-signal/90 disabled:opacity-50 transition-colors"
           >
             Select Image
           </button>

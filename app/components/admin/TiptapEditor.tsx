@@ -39,15 +39,15 @@ const TableTools = ({ editor }: { editor: Editor }) => {
   return (
     <div role="group" aria-label="Edit table" className="flex flex-wrap items-center gap-1">
       <button type="button" onClick={() => editor.chain().focus().addRowAfter().run()} aria-label="Add row below"
-        className="rounded p-2 text-sm text-ink-secondary hover:bg-surface-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-signal">+ Row</button>
+        className="min-h-11 rounded p-2 text-sm text-ink-secondary hover:bg-surface-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-signal">+ Row</button>
       <button type="button" onClick={() => editor.chain().focus().deleteRow().run()} aria-label="Delete row"
-        className="rounded p-2 text-sm text-ink-secondary hover:bg-surface-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-signal">- Row</button>
+        className="min-h-11 rounded p-2 text-sm text-ink-secondary hover:bg-surface-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-signal">- Row</button>
       <button type="button" onClick={() => editor.chain().focus().addColumnAfter().run()} aria-label="Add column to right"
-        className="rounded p-2 text-sm text-ink-secondary hover:bg-surface-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-signal">+ Column</button>
+        className="min-h-11 rounded p-2 text-sm text-ink-secondary hover:bg-surface-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-signal">+ Column</button>
       <button type="button" onClick={() => editor.chain().focus().deleteColumn().run()} aria-label="Delete column"
-        className="rounded p-2 text-sm text-ink-secondary hover:bg-surface-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-signal">- Column</button>
+        className="min-h-11 rounded p-2 text-sm text-ink-secondary hover:bg-surface-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-signal">- Column</button>
       <button type="button" onClick={() => editor.chain().focus().deleteTable().run()} aria-label="Delete table"
-        className="rounded p-2 text-sm text-ink-secondary hover:bg-surface-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-signal">Delete table</button>
+        className="min-h-11 rounded p-2 text-sm text-ink-secondary hover:bg-surface-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-signal">Delete table</button>
     </div>
   );
 };
@@ -319,7 +319,9 @@ const MenuBar = ({ editor, story, blogTools }: { editor: Editor | null; story: b
           type="button"
           onClick={() => setAiMenuOpen(!aiMenuOpen)}
           disabled={aiLoading}
-          className="flex items-center gap-1 px-3 py-1.5 rounded bg-accent-signal/10 text-accent-signal hover:bg-accent-signal/20 transition-colors disabled:opacity-50 text-sm font-medium"
+          aria-expanded={aiMenuOpen}
+          aria-controls="editor-ai-actions"
+          className="flex min-h-11 items-center gap-1 rounded bg-accent-signal/10 px-3 text-sm font-medium text-accent-signal transition-colors hover:bg-accent-signal/20 disabled:opacity-50"
         >
           {aiLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
           AI Assist
@@ -327,39 +329,39 @@ const MenuBar = ({ editor, story, blogTools }: { editor: Editor | null; story: b
         </button>
 
         {aiMenuOpen && (
-          <div className="absolute right-0 top-full mt-1 w-48 bg-surface-base border border-border-hairline rounded-lg shadow-xl z-50 overflow-hidden flex flex-col">
+          <div id="editor-ai-actions" className="absolute left-0 top-full z-50 mt-1 flex w-48 flex-col overflow-hidden rounded-lg border border-border-hairline bg-surface-base shadow-xl sm:left-auto sm:right-0">
             <button
               type="button"
               onClick={() => handleAiAssist('improve')}
-              className="text-left px-4 py-2 text-sm text-ink-primary hover:bg-surface-raised transition-colors border-b border-border-hairline"
+              className="min-h-11 border-b border-border-hairline px-4 py-2 text-left text-sm text-ink-primary transition-colors hover:bg-surface-raised"
             >
               ✨ Improve Selection
             </button>
             <button
               type="button"
               onClick={() => handleAiAssist('grammar')}
-              className="text-left px-4 py-2 text-sm text-ink-primary hover:bg-surface-raised transition-colors border-b border-border-hairline"
+              className="min-h-11 border-b border-border-hairline px-4 py-2 text-left text-sm text-ink-primary transition-colors hover:bg-surface-raised"
             >
               📝 Fix Grammar (Selection)
             </button>
             <button
               type="button"
               onClick={() => handleAiAssist('summary')}
-              className="text-left px-4 py-2 text-sm text-ink-primary hover:bg-surface-raised transition-colors border-b border-border-hairline"
+              className="min-h-11 border-b border-border-hairline px-4 py-2 text-left text-sm text-ink-primary transition-colors hover:bg-surface-raised"
             >
               📑 Generate Summary
             </button>
             <button
               type="button"
               onClick={() => handleAiAssist('title')}
-              className="text-left px-4 py-2 text-sm text-ink-primary hover:bg-surface-raised transition-colors border-b border-border-hairline"
+              className="min-h-11 border-b border-border-hairline px-4 py-2 text-left text-sm text-ink-primary transition-colors hover:bg-surface-raised"
             >
               💡 Suggest Titles
             </button>
             <button
               type="button"
               onClick={() => handleAiAssist('tags')}
-              className="text-left px-4 py-2 text-sm text-ink-primary hover:bg-surface-raised transition-colors"
+              className="min-h-11 px-4 py-2 text-left text-sm text-ink-primary transition-colors hover:bg-surface-raised"
             >
               🏷️ Suggest Tags
             </button>
@@ -382,14 +384,14 @@ const MenuBar = ({ editor, story, blogTools }: { editor: Editor | null; story: b
             aria-invalid={Boolean(linkError)} aria-describedby={linkError ? "blog-link-error" : undefined}
             autoFocus className="rounded border border-border-hairline bg-surface-raised p-2" placeholder="https://example.com or /blog/post" />
         </label>
-        <button type="button" onClick={saveLink} className="rounded border border-border-hairline p-2 text-sm hover:bg-surface-raised">Apply link</button>
+        <button type="button" onClick={saveLink} className="min-h-11 rounded border border-border-hairline p-2 text-sm hover:bg-surface-raised">Apply link</button>
         {linkRange.existing && (
           <button type="button" onClick={() => {
             editor.chain().focus().setTextSelection({ from: linkRange.from, to: linkRange.to }).extendMarkRange("link").unsetLink().run();
             setLinkOpen(false);
-          }} className="rounded border border-border-hairline p-2 text-sm hover:bg-surface-raised">Remove link</button>
+          }} className="min-h-11 rounded border border-border-hairline p-2 text-sm hover:bg-surface-raised">Remove link</button>
         )}
-        <button type="button" onClick={() => { setLinkOpen(false); editor.commands.focus(); }} className="rounded border border-border-hairline p-2 text-sm hover:bg-surface-raised">Cancel</button>
+        <button type="button" onClick={() => { setLinkOpen(false); editor.commands.focus(); }} className="min-h-11 rounded border border-border-hairline p-2 text-sm hover:bg-surface-raised">Cancel</button>
         {linkError && <p id="blog-link-error" role="alert" className="w-full text-sm text-red-500">{linkError}</p>}
       </div>
     )}
@@ -406,8 +408,8 @@ const MenuBar = ({ editor, story, blogTools }: { editor: Editor | null; story: b
             onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); insertImage(); } }}
             className="rounded border border-border-hairline bg-surface-raised p-2" />
         </label>
-        <button type="button" disabled={!imageAlt.trim()} onClick={insertImage} className="rounded border border-border-hairline p-2 text-sm hover:bg-surface-raised disabled:opacity-50">Insert image</button>
-        <button type="button" onClick={() => setImageUrl("")} className="rounded border border-border-hairline p-2 text-sm hover:bg-surface-raised">Cancel</button>
+        <button type="button" disabled={!imageAlt.trim()} onClick={insertImage} className="min-h-11 rounded border border-border-hairline p-2 text-sm hover:bg-surface-raised disabled:opacity-50">Insert image</button>
+        <button type="button" onClick={() => setImageUrl("")} className="min-h-11 rounded border border-border-hairline p-2 text-sm hover:bg-surface-raised">Cancel</button>
       </div>
     )}
     {blogTools && <MediaPickerModal isOpen={imagePickerOpen} onClose={() => setImagePickerOpen(false)} onSelect={(media) => {

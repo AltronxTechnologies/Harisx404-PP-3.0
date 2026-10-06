@@ -9,6 +9,7 @@ import { Loader2 } from "lucide-react";
 import { AdminConfirmDialog } from "./AdminConfirmDialog";
 import { BuildlogSelect } from "./BuildlogSelect";
 import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
+import { useAdminNavigationGuard } from "./useAdminNavigationGuard";
 
 const MONTHS = [
   "January",
@@ -38,6 +39,9 @@ const EMPLOYMENT_TYPES = [
   "Seasonal",
   "Open source",
 ] as const;
+const locationOptions = [{ value: "", label: "Not specified" }, ...LOCATION_TYPES.map((value) => ({ value, label: value }))];
+const employmentOptions = [{ value: "", label: "Not specified" }, ...EMPLOYMENT_TYPES.map((value) => ({ value, label: value }))];
+const monthOptions = [{ value: "", label: "Month not set" }, ...MONTHS.map((label, index) => ({ value: String(index + 1), label }))];
 
 const visibilityOptions = [
   { value: "draft", label: "Draft", hint: "Only visible in Admin" },
@@ -171,6 +175,7 @@ export function ExperienceForm({ initialData }: ExperienceFormProps) {
       status: (initialData?.status as ExperienceFormValues["status"]) ?? "published",
     },
   });
+  const { leaveTarget, setLeaveTarget, confirmLeave } = useAdminNavigationGuard(isDirty);
 
   const isCurrent = watch("is_current");
 
@@ -213,6 +218,7 @@ export function ExperienceForm({ initialData }: ExperienceFormProps) {
       const result = await readAdminResponse(res, "Experience");
       if (!res.ok) throw new Error(result.error || "Failed to save experience entry");
 
+      if (!result.data?.id) throw new Error("Experience save could not be confirmed. Refresh the list before retrying.");
       router.push(result.warning ? "/admin/experience?notice=saved&cache=stale" : "/admin/experience?notice=saved");
       router.refresh();
     } catch (err) {
@@ -277,27 +283,11 @@ export function ExperienceForm({ initialData }: ExperienceFormProps) {
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="experience-location-type" className="text-sm font-medium">Location type</label>
-          <select id="experience-location-type" {...register("location_type")} className={inputCls}>
-            <option value="">Please select (optional)</option>
-            {LOCATION_TYPES.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
+          <Controller name="location_type" control={control} render={({ field }) => <BuildlogSelect id="experience-location-type" label="Location type" value={field.value} onChange={field.onChange} options={locationOptions} />} />
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="experience-employment-type" className="text-sm font-medium">Employment type</label>
-          <select id="experience-employment-type" {...register("employment_type")} className={inputCls}>
-            <option value="">Please select (optional)</option>
-            {EMPLOYMENT_TYPES.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
+          <Controller name="employment_type" control={control} render={({ field }) => <BuildlogSelect id="experience-employment-type" label="Employment type" value={field.value} onChange={field.onChange} options={employmentOptions} />} />
         </div>
       </div>
 
@@ -312,16 +302,8 @@ export function ExperienceForm({ initialData }: ExperienceFormProps) {
         </label>
 
         <div className="grid gap-6 md:grid-cols-4">
-          <div className="space-y-2">
-            <label htmlFor="experience-start-month" className="text-sm font-medium">Start month</label>
-            <select id="experience-start-month" {...register("start_month")} className={inputCls}>
-              <option value="">Month</option>
-              {MONTHS.map((m, i) => (
-                <option key={m} value={i + 1}>
-                  {m}
-                </option>
-              ))}
-            </select>
+              <div className="space-y-2">
+                <Controller name="start_month" control={control} render={({ field }) => <BuildlogSelect id="experience-start-month" label="Start month" value={field.value} onChange={field.onChange} options={monthOptions} />} />
           </div>
 
           <div className="space-y-2">
@@ -340,16 +322,8 @@ export function ExperienceForm({ initialData }: ExperienceFormProps) {
             )}
           </div>
 
-          <div className="space-y-2">
-            <label htmlFor="experience-end-month" className="text-sm font-medium">End month</label>
-            <select id="experience-end-month" {...register("end_month")} className={inputCls} disabled={isCurrent}>
-              <option value="">Month</option>
-              {MONTHS.map((m, i) => (
-                <option key={m} value={i + 1}>
-                  {m}
-                </option>
-              ))}
-            </select>
+              <div className="space-y-2">
+                <Controller name="end_month" control={control} render={({ field }) => <BuildlogSelect id="experience-end-month" label="End month" value={field.value} onChange={field.onChange} options={monthOptions} disabled={isCurrent} />} />
           </div>
 
           <div className="space-y-2">
@@ -439,6 +413,7 @@ export function ExperienceForm({ initialData }: ExperienceFormProps) {
       </div>
     </form>
     <AdminConfirmDialog open={confirmingLeave} title="Discard unsaved Experience changes?" description="Your role, dates, highlights and visibility edits will be lost." confirmLabel="Discard changes" destructive onClose={() => setConfirmingLeave(false)} onConfirm={() => { setConfirmingLeave(false); router.push("/admin/experience"); }} />
+    <AdminConfirmDialog open={leaveTarget !== null} title="Discard unsaved Experience changes?" description="Your role, dates, highlights and visibility edits will be lost." confirmLabel="Discard changes" destructive onClose={() => setLeaveTarget(null)} onConfirm={() => confirmLeave(router.push)} />
     <AdminConfirmDialog open={pendingPublication !== null} title={pendingPublication?.status === "published" ? "Publish experience entry?" : "Hide experience entry?"} description={pendingPublication?.status === "published" ? "This role will become visible on the public About timeline." : "This role will leave the public About timeline but remain editable in Admin."} confirmLabel={pendingPublication?.status === "published" ? "Publish entry" : "Hide entry"} pending={isSubmitting} onClose={() => setPendingPublication(null)} onConfirm={() => { if (pendingPublication) { const values = pendingPublication; setPendingPublication(null); void save(values); } }} />
     </>
   );

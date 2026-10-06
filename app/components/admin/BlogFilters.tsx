@@ -21,13 +21,13 @@ function FilterSelect<K extends FilterKey>({
     <Listbox name={name} value={value} onChange={onChange}>
       <div className="min-w-0">
         <ListboxLabel className="mb-1.5 block text-xs font-medium text-ink-secondary">{label}</ListboxLabel>
-        <ListboxButton className="group flex h-10 w-full items-center justify-between gap-3 rounded-lg border border-[#72747e] bg-[#131316] px-3 text-left text-sm text-ink-primary transition-colors hover:border-[#aeb0b7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+        <ListboxButton className="group flex min-h-11 w-full items-center justify-between gap-3 rounded-lg border border-[#72747e] bg-[#131316] px-3 text-left text-sm text-ink-primary transition-colors hover:border-[#aeb0b7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
           <span className="truncate">{options.find((option) => option.value === value)?.label}</span>
           <ChevronDown aria-hidden className="size-4 shrink-0 text-ink-secondary transition-transform group-data-[open]:rotate-180" />
         </ListboxButton>
         <ListboxOptions anchor="bottom" modal={false} className="z-50 w-[var(--button-width)] rounded-xl border border-[#55555e] bg-[#1b1b1f] p-1.5 text-sm text-[#fafafa] shadow-2xl shadow-black/50 outline-none [--anchor-gap:6px]">
           {options.map((option) => (
-            <ListboxOption key={option.value} value={option.value} className="group flex min-h-10 cursor-default items-center justify-between gap-2 rounded-lg px-3 text-[#aeb0b7] transition-colors data-[focus]:bg-[#303036] data-[focus]:text-white data-[selected]:text-white">
+            <ListboxOption key={option.value} value={option.value} className="group flex min-h-11 cursor-default items-center justify-between gap-2 rounded-lg px-3 text-[#aeb0b7] transition-colors data-[focus]:bg-[#303036] data-[focus]:text-white data-[selected]:text-white">
               <span className="truncate group-data-[selected]:font-medium">{option.label}</span>
               <Check aria-hidden className="size-4 shrink-0 opacity-0 group-data-[selected]:opacity-100" />
             </ListboxOption>
@@ -65,16 +65,16 @@ export function BlogFilters({ params }: { params: BlogListParams }) {
       <div className="min-w-0">
         <label htmlFor="blog-search" className="mb-1.5 block text-xs font-medium text-ink-secondary">Search titles</label>
         <div className="relative">
-          <Search aria-hidden className="pointer-events-none absolute left-3 top-3 size-4 text-ink-secondary" />
-          <input id="blog-search" name="q" type="search" defaultValue={params.q} maxLength={100} placeholder="Search post titles" style={{ minHeight: 40, height: 40 }} className="w-full rounded-lg border border-border-hairline bg-surface-base pl-9 pr-3 text-ink-primary" />
+          <Search aria-hidden className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ink-secondary" />
+          <input id="blog-search" name="q" type="search" defaultValue={params.q} maxLength={100} placeholder="Search post titles" className="min-h-11 w-full rounded-lg border border-border-hairline bg-surface-base pl-9 pr-3 text-ink-primary" />
         </div>
       </div>
       <FilterSelect name="status" label="Status" value={filters.status} onChange={(status) => setFilters({ ...filters, status })} options={statuses} />
       <FilterSelect name="sort" label="Sort by" value={filters.sort} onChange={(sort) => setFilters({ ...filters, sort })} options={sorts} />
       <FilterSelect name="direction" label="Direction" value={filters.direction} onChange={(direction) => setFilters({ ...filters, direction })} options={directions} />
       <div className="flex items-center gap-2 sm:col-span-2 xl:col-span-1">
-        <button type="submit" style={{ minHeight: 40 }} className="inline-flex h-10 flex-1 items-center justify-center rounded-lg bg-accent-signal px-4 font-medium text-white transition-colors hover:bg-accent-signal/90 xl:flex-none">Apply</button>
-        <Link href="/admin/blogs" className="inline-flex h-10 items-center justify-center rounded-lg px-3 text-ink-secondary transition-colors hover:bg-surface-base hover:text-ink-primary">Clear</Link>
+        <button type="submit" className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg bg-accent-signal px-4 font-medium text-white transition-colors hover:bg-accent-signal/90 xl:flex-none">Apply</button>
+        <Link href="/admin/blogs" className="inline-flex min-h-11 items-center justify-center rounded-lg px-3 text-ink-secondary transition-colors hover:bg-surface-base hover:text-ink-primary">Clear</Link>
       </div>
     </form>
   );

@@ -3,24 +3,53 @@
 import { useState, useEffect } from "react";
 import { Loader2, Save } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useRouter } from "next/navigation";
+import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
+import { AdminConfirmDialog } from "@/app/components/admin/AdminConfirmDialog";
+import { useAdminNavigationGuard } from "@/app/components/admin/useAdminNavigationGuard";
 
-type SiteSettings = {
-  site_name: string;
-  seo_description: string;
-  seo_keywords: string;
-  github_url: string;
-  twitter_url: string;
-  linkedin_url: string;
-  email_address: string;
-};
+const secureUrl = z.string().trim().max(2048).refine((value) => {
+  if (!value) return true;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && !!url.hostname && !url.username && !url.password;
+  } catch { return false; }
+}, "Use a valid HTTPS URL without embedded credentials");
+const settingsSchema = z.object({
+  site_name: z.string().trim().min(1, "Site name is required").max(120),
+  seo_description: z.string().trim().max(500),
+  seo_keywords: z.string().trim().max(500),
+  github_url: secureUrl,
+  twitter_url: secureUrl,
+  linkedin_url: secureUrl,
+  email_address: z.union([z.literal(""), z.string().trim().email("Enter a valid email address").max(320)]),
+});
+type SiteSettings = z.infer<typeof settingsSchema>;
 
 export default function AdminSettingsPage() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [loadFailed, setLoadFailed] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
 
-  const { register, handleSubmit, reset } = useForm<SiteSettings>();
+  const { register, handleSubmit, reset, setError, formState: { errors, isDirty } } = useForm<SiteSettings>({ resolver: zodResolver(settingsSchema) });
+  const { leaveTarget, setLeaveTarget, confirmLeave } = useAdminNavigationGuard(isDirty);
+  useEffect(() => {
+    if (!isDirty) return;
+    const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [isDirty]);
+  const errorProps = (name: keyof SiteSettings) => ({
+    "aria-invalid": Boolean(errors[name]),
+    "aria-describedby": errors[name] ? `${name}-error` : undefined,
+  });
+  const FieldError = ({ name }: { name: keyof SiteSettings }) => errors[name]
+    ? <p id={`${name}-error`} role="alert" className="mt-1 text-xs text-red-300">{errors[name]?.message}</p>
+    : null;
 
   useEffect(() => {
     fetch("/api/admin/settings")
@@ -50,12 +79,23 @@ export default function AdminSettingsPage() {
         body: JSON.stringify(data),
       });
 
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.error || "Failed to save changes");
+      const result = await readAdminResponse(res, "Site settings");
+      if (!res.ok) {
+        if (result.fields) {
+          for (const [name, messages] of Object.entries(result.fields)) {
+            if (name in settingsSchema.shape && Array.isArray(messages) && typeof messages[0] === "string") {
+              setError(name as keyof SiteSettings, { message: messages[0] });
+            }
+          }
+        }
+        throw new Error(result.error || "Failed to save changes");
+      }
 
+      if (result.success !== true) throw new Error("Settings save could not be confirmed. Refresh status before retrying.");
+      reset(data);
       setMessage(result.warning ? { type: "warning", text: result.warning } : { type: "success", text: "Settings saved successfully!" });
-    } catch (err: any) {
-      setMessage({ type: "error", text: err.message });
+    } catch (err) {
+      setMessage({ type: "error", text: err instanceof Error ? err.message : "Failed to save settings." });
     } finally {
       setIsSaving(false);
     }
@@ -92,7 +132,7 @@ export default function AdminSettingsPage() {
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-        
+        <fieldset disabled={isSaving} className="min-w-0 space-y-8 border-0 p-0 disabled:opacity-70">
         <div className="rounded-2xl border border-border-primary bg-white p-6 dark:bg-white/[0.03] space-y-4">
           <h2 className="text-lg font-medium text-text-primary">General Settings</h2>
           <div className="space-y-4">
@@ -101,26 +141,32 @@ export default function AdminSettingsPage() {
               <input
                 id="site_name"
                 {...register("site_name")}
+                {...errorProps("site_name")}
                 className="min-h-11 w-full rounded-xl border border-border-primary bg-bg-primary px-3 py-2 text-sm text-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-text-primary/40"
               />
+              <FieldError name="site_name" />
             </div>
             <div>
               <label htmlFor="seo_description" className="mb-2 block text-sm font-medium">SEO Description (Meta)</label>
               <textarea
                 id="seo_description"
                 {...register("seo_description")}
+                {...errorProps("seo_description")}
                 rows={3}
                 className="w-full rounded-xl border border-border-primary bg-bg-primary px-3 py-2 text-sm text-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-text-primary/40"
               />
+              <FieldError name="seo_description" />
             </div>
             <div>
               <label htmlFor="seo_keywords" className="mb-2 block text-sm font-medium">SEO Keywords</label>
               <input
                 id="seo_keywords"
                 {...register("seo_keywords")}
+                {...errorProps("seo_keywords")}
                 placeholder="Comma separated..."
                 className="min-h-11 w-full rounded-xl border border-border-primary bg-bg-primary px-3 py-2 text-sm text-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-text-primary/40"
               />
+              <FieldError name="seo_keywords" />
             </div>
           </div>
         </div>
@@ -134,42 +180,51 @@ export default function AdminSettingsPage() {
                 <input
                   id="github_url"
                   {...register("github_url")}
+                  {...errorProps("github_url")}
                   className="min-h-11 w-full rounded-xl border border-border-primary bg-bg-primary px-3 py-2 text-sm text-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-text-primary/40"
                 />
+                <FieldError name="github_url" />
               </div>
               <div>
                 <label htmlFor="twitter_url" className="mb-2 block text-sm font-medium">X / Twitter URL</label>
                 <input
                   id="twitter_url"
                   {...register("twitter_url")}
+                  {...errorProps("twitter_url")}
                   className="min-h-11 w-full rounded-xl border border-border-primary bg-bg-primary px-3 py-2 text-sm text-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-text-primary/40"
                 />
+                <FieldError name="twitter_url" />
               </div>
               <div>
                 <label htmlFor="linkedin_url" className="mb-2 block text-sm font-medium">LinkedIn URL</label>
                 <input
                   id="linkedin_url"
                   {...register("linkedin_url")}
+                  {...errorProps("linkedin_url")}
                   className="min-h-11 w-full rounded-xl border border-border-primary bg-bg-primary px-3 py-2 text-sm text-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-text-primary/40"
                 />
+                <FieldError name="linkedin_url" />
               </div>
               <div>
                 <label htmlFor="email_address" className="mb-2 block text-sm font-medium">Contact Email</label>
                 <input
                   id="email_address"
                   {...register("email_address")}
+                  {...errorProps("email_address")}
                   type="email"
                   className="min-h-11 w-full rounded-xl border border-border-primary bg-bg-primary px-3 py-2 text-sm text-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-text-primary/40"
                 />
+                <FieldError name="email_address" />
               </div>
             </div>
           </div>
         </div>
 
+        </fieldset>
         <div className="flex justify-end">
           <button
             type="submit"
-            disabled={isSaving}
+            disabled={isSaving || !isDirty}
             className="inline-flex min-h-11 items-center justify-center rounded-full bg-text-primary px-6 py-2 text-sm font-medium text-bg-primary transition-colors hover:opacity-85 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary disabled:opacity-50"
           >
             {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
@@ -177,6 +232,7 @@ export default function AdminSettingsPage() {
           </button>
         </div>
       </form>
+      <AdminConfirmDialog open={leaveTarget !== null} title="Discard unsaved settings?" description="Your global site settings have not been saved." confirmLabel="Discard changes" destructive onClose={() => setLeaveTarget(null)} onConfirm={() => confirmLeave(router.push)} />
     </div>
   );
 }

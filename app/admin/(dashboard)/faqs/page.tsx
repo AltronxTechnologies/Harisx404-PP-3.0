@@ -8,9 +8,10 @@ import { FaqVisibilityToggle, FaqSectionToggle } from "@/app/components/admin/Fa
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminFaqsPage() {
+export default async function AdminFaqsPage({ searchParams }: { searchParams: Promise<{ notice?: string; cache?: string }> }) {
   const auth = await requireAdmin();
   if (auth.response) redirect(auth.response.status === 401 ? "/admin/login" : "/");
+  const params = await searchParams;
   const supabase = await createSupabaseAdminClient();
 
   const [{ data: faqs, error: faqsError }, { data: settings, error: settingError }] = await Promise.all([
@@ -41,6 +42,9 @@ export default async function AdminFaqsPage() {
           New FAQ
         </Link>
       </div>
+
+      {["saved", "updated", "deleted"].includes(params.notice || "") && <p role="status" className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-4 text-sm text-emerald-200">{params.notice === "saved" ? "FAQ saved." : params.notice === "deleted" ? "FAQ deleted." : "FAQ visibility updated."}</p>}
+      {params.cache === "stale" && <p role="alert" className="rounded-xl border border-amber-500/30 bg-amber-950/20 p-4 text-sm text-amber-200">The database change completed, but homepage cache refresh could not be confirmed. Visitors may temporarily see the previous version.</p>}
 
        {(settingError || !setting) ? (
          <p role="alert" className="rounded-xl border border-red-500/30 bg-red-950/20 p-4 text-sm text-red-200">

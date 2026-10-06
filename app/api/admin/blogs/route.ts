@@ -5,7 +5,7 @@ import createSupabaseServerClient, { createSupabaseAdminClient } from "@/app/lib
 import { saveBlogPostWithTags } from "@/app/lib/tag-sync";
 import { isAllowedBlogImageUrl } from "@/app/components/blog/blogImage";
 import { estimateReadingMinutes } from "@/app/lib/reading-time";
-import { blogCanonicalUrl, defaultBlogSummary, normalizeBlogSlug } from "@/app/lib/blog-defaults";
+import { blogCanonicalUrl, defaultBlogSummary, isValidBlogDate, normalizeBlogSlug } from "@/app/lib/blog-defaults";
 import { blogImageUrls } from "@/app/lib/admin/blog-image-urls";
 import { deleteManagedMedia } from "@/app/lib/admin/delete-media";
 import { siteMetadata } from "@/app/data/siteMetadata";
@@ -69,7 +69,11 @@ const tagsSchema = z
 
 const optionalDate = z
   .union([
-    z.string().max(64).refine((value) => !Number.isNaN(Date.parse(value)), "Invalid publish date"),
+    z.string().max(64).refine((value) => {
+      if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return isValidBlogDate(value);
+      return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})$/.test(value)
+        && isValidBlogDate(value.slice(0, 10)) && !Number.isNaN(Date.parse(value));
+    }, "Choose a valid calendar date or ISO timestamp with timezone"),
     z.literal(""),
     z.null(),
   ])

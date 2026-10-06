@@ -24,7 +24,13 @@ export function FaqVisibilityToggle({ id, isVisible, question }: { id: string; i
       });
       const result = await readAdminResponse(res, "FAQ visibility");
       if (!res.ok) throw new Error(result.error || "Failed to update FAQ visibility");
+      if (result.data?.id !== id) throw new Error("FAQ visibility could not be confirmed. Refresh the list before retrying.");
       setConfirming(false);
+      const url = new URL(window.location.href);
+      url.searchParams.set("notice", "updated");
+      if (result.warning) url.searchParams.set("cache", "stale");
+      else url.searchParams.delete("cache");
+      router.replace(`${url.pathname}${url.search}`);
       router.refresh();
     } catch (err) {
       setConfirming(false);
@@ -80,7 +86,13 @@ export function FaqSectionToggle({ enabled }: { enabled: boolean }) {
       });
       const result = await readAdminResponse(res, "FAQ section visibility");
       if (!res.ok) throw new Error(result.error || "Failed to update FAQ section visibility");
+      if (result.success !== true) throw new Error("FAQ section visibility could not be confirmed. Refresh before retrying.");
       setConfirming(false);
+      const url = new URL(window.location.href);
+      url.searchParams.set("notice", "updated");
+      if (result.warning) url.searchParams.set("cache", "stale");
+      else url.searchParams.delete("cache");
+      router.replace(`${url.pathname}${url.search}`);
       router.refresh();
     } catch (err) {
       setConfirming(false);

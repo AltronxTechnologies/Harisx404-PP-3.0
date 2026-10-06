@@ -4,6 +4,7 @@ import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { Check, Trash2, AlertCircle, Info, AlertTriangle, Bug } from "lucide-react";
 import { resolveLog, clearAllResolvedLogs, testErrorLogger } from "./actions";
+import { AdminConfirmDialog } from "@/app/components/admin/AdminConfirmDialog";
 
 type LogEntry = {
   id: string;
@@ -14,11 +15,13 @@ type LogEntry = {
   created_at: string;
 };
 
-export default function LogsDashboardClient({ initialLogs, loadError = "" }: { initialLogs: LogEntry[]; loadError?: string }) {
+export default function LogsDashboardClient({ initialLogs, unresolvedCount: initialUnresolvedCount, loadError = "" }: { initialLogs: LogEntry[]; unresolvedCount: number; loadError?: string }) {
   const [logs, setLogs] = useState<LogEntry[]>(initialLogs);
+  const [unresolvedCount, setUnresolvedCount] = useState(initialUnresolvedCount);
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
   const [actionError, setActionError] = useState("");
   const [working, setWorking] = useState(false);
+  const [confirmingClear, setConfirmingClear] = useState(false);
 
   const handleResolve = async (id: string) => {
     setWorking(true);
@@ -26,7 +29,10 @@ export default function LogsDashboardClient({ initialLogs, loadError = "" }: { i
     try {
       const result = await resolveLog(id);
       if (!result.success) setActionError(result.error || "Unable to resolve log");
-      else setLogs(current => current.map(log => log.id === id ? { ...log, resolved: true } : log));
+      else {
+        setLogs(current => current.map(log => log.id === id ? { ...log, resolved: true } : log));
+        setUnresolvedCount(current => Math.max(0, current - 1));
+      }
     } catch {
       setActionError("Unable to resolve log. Try again.");
     } finally {
@@ -34,14 +40,17 @@ export default function LogsDashboardClient({ initialLogs, loadError = "" }: { i
     }
   };
 
-  const handleClearResolved = async () => {
-    if (!window.confirm("Permanently delete all resolved logs?")) return;
+  const handleClearResolved = async (typed: string) => {
+    if (typed !== "DELETE" || working) return;
     setWorking(true);
     setActionError("");
     try {
       const result = await clearAllResolvedLogs();
       if (!result.success) setActionError(result.error || "Unable to clear logs");
-      else setLogs(current => current.filter(log => !log.resolved));
+      else {
+        setLogs(current => current.filter(log => !log.resolved));
+        setConfirmingClear(false);
+      }
     } catch {
       setActionError("Unable to clear logs. Try again.");
     } finally {
@@ -102,7 +111,7 @@ export default function LogsDashboardClient({ initialLogs, loadError = "" }: { i
             Simulate Error
           </button>
           <button
-            onClick={handleClearResolved}
+             onClick={() => setConfirmingClear(true)}
             disabled={working || !!loadError || !logs.some(log => log.resolved)}
             className="flex min-h-11 items-center gap-2 rounded-lg bg-red-50 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-100 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/50"
           >
@@ -112,14 +121,16 @@ export default function LogsDashboardClient({ initialLogs, loadError = "" }: { i
         </div>
       </div>
 
-      {(loadError || actionError) && <div role="alert" className="rounded-xl border border-red-300/50 bg-red-50 p-4 text-sm text-red-800 dark:border-red-500/30 dark:bg-red-950/30 dark:text-red-300">{loadError || actionError} <button type="button" onClick={() => window.location.reload()} className="ml-2 underline underline-offset-2">Retry loading</button></div>}
+       {loadError && <div role="alert" className="rounded-xl border border-red-300/50 bg-red-50 p-4 text-sm text-red-800 dark:border-red-500/30 dark:bg-red-950/30 dark:text-red-300">{loadError} <button type="button" onClick={() => window.location.reload()} className="ml-2 inline-flex min-h-11 items-center underline underline-offset-2">Reload logs</button></div>}
+       {actionError && <div role="alert" className="rounded-xl border border-red-300/50 bg-red-50 p-4 text-sm text-red-800 dark:border-red-500/30 dark:bg-red-950/30 dark:text-red-300">{actionError} The action was not confirmed; refresh status before retrying. <button type="button" onClick={() => window.location.reload()} className="ml-2 inline-flex min-h-11 items-center underline underline-offset-2">Refresh status</button></div>}
+       {!loadError && unresolvedCount > logs.filter(log => !log.resolved).length && <p role="status" className="rounded-xl border border-amber-500/30 bg-amber-950/20 p-4 text-sm text-amber-200">{unresolvedCount} unresolved logs exist; this view shows only the newest 100 events. Older unresolved entries may not be visible here.</p>}
 
       <div className="rounded-xl border border-border-primary bg-surface-raised overflow-hidden shadow-sm">
         {loadError ? null : logs.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 text-center">
             <Check className="h-12 w-12 text-emerald-500 mb-4" />
-            <h3 className="text-lg font-medium text-text-primary">System is healthy</h3>
-            <p className="text-sm text-text-secondary mt-1">No pending logs or errors found.</p>
+             <h3 className="text-lg font-medium text-text-primary">No recent logs to display</h3>
+             <p className="text-sm text-text-secondary mt-1">{unresolvedCount ? `${unresolvedCount} unresolved logs exist outside this view.` : "No unresolved logs were reported."}</p>
           </div>
         ) : (
           <div className="divide-y divide-border-hairline">
@@ -177,6 +188,7 @@ export default function LogsDashboardClient({ initialLogs, loadError = "" }: { i
           </div>
         )}
       </div>
+      <AdminConfirmDialog open={confirmingClear} title="Permanently clear resolved logs?" description="All resolved log records will be deleted. This cannot be undone. Unresolved logs will be kept." confirmLabel="Clear resolved logs" confirmText="DELETE" destructive pending={working} onClose={() => setConfirmingClear(false)} onConfirm={(typed) => void handleClearResolved(typed)} />
     </div>
   );
 }

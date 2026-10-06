@@ -4,6 +4,7 @@ import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 import Link from "next/link";
 import { Plus, Edit, ChevronLeft, ChevronRight } from "lucide-react";
 import { DeleteProjectButton } from "@/app/components/admin/DeleteProjectButton";
+import { ProjectListFilters } from "@/app/components/admin/ProjectListFilters";
 
 const PAGE_SIZE = 10;
 
@@ -12,7 +13,7 @@ export default async function AdminProjectsPage({ searchParams }: { searchParams
   if (auth.response) redirect(auth.response.status === 401 ? "/admin/login" : "/");
   const params = await searchParams;
   const q = typeof params.q === "string" ? params.q.trim().slice(0, 100) : "";
-  const status = typeof params.status === "string" && ["draft", "published", "archived"].includes(params.status) ? params.status : "all";
+  const status: "all" | "draft" | "published" | "archived" = typeof params.status === "string" && ["draft", "published", "archived"].includes(params.status) ? params.status as "draft" | "published" | "archived" : "all";
   const page = typeof params.page === "string" && /^[1-9]\d*$/.test(params.page) ? Math.min(Number(params.page), 10000) : 1;
   const pageHref = (target: number) => {
     const values = new URLSearchParams();
@@ -52,11 +53,7 @@ export default async function AdminProjectsPage({ searchParams }: { searchParams
         </Link>
       </div>
 
-      <form action="/admin/projects" method="get" className="grid gap-3 rounded-xl border border-border-hairline bg-surface-raised p-4 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-end">
-        <div className="space-y-1"><label htmlFor="project-search" className="text-sm font-medium">Search titles</label><input id="project-search" name="q" type="search" defaultValue={q} maxLength={100} placeholder="Find a project" className="min-h-11 w-full rounded-xl border border-border-hairline bg-surface-base px-3 text-sm" /></div>
-        <div className="space-y-1"><label htmlFor="project-list-status" className="text-sm font-medium">Status</label><select id="project-list-status" name="status" defaultValue={status} className="min-h-11 w-full rounded-xl border border-border-hairline bg-surface-base px-3 text-sm"><option value="all">All statuses</option><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select></div>
-        <button type="submit" className="min-h-11 rounded-xl bg-accent-signal px-5 text-sm font-medium text-white">Apply</button>
-      </form>
+      <ProjectListFilters key={`${q}:${status}`} q={q} status={status} />
       <div className="overflow-hidden rounded-xl border border-border-hairline bg-surface-raised shadow-sm">
         {!error && <p role="status" className="border-b border-border-hairline px-6 py-3 text-sm text-ink-secondary">{count === 0 ? "Showing 0 projects" : `Showing ${(page - 1) * PAGE_SIZE + 1}-${(page - 1) * PAGE_SIZE + (projects?.length ?? 0)} of ${count} projects`}</p>}
         <div className="overflow-x-auto" role="region" aria-label="Projects table" tabIndex={0}>

@@ -96,9 +96,10 @@ test("Blog deletion announces success only after an authenticated API success", 
 test("Admin editors do not mistake failed reads for empty data", async () => {
   const React = await import("react");
   (globalThis as typeof globalThis & { React: typeof React }).React = React;
-  const [{ createRoot }, { act }, { default: Settings }, { default: Media }] = await Promise.all([
+  const [{ createRoot }, { act }, { AppRouterContext }, { default: Settings }, { default: Media }] = await Promise.all([
     import("react-dom/client"),
     import("react-dom/test-utils"),
+    import("next/dist/shared/lib/app-router-context.shared-runtime"),
     import("../app/admin/(dashboard)/settings/page"),
     import("../app/admin/(dashboard)/media/page"),
   ]);
@@ -114,7 +115,7 @@ test("Admin editors do not mistake failed reads for empty data", async () => {
       const root = createRoot(host);
       try {
         await act(async () => {
-          root.render(React.createElement(Component));
+          root.render(React.createElement(AppRouterContext.Provider, { value: { push: () => {}, refresh: () => {} } as any }, React.createElement(Component)));
           await new Promise((resolve) => setTimeout(resolve, 0));
         });
         assert.match(host.textContent || "", new RegExp(errorText));

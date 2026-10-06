@@ -75,6 +75,33 @@ export async function deleteManagedMedia(db: Db, id: string, detachPostId?: stri
       }
     }
 
+    const adminImageColumns = [
+      ["testimonials", ["avatar_url"]],
+      ["experience", ["logo_url"]],
+      ["certifications", ["issuer_logo_url", "badge_image_url"]],
+    ] as const;
+    const urls = new Set([item.secure_url, item.url].filter((value): value is string => Boolean(value)));
+    for (const [table, columns] of adminImageColumns) {
+      // These tables currently store URLs, but also protect an ID link if a deployment has added one.
+      const linked = await db.from(table).select("id", { count: "exact", head: true }).eq("media_id", id);
+      if (linked.error?.code !== "42703" && (linked.error || linked.count === null)) throw linked.error || new Error("Admin image reference check unavailable");
+      if (linked.count && linked.count > 0) return { kind: "in_use", status: 409, error: "This image is in use by Admin content. Remove that use before deleting it." };
+
+      for (const column of columns) {
+        for (const url of urls) {
+          const reference = await db.from(table).select("id", { count: "exact", head: true }).eq(column, url);
+          // Experience and certification image fields were added in later migrations.
+          if (reference.error?.code === "42703" && table !== "testimonials") break;
+          if (reference.error || reference.count === null) throw reference.error || new Error("Admin image reference check unavailable");
+          if (reference.count > 0) return { kind: "in_use", status: 409, error: "This image is in use by Admin content. Remove that use before deleting it." };
+        }
+        const reference = await db.from(table).select("id", { count: "exact", head: true }).ilike(column, `%${marker}%`);
+        if (reference.error?.code === "42703" && table !== "testimonials") continue;
+        if (reference.error || reference.count === null) throw reference.error || new Error("Admin image reference check unavailable");
+        if (reference.count > 0) return { kind: "in_use", status: 409, error: "This image is in use by Admin content. Remove that use before deleting it." };
+      }
+    }
+
     let association: (typeof attached)[number] | undefined;
     if (detachPostId) {
       const { data: detached, error } = await db.from("blog_post_media").delete()

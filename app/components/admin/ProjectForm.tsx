@@ -9,6 +9,9 @@ import * as z from "zod";
 import { TiptapEditor } from "./TiptapEditor";
 import { MediaPickerModal } from "./MediaPickerModal";
 import { AdminConfirmDialog } from "./AdminConfirmDialog";
+import { BuildlogSelect } from "./BuildlogSelect";
+import { useAdminNavigationGuard } from "./useAdminNavigationGuard";
+import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
 import { captionWordCount } from "@/app/lib/project-captions";
 import { projectStages, projectStageLabels } from "@/app/lib/project-stage";
 import { normalizeBlogSlug, isValidBlogDate } from "@/app/lib/blog-defaults";
@@ -21,6 +24,12 @@ const sectionFields = [
   { key: "key_decisions", label: "Key decisions", hint: "Important technical or design tradeoffs." },
   { key: "results", label: "Results", hint: "Measured outcomes or what shipped. Leave blank if not known." },
   { key: "lessons_learned", label: "What I learned", hint: "What you would carry into the next project." },
+] as const;
+const stageOptions = projectStages.map((stage) => ({ value: stage, label: projectStageLabels[stage] }));
+const statusOptions = [
+  { value: "draft", label: "Draft", hint: "Only visible in Admin" },
+  { value: "published", label: "Published", hint: "Visible on the public Projects page" },
+  { value: "archived", label: "Archived", hint: "Hidden from visitors" },
 ] as const;
 
 type CaseStudySections = Record<(typeof sectionFields)[number]["key"], string>;
@@ -45,8 +54,8 @@ const projectSchema = z.object({
     results: z.string().max(10000),
     lessons_learned: z.string().max(10000),
   }),
-  tech_stack: z.string().refine((value) => value.split(/\r?\n/).filter((item) => item.trim()).every((item) => item.trim().length <= 100), "Each technology must be 100 characters or fewer").optional(),
-  tags: z.string().refine((value) => value.split(",").filter((item) => item.trim()).every((item) => item.trim().length <= 100), "Each tag must be 100 characters or fewer").optional(),
+  tech_stack: z.string().refine((value) => { const items = value.split(/\r?\n/).filter((item) => item.trim()); return items.length <= 32 && items.every((item) => item.trim().length <= 100); }, "Use at most 32 technologies, each within 100 characters").optional(),
+  tags: z.string().refine((value) => { const items = value.split(",").filter((item) => item.trim()); return items.length <= 32 && items.every((item) => item.trim().length <= 100); }, "Use at most 32 tags, each within 100 characters").optional(),
   features: z.string().refine((value) => { const items = value.split(/\r?\n/).filter((item) => item.trim()); return items.length <= 100 && items.every((item) => item.trim().length <= 500); }, "Use at most 100 features, each within 500 characters").optional(),
   related_project_ids: z.array(z.string().uuid()).max(2, "Choose no more than two projects").refine((ids) => new Set(ids).size === ids.length, "Choose two different projects"),
   content: z.string().max(200000, "Case study must be 200,000 characters or fewer").optional(),
@@ -145,6 +154,7 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
   const coverCaption = watch("case_study_sections.cover_caption") || "";
   const coverField = register("cover_image_url");
   const galleryDirty = JSON.stringify(galleryImages) !== JSON.stringify(initialData?.galleryImages ?? []);
+  const { leaveTarget: navigationTarget, setLeaveTarget: setNavigationTarget, confirmLeave } = useAdminNavigationGuard(isDirty || galleryDirty);
 
   useEffect(() => {
     if (!isDirty && !galleryDirty) return;
@@ -182,6 +192,7 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
       if (galleryImages.some((image) => captionWordCount(image.caption) > 30)) {
         throw new Error("Each image caption must be 30 words or fewer.");
       }
+      if (galleryImages.length > 20) throw new Error("Choose no more than 20 gallery images.");
       const payload = {
         ...data,
         tech_stack: (data.tech_stack || "")
@@ -204,8 +215,9 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
         body: JSON.stringify(initialData?.id ? { id: initialData.id, updated_at: initialData.updated_at, ...payload } : payload),
       });
 
+      const result = await readAdminResponse(res, "Project");
       if (!res.ok) {
-        const err = await res.json();
+        const err = result;
         if (err.issues?.fieldErrors) {
           for (const [name, messages] of Object.entries(err.issues.fieldErrors)) {
             if (name in projectSchema.shape && Array.isArray(messages) && typeof messages[0] === "string") {
@@ -215,6 +227,7 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
         }
         throw new Error(err.error || "Failed to save project");
       }
+      if (!result?.id) throw new Error("Project save could not be confirmed. Refresh the list before retrying.");
 
       router.push("/admin/projects");
       router.refresh();
@@ -243,7 +256,8 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
   const handleGenerateFromGithub = async () => {
     const github_url = getValues("github_url");
     if (!github_url) {
-      alert("Please enter a GitHub URL first.");
+      setError("github_url", { message: "Enter a GitHub URL before generating project details." });
+      setErrorMsg("Enter a GitHub URL before generating project details.");
       return;
     }
     
@@ -256,12 +270,9 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
         body: JSON.stringify({ github_url })
       });
       
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Failed to generate");
-      }
-      
-      const { result } = await res.json();
+      const { result, error } = await readAdminResponse(res, "Project generation");
+      if (!res.ok) throw new Error(error || "Failed to generate");
+      if (!result || typeof result !== "object") throw new Error("Project generation returned no result. No changes were applied.");
       
       if (result.summary) setValue("description", result.summary, { shouldDirty: true, shouldValidate: true });
       if (result.description) setValue("content", result.description, { shouldDirty: true, shouldValidate: true });
@@ -339,12 +350,9 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="project-stage" className="text-sm font-medium">Development stage</label>
-        <select id="project-stage" {...register("project_stage")} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal">
-          {projectStages.map((stage) => <option key={stage} value={stage}>{projectStageLabels[stage]}</option>)}
-        </select>
+        <Controller name="project_stage" control={control} render={({ field }) => <BuildlogSelect id="project-stage" label="Development stage" value={field.value} onChange={field.onChange} options={stageOptions} errorId={errors.project_stage ? "project-stage-error" : undefined} />} />
         <p className="text-xs text-ink-secondary">Independent of publication status. Completed shows Built and Latest update; other stages show Stage and Expected completion.</p>
-        {errors.project_stage && <p className="text-xs text-red-500">{errors.project_stage.message}</p>}
+        {errors.project_stage && <p id="project-stage-error" role="alert" className="text-xs text-red-300">{errors.project_stage.message}</p>}
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
@@ -353,12 +361,14 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
           <input
             id="project-category"
             {...register("category")}
+            aria-invalid={Boolean(errors.category)}
+            aria-describedby={errors.category ? "project-category-error" : undefined}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
             maxLength={60}
             placeholder="Cybersecurity / Networking, AI/ML..."
           />
           <p className="text-xs text-ink-secondary">Separate categories with commas or spaced slashes; AI/ML stays one category.</p>
-          {errors.category && <p className="text-xs text-red-500">{errors.category.message}</p>}
+          {errors.category && <p id="project-category-error" role="alert" className="text-xs text-red-300">{errors.category.message}</p>}
         </div>
 
         {completed ? <div className="space-y-2">
@@ -400,7 +410,7 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
         />
         {errors.tags && <p role="alert" className="text-xs text-red-300">{errors.tags.message}</p>}
         <p className="text-xs text-ink-secondary">
-          Add as many comma-separated tags as you need. All are searchable and filterable; project cards show up to three.
+          Add up to 32 comma-separated tags. All are searchable and filterable; project cards show up to three.
         </p>
       </div>
 
@@ -416,7 +426,7 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
         {errors.features && <p role="alert" className="text-xs text-red-300">{errors.features.message}</p>}
       </div>
 
-      <fieldset className="space-y-3 rounded-xl border border-border-hairline p-4">
+      <fieldset aria-describedby={errors.related_project_ids ? "project-related-error" : undefined} className="space-y-3 rounded-xl border border-border-hairline p-4">
         <legend className="px-1 text-sm font-medium">Related projects</legend>
         <p className="text-xs text-ink-secondary">Choose up to two published projects to show below this case study. They appear in the order selected. Leave empty to hide the section.</p>
         <p className="text-xs font-medium text-ink-secondary">Selected {selectedRelatedIds.length} / 2</p>
@@ -425,7 +435,7 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
             const chosen = availableProjects.find((item) => item.id === id);
             return <li key={id} className="flex items-center justify-between gap-3 rounded-lg bg-surface-base px-3 py-2 text-sm text-ink-primary">
               <span className="min-w-0 break-words">{index + 1}. {chosen?.title || "Project no longer available"}</span>
-              <button type="button" onClick={() => setValue("related_project_ids", selectedRelatedIds.filter((value) => value !== id), { shouldDirty: true, shouldValidate: true })} className="shrink-0 text-xs text-ink-secondary underline underline-offset-2 hover:text-ink-primary">Remove</button>
+              <button type="button" onClick={() => setValue("related_project_ids", selectedRelatedIds.filter((value) => value !== id), { shouldDirty: true, shouldValidate: true })} className="min-h-11 shrink-0 text-xs text-ink-secondary underline underline-offset-2 hover:text-ink-primary">Remove</button>
             </li>;
           })}
         </ol>}
@@ -435,7 +445,7 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
           {relatedOptions.map((item) => {
             const selected = selectedRelatedIds.includes(item.id);
             const disabled = !selected && (item.status !== "published" || selectedRelatedIds.length >= 2);
-            return <label key={item.id} className={`flex items-center gap-3 rounded-lg border border-border-hairline px-3 py-2 text-sm ${disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-surface-base"}`}>
+            return <label key={item.id} className={`flex min-h-11 items-center gap-3 rounded-lg border border-border-hairline px-3 py-2 text-sm ${disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-surface-base"}`}>
               <input type="checkbox" checked={selected} disabled={disabled} onChange={() => setValue("related_project_ids", selected ? selectedRelatedIds.filter((id) => id !== item.id) : [...selectedRelatedIds, item.id], { shouldDirty: true, shouldValidate: true })} className="size-4 shrink-0 rounded border-border-hairline text-accent-signal focus:ring-accent-signal" />
               <span className="min-w-0 flex-1 break-words text-ink-primary">{item.title}</span>
               <span className="shrink-0 text-xs text-ink-secondary">{selected ? `#${selectedRelatedIds.indexOf(item.id) + 1}` : item.status}</span>
@@ -443,25 +453,16 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
           })}
           {relatedOptions.length === 0 && <p className="px-3 py-4 text-sm text-ink-secondary">No matching projects.</p>}
         </div>
-        {errors.related_project_ids && <p className="text-xs text-red-500">{errors.related_project_ids.message}</p>}
+        {errors.related_project_ids && <p id="project-related-error" role="alert" className="text-xs text-red-300">{errors.related_project_ids.message}</p>}
       </fieldset>
 
       <div className="grid gap-6 md:grid-cols-3">
         <div className="space-y-2">
-          <label htmlFor="project-status" className="text-sm font-medium">Publication status</label>
-          <select
-            id="project-status"
-            {...register("status")}
-            className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
-          >
-            <option value="draft">Draft</option>
-            <option value="published">Published</option>
-            <option value="archived">Archived</option>
-          </select>
+          <Controller name="status" control={control} render={({ field }) => <BuildlogSelect id="project-status" label="Publication status" value={field.value} onChange={field.onChange} options={statusOptions} />} />
         </div>
 
         <div className="space-y-2 flex flex-col justify-end">
-          <label className="flex items-center gap-2 cursor-pointer text-sm font-medium p-2 border border-border-hairline rounded-xl bg-surface-base hover:bg-surface-raised transition-colors">
+          <label className="flex min-h-11 items-center gap-2 cursor-pointer text-sm font-medium p-2 border border-border-hairline rounded-xl bg-surface-base hover:bg-surface-raised transition-colors">
             <input
               type="checkbox"
               {...register("featured")}
@@ -478,10 +479,12 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
           <input
             id="project-live-url"
             {...register("live_url")}
+            aria-invalid={Boolean(errors.live_url)}
+            aria-describedby={errors.live_url ? "project-live-url-error" : undefined}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
             placeholder="https://..."
           />
-          {errors.live_url && <p className="text-xs text-red-500">{errors.live_url.message}</p>}
+          {errors.live_url && <p id="project-live-url-error" role="alert" className="text-xs text-red-300">{errors.live_url.message}</p>}
           <p className="text-xs text-ink-secondary">Leave blank for a local or CLI project; Visit will show None.</p>
         </div>
 
@@ -495,7 +498,7 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
               type="button"
               onClick={handleGenerateFromGithub}
               disabled={isGenerating}
-              className="text-xs flex items-center gap-1 text-accent-signal hover:text-accent-signal/80 transition-colors disabled:opacity-50"
+              className="flex min-h-11 items-center gap-1 text-xs text-accent-signal transition-colors hover:text-accent-signal/80 disabled:opacity-50"
             >
               {isGenerating ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
               Generate from README
@@ -504,11 +507,13 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
           <input
             id="project-source-url"
             {...register("github_url")}
+            aria-invalid={Boolean(errors.github_url)}
+            aria-describedby={errors.github_url ? "project-source-url-error" : undefined}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
             placeholder="https://github.com/your-name/project-repo"
           />
           <p className="text-xs text-ink-secondary">Link to this project&apos;s public repository, not your profile. Leave blank when the source is private.</p>
-          {errors.github_url && <p className="text-xs text-red-500">{errors.github_url.message}</p>}
+          {errors.github_url && <p id="project-source-url-error" role="alert" className="text-xs text-red-300">{errors.github_url.message}</p>}
         </div>
       </div>
       
@@ -519,9 +524,11 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
             id="project-start-date"
             type="date"
             {...register("start_date")}
+            aria-invalid={Boolean(errors.start_date)}
+            aria-describedby={errors.start_date ? "project-start-date-error" : undefined}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
           />
-          {errors.start_date && <p role="alert" className="text-xs text-red-300">{errors.start_date.message}</p>}
+          {errors.start_date && <p id="project-start-date-error" role="alert" className="text-xs text-red-300">{errors.start_date.message}</p>}
         </div>
 
         <div className="space-y-2">
@@ -530,15 +537,17 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
             id="project-end-date"
             type="date"
             {...register("end_date")}
+            aria-invalid={Boolean(errors.end_date)}
+            aria-describedby={errors.end_date ? "project-end-date-error" : undefined}
             className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
           />
-          {errors.end_date && <p role="alert" className="text-xs text-red-300">{errors.end_date.message}</p>}
+          {errors.end_date && <p id="project-end-date-error" role="alert" className="text-xs text-red-300">{errors.end_date.message}</p>}
         </div>
       </div>
 
       <div className="space-y-3">
         <h2 className="text-sm font-medium">Project images</h2>
-        <p className="text-xs text-ink-secondary">At least one image is required. The cover appears first in the project carousel; add as many more images as you need. Reorder or replace them below.</p>
+        <p className="text-xs text-ink-secondary">A cover image is required even for drafts. It appears first in the project carousel; add up to 20 gallery images and reorder or replace them below.</p>
         {coverUrl && z.string().url().safeParse(coverUrl).success ? (
           <div className="relative isolate flex h-48 items-center justify-center overflow-hidden rounded-xl border border-border-hairline bg-neutral-100 dark:bg-white/[0.04]">
             {/* A direct preview supports manually entered image hosts outside Next's remote allowlist. */}
@@ -555,9 +564,9 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
         </div>
         <p className="text-xs text-ink-secondary">Removing the cover promotes the next image. Add another image first if this is the only one. Changes take effect when you save and do not delete shared media-library images.</p>
         <label htmlFor="project-cover-url" className="block text-xs text-ink-secondary">Or enter a cover image URL</label>
-        <input id="project-cover-url" {...coverField} onChange={(event) => { coverField.onChange(event); setValue("cover_image_id", "", { shouldDirty: true }); setValue("case_study_sections.cover_caption", "", { shouldDirty: true }); setValue("case_study_sections.cover_alt", "", { shouldDirty: true }); }} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="https://..." />
+        <input id="project-cover-url" {...coverField} aria-invalid={Boolean(errors.cover_image_url)} aria-describedby={errors.cover_image_url ? "project-cover-url-error" : undefined} onChange={(event) => { coverField.onChange(event); setValue("cover_image_id", "", { shouldDirty: true }); setValue("case_study_sections.cover_caption", "", { shouldDirty: true }); setValue("case_study_sections.cover_alt", "", { shouldDirty: true }); }} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="https://..." />
         <input type="hidden" {...register("cover_image_id")} />
-        {errors.cover_image_url && <p className="text-xs text-red-500">{errors.cover_image_url.message}</p>}
+        {errors.cover_image_url && <p id="project-cover-url-error" role="alert" className="text-xs text-red-300">{errors.cover_image_url.message}</p>}
         <label htmlFor="project-cover-caption" className="block text-xs text-ink-secondary">Cover caption (optional, up to 200 characters / 30 words)</label>
         <textarea id="project-cover-caption" {...register("case_study_sections.cover_caption")} rows={2} maxLength={200} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="Describe this image" />
         <p className={`text-xs ${captionWordCount(coverCaption) > 30 ? "text-red-600 dark:text-red-400" : "text-ink-secondary"}`}>{coverCaption.length} / 200 characters, {captionWordCount(coverCaption)} / 30 words</p>
@@ -573,7 +582,7 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
           <button
             type="button"
             onClick={() => { setMediaPickerTarget("gallery"); setMediaPickerTab("library"); setIsMediaPickerOpen(true); }}
-            className="inline-flex items-center gap-2 rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm hover:bg-surface-raised"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm hover:bg-surface-raised"
           >
             <ImageIcon className="h-4 w-4" /> Add from Media Library
           </button>
@@ -621,6 +630,10 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
               const oldId = getValues("cover_image_id");
               const oldCaption = getValues("case_study_sections.cover_caption") || "";
               const oldAlt = getValues("case_study_sections.cover_alt") || "";
+              if (oldId && oldId !== media.id && !galleryImages.some((image) => image.mediaId === oldId) && galleryImages.filter((image) => image.mediaId !== media.id).length >= 20) {
+                setErrorMsg("Choose no more than 20 gallery images. Remove an image before replacing the cover.");
+                return false;
+              }
               setValue("cover_image_url", media.secure_url || media.url, { shouldDirty: true, shouldValidate: true });
               setValue("cover_image_id", media.id, { shouldDirty: true });
               setValue("case_study_sections.cover_caption", "", { shouldDirty: true, shouldValidate: true });
@@ -632,16 +645,21 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
                   : remaining;
               });
           } else if (mediaPickerTarget === "replace-gallery") {
-            if (media.id === getValues("cover_image_id")) return;
+            if (media.id === getValues("cover_image_id")) return false;
             setGalleryImages((images) => images.some((image, index) => image.mediaId === media.id && index !== replacingIndex)
               ? images
               : images.map((image, index) => index === replacingIndex ? { mediaId: media.id, url: media.secure_url || media.url, caption: "", altText: "" } : image));
           } else {
-            if (media.id === getValues("cover_image_id")) return;
+            if (media.id === getValues("cover_image_id")) return false;
+            if (galleryImages.length >= 20 && !galleryImages.some((image) => image.mediaId === media.id)) {
+              setErrorMsg("Choose no more than 20 gallery images.");
+              return false;
+            }
             setGalleryImages((images) => images.some((image) => image.mediaId === media.id)
               ? images
               : [...images, { mediaId: media.id, url: media.secure_url || media.url, caption: "", altText: "" }]);
           }
+          return true;
         }}
       />
 
@@ -699,6 +717,7 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
     </form>
     <AdminConfirmDialog open={saveConfirmation !== null} title={saveConfirmation?.title || "Confirm publication"} description={saveConfirmation?.description || ""} confirmLabel={saveConfirmation?.label || "Confirm"} pending={isSubmitting} onClose={() => setSaveConfirmation(null)} onConfirm={() => { const pending = saveConfirmation; setSaveConfirmation(null); if (pending) void saveProject(pending.data); }} />
     <AdminConfirmDialog open={leaveConfirmation} title="Discard unsaved project changes?" description="Project details and gallery changes on this page have not been saved." confirmLabel="Discard changes" destructive onClose={() => setLeaveConfirmation(false)} onConfirm={() => { setLeaveConfirmation(false); router.push("/admin/projects"); }} />
+    <AdminConfirmDialog open={navigationTarget !== null} title="Discard unsaved project changes?" description="Project details and gallery changes on this page have not been saved." confirmLabel="Discard changes" destructive onClose={() => setNavigationTarget(null)} onConfirm={() => confirmLeave(router.push)} />
     </>
   );
 }

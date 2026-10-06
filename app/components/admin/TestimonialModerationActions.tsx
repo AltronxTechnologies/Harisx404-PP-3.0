@@ -24,7 +24,13 @@ export function TestimonialModerationActions({ id }: { id: string }) {
       });
       const result = await readAdminResponse(response, "Testimonial moderation");
       if (!response.ok) throw new Error(result.error || "Could not moderate this testimonial.");
+      if (result.data?.id !== id) throw new Error("Moderation could not be confirmed. Refresh the list before retrying.");
       setConfirming(null);
+      const url = new URL(window.location.href);
+      url.searchParams.set("notice", status === "published" ? "published" : "archived");
+      if (result.warning) url.searchParams.set("cache", "stale");
+      else url.searchParams.delete("cache");
+      router.replace(`${url.pathname}${url.search}`);
       router.refresh();
     } catch (cause) {
       setConfirming(null);

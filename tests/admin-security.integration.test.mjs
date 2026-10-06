@@ -128,9 +128,14 @@ test("Admin editors and mobile lists keep labelled controls and reachable action
     source("app/components/admin/MediaPickerModal.tsx"),
   ]);
   for (const field of ["title", "slug", "description", "tagline", "category", "tech-stack", "latest-update", "tags", "features", "status", "start-date", "end-date"]) {
-    assert.match(project, new RegExp(`htmlFor="project-${field}"`));
-    assert.match(project, new RegExp(`id="project-${field}"`));
+    if (field === "status") {
+      assert.match(project, /<BuildlogSelect id="project-status" label="Publication status"/);
+    } else {
+      assert.match(project, new RegExp(`htmlFor="project-${field}"`));
+      assert.match(project, new RegExp(`id="project-${field}"`));
+    }
   }
+  assert.match(project, /<BuildlogSelect id="project-stage" label="Development stage"/);
   assert.match(editor, /"aria-label": label/);
   assert.match(theme, /\.ProseMirror:focus-visible/);
   assert.match(theme, /\.admin-action-table \{ min-width: 680px/);
@@ -176,7 +181,7 @@ test("unlocked privileged reads and log actions check Admin identity before serv
   const blogActions = await source("app/admin/(dashboard)/blogs/BlogArchiveAction.tsx");
   assert.match(blogList, /flex flex-wrap items-center justify-between gap-4/);
   assert.match(blogList, /<BlogFilters /);
-  assert.match(blogFilters, /id="blog-search"[^\n]*style=\{\{ minHeight: 40, height: 40 \}\}/);
+  assert.match(blogFilters, /id="blog-search"[^\n]*className="min-h-11/);
   assert.match(blogActions, /aria-label=\{`\$\{archived \? "Restore" : "Archive"\} \$\{post\.title\}`\}/);
   assert.match(blogActions, /inline-flex size-11 items-center justify-center/);
 });
@@ -204,12 +209,16 @@ test("locked-scope Admin form labels and Edit links use the owner-approved acces
     source("app/admin/(dashboard)/experience/page.tsx"),
   ]);
   for (const field of ["headline", "quote", "name", "role", "avatar-url", "display-order", "status"]) {
-    assert.match(testimonialForm, new RegExp(`htmlFor="testimonial-${field}"`));
-    assert.match(testimonialForm, new RegExp(`id="testimonial-${field}"`));
+    if (field === "status") {
+      assert.match(testimonialForm, /<BuildlogSelect id="testimonial-status" label="Visibility"/);
+    } else {
+      assert.match(testimonialForm, new RegExp(`htmlFor="testimonial-${field}"`));
+      assert.match(testimonialForm, new RegExp(`id="testimonial-${field}"`));
+    }
   }
   for (const field of ["role", "company", "logo-url", "location", "location-type", "employment-type", "start-month", "start-year", "end-month", "end-year", "summary", "highlights", "display-order", "status"]) {
-    if (field === "status") {
-      assert.match(experienceForm, /<BuildlogSelect id="experience-status" label="Visibility"/);
+    if (["status", "location-type", "employment-type", "start-month", "end-month"].includes(field)) {
+      assert.match(experienceForm, new RegExp(`<BuildlogSelect id="experience-${field}" label="`));
     } else {
       assert.match(experienceForm, new RegExp(`htmlFor="experience-${field}"`));
       assert.match(experienceForm, new RegExp(`id="experience-${field}"`));

@@ -17,8 +17,9 @@ const updateSchema = faqSchema.partial().extend({ id: z.string().uuid() }).stric
 function revalidateFaqPaths() {
   try {
     revalidatePath("/");
-  } catch (e) {
-    console.error("Revalidation failed:", e);
+    return null;
+  } catch {
+    return "The FAQ change was saved, but the homepage cache could not be refreshed. Visitors may temporarily see the previous version.";
   }
 }
 
@@ -57,8 +58,8 @@ export async function POST(request: Request) {
       .single();
 
     if (error) throw error;
-    revalidateFaqPaths();
-    return NextResponse.json({ data: faq });
+    const warning = revalidateFaqPaths();
+    return NextResponse.json({ data: faq, ...(warning ? { warning } : {}) });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
@@ -83,8 +84,8 @@ export async function PUT(request: Request) {
 
     if (error) throw error;
     if (!faq) return NextResponse.json({ error: "FAQ not found. Refresh the list before retrying." }, { status: 404 });
-    revalidateFaqPaths();
-    return NextResponse.json({ data: faq });
+    const warning = revalidateFaqPaths();
+    return NextResponse.json({ data: faq, ...(warning ? { warning } : {}) });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
@@ -121,8 +122,8 @@ export async function PATCH(request: Request) {
 
     if (error) throw error;
     if (!saved) return NextResponse.json({ error: "FAQ section settings changed. Refresh before retrying." }, { status: 409 });
-    revalidateFaqPaths();
-    return NextResponse.json({ success: true });
+    const warning = revalidateFaqPaths();
+    return NextResponse.json({ success: true, ...(warning ? { warning } : {}) });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
@@ -148,8 +149,8 @@ export async function DELETE(request: Request) {
 
     if (error) throw error;
     if (!deleted) return NextResponse.json({ error: "FAQ not found. Refresh the list before retrying." }, { status: 404 });
-    revalidateFaqPaths();
-    return NextResponse.json({ success: true });
+    const warning = revalidateFaqPaths();
+    return NextResponse.json({ success: true, ...(warning ? { warning } : {}) });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

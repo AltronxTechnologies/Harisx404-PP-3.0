@@ -43,9 +43,10 @@ function formatDate(value: string | null) {
   }
 }
 
-export default async function AdminTestimonialsPage() {
+export default async function AdminTestimonialsPage({ searchParams }: { searchParams: Promise<{ notice?: string; cache?: string }> }) {
   const auth = await requireAdmin();
   if (auth.response) redirect(auth.response.status === 401 ? "/admin/login" : "/");
+  const params = await searchParams;
   const supabase = await createSupabaseAdminClient();
   // select("*") so the page keeps working whether or not the optional
   // email/source columns from the submissions migration exist yet.
@@ -76,6 +77,8 @@ export default async function AdminTestimonialsPage() {
           New Testimonial
         </Link>
       </div>
+      {["saved", "published", "archived", "deleted"].includes(params.notice || "") && <p role="status" className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-4 text-sm text-emerald-200">{params.notice === "saved" ? "Testimonial saved." : params.notice === "published" ? "Testimonial published." : params.notice === "archived" ? "Testimonial archived." : "Testimonial deleted."}</p>}
+      {params.cache === "stale" && <p role="alert" className="rounded-xl border border-amber-500/30 bg-amber-950/20 p-4 text-sm text-amber-200">The database change completed, but homepage cache refresh could not be confirmed. Visitors may temporarily see the previous version.</p>}
 
       {error ? <div role="alert" className="rounded-2xl border border-red-500/30 bg-red-950/20 p-6 text-sm text-red-200">Testimonials could not be loaded. No submissions are displayed. <Link prefetch={false} href={`/admin/testimonials?retry=${Date.now()}`} className="inline-flex min-h-11 items-center font-medium underline underline-offset-2">Retry loading</Link></div> : <>
       {/* ---------- Pending review queue ---------- */}

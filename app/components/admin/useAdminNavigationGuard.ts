@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { logout } from "@/app/lib/supabase/auth";
 
-export function useBuildlogNavigationGuard(isDirty: boolean) {
+export function useAdminNavigationGuard(isDirty: boolean) {
   const [leaveTarget, setLeaveTarget] = useState<string | null>(null);
   const allowHistory = useRef(false);
 
@@ -23,7 +23,7 @@ export function useBuildlogNavigationGuard(isDirty: boolean) {
         return;
       }
       const anchor = event.target.closest<HTMLAnchorElement>("a[href]");
-      if (!anchor || anchor.hasAttribute("download") || anchor.target === "_blank") return;
+      if (!anchor || anchor.hasAttribute("download") || anchor.hasAttribute("data-admin-unguarded") || anchor.target === "_blank") return;
       const destination = new URL(anchor.href, currentUrl);
       if (destination.origin !== window.location.origin || destination.href === currentUrl) return;
       event.preventDefault();

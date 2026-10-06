@@ -8,6 +8,7 @@ import { MediaPickerModal } from "./MediaPickerModal";
 import { AdminConfirmDialog } from "./AdminConfirmDialog";
 import { blogImageUrls } from "@/app/lib/admin/blog-image-urls";
 import { isAllowedBlogImageUrl } from "@/app/components/blog/blogImage";
+import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
 
 export type BlogMediaItem = { id: string; url: string; secure_url: string; alt_text?: string };
 
@@ -87,10 +88,11 @@ export function BlogImageManager({ postId, images, onImagesChange, onAvailabilit
       const params = new URLSearchParams({ id: image.id });
       if (postId && attachedIds.includes(image.id)) params.set("detach_blog_post_id", postId);
       const response = await fetch(`/api/admin/media?${params}`, { method: "DELETE" });
+      const result = await readAdminResponse(response, "Blog image deletion");
       if (!response.ok) {
-        const result = await response.json();
         throw new Error(result.error || "Image could not be deleted.");
       }
+      if (result.success !== true) throw new Error("Image deletion could not be confirmed. Refresh the library before retrying.");
       onImagesChange(images.filter((item) => item.id !== image.id));
       setAttachedIds((ids) => ids.filter((id) => id !== image.id));
       setDeleting(null);

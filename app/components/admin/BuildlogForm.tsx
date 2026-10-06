@@ -11,7 +11,7 @@ import { parseSemanticVersion } from "@/app/buildlog/version";
 import { AdminConfirmDialog } from "./AdminConfirmDialog";
 import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
 import { BuildlogSelect } from "./BuildlogSelect";
-import { useBuildlogNavigationGuard } from "./useBuildlogNavigationGuard";
+import { useAdminNavigationGuard } from "./useAdminNavigationGuard";
 
 const itemSchema = z.object({
   id: z.string().optional(),
@@ -131,7 +131,7 @@ export function BuildlogForm({ initialData }: { initialData?: BuildlogProjectAdm
         },
   });
   const { fields, append, remove, swap } = useFieldArray({ control, name: "items" });
-  const { leaveTarget, setLeaveTarget, confirmLeave } = useBuildlogNavigationGuard(isDirty);
+  const { leaveTarget, setLeaveTarget, confirmLeave } = useAdminNavigationGuard(isDirty);
 
   useEffect(() => {
     if (!isDirty) return;

@@ -1,23 +1,38 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { MediaPickerModal } from "./MediaPickerModal";
 import { Image as ImageIcon, Loader2 } from "lucide-react";
 import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
+import { AdminConfirmDialog } from "./AdminConfirmDialog";
+import { BuildlogSelect } from "./BuildlogSelect";
+import { useAdminNavigationGuard } from "./useAdminNavigationGuard";
+
+const statusOptions = [
+  { value: "pending", label: "Pending review", hint: "Waiting for approval" },
+  { value: "draft", label: "Draft", hint: "Only visible in Admin" },
+  { value: "published", label: "Published", hint: "Visible on the homepage" },
+  { value: "archived", label: "Archived", hint: "Hidden from visitors" },
+] as const;
+const secureUrl = z.string().trim().max(2048).refine((value) => {
+  if (!value) return true;
+  try { const url = new URL(value); return url.protocol === "https:" && !!url.hostname && !url.username && !url.password; }
+  catch { return false; }
+}, "Use a valid HTTPS image URL without credentials");
 
 const testimonialSchema = z.object({
   // Length caps match the homepage card zones (headline ≤ 2 lines,
   // quote ≤ 6 lines) so approved content always fits perfectly.
-  headline: z.string().min(1, "Headline is required").max(70, "Max 70 characters (2 lines on the card)"),
-  quote: z.string().min(1, "Quote is required").max(280, "Max 280 characters (6 lines on the card)"),
-  name: z.string().min(1, "Name is required").max(80, "Max 80 characters"),
-  role: z.string().max(80, "Max 80 characters").optional().or(z.literal("")),
-  avatar_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
-  display_order: z.coerce.number().int(),
+  headline: z.string().trim().min(1, "Headline is required").max(70, "Max 70 characters (2 lines on the card)"),
+  quote: z.string().trim().min(1, "Quote is required").max(280, "Max 280 characters (6 lines on the card)"),
+  name: z.string().trim().min(1, "Name is required").max(80, "Max 80 characters"),
+  role: z.string().trim().max(80, "Max 80 characters"),
+  avatar_url: secureUrl,
+  display_order: z.number({ invalid_type_error: "Enter a display order" }).int("Use a whole number"),
   status: z.enum(["pending", "draft", "published", "archived"]),
 });
 
@@ -32,12 +47,16 @@ export function TestimonialForm({ initialData }: TestimonialFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
+  const [confirmingLeave, setConfirmingLeave] = useState(false);
+  const [pendingPublication, setPendingPublication] = useState<TestimonialFormValues | null>(null);
 
   const {
     register,
+    control,
     handleSubmit,
     setValue,
-    formState: { errors },
+    setError,
+    formState: { errors, isDirty },
   } = useForm<TestimonialFormValues>({
     resolver: zodResolver(testimonialSchema),
     defaultValues: {
@@ -47,11 +66,18 @@ export function TestimonialForm({ initialData }: TestimonialFormProps) {
       role: initialData?.role ?? "",
       avatar_url: initialData?.avatar_url ?? "",
       display_order: initialData?.display_order ?? 0,
-      status: (initialData?.status as TestimonialFormValues["status"]) ?? "published",
+      status: (initialData?.status as TestimonialFormValues["status"]) ?? "draft",
     },
   });
+  const { leaveTarget, setLeaveTarget, confirmLeave } = useAdminNavigationGuard(isDirty);
+  useEffect(() => {
+    if (!isDirty) return;
+    const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [isDirty]);
 
-  const onSubmit = async (data: TestimonialFormValues) => {
+  const save = async (data: TestimonialFormValues) => {
     setIsSubmitting(true);
     setErrorMsg("");
     try {
@@ -67,9 +93,17 @@ export function TestimonialForm({ initialData }: TestimonialFormProps) {
       });
 
       const result = await readAdminResponse(res, "Testimonial");
-      if (!res.ok) throw new Error(result.error || "Failed to save testimonial");
+      if (!res.ok) {
+        if (result.fields) {
+          for (const [name, messages] of Object.entries(result.fields)) {
+            if (name in testimonialSchema.shape && Array.isArray(messages) && typeof messages[0] === "string") setError(name as keyof TestimonialFormValues, { message: messages[0] });
+          }
+        }
+        throw new Error(result.error || "Failed to save testimonial");
+      }
 
-      router.push("/admin/testimonials");
+      if (!result.data?.id) throw new Error("Testimonial save could not be confirmed. Refresh the list before retrying.");
+      router.push(result.warning ? "/admin/testimonials?notice=saved&cache=stale" : "/admin/testimonials?notice=saved");
       router.refresh();
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : "Failed to save testimonial");
@@ -78,23 +112,35 @@ export function TestimonialForm({ initialData }: TestimonialFormProps) {
     }
   };
 
+  const onSubmit = (data: TestimonialFormValues) => {
+    if (data.status !== initialData?.status && (data.status === "published" || initialData?.status === "published")) {
+      setPendingPublication(data);
+      return;
+    }
+    void save(data);
+  };
+  const errorProps = (name: keyof TestimonialFormValues) => ({ "aria-invalid": Boolean(errors[name]), "aria-describedby": errors[name] ? `testimonial-${name}-error` : undefined });
+  const FieldError = ({ name }: { name: keyof TestimonialFormValues }) => errors[name] ? <p id={`testimonial-${name}-error`} role="alert" className="text-xs text-red-300">{errors[name]?.message}</p> : null;
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+    <><form onSubmit={handleSubmit(onSubmit)} className="min-w-0 space-y-8">
       {errorMsg && (
         <div role="alert" className="rounded-lg bg-red-50 p-4 text-sm text-red-500 dark:bg-red-950/30">
           {errorMsg}
         </div>
       )}
+      <fieldset disabled={isSubmitting} className="min-w-0 space-y-8 border-0 p-0 disabled:opacity-70">
 
       <div className="space-y-2">
         <label htmlFor="testimonial-headline" className="text-sm font-medium">Headline</label>
         <input
           id="testimonial-headline"
           {...register("headline")}
+          {...errorProps("headline")}
           className="min-h-11 w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
           placeholder="He shipped in weeks what we scoped for months."
         />
-        {errors.headline && <p className="text-xs text-red-500">{errors.headline.message}</p>}
+        <FieldError name="headline" />
       </div>
 
       <div className="space-y-2">
@@ -102,11 +148,12 @@ export function TestimonialForm({ initialData }: TestimonialFormProps) {
         <textarea
           id="testimonial-quote"
           {...register("quote")}
+          {...errorProps("quote")}
           rows={4}
           className="min-h-11 w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
           placeholder="The full testimonial quote..."
         />
-        {errors.quote && <p className="text-xs text-red-500">{errors.quote.message}</p>}
+        <FieldError name="quote" />
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -115,10 +162,11 @@ export function TestimonialForm({ initialData }: TestimonialFormProps) {
           <input
             id="testimonial-name"
             {...register("name")}
+            {...errorProps("name")}
             className="min-h-11 w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
             placeholder="Jane Doe"
           />
-          {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
+          <FieldError name="name" />
         </div>
 
         <div className="space-y-2">
@@ -126,9 +174,11 @@ export function TestimonialForm({ initialData }: TestimonialFormProps) {
           <input
             id="testimonial-role"
             {...register("role")}
+            {...errorProps("role")}
             className="min-h-11 w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
             placeholder="Founder, SaaS Startup"
           />
+          <FieldError name="role" />
         </div>
       </div>
 
@@ -138,6 +188,7 @@ export function TestimonialForm({ initialData }: TestimonialFormProps) {
           <input
             id="testimonial-avatar-url"
             {...register("avatar_url")}
+            {...errorProps("avatar_url")}
             className="min-h-11 min-w-0 flex-1 rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
             placeholder="https://..."
           />
@@ -151,14 +202,14 @@ export function TestimonialForm({ initialData }: TestimonialFormProps) {
             <ImageIcon className="h-5 w-5" />
           </button>
         </div>
-        {errors.avatar_url && <p className="text-xs text-red-500">{errors.avatar_url.message}</p>}
+        <FieldError name="avatar_url" />
       </div>
 
       <MediaPickerModal
         isOpen={isMediaPickerOpen}
         onClose={() => setIsMediaPickerOpen(false)}
         onSelect={(media) => {
-          setValue("avatar_url", media.secure_url || media.url, { shouldValidate: true });
+          setValue("avatar_url", media.secure_url || media.url, { shouldDirty: true, shouldValidate: true });
         }}
       />
 
@@ -168,31 +219,21 @@ export function TestimonialForm({ initialData }: TestimonialFormProps) {
           <input
             id="testimonial-display-order"
             type="number"
-            {...register("display_order")}
+            {...register("display_order", { setValueAs: (value: string) => value === "" ? NaN : Number(value) })}
+            {...errorProps("display_order")}
             className="min-h-11 w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
           />
-          {errors.display_order && <p className="text-xs text-red-500">{errors.display_order.message}</p>}
+          <FieldError name="display_order" />
         </div>
 
-        <div className="space-y-2">
-          <label htmlFor="testimonial-status" className="text-sm font-medium">Status</label>
-          <select
-            id="testimonial-status"
-            {...register("status")}
-            className="min-h-11 w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
-          >
-            <option value="pending">Pending review</option>
-            <option value="draft">Draft</option>
-            <option value="published">Published</option>
-            <option value="archived">Archived</option>
-          </select>
-        </div>
+        <div className="min-w-0"><Controller name="status" control={control} render={({ field }) => <BuildlogSelect id="testimonial-status" label="Visibility" value={field.value} onChange={field.onChange} options={statusOptions} />} /></div>
       </div>
 
-      <div className="flex justify-end gap-4">
+      </fieldset>
+      <div className="flex flex-wrap justify-end gap-4">
         <button
           type="button"
-          onClick={() => router.back()}
+          onClick={() => isDirty ? setConfirmingLeave(true) : router.push("/admin/testimonials")}
           className="min-h-11 rounded-xl px-4 py-2 text-sm font-medium text-ink-secondary hover:bg-surface-base transition-colors"
         >
           Cancel
@@ -207,5 +248,9 @@ export function TestimonialForm({ initialData }: TestimonialFormProps) {
         </button>
       </div>
     </form>
+    <AdminConfirmDialog open={confirmingLeave} title="Discard unsaved testimonial changes?" description="Your text, image, order and visibility edits will be lost." confirmLabel="Discard changes" destructive onClose={() => setConfirmingLeave(false)} onConfirm={() => { setConfirmingLeave(false); router.push("/admin/testimonials"); }} />
+    <AdminConfirmDialog open={leaveTarget !== null} title="Discard unsaved testimonial changes?" description="Your text, image, order and visibility edits will be lost." confirmLabel="Discard changes" destructive onClose={() => setLeaveTarget(null)} onConfirm={() => confirmLeave(router.push)} />
+    <AdminConfirmDialog open={pendingPublication !== null} title={pendingPublication?.status === "published" ? "Publish testimonial?" : "Hide testimonial?"} description={pendingPublication?.status === "published" ? "This testimonial will appear in the public homepage carousel." : "This testimonial will leave the public homepage carousel but remain editable in Admin."} confirmLabel={pendingPublication?.status === "published" ? "Publish testimonial" : "Hide testimonial"} pending={isSubmitting} onClose={() => setPendingPublication(null)} onConfirm={() => { if (pendingPublication) { const values = pendingPublication; setPendingPublication(null); void save(values); } }} />
+    </>
   );
 }

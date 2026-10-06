@@ -230,6 +230,10 @@ html:has([data-admin-root])::-webkit-scrollbar-thumb:hover {
   justify-content: center;
 }
 
+[data-admin-root] .admin-content :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]), select, textarea) {
+  min-height: 44px;
+}
+
 [data-admin-root] .admin-content [class~="hover:bg-indigo-700"]:hover {
   background-color: #dedee2;
 }

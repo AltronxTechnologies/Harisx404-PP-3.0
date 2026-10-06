@@ -20,6 +20,7 @@ export function DeleteExperienceButton({ id, name }: { id: string; name: string 
       const response = await fetch(`/api/admin/experience?${new URLSearchParams({ id })}`, { method: "DELETE" });
       const result = await readAdminResponse(response, "Experience deletion");
       if (!response.ok) throw new Error(result.error || "Could not delete this experience entry.");
+      if (result.success !== true) throw new Error("Experience deletion could not be confirmed. Refresh the list before retrying.");
       setConfirming(false);
       const url = new URL(window.location.href);
       url.searchParams.set("notice", "deleted");

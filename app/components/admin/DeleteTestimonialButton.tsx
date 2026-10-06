@@ -20,7 +20,13 @@ export function DeleteTestimonialButton({ id, name }: { id: string; name: string
       const response = await fetch(`/api/admin/testimonials?${new URLSearchParams({ id })}`, { method: "DELETE" });
       const result = await readAdminResponse(response, "Testimonial deletion");
       if (!response.ok) throw new Error(result.error || "Could not delete this testimonial.");
+      if (result.success !== true) throw new Error("Testimonial deletion could not be confirmed. Refresh the list before retrying.");
       setConfirming(false);
+      const url = new URL(window.location.href);
+      url.searchParams.set("notice", "deleted");
+      if (result.warning) url.searchParams.set("cache", "stale");
+      else url.searchParams.delete("cache");
+      router.replace(`${url.pathname}${url.search}`);
       router.refresh();
     } catch (cause) {
       setConfirming(false);

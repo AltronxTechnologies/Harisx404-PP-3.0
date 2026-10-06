@@ -35,7 +35,7 @@ const fields = z.object({
   display_order: z.number().int(),
   status: z.enum(["draft", "published", "archived"]),
 }).strict();
-const createSchema = fields.refine((value) => !value.end_month || value.end_year !== null, "End month requires an end year")
+const createSchema = fields.refine((value) => value.is_current ? !value.end_month && !value.end_year : !value.end_month || value.end_year !== null, "Current positions cannot have an end date; other positions require an end year with an end month")
   .refine((value) => value.is_current || !value.end_year || value.end_year > value.start_year || (value.end_year === value.start_year && (!value.start_month || !value.end_month || value.end_month >= value.start_month)), "End date must not precede start date");
 const updateSchema = fields.partial().extend({ id: idSchema }).strict()
   .refine((value) => Object.keys(value).length > 1, "Provide at least one change");
@@ -96,6 +96,21 @@ export async function PUT(request: Request) {
     if (!parsed.success) return NextResponse.json({ error: "Invalid Experience fields or missing ID", fields: parsed.error.flatten().fieldErrors }, { status: 400 });
     const { id, ...changes } = parsed.data;
     const db = await createSupabaseAdminClient();
+    const { data: current, error: readError } = await db.from("experience")
+      .select("start_month, start_year, end_month, end_year, is_current")
+      .eq("id", id).maybeSingle();
+    if (readError) throw readError;
+    if (!current) return NextResponse.json({ error: "Experience entry not found. Refresh the list before retrying." }, { status: 404 });
+    const dates = { ...current, ...changes };
+    if (dates.is_current && (changes.end_month || changes.end_year)) {
+      return NextResponse.json({ error: "Current positions cannot have an end date." }, { status: 400 });
+    }
+    if (changes.is_current === true) {
+      changes.end_month = null;
+      changes.end_year = null;
+    } else if (!dates.is_current && ((dates.end_month && !dates.end_year) || (dates.end_year && dates.start_year && (dates.end_year < dates.start_year || (dates.end_year === dates.start_year && dates.start_month && dates.end_month && dates.end_month < dates.start_month))))) {
+      return NextResponse.json({ error: "End date cannot precede the start date or lack an end year." }, { status: 400 });
+    }
     const { data, error } = await db.from("experience").update(changes).eq("id", id).select().maybeSingle();
     if (error) throw error;
     if (!data) return NextResponse.json({ error: "Experience entry not found. Refresh the list before retrying." }, { status: 404 });

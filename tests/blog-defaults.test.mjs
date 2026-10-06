@@ -8,10 +8,15 @@ test("new Blog slugs normalize titles but remain editable", async () => {
   const form = await readFile(new URL("../app/components/admin/BlogForm.tsx", import.meta.url), "utf8");
   assert.match(form, /slugEdited\.current = true/);
   assert.match(form, /if \(!slugEdited\.current\) setValue\("slug", normalizeBlogSlug/);
-  for (const id of ["blog-title", "blog-slug", "blog-summary", "blog-status", "blog-published-at", "blog-cover-url", "blog-canonical-url", "blog-tag-input"]) {
+  for (const id of ["blog-title", "blog-slug", "blog-summary", "blog-cover-url", "blog-canonical-url", "blog-tag-input"]) {
     assert.match(form, new RegExp(`htmlFor="${id}"`));
     assert.match(form, new RegExp(`id="${id}"`));
   }
+  assert.match(form, /id="blog-status-label"/);
+  assert.match(form, /<ListboxButton id="blog-status" aria-labelledby="blog-status-label blog-status"/);
+  assert.match(form, /id="blog-published-at-label"/);
+  const picker = await readFile(new URL("../app/components/admin/BlogDatePicker.tsx", import.meta.url), "utf8");
+  assert.match(picker, /id="blog-published-at"/);
   assert.match(form, /aria-label=\{`Remove \$\{tag\} tag`\}/);
   assert.match(form, /aria-label="Add tag"/);
 });
