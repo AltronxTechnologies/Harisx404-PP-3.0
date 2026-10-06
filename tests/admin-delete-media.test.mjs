@@ -39,13 +39,14 @@ function database(rows = {}, { missing = [], failure = null } = {}) {
         select(_fields, opts) { options = opts; return this; },
         eq(key, expected) { column = key; value = expected; match = "eq"; return this; },
         ilike(key, expected) { column = key; value = expected; match = "ilike"; return this; },
+        limit() { return this; },
         delete() { action = "delete"; writes.push([table, "delete"]); return this; },
         insert(row) { writes.push([table, "insert"]); tables[table].push(row); return Promise.resolve({ error: null }); },
         maybeSingle() { return Promise.resolve(this.result(true)); },
         then(resolve, reject) { return Promise.resolve(this.result(false)).then(resolve, reject); },
         result(single) {
           if (action === "read") reads.push([table, column, value]);
-          if (missing.includes(`${table}.${column}`)) return { count: null, error: { code: "42703" } };
+          if (missing.includes(`${table}.${column}`)) return { count: null, error: options?.head ? null : { code: "42703" } };
           if (failure === `${table}.${column}`) return { count: null, error: { code: "XX000" } };
           const found = tables[table].filter((row) => !column || (match === "eq" ? row[column] === value :
             String(row[column] ?? "").toLowerCase().includes(value.slice(1, -1).replace(/\\([\\%_])/g, "$1").toLowerCase())));
