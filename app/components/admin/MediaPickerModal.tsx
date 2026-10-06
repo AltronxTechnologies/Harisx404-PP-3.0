@@ -32,6 +32,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
   const [activeTab, setActiveTab] = useState<"library" | "upload">("library");
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
+  const [uploadWarning, setUploadWarning] = useState("");
   const dialogRef = useRef<HTMLDivElement>(null);
   const libraryTabRef = useRef<HTMLButtonElement>(null);
   const uploadTabRef = useRef<HTMLButtonElement>(null);
@@ -73,6 +74,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
       setSelectionError("");
       setActiveTab(initialTab);
       setUploadError("");
+      setUploadWarning("");
       fetchMedia(0);
     }
   }, [isOpen, initialTab]);
@@ -113,6 +115,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
 
     setIsUploading(true);
     setUploadError("");
+    setUploadWarning("");
 
     const formData = new FormData();
     formData.append("file", file);
@@ -124,8 +127,10 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
         body: formData,
       });
 
-      const { data, error } = await readAdminResponse(res, "Image upload");
+      const { data, error, warning } = await readAdminResponse(res, "Image upload");
       if (!res.ok) throw new Error(error || "Failed to upload image");
+      if (!data?.id) throw new Error("Image upload returned no library record. Check Cloudinary before retrying.");
+      setUploadWarning(warning || "");
       
       // Add the new image to the library and select it
       setMedia((current) => [data, ...current]);
@@ -249,6 +254,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
           )}
         </div>
 
+        {uploadWarning && <p role="alert" className="border-t border-amber-500/30 bg-amber-950/20 px-4 py-2 text-sm text-amber-200">{uploadWarning}</p>}
         {selectionError && <p role="alert" className="border-t border-border-hairline px-4 py-2 text-sm text-red-300">{selectionError}</p>}
         <div className="p-4 border-t border-border-hairline bg-surface-raised flex justify-end gap-3">
           <button

@@ -25,6 +25,7 @@ CREATE TABLE media (
   format TEXT,                         -- jpg, png, webp
   bytes INTEGER,                       -- File size
   alt_text TEXT,
+  original_filename TEXT,             -- Original upload name; unlike alt_text, not editable
   folder TEXT,                         -- Cloudinary folder name
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()

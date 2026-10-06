@@ -105,6 +105,16 @@ URLs, but links hard-coded outside tracked content cannot always be detected.
 Deletion across the database and Cloudinary is not atomic; an unexpected
 concurrent edit or failed restoration still needs manual review. Use test-only
 assets and a backup/restore plan for further workflows.
+The Admin Media page now has a checked-in additive filename migration
+(`migrations/2026_media_original_filename.sql`). The connected table does not
+yet have that column: review a backup, apply the migration in the intended
+environment, verify Admin read/write grants and then test a disposable upload,
+description edit, copy and deletion. Existing `alt_text` or Cloudinary public IDs
+cannot reliably reconstruct original filenames for historical files. Until the
+migration is applied, the API is designed to retain uploads with a warning that
+the original name is not protected separately from the editable description;
+connected acceptance is still pending. The latest browser pass
+mocked Media writes and made no connected Cloudinary or database changes.
 
 Before asking for a valid Settings save-and-reopen test:
 

@@ -49,6 +49,9 @@ export async function POST(request: Request) {
     if (!file.size) {
       return NextResponse.json({ error: "Image is empty" }, { status: 400 });
     }
+    if (!file.name || file.name.length > 255) {
+      return NextResponse.json({ error: "Choose an image with a filename of 1 to 255 characters" }, { status: 400 });
+    }
     if (file.size > 20 * 1024 * 1024) {
       return NextResponse.json({ error: "Choose an image smaller than 20 MB" }, { status: 413 });
     }
@@ -71,31 +74,39 @@ export async function POST(request: Request) {
 
     // Insert into Supabase `media` table
     const admin = await createSupabaseAdminClient();
-    const { data, error } = await admin
+    const row = {
+      public_id: uploadResult.public_id,
+      url: uploadResult.secure_url,
+      secure_url: uploadResult.secure_url,
+      width: uploadResult.width,
+      height: uploadResult.height,
+      format: uploadResult.format,
+      bytes: uploadResult.bytes,
+      alt_text: file.name,
+      original_filename: file.name,
+      folder,
+    };
+    let { data, error } = await admin
       .from("media")
-      .insert([
-        {
-          public_id: uploadResult.public_id,
-          url: uploadResult.secure_url,
-          secure_url: uploadResult.secure_url,
-          width: uploadResult.width,
-          height: uploadResult.height,
-          format: uploadResult.format,
-          bytes: uploadResult.bytes,
-          alt_text: file.name,
-          folder,
-        }
-      ])
+      .insert([row])
       .select()
       .single();
-
-    if (error) {
-      await cloudinary.uploader.destroy(uploadResult.public_id).catch(() => {});
-      return NextResponse.json({ error: error.message }, { status: 400 });
+    let warning: string | undefined;
+    if (error && ["42703", "PGRST204"].includes(error.code) && /original_filename/.test(error.message)) {
+      ({ data, error } = await admin.from("media").insert([{ ...row, original_filename: undefined }]).select().single());
+      if (!error) warning = "Image uploaded, but the original filename cannot be protected until the Media filename migration is applied.";
     }
 
-    return NextResponse.json({ data });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || "Failed to upload" }, { status: 500 });
+    if (error) {
+      const cleaned = await cloudinary.uploader.destroy(uploadResult.public_id, { resource_type: "image", invalidate: true }).catch(() => null);
+      if (cleaned?.result !== "ok" && cleaned?.result !== "not found") {
+        return NextResponse.json({ error: "The image may remain in Cloudinary after a library save failure. Check Cloudinary before retrying." }, { status: 502 });
+      }
+      return NextResponse.json({ error: "The image could not be added to the library. Its Cloudinary upload was rolled back." }, { status: 503 });
+    }
+
+    return NextResponse.json({ data, ...(warning ? { warning } : {}) });
+  } catch {
+    return NextResponse.json({ error: "Image upload could not be confirmed. Check the library and Cloudinary before retrying." }, { status: 503 });
   }
 }

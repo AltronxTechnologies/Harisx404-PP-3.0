@@ -234,11 +234,12 @@ test("Media library uses the connected row fields and keeps errors distinct from
     source("app/api/admin/media/route.ts"),
   ]);
   assert.match(mediaPage, /formatBytes\(item\.bytes\)/);
-  assert.match(mediaPage, /item\.alt_text \|\| item\.public_id/);
-  assert.match(mediaPage, /if \(!res\.ok\) throw new Error\("Media could not be loaded"\)/);
-  assert.match(mediaPage, /\) : loadFailed \? \(/);
-  assert.match(mediaPage, /aria-label=\{`Copy URL for/);
-  assert.doesNotMatch(mediaPage, /item\.filename|formatBytes\(item\.size\)/);
+  assert.match(mediaPage, /item\.original_filename \|\| item\.alt_text/);
+  assert.match(mediaPage, /if \(!res\.ok \|\| !Array\.isArray\(result\.data\)/);
+  assert.match(mediaPage, /loadFailed \? <div role="alert"/);
+  assert.match(mediaPage, /aria-label=\{`Copy link for \$\{name\}`\}/);
+  assert.match(mediaPage, /grid min-w-0 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4/);
+  assert.doesNotMatch(mediaPage, /formatBytes\(item\.size\)/);
   assert.match(mediaApi, /const limit = Math\.min\(requestedLimit, 100\)/);
 });
 
@@ -255,7 +256,7 @@ test("Media deletion checks protected references before Cloudinary and fails clo
   }
   assert.ok(guard.indexOf('db.from("media").delete()') < guard.indexOf("cloudinary.uploader.destroy"));
   assert.match(guard, /db\.from\("media"\)\.insert\(item\)/);
-  assert.match(page, /aria-label=\{`Delete \$\{item\.alt_text/);
+  assert.match(page, /aria-label=\{`Delete \$\{name\}`\}/);
   assert.match(page, /Image deleted from the library and Cloudinary/);
   const anonymous = await fetch(`${baseUrl}/api/admin/media?id=00000000-0000-4000-8000-000000000001`, { method: "DELETE" });
   assert.equal(anonymous.status, 401);

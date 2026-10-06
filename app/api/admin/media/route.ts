@@ -8,12 +8,12 @@ export async function GET(request: Request) {
   try {
     const auth = await requireAdmin();
     if (auth.response) return auth.response;
-    const supabase = auth.client;
+    const supabase = await createSupabaseAdminClient();
 
     const { searchParams } = new URL(request.url);
     const requestedLimit = Number(searchParams.get("limit") ?? 50);
     const requestedOffset = Number(searchParams.get("offset") ?? 0);
-    if (!Number.isSafeInteger(requestedLimit) || requestedLimit < 1 || !Number.isSafeInteger(requestedOffset) || requestedOffset < 0) {
+    if (!Number.isSafeInteger(requestedLimit) || requestedLimit < 1 || !Number.isSafeInteger(requestedOffset) || requestedOffset < 0 || requestedOffset > 120000) {
       return NextResponse.json({ error: "Invalid pagination" }, { status: 400 });
     }
     const limit = Math.min(requestedLimit, 100);
@@ -23,15 +23,16 @@ export async function GET(request: Request) {
       .from("media")
       .select("*", { count: "exact" })
       .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
       .range(offset, offset + limit - 1);
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      return NextResponse.json({ error: "Media could not be loaded. Retry before managing files." }, { status: 503 });
     }
 
-    return NextResponse.json({ data, count });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ data, count }, { headers: { "Cache-Control": "private, no-store" } });
+  } catch {
+    return NextResponse.json({ error: "Media could not be loaded. Retry before managing files." }, { status: 503 });
   }
 }
 

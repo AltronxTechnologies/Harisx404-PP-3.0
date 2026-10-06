@@ -132,7 +132,7 @@ test("Admin editors do not mistake failed reads for empty data", async () => {
   }
 });
 
-test("Media pagination preserves loaded images when a later page fails and can retry", async () => {
+test("Media page navigation retries a failed page without calling it empty", async () => {
   const React = await import("react");
   (globalThis as typeof globalThis & { React: typeof React }).React = React;
   const [{ createRoot }, { act }, { default: Media }] = await Promise.all([
@@ -143,35 +143,40 @@ test("Media pagination preserves loaded images when a later page fails and can r
   const originalFetch = globalThis.fetch;
   const item = (id: number) => ({
     id: String(id), url: "/brand/logo-wide.png", secure_url: "", public_id: `test/${id}`,
-    alt_text: `Test image ${id}`, format: "png", width: 1, height: 1, bytes: 128,
+    original_filename: `Original photo ${id}.png`, alt_text: `Description ${id}`, format: "png", width: 1, height: 1, bytes: 128,
     created_at: "2026-01-01T00:00:00Z",
   });
   let failNext = true;
+  const offsets: string[] = [];
   globalThis.fetch = async (input) => {
     const offset = new URL(String(input), "http://localhost:3000").searchParams.get("offset");
-    if (offset === "0") return Response.json({ data: [item(1)], count: 2 });
+    offsets.push(offset || "0");
+    if (offset === "0") return Response.json({ data: Array.from({ length: 12 }, (_, index) => item(index + 1)), count: 14 });
     if (failNext) {
       failNext = false;
       return Response.json({ error: "Unavailable" }, { status: 503 });
     }
-    return Response.json({ data: [item(2)], count: 2 });
+    return Response.json({ data: [item(13), item(14)], count: 14 });
   };
   const host = document.createElement("div");
   document.body.append(host);
   const root = createRoot(host);
   try {
     await act(async () => { root.render(React.createElement(Media)); await new Promise((resolve) => setTimeout(resolve, 0)); });
-    assert.match(host.textContent || "", /Showing 1 of 2 files/);
-    assert.match(host.textContent || "", /Test image 1/);
-    const loadMore = () => [...host.querySelectorAll("button")].find((button) => button.textContent?.includes("Load more images"));
-    await act(async () => { loadMore()?.click(); await new Promise((resolve) => setTimeout(resolve, 0)); });
-    assert.match(host.textContent || "", /More images could not be loaded/);
-    assert.match(host.textContent || "", /Showing 1 of 2 files/);
-    await act(async () => { loadMore()?.click(); await new Promise((resolve) => setTimeout(resolve, 0)); });
-    assert.match(host.textContent || "", /Showing 2 of 2 files/);
-    assert.match(host.textContent || "", /Test image 2/);
-    assert.doesNotMatch(host.textContent || "", /More images could not be loaded/);
-    assert.equal(loadMore(), undefined);
+    assert.match(host.textContent || "", /Showing 1-12 of 14 files/);
+    assert.match(host.textContent || "", /Original photo 1\.png/);
+    assert.match(host.textContent || "", /Description: Description 1/);
+    assert.match(host.textContent || "", /128 bytes/);
+    const button = (label: string) => [...host.querySelectorAll("button")].find((entry) => entry.textContent?.trim() === label);
+    await act(async () => { button("Next")?.click(); await new Promise((resolve) => setTimeout(resolve, 0)); });
+    assert.match(host.textContent || "", /Media could not be loaded/);
+    assert.doesNotMatch(host.textContent || "", /No media yet/);
+    await act(async () => { button("Retry loading")?.click(); await new Promise((resolve) => setTimeout(resolve, 0)); });
+    assert.match(host.textContent || "", /Showing 13-14 of 14 files/);
+    assert.match(host.textContent || "", /Original photo 13\.png/);
+    await act(async () => { button("Previous")?.click(); await new Promise((resolve) => setTimeout(resolve, 0)); });
+    assert.match(host.textContent || "", /Showing 1-12 of 14 files/);
+    assert.deepEqual(offsets, ["0", "12", "12", "0"]);
   } finally {
     await act(async () => root.unmount());
     host.remove();
@@ -179,7 +184,7 @@ test("Media pagination preserves loaded images when a later page fails and can r
   }
 });
 
-test("Media delete keeps an in-use image visible and removes it only after success", async () => {
+test("Media deletion requires typed confirmation, keeps in-use files, and removes only after success", async () => {
   const React = await import("react");
   (globalThis as typeof globalThis & { React: typeof React }).React = React;
   const [{ createRoot }, { act }, { default: Media }] = await Promise.all([
@@ -188,21 +193,21 @@ test("Media delete keeps an in-use image visible and removes it only after succe
     import("../app/admin/(dashboard)/media/page"),
   ]);
   const originalFetch = globalThis.fetch;
-  const originalConfirm = window.confirm;
   let calls = 0;
-  window.confirm = () => true;
+  let deleted = false;
   globalThis.fetch = async (_input, init) => {
     if (init?.method === "DELETE") {
       calls++;
+      if (calls === 2) deleted = true;
       return calls === 1
         ? Response.json({ error: "This image is in use by a Blog or Project." }, { status: 409 })
         : Response.json({ success: true });
     }
-    return Response.json({ data: [{
+    return Response.json({ data: deleted ? [] : [{
       id: "test", url: "/brand/logo-wide.png", secure_url: "", public_id: "test/image",
-      alt_text: "Test image.png", format: "png", width: 1, height: 1, bytes: 128,
+      original_filename: "Test image.png", alt_text: "Test description", format: "png", width: 1, height: 1, bytes: 128,
       created_at: "2026-01-01T00:00:00Z",
-    }], count: 1 });
+    }], count: deleted ? 0 : 1 });
   };
   const host = document.createElement("div");
   document.body.append(host);
@@ -211,17 +216,29 @@ test("Media delete keeps an in-use image visible and removes it only after succe
     await act(async () => { root.render(React.createElement(Media)); await new Promise((resolve) => setTimeout(resolve, 0)); });
     const deleteButton = () => host.querySelector<HTMLButtonElement>('button[aria-label="Delete Test image.png"]');
     assert.ok(deleteButton());
-    await act(async () => { deleteButton()?.click(); await new Promise((resolve) => setTimeout(resolve, 0)); });
+    const confirm = async () => {
+      await act(async () => deleteButton()?.click());
+      const dialog = document.querySelector('[role="dialog"]')!;
+      const submit = [...dialog.querySelectorAll("button")].find((button) => button.textContent === "Delete permanently")!;
+      assert.equal(submit.disabled, true);
+      const input = dialog.querySelector("input")!;
+      await act(async () => {
+        Object.getOwnPropertyDescriptor(browser.HTMLInputElement.prototype, "value")!.set!.call(input, "DELETE");
+        input.dispatchEvent(new browser.Event("input", { bubbles: true }) as unknown as Event);
+      });
+      await act(async () => { submit.click(); await new Promise((resolve) => setTimeout(resolve, 0)); });
+    };
+    await confirm();
     assert.ok(deleteButton());
     assert.match(host.querySelector('[role="alert"]')?.textContent || "", /in use by a Blog or Project/);
-    await act(async () => { deleteButton()?.click(); await new Promise((resolve) => setTimeout(resolve, 0)); });
+    await confirm();
     assert.equal(deleteButton(), null);
     assert.match(host.textContent || "", /No media yet/);
     assert.match(host.querySelector('[role="status"]')?.textContent || "", /Image deleted/);
+    assert.equal(calls, 2);
   } finally {
     await act(async () => root.unmount());
     host.remove();
     globalThis.fetch = originalFetch;
-    window.confirm = originalConfirm;
   }
 });
