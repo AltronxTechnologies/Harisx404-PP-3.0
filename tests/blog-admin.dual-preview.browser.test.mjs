@@ -47,6 +47,10 @@ test(
       const context = await browser.newContext({
         viewport: { width: 1440, height: 900 },
       });
+      let hydrationErrors = 0;
+      context.on("page", (opened) => opened.on("console", (entry) => {
+        if (entry.type() === "error" && /A tree hydrated but some attributes|hydration failed|server rendered HTML didn't match/i.test(entry.text())) hydrationErrors++;
+      }));
       await context.addCookies(
         [...cookies].map(([name, value]) => ({
           name,
@@ -453,10 +457,11 @@ test(
           writes: writes - mockedSaves,
           mockedSaves,
           mockedUploads,
+          hydrationErrors,
           failures,
         }),
       );
-      if (failures.length || errors || writes !== mockedSaves)
+      if (failures.length || errors || hydrationErrors || writes !== mockedSaves)
         throw new Error("Blog read-only preview checks failed");
       await context.close();
     } finally {
