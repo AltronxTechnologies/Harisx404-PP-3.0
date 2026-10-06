@@ -163,7 +163,7 @@ test("unlocked privileged reads and log actions check Admin identity before serv
     assert.ok(text.indexOf("requireAdmin()") < text.indexOf("createSupabaseAdminClient()") || !text.includes("createSupabaseAdminClient()"), `${path} verifies identity before creating service-role client`);
   }
   const actions = await source("app/admin/(dashboard)/logs/actions.ts");
-  for (const name of ["resolveLog", "clearAllResolvedLogs", "getLogsPage"]) {
+  for (const name of ["resolveLog", "resolveAllLogs", "clearAllResolvedLogs", "getLogsPage"]) {
     assert.match(actions, new RegExp(`function ${name}\\([^]*?const auth = await requireAdmin\\(\\);[^]*?if \\(auth\\.response\\) return`));
   }
   const faq = await source("app/api/admin/faqs/route.ts");

@@ -17,6 +17,7 @@ test("Admin Logs browses connected events without writes", { skip: process.env.R
   let revoked = false;
   let pageErrors = 0;
   let blockedWrites = 0;
+  let mockedWrites = 0;
   let stage = "auth";
   try {
     const admin = createClient(url, service, { auth: { persistSession: false } });
@@ -54,10 +55,15 @@ test("Admin Logs browses connected events without writes", { skip: process.env.R
     stage = "alerts";
     assert.equal(await page.getByRole("alert").filter({ hasText: /Logs or counts could not be loaded|Logs could not be loaded/ }).count(), 0);
     stage = "responsive";
-    for (const width of [320, 390, 768, 1440]) {
+    for (const width of [320, 390, 768, 1280, 1440]) {
       await page.setViewportSize({ width, height: 900 });
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false, `Overflow at ${width}`);
       assert.equal(await page.locator("main button:visible").evaluateAll((buttons) => buttons.filter((button) => button.getBoundingClientRect().right > innerWidth + 1).length), 0, `Out-of-view action at ${width}`);
+      assert.equal(await page.locator("main button:visible:not(:disabled)").evaluateAll((buttons) => buttons.filter((button) => button.getBoundingClientRect().height < 44).length), 0, `Undersized action at ${width}`);
+      if (width >= 1280) {
+        const positions = await Promise.all(["Refresh", "Mark all as resolved", "Clear all resolved"].map(async (name) => (await page.getByRole("button", { name, exact: true }).first().boundingBox())?.y));
+        assert.equal(new Set(positions).size, 1, `Header actions did not align at ${width}`);
+      }
       if (process.env.RUN_REDACTED_LOGS_SCREENSHOT === "1" && (width === 320 || width === 1440)) {
         await page.screenshot({ path: `/tmp/opencode/admin-logs-${width}-redacted.png`, maskColor: "#303036", mask: [page.locator(".divide-y > div")] });
       }
@@ -69,6 +75,9 @@ test("Admin Logs browses connected events without writes", { skip: process.env.R
     await page.getByRole("button", { name: "Next", exact: true }).click();
     await page.getByRole("status").filter({ hasText: /Showing 51-100 of/ }).waitFor();
     stage = "filters";
+    assert.deepEqual(await page.getByRole("combobox", { name: "Severity" }).locator("option").allTextContents(), ["All levels", "Fatal", "Error", "Warning", "Info"]);
+    assert.deepEqual(await page.getByRole("combobox", { name: "Status" }).locator("option").allTextContents(), ["All statuses", "Unresolved", "Resolved"]);
+    assert.equal(await page.getByRole("combobox", { name: "Severity" }).evaluate((select) => getComputedStyle(select).colorScheme), "dark");
     await page.getByRole("combobox", { name: "Status" }).selectOption("resolved");
     await page.getByRole("button", { name: "Apply filters" }).click();
     await page.getByRole("status").filter({ hasText: /matching events \(filtered\)/ }).waitFor();
@@ -77,6 +86,38 @@ test("Admin Logs browses connected events without writes", { skip: process.env.R
     await page.getByRole("searchbox", { name: "Search message" }).fill("unlikely-review-search-sentinel-94719");
     await page.getByRole("button", { name: "Apply filters" }).click();
     await page.getByRole("heading", { name: "No matching events" }).waitFor();
+    stage = "bulk-actions";
+    await page.setViewportSize({ width: 320, height: 900 });
+    await page.route("**/admin/logs", (route) => {
+      if (route.request().method() === "POST") {
+        mockedWrites++;
+        return route.fulfill({ status: 503, body: "" });
+      }
+      return route.continue();
+    });
+    await page.getByRole("button", { name: "Mark all as resolved" }).first().click();
+    const resolveDialog = page.getByRole("dialog", { name: "Mark all logs as resolved?" });
+    await resolveDialog.waitFor();
+    assert.equal(await resolveDialog.evaluate((dialog) => dialog.getBoundingClientRect().width > innerWidth || dialog.getBoundingClientRect().left < 0), false);
+    assert.equal(await resolveDialog.getByRole("button", { name: "Mark all as resolved" }).isDisabled(), true);
+    await resolveDialog.getByRole("textbox").fill("NO");
+    assert.equal(await resolveDialog.getByRole("button", { name: "Mark all as resolved" }).isDisabled(), true);
+    await resolveDialog.getByRole("button", { name: "Cancel" }).click();
+    assert.equal(mockedWrites, 0);
+    await page.getByRole("button", { name: "Mark all as resolved" }).first().click();
+    await resolveDialog.getByRole("textbox").fill("RESOLVE ALL");
+    await resolveDialog.getByRole("button", { name: "Mark all as resolved" }).click();
+    await page.getByRole("alert").filter({ hasText: /Unable to resolve all logs/ }).waitFor();
+    assert.equal(mockedWrites, 1);
+    await page.getByRole("button", { name: "Clear all resolved" }).first().click();
+    const clearDialog = page.getByRole("dialog", { name: "Permanently clear resolved logs?" });
+    await clearDialog.waitFor();
+    assert.equal(await clearDialog.evaluate((dialog) => dialog.getBoundingClientRect().width > innerWidth || dialog.getBoundingClientRect().left < 0), false);
+    assert.equal(await clearDialog.getByRole("button", { name: "Clear all resolved" }).isDisabled(), true);
+    await clearDialog.getByRole("textbox").fill("DELETE");
+    await clearDialog.getByRole("button", { name: "Clear all resolved" }).click();
+    await page.getByRole("alert").filter({ hasText: /Unable to clear logs/ }).waitFor();
+    assert.equal(mockedWrites, 2);
     assert.equal(blockedWrites, 0);
     assert.equal(pageErrors, 0);
   } catch {
@@ -88,7 +129,7 @@ test("Admin Logs browses connected events without writes", { skip: process.env.R
       try { const { error } = await client.auth.signOut({ scope: "local" }); revoked = !error; } catch { /* Do not revoke unrelated sessions. */ }
     }
     cookies.clear();
-    console.log(JSON.stringify({ stage, pageErrors, blockedWrites, sessionRevoked: revoked }));
+    console.log(JSON.stringify({ stage, pageErrors, blockedWrites, mockedWrites, sessionRevoked: revoked }));
     if (client && !revoked) throw new Error("Review session could not be locally revoked");
   }
 });

@@ -51,6 +51,19 @@ export async function resolveLog(id: string) {
   return { success: true };
 }
 
+export async function resolveAllLogs() {
+  const auth = await requireAdmin();
+  if (auth.response) return { success: false, error: "Unauthorized" };
+  const db = await createSupabaseAdminClient();
+  const { error } = await db.from("system_logs").update({ resolved: true }).eq("resolved", false);
+  if (error) {
+    console.error("Failed to resolve all logs:", error.code || "unknown");
+    return { success: false, error: "Unable to resolve all logs. Refresh and try again." };
+  }
+  revalidatePath("/admin/logs");
+  return { success: true };
+}
+
 export async function clearAllResolvedLogs() {
   const auth = await requireAdmin();
   if (auth.response) return { success: false, error: "Unauthorized" };
