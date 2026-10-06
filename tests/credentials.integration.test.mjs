@@ -71,9 +71,10 @@ test("Certification admin API rejects unauthenticated access", async () => {
 });
 
 test("Admin form, API, and cache invalidation cover the complete credential model", async () => {
-  const [form, api] = await Promise.all([
+  const [form, api, auth] = await Promise.all([
     readFile(new URL("../app/components/admin/CertificationForm.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/api/admin/certifications/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/lib/admin-auth.ts", import.meta.url), "utf8"),
   ]);
   const fields = [
     "title", "issuer", "description", "category", "issue_date",
@@ -87,5 +88,6 @@ test("Admin form, API, and cache invalidation cover the complete credential mode
   });
   assert.match(api, /revalidatePath\("\/credentials"\)/);
   assert.match(api, /revalidateTag\("credentials"\)/);
-  assert.match(api, /auth\.getUser\(\)/);
+  assert.match(api, /await requireAdmin\(\)/);
+  assert.match(auth, /\.auth\.getUser\(\)/);
 });

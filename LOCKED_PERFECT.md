@@ -1703,6 +1703,14 @@ static and route checks.
 Do not modify Credentials, its Admin controls, schema, data source, or public
 presentation without a new explicit owner unlock.
 
+### 2026-10-06 owner-authorized Certifications Admin follow-up
+
+The owner requested the next Admin quality pass for Certifications. Only the
+Admin list, editor, API and related controls were opened. Public `/credentials`,
+the Credentials data source, historical migrations, and the five authored rows
+remain frozen. This does not constitute a new audit, lock or production sign-off;
+connected CRUD and owner visual acceptance remain separate gates.
+
 ### 2026-09-08 owner-authorized Credentials visual rollback
 
 The owner temporarily unlocked only the last Credentials card refinements and
