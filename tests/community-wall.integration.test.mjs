@@ -70,11 +70,16 @@ test("Community Wall source enforces moderation, bounded reads, and static page 
   assert.match(action, /Math\.random\(\) \* 24/);
   assert.match(adminApi, /auth\.getUser\(\)/);
   assert.match(adminApi, /ADMIN_EMAIL/);
-  assert.match(adminApi, /Community Wall note not found/);
+  assert.match(adminApi, /This note changed or was removed/);
+  assert.match(adminApi, /\.eq\("updated_at", parsed\.data\.updated_at\)/);
+  assert.match(adminApi, /\.eq\("updated_at", updatedAt\)/);
   assert.match(data, /export const communityWallPageSettings/);
   assert.doesNotMatch(data, /public_community_wall_settings|fetchCommunityWallSettings/);
   assert.match(adminPage, /Pending review/);
   assert.match(adminPage, /CommunityWallModerationActions/);
+  assert.ok(adminPage.indexOf("requireAdmin()") < adminPage.indexOf("createSupabaseAdminClient()"));
+  assert.match(adminPage, /count: "exact", head: true/);
+  assert.match(adminPage, /Community Wall notes could not be loaded/);
   assert.match(adminPage, /\.range\(/);
   assert.doesNotMatch(adminPage, /Page settings|\/admin\/community-wall\/settings/);
   assert.match(redirect, /redirect\("\/admin\/community-wall"\)/);
