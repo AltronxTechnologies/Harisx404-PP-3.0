@@ -41,7 +41,7 @@ export function DeleteBuildlogButton({ id, name, updatedAt }: { id: string; name
         {isDeleting ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
       </button>
       {error && <span role="alert" className="mt-1 text-xs text-red-500">{error}</span>}
-      <AdminConfirmDialog open={confirming} title="Permanently delete Buildlog project?" description={`This removes “${name}” and its release items. Type the exact project name to confirm; this cannot be undone.`} confirmLabel="Delete project" confirmText={name} destructive pending={isDeleting} onClose={() => setConfirming(false)} onConfirm={(value) => void remove(value)} />
+      <AdminConfirmDialog open={confirming} title="Permanently delete Buildlog project?" description={`This removes “${name}” and its release items. This cannot be undone.`} confirmLabel="Delete project" confirmText={name} destructive pending={isDeleting} onClose={() => setConfirming(false)} onConfirm={(value) => void remove(value)} />
     </div>
   );
 }

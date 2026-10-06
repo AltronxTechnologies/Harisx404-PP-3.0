@@ -1799,6 +1799,13 @@ metadata, responsive geometry, or public presentation without a new explicit
 owner unlock. Shared locked Navbar, Search, Reach Out, CTA, and Footer remain
 independently frozen under their existing entries.
 
+### 2026-10-06 owner-authorized Admin confirmation copy
+
+The owner requested button-only confirmations across Admin without typing a
+project name or DELETE. Only the obsolete typing instruction in
+`app/components/admin/DeleteBuildlogButton.tsx` was removed; the confirmation
+dialog, guarded server deletion and all other locked Buildlog behavior remain.
+
 ### 2026-10-03 owner-authorized Admin Buildlog mobile layout work
 
 The owner explicitly authorized fixing the Admin Buildlog mobile layout while

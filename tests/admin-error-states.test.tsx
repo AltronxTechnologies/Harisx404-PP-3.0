@@ -13,7 +13,7 @@ Object.assign(globalThis, {
 Object.defineProperty(globalThis, "navigator", { configurable: true, value: browser.navigator });
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
-test("Admin delete dialog requires an exact slug before confirming", async () => {
+test("Admin delete dialog confirms with buttons without requiring typed input", async () => {
   const React = await import("react");
   (globalThis as typeof globalThis & { React: typeof React }).React = React;
   const [{ createRoot }, { act }, { AdminConfirmDialog }] = await Promise.all([
@@ -31,15 +31,7 @@ test("Admin delete dialog requires an exact slug before confirming", async () =>
     const dialog = document.querySelector('[role="dialog"]');
     assert.ok(dialog);
     const submit = [...dialog.querySelectorAll("button")].find((button) => button.textContent === "Delete permanently")!;
-    assert.equal(submit.disabled, true);
-    const input = dialog.querySelector("input")!;
-    const setValue = async (value: string) => act(async () => {
-      Object.getOwnPropertyDescriptor(browser.HTMLInputElement.prototype, "value")!.set!.call(input, value);
-      input.dispatchEvent(new browser.Event("input", { bubbles: true }) as unknown as Event);
-    });
-    await setValue("wrong-slug");
-    assert.equal(submit.disabled, true);
-    await setValue("example-post");
+    assert.equal(dialog.querySelector("input"), null);
     assert.equal(submit.disabled, false);
     await act(async () => submit.click());
     assert.equal(confirmed, "example-post");
@@ -75,11 +67,6 @@ test("Blog deletion announces success only after an authenticated API success", 
     await act(async () => root.render(React.createElement(AppRouterContext.Provider, { value: router as any },
       React.createElement(BlogArchiveAction, { post: { id: "00000000-0000-4000-8000-000000000000", slug: "review-post", title: "Review post", status: "archived", updated_at: "2026-01-01T00:00:00.000Z" } }))));
     await act(async () => host.querySelector<HTMLButtonElement>('[aria-label="Permanently delete Review post"]')!.click());
-    const input = document.querySelector<HTMLInputElement>("#admin-confirm-text")!;
-    await act(async () => {
-      Object.getOwnPropertyDescriptor(browser.HTMLInputElement.prototype, "value")!.set!.call(input, "review-post");
-      input.dispatchEvent(new browser.Event("input", { bubbles: true }) as unknown as Event);
-    });
     await act(async () => {
       [...document.querySelectorAll<HTMLButtonElement>("button")].find((button) => button.textContent === "Delete permanently")!.click();
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -210,7 +197,7 @@ test("Media page navigation retries a failed page without calling it empty", asy
   }
 });
 
-test("Media deletion requires typed confirmation, keeps in-use files, and removes only after success", async () => {
+test("Media deletion requires a confirm click, keeps in-use files, and removes only after success", async () => {
   const React = await import("react");
   (globalThis as typeof globalThis & { React: typeof React }).React = React;
   const [{ createRoot }, { act }, { default: Media }] = await Promise.all([
@@ -246,12 +233,8 @@ test("Media deletion requires typed confirmation, keeps in-use files, and remove
       await act(async () => deleteButton()?.click());
       const dialog = document.querySelector('[role="dialog"]')!;
       const submit = [...dialog.querySelectorAll("button")].find((button) => button.textContent === "Delete permanently")!;
-      assert.equal(submit.disabled, true);
-      const input = dialog.querySelector("input")!;
-      await act(async () => {
-        Object.getOwnPropertyDescriptor(browser.HTMLInputElement.prototype, "value")!.set!.call(input, "DELETE");
-        input.dispatchEvent(new browser.Event("input", { bubbles: true }) as unknown as Event);
-      });
+      assert.equal(dialog.querySelector("input"), null);
+      assert.equal(submit.disabled, false);
       await act(async () => { submit.click(); await new Promise((resolve) => setTimeout(resolve, 0)); });
     };
     await confirm();

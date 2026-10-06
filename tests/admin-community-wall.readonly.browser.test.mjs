@@ -79,9 +79,8 @@ test("Admin Community Wall read-only moderation review", { skip: process.env.RUN
       await deleteButton.click();
       const dialog = page.getByRole("dialog", { name: "Permanently delete Community Wall note?" });
       await dialog.waitFor();
-      assert.equal(await dialog.getByRole("button", { name: "Delete permanently" }).isDisabled(), true);
-      await dialog.getByRole("textbox").fill("WRONG");
-      assert.equal(await dialog.getByRole("button", { name: "Delete permanently" }).isDisabled(), true);
+      assert.equal(await dialog.getByRole("textbox").count(), 0);
+      assert.equal(await dialog.getByRole("button", { name: "Delete permanently" }).isDisabled(), false);
       await dialog.getByRole("button", { name: "Cancel" }).click();
       assert.equal(mockedWrites, 0, "Cancel attempted a mutation");
       const archive = page.getByRole("button", { name: "Archive", exact: true }).first();

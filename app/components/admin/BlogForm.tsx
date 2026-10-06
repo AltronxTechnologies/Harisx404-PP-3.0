@@ -66,6 +66,9 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
   const [tagInput, setTagInput] = useState("");
   const [relatedSearch, setRelatedSearch] = useState("");
   const [blogImages, setBlogImages] = useState<BlogMediaItem[]>([]);
+  const uploadedImages = useRef(new Map<string, BlogMediaItem>());
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
+  const [isCleaningImages, setIsCleaningImages] = useState(false);
   const [imageManagerAvailable, setImageManagerAvailable] = useState(false);
   const [confirmation, setConfirmation] = useState<{ title: string; description: string; label: string; data: BlogFormValues; publishedAt: string; content: string } | null>(null);
   const [leaveTarget, setLeaveTarget] = useState<"list" | "preview" | null>(null);
@@ -73,7 +76,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
     initialData?.id && (initialData.editor_mode !== "rich" || !canUseVisualBlogEditor(initialData.content)) ? "source" : "rich"
   );
   const [modeError, setModeError] = useState("");
-  const [previewSnapshot, setPreviewSnapshot] = useState<Pick<BlogFormValues, "title" | "slug" | "summary" | "content" | "cover_image_url" | "published_at" | "status" | "tags" | "related_blog_post_ids" | "canonical_url"> | null>(null);
+  const [previewSnapshot, setPreviewSnapshot] = useState<Pick<BlogFormValues, "title" | "slug" | "summary" | "content" | "published_at" | "status" | "tags" | "related_blog_post_ids" | "canonical_url"> | null>(null);
   const slugEdited = useRef(Boolean(initialData?.id));
   const canonicalEdited = useRef(Boolean(initialData?.canonical_url && initialData.canonical_url !== blogCanonicalUrl(initialData.slug, siteMetadata.siteUrl)));
   const publishDateEdited = useRef(false);
@@ -116,7 +119,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
       image_ids: [],
     },
   });
-  const { leaveTarget: navigationTarget, setLeaveTarget: setNavigationTarget, confirmLeave } = useAdminNavigationGuard(isDirty || Boolean(tagInput.trim()));
+  const { leaveTarget: navigationTarget, setLeaveTarget: setNavigationTarget, confirmLeave } = useAdminNavigationGuard(isDirty || Boolean(tagInput.trim()) || isUploadingImages);
 
   const tags = watch("tags") || [];
   const status = watch("status");
@@ -143,7 +146,6 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
       slug: data.slug,
       summary: data.summary,
       content: data.content,
-      cover_image_url: data.cover_image_url,
       published_at: resolveBlogPublishDate({ date: data.published_at || "", edited: publishDateEdited.current, status: data.status, previous: initialData?.published_at, previousStatus: initialData?.status }),
       status: data.status,
       canonical_url: data.canonical_url || ownCanonical,
@@ -165,18 +167,55 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
   };
 
   useEffect(() => {
-    if (!isDirty && !tagInput.trim()) return;
+    if (!isDirty && !tagInput.trim() && !isUploadingImages) return;
     const warn = (event: BeforeUnloadEvent) => {
       event.preventDefault();
       event.returnValue = "";
     };
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
-  }, [isDirty, tagInput]);
+  }, [isDirty, tagInput, isUploadingImages]);
+
+  const discardUploadedImages = async () => {
+    if (isUploadingImages || isCleaningImages) {
+      setErrorMsg("Wait for image uploads or cleanup to finish before leaving.");
+      return false;
+    }
+    if (!uploadedImages.current.size) return true;
+    setIsCleaningImages(true);
+    setErrorMsg("");
+    const removed = new Set<string>();
+    try {
+      for (const [id] of uploadedImages.current) {
+        try {
+          const response = await fetch(`/api/admin/media?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+          const result = await readAdminResponse(response, "Unsaved Blog image cleanup");
+          if (!response.ok || result.success !== true) continue;
+          uploadedImages.current.delete(id);
+          removed.add(id);
+        } catch { /* Keep failed files tracked for a retry. */ }
+      }
+      if (removed.size) {
+        setBlogImages((current) => current.filter((image) => !removed.has(image.id)));
+        setValue("image_ids", (getValues("image_ids") || []).filter((id) => !removed.has(id)), { shouldDirty: true });
+        if (getValues("cover_image_id") && removed.has(getValues("cover_image_id")!)) {
+          setValue("cover_image_id", "", { shouldDirty: true });
+          setValue("cover_image_url", "", { shouldDirty: true });
+        }
+      }
+      if (uploadedImages.current.size) {
+        setErrorMsg(`${uploadedImages.current.size} uploaded image(s) could not be removed. The files remain in the Media Library. Review their references or retry leaving before closing this tab.`);
+        return false;
+      }
+      return true;
+    } finally {
+      setIsCleaningImages(false);
+    }
+  };
 
   const leave = (target: "list" | "preview") => {
-    if (isSubmitting) return;
-    if (isDirty || tagInput.trim()) setLeaveTarget(target);
+    if (isSubmitting || isCleaningImages) return;
+    if (isDirty || tagInput.trim() || uploadedImages.current.size || isUploadingImages) setLeaveTarget(target);
     else router.push(target === "list" ? "/admin/blogs" : `/admin/blogs/${initialData?.id}/preview`);
   };
 
@@ -244,6 +283,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
       }
       if (!result?.id) throw new Error("Blog save could not be confirmed. Refresh the list before retrying.");
 
+      uploadedImages.current.clear();
       router.push("/admin/blogs?saved=1");
       router.refresh();
     } catch (err: any) {
@@ -395,7 +435,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
         </div>
       </div>
 
-      <BlogImageManager postId={initialData?.id} images={blogImages} onImagesChange={(images, dirty = true) => {
+      <BlogImageManager postId={initialData?.id} images={blogImages} onUploaded={(image) => uploadedImages.current.set(image.id, image)} onRemoved={(id) => uploadedImages.current.delete(id)} onUploadingChange={setIsUploadingImages} onImagesChange={(images, dirty = true) => {
         setBlogImages(images);
         setValue("image_ids", images.map((image) => image.id), { shouldDirty: dirty, shouldValidate: true });
       }} onAvailabilityChange={setImageManagerAvailable} coverUrl={coverUrl} content={content} onCoverChange={(image) => {
@@ -542,7 +582,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
         </button>
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || isUploadingImages || isCleaningImages}
           className="inline-flex items-center justify-center rounded-xl bg-accent-signal px-6 py-2 text-sm font-medium text-white shadow hover:bg-accent-signal/90 focus:outline-none disabled:opacity-50 transition-all"
         >
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -558,7 +598,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
       description={confirmation?.description || ""}
       confirmLabel={confirmation?.label || "Confirm"}
       cancelLabel="Keep editing"
-      pending={isSubmitting}
+      pending={isSubmitting || isUploadingImages || isCleaningImages}
       onClose={() => setConfirmation(null)}
       onConfirm={() => {
         if (!confirmation) return;
@@ -569,18 +609,23 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
     <AdminConfirmDialog
       open={leaveTarget !== null}
       title={leaveTarget === "preview" ? "Open saved preview?" : "Discard unsaved changes?"}
-      description={leaveTarget === "preview" ? "The preview shows only the last saved version. Unsaved edits will not appear there." : "Your changes on this page have not been saved and will be lost."}
+      description={leaveTarget === "preview" ? "The preview shows only the last saved version. Unsaved edits will not appear there. Images uploaded in this session will be removed if they are unused." : "Your unsaved changes will be lost. Images uploaded in this session will be removed if they are unused."}
       confirmLabel={leaveTarget === "preview" ? "Open saved preview" : "Discard changes"}
       cancelLabel="Keep editing"
       destructive={leaveTarget === "list"}
+      pending={isCleaningImages || isUploadingImages}
       onClose={() => setLeaveTarget(null)}
       onConfirm={() => {
         const target = leaveTarget;
-        setLeaveTarget(null);
-        if (target) router.push(target === "list" ? "/admin/blogs" : `/admin/blogs/${initialData?.id}/preview`);
+        if (!target) return;
+        void (async () => {
+          const cleaned = await discardUploadedImages();
+          setLeaveTarget(null);
+          if (cleaned) router.push(target === "list" ? "/admin/blogs" : `/admin/blogs/${initialData?.id}/preview`);
+        })();
       }}
     />
-    <AdminConfirmDialog open={navigationTarget !== null} title="Discard unsaved Blog changes?" description="Your article, tags and image selections have not been saved." confirmLabel="Discard changes" cancelLabel="Keep editing" destructive onClose={() => setNavigationTarget(null)} onConfirm={() => confirmLeave(router.push)} />
+    <AdminConfirmDialog open={navigationTarget !== null} title="Discard unsaved Blog changes?" description="Your unsaved article, tags and image selections will be lost. Images uploaded in this session will be removed if they are unused." confirmLabel="Discard changes" cancelLabel="Keep editing" destructive pending={isCleaningImages || isUploadingImages} onClose={() => setNavigationTarget(null)} onConfirm={() => { void (async () => { const cleaned = await discardUploadedImages(); if (cleaned) confirmLeave(router.push); else setNavigationTarget(null); })(); }} />
     </>
   );
 }

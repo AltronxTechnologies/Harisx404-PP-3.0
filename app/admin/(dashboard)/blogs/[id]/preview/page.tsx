@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { MDXContent } from "@/app/components/mdx";
@@ -7,7 +6,6 @@ import { BlogArticleImage } from "@/app/components/blog/BlogArticleImage";
 import { BlogCodeWindow, BlogInlineCode } from "@/app/components/blog/BlogCode";
 import { ImageLightbox } from "@/app/components/blog/ImageLightbox";
 import { TableOfContents } from "@/app/components/TableOfContents";
-import { getBlogImageSrc } from "@/app/components/blog/blogImage";
 import { extractHeadingsFromMdx } from "@/app/lib/toc-utils";
 import { formatReadingTime } from "@/app/lib/reading-time";
 import createSupabaseServerClient, { createSupabaseAdminClient } from "@/app/lib/supabase/server";
@@ -35,7 +33,7 @@ export default async function SavedBlogPreviewPage({
   const supabase = await createSupabaseAdminClient();
   const { data: post, error } = await supabase
     .from("blog_posts")
-    .select("id, title, summary, content, status, published_at, cover_image_url, reading_time_minutes")
+    .select("id, title, summary, content, status, published_at, reading_time_minutes")
     .eq("id", id)
     .single();
 
@@ -49,10 +47,6 @@ export default async function SavedBlogPreviewPage({
     : publicationDate && publicationDate.getTime() > Date.now()
       ? "Scheduled"
       : publicationDate ? "Live" : "Not live";
-  const cover = post.cover_image_url || "";
-  const coverSrc = getBlogImageSrc(
-    cover && !cover.startsWith("/") && !/^https?:\/\//i.test(cover) ? `/blog/${cover}` : cover,
-  );
   const readingTime = Number(post.reading_time_minutes) > 0
     ? `${post.reading_time_minutes} min read`
     : formatReadingTime(post.content || "");
@@ -70,12 +64,6 @@ export default async function SavedBlogPreviewPage({
       <p className="mx-auto mt-5 max-w-3xl rounded-lg border border-border-hairline bg-surface-raised px-4 py-3 text-sm text-ink-secondary">
         Admin-only preview of the saved post. Unsaved editor changes will not appear here.
       </p>
-
-      {coverSrc && (
-        <div className="relative mx-auto mt-8 h-48 w-full max-w-3xl overflow-hidden rounded-xl bg-surface-raised sm:h-72">
-          <Image src={coverSrc} alt="" fill sizes="(max-width: 768px) 100vw, 768px" className="object-cover" />
-        </div>
-      )}
 
       <header className="mx-auto flex w-full max-w-3xl flex-col items-center gap-y-5 px-4 pt-12 text-center md:px-6">
         <p className="font-mono text-xs uppercase tracking-widest text-text-secondary">Blog / {status}</p>

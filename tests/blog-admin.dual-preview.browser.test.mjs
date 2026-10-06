@@ -106,6 +106,12 @@ test(
         !(await article.textContent())?.includes("Custom content survives")
       )
         failures.push({ kind: "custom-component-preview" });
+      await page.locator("#blog-cover-url").fill("/blog/blogfolio_v5.jpg");
+      await page.getByRole("button", { name: "Refresh preview" }).click();
+      if (await page.locator(".blog-detail > div > img, .blog-detail > div > span > img").count()) failures.push({ kind: "standalone-cover-in-preview" });
+      await page.locator("#blog-cover-url").fill("not-a-cover-url");
+      await page.getByRole("button", { name: "Refresh preview" }).click();
+      if (!(await article.textContent())?.includes("Custom content survives")) failures.push({ kind: "cover-url-blocked-article-preview" });
       if (!(await code.count()))
         throw new Error(
           JSON.stringify({
@@ -365,8 +371,7 @@ test(
        await ui.locator("#blog-cover-url").fill("");
        await ui.getByRole("button", { name: "Remove", exact: true }).click();
        const removeDialog = ui.getByRole("dialog", { name: "Permanently remove image?" });
-       if (!(await removeDialog.getByRole("button", { name: "Remove permanently" }).isDisabled())) failures.push({ kind: "unguarded-image-delete" });
-       await removeDialog.getByRole("textbox").fill("DELETE");
+       if (await removeDialog.getByRole("textbox").count()) failures.push({ kind: "typed-delete-still-visible" });
        await removeDialog.getByRole("button", { name: "Remove permanently" }).click();
        await ui
          .getByText("No managed images selected.", { exact: false })
@@ -450,6 +455,45 @@ test(
       await ui.waitForTimeout(350);
       if (mockedSaves !== 2) failures.push({ kind: "draft-not-retried" });
       await ui.close();
+      const discardPage = await context.newPage();
+      let cleanupUploads = 0;
+      let cleanupDeletes = 0;
+      let unexpectedWrites = 0;
+      discardPage.on("pageerror", () => { errors++; });
+      await discardPage.route("**/*", (route) => {
+        if (["GET", "HEAD", "OPTIONS"].includes(route.request().method()) || new URL(route.request().url()).pathname === "/__nextjs_original-stack-frames") return route.continue();
+        unexpectedWrites++;
+        return route.abort();
+      });
+      await discardPage.route("**/api/admin/blogs/images**", (route) => route.fulfill({ json: { data: [], available: true } }));
+      await discardPage.route("**/api/admin/media/upload", (route) => {
+        cleanupUploads++;
+        return route.fulfill({ json: { data: { id: `00000000-0000-4000-8000-00000000013${cleanupUploads}`, url: `/blog/review-${cleanupUploads}.png`, secure_url: `/blog/review-${cleanupUploads}.png`, alt_text: "Review image" } } });
+      });
+      await discardPage.route("**/api/admin/media?*", (route) => {
+        if (route.request().method() !== "DELETE") return route.continue();
+        cleanupDeletes++;
+        return cleanupDeletes === 2
+          ? route.fulfill({ status: 409, json: { error: "Review image remains referenced" } })
+          : route.fulfill({ json: { success: true } });
+      });
+      await discardPage.goto("http://localhost:3000/admin/blogs/new", { waitUntil: "domcontentloaded" });
+      await discardPage.getByRole("heading", { name: "Create New Post" }).waitFor();
+      await discardPage.locator('section[aria-labelledby="blog-images-heading"] input[type="file"]').setInputFiles([
+        { name: "discard-one.png", mimeType: "image/png", buffer: smallPng },
+        { name: "discard-two.png", mimeType: "image/png", buffer: smallPng },
+      ]);
+      await discardPage.getByRole("region", { name: "Post image thumbnails" }).locator("img").nth(1).waitFor();
+      await discardPage.getByRole("button", { name: "Cancel", exact: true }).click();
+      const discardDialog = discardPage.getByRole("dialog", { name: "Discard unsaved changes?" });
+      await discardDialog.getByRole("button", { name: "Discard changes" }).click();
+      await discardPage.getByRole("alert").filter({ hasText: "1 uploaded image(s) could not be removed" }).waitFor();
+      if (new URL(discardPage.url()).pathname !== "/admin/blogs/new") failures.push({ kind: "failed-cleanup-left-editor" });
+      await discardPage.getByRole("button", { name: "Cancel", exact: true }).click();
+      await discardDialog.getByRole("button", { name: "Discard changes" }).click();
+      await discardPage.waitForURL("**/admin/blogs");
+      if (cleanupUploads !== 2 || cleanupDeletes !== 3 || unexpectedWrites) failures.push({ kind: "session-cleanup", cleanupUploads, cleanupDeletes, unexpectedWrites });
+      await discardPage.close();
       console.log(
         JSON.stringify({
           widths: 4,
@@ -457,6 +501,9 @@ test(
           writes: writes - mockedSaves,
           mockedSaves,
           mockedUploads,
+          cleanupUploads,
+          cleanupDeletes,
+          unexpectedWrites,
           hydrationErrors,
           failures,
         }),

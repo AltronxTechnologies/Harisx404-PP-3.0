@@ -10,11 +10,14 @@ import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
 
 export type BlogMediaItem = { id: string; url: string; secure_url: string; alt_text?: string };
 
-export function BlogImageManager({ postId, images, onImagesChange, onAvailabilityChange, coverUrl, content, onCoverChange }: {
+export function BlogImageManager({ postId, images, onImagesChange, onAvailabilityChange, onUploaded, onRemoved, onUploadingChange, coverUrl, content, onCoverChange }: {
   postId?: string;
   images: BlogMediaItem[];
   onImagesChange: (images: BlogMediaItem[], dirty?: boolean) => void;
   onAvailabilityChange: (available: boolean) => void;
+  onUploaded: (image: BlogMediaItem) => void;
+  onRemoved: (id: string) => void;
+  onUploadingChange: (uploading: boolean) => void;
   coverUrl: string;
   content: string;
   onCoverChange: (image?: BlogMediaItem) => void;
@@ -75,6 +78,7 @@ export function BlogImageManager({ postId, images, onImagesChange, onAvailabilit
       return;
     }
     setUploading(true);
+    onUploadingChange(true);
     setMessage("");
     const next = [...images];
     let warning = "";
@@ -87,14 +91,16 @@ export function BlogImageManager({ postId, images, onImagesChange, onAvailabilit
         const result = await readAdminResponse(response, "Blog image upload");
         if (!response.ok || !result.data?.id) throw new Error(result.error || "Upload could not be confirmed. Check the Media Library before retrying.");
         next.push(result.data as BlogMediaItem);
+        onUploaded(result.data as BlogMediaItem);
+        onImagesChange([...next]);
         if (result.warning) warning = result.warning;
       }
       setMessage(warning || `${files.length} ${files.length === 1 ? "image" : "images"} uploaded. Save the post to attach them; the files are already in the Media Library.`);
     } catch (error) {
       setMessage(`${next.length - images.length} of ${files.length} images uploaded. ${error instanceof Error ? error.message : "Check the Media Library before retrying."} Uploaded files remain in the library until removed.`);
     } finally {
-      if (next.length !== images.length) onImagesChange(next);
       setUploading(false);
+      onUploadingChange(false);
     }
   };
 
@@ -122,6 +128,7 @@ export function BlogImageManager({ postId, images, onImagesChange, onAvailabilit
       }
       if (result.success !== true) throw new Error("Image deletion could not be confirmed. Refresh the library before retrying.");
       onImagesChange(images.filter((item) => item.id !== image.id));
+      onRemoved(image.id);
       setAttachedIds((ids) => ids.filter((id) => id !== image.id));
       setDeleting(null);
       setMessage("Image removed from Cloudinary and the media library.");
@@ -137,7 +144,7 @@ export function BlogImageManager({ postId, images, onImagesChange, onAvailabilit
     <section aria-labelledby="blog-images-heading" className="min-w-0 space-y-4 rounded-xl border border-border-hairline bg-surface-base p-4 sm:p-5">
       <div>
         <h2 id="blog-images-heading" className="text-base font-semibold">Post images</h2>
-        <p className="mt-1 text-sm text-ink-secondary">Upload up to 20 images, choose one as the cover shown on Blog cards, or copy a link into your MDX. Uploads enter the Media Library immediately; save the post to attach them. Remove permanently deletes an unused file from Cloudinary and the library after confirmation. Referenced images cannot be deleted.</p>
+        <p className="mt-1 text-sm text-ink-secondary">Upload up to 20 images, choose one as the cover shown on Blog cards, or copy a link into your MDX. Uploads enter the Media Library immediately; save the post to attach them. Confirmed in-app discard attempts to remove unused session uploads; closing the tab cannot guarantee cleanup. Remove permanently deletes an unused file from Cloudinary and the library after confirmation. Referenced images cannot be deleted.</p>
       </div>
       {message && <p role="status" className="rounded-lg border border-border-hairline p-3 text-sm text-ink-secondary">{message}</p>}
       {loading && <p role="status" className="text-sm text-ink-secondary">Loading post images...</p>}

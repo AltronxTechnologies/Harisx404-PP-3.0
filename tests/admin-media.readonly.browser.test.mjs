@@ -119,11 +119,11 @@ test("Admin Media library renders, paginates and protects mocked actions", { ski
     await deleteButton.click();
     const dialog = page.getByRole("dialog", { name: "Permanently delete image?" });
     await dialog.waitFor();
-    assert.equal(await dialog.getByRole("button", { name: "Delete permanently" }).isDisabled(), true);
+    assert.equal(await dialog.getByRole("textbox").count(), 0);
+    assert.equal(await dialog.getByRole("button", { name: "Delete permanently" }).isDisabled(), false);
     await dialog.getByRole("button", { name: "Cancel" }).click();
     assert.equal(mockedWrites, 0, "Cancelled deletion attempted a write");
     await deleteButton.click();
-    await dialog.getByRole("textbox").fill("DELETE");
     await dialog.getByRole("button", { name: "Delete permanently" }).click();
     await page.getByRole("alert").filter({ hasText: "Review image is in use" }).waitFor();
     assert.equal(mockedWrites, 1);

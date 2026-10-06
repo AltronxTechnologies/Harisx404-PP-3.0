@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, type ComponentType } from "react";
-import Image from "next/image";
 import { evaluate } from "@mdx-js/mdx";
 import remarkGfm from "remark-gfm";
 import * as jsxRuntime from "react/jsx-runtime";
@@ -9,9 +8,7 @@ import * as jsxDevRuntime from "react/jsx-dev-runtime";
 import { sharedComponents } from "@/app/components/mdx-components";
 import { BlogArticleImage } from "@/app/components/blog/BlogArticleImage";
 import { BlogCodeWindow, BlogInlineCode } from "@/app/components/blog/BlogCode";
-import { getBlogImageSrc, isAllowedBlogImageUrl } from "@/app/components/blog/blogImage";
 import { defaultBlogSummary } from "@/app/lib/blog-defaults";
-import { optimizeImageUrl } from "@/app/lib/image-utils";
 import { ImageLightbox } from "@/app/components/blog/ImageLightbox";
 import { TableOfContents } from "@/app/components/TableOfContents";
 import { GridWrapper } from "@/app/components/GridWrapper";
@@ -25,7 +22,6 @@ type Snapshot = {
   slug?: string;
   summary?: string;
   content: string;
-  cover_image_url?: string;
   published_at?: string;
   status: "draft" | "published";
   canonical_url?: string;
@@ -41,7 +37,7 @@ export function BlogUnsavedPreview({ snapshot: post, isNew, relatedPosts = [] }:
     setRendered({ content: null, error: "", loading: true });
     (async () => {
       try {
-        if (!post.title.trim() || post.title.length > 200 || !post.content.trim() || post.content.length > 1_000_000 || (post.summary?.length ?? 0) > 1000 || (post.cover_image_url && !isAllowedBlogImageUrl(post.cover_image_url) && !post.cover_image_url.startsWith("/blog/"))) {
+        if (!post.title.trim() || post.title.length > 200 || !post.content.trim() || post.content.length > 1_000_000 || (post.summary?.length ?? 0) > 1000) {
           throw new Error("Invalid preview fields");
         }
         validateBlogMdx(post.content);
@@ -68,7 +64,6 @@ export function BlogUnsavedPreview({ snapshot: post, isNew, relatedPosts = [] }:
   const Content = rendered.content;
   const publicationDate = post.published_at && Number.isFinite(Date.parse(post.published_at)) ? new Date(post.published_at) : null;
   const status = post.status === "draft" ? "Draft" : publicationDate && publicationDate.getTime() > Date.now() ? "Scheduled" : "Live when saved";
-  const coverSrc = getBlogImageSrc(optimizeImageUrl(post.cover_image_url || "", 1600));
   const summary = post.summary?.trim() || (isNew ? defaultBlogSummary(post.content, post.title) : "");
   const related = (post.related_blog_post_ids || []).map((id) => relatedPosts.find((item) => item.id === id)).filter((item): item is NonNullable<typeof item> => Boolean(item && item.status === "published" && item.published_at && Date.parse(item.published_at) <= Date.now()));
 
@@ -77,9 +72,6 @@ export function BlogUnsavedPreview({ snapshot: post, isNew, relatedPosts = [] }:
       <p className="mx-auto mb-8 max-w-3xl rounded-lg border border-border-hairline bg-surface-raised px-4 py-3 text-sm text-ink-secondary">
         {status} / Unsaved editorial preview. Article visuals are shared with the public Blog; site navigation and live interactions are not included. Nothing has been published or saved.
       </p>
-      {coverSrc && <div className="relative mx-auto mb-10 h-48 w-full max-w-3xl overflow-hidden rounded-xl bg-surface-raised sm:h-72">
-        <Image src={coverSrc} alt="" fill sizes="(max-width: 768px) 100vw, 768px" className="object-cover" />
-      </div>}
       <GridWrapper>
         <div className="relative px-4 xl:px-0">
           <PaperHeroTexture className="-inset-x-2 bottom-0 top-[-128px] sm:-inset-x-3 sm:top-[-144px] md:top-[-176px] lg:inset-x-0" />

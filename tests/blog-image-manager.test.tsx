@@ -52,6 +52,7 @@ test("post image grid selects a cover, copies links, batches uploads and guards 
   const root = createRoot(host);
   let latest: BlogMediaItem[] = [];
   let cover = "";
+  const uploadedIds = new Set<string>();
   const availability: boolean[] = [];
   const Harness = () => {
     const [images, setImages] = React.useState<BlogMediaItem[]>([]);
@@ -59,7 +60,7 @@ test("post image grid selects a cover, copies links, batches uploads and guards 
     return React.createElement(BlogImageManager, {
       postId: "00000000-0000-4000-8000-000000000000", images,
       onImagesChange: (next) => { latest = next; setImages(next); },
-      onAvailabilityChange: (value) => availability.push(value), coverUrl,
+      onAvailabilityChange: (value) => availability.push(value), onUploaded: (uploaded) => { uploadedIds.add(uploaded.id); }, onRemoved: (id) => { uploadedIds.delete(id); }, onUploadingChange: () => {}, coverUrl,
       content: "![Article](/blog/article.png)",
       onCoverChange: (selected) => { cover = selected?.url || ""; setCoverUrl(cover); },
     });
@@ -94,15 +95,18 @@ test("post image grid selects a cover, copies links, batches uploads and guards 
     await act(async () => { uploadInput.dispatchEvent(new browser.Event("change", { bubbles: true }) as unknown as Event); await new Promise((resolve) => setTimeout(resolve, 0)); });
     assert.equal(requests.filter((request) => request === "POST /api/admin/media/upload").length, 2);
     assert.deepEqual(latest.map((item) => item.id), ["first", "second", "article", "uploaded-1", "uploaded-2"]);
+    assert.deepEqual([...uploadedIds], ["uploaded-1", "uploaded-2"]);
     await act(async () => button("Remove", row.children[1]).click());
     const dialog = document.querySelector('[role="dialog"]')!;
     const confirm = button("Remove permanently", dialog);
-    assert.equal(confirm.disabled, true);
-    const input = dialog.querySelector<HTMLInputElement>("input")!;
-    await act(async () => { Object.getOwnPropertyDescriptor(browser.HTMLInputElement.prototype, "value")!.set!.call(input, "DELETE"); input.dispatchEvent(new browser.Event("input", { bubbles: true }) as unknown as Event); });
+    assert.equal(dialog.querySelector("input"), null);
+    assert.equal(confirm.disabled, false);
     await act(async () => { confirm.click(); await new Promise((resolve) => setTimeout(resolve, 0)); });
     assert.deepEqual(latest.map((item) => item.id), ["first", "article", "uploaded-1", "uploaded-2"]);
     assert.ok(requests.some((request) => /DELETE \/api\/admin\/media\?id=second&detach_blog_post_id=/.test(request)));
+    await act(async () => button("Remove", row.children[2]).click());
+    await act(async () => { button("Remove permanently", document.querySelector('[role="dialog"]')!).click(); await new Promise((resolve) => setTimeout(resolve, 0)); });
+    assert.deepEqual([...uploadedIds], ["uploaded-2"], "Manually removed uploads must not be cleaned again on discard");
   } finally {
     await act(async () => root.unmount());
     host.remove();
@@ -129,13 +133,13 @@ test("image manager caps additions at 20 and keeps failed deletion attached", as
   try {
     await act(async () => { root.render(React.createElement(BlogImageManager, {
       postId: "00000000-0000-4000-8000-000000000000", images: [],
-      onImagesChange: (images) => { latest = images; }, onAvailabilityChange: () => {},
+      onImagesChange: (images) => { latest = images; }, onAvailabilityChange: () => {}, onUploaded: () => {}, onRemoved: () => {}, onUploadingChange: () => {},
       coverUrl: "", content: "", onCoverChange: () => {},
     })); await new Promise((resolve) => setTimeout(resolve, 0)); });
     // Re-render with the controlled parent value, as BlogForm does.
     await act(async () => root.render(React.createElement(BlogImageManager, {
       postId: "00000000-0000-4000-8000-000000000000", images: latest,
-      onImagesChange: (images) => { latest = images; }, onAvailabilityChange: () => {},
+      onImagesChange: (images) => { latest = images; }, onAvailabilityChange: () => {}, onUploaded: () => {}, onRemoved: () => {}, onUploadingChange: () => {},
       coverUrl: "", content: "", onCoverChange: () => {},
     })));
     assert.equal(host.querySelector<HTMLInputElement>('section input[type="file"]')?.disabled, true);
@@ -144,11 +148,6 @@ test("image manager caps additions at 20 and keeps failed deletion attached", as
     await act(async () => [...first.querySelectorAll<HTMLButtonElement>("button")].find((item) => item.textContent?.trim() === "Remove")!.click());
     assert.ok(document.querySelector('[role="dialog"]'));
     assert.equal(requests.length, 1, "no deletion before confirmation");
-    await act(async () => {
-      const input = document.querySelector<HTMLInputElement>('#admin-confirm-text')!;
-      Object.getOwnPropertyDescriptor(browser.HTMLInputElement.prototype, "value")!.set!.call(input, "DELETE");
-      input.dispatchEvent(new browser.Event("input", { bubbles: true }) as unknown as Event);
-    });
     await act(async () => {
       [...document.querySelectorAll<HTMLButtonElement>("button")].find((item) => item.textContent === "Remove permanently")!.click();
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -180,7 +179,7 @@ test("a failed batch leaves confirmed uploads visible and reports the partial re
   let latest: BlogMediaItem[] = [];
   const Harness = () => {
     const [images, setImages] = React.useState<BlogMediaItem[]>([]);
-    return React.createElement(BlogImageManager, { images, onImagesChange: (next) => { latest = next; setImages(next); }, onAvailabilityChange: () => {}, coverUrl: "", content: "", onCoverChange: () => {} });
+    return React.createElement(BlogImageManager, { images, onImagesChange: (next) => { latest = next; setImages(next); }, onAvailabilityChange: () => {}, onUploaded: () => {}, onRemoved: () => {}, onUploadingChange: () => {}, coverUrl: "", content: "", onCoverChange: () => {} });
   };
   try {
     await act(async () => { root.render(React.createElement(Harness)); await new Promise((resolve) => setTimeout(resolve, 0)); });
@@ -213,7 +212,7 @@ test("missing migration leaves post attachments untouched and picker unavailable
   try {
     await act(async () => { root.render(React.createElement(BlogImageManager, {
       images: [image("saved")], onImagesChange: () => { changed = true; },
-      onAvailabilityChange: (value) => availability.push(value), coverUrl: "", content: "",
+      onAvailabilityChange: (value) => availability.push(value), onUploaded: () => {}, onRemoved: () => {}, onUploadingChange: () => {}, coverUrl: "", content: "",
       onCoverChange: () => {},
     })); await new Promise((resolve) => setTimeout(resolve, 0)); });
     assert.equal(changed, false);

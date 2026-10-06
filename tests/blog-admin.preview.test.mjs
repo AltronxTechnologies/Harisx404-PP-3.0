@@ -41,6 +41,7 @@ test("preview renders the saved body with public editorial styles without public
   assert.match(page, /<ImageLightbox \/>/);
   assert.match(page, /blog-article-shell prose prose-neutral dark:prose-invert/);
   assert.match(page, /Unsaved editor changes will not appear here/);
+  assert.doesNotMatch(page, /coverSrc|<Image /);
   assert.match(page, /status === "draft"[\s\S]*?"Scheduled"[\s\S]*?"Live"/);
   assert.doesNotMatch(page, /ArticleReactionWrapper|CtaSection|RelatedPostCard/);
 });

@@ -236,7 +236,6 @@ test(
       await mock.getByText("review-updated.pdf", { exact: true }).waitFor({ timeout: 10000 }).catch(() => failures.push("signed-upload-workflow"));
       if (signedTransfers !== 1) failures.push("signed-transfer-not-called");
       await mock.getByRole("button", { name: "Delete live PDF" }).click();
-      await mock.locator("#admin-confirm-text").fill("DELETE");
       await mock
         .getByRole("dialog", { name: "Delete the live Resume?" })
         .getByRole("button", { name: "Delete PDF" })
