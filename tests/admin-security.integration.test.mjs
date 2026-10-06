@@ -274,7 +274,7 @@ test("Legacy Changelog Admin routes retire safely and Logs controls fit phones",
 test("FAQ list does not claim a failed read means the table is missing or visibility is enabled", async () => {
   const page = await source("app/admin/(dashboard)/faqs/page.tsx");
   assert.match(page, /error: settingError/);
-  assert.match(page, /\{settingError \? \(/);
+  assert.match(page, /\{\(settingError \|\| !setting\) \? \(/);
   assert.match(page, /\{faqsError \? \(/);
   assert.match(page, /aria-label=\{`Edit \$\{faq\.question\}`\}/);
   assert.doesNotMatch(page, /The <code className="font-mono">faqs<\/code> table doesn/);

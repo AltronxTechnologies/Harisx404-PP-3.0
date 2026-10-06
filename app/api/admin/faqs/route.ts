@@ -35,7 +35,7 @@ export async function GET() {
       .order("created_at", { ascending: true });
 
     if (error) throw error;
-    return NextResponse.json({ data });
+    return NextResponse.json({ data }, { headers: { "Cache-Control": "private, no-store" } });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
@@ -79,9 +79,10 @@ export async function PUT(request: Request) {
       .update(updateData)
       .eq("id", id)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
+    if (!faq) return NextResponse.json({ error: "FAQ not found. Refresh the list before retrying." }, { status: 404 });
     revalidateFaqPaths();
     return NextResponse.json({ data: faq });
   } catch (err: any) {
@@ -104,12 +105,22 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: "show_faq_section must be a boolean" }, { status: 400 });
     }
 
-    const { error } = await supabase
+    const { data: settings, error: settingsError } = await supabase
+      .from("site_settings")
+      .select("id")
+      .limit(2);
+    if (settingsError) throw settingsError;
+    if (settings?.length !== 1) return NextResponse.json({ error: "FAQ section settings are unavailable." }, { status: 503 });
+
+    const { data: saved, error } = await supabase
       .from("site_settings")
       .update(parsed.data)
-      .not("id", "is", null);
+      .eq("id", settings[0].id)
+      .select("id")
+      .maybeSingle();
 
     if (error) throw error;
+    if (!saved) return NextResponse.json({ error: "FAQ section settings changed. Refresh before retrying." }, { status: 409 });
     revalidateFaqPaths();
     return NextResponse.json({ success: true });
   } catch (err: any) {
@@ -128,12 +139,15 @@ export async function DELETE(request: Request) {
 
     if (!id || !z.string().uuid().safeParse(id).success) return NextResponse.json({ error: "Invalid FAQ ID" }, { status: 400 });
 
-    const { error } = await supabase
+    const { data: deleted, error } = await supabase
       .from("faqs")
       .delete()
-      .eq("id", id);
+      .eq("id", id)
+      .select("id")
+      .maybeSingle();
 
     if (error) throw error;
+    if (!deleted) return NextResponse.json({ error: "FAQ not found. Refresh the list before retrying." }, { status: 404 });
     revalidateFaqPaths();
     return NextResponse.json({ success: true });
   } catch (err: any) {

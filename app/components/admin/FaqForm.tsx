@@ -1,16 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Loader2 } from "lucide-react";
+import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
+import { AdminConfirmDialog } from "./AdminConfirmDialog";
 
 const faqSchema = z.object({
-  question: z.string().min(1, "Question is required").max(200, "Max 200 characters"),
-  answer: z.string().min(1, "Answer is required").max(1000, "Max 1000 characters"),
-  display_order: z.coerce.number().int(),
+  question: z.string().trim().min(1, "Question is required").max(200, "Max 200 characters"),
+  answer: z.string().trim().min(1, "Answer is required").max(1000, "Max 1000 characters"),
+  display_order: z.number({ invalid_type_error: "Enter a display order" }).int("Use a whole number"),
   is_visible: z.boolean(),
 });
 
@@ -24,11 +26,12 @@ export function FaqForm({ initialData }: FaqFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [confirmingLeave, setConfirmingLeave] = useState(false);
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<FaqFormValues>({
     resolver: zodResolver(faqSchema),
     defaultValues: {
@@ -38,6 +41,13 @@ export function FaqForm({ initialData }: FaqFormProps) {
       is_visible: initialData?.is_visible ?? true,
     },
   });
+
+  useEffect(() => {
+    if (!isDirty) return;
+    const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [isDirty]);
 
   const onSubmit = async (data: FaqFormValues) => {
     setIsSubmitting(true);
@@ -49,22 +59,20 @@ export function FaqForm({ initialData }: FaqFormProps) {
         body: JSON.stringify(initialData?.id ? { id: initialData.id, ...data } : data),
       });
 
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Failed to save FAQ");
-      }
+      const result = await readAdminResponse(res, "FAQ");
+      if (!res.ok) throw new Error(result.error || "Failed to save FAQ");
 
       router.push("/admin/faqs");
       router.refresh();
-    } catch (err: any) {
-      setErrorMsg(err.message);
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : "Failed to save FAQ");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+    <><form onSubmit={handleSubmit(onSubmit)} className="min-w-0 space-y-8">
       {errorMsg && (
         <div role="alert" className="rounded-lg bg-red-50 p-4 text-sm text-red-700 dark:bg-red-950/30 dark:text-red-400">
           {errorMsg}
@@ -78,7 +86,7 @@ export function FaqForm({ initialData }: FaqFormProps) {
           {...register("question")}
           aria-invalid={!!errors.question}
           aria-describedby={errors.question ? "faq-question-error" : undefined}
-          className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
+          className="min-h-11 w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
           placeholder="What kind of work are you available for?"
         />
         {errors.question && <p id="faq-question-error" className="text-xs text-red-700 dark:text-red-400">{errors.question.message}</p>}
@@ -92,7 +100,7 @@ export function FaqForm({ initialData }: FaqFormProps) {
           aria-invalid={!!errors.answer}
           aria-describedby={errors.answer ? "faq-answer-error" : undefined}
           rows={5}
-          className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
+          className="min-h-11 w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
           placeholder="The answer shown when the question is expanded. Line breaks are preserved on the homepage."
         />
         {errors.answer && <p id="faq-answer-error" className="text-xs text-red-700 dark:text-red-400">{errors.answer.message}</p>}
@@ -104,10 +112,10 @@ export function FaqForm({ initialData }: FaqFormProps) {
           <input
             id="faq-order"
             type="number"
-            {...register("display_order")}
+            {...register("display_order", { setValueAs: (value: string) => value === "" ? NaN : Number(value) })}
             aria-invalid={!!errors.display_order}
             aria-describedby={errors.display_order ? "faq-order-error" : undefined}
-            className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
+            className="min-h-11 w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
           />
           <p className="text-xs text-ink-secondary">Lower numbers appear first.</p>
           {errors.display_order && (
@@ -117,7 +125,7 @@ export function FaqForm({ initialData }: FaqFormProps) {
 
         <div className="space-y-2">
           <label className="text-sm font-medium">Visibility</label>
-          <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-border-hairline bg-surface-base px-3 py-2">
+           <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border border-border-hairline bg-surface-base px-3 py-2">
             <input type="checkbox" {...register("is_visible")} className="h-4 w-4 accent-indigo-600" />
             <span className="text-sm">Show this question on the homepage</span>
           </label>
@@ -128,19 +136,21 @@ export function FaqForm({ initialData }: FaqFormProps) {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="inline-flex items-center justify-center rounded-xl bg-accent-signal px-4 py-2 text-sm font-medium text-white shadow hover:bg-accent-signal/90 transition-all disabled:opacity-50"
+           className="inline-flex min-h-11 items-center justify-center rounded-xl bg-accent-signal px-4 py-2 text-sm font-medium text-white shadow hover:bg-accent-signal/90 transition-all disabled:opacity-50"
         >
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {initialData?.id ? "Save changes" : "Create FAQ"}
         </button>
         <button
           type="button"
-          onClick={() => router.push("/admin/faqs")}
-          className="rounded-xl border border-border-hairline bg-surface-base px-4 py-2 text-sm text-ink-secondary hover:text-ink-primary transition-colors"
+           onClick={() => isDirty ? setConfirmingLeave(true) : router.push("/admin/faqs")}
+           className="min-h-11 rounded-xl border border-border-hairline bg-surface-base px-4 py-2 text-sm text-ink-secondary hover:text-ink-primary transition-colors"
         >
           Cancel
         </button>
       </div>
     </form>
+    <AdminConfirmDialog open={confirmingLeave} title="Discard unsaved FAQ changes?" description="Your question, answer, display order and visibility edits will be lost." confirmLabel="Discard changes" destructive onClose={() => setConfirmingLeave(false)} onConfirm={() => { setConfirmingLeave(false); router.push("/admin/faqs"); }} />
+    </>
   );
 }

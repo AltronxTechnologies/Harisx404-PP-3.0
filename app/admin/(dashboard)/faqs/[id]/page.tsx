@@ -1,4 +1,5 @@
 import { FaqForm } from "@/app/components/admin/FaqForm";
+import Link from "next/link";
 import { requireAdmin } from "@/app/lib/admin-auth";
 import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
@@ -12,11 +13,10 @@ export default async function EditFaqPage({ params }: { params: Promise<{ id: st
     .from("faqs")
     .select("*")
     .eq("id", id)
-    .single();
+    .maybeSingle();
 
-  if (error || !faq) {
-    notFound();
-  }
+  if (error) return <div role="alert" className="rounded-xl border border-red-500/30 bg-red-950/20 p-5 text-sm text-red-200">This FAQ could not be loaded. <Link prefetch={false} href={`/admin/faqs/${id}?retry=${Date.now()}`} className="inline-flex min-h-11 items-center font-medium underline underline-offset-2">Retry loading</Link></div>;
+  if (!faq) notFound();
 
   return (
     <div className="flex flex-col gap-6">
