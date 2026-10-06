@@ -2,8 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { Dialog, DialogDescription, DialogPanel, DialogTitle } from "@headlessui/react";
-import { Check, ChevronLeft, ChevronRight, Copy, ExternalLink, Image as ImageIcon, Loader2, Pencil, Trash2, Upload, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Copy, Image as ImageIcon, Loader2, Trash2, Upload, X } from "lucide-react";
 import { AdminConfirmDialog } from "@/app/components/admin/AdminConfirmDialog";
 import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
 
@@ -19,20 +18,10 @@ interface MediaItem {
   original_filename?: string | null;
   alt_text: string | null;
   format: string | null;
-  width: number | null;
-  height: number | null;
-  bytes: number | null;
 }
 
 function displayName(item: MediaItem) {
   return item.original_filename || item.alt_text || `${item.public_id.split("/").pop() || "Image"}${item.format ? `.${item.format}` : ""}`;
-}
-
-function formatBytes(bytes: number | null) {
-  if (bytes === null || !Number.isFinite(bytes) || bytes < 0) return "Size unavailable";
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 export default function AdminMediaPage() {
@@ -45,10 +34,6 @@ export default function AdminMediaPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirming, setConfirming] = useState<MediaItem | null>(null);
-  const [editing, setEditing] = useState<MediaItem | null>(null);
-  const [descriptionDraft, setDescriptionDraft] = useState("");
-  const [descriptionError, setDescriptionError] = useState("");
-  const [isSavingDescription, setIsSavingDescription] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: "" | "success" | "warning" | "error"; text: string }>({ type: "", text: "" });
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -159,36 +144,6 @@ export default function AdminMediaPage() {
     }
   };
 
-  const saveDescription = async () => {
-    if (!editing || isSavingDescription) return;
-    const description = descriptionDraft.trim();
-    if (!description || description.length > 160) {
-      setDescriptionError("Enter a description of 1 to 160 characters.");
-      return;
-    }
-    setIsSavingDescription(true);
-    setDescriptionError("");
-    try {
-      const res = await fetch("/api/admin/media", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: editing.id, alt_text: description }),
-      });
-      const result = await readAdminResponse(res, "Image description");
-      if (!res.ok) throw new Error(result.error || "Image description could not be saved.");
-      if (result.data?.id !== editing.id) throw new Error("Description update could not be confirmed. Refresh the library before retrying.");
-      setEditing(null);
-      setMessage(editing.original_filename
-        ? { type: "success", text: "Image description updated." }
-        : { type: "warning", text: "Description updated. This file has no separately recorded original filename, so its stored label changed." });
-      setRevision((value) => value + 1);
-    } catch (error) {
-      setDescriptionError(error instanceof Error ? error.message : "Image description could not be confirmed. Refresh before retrying.");
-    } finally {
-      setIsSavingDescription(false);
-    }
-  };
-
   const pages = Math.max(1, Math.ceil(totalMedia / PAGE_SIZE));
   const openPage = (target: number) => {
     setCopiedId(null);
@@ -198,7 +153,7 @@ export default function AdminMediaPage() {
 
   return <div className="flex min-w-0 flex-col gap-6">
     <header className="flex flex-wrap items-center justify-between gap-4">
-      <div><h1 className="text-2xl font-bold tracking-tight text-ink-primary">Media Library</h1><p className="mt-1 text-sm text-ink-secondary">Cloudinary images used throughout your content. Delete only after removing every reference.</p></div>
+      <div><h1 className="text-2xl font-bold tracking-tight text-ink-primary">Media Library</h1><p className="mt-1 text-sm text-ink-secondary">Your Cloudinary image collection. Delete only after removing every reference.</p></div>
       <div>
         <input ref={fileInputRef} id="upload-input" type="file" tabIndex={-1} accept="image/jpeg,image/png,image/webp,image/gif,image/avif,image/heic,image/heif,image/tiff,image/bmp,image/x-icon" onChange={handleUpload} className="sr-only" aria-label="Choose an image to upload" />
         <button type="button" onClick={() => fileInputRef.current?.click()} disabled={isUploading || deletingId !== null} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-accent-signal px-5 text-sm font-medium text-white transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:cursor-wait disabled:opacity-50">{isUploading ? <Loader2 aria-hidden className="size-4 animate-spin" /> : <Upload aria-hidden className="size-4" />}{isUploading ? "Uploading..." : "Upload image"}</button>
@@ -215,36 +170,18 @@ export default function AdminMediaPage() {
               const name = displayName(item);
               const url = item.secure_url || item.url;
               return <article key={item.id} className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-border-hairline bg-surface-raised shadow-sm">
-                <div className="relative aspect-[4/3] bg-surface-base"><Image src={url} alt={item.alt_text || name} fill sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1280px) 33vw, 25vw" className="object-contain" /></div>
+                <div className="relative aspect-[16/10] bg-surface-base"><Image src={url} alt={item.alt_text || name} fill sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1280px) 33vw, 25vw" className="object-contain" /></div>
                 <div className="flex flex-1 flex-col gap-3 p-4">
-                  <div className="min-w-0"><p className="text-[11px] font-medium uppercase tracking-wide text-ink-secondary">{item.original_filename ? "Original filename" : "Stored label (original name unverified)"}</p><p className="mt-1 text-sm font-semibold text-ink-primary" style={{ overflowWrap: "anywhere" }}>{name}</p>{item.original_filename && item.alt_text && item.alt_text !== item.original_filename && <p className="mt-2 text-xs text-ink-secondary" style={{ overflowWrap: "anywhere" }}>Description: {item.alt_text}</p>}</div>
-                  <dl className="grid grid-cols-2 gap-2 border-t border-border-hairline pt-3 text-xs"><div><dt className="text-ink-secondary">File size</dt><dd className="mt-1 font-medium text-ink-primary">{formatBytes(item.bytes)}{item.bytes !== null && Number.isFinite(item.bytes) && item.bytes >= 0 && <span className="block font-normal text-ink-secondary">{item.bytes.toLocaleString()} bytes</span>}</dd></div><div><dt className="text-ink-secondary">Dimensions</dt><dd className="mt-1 font-medium text-ink-primary">{item.width && item.height ? `${item.width} × ${item.height}px` : "Unavailable"}</dd></div></dl>
-                  <button type="button" onClick={() => { setEditing(item); setDescriptionDraft(item.alt_text || ""); setDescriptionError(""); }} disabled={isUploading || deletingId !== null} aria-label={`Edit description for ${name}`} className="inline-flex min-h-11 items-center justify-start gap-2 rounded-xl text-xs font-medium text-ink-secondary underline underline-offset-2 hover:text-ink-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current disabled:opacity-50"><Pencil aria-hidden className="size-4" />Edit description</button>
+                  <p className="text-sm font-semibold text-ink-primary" title={item.original_filename ? "Original filename" : "Stored media label; original filename unverified"} style={{ overflowWrap: "anywhere" }}>{name}</p>
                   <div className="mt-auto grid grid-cols-2 gap-2 border-t border-border-hairline pt-3">
                     <button type="button" onClick={() => void copyUrl(item)} aria-label={`Copy link for ${name}`} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border-hairline px-2 text-xs font-medium text-ink-primary hover:bg-surface-base focus-visible:outline focus-visible:outline-2 focus-visible:outline-current">{copiedId === item.id ? <Check aria-hidden className="size-4" /> : <Copy aria-hidden className="size-4" />}{copiedId === item.id ? "Copied" : "Copy link"}<span role="status" className="sr-only">{copiedId === item.id ? "Link copied to clipboard" : ""}</span></button>
                     <button type="button" onClick={() => setConfirming(item)} disabled={deletingId !== null || isUploading} aria-label={`Delete ${name}`} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-red-500/30 px-2 text-xs font-medium text-red-300 hover:bg-red-950/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-current disabled:opacity-50">{deletingId === item.id ? <Loader2 aria-hidden className="size-4 animate-spin" /> : <Trash2 aria-hidden className="size-4" />}Delete</button>
                   </div>
-                  <a href={url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center justify-center gap-1 text-xs font-medium text-ink-secondary underline underline-offset-2 hover:text-ink-primary">Open image<ExternalLink aria-hidden className="size-3" /></a>
                 </div>
               </article>;
             })}</div>}
       {!isLoading && !loadFailed && pages > 1 && <nav aria-label="Media pages" className="flex items-center justify-between gap-3 text-sm"><button type="button" onClick={() => openPage(page - 1)} disabled={page <= 1} className="inline-flex min-h-11 items-center gap-1 rounded-xl border border-border-hairline px-3 text-ink-primary disabled:opacity-50"><ChevronLeft aria-hidden className="size-4" />Previous</button><span className="text-ink-secondary">Page {page} of {pages}</span><button type="button" onClick={() => openPage(page + 1)} disabled={page >= pages} className="inline-flex min-h-11 items-center gap-1 rounded-xl border border-border-hairline px-3 text-ink-primary disabled:opacity-50">Next<ChevronRight aria-hidden className="size-4" /></button></nav>}
     </section>
-    <Dialog open={editing !== null} onClose={() => { if (!isSavingDescription) setEditing(null); }} className="fixed inset-0 z-[7000] dark">
-      <div aria-hidden="true" className="fixed inset-0 bg-black/75" />
-      <div className="fixed inset-0 flex items-center justify-center overflow-y-auto p-4">
-        <DialogPanel className="w-full max-w-md rounded-3xl border border-white/15 bg-[#1b1b1f] p-5 text-white shadow-2xl sm:p-6">
-          <DialogTitle className="text-xl font-semibold">Edit image description</DialogTitle>
-          <DialogDescription className="mt-2 text-sm leading-6 text-[#b5b5bd]">Update the shared accessibility description used by other content. This does not rename the Cloudinary asset.</DialogDescription>
-          {!editing?.original_filename && <p className="mt-3 rounded-xl border border-amber-500/30 bg-amber-950/20 p-3 text-xs text-amber-200">This file has no separately recorded original filename. Editing the description will replace its stored label.</p>}
-          <label htmlFor="media-description" className="mt-5 block text-sm font-medium">Image description</label>
-          <textarea id="media-description" autoFocus value={descriptionDraft} onChange={(event) => setDescriptionDraft(event.target.value)} maxLength={160} rows={3} disabled={isSavingDescription} aria-invalid={Boolean(descriptionError)} aria-describedby={descriptionError ? "media-description-error" : undefined} className="mt-2 min-h-24 w-full resize-y rounded-xl border border-white/30 bg-[#101013] px-3 py-2 text-sm text-white outline-none focus-visible:ring-2 focus-visible:ring-white/70" />
-          <p className="mt-1 text-right text-xs text-[#b5b5bd]">{descriptionDraft.length}/160</p>
-          {descriptionError && <p id="media-description-error" role="alert" className="mt-2 text-sm text-red-300">{descriptionError}</p>}
-          <div className="mt-6 flex flex-wrap justify-end gap-2"><button type="button" onClick={() => setEditing(null)} disabled={isSavingDescription} className="min-h-11 rounded-full border border-white/25 px-5 text-sm font-medium text-white hover:bg-white/10 disabled:opacity-50">Cancel</button><button type="button" onClick={() => void saveDescription()} disabled={isSavingDescription || !descriptionDraft.trim()} className="min-h-11 rounded-full bg-white px-5 text-sm font-medium text-[#101013] hover:bg-[#dedee2] disabled:opacity-50">{isSavingDescription ? "Saving..." : "Save description"}</button></div>
-        </DialogPanel>
-      </div>
-    </Dialog>
     <AdminConfirmDialog open={confirming !== null} title="Permanently delete image?" description={confirming ? `“${displayName(confirming)}” will be removed from the library and Cloudinary. Known Blog, Project, Testimonial, Experience and Certification uses are blocked, but untracked references may break. This cannot be undone.` : ""} confirmLabel="Delete permanently" confirmText="DELETE" destructive pending={deletingId !== null} onClose={() => setConfirming(null)} onConfirm={(value) => void deleteMedia(value)} />
   </div>;
 }

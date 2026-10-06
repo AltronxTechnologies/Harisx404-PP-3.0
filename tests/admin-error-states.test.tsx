@@ -165,8 +165,7 @@ test("Media page navigation retries a failed page without calling it empty", asy
     await act(async () => { root.render(React.createElement(Media)); await new Promise((resolve) => setTimeout(resolve, 0)); });
     assert.match(host.textContent || "", /Showing 1-12 of 14 files/);
     assert.match(host.textContent || "", /Original photo 1\.png/);
-    assert.match(host.textContent || "", /Description: Description 1/);
-    assert.match(host.textContent || "", /128 bytes/);
+    assert.doesNotMatch(host.textContent || "", /Description: Description 1|128 bytes|File size|Open image|Edit description/);
     const button = (label: string) => [...host.querySelectorAll("button")].find((entry) => entry.textContent?.trim() === label);
     await act(async () => { button("Next")?.click(); await new Promise((resolve) => setTimeout(resolve, 0)); });
     assert.match(host.textContent || "", /Media could not be loaded/);

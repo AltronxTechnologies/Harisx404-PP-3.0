@@ -233,7 +233,7 @@ test("Media library uses the connected row fields and keeps errors distinct from
     source("app/admin/(dashboard)/media/page.tsx"),
     source("app/api/admin/media/route.ts"),
   ]);
-  assert.match(mediaPage, /formatBytes\(item\.bytes\)/);
+  assert.doesNotMatch(mediaPage, /formatBytes\(item\.bytes\)|Edit description|Open image/);
   assert.match(mediaPage, /item\.original_filename \|\| item\.alt_text/);
   assert.match(mediaPage, /if \(!res\.ok \|\| !Array\.isArray\(result\.data\)/);
   assert.match(mediaPage, /loadFailed \? <div role="alert"/);

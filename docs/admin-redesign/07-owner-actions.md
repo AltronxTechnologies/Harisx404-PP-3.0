@@ -105,16 +105,19 @@ URLs, but links hard-coded outside tracked content cannot always be detected.
 Deletion across the database and Cloudinary is not atomic; an unexpected
 concurrent edit or failed restoration still needs manual review. Use test-only
 assets and a backup/restore plan for further workflows.
-The Admin Media page now has a checked-in additive filename migration
-(`migrations/2026_media_original_filename.sql`). The connected table does not
-yet have that column: review a backup, apply the migration in the intended
-environment, verify Admin read/write grants and then test a disposable upload,
-description edit, copy and deletion. Existing `alt_text` or Cloudinary public IDs
-cannot reliably reconstruct original filenames for historical files. Until the
-migration is applied, the API is designed to retain uploads with a warning that
-the original name is not protected separately from the editable description;
-connected acceptance is still pending. The latest browser pass
-mocked Media writes and made no connected Cloudinary or database changes.
+The Admin Media page now has compact preview/name/Copy link/Delete cards and a
+checked-in additive filename migration (`migrations/2026_media_original_filename.sql`).
+The connected 15-row table does not yet have that column. The assistant has no
+direct SQL connection credentials or verified backup/restore point and **did
+not apply or verify this migration** against the connected database. After a
+reviewed backup, apply it using your intended environment's trusted SQL access,
+verify the column and Admin read/write grants, then test a disposable upload,
+copy and deletion. Existing editable `alt_text` and Cloudinary public IDs do not
+authoritatively reconstruct historical original filenames; do not backfill by
+guessing. Until migration, the upload API retains files with a warning that the
+original name is not stored separately from the editable description. The
+latest browser pass mocked two Media writes and made no connected Cloudinary
+or database changes; connected acceptance and visual sign-off remain pending.
 
 Before asking for a valid Settings save-and-reopen test:
 

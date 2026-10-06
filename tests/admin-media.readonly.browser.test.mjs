@@ -47,11 +47,6 @@ test("Admin Media library renders, paginates and protects mocked actions", { ski
         mockedWrites++;
         return route.fulfill({ status: 409, json: { error: "Review image is in use" } });
       }
-      if (path === "/api/admin/media" && method === "PATCH") {
-        mockedWrites++;
-        const body = JSON.parse(route.request().postData() || "{}");
-        return route.fulfill({ status: 200, json: { data: { id: body.id, alt_text: body.alt_text } } });
-      }
       if (path === "/api/admin/media/upload" && method === "POST") {
         mockedWrites++;
         return route.fulfill({ status: 200, json: { data: { id: "review-only-upload" }, warning: "Original filename migration pending" } });
@@ -74,7 +69,8 @@ test("Admin Media library renders, paginates and protects mocked actions", { ski
     const expectedName = first.original_filename || first.alt_text || `${first.public_id.split("/").pop() || "Image"}${first.format ? `.${first.format}` : ""}`;
     const firstCard = page.getByRole("article").first();
     assert.ok((await firstCard.textContent()).includes(expectedName), "Image name was not shown in full");
-    if (Number.isFinite(first.bytes) && first.bytes >= 0) assert.ok((await firstCard.textContent()).includes(first.bytes.toLocaleString()), "Exact byte size missing");
+    assert.equal(await firstCard.getByRole("button").count(), 2, "Image card includes unrelated actions");
+    assert.equal(await firstCard.getByText(/File size|Dimensions|Edit description|Open image/).count(), 0, "Image card includes retired metadata");
 
     stage = "responsive";
     for (const [width, columns] of [[320, 1], [390, 1], [768, 3], [1280, 4], [1440, 4]]) {
@@ -87,7 +83,7 @@ test("Admin Media library renders, paginates and protects mocked actions", { ski
           columns: getComputedStyle(grid).gridTemplateColumns.split(" ").length,
           overflow: document.documentElement.scrollWidth > innerWidth + 1,
           short: buttons.filter((button) => button.getBoundingClientRect().height < 44 || button.getBoundingClientRect().width < 44).length,
-          actions: cards.every((card) => card.querySelectorAll("button").length === 3),
+          actions: cards.every((card) => card.querySelectorAll("button").length === 2),
         };
       });
       if (metrics.columns !== columns || metrics.overflow || metrics.short || !metrics.actions) failures.push(`layout-${width}:${JSON.stringify(metrics)}`);
@@ -118,18 +114,6 @@ test("Admin Media library renders, paginates and protects mocked actions", { ski
     await page.getByRole("button", { name: `Copy link for ${expectedName}` }).first().getByText("Copied").waitFor();
     assert.equal(await page.evaluate(() => navigator.clipboard.readText()), first.secure_url || first.url, "Copied URL did not match the stored image");
 
-    stage = "description";
-    await page.getByRole("button", { name: `Edit description for ${expectedName}` }).first().click();
-    const description = page.getByRole("dialog", { name: "Edit image description" });
-    await description.waitFor();
-    await description.getByRole("textbox", { name: "Image description" }).fill(" ");
-    assert.equal(await description.getByRole("button", { name: "Save description" }).isDisabled(), true);
-    assert.equal(mockedWrites, 0, "Blank description attempted a write");
-    await description.getByRole("textbox", { name: "Image description" }).fill("Review-only description");
-    await description.getByRole("button", { name: "Save description" }).click();
-    await page.getByText(/description updated/i).first().waitFor();
-    assert.equal(mockedWrites, 1);
-
     stage = "delete";
     const deleteButton = page.getByRole("button", { name: `Delete ${expectedName}` }).first();
     await deleteButton.click();
@@ -137,21 +121,21 @@ test("Admin Media library renders, paginates and protects mocked actions", { ski
     await dialog.waitFor();
     assert.equal(await dialog.getByRole("button", { name: "Delete permanently" }).isDisabled(), true);
     await dialog.getByRole("button", { name: "Cancel" }).click();
-    assert.equal(mockedWrites, 1, "Cancelled deletion attempted a write");
+    assert.equal(mockedWrites, 0, "Cancelled deletion attempted a write");
     await deleteButton.click();
     await dialog.getByRole("textbox").fill("DELETE");
     await dialog.getByRole("button", { name: "Delete permanently" }).click();
     await page.getByRole("alert").filter({ hasText: "Review image is in use" }).waitFor();
-    assert.equal(mockedWrites, 2);
+    assert.equal(mockedWrites, 1);
     assert.equal(await deleteButton.count(), 1, "A failed delete removed the card");
 
     stage = "upload";
     await page.locator("#upload-input").setInputFiles({ name: "blocked.svg", mimeType: "image/svg+xml", buffer: Buffer.from("<svg xmlns='http://www.w3.org/2000/svg'/>") });
     await page.getByRole("alert").filter({ hasText: "SVG is not accepted" }).waitFor();
-    assert.equal(mockedWrites, 2, "Invalid SVG attempted an upload");
+    assert.equal(mockedWrites, 1, "Invalid SVG attempted an upload");
     await page.locator("#upload-input").setInputFiles({ name: "review-upload.png", mimeType: "image/png", buffer: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLttAAAAABJRU5ErkJggg==", "base64") });
     await page.getByRole("alert").filter({ hasText: "Original filename migration pending" }).waitFor();
-    assert.equal(mockedWrites, 3);
+    assert.equal(mockedWrites, 2);
     assert.equal(blockedWrites, 0);
     assert.equal(pageErrors, 0);
     assert.deepEqual(failures, []);
