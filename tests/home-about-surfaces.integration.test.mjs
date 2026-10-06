@@ -4,6 +4,23 @@ import test from "node:test";
 
 const baseUrl = process.env.PREVIEW_BASE_URL || "http://localhost:3000";
 
+test("Home header and bio portraits use independent project assets", async () => {
+  const [hero, teaser, reachOut, headerImage, aboutImage] = await Promise.all([
+    readFile(new URL("../app/components/home/HomeHero.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/home/AboutTeaser.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/navbar/ReachOutModal.tsx", import.meta.url), "utf8"),
+    fetch(`${baseUrl}/home-header-portrait.png`),
+    fetch(`${baseUrl}/home-about-portrait.png`),
+  ]);
+  assert.match(hero, /src="\/home-header-portrait\.png"/);
+  assert.match(teaser, /src="\/home-about-portrait\.png"/);
+  assert.match(reachOut, /src="\/harisx404\.png"/);
+  for (const response of [headerImage, aboutImage]) {
+    assert.equal(response.status, 200);
+    assert.match(response.headers.get("content-type") || "", /^image\/png/);
+  }
+});
+
 test("Home and About render live GitHub and credential surfaces", async () => {
   for (const route of ["/", "/about"]) {
     const response = await fetch(`${baseUrl}${route}`);

@@ -361,7 +361,7 @@ export function HomeHero({
             <div className="relative rounded-full border border-border-primary/70 p-2.5 sm:p-3">
               <div className="rounded-full border border-border-primary p-1.5 sm:p-2">
                 <Image
-                  src="/harisx404.png"
+                  src="/home-header-portrait.png"
                   alt="Muhammad Haris"
                   width={144}
                   height={144}

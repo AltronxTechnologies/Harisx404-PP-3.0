@@ -92,7 +92,7 @@ export function AboutTeaser() {
             <div className="flex flex-col gap-6 md:flex-row md:items-stretch md:gap-8">
               <div className="relative mx-auto aspect-square w-40 overflow-hidden rounded-2xl border border-border-primary sm:w-44 md:mx-0 md:aspect-auto md:w-48 md:shrink-0 lg:w-52">
                 <Image
-                  src="/harisx404.png"
+                  src="/home-about-portrait.png"
                   alt="Muhammad Haris"
                   fill
                   sizes="(max-width: 768px) 192px, 208px"

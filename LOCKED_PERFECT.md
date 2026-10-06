@@ -36,6 +36,14 @@
 
 ## Locked entries
 
+**2026-10-06 scoped owner permission:** The owner requested separate, replaceable
+project assets for the Home hero and "Know about me" portraits. Only the `src`
+values in `HomeHero.tsx` and `AboutTeaser.tsx` change to
+`/home-header-portrait.png` and `/home-about-portrait.png` respectively. The
+original `/harisx404.png` remains in place for Reach Out, Links, Resume and
+other consumers. The historical locked portrait specification below records
+the original asset; its layout, styling and all other behavior remain locked.
+
 ### 1. Reach Out modal ("Let's Connect") — LOCKED ✅ (v5 FINAL — production-signed-off)
 - **Date locked:** 2026-09-01 (supersedes the 2026-08-16 lock at `5a97fe8`)
 - **Status:** production-ready. Full A–Z audit passed. **Do not change anything in
