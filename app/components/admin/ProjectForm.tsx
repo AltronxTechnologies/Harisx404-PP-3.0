@@ -34,6 +34,7 @@ const statusOptions = [
 
 type CaseStudySections = Record<(typeof sectionFields)[number]["key"], string>;
 const emptySections: CaseStudySections = { why_built: "", key_decisions: "", results: "", lessons_learned: "" };
+const optionalHttpUrl = z.string().refine((url) => !url || (z.string().url().safeParse(url).success && /^https?:\/\//i.test(url)), "Use an HTTP or HTTPS URL");
 
 const projectSchema = z.object({
   title: z.string().trim().min(1, "Title is required").max(200, "Title must be 200 characters or fewer"),
@@ -62,8 +63,8 @@ const projectSchema = z.object({
   status: z.enum(["draft", "published", "archived"]),
   cover_image_url: z.string().url("At least one image is required; choose a cover").refine((url) => /^https?:\/\//i.test(url), "Use an HTTP or HTTPS image URL"),
   cover_image_id: z.string().uuid().optional().or(z.literal("")),
-  live_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
-  github_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  live_url: optionalHttpUrl.optional(),
+  github_url: optionalHttpUrl.optional(),
   start_date: z.string().refine((date) => !date || isValidBlogDate(date), "Choose a valid start date").optional(),
   end_date: z.string().refine((date) => !date || isValidBlogDate(date), "Choose a valid end date").optional(),
   featured: z.boolean().optional(),
@@ -97,6 +98,11 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
   const [replacingIndex, setReplacingIndex] = useState(0);
   const [mediaPickerTab, setMediaPickerTab] = useState<"library" | "upload">("library");
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>(initialData?.galleryImages ?? []);
+  const uploadedMedia = useRef(new Map<string, { url: string; secure_url: string }>());
+  const [uploadedCount, setUploadedCount] = useState(0);
+  const [isUploadingMedia, setIsUploadingMedia] = useState(false);
+  const [isCleaningMedia, setIsCleaningMedia] = useState(false);
+  const cleanupInProgress = useRef(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [relatedSearch, setRelatedSearch] = useState("");
   const slugEdited = useRef(Boolean(initialData?.id));
@@ -154,14 +160,57 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
   const coverCaption = watch("case_study_sections.cover_caption") || "";
   const coverField = register("cover_image_url");
   const galleryDirty = JSON.stringify(galleryImages) !== JSON.stringify(initialData?.galleryImages ?? []);
-  const { leaveTarget: navigationTarget, setLeaveTarget: setNavigationTarget, confirmLeave } = useAdminNavigationGuard(isDirty || galleryDirty);
+  const { leaveTarget: navigationTarget, setLeaveTarget: setNavigationTarget, confirmLeave } = useAdminNavigationGuard(isDirty || galleryDirty || uploadedCount > 0 || isUploadingMedia);
 
   useEffect(() => {
-    if (!isDirty && !galleryDirty) return;
+    if (!isDirty && !galleryDirty && !uploadedCount && !isUploadingMedia) return;
     const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
-  }, [isDirty, galleryDirty]);
+  }, [isDirty, galleryDirty, uploadedCount, isUploadingMedia]);
+
+  const discardSessionUploads = async (preserve = new Set<string>()) => {
+    if (isUploadingMedia || cleanupInProgress.current) {
+      setErrorMsg("Wait for image uploads or cleanup to finish before leaving.");
+      return false;
+    }
+    if (!uploadedMedia.current.size) return true;
+    cleanupInProgress.current = true;
+    setIsCleaningMedia(true);
+    setErrorMsg("");
+    const removed = new Set<string>();
+    try {
+      for (const id of uploadedMedia.current.keys()) {
+        if (preserve.has(id)) continue;
+        try {
+          const response = await fetch(`/api/admin/media?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+          const result = await readAdminResponse(response, "Unsaved Project image cleanup");
+          if (!response.ok || result.success !== true) continue;
+          uploadedMedia.current.delete(id);
+          removed.add(id);
+        } catch { /* Keep failed uploads tracked for retry. */ }
+      }
+      if (removed.size) {
+        setGalleryImages((current) => current.filter((image) => !removed.has(image.mediaId)));
+        if (removed.has(getValues("cover_image_id") || "")) {
+          setValue("cover_image_url", initialData?.cover_image_url || "", { shouldDirty: true, shouldValidate: true });
+          setValue("cover_image_id", initialData?.cover_image_id || "", { shouldDirty: true });
+          setValue("case_study_sections.cover_caption", initialData?.case_study_sections?.cover_caption || "", { shouldDirty: true });
+          setValue("case_study_sections.cover_alt", initialData?.case_study_sections?.cover_alt || "", { shouldDirty: true });
+        }
+      }
+      setUploadedCount(uploadedMedia.current.size);
+      const remaining = [...uploadedMedia.current.keys()].filter((id) => !preserve.has(id)).length;
+      if (remaining) {
+        setErrorMsg(`${remaining} uploaded image(s) could not be removed. They remain in the Media Library; review their references or retry leaving.`);
+        return false;
+      }
+      return true;
+    } finally {
+      cleanupInProgress.current = false;
+      setIsCleaningMedia(false);
+    }
+  };
 
   const chooseCover = (image: GalleryImage) => {
     const oldUrl = getValues("cover_image_url");
@@ -193,6 +242,13 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
         throw new Error("Each image caption must be 30 words or fewer.");
       }
       if (galleryImages.length > 20) throw new Error("Choose no more than 20 gallery images.");
+      const preserve = new Set(galleryImages.map((image) => image.mediaId));
+      if (data.cover_image_id) preserve.add(data.cover_image_id);
+      const submittedText = JSON.stringify(data);
+      for (const [id, media] of uploadedMedia.current) {
+        if ([media.url, media.secure_url].some((url) => Boolean(url) && submittedText.includes(url))) preserve.add(id);
+      }
+      if (!await discardSessionUploads(preserve)) return;
       const payload = {
         ...data,
         tech_stack: (data.tech_stack || "")
@@ -229,6 +285,8 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
       }
       if (!result?.id) throw new Error("Project save could not be confirmed. Refresh the list before retrying.");
 
+      uploadedMedia.current.clear();
+      setUploadedCount(0);
       router.push("/admin/projects");
       router.refresh();
     } catch (err: any) {
@@ -239,6 +297,10 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
   };
 
   const onSubmit = (data: ProjectFormValues) => {
+    if (isUploadingMedia || isCleaningMedia) {
+      setErrorMsg("Wait for image uploads or cleanup to finish before saving.");
+      return;
+    }
     if (data.start_date && data.end_date && data.end_date < data.start_date) {
       setError("end_date", { message: "End date must be on or after the start date" });
       setErrorMsg("Check the project dates before saving.");
@@ -547,7 +609,7 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
 
       <div className="space-y-3">
         <h2 className="text-sm font-medium">Project images</h2>
-        <p className="text-xs text-ink-secondary">A cover image is required even for drafts. It appears first in the project carousel; add up to 20 gallery images and reorder or replace them below.</p>
+        <p className="text-xs text-ink-secondary">A cover image is required even for drafts. It appears first in the project carousel; add up to 20 gallery images and reorder or replace them below. Uploads enter the shared Media Library immediately; confirmed in-app discard attempts to remove unused session uploads, but closing the tab cannot guarantee cleanup.</p>
         {coverUrl && z.string().url().safeParse(coverUrl).success ? (
           <div className="relative isolate flex h-48 items-center justify-center overflow-hidden rounded-xl border border-border-hairline bg-neutral-100 dark:bg-white/[0.04]">
             {/* A direct preview supports manually entered image hosts outside Next's remote allowlist. */}
@@ -610,10 +672,10 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
                 <button type="button" onClick={() => chooseCover(image)} className="min-h-11 text-left text-xs text-accent-signal underline underline-offset-2">Make cover (first image)</button>
               </div>
                <div className="flex flex-wrap gap-1">
-                <button type="button" aria-label={`Replace image ${index + 2}`} onClick={() => { setReplacingIndex(index); setMediaPickerTarget("replace-gallery"); setMediaPickerTab("upload"); setIsMediaPickerOpen(true); }} className="flex size-11 items-center justify-center rounded-lg hover:bg-surface-raised"><UploadCloud className="h-4 w-4" /></button>
-                <button type="button" aria-label={`Move image ${index + 1} up`} disabled={index === 0} onClick={() => setGalleryImages((images) => { const next = [...images]; [next[index - 1], next[index]] = [next[index], next[index - 1]]; return next; })} className="flex size-11 items-center justify-center rounded-lg hover:bg-surface-raised disabled:opacity-40"><ArrowUp className="h-4 w-4" /></button>
-                <button type="button" aria-label={`Move image ${index + 1} down`} disabled={index === galleryImages.length - 1} onClick={() => setGalleryImages((images) => { const next = [...images]; [next[index], next[index + 1]] = [next[index + 1], next[index]]; return next; })} className="flex size-11 items-center justify-center rounded-lg hover:bg-surface-raised disabled:opacity-40"><ArrowDown className="h-4 w-4" /></button>
-                <button type="button" aria-label={`Remove image ${index + 1}`} onClick={() => setGalleryImages((images) => images.filter((item) => item.mediaId !== image.mediaId))} className="flex size-11 items-center justify-center rounded-lg text-red-400 hover:bg-surface-raised"><Trash2 className="h-4 w-4" /></button>
+                 <button type="button" aria-label={`Replace image ${index + 2}`} onClick={() => { setReplacingIndex(index); setMediaPickerTarget("replace-gallery"); setMediaPickerTab("upload"); setIsMediaPickerOpen(true); }} className="flex size-11 items-center justify-center rounded-lg hover:bg-surface-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-current"><UploadCloud className="h-4 w-4" aria-hidden /></button>
+                 <button type="button" aria-label={`Move image ${index + 1} up`} disabled={index === 0} onClick={() => setGalleryImages((images) => { const next = [...images]; [next[index - 1], next[index]] = [next[index], next[index - 1]]; return next; })} className="flex size-11 items-center justify-center rounded-lg hover:bg-surface-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-current disabled:opacity-40"><ArrowUp className="h-4 w-4" aria-hidden /></button>
+                 <button type="button" aria-label={`Move image ${index + 1} down`} disabled={index === galleryImages.length - 1} onClick={() => setGalleryImages((images) => { const next = [...images]; [next[index], next[index + 1]] = [next[index + 1], next[index]]; return next; })} className="flex size-11 items-center justify-center rounded-lg hover:bg-surface-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-current disabled:opacity-40"><ArrowDown className="h-4 w-4" aria-hidden /></button>
+                 <button type="button" aria-label={`Remove image ${index + 1}`} onClick={() => setGalleryImages((images) => images.filter((item) => item.mediaId !== image.mediaId))} className="flex size-11 items-center justify-center rounded-lg text-red-400 hover:bg-surface-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-current"><Trash2 className="h-4 w-4" aria-hidden /></button>
               </div>
             </div>
           ))}
@@ -624,6 +686,8 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
         isOpen={isMediaPickerOpen}
         initialTab={mediaPickerTab}
         onClose={() => setIsMediaPickerOpen(false)}
+        onUploadingChange={setIsUploadingMedia}
+        onUploaded={(media) => { uploadedMedia.current.set(media.id, { url: media.url, secure_url: media.secure_url }); setUploadedCount(uploadedMedia.current.size); }}
           onSelect={(media) => {
             if (mediaPickerTarget === "cover") {
               const oldUrl = getValues("cover_image_url");
@@ -700,14 +764,14 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
       <div className="flex flex-wrap justify-end gap-4">
         <button
           type="button"
-          onClick={() => { if (isSubmitting) return; if (isDirty || galleryDirty) setLeaveConfirmation(true); else router.push("/admin/projects"); }}
+          onClick={() => { if (isSubmitting || isCleaningMedia) return; if (isDirty || galleryDirty || uploadedMedia.current.size || isUploadingMedia) setLeaveConfirmation(true); else router.push("/admin/projects"); }}
           className="min-h-11 rounded-xl px-4 py-2 text-sm font-medium text-ink-secondary hover:bg-surface-base transition-colors"
         >
           Cancel
         </button>
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || isUploadingMedia || isCleaningMedia}
           className="inline-flex items-center justify-center rounded-xl bg-accent-signal px-6 py-2 text-sm font-medium text-white shadow hover:bg-accent-signal/90 focus:outline-none disabled:opacity-50 transition-all"
         >
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -716,8 +780,8 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
       </div>
     </form>
     <AdminConfirmDialog open={saveConfirmation !== null} title={saveConfirmation?.title || "Confirm publication"} description={saveConfirmation?.description || ""} confirmLabel={saveConfirmation?.label || "Confirm"} pending={isSubmitting} onClose={() => setSaveConfirmation(null)} onConfirm={() => { const pending = saveConfirmation; setSaveConfirmation(null); if (pending) void saveProject(pending.data); }} />
-    <AdminConfirmDialog open={leaveConfirmation} title="Discard unsaved project changes?" description="Project details and gallery changes on this page have not been saved." confirmLabel="Discard changes" destructive onClose={() => setLeaveConfirmation(false)} onConfirm={() => { setLeaveConfirmation(false); router.push("/admin/projects"); }} />
-    <AdminConfirmDialog open={navigationTarget !== null} title="Discard unsaved project changes?" description="Project details and gallery changes on this page have not been saved." confirmLabel="Discard changes" destructive onClose={() => setNavigationTarget(null)} onConfirm={() => confirmLeave(router.push)} />
+    <AdminConfirmDialog open={leaveConfirmation} title="Discard unsaved project changes?" description="Unsaved project changes will be lost. Images uploaded in this session will be removed if unused; closing this tab cannot guarantee cleanup." confirmLabel="Discard changes" destructive pending={isCleaningMedia || isUploadingMedia} onClose={() => setLeaveConfirmation(false)} onConfirm={() => { void (async () => { const cleaned = await discardSessionUploads(); setLeaveConfirmation(false); if (cleaned) router.push("/admin/projects"); })(); }} />
+    <AdminConfirmDialog open={navigationTarget !== null} title="Discard unsaved project changes?" description="Unsaved project changes will be lost. Images uploaded in this session will be removed if unused; closing this tab cannot guarantee cleanup." confirmLabel="Discard changes" destructive pending={isCleaningMedia || isUploadingMedia} onClose={() => setNavigationTarget(null)} onConfirm={() => { void (async () => { const cleaned = await discardSessionUploads(); if (cleaned) confirmLeave(router.push); else setNavigationTarget(null); })(); }} />
     </>
   );
 }

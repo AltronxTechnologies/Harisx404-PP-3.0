@@ -110,7 +110,7 @@ test("project images enforce a cover, allow ordered additions, and deliver respo
   assert.match(form, /maxLength=\{200\}/);
   assert.match(form, /\.slice\(0, 200\)/);
   assert.match(form, /setValue\("case_study_sections\.cover_caption", nextCover\.caption/);
-  assert.match(picker, /setActiveTab\(initialTab\)/);
+  assert.match(picker, /setActiveTab\(libraryOnly \? "library" : initialTab\)/);
   assert.match(picker, /aria-label="Close media picker"/);
   assert.match(picker, /document\.addEventListener\("keydown", onKeyDown\)/);
   assert.match(picker, /previousFocus\.focus\(\)/);

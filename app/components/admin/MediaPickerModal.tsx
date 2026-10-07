@@ -20,9 +20,11 @@ interface MediaPickerModalProps {
   initialTab?: "library" | "upload";
   blogPostId?: string;
   libraryOnly?: boolean;
+  onUploaded?: (media: MediaItem) => void;
+  onUploadingChange?: (uploading: boolean) => void;
 }
 
-export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "library", blogPostId, libraryOnly = false }: MediaPickerModalProps) {
+export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "library", blogPostId, libraryOnly = false, onUploaded, onUploadingChange }: MediaPickerModalProps) {
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [totalMedia, setTotalMedia] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -115,6 +117,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
     if (!file) return;
 
     setIsUploading(true);
+    onUploadingChange?.(true);
     setUploadError("");
     setUploadWarning("");
 
@@ -132,6 +135,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
       if (!res.ok) throw new Error(error || "Failed to upload image");
       if (!data?.id) throw new Error("Image upload returned no library record. Check Cloudinary before retrying.");
       setUploadWarning(warning || "");
+      onUploaded?.(data);
       
       // Add the new image to the library and select it
       setMedia((current) => [data, ...current]);
@@ -142,6 +146,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
       setUploadError(err.message);
     } finally {
       setIsUploading(false);
+      onUploadingChange?.(false);
     }
   };
 

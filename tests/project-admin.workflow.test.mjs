@@ -16,6 +16,8 @@ test("Project Admin list bounds searches and counts results before pagination", 
   );
   assert.match(list, /aria-label="Projects pages"/);
   assert.match(list, /updated_at/);
+  assert.match(list, /space-y-3 p-4 xl:hidden/);
+  assert.match(list, /hidden overflow-x-auto xl:block/);
 });
 
 test("Project editor preserves prior cover, announces validation and guards unsaved gallery changes", async () => {
@@ -30,6 +32,10 @@ test("Project editor preserves prior cover, announces validation and guards unsa
     /mediaId: oldId, url: oldUrl, caption: oldCaption, altText: oldAlt/,
   );
   assert.match(form, /const galleryDirty = JSON\.stringify\(galleryImages\)/);
+  assert.match(form, /const discardSessionUploads = async \(preserve = new Set<string>\(\)\) =>/);
+  assert.match(form, /onUploaded=\{\(media\) =>/);
+  assert.match(form, /const optionalHttpUrl = z\.string\(\)\.refine/);
+  assert.match(form, /live_url: optionalHttpUrl\.optional\(\)/);
   assert.match(form, /<AdminConfirmDialog open=\{leaveConfirmation\}/);
   assert.match(form, /setError\(name as keyof ProjectFormValues/);
   assert.match(form, /Check the highlighted fields before saving/);

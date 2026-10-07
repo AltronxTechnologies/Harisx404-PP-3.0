@@ -353,6 +353,8 @@ test(
           .count()) !== 3
       )
         failures.push({ kind: "comma-separated-tags" });
+      const tagSizes = await ui.getByRole("button", { name: /^Remove (Security|AI|Testing) tag$/ }).evaluateAll((buttons) => buttons.map((button) => ({ target: button.getBoundingClientRect().height, pill: button.parentElement?.getBoundingClientRect().height ?? 0 })));
+      if (tagSizes.some(({ target, pill }) => target < 44 || pill > 48)) failures.push({ kind: "tag-pill-height" });
       await ui.getByRole("button", { name: "Publish date" }).click();
       await ui.getByRole("button", { name: "Next month" }).click();
       await ui.getByRole("button", { name: "Clear date" }).click();
@@ -387,6 +389,7 @@ test(
       if (mockedUploads !== 2) failures.push({ kind: "batch-upload-count" });
       for (const width of [320, 1440]) {
         await ui.setViewportSize({ width, height: 900 });
+        await ui.waitForTimeout(100);
         const cards = ui.getByRole("region", { name: "Post image thumbnails" });
         const short = await cards.locator("button").evaluateAll((buttons) => buttons.filter((button) => button.getBoundingClientRect().height < 44 || button.getBoundingClientRect().right > innerWidth + 1).length);
         if (short) failures.push({ kind: "image-actions-geometry", width, short });

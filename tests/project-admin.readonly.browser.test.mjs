@@ -97,6 +97,24 @@ test(
           kind: "filtered-count",
           errorShown: (await page.getByRole("alert").count()) > 0,
         });
+      await page.goto("http://localhost:3000/admin/projects", { waitUntil: "domcontentloaded" });
+      await page.getByRole("status").filter({ hasText: /Showing 1-/ }).waitFor();
+      for (const width of [320, 390, 768, 1440]) {
+        await page.setViewportSize({ width, height: 900 });
+        await page.waitForTimeout(100);
+        const cards = page.locator("article").filter({ has: page.locator('a[aria-label^="Edit "]') });
+        if (width < 1280) {
+          if (!(await cards.count())) failures.push(`mobile-project-cards-${width}`);
+          const geometry = await cards.locator("a,button").evaluateAll((controls) => controls.map((control) => ({ width: control.getBoundingClientRect().width, height: control.getBoundingClientRect().height, right: control.getBoundingClientRect().right })).filter((control) => control.width < 44 || control.height < 44 || control.right > innerWidth + 1));
+          if (geometry.length) failures.push({ kind: "mobile-project-actions", width, count: geometry.length, sample: geometry[0] });
+        } else if (!(await page.getByRole("region", { name: "Projects table" }).isVisible())) failures.push("desktop-project-table");
+        if (await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)) failures.push(`list-overflow-${width}`);
+        if (process.env.RUN_REDACTED_PROJECT_SCREENSHOT === "1" && (width === 320 || width === 1440)) {
+          await page.evaluate(() => scrollTo(0, 0));
+          await page.screenshot({ path: `/tmp/opencode/admin-projects-${width}-redacted.png`, maskColor: "#303036", mask: [page.locator(".admin-content article span"), page.locator(".admin-content article p"), page.locator(".admin-content td")] });
+        }
+      }
+      await page.setViewportSize({ width: 1440, height: 900 });
       const first =
         "https://res.cloudinary.com/i22q5puf/image/upload/v1786526260/portfolio/haris_primary_photo.png";
       const fixtures = [
@@ -109,9 +127,19 @@ test(
         secure_url: src,
         alt_text: `Review image ${index + 1}`,
       }));
-      await page.route("**/api/admin/media?*", (route) =>
-        route.fulfill({ json: { data: fixtures, count: fixtures.length } }),
-      );
+      let mockedUpload = 0;
+      let mockedCleanup = 0;
+      await page.route("**/api/admin/media?*", (route) => {
+        if (route.request().method() === "DELETE") {
+          mockedCleanup++;
+          return mockedCleanup === 1 ? route.fulfill({ status: 409, json: { error: "Review asset is referenced" } }) : route.fulfill({ json: { success: true } });
+        }
+        return route.fulfill({ json: { data: fixtures, count: fixtures.length } });
+      });
+      await page.route("**/api/admin/media/upload", (route) => {
+        mockedUpload++;
+        return route.fulfill({ json: { data: { id: "00000000-0000-4000-8000-000000000099", url: first, secure_url: first, alt_text: "Unsaved review image" } } });
+      });
       const editor = await page.goto(
         "http://localhost:3000/admin/projects/new",
         { waitUntil: "domcontentloaded" },
@@ -130,6 +158,10 @@ test(
       if (!(await page.locator("#project-slug-error").count()))
         failures.push("slug-validation");
       await page.locator("#project-slug").fill("project-review");
+      await page.locator("#project-live-url").fill("javascript:alert(1)");
+      await page.getByRole("button", { name: "Save Project" }).click();
+      if (!(await page.locator("#project-live-url-error").count())) failures.push("unsafe-url-validation");
+      await page.locator("#project-live-url").fill("");
       const selectImage = async (label) => {
         await page
           .getByRole("dialog", { name: "Choose an image" })
@@ -183,12 +215,13 @@ test(
         failures.push("picker-replacement-dropped-cover");
       for (const width of [320, 390, 768, 1440]) {
         await page.setViewportSize({ width, height: 900 });
-        if (
-          await page.evaluate(
-            () => document.documentElement.scrollWidth > innerWidth + 1,
-          )
-        )
-          failures.push(`overflow-${width}`);
+        await page.waitForTimeout(100);
+        const measure = await page.evaluate(() => {
+          const controls = [...document.querySelectorAll('.admin-content input[id^="project-"]:not([type="hidden"]):not([type="checkbox"]), .admin-content textarea[id^="project-"], .admin-content button[aria-label^="Move image"], .admin-content button[aria-label^="Replace image"], .admin-content button[aria-label^="Remove image"]')].filter((control) => control.getBoundingClientRect().height > 0);
+          const short = controls.filter((control) => control.getBoundingClientRect().height < 44 || control.getBoundingClientRect().right > innerWidth + 1);
+          return { overflow: document.documentElement.scrollWidth > innerWidth + 1, short: short.length, sample: short[0]?.id || short[0]?.getAttribute("aria-label") || "" };
+        });
+        if (measure.overflow || measure.short) failures.push({ kind: "editor-geometry", width, ...measure });
       }
       await page.route("**/api/admin/projects", (route) => {
         mockedWrites++;
@@ -214,12 +247,54 @@ test(
       )
         failures.push("unsaved-cancel");
       await page.getByRole("button", { name: "Cancel" }).last().click();
+      await page.getByRole("button", { name: "Upload replacement" }).click();
+      await page.getByRole("dialog", { name: "Choose an image" }).locator('input[type="file"]').setInputFiles({ name: "unsaved-project.png", mimeType: "image/png", buffer: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLttAAAAABJRU5ErkJggg==", "base64") });
+      await page.getByRole("button", { name: "Close media picker" }).click();
+      await page.getByRole("button", { name: "Cancel", exact: true }).click();
+      const discard = page.getByRole("dialog", { name: "Discard unsaved project changes?" });
+      await discard.getByRole("button", { name: "Discard changes" }).click();
+      await page.getByRole("alert").filter({ hasText: "1 uploaded image(s) could not be removed" }).waitFor();
+      if (new URL(page.url()).pathname !== "/admin/projects/new") failures.push("failed-cleanup-left-editor");
+      await page.getByRole("button", { name: "Cancel", exact: true }).click();
+      await discard.getByRole("button", { name: "Discard changes" }).click();
+      await page.waitForURL("**/admin/projects");
+      if (mockedUpload !== 1 || mockedCleanup !== 2) failures.push({ kind: "unsaved-project-upload-cleanup", mockedUpload, mockedCleanup });
+      const saveOrder = [];
+      await page.route("**/api/admin/media?*", (route) => {
+        if (route.request().method() === "DELETE") {
+          saveOrder.push("cleanup");
+          return route.fulfill({ json: { success: true } });
+        }
+        return route.fulfill({ json: { data: fixtures, count: fixtures.length } });
+      });
+      await page.route("**/api/admin/media/upload", (route) => {
+        saveOrder.push("upload");
+        return route.fulfill({ json: { data: { id: "00000000-0000-4000-8000-000000000098", url: `${first}?unsaved=1`, secure_url: `${first}?unsaved=1`, alt_text: "Unused review image" } } });
+      });
+      await page.route("**/api/admin/projects", (route) => {
+        mockedWrites++;
+        saveOrder.push("save");
+        return route.fulfill({ status: 503, json: { error: "Review save unavailable" } });
+      });
+      await page.goto("http://localhost:3000/admin/projects/new", { waitUntil: "domcontentloaded" });
+      await page.getByRole("heading", { name: "Create New Project" }).waitFor();
+      await page.locator("#project-title").fill("Unsaved project review");
+      await page.getByRole("button", { name: "Choose from library" }).click();
+      await selectImage("Review image 1");
+      await page.getByRole("button", { name: "Upload replacement" }).click();
+      await page.getByRole("dialog", { name: "Choose an image" }).locator('input[type="file"]').setInputFiles({ name: "unused-project.png", mimeType: "image/png", buffer: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLttAAAAABJRU5ErkJggg==", "base64") });
+      await page.getByRole("button", { name: "Close media picker" }).click();
+      await page.getByRole("button", { name: "Save Project" }).click();
+      await page.getByRole("alert").filter({ hasText: "Review save unavailable" }).waitFor();
+      if (JSON.stringify(saveOrder) !== JSON.stringify(["upload", "cleanup", "save"])) failures.push({ kind: "unused-upload-before-save", saveOrder });
       console.log(
         JSON.stringify({
           widths: 4,
           errors,
           writes: writes - mockedWrites,
           mockedWrites,
+          mockedUpload,
+          mockedCleanup,
           failures,
         }),
       );

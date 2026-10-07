@@ -450,7 +450,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
           <p id="blog-tags-hint" className="text-xs text-ink-secondary">{tags.length} / 10 tags. Separate multiple tags with commas; they power Blog filters. {tags.length > 10 ? "This legacy post exceeds the new limit; existing tags are preserved, but reduce them to add new ones." : ""}</p>
           <div className="mb-2 flex flex-wrap gap-2">
             {tags.map(tag => (
-             <span key={tag} className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-border-hairline bg-surface-raised py-1 pl-3 pr-1 text-sm text-ink-primary">
+              <span key={tag} className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-border-hairline bg-surface-raised pl-3 pr-1 text-sm text-ink-primary">
                <span className="min-w-0 break-words">{tag}</span>
                <button type="button" onClick={() => removeTag(tag)} aria-label={`Remove ${tag} tag`} className="flex size-11 shrink-0 items-center justify-center rounded-full text-ink-secondary hover:bg-surface-base hover:text-ink-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-current">
                  <X aria-hidden className="size-4" />
