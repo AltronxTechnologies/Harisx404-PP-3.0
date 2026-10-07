@@ -140,7 +140,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
               aria-label="Back to Blog"
               className="inline-flex min-h-6 items-center font-mono text-xs font-medium uppercase tracking-widest text-text-secondary transition-colors hover:text-text-primary focus-visible:rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current"
             >
-              The Blog
+              Blog
             </Link>
             <h1 className="heading-glow mx-auto mt-4 max-w-xl break-words text-balance font-display text-[46px] font-medium leading-none tracking-tight text-text-primary md:text-[56px] md:tracking-[-1.5px]">
               {post.title}

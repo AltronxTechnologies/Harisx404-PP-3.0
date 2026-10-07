@@ -242,7 +242,7 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
         <div className="relative px-4 xl:px-0">
           <PaperHeroTexture className="-inset-x-2 bottom-0 top-[-128px] sm:-inset-x-3 sm:top-[-144px] md:top-[-176px] lg:inset-x-0" />
           <header className="relative mx-auto max-w-4xl text-center">
-            <p className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">Selected Projects</p>
+            <p className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">Project</p>
             <h1 className="heading-glow mx-auto mt-4 max-w-3xl break-words text-balance [font-family:var(--font-instrument-serif),serif] text-[46px] font-medium leading-none tracking-tight text-text-primary md:text-[56px] md:tracking-[-1.5px]">{project.title}</h1>
             {summary && <p className="mx-auto mt-4 max-w-2xl text-pretty text-[15px] leading-6 text-text-secondary [overflow-wrap:anywhere]">{summary}</p>}
           </header>
