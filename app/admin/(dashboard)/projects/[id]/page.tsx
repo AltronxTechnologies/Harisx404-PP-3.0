@@ -1,10 +1,13 @@
 import { ProjectForm } from "@/app/components/admin/ProjectForm";
+import { requireAdmin } from "@/app/lib/admin-auth";
 import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
 import Link from "next/link";
 
 export default async function EditProjectPage({ params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireAdmin();
+  if (auth.response) redirect(auth.response.status === 401 ? "/admin/login" : "/");
   const { id } = await params;
   if (!z.string().uuid().safeParse(id).success) notFound();
   const supabase = await createSupabaseAdminClient();

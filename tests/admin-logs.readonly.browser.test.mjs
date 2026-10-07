@@ -56,7 +56,9 @@ test("Admin Logs browses connected events without writes", { skip: process.env.R
     assert.equal(await page.getByRole("alert").filter({ hasText: /Logs or counts could not be loaded|Logs could not be loaded/ }).count(), 0);
     stage = "responsive";
     for (const width of [320, 390, 768, 1280, 1440]) {
+      stage = `responsive-${width}`;
       await page.setViewportSize({ width, height: 900 });
+      await page.waitForTimeout(150);
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false, `Overflow at ${width}`);
       assert.equal(await page.locator("main button:visible").evaluateAll((buttons) => buttons.filter((button) => button.getBoundingClientRect().right > innerWidth + 1).length), 0, `Out-of-view action at ${width}`);
       assert.equal(await page.locator("main button:visible:not(:disabled)").evaluateAll((buttons) => buttons.filter((button) => button.getBoundingClientRect().height < 44).length), 0, `Undersized action at ${width}`);

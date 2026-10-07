@@ -48,6 +48,7 @@ test("Analytics reflects the public published collection and explains missing sc
   assert.match(stats, /fetchBlogIndexPosts\(\)/);
   assert.doesNotMatch(stats, /fetchAndSortBlogPosts/);
   assert.match(page, /target="_blank" rel="noopener noreferrer"/);
+  assert.match(page, /<span className="sr-only">\(opens in a new tab\)<\/span>/);
   assert.match(page, /data-admin-analytics/);
   assert.match(page, /PageSpeed scores are unavailable in the sandbox preview/);
   assert.match(page, /export const maxDuration = 60/);
@@ -107,6 +108,7 @@ test("Dashboard uses the site logo and the requested action/recent layout", asyn
   assert.match(sidebar, /section: "Content"/);
   assert.match(sidebar, /section: "Operations"/);
   assert.match(dashboard, /data-admin-dashboard-actions/);
+  assert.match(dashboard, /<span className="sr-only">\(opens in a new tab\)<\/span>/);
   assert.match(dashboard, /data-admin-dashboard-recent/);
   assert.match(dashboard, /admin-status--live/);
   assert.match(dashboard, /admin-status--pending/);

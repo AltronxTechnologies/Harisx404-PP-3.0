@@ -13,10 +13,12 @@ test("Admin settings, alerts and logs do not report invalid or partial state as 
     source("app/admin/(dashboard)/logs/page.tsx"),
     source("app/admin/(dashboard)/page.tsx"),
   ]);
-  for (const field of ["site_name", "seo_description", "seo_keywords", "github_url", "twitter_url", "linkedin_url", "email_address"]) {
+  for (const field of ["site_name", "seo_description", "github_url", "twitter_url", "linkedin_url", "email_address"]) {
     assert.match(settings, new RegExp(`errorProps\\("${field}"\\)`));
     assert.match(settings, new RegExp(`<FieldError name="${field}"`));
   }
+  assert.doesNotMatch(settings, /register\("seo_keywords"\)/);
+  assert.match(settingsApi, /seo_keywords: z\.string\(\)\.trim\(\)\.max\(500\)\.optional\(\)/);
   assert.match(settings, /useAdminNavigationGuard\(isDirty\)/);
   assert.match(settings, /readAdminResponse\(res, "Site settings"\)/);
   assert.match(settingsApi, /fields: parsed\.error\.flatten\(\)\.fieldErrors/);
@@ -38,9 +40,10 @@ test("Admin navigation, media references and project bounds protect unsaved or m
     source("app/api/admin/experience/route.ts"),
   ]);
   assert.match(guard, /setLeaveTarget\("__signout__"\)/);
+  assert.match(guard, /button\?\.getAttribute\("aria-label"\) === "Sign Out"/);
   assert.match(guard, /window\.history\.pushState/);
-  assert.match(blog, /useAdminNavigationGuard\(isDirty \|\| Boolean\(tagInput\.trim\(\)\)\)/);
-  assert.match(project, /useAdminNavigationGuard\(isDirty \|\| galleryDirty\)/);
+  assert.match(blog, /useAdminNavigationGuard\(isDirty \|\| Boolean\(tagInput\.trim\(\)\) \|\| isUploadingImages\)/);
+  assert.match(project, /useAdminNavigationGuard\(isDirty \|\| galleryDirty \|\| stagedImages\.length > 0/);
   assert.match(project, /<BuildlogSelect id="project-stage"/);
   assert.match(project, /<BuildlogSelect id="project-status"/);
   assert.match(projectApi, /\.max\(32\)\.optional\(\)\.default\(\[\]\)/);

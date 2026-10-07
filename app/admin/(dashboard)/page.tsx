@@ -97,6 +97,7 @@ export default async function AdminDashboard() {
                   <a key={action.label} href={action.href} target="_blank" rel="noopener noreferrer" className="flex min-h-11 items-center gap-3 rounded-xl border border-border-primary/50 bg-bg-primary px-4 py-2.5 text-sm font-medium text-text-secondary transition-colors hover:bg-border-primary/30 hover:text-text-primary">
                     <Icon className="h-4 w-4 shrink-0" />
                     {action.label}
+                    <span className="sr-only">(opens in a new tab)</span>
                   </a>
                 );
               }

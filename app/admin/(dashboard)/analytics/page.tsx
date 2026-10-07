@@ -59,6 +59,7 @@ function TopArticles({ title, articles, unit, unavailable }: { title: string; ar
                     <span aria-hidden="true">{share}%</span>
                   </span>
                   <ArrowUpRight aria-hidden className="size-4 shrink-0 text-ink-secondary" />
+                  <span className="sr-only">(opens in a new tab)</span>
                 </Link>
               </li>
             );

@@ -53,7 +53,7 @@ test("Buildlog Admin edits fail on stale timestamps and per-page settings are st
   assert.match(form, /<BuildlogSelect id="buildlog-lifecycle"/);
   assert.doesNotMatch(form, /<select/);
   assert.match(guard, /window\.history\.pushState\(currentState, "", currentUrl\)/);
-  assert.match(guard, /button\?\.textContent\?\.trim\(\) === "Sign Out"/);
+  assert.match(guard, /button\?\.textContent\?\.trim\(\) === "Sign Out" \|\| button\?\.getAttribute\("aria-label"\) === "Sign Out"/);
   assert.match(form, /<fieldset disabled=\{isSubmitting\}/);
   assert.match(settings, /export const buildlogPageSettings/);
   assert.doesNotMatch(settings, /public_buildlog_settings|fetchBuildlogSettings/);

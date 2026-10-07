@@ -16,7 +16,7 @@ export function useAdminNavigationGuard(isDirty: boolean) {
     const onClick = (event: MouseEvent) => {
       if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.altKey || event.shiftKey || !(event.target instanceof Element)) return;
       const button = event.target.closest("button");
-      if (button?.textContent?.trim() === "Sign Out") {
+      if (button?.textContent?.trim() === "Sign Out" || button?.getAttribute("aria-label") === "Sign Out") {
         event.preventDefault();
         event.stopImmediatePropagation();
         setLeaveTarget("__signout__");

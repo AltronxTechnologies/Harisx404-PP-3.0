@@ -58,12 +58,7 @@ test("FAQ visibility and deletion confirm before writes and report failures", as
     await click(host.querySelector<HTMLButtonElement>('[aria-label="Delete FAQ: Review FAQ?"]')!);
     dialog = document.querySelector('[role="dialog"]')!;
     const confirm = [...dialog.querySelectorAll("button")].find((button) => button.textContent === "Delete permanently")!;
-    assert.equal(confirm.disabled, true);
-    await act(async () => {
-      const input = dialog.querySelector("input")!;
-      Object.getOwnPropertyDescriptor(browser.HTMLInputElement.prototype, "value")!.set!.call(input, "DELETE");
-      input.dispatchEvent(new browser.Event("input", { bubbles: true }) as unknown as Event);
-    });
+    assert.equal(dialog.querySelector("input"), null);
     assert.equal(confirm.disabled, false);
     await act(async () => { confirm.click(); await new Promise((resolve) => setTimeout(resolve, 0)); });
     assert.equal(requests[2].method, "DELETE");

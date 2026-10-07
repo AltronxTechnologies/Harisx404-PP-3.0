@@ -93,6 +93,18 @@ test("Admin Settings and Testimonials validation and navigation review", { skip:
     stage = "settings-signout";
     await settingsDialog.waitFor();
     await settingsDialog.getByRole("button", { name: "Cancel" }).click();
+    stage = "settings-collapsed-signout";
+    await settings.addStyleTag({ content: "nextjs-portal { display: none !important; }" });
+    await settings.getByRole("button", { name: "Collapse navigation" }).click();
+    await settings.waitForTimeout(200);
+    const collapsedSignout = settings.getByRole("button", { name: "Sign Out" });
+    assert.equal(await collapsedSignout.getAttribute("aria-label"), "Sign Out");
+    await collapsedSignout.click({ noWaitAfter: true, timeout: 5000 });
+    await settingsDialog.waitFor();
+    assert.equal(mockedWrites, 1, "Collapsed Sign Out attempted a write");
+    await settingsDialog.getByRole("button", { name: "Cancel" }).click();
+    assert.equal(new URL(settings.url()).pathname, "/admin/settings");
+    await settings.getByRole("button", { name: "Expand navigation" }).click();
 
     stage = "settings-discard";
     await settings.getByRole("button", { name: "Discard changes" }).click();

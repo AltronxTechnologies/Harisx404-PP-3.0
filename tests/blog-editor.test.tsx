@@ -223,11 +223,14 @@ test("Blog-only toolbar controls do not appear in Project/Changelog editors", as
     await act(async () => host.querySelector<HTMLButtonElement>('[role="group"][aria-label="Edit link"] button:last-of-type')!.click());
     assert.equal(host.querySelector('[role="group"][aria-label="Edit link"]'), null);
     const previousFetch = globalThis.fetch;
-    globalThis.fetch = async () => new Response(JSON.stringify({ data: [{ id: "photo", url: "/blog/photo.jpg", secure_url: "/blog/photo.jpg", alt_text: "IMG_1234.png" }], count: 1 }), { status: 200 });
+    globalThis.fetch = async () => Response.json({ data: [{ id: "photo", url: "/blog/photo.jpg", secure_url: "/blog/photo.jpg", alt_text: "IMG_1234.png" }], count: 1 });
     try {
       await act(async () => host.querySelector<HTMLButtonElement>('[aria-label="Insert image"]')!.click());
       assert.ok(document.querySelector('[role="dialog"][aria-label="Choose an image"]'));
-       await act(async () => document.querySelector<HTMLButtonElement>('[aria-label="IMG_1234.png"]')!.click());
+      await act(async () => { await new Promise((resolve) => setTimeout(resolve, 0)); });
+      const option = document.querySelector<HTMLButtonElement>('[aria-label="IMG_1234.png"]');
+      assert.ok(option, "the media option should render after its read completes");
+      await act(async () => option.click());
       await act(async () => [...document.querySelectorAll<HTMLButtonElement>("button")].find((button) => button.textContent === "Select Image")!.click());
        assert.ok(host.querySelector('[role="group"][aria-label="Image details"]'));
        assert.equal(host.querySelector<HTMLInputElement>('[role="group"][aria-label="Image details"] input')!.value, "");

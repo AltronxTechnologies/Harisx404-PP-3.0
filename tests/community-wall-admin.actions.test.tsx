@@ -61,12 +61,7 @@ test("Community Wall moderation confirms decisions, rejects stale edits, and pre
     await act(async () => host.querySelector<HTMLButtonElement>('[aria-label="Delete Review visitor\'s Community Wall note"]')!.click());
     dialog = document.querySelector('[role="dialog"]')!;
     const confirm = [...dialog.querySelectorAll("button")].find((item) => item.textContent === "Delete permanently")!;
-    assert.equal(confirm.disabled, true);
-    const input = dialog.querySelector("input")!;
-    await act(async () => {
-      Object.getOwnPropertyDescriptor(browser.HTMLInputElement.prototype, "value")!.set!.call(input, "DELETE");
-      input.dispatchEvent(new browser.Event("input", { bubbles: true }) as unknown as Event);
-    });
+    assert.equal(dialog.querySelector("input"), null);
     assert.equal(confirm.disabled, false);
     await act(async () => { confirm.click(); await new Promise((resolve) => setTimeout(resolve, 0)); });
     assert.equal(requests.length, 2);

@@ -63,7 +63,8 @@ test("Admin Certifications connected read-only list and form review", { skip: pr
       await deleteButton.click();
       const dialog = list.getByRole("dialog", { name: "Permanently delete certification?" });
       await dialog.waitFor();
-      assert.equal(await dialog.getByRole("button", { name: "Delete permanently" }).isDisabled(), true);
+      assert.equal(await dialog.getByRole("textbox").count(), 0);
+      assert.equal(await dialog.getByRole("button", { name: "Delete permanently" }).isDisabled(), false);
       await dialog.getByRole("button", { name: "Cancel" }).click();
       assert.equal(mockedWrites, 0);
       const editHref = await list.getByRole("link", { name: /^Edit / }).first().getAttribute("href");
