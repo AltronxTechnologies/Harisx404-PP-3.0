@@ -164,6 +164,7 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
             name: canonicalProject.title,
             ...(canonicalProject.image_url ? { image: canonicalProject.image_url } : {}),
             description: canonicalProject.tagline || canonicalProject.description,
+            ...(canonicalProject.tags.length ? { keywords: canonicalProject.tags.slice(0, 10).join(", ") } : {}),
             /* Canonical page URL — the live demo URL (when present) goes in
                sameAs instead of overloading `url`. */
             url: `${siteMetadata.siteUrl}/projects/${canonicalProject.slug}`,
@@ -195,6 +196,7 @@ export async function generateMetadata({
   return {
     title: project.title,
     description,
+    keywords: project.tags.slice(0, 10),
     openGraph: {
       title: project.title,
       description,

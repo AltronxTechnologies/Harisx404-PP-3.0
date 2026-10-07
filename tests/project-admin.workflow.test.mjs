@@ -33,7 +33,9 @@ test("Project editor preserves prior cover, announces validation and guards unsa
   );
   assert.match(form, /const galleryDirty = JSON\.stringify\(galleryImages\)/);
   assert.match(form, /const discardSessionUploads = async \(preserve = new Set<string>\(\)\) =>/);
-  assert.match(form, /onUploaded=\{\(media\) =>/);
+  assert.match(form, /const stageFiles = \(event: React\.ChangeEvent<HTMLInputElement>\) =>/);
+  assert.match(form, /await fetch\("\/api\/admin\/media\/upload", \{ method: "POST", body \}\)/);
+  assert.match(form, /const cleaned = createdIds\.length \? await discardSessionUploads\(preserveOthers\)/);
   assert.match(form, /const optionalHttpUrl = z\.string\(\)\.refine/);
   assert.match(form, /live_url: optionalHttpUrl\.optional\(\)/);
   assert.match(form, /<AdminConfirmDialog open=\{leaveConfirmation\}/);

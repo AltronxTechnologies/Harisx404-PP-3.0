@@ -127,7 +127,7 @@ test("Admin editors and mobile lists keep labelled controls and reachable action
     source("app/components/admin/TiptapEditor.tsx"),
     source("app/components/admin/MediaPickerModal.tsx"),
   ]);
-  for (const field of ["title", "slug", "description", "tagline", "category", "tech-stack", "latest-update", "tags", "features", "status", "start-date", "end-date"]) {
+  for (const field of ["title", "slug", "tagline", "category", "latest-update", "features", "status", "start-date"]) {
     if (field === "status") {
       assert.match(project, /<BuildlogSelect id="project-status" label="Publication status"/);
     } else {
@@ -135,6 +135,8 @@ test("Admin editors and mobile lists keep labelled controls and reachable action
       assert.match(project, new RegExp(`id="project-${field}"`));
     }
   }
+  for (const field of ["tech-stack", "tags"]) assert.match(project, new RegExp(`<ProjectPillEditor id="project-${field}"`));
+  assert.doesNotMatch(project, /id="project-end-date"|id="project-description"/);
   assert.match(project, /<BuildlogSelect id="project-stage" label="Development stage"/);
   assert.match(editor, /"aria-label": label/);
   assert.match(theme, /\.ProseMirror:focus-visible/);

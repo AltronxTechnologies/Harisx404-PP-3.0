@@ -15,9 +15,10 @@ import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
 import { captionWordCount } from "@/app/lib/project-captions";
 import { projectStages, projectStageLabels } from "@/app/lib/project-stage";
 import { normalizeBlogSlug, isValidBlogDate } from "@/app/lib/blog-defaults";
-import { Image as ImageIcon, Loader2, Sparkles, ArrowUp, ArrowDown, Trash2, UploadCloud } from "lucide-react";
+import { Image as ImageIcon, Loader2, Sparkles, ArrowUp, ArrowDown, Trash2, UploadCloud, X } from "lucide-react";
 
-type GalleryImage = { mediaId: string; url: string; caption: string; altText: string };
+type GalleryImage = { mediaId: string; url: string; caption: string; altText: string; fileName?: string };
+type StagedImage = { id: string; file: File; url: string; caption: string; altText: string };
 
 const sectionFields = [
   { key: "why_built", label: "Why I built this", hint: "The problem and your motivation." },
@@ -36,11 +37,53 @@ type CaseStudySections = Record<(typeof sectionFields)[number]["key"], string>;
 const emptySections: CaseStudySections = { why_built: "", key_decisions: "", results: "", lessons_learned: "" };
 const optionalHttpUrl = z.string().refine((url) => !url || (z.string().url().safeParse(url).success && /^https?:\/\//i.test(url)), "Use an HTTP or HTTPS URL");
 
+function mergeProjectTokens(current: string, draft: string, separator: "," | "\n") {
+  const split = separator === "," ? /[,\n]/ : /\r?\n/;
+  const tokens = current.split(split).map((value) => value.trim()).filter(Boolean);
+  for (const value of draft.split(split).map((part) => part.trim()).filter(Boolean)) {
+    if (value.length > 100 || !/[\p{L}\p{N}]/u.test(value)) return null;
+    if (!tokens.some((item) => item.toLocaleLowerCase() === value.toLocaleLowerCase())) tokens.push(value);
+  }
+  return tokens.length <= 32 ? tokens.join(separator === "," ? ", " : "\n") : null;
+}
+
+function ProjectPillEditor({ id, label, value, draft, onDraftChange, onChange, separator, hint, error }: {
+  id: string; label: string; value: string; draft: string; onDraftChange: (value: string) => void;
+  onChange: (value: string) => void; separator: "," | "\n"; hint: string; error?: string;
+}) {
+  const [inputError, setInputError] = useState("");
+  const tokens = value.split(separator === "," ? /,/ : /\r?\n/).map((item) => item.trim()).filter(Boolean);
+  const add = (text = draft) => {
+    const next = mergeProjectTokens(value, text, separator);
+    if (next === null) {
+      setInputError("Use at most 32 unique entries with letters or numbers, each under 101 characters.");
+      return;
+    }
+    onChange(next);
+    onDraftChange("");
+    setInputError("");
+  };
+  return <div className="min-w-0 space-y-2 rounded-xl border border-border-hairline bg-surface-base p-4">
+    <label htmlFor={id} className="block text-sm font-medium">{label}</label>
+    <p className="text-xs text-ink-secondary">{hint} {tokens.length} / 32 selected.</p>
+    {tokens.length > 0 && <div className="flex flex-wrap gap-2">{tokens.map((item, index) =>
+      <span key={`${item}-${index}`} className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-border-hairline bg-surface-raised pl-3 pr-1 text-sm text-ink-primary">
+        <span className="min-w-0 break-words">{item}</span>
+        <button type="button" aria-label={`Remove ${item} from ${label}`} onClick={() => onChange(tokens.filter((_, position) => position !== index).join(separator === "," ? ", " : "\n"))} className="flex size-11 shrink-0 items-center justify-center rounded-full text-ink-secondary hover:bg-surface-base focus-visible:outline focus-visible:outline-2 focus-visible:outline-current"><X className="size-4" aria-hidden /></button>
+      </span>)}</div>}
+    <div className="flex gap-2">
+      <input id={id} value={draft} onChange={(event) => { const text = event.target.value; onDraftChange(text); if (separator === "," && text.includes(",")) add(text); }} onPaste={(event) => { const pasted = event.clipboardData.getData("text"); if (pasted.includes(separator)) { event.preventDefault(); add(`${draft}${pasted}`); } }} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); add(); } }} aria-invalid={Boolean(error || inputError)} aria-describedby={error || inputError ? `${id}-error` : undefined} className="min-h-11 min-w-0 flex-1 rounded-xl border border-border-hairline bg-surface-raised px-3 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-current" placeholder={separator === "," ? "Add tags, separated by commas" : "Add a technology"} />
+      <button type="button" onClick={() => add()} aria-label={`Add ${label}`} className="min-h-11 rounded-xl border border-border-hairline px-4 text-sm hover:bg-surface-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-current">Add</button>
+    </div>
+    {(error || inputError) && <p id={`${id}-error`} role="alert" className="text-xs text-red-300">{error || inputError}</p>}
+  </div>;
+}
+
 const projectSchema = z.object({
   title: z.string().trim().min(1, "Title is required").max(200, "Title must be 200 characters or fewer"),
   slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase letters, numbers and hyphens").max(200),
   description: z.string().max(10000).optional(),
-  tagline: z.string().max(160, "Keep the short description within 160 characters").optional(),
+  tagline: z.string().trim().min(1, "Add a short summary for project cards and the detail header").max(160, "Keep the summary within 160 characters"),
   category: z.string().trim().min(1, "At least one category is required").max(60),
   year: z.string().optional().or(z.literal("")),
   latest_update_label: z.string().max(32).optional(),
@@ -61,7 +104,7 @@ const projectSchema = z.object({
   related_project_ids: z.array(z.string().uuid()).max(2, "Choose no more than two projects").refine((ids) => new Set(ids).size === ids.length, "Choose two different projects"),
   content: z.string().max(200000, "Case study must be 200,000 characters or fewer").optional(),
   status: z.enum(["draft", "published", "archived"]),
-  cover_image_url: z.string().url("At least one image is required; choose a cover").refine((url) => /^https?:\/\//i.test(url), "Use an HTTP or HTTPS image URL"),
+  cover_image_url: z.string().refine((url) => !url || (z.string().url().safeParse(url).success && /^https?:\/\//i.test(url)), "Use an HTTP or HTTPS image URL"),
   cover_image_id: z.string().uuid().optional().or(z.literal("")),
   live_url: optionalHttpUrl.optional(),
   github_url: optionalHttpUrl.optional(),
@@ -94,17 +137,19 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
-  const [mediaPickerTarget, setMediaPickerTarget] = useState<"cover" | "gallery" | "replace-gallery">("cover");
-  const [replacingIndex, setReplacingIndex] = useState(0);
-  const [mediaPickerTab, setMediaPickerTab] = useState<"library" | "upload">("library");
+  const [mediaPickerTarget, setMediaPickerTarget] = useState<"cover" | "gallery">("cover");
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>(initialData?.galleryImages ?? []);
+  const [stagedImages, setStagedImages] = useState<StagedImage[]>([]);
+  const [stagedCoverId, setStagedCoverId] = useState<string | null>(null);
+  const stagedUrls = useRef(new Set<string>());
   const uploadedMedia = useRef(new Map<string, { url: string; secure_url: string }>());
   const [uploadedCount, setUploadedCount] = useState(0);
-  const [isUploadingMedia, setIsUploadingMedia] = useState(false);
   const [isCleaningMedia, setIsCleaningMedia] = useState(false);
   const cleanupInProgress = useRef(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [relatedSearch, setRelatedSearch] = useState("");
+  const [techDraft, setTechDraft] = useState("");
+  const [tagDraft, setTagDraft] = useState("");
   const slugEdited = useRef(Boolean(initialData?.id));
   const [saveConfirmation, setSaveConfirmation] = useState<{ title: string; description: string; label: string; data: ProjectFormValues } | null>(null);
   const [leaveConfirmation, setLeaveConfirmation] = useState(false);
@@ -124,7 +169,7 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
       title: initialData?.title ?? "",
       slug: initialData?.slug ?? "",
       description: initialData?.description ?? "",
-      tagline: initialData?.tagline ?? "",
+      tagline: initialData?.tagline || (initialData?.description || "").slice(0, 160),
       category: initialData?.category ?? "Web App",
       year: initialData?.year ?? "",
       latest_update_label: initialData?.latest_update_label ?? "",
@@ -142,7 +187,7 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
         ? initialData.features.join("\n")
         : initialData?.features ?? "",
       related_project_ids: initialData?.related_project_ids ?? [],
-      content: initialData?.content ?? "",
+      content: initialData?.content || initialData?.description || "",
       status: (initialData?.status as ProjectFormValues["status"]) ?? "draft",
       cover_image_url: initialData?.cover_image_url ?? "",
       cover_image_id: initialData?.cover_image_id ?? "",
@@ -154,23 +199,49 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
     },
   });
   const coverUrl = watch("cover_image_url") || "";
+  const stagedCover = stagedImages.find((image) => image.id === stagedCoverId);
+  const coverPreview = stagedCover?.url || coverUrl;
   const completed = watch("project_stage") === "completed";
   const selectedRelatedIds = watch("related_project_ids") || [];
   const relatedOptions = availableProjects.filter((item) => item.id !== initialData?.id && `${item.title} ${item.slug}`.toLowerCase().includes(relatedSearch.trim().toLowerCase()));
   const coverCaption = watch("case_study_sections.cover_caption") || "";
   const coverField = register("cover_image_url");
   const galleryDirty = JSON.stringify(galleryImages) !== JSON.stringify(initialData?.galleryImages ?? []);
-  const { leaveTarget: navigationTarget, setLeaveTarget: setNavigationTarget, confirmLeave } = useAdminNavigationGuard(isDirty || galleryDirty || uploadedCount > 0 || isUploadingMedia);
+  const { leaveTarget: navigationTarget, setLeaveTarget: setNavigationTarget, confirmLeave } = useAdminNavigationGuard(isDirty || galleryDirty || stagedImages.length > 0 || uploadedCount > 0 || Boolean(techDraft.trim() || tagDraft.trim()));
 
   useEffect(() => {
-    if (!isDirty && !galleryDirty && !uploadedCount && !isUploadingMedia) return;
+    if (!isDirty && !galleryDirty && !stagedImages.length && !uploadedCount && !techDraft.trim() && !tagDraft.trim()) return;
     const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
-  }, [isDirty, galleryDirty, uploadedCount, isUploadingMedia]);
+  }, [isDirty, galleryDirty, stagedImages.length, uploadedCount, techDraft, tagDraft]);
+
+  useEffect(() => () => { for (const url of stagedUrls.current) URL.revokeObjectURL(url); }, []);
+
+  const stageFiles = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = [...(event.target.files || [])];
+    event.target.value = "";
+    if (!files.length) return;
+    if (galleryImages.length + stagedImages.length + files.length > (coverUrl ? 20 : 21)) { setErrorMsg("Choose no more than 20 gallery images and one cover."); return; }
+    if (files.some((file) => ((file.type !== "" && !file.type.startsWith("image/")) || (file.type === "" && !/\.(?:jpe?g|png|webp|gif|avif|heic|heif|tiff?|bmp|ico)$/i.test(file.name)) || file.type === "image/svg+xml" || /\.svgz?$/i.test(file.name) || !file.name || file.name.length > 255 || !file.size || file.size > 20 * 1024 * 1024))) {
+      setErrorMsg("Choose nonempty images under 20 MB with filenames under 256 characters. SVG is not supported.");
+      return;
+    }
+    const next = files.map((file) => { const url = URL.createObjectURL(file); stagedUrls.current.add(url); return { id: crypto.randomUUID(), file, url, caption: "", altText: "" }; });
+    setStagedImages((current) => [...current, ...next]);
+    if (!coverUrl && !stagedCoverId) setStagedCoverId(next[0].id);
+    setErrorMsg("");
+  };
+
+  const removeStaged = (id: string) => {
+    const image = stagedImages.find((item) => item.id === id);
+    if (image) { URL.revokeObjectURL(image.url); stagedUrls.current.delete(image.url); }
+    setStagedImages((current) => current.filter((item) => item.id !== id));
+    if (stagedCoverId === id) setStagedCoverId(null);
+  };
 
   const discardSessionUploads = async (preserve = new Set<string>()) => {
-    if (isUploadingMedia || cleanupInProgress.current) {
+    if (cleanupInProgress.current) {
       setErrorMsg("Wait for image uploads or cleanup to finish before leaving.");
       return false;
     }
@@ -229,6 +300,7 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
     });
     setValue("cover_image_url", image.url, { shouldDirty: true, shouldValidate: true });
     setValue("cover_image_id", image.mediaId, { shouldDirty: true });
+    setStagedCoverId(null);
     setValue("case_study_sections.cover_caption", image.caption, { shouldDirty: true, shouldValidate: true });
     setValue("case_study_sections.cover_alt", image.altText, { shouldDirty: true, shouldValidate: true });
     setErrorMsg("");
@@ -237,11 +309,12 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
   const saveProject = async (data: ProjectFormValues) => {
     setIsSubmitting(true);
     setErrorMsg("");
+    const createdIds: string[] = [];
     try {
-      if (galleryImages.some((image) => captionWordCount(image.caption) > 30)) {
+      if ([...galleryImages, ...stagedImages].some((image) => captionWordCount(image.caption) > 30)) {
         throw new Error("Each image caption must be 30 words or fewer.");
       }
-      if (galleryImages.length > 20) throw new Error("Choose no more than 20 gallery images.");
+      if (galleryImages.length + stagedImages.length - Number(Boolean(stagedCoverId)) > 20) throw new Error("Choose no more than 20 gallery images.");
       const preserve = new Set(galleryImages.map((image) => image.mediaId));
       if (data.cover_image_id) preserve.add(data.cover_image_id);
       const submittedText = JSON.stringify(data);
@@ -249,8 +322,31 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
         if ([media.url, media.secure_url].some((url) => Boolean(url) && submittedText.includes(url))) preserve.add(id);
       }
       if (!await discardSessionUploads(preserve)) return;
+      const uploaded = new Map<string, { id: string; url: string }>();
+      for (const staged of stagedImages) {
+        const body = new FormData();
+        body.append("file", staged.file);
+        const response = await fetch("/api/admin/media/upload", { method: "POST", body });
+        const result = await readAdminResponse(response, "Project image upload");
+        if (!response.ok || !result.data?.id) throw new Error(result.error || "Project image upload could not be confirmed. Check the Media Library before retrying.");
+        const url = result.data.secure_url || result.data.url;
+        uploadedMedia.current.set(result.data.id, { url: result.data.url, secure_url: result.data.secure_url });
+        createdIds.push(result.data.id);
+        setUploadedCount(uploadedMedia.current.size);
+        if (!url) throw new Error("Project image upload returned no URL. Cleanup was attempted; check the Media Library before retrying.");
+        uploaded.set(staged.id, { id: result.data.id, url });
+      }
+      const chosenCover = stagedCoverId ? uploaded.get(stagedCoverId) : null;
+      const existingCover = chosenCover && data.cover_image_id && data.cover_image_url && !galleryImages.some((image) => image.mediaId === data.cover_image_id)
+        ? [{ mediaId: data.cover_image_id, url: data.cover_image_url, caption: data.case_study_sections.cover_caption, altText: data.case_study_sections.cover_alt }]
+        : [];
+      const fullGallery = [...existingCover, ...galleryImages, ...stagedImages.filter((image) => image.id !== stagedCoverId).map((image) => ({ mediaId: uploaded.get(image.id)!.id, url: uploaded.get(image.id)!.url, caption: image.caption, altText: image.altText }))];
+      if (fullGallery.length > 20) throw new Error("Choose no more than 20 gallery images after selecting the cover.");
       const payload = {
         ...data,
+        cover_image_url: chosenCover?.url || data.cover_image_url,
+        cover_image_id: chosenCover?.id || data.cover_image_id,
+        case_study_sections: chosenCover ? { ...data.case_study_sections, cover_caption: stagedCover?.caption || "", cover_alt: stagedCover?.altText || "" } : data.case_study_sections,
         tech_stack: (data.tech_stack || "")
           .split(/\r?\n/)
           .map((t) => t.trim())
@@ -263,7 +359,7 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
           .split("\n")
           .map((f) => f.trim())
           .filter(Boolean),
-        gallery: galleryImages.map(({ mediaId, caption, altText }) => ({ mediaId, caption, altText })),
+        gallery: fullGallery.map(({ mediaId, caption, altText }) => ({ mediaId, caption, altText })),
       };
       const res = await fetch("/api/admin/projects", {
         method: initialData?.id ? "PUT" : "POST",
@@ -290,14 +386,28 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
       router.push("/admin/projects");
       router.refresh();
     } catch (err: any) {
-      setErrorMsg(err.message);
+      const preserveOthers = new Set([...uploadedMedia.current.keys()].filter((id) => !createdIds.includes(id)));
+      const cleaned = createdIds.length ? await discardSessionUploads(preserveOthers) : true;
+      setErrorMsg(`${err instanceof Error ? err.message : "Project save failed."}${cleaned ? "" : " Some new files may remain in the Media Library; review them before retrying."}`);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const onSubmit = (data: ProjectFormValues) => {
-    if (isUploadingMedia || isCleaningMedia) {
+    if (!data.cover_image_url && !stagedCoverId) { setError("cover_image_url", { message: "Choose a cover image before saving." }); return; }
+    const techStack = mergeProjectTokens(data.tech_stack || "", techDraft, "\n");
+    const tags = mergeProjectTokens(data.tags || "", tagDraft, ",");
+    if (techStack === null || tags === null) {
+      setErrorMsg("Review the Tech stack and Tags entries before saving.");
+      return;
+    }
+    data = { ...data, tech_stack: techStack, tags };
+    setValue("tech_stack", techStack, { shouldDirty: true, shouldValidate: true });
+    setValue("tags", tags, { shouldDirty: true, shouldValidate: true });
+    setTechDraft("");
+    setTagDraft("");
+    if (isSubmitting || isCleaningMedia) {
       setErrorMsg("Wait for image uploads or cleanup to finish before saving.");
       return;
     }
@@ -336,7 +446,7 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
       if (!res.ok) throw new Error(error || "Failed to generate");
       if (!result || typeof result !== "object") throw new Error("Project generation returned no result. No changes were applied.");
       
-      if (result.summary) setValue("description", result.summary, { shouldDirty: true, shouldValidate: true });
+      if (result.summary) setValue("tagline", result.summary.slice(0, 160), { shouldDirty: true, shouldValidate: true });
       if (result.description) setValue("content", result.description, { shouldDirty: true, shouldValidate: true });
       if (result.tags && result.tags.length > 0) {
         // Merge AI-suggested tags into the tags field (deduped).
@@ -388,135 +498,52 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="project-description" className="text-sm font-medium">Short Description</label>
-        <textarea
-          id="project-description"
-          {...register("description")}
-          rows={2}
+        <div className="flex justify-between gap-3"><label htmlFor="project-tagline" className="text-sm font-medium">Summary</label><span className="text-xs text-ink-secondary">{watch("tagline")?.length ?? 0}/160</span></div>
+        <input
+          id="project-tagline"
+          {...register("tagline")}
+          maxLength={160}
           className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
-          placeholder="A brief 1-2 sentence description..."
+          placeholder="One concise summary for the project header, cards and search previews"
         />
-        {errors.description && <p role="alert" className="text-xs text-red-300">{errors.description.message}</p>}
-      </div>
-
-        <div className="space-y-2">
-          <div className="flex justify-between gap-3"><label htmlFor="project-tagline" className="text-sm font-medium">Card / page summary (Optional)</label><span className="text-xs text-ink-secondary">{watch("tagline")?.length ?? 0}/160</span></div>
-          <input
-            id="project-tagline"
-            {...register("tagline")}
-            maxLength={160}
-            className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
-            placeholder="A concise description for the homepage and case study..."
-          />
-          {errors.tagline && <p className="text-xs text-red-500">{errors.tagline.message}</p>}
+        <p className="text-xs text-ink-secondary">Used in the detail-page header, all short card descriptions and search/social metadata. Write a brief sentence; longer context belongs in Overview below.</p>
+        {errors.tagline && <p className="text-xs text-red-500">{errors.tagline.message}</p>}
       </div>
 
       <div className="space-y-2">
-        <Controller name="project_stage" control={control} render={({ field }) => <BuildlogSelect id="project-stage" label="Development stage" value={field.value} onChange={field.onChange} options={stageOptions} errorId={errors.project_stage ? "project-stage-error" : undefined} />} />
-        <p className="text-xs text-ink-secondary">Independent of publication status. Completed shows Built and Latest update; other stages show Stage and Expected completion.</p>
-        {errors.project_stage && <p id="project-stage-error" role="alert" className="text-xs text-red-300">{errors.project_stage.message}</p>}
+        <label htmlFor="project-features" className="text-sm font-medium">Key highlights (one per line)</label>
+        <textarea id="project-features" {...register("features")} rows={4} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder={"Realtime dashboard with live charts\nRole-based access control"} />
+        <p className="text-xs text-ink-secondary">These become the bullets on project cards and the Highlights section in the case study.</p>
+        {errors.features && <p role="alert" className="text-xs text-red-300">{errors.features.message}</p>}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
-        <div className="space-y-2">
-          <label htmlFor="project-category" className="text-sm font-medium">Categories</label>
-          <input
-            id="project-category"
-            {...register("category")}
-            aria-invalid={Boolean(errors.category)}
-            aria-describedby={errors.category ? "project-category-error" : undefined}
-            className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
-            maxLength={60}
-            placeholder="Cybersecurity / Networking, AI/ML..."
-          />
-          <p className="text-xs text-ink-secondary">Separate categories with commas or spaced slashes; AI/ML stays one category.</p>
-          {errors.category && <p id="project-category-error" role="alert" className="text-xs text-red-300">{errors.category.message}</p>}
-        </div>
+       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+         <div className="min-w-0 space-y-2">
+         <Controller name="project_stage" control={control} render={({ field }) => <BuildlogSelect id="project-stage" label="Development stage" value={field.value} onChange={field.onChange} options={stageOptions} errorId={errors.project_stage ? "project-stage-error" : undefined} />} />
+         {errors.project_stage && <p id="project-stage-error" role="alert" className="text-xs text-red-300">{errors.project_stage.message}</p>}
+         </div>
 
-        {completed ? <div className="space-y-2">
-          <label htmlFor="project-built" className="text-sm font-medium">Built (Optional)</label>
-          <input id="project-built" {...register("year")} maxLength={20} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="Q2 2026 or 2025" />
-        </div> : <div className="space-y-2">
+         {completed ? <div className="min-w-0 space-y-2">
+           <label htmlFor="project-built" className="text-sm font-medium">Built (Optional)</label>
+           <input id="project-built" {...register("year")} maxLength={20} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="Q2 2026 or 2025" />
+         </div> : <div className="min-w-0 space-y-2">
           <label htmlFor="project-expected-completion" className="text-sm font-medium">Expected completion (Optional)</label>
           <input id="project-expected-completion" {...register("expected_completion_label")} maxLength={32} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="Q2 2027" />
           {errors.expected_completion_label && <p className="text-xs text-red-500">{errors.expected_completion_label.message}</p>}
         </div>}
 
-        <div className="space-y-2">
-          <label htmlFor="project-tech-stack" className="text-sm font-medium">Tech stack (one per line)</label>
-          <textarea
-            id="project-tech-stack"
-            {...register("tech_stack")}
-            rows={3}
-            className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
-            placeholder={"Next.js\nTypeScript\nSupabase"}
-          />
-          {errors.tech_stack && <p role="alert" className="text-xs text-red-300">{errors.tech_stack.message}</p>}
-        </div>
-      </div>
+         {completed && <div className="min-w-0 space-y-2"><label htmlFor="project-latest-update" className="text-sm font-medium">Latest project update (Optional)</label><input id="project-latest-update" {...register("latest_update_label")} maxLength={32} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="Q3 2026" /><p className="text-xs text-ink-secondary">Update this when the project itself changes.</p></div>}
+       </div>
 
-      {completed && <div className="space-y-2">
-        <label htmlFor="project-latest-update" className="text-sm font-medium">Latest project update (Optional)</label>
-        <input id="project-latest-update" {...register("latest_update_label")} maxLength={32} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="Q3 2026" />
-        <p className="text-xs text-ink-secondary">Set this when you update the project itself, not when you edit this page.</p>
-      </div>}
+       <div className="grid gap-4 md:grid-cols-2">
+         <div className="min-w-0 space-y-2"><label htmlFor="project-category" className="text-sm font-medium">Project type</label><input id="project-category" {...register("category")} aria-invalid={Boolean(errors.category)} aria-describedby={errors.category ? "project-category-error" : "project-category-hint"} maxLength={60} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="Web App, Cybersecurity, AI/ML..." /><p id="project-category-hint" className="text-xs text-ink-secondary">Used for fallback chips and related-project matching; tags drive the visible filters.</p>{errors.category && <p id="project-category-error" role="alert" className="text-xs text-red-300">{errors.category.message}</p>}</div>
+         <div className="min-w-0 space-y-2"><label htmlFor="project-start-date" className="text-sm font-medium">Start date (Optional)</label><input id="project-start-date" type="date" {...register("start_date")} aria-invalid={Boolean(errors.start_date)} aria-describedby={errors.start_date ? "project-start-date-error" : "project-start-date-hint"} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" /><p id="project-start-date-hint" className="text-xs text-ink-secondary">Controls project ordering and the quarter label on cards. Defaults to creation date if empty.</p>{errors.start_date && <p id="project-start-date-error" role="alert" className="text-xs text-red-300">{errors.start_date.message}</p>}</div>
+       </div>
 
-      <div className="space-y-2">
-        <label htmlFor="project-tags" className="text-sm font-medium">Tags (comma-separated)</label>
-        <textarea
-          id="project-tags"
-          {...register("tags")}
-          rows={3}
-          className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
-          placeholder="Web, Cybersecurity, AI/ML, Networking, SaaS..."
-        />
-        {errors.tags && <p role="alert" className="text-xs text-red-300">{errors.tags.message}</p>}
-        <p className="text-xs text-ink-secondary">
-          Add up to 32 comma-separated tags. All are searchable and filterable; project cards show up to three.
-        </p>
-      </div>
-
-      <div className="space-y-2">
-        <label htmlFor="project-features" className="text-sm font-medium">Key features / highlights (one per line)</label>
-        <textarea
-          id="project-features"
-          {...register("features")}
-          rows={4}
-          className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
-          placeholder={"Realtime dashboard with live charts\nRole-based access control"}
-        />
-        {errors.features && <p role="alert" className="text-xs text-red-300">{errors.features.message}</p>}
-      </div>
-
-      <fieldset aria-describedby={errors.related_project_ids ? "project-related-error" : undefined} className="space-y-3 rounded-xl border border-border-hairline p-4">
-        <legend className="px-1 text-sm font-medium">Related projects</legend>
-        <p className="text-xs text-ink-secondary">Choose up to two published projects to show below this case study. They appear in the order selected. Leave empty to hide the section.</p>
-        <p className="text-xs font-medium text-ink-secondary">Selected {selectedRelatedIds.length} / 2</p>
-        {selectedRelatedIds.length > 0 && <ol className="space-y-1">
-          {selectedRelatedIds.map((id, index) => {
-            const chosen = availableProjects.find((item) => item.id === id);
-            return <li key={id} className="flex items-center justify-between gap-3 rounded-lg bg-surface-base px-3 py-2 text-sm text-ink-primary">
-              <span className="min-w-0 break-words">{index + 1}. {chosen?.title || "Project no longer available"}</span>
-              <button type="button" onClick={() => setValue("related_project_ids", selectedRelatedIds.filter((value) => value !== id), { shouldDirty: true, shouldValidate: true })} className="min-h-11 shrink-0 text-xs text-ink-secondary underline underline-offset-2 hover:text-ink-primary">Remove</button>
-            </li>;
-          })}
-        </ol>}
-        <label htmlFor="related-project-search" className="sr-only">Search projects for related links</label>
-        <input id="related-project-search" type="search" value={relatedSearch} onChange={(event) => setRelatedSearch(event.target.value)} placeholder="Search all projects..." className="w-full rounded-lg border border-border-hairline bg-surface-base px-3 py-2 text-sm text-ink-primary focus:outline-none focus:ring-2 focus:ring-accent-signal" />
-        <div className="max-h-56 space-y-1 overflow-y-auto">
-          {relatedOptions.map((item) => {
-            const selected = selectedRelatedIds.includes(item.id);
-            const disabled = !selected && (item.status !== "published" || selectedRelatedIds.length >= 2);
-            return <label key={item.id} className={`flex min-h-11 items-center gap-3 rounded-lg border border-border-hairline px-3 py-2 text-sm ${disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-surface-base"}`}>
-              <input type="checkbox" checked={selected} disabled={disabled} onChange={() => setValue("related_project_ids", selected ? selectedRelatedIds.filter((id) => id !== item.id) : [...selectedRelatedIds, item.id], { shouldDirty: true, shouldValidate: true })} className="size-4 shrink-0 rounded border-border-hairline text-accent-signal focus:ring-accent-signal" />
-              <span className="min-w-0 flex-1 break-words text-ink-primary">{item.title}</span>
-              <span className="shrink-0 text-xs text-ink-secondary">{selected ? `#${selectedRelatedIds.indexOf(item.id) + 1}` : item.status}</span>
-            </label>;
-          })}
-          {relatedOptions.length === 0 && <p className="px-3 py-4 text-sm text-ink-secondary">No matching projects.</p>}
-        </div>
-        {errors.related_project_ids && <p id="project-related-error" role="alert" className="text-xs text-red-300">{errors.related_project_ids.message}</p>}
-      </fieldset>
+       <div className="grid gap-4 lg:grid-cols-2">
+         <ProjectPillEditor id="project-tech-stack" label="Tech stack" value={watch("tech_stack") || ""} draft={techDraft} onDraftChange={setTechDraft} onChange={(value) => setValue("tech_stack", value, { shouldDirty: true, shouldValidate: true })} separator={"\n"} hint="Shown in the case study and project card details." error={errors.tech_stack?.message} />
+         <ProjectPillEditor id="project-tags" label="Tags" value={watch("tags") || ""} draft={tagDraft} onDraftChange={setTagDraft} onChange={(value) => setValue("tags", value, { shouldDirty: true, shouldValidate: true })} separator="," hint="Drive project filters and card chips; up to three show on each card." error={errors.tags?.message} />
+       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
         <div className="space-y-2">
@@ -579,63 +606,28 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
         </div>
       </div>
       
-      <div className="grid gap-6 md:grid-cols-2">
-        <div className="space-y-2">
-          <label htmlFor="project-start-date" className="text-sm font-medium">Start Date (Optional)</label>
-          <input
-            id="project-start-date"
-            type="date"
-            {...register("start_date")}
-            aria-invalid={Boolean(errors.start_date)}
-            aria-describedby={errors.start_date ? "project-start-date-error" : undefined}
-            className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
-          />
-          {errors.start_date && <p id="project-start-date-error" role="alert" className="text-xs text-red-300">{errors.start_date.message}</p>}
-        </div>
-
-        <div className="space-y-2">
-          <label htmlFor="project-end-date" className="text-sm font-medium">End Date (Optional)</label>
-          <input
-            id="project-end-date"
-            type="date"
-            {...register("end_date")}
-            aria-invalid={Boolean(errors.end_date)}
-            aria-describedby={errors.end_date ? "project-end-date-error" : undefined}
-            className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
-          />
-          {errors.end_date && <p id="project-end-date-error" role="alert" className="text-xs text-red-300">{errors.end_date.message}</p>}
-        </div>
-      </div>
-
       <div className="space-y-3">
         <h2 className="text-sm font-medium">Project images</h2>
-        <p className="text-xs text-ink-secondary">A cover image is required even for drafts. It appears first in the project carousel; add up to 20 gallery images and reorder or replace them below. Uploads enter the shared Media Library immediately; confirmed in-app discard attempts to remove unused session uploads, but closing the tab cannot guarantee cleanup.</p>
-        {coverUrl && z.string().url().safeParse(coverUrl).success ? (
+        <p className="text-xs text-ink-secondary">Choose a cover and up to 20 gallery images. New files stay on this device until Save; existing library images are only linked to this project. A failed save attempts to remove newly uploaded assets.</p>
+        {coverPreview && z.string().url().safeParse(coverPreview).success ? (
           <div className="relative isolate flex h-48 items-center justify-center overflow-hidden rounded-xl border border-border-hairline bg-neutral-100 dark:bg-white/[0.04]">
             {/* A direct preview supports manually entered image hosts outside Next's remote allowlist. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={coverUrl} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover opacity-25 blur-xl" />
+            <img src={coverPreview} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover opacity-25 blur-xl" />
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={coverUrl} alt="Current project cover preview" className="relative z-10 h-full w-full object-contain" />
+            <img src={coverPreview} alt="Current project cover preview" className="relative z-10 h-full w-full object-contain" />
           </div>
         ) : <p className="rounded-xl border border-dashed border-border-hairline px-4 py-6 text-sm text-ink-secondary">No cover selected.</p>}
         <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={() => { setMediaPickerTarget("cover"); setMediaPickerTab("upload"); setIsMediaPickerOpen(true); }} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border-hairline px-3 text-sm text-text-primary hover:bg-surface-base"><UploadCloud className="size-4" aria-hidden />{coverUrl ? "Upload replacement" : "Upload cover"}</button>
-          <button type="button" onClick={() => { setMediaPickerTarget("cover"); setMediaPickerTab("library"); setIsMediaPickerOpen(true); }} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border-hairline px-3 text-sm text-text-primary hover:bg-surface-base"><ImageIcon className="size-4" aria-hidden />Choose from library</button>
-          {coverUrl && <button type="button" disabled={galleryImages.length === 0} onClick={() => { const [nextCover, ...remaining] = galleryImages; setValue("cover_image_url", nextCover.url, { shouldDirty: true, shouldValidate: true }); setValue("cover_image_id", nextCover.mediaId, { shouldDirty: true }); setValue("case_study_sections.cover_caption", nextCover.caption, { shouldDirty: true, shouldValidate: true }); setValue("case_study_sections.cover_alt", nextCover.altText, { shouldDirty: true, shouldValidate: true }); setGalleryImages(remaining); }} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border-hairline px-3 text-sm text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 dark:text-red-400 dark:hover:bg-red-950/30"><Trash2 className="size-4" aria-hidden />Remove cover</button>}
+          <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-border-hairline px-3 text-sm text-text-primary hover:bg-surface-base focus-within:outline focus-within:outline-2 focus-within:outline-current"><UploadCloud className="size-4" aria-hidden />Select images<input type="file" multiple disabled={isSubmitting} accept="image/jpeg,image/png,image/webp,image/gif,image/avif,image/heic,image/heif,image/tiff,image/bmp,image/x-icon" onChange={stageFiles} className="sr-only" /></label>
+          <button type="button" onClick={() => { setMediaPickerTarget("cover"); setIsMediaPickerOpen(true); }} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border-hairline px-3 text-sm text-text-primary hover:bg-surface-base"><ImageIcon className="size-4" aria-hidden />Choose from library</button>
+          {coverUrl && !stagedCoverId && <button type="button" disabled={galleryImages.length === 0} onClick={() => { const [nextCover, ...remaining] = galleryImages; setValue("cover_image_url", nextCover.url, { shouldDirty: true, shouldValidate: true }); setValue("cover_image_id", nextCover.mediaId, { shouldDirty: true }); setValue("case_study_sections.cover_caption", nextCover.caption, { shouldDirty: true, shouldValidate: true }); setValue("case_study_sections.cover_alt", nextCover.altText, { shouldDirty: true }); setGalleryImages(remaining); }} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border-hairline px-3 text-sm text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 dark:text-red-400 dark:hover:bg-red-950/30"><Trash2 className="size-4" aria-hidden />Remove cover</button>}
         </div>
-        <p className="text-xs text-ink-secondary">Removing the cover promotes the next image. Add another image first if this is the only one. Changes take effect when you save and do not delete shared media-library images.</p>
-        <label htmlFor="project-cover-url" className="block text-xs text-ink-secondary">Or enter a cover image URL</label>
-        <input id="project-cover-url" {...coverField} aria-invalid={Boolean(errors.cover_image_url)} aria-describedby={errors.cover_image_url ? "project-cover-url-error" : undefined} onChange={(event) => { coverField.onChange(event); setValue("cover_image_id", "", { shouldDirty: true }); setValue("case_study_sections.cover_caption", "", { shouldDirty: true }); setValue("case_study_sections.cover_alt", "", { shouldDirty: true }); }} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="https://..." />
+        <p className="text-xs text-ink-secondary">Removing a saved cover promotes the next saved image. Nothing is sent to Cloudinary until Save.</p>
+        {stagedCoverId ? <p className="text-xs text-ink-secondary">This cover is previewed locally. Its final URL is assigned on Save; edit its caption and description in the pending-image card below.</p> : <><label htmlFor="project-cover-url" className="block text-xs text-ink-secondary">Or enter a cover image URL</label><input id="project-cover-url" {...coverField} aria-invalid={Boolean(errors.cover_image_url)} aria-describedby={errors.cover_image_url ? "project-cover-url-error" : undefined} onChange={(event) => { coverField.onChange(event); setValue("cover_image_id", "", { shouldDirty: true }); setValue("case_study_sections.cover_caption", "", { shouldDirty: true }); setValue("case_study_sections.cover_alt", "", { shouldDirty: true }); }} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="https://..." /></>}
         <input type="hidden" {...register("cover_image_id")} />
         {errors.cover_image_url && <p id="project-cover-url-error" role="alert" className="text-xs text-red-300">{errors.cover_image_url.message}</p>}
-        <label htmlFor="project-cover-caption" className="block text-xs text-ink-secondary">Cover caption (optional, up to 200 characters / 30 words)</label>
-        <textarea id="project-cover-caption" {...register("case_study_sections.cover_caption")} rows={2} maxLength={200} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="Describe this image" />
-        <p className={`text-xs ${captionWordCount(coverCaption) > 30 ? "text-red-600 dark:text-red-400" : "text-ink-secondary"}`}>{coverCaption.length} / 200 characters, {captionWordCount(coverCaption)} / 30 words</p>
-        {errors.case_study_sections?.cover_caption && <p className="text-xs text-red-500">{errors.case_study_sections.cover_caption.message}</p>}
-        <label htmlFor="project-cover-alt" className="block text-xs text-ink-secondary">Cover image description for screen readers (optional, up to 160 characters)</label>
-        <input id="project-cover-alt" {...register("case_study_sections.cover_alt")} maxLength={160} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="Describe what the cover image shows" />
-        {errors.case_study_sections?.cover_alt && <p className="text-xs text-red-500">{errors.case_study_sections.cover_alt.message}</p>}
+        {!stagedCoverId && <><label htmlFor="project-cover-caption" className="block text-xs text-ink-secondary">Cover caption (optional, up to 200 characters / 30 words)</label><textarea id="project-cover-caption" {...register("case_study_sections.cover_caption")} rows={2} maxLength={200} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="Describe this image" /><p className={`text-xs ${captionWordCount(coverCaption) > 30 ? "text-red-600 dark:text-red-400" : "text-ink-secondary"}`}>{coverCaption.length} / 200 characters, {captionWordCount(coverCaption)} / 30 words</p>{errors.case_study_sections?.cover_caption && <p className="text-xs text-red-500">{errors.case_study_sections.cover_caption.message}</p>}<label htmlFor="project-cover-alt" className="block text-xs text-ink-secondary">Cover image description for screen readers (optional, up to 160 characters)</label><input id="project-cover-alt" {...register("case_study_sections.cover_alt")} maxLength={160} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="Describe what the cover image shows" />{errors.case_study_sections?.cover_alt && <p className="text-xs text-red-500">{errors.case_study_sections.cover_alt.message}</p>}</>}
       </div>
 
       <div className="space-y-3">
@@ -643,19 +635,20 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
           <h3 className="text-sm font-medium">More carousel images</h3>
           <button
             type="button"
-            onClick={() => { setMediaPickerTarget("gallery"); setMediaPickerTab("library"); setIsMediaPickerOpen(true); }}
+            onClick={() => { setMediaPickerTarget("gallery"); setIsMediaPickerOpen(true); }}
             className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm hover:bg-surface-raised"
           >
             <ImageIcon className="h-4 w-4" /> Add from Media Library
           </button>
         </div>
         <p className="text-xs text-ink-secondary">Captions are optional, up to 200 characters and 30 words.</p>
-        {galleryImages.length === 0 && <p className="text-sm text-ink-secondary">No additional images yet.</p>}
+        {galleryImages.length === 0 && stagedImages.length === 0 && <p className="text-sm text-ink-secondary">No additional images yet.</p>}
         <div className="space-y-3">
           {galleryImages.map((image, index) => (
             <div key={image.mediaId} className="flex flex-col gap-3 rounded-xl border border-border-hairline bg-surface-base p-3 sm:flex-row sm:items-center">
               <Image src={image.url} alt={image.altText || image.caption || "Project gallery image"} width={128} height={96} className="h-24 w-full rounded-lg object-cover sm:w-32" />
               <div className="min-w-0 flex-1 space-y-1">
+                <p className="break-all text-xs font-medium text-ink-primary">{image.fileName || image.url.split("/").pop()?.split("?")[0] || "Library image"}</p>
                 <label htmlFor={`gallery-caption-${image.mediaId}`} className="text-xs text-ink-secondary">Caption</label>
                 <textarea
                   id={`gallery-caption-${image.mediaId}`}
@@ -672,22 +665,29 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
                 <button type="button" onClick={() => chooseCover(image)} className="min-h-11 text-left text-xs text-accent-signal underline underline-offset-2">Make cover (first image)</button>
               </div>
                <div className="flex flex-wrap gap-1">
-                 <button type="button" aria-label={`Replace image ${index + 2}`} onClick={() => { setReplacingIndex(index); setMediaPickerTarget("replace-gallery"); setMediaPickerTab("upload"); setIsMediaPickerOpen(true); }} className="flex size-11 items-center justify-center rounded-lg hover:bg-surface-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-current"><UploadCloud className="h-4 w-4" aria-hidden /></button>
                  <button type="button" aria-label={`Move image ${index + 1} up`} disabled={index === 0} onClick={() => setGalleryImages((images) => { const next = [...images]; [next[index - 1], next[index]] = [next[index], next[index - 1]]; return next; })} className="flex size-11 items-center justify-center rounded-lg hover:bg-surface-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-current disabled:opacity-40"><ArrowUp className="h-4 w-4" aria-hidden /></button>
                  <button type="button" aria-label={`Move image ${index + 1} down`} disabled={index === galleryImages.length - 1} onClick={() => setGalleryImages((images) => { const next = [...images]; [next[index], next[index + 1]] = [next[index + 1], next[index]]; return next; })} className="flex size-11 items-center justify-center rounded-lg hover:bg-surface-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-current disabled:opacity-40"><ArrowDown className="h-4 w-4" aria-hidden /></button>
                  <button type="button" aria-label={`Remove image ${index + 1}`} onClick={() => setGalleryImages((images) => images.filter((item) => item.mediaId !== image.mediaId))} className="flex size-11 items-center justify-center rounded-lg text-red-400 hover:bg-surface-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-current"><Trash2 className="h-4 w-4" aria-hidden /></button>
               </div>
             </div>
           ))}
+          {stagedImages.map((image, index) => <div key={image.id} className="flex min-w-0 flex-col gap-3 rounded-xl border border-border-hairline bg-surface-base p-3 sm:flex-row sm:items-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={image.url} alt={image.altText || image.file.name} className="h-24 w-full rounded-lg object-cover sm:w-32" />
+            <div className="min-w-0 flex-1 space-y-2"><p className="break-all text-xs font-medium text-ink-primary">{image.file.name} <span className="text-ink-secondary">(pending Save)</span></p>
+              <label htmlFor={`staged-caption-${image.id}`} className="block text-xs text-ink-secondary">Caption</label><textarea id={`staged-caption-${image.id}`} value={image.caption} rows={2} maxLength={200} onChange={(event) => setStagedImages((current) => current.map((item) => item.id === image.id ? { ...item, caption: event.target.value } : item))} className="w-full rounded-lg border border-border-hairline bg-surface-raised px-3 py-2 text-sm" />
+              <label htmlFor={`staged-alt-${image.id}`} className="block text-xs text-ink-secondary">Image description for screen readers</label><input id={`staged-alt-${image.id}`} value={image.altText} maxLength={160} onChange={(event) => setStagedImages((current) => current.map((item) => item.id === image.id ? { ...item, altText: event.target.value } : item))} className="min-h-11 w-full rounded-lg border border-border-hairline bg-surface-raised px-3 text-sm" />
+              <p className="text-xs text-ink-secondary">{image.caption.length} / 200 characters, {captionWordCount(image.caption)} / 30 words</p>
+            </div>
+            <div className="flex flex-wrap gap-2"><button type="button" aria-pressed={stagedCoverId === image.id} onClick={() => { if (getValues("cover_image_url") && !z.string().url().safeParse(getValues("cover_image_url")).success) { setValue("cover_image_url", "", { shouldDirty: true, shouldValidate: true }); setValue("cover_image_id", "", { shouldDirty: true }); } setStagedCoverId(image.id); }} className="min-h-11 rounded-lg border border-border-hairline px-3 text-xs text-ink-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-current">{stagedCoverId === image.id ? "Cover selected" : "Make cover"}</button><button type="button" aria-label={`Remove pending image ${index + 1}`} onClick={() => removeStaged(image.id)} className="inline-flex size-11 items-center justify-center rounded-lg text-red-300 hover:bg-surface-raised focus-visible:outline focus-visible:outline-2 focus-visible:outline-current"><Trash2 className="size-4" aria-hidden /></button></div>
+          </div>)}
         </div>
       </div>
 
       <MediaPickerModal
         isOpen={isMediaPickerOpen}
-        initialTab={mediaPickerTab}
+        libraryOnly
         onClose={() => setIsMediaPickerOpen(false)}
-        onUploadingChange={setIsUploadingMedia}
-        onUploaded={(media) => { uploadedMedia.current.set(media.id, { url: media.url, secure_url: media.secure_url }); setUploadedCount(uploadedMedia.current.size); }}
           onSelect={(media) => {
             if (mediaPickerTarget === "cover") {
               const oldUrl = getValues("cover_image_url");
@@ -700,6 +700,7 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
               }
               setValue("cover_image_url", media.secure_url || media.url, { shouldDirty: true, shouldValidate: true });
               setValue("cover_image_id", media.id, { shouldDirty: true });
+              setStagedCoverId(null);
               setValue("case_study_sections.cover_caption", "", { shouldDirty: true, shouldValidate: true });
               setValue("case_study_sections.cover_alt", "", { shouldDirty: true, shouldValidate: true });
               setGalleryImages((images) => {
@@ -708,20 +709,15 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
                   ? [{ mediaId: oldId, url: oldUrl, caption: oldCaption, altText: oldAlt }, ...remaining]
                   : remaining;
               });
-          } else if (mediaPickerTarget === "replace-gallery") {
-            if (media.id === getValues("cover_image_id")) return false;
-            setGalleryImages((images) => images.some((image, index) => image.mediaId === media.id && index !== replacingIndex)
-              ? images
-              : images.map((image, index) => index === replacingIndex ? { mediaId: media.id, url: media.secure_url || media.url, caption: "", altText: "" } : image));
           } else {
             if (media.id === getValues("cover_image_id")) return false;
             if (galleryImages.length >= 20 && !galleryImages.some((image) => image.mediaId === media.id)) {
               setErrorMsg("Choose no more than 20 gallery images.");
               return false;
             }
-            setGalleryImages((images) => images.some((image) => image.mediaId === media.id)
-              ? images
-              : [...images, { mediaId: media.id, url: media.secure_url || media.url, caption: "", altText: "" }]);
+               setGalleryImages((images) => images.some((image) => image.mediaId === media.id)
+                  ? images
+                  : [...images, { mediaId: media.id, url: media.secure_url || media.url, caption: "", altText: "", fileName: media.original_filename || media.alt_text || "" }]);
           }
           return true;
         }}
@@ -761,17 +757,47 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
         ))}
       </div>
 
+      <fieldset aria-describedby={errors.related_project_ids ? "project-related-error" : undefined} className="space-y-3 rounded-xl border border-border-hairline p-4">
+        <legend className="px-1 text-sm font-medium">Related projects</legend>
+        <p className="text-xs text-ink-secondary">Choose up to two published projects to show below this case study. They appear in the order selected. Leave empty to hide the section.</p>
+        <p className="text-xs font-medium text-ink-secondary">Selected {selectedRelatedIds.length} / 2</p>
+        {selectedRelatedIds.length > 0 && <ol className="space-y-1">
+          {selectedRelatedIds.map((id, index) => {
+            const chosen = availableProjects.find((item) => item.id === id);
+            return <li key={id} className="flex items-center justify-between gap-3 rounded-lg bg-surface-base px-3 py-2 text-sm text-ink-primary">
+              <span className="min-w-0 break-words">{index + 1}. {chosen?.title || "Project no longer available"}</span>
+              <button type="button" onClick={() => setValue("related_project_ids", selectedRelatedIds.filter((value) => value !== id), { shouldDirty: true, shouldValidate: true })} className="min-h-11 shrink-0 text-xs text-ink-secondary underline underline-offset-2 hover:text-ink-primary">Remove</button>
+            </li>;
+          })}
+        </ol>}
+        <label htmlFor="related-project-search" className="sr-only">Search projects for related links</label>
+        <input id="related-project-search" type="search" value={relatedSearch} onChange={(event) => setRelatedSearch(event.target.value)} placeholder="Search all projects..." className="w-full rounded-lg border border-border-hairline bg-surface-base px-3 py-2 text-sm text-ink-primary focus:outline-none focus:ring-2 focus:ring-accent-signal" />
+        <div className="max-h-56 space-y-1 overflow-y-auto">
+          {relatedOptions.map((item) => {
+            const selected = selectedRelatedIds.includes(item.id);
+            const disabled = !selected && (item.status !== "published" || selectedRelatedIds.length >= 2);
+            return <label key={item.id} className={`flex min-h-11 items-center gap-3 rounded-lg border border-border-hairline px-3 py-2 text-sm ${disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-surface-base"}`}>
+              <input type="checkbox" checked={selected} disabled={disabled} onChange={() => setValue("related_project_ids", selected ? selectedRelatedIds.filter((id) => id !== item.id) : [...selectedRelatedIds, item.id], { shouldDirty: true, shouldValidate: true })} className="size-4 shrink-0 rounded border-border-hairline text-accent-signal focus:ring-accent-signal" />
+              <span className="min-w-0 flex-1 break-words text-ink-primary">{item.title}</span>
+              <span className="shrink-0 text-xs text-ink-secondary">{selected ? `#${selectedRelatedIds.indexOf(item.id) + 1}` : item.status}</span>
+            </label>;
+          })}
+          {relatedOptions.length === 0 && <p className="px-3 py-4 text-sm text-ink-secondary">No matching projects.</p>}
+        </div>
+        {errors.related_project_ids && <p id="project-related-error" role="alert" className="text-xs text-red-300">{errors.related_project_ids.message}</p>}
+      </fieldset>
+
       <div className="flex flex-wrap justify-end gap-4">
         <button
           type="button"
-          onClick={() => { if (isSubmitting || isCleaningMedia) return; if (isDirty || galleryDirty || uploadedMedia.current.size || isUploadingMedia) setLeaveConfirmation(true); else router.push("/admin/projects"); }}
+          onClick={() => { if (isSubmitting || isCleaningMedia) return; if (isDirty || galleryDirty || stagedImages.length || uploadedMedia.current.size || techDraft.trim() || tagDraft.trim()) setLeaveConfirmation(true); else router.push("/admin/projects"); }}
           className="min-h-11 rounded-xl px-4 py-2 text-sm font-medium text-ink-secondary hover:bg-surface-base transition-colors"
         >
           Cancel
         </button>
         <button
           type="submit"
-          disabled={isSubmitting || isUploadingMedia || isCleaningMedia}
+          disabled={isSubmitting || isCleaningMedia}
           className="inline-flex items-center justify-center rounded-xl bg-accent-signal px-6 py-2 text-sm font-medium text-white shadow hover:bg-accent-signal/90 focus:outline-none disabled:opacity-50 transition-all"
         >
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -780,8 +806,8 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
       </div>
     </form>
     <AdminConfirmDialog open={saveConfirmation !== null} title={saveConfirmation?.title || "Confirm publication"} description={saveConfirmation?.description || ""} confirmLabel={saveConfirmation?.label || "Confirm"} pending={isSubmitting} onClose={() => setSaveConfirmation(null)} onConfirm={() => { const pending = saveConfirmation; setSaveConfirmation(null); if (pending) void saveProject(pending.data); }} />
-    <AdminConfirmDialog open={leaveConfirmation} title="Discard unsaved project changes?" description="Unsaved project changes will be lost. Images uploaded in this session will be removed if unused; closing this tab cannot guarantee cleanup." confirmLabel="Discard changes" destructive pending={isCleaningMedia || isUploadingMedia} onClose={() => setLeaveConfirmation(false)} onConfirm={() => { void (async () => { const cleaned = await discardSessionUploads(); setLeaveConfirmation(false); if (cleaned) router.push("/admin/projects"); })(); }} />
-    <AdminConfirmDialog open={navigationTarget !== null} title="Discard unsaved project changes?" description="Unsaved project changes will be lost. Images uploaded in this session will be removed if unused; closing this tab cannot guarantee cleanup." confirmLabel="Discard changes" destructive pending={isCleaningMedia || isUploadingMedia} onClose={() => setNavigationTarget(null)} onConfirm={() => { void (async () => { const cleaned = await discardSessionUploads(); if (cleaned) confirmLeave(router.push); else setNavigationTarget(null); })(); }} />
+    <AdminConfirmDialog open={leaveConfirmation} title="Discard unsaved project changes?" description="Unsaved changes and locally selected images will be discarded. Any files from a failed Save will be removed if unused." confirmLabel="Discard changes" destructive pending={isCleaningMedia || isSubmitting} onClose={() => setLeaveConfirmation(false)} onConfirm={() => { void (async () => { const cleaned = await discardSessionUploads(); setLeaveConfirmation(false); if (cleaned) router.push("/admin/projects"); })(); }} />
+    <AdminConfirmDialog open={navigationTarget !== null} title="Discard unsaved project changes?" description="Unsaved changes and locally selected images will be discarded. Any files from a failed Save will be removed if unused." confirmLabel="Discard changes" destructive pending={isCleaningMedia || isSubmitting} onClose={() => setNavigationTarget(null)} onConfirm={() => { void (async () => { const cleaned = await discardSessionUploads(); if (cleaned) confirmLeave(router.push); else setNavigationTarget(null); })(); }} />
     </>
   );
 }

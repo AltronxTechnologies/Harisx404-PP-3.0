@@ -1454,6 +1454,16 @@ headings; TypeScript, targeted ESLint, and `git diff --check` passed.
 | Footer | `app/components/Footer.tsx`, `app/components/SocialPill.tsx` |
 | Shared presentation | `app/components/navbar/modalSurfaces.ts`, `app/components/BrandGlyph.tsx`, and applicable rules in `app/globals.css` and `app/layout.tsx` |
 
+**2026-10-07 scoped owner permission:** The owner requested one Admin Project
+summary to drive the short text in the Home and Projects index cards and the
+detail header/metadata. Only the `description` data mapping in `app/page.tsx`
+and `app/projects/page.tsx` now prefers the existing `tagline`, with legacy
+description as fallback. The existing project tags also feed bounded keywords
+in `app/projects/[slug]/page.tsx` metadata and JSON-LD. The locked card
+components, markup, geometry and remaining public presentation are unchanged.
+Historical long descriptions remain available to the detail-page overview;
+this does not unlock other public changes.
+
 ### Frozen final amendments
 
 - Shared Home/Projects cards include the approved touch scroll-preview,

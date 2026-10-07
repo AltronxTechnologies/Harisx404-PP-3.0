@@ -101,7 +101,7 @@ export default async function Home() {
           title: p.title,
           slug: p.slug,
           tagline: (p.tagline || p.short_description || p.description || "").slice(0, 160),
-          description: p.description || "",
+          description: (p.tagline || p.short_description || p.description || "").slice(0, 160),
           tech: Array.isArray(p.tech_stack) ? p.tech_stack : [],
           // Quarter label like "Q2 2026" — uses start_date when set in
           // admin, otherwise falls back to the row's created_at.

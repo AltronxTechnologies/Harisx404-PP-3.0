@@ -10,6 +10,7 @@ interface MediaItem {
   url: string;
   secure_url: string;
   alt_text?: string;
+  original_filename?: string;
   format?: string;
 }
 

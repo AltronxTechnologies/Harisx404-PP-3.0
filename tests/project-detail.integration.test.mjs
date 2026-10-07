@@ -97,15 +97,15 @@ test("project images enforce a cover, allow ordered additions, and deliver respo
     readFile(new URL("../app/lib/project-captions.ts", import.meta.url), "utf8"),
   ]);
 
-  assert.match(form, /Upload replacement/);
-  assert.match(form, /setMediaPickerTab\("upload"\)/);
+  assert.match(form, /Select images<input type="file" multiple/);
+  assert.doesNotMatch(form, /setMediaPickerTab\("upload"\)/);
   assert.match(form, /Choose from library/);
-  assert.match(form, /At least one image is required/);
+  assert.match(form, /Choose a cover image before saving/);
   assert.match(form, /setValue\("cover_image_url", nextCover\.url/);
-  assert.match(form, /do not delete shared media-library images/);
+  assert.match(form, /existing library images are only linked to this project/);
   assert.match(form, /setValue\("cover_image_id", media\.id/);
   assert.match(form, /Make cover \(first image\)/);
-  assert.match(form, /Replace image/);
+  assert.match(form, /Remove pending image/);
   assert.match(form, /register\("case_study_sections\.cover_caption"\)/);
   assert.match(form, /maxLength=\{200\}/);
   assert.match(form, /\.slice\(0, 200\)/);
@@ -185,6 +185,17 @@ test("project images enforce a cover, allow ordered additions, and deliver respo
   assert.equal(response.status, 401);
 });
 
+test("project summary feeds short public card copy while legacy detail overview stays intact", async () => {
+  const [home, index, detail] = await Promise.all([
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/projects/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/projects/[slug]/ProjectDetail.tsx", import.meta.url), "utf8"),
+  ]);
+  for (const source of [home, index]) assert.match(source, /description: \(p\.tagline \|\| p\.short_description \|\| p\.description \|\| ""\)\.slice\(0, 160\)/);
+  assert.match(detail, /project\.description\.trim\(\) !== summary\.trim\(\) \? project\.description\.trim\(\) : ""/);
+  assert.match(await readFile(new URL("../app/projects/[slug]/page.tsx", import.meta.url), "utf8"), /keywords: project\.tags\.slice\(0, 10\)/);
+});
+
 test("project gallery and narrative are sourced from Admin-authored data", async () => {
   const [page, detail, publicData, api, form] = await Promise.all([
     readFile(new URL("../app/projects/[slug]/page.tsx", import.meta.url), "utf8"),
@@ -237,7 +248,7 @@ test("project gallery and narrative are sourced from Admin-authored data", async
   assert.match(api, /auth\.getUser\(\)/);
   assert.match(api, /ADMIN_EMAIL/);
   assert.match(api, /await validateGalleryMedia/);
-  assert.match(form, /galleryImages\.map\(\(\{ mediaId, caption, altText \}\)/);
+  assert.match(form, /fullGallery\.map\(\(\{ mediaId, caption, altText \}\)/);
 });
 
 test("project tags, timeline, source name and optional sections remain owner-managed", async () => {

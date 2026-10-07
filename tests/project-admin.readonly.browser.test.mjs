@@ -115,6 +115,15 @@ test(
         }
       }
       await page.setViewportSize({ width: 1440, height: 900 });
+      const { data: legacyRows, error: legacyError } = await admin.from("projects").select("id, tagline, description, content").limit(20);
+      if (legacyError) throw new Error("Project legacy read unavailable");
+      const legacy = legacyRows?.find((item) => !item.content && item.description);
+      if (legacy) {
+        await page.goto(`http://localhost:3000/admin/projects/${legacy.id}`, { waitUntil: "domcontentloaded" });
+        await page.getByRole("heading", { name: "Edit Project" }).waitFor();
+        if ((await page.locator("#project-tagline").inputValue()) !== (legacy.tagline || legacy.description.slice(0, 160))) failures.push("legacy-summary-not-preserved");
+        if (await page.locator("#project-description, #project-end-date").count()) failures.push("retired-project-fields-visible");
+      }
       const first =
         "https://res.cloudinary.com/i22q5puf/image/upload/v1786526260/portfolio/haris_primary_photo.png";
       const fixtures = [
@@ -158,18 +167,24 @@ test(
       if (!(await page.locator("#project-slug-error").count()))
         failures.push("slug-validation");
       await page.locator("#project-slug").fill("project-review");
+      await page.locator("#project-tagline").fill("Concise project review summary");
       await page.locator("#project-live-url").fill("javascript:alert(1)");
       await page.getByRole("button", { name: "Save Project" }).click();
       if (!(await page.locator("#project-live-url-error").count())) failures.push("unsafe-url-validation");
       await page.locator("#project-live-url").fill("");
+      await page.locator("#project-tech-stack").fill("TypeScript");
+      await page.locator("#project-tech-stack").press("Enter");
+      await page.locator("#project-tags").fill("Security,");
+      if (!(await page.getByRole("button", { name: "Remove TypeScript from Tech stack" }).count()) || !(await page.getByRole("button", { name: "Remove Security from Tags" }).count())) failures.push("project-token-pills");
       const selectImage = async (label) => {
         await page
           .getByRole("dialog", { name: "Choose an image" })
           .getByRole("button", { name: label })
           .click();
-        await page.getByRole("button", { name: "Select Image" }).click();
+        await page.getByRole("button", { name: "Select Image", exact: true }).click();
       };
       await page.getByRole("button", { name: "Choose from library" }).click();
+      if (await page.getByRole("dialog", { name: "Choose an image" }).getByRole("button", { name: "Upload", exact: true }).count()) failures.push("project-library-picker-still-uploads");
       await selectImage("Review image 1");
       await page.locator("#project-cover-caption").fill("Old cover caption");
       await page.locator("#project-cover-alt").fill("Old cover description");
@@ -213,6 +228,8 @@ test(
           .count()) !== 2
       )
         failures.push("picker-replacement-dropped-cover");
+      await page.getByRole("button", { name: "Remove image 1" }).click();
+      if (mockedUpload || mockedCleanup) failures.push("detaching-saved-image-touched-cloudinary");
       for (const width of [320, 390, 768, 1440]) {
         await page.setViewportSize({ width, height: 900 });
         await page.waitForTimeout(100);
@@ -222,6 +239,10 @@ test(
           return { overflow: document.documentElement.scrollWidth > innerWidth + 1, short: short.length, sample: short[0]?.id || short[0]?.getAttribute("aria-label") || "" };
         });
         if (measure.overflow || measure.short) failures.push({ kind: "editor-geometry", width, ...measure });
+        if (process.env.RUN_REDACTED_PROJECT_FORM_SCREENSHOT === "1" && (width === 320 || width === 1440)) {
+          await page.evaluate(() => scrollTo(0, 0));
+          await page.screenshot({ path: `/tmp/opencode/admin-project-form-${width}-redacted.png`, maskColor: "#303036", mask: [page.locator(".admin-content input:not([type='checkbox'])"), page.locator(".admin-content textarea"), page.locator(".admin-content [contenteditable]")] });
+        }
       }
       await page.route("**/api/admin/projects", (route) => {
         mockedWrites++;
@@ -247,19 +268,21 @@ test(
       )
         failures.push("unsaved-cancel");
       await page.getByRole("button", { name: "Cancel" }).last().click();
-      await page.getByRole("button", { name: "Upload replacement" }).click();
-      await page.getByRole("dialog", { name: "Choose an image" }).locator('input[type="file"]').setInputFiles({ name: "unsaved-project.png", mimeType: "image/png", buffer: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLttAAAAABJRU5ErkJggg==", "base64") });
-      await page.getByRole("button", { name: "Close media picker" }).click();
+      await page.locator('input[type="file"][multiple]').setInputFiles([
+        { name: "unsaved-one.png", mimeType: "image/png", buffer: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLttAAAAABJRU5ErkJggg==", "base64") },
+        { name: "unsaved-two.png", mimeType: "image/png", buffer: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLttAAAAABJRU5ErkJggg==", "base64") },
+      ]);
+      await page.getByText("unsaved-two.png").waitFor();
+      await page.getByRole("button", { name: "Remove pending image 1" }).click();
+      if (await page.getByText("unsaved-one.png").count()) failures.push("removed-staged-image-still-visible");
+      if (mockedUpload || mockedCleanup) failures.push("staging-touched-cloudinary-before-save");
       await page.getByRole("button", { name: "Cancel", exact: true }).click();
       const discard = page.getByRole("dialog", { name: "Discard unsaved project changes?" });
       await discard.getByRole("button", { name: "Discard changes" }).click();
-      await page.getByRole("alert").filter({ hasText: "1 uploaded image(s) could not be removed" }).waitFor();
-      if (new URL(page.url()).pathname !== "/admin/projects/new") failures.push("failed-cleanup-left-editor");
-      await page.getByRole("button", { name: "Cancel", exact: true }).click();
-      await discard.getByRole("button", { name: "Discard changes" }).click();
       await page.waitForURL("**/admin/projects");
-      if (mockedUpload !== 1 || mockedCleanup !== 2) failures.push({ kind: "unsaved-project-upload-cleanup", mockedUpload, mockedCleanup });
+      if (mockedUpload || mockedCleanup) failures.push({ kind: "staged-discard-made-writes", mockedUpload, mockedCleanup });
       const saveOrder = [];
+      let saveAttempts = 0;
       await page.route("**/api/admin/media?*", (route) => {
         if (route.request().method() === "DELETE") {
           saveOrder.push("cleanup");
@@ -273,20 +296,60 @@ test(
       });
       await page.route("**/api/admin/projects", (route) => {
         mockedWrites++;
+        saveAttempts++;
         saveOrder.push("save");
-        return route.fulfill({ status: 503, json: { error: "Review save unavailable" } });
+        const submitted = route.request().postDataJSON();
+        if (submitted.cover_image_id !== "00000000-0000-4000-8000-000000000098" || !submitted.gallery.some((item) => item.mediaId === fixtures[0].id)) failures.push("staged-cover-payload");
+        return saveAttempts === 1 ? route.fulfill({ status: 503, json: { error: "Review save unavailable" } }) : route.fulfill({ json: { id: "00000000-0000-4000-8000-000000000097", slug: "unsaved-project-review" } });
       });
       await page.goto("http://localhost:3000/admin/projects/new", { waitUntil: "domcontentloaded" });
       await page.getByRole("heading", { name: "Create New Project" }).waitFor();
       await page.locator("#project-title").fill("Unsaved project review");
+      await page.locator("#project-tagline").fill("Unsaved project summary");
       await page.getByRole("button", { name: "Choose from library" }).click();
       await selectImage("Review image 1");
-      await page.getByRole("button", { name: "Upload replacement" }).click();
-      await page.getByRole("dialog", { name: "Choose an image" }).locator('input[type="file"]').setInputFiles({ name: "unused-project.png", mimeType: "image/png", buffer: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLttAAAAABJRU5ErkJggg==", "base64") });
-      await page.getByRole("button", { name: "Close media picker" }).click();
+      await page.locator('input[type="file"][multiple]').setInputFiles({ name: "new-cover.png", mimeType: "image/png", buffer: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLttAAAAABJRU5ErkJggg==", "base64") });
+      await page.getByRole("button", { name: "Make cover", exact: true }).click();
+      if (await page.locator("#project-cover-caption, #project-cover-url").count()) failures.push("duplicate-staged-cover-fields");
+      for (const width of [320, 1440]) {
+        await page.setViewportSize({ width, height: 900 });
+        await page.waitForTimeout(100);
+        const controls = await page.locator('input[id^="staged-"],textarea[id^="staged-"],button[aria-label^="Remove pending image"]').evaluateAll((items) => items.filter((item) => item.getBoundingClientRect().height < 44 || item.getBoundingClientRect().right > innerWidth + 1).length);
+        if (controls || await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)) failures.push({ kind: "staged-card-geometry", width, controls });
+        if (process.env.RUN_REDACTED_PROJECT_FORM_SCREENSHOT === "1") await page.getByText("new-cover.png").locator("..").locator("..").screenshot({ path: `/tmp/opencode/admin-project-image-${width}.png`, maskColor: "#303036", mask: [page.locator('input[id^="staged-"],textarea[id^="staged-"]')] });
+      }
+      if (saveOrder.length) failures.push("staged-cover-made-writes-before-save");
       await page.getByRole("button", { name: "Save Project" }).click();
       await page.getByRole("alert").filter({ hasText: "Review save unavailable" }).waitFor();
-      if (JSON.stringify(saveOrder) !== JSON.stringify(["upload", "cleanup", "save"])) failures.push({ kind: "unused-upload-before-save", saveOrder });
+      if (JSON.stringify(saveOrder) !== JSON.stringify(["upload", "save", "cleanup"])) failures.push({ kind: "staged-upload-rollback", saveOrder });
+      await page.getByRole("button", { name: "Save Project" }).click();
+      await page.waitForURL("**/admin/projects");
+      if (JSON.stringify(saveOrder) !== JSON.stringify(["upload", "save", "cleanup", "upload", "save"])) failures.push({ kind: "staged-upload-retry", saveOrder });
+      const partialOrder = [];
+      let uploadAttempts = 0;
+      await page.route("**/api/admin/media/upload", (route) => {
+        partialOrder.push("upload");
+        uploadAttempts++;
+        return uploadAttempts === 1 ? route.fulfill({ json: { data: { id: "00000000-0000-4000-8000-000000000096", url: `${first}?partial=1`, secure_url: `${first}?partial=1` } } })
+          : route.fulfill({ status: 503, json: { error: "Review second upload unavailable" } });
+      });
+      await page.route("**/api/admin/media?*", (route) => {
+        if (route.request().method() === "DELETE") { partialOrder.push("cleanup"); return route.fulfill({ json: { success: true } }); }
+        return route.fulfill({ json: { data: fixtures, count: fixtures.length } });
+      });
+      await page.route("**/api/admin/projects", (route) => { partialOrder.push("save"); return route.fulfill({ status: 503, json: { error: "Unexpected save" } }); });
+      await page.goto("http://localhost:3000/admin/projects/new", { waitUntil: "domcontentloaded" });
+      await page.getByRole("heading", { name: "Create New Project" }).waitFor();
+      await page.locator("#project-title").fill("Partial upload review");
+      await page.locator("#project-tagline").fill("Partial upload summary");
+      await page.locator('input[type="file"][multiple]').setInputFiles([
+        { name: "partial-one.png", mimeType: "image/png", buffer: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLttAAAAABJRU5ErkJggg==", "base64") },
+        { name: "partial-two.png", mimeType: "image/png", buffer: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLttAAAAABJRU5ErkJggg==", "base64") },
+      ]);
+      await page.getByRole("button", { name: "Save Project" }).click();
+      await page.getByRole("alert").filter({ hasText: "Review second upload unavailable" }).waitFor();
+      if (JSON.stringify(partialOrder) !== JSON.stringify(["upload", "upload", "cleanup"])) failures.push({ kind: "partial-upload-rollback", partialOrder });
+      if (new URL(page.url()).pathname !== "/admin/projects/new") failures.push("partial-upload-left-editor");
       console.log(
         JSON.stringify({
           widths: 4,

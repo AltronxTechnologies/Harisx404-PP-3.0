@@ -10,7 +10,7 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
   const supabase = await createSupabaseAdminClient();
   const loadProject = (withAlt: boolean) => supabase.from("projects")
       .select(withAlt
-        ? "*, project_tags ( tags ( name ) ), project_images ( media_id, caption, alt_text, display_order, media ( secure_url, url, alt_text ) )"
+        ? "*, project_tags ( tags ( name ) ), project_images ( media_id, caption, alt_text, display_order, media ( secure_url, url, alt_text, original_filename ) )"
         : "*, project_tags ( tags ( name ) ), project_images ( media_id, caption, display_order, media ( secure_url, url, alt_text ) )")
       .eq("id", id)
       .maybeSingle();
@@ -18,7 +18,7 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
     loadProject(true),
     supabase.from("projects").select("id, title, slug, status").order("title"),
   ]);
-  if (error && ["42703", "PGRST200", "PGRST204"].includes(error.code) && /alt_text/.test(error.message)) {
+  if (error && ["42703", "PGRST200", "PGRST204"].includes(error.code) && /alt_text|original_filename/.test(error.message)) {
     ({ data: project, error } = await loadProject(false));
   }
 
@@ -37,7 +37,8 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
       mediaId: image.media_id,
       url: image.media?.secure_url || image.media?.url || "",
       caption: image.caption ?? "",
-      altText: image.alt_text ?? "",
+       altText: image.alt_text ?? "",
+       fileName: image.media?.original_filename || image.media?.alt_text || "",
     }));
   const { project_tags: _ignored, project_images: _ignoredImages, ...projectFields } = project;
 
