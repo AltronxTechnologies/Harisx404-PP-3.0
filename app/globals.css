@@ -1104,11 +1104,7 @@ blockquote p {
   margin-bottom: 1.25em;
   font-size: 1rem;
   line-height: 1.75;
-  color: #364153;
-}
-
-.dark .blog-article-shell p {
-  color: #d1d5dc;
+  color: var(--text-secondary);
 }
 
 .blog-article-shell h2 {
@@ -1391,11 +1387,7 @@ blockquote p {
   margin-bottom: 0.5em;
   font-size: 1rem;
   line-height: 1.75;
-  color: #364153;
-}
-
-.dark .blog-article-shell li {
-  color: #d1d5dc;
+  color: var(--text-secondary);
 }
 
 /* Code blocks — 13px/24px mono, no line numbers, filename badge, hover copy */
