@@ -159,31 +159,61 @@ html:has([data-admin-root])::-webkit-scrollbar-thumb:hover {
 }
 
 [data-admin-root] .admin-mdx-editor .w-md-editor {
-  border: 0;
-  background: #131316;
-  box-shadow: none;
+  border: 0 !important;
+  background: #090a10 !important;
+  box-shadow: none !important;
 }
 
 [data-admin-root] .admin-mdx-editor .w-md-editor-toolbar {
-  display: none;
+  display: none !important;
+}
+
+[data-admin-root] .admin-mdx-editor .w-md-editor-content {
+  background: #090a10 !important;
+}
+
+[data-admin-root] .admin-mdx-editor .w-md-editor-area {
+  background: #090a10 !important;
+}
+
+[data-admin-root] .admin-mdx-editor .w-md-editor-text {
+  padding: 0 !important;
+  background: #090a10 !important;
+}
+
+[data-admin-root] .admin-mdx-editor .w-md-editor-text-pre {
+  display: none !important;
 }
 
 [data-admin-root] .admin-mdx-editor .w-md-editor-text-input {
-  border: 0;
-  background: transparent;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-  caret-color: #fafafa;
+  position: relative !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  background: #090a10 !important;
+  color: #f8fafc !important;
+  -webkit-text-fill-color: #f8fafc !important;
+  caret-color: #818cf8 !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+  font-size: 13.5px !important;
+  line-height: 1.75 !important;
+  tab-size: 2 !important;
+  padding: 18px 20px !important;
+  letter-spacing: normal !important;
+  resize: none !important;
+  outline: none !important;
+  border: none !important;
 }
 
-[data-admin-root] .admin-mdx-editor :is(.w-md-editor-text-input, .w-md-editor-text-pre) {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 13px;
-  line-height: 1.7;
+[data-admin-root] .admin-mdx-editor .w-md-editor-text-input::selection {
+  background: rgba(99, 102, 241, 0.45) !important;
+  color: #ffffff !important;
 }
 
 [data-admin-root] .admin-mdx-editor:focus-within {
-  outline: 2px solid var(--admin-ink);
+  outline: 2px solid #6366f1;
   outline-offset: 2px;
 }
 

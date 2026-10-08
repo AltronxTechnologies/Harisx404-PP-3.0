@@ -114,6 +114,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
     : formatReadingTime(post.code);
 
   const coverSrc = blogCoverSrc(post.imageName);
+  const modifiedAt = post.modifiedAt && Date.parse(post.modifiedAt) >= Date.parse(post.publishedAt) ? post.modifiedAt : undefined;
 
   return (
     <div className="blog-detail relative mt-14 min-w-0">
@@ -126,7 +127,18 @@ export default async function BlogPage({ params }: BlogPageProps) {
             headline: post.title,
             ...(coverSrc ? { image: new URL(coverSrc, siteMetadata.siteUrl).href } : {}),
             datePublished: post.publishedAt,
+            ...(modifiedAt ? { dateModified: modifiedAt } : {}),
             description: post.summary,
+            mainEntityOfPage: {
+              "@type": "WebPage",
+              "@id": new URL(safeCanonicalUrl(post.canonicalUrl, post.slug), siteMetadata.siteUrl).href,
+            },
+            ...(post.categories && post.categories.length > 0 ? { keywords: post.categories.join(", ") } : {}),
+            publisher: {
+              "@type": "Person",
+              name: siteMetadata.author,
+              url: siteMetadata.siteUrl,
+            },
           }).replace(/</g, "\\u003c"),
         }}
       />
@@ -269,10 +281,14 @@ export async function generateMetadata(
   const socialImage = coverSrc
     ? new URL(coverSrc, siteMetadata.siteUrl).href
     : `/api/og?title=${encodeURIComponent(post.title)}&category=Blog`;
+  const modifiedAt = post.modifiedAt && Date.parse(post.modifiedAt) >= Date.parse(post.publishedAt) ? post.modifiedAt : undefined;
 
   return {
     title: post.title,
     description: post.summary,
+    keywords: post.categories,
+    creator: siteMetadata.author,
+    publisher: siteMetadata.author,
     alternates: {
       canonical: safeCanonicalUrl(post.canonicalUrl, post.slug),
     },
@@ -281,6 +297,8 @@ export async function generateMetadata(
       description: post.summary,
       type: "article",
       publishedTime: post.publishedAt,
+      ...(modifiedAt ? { modifiedTime: modifiedAt } : {}),
+      tags: post.categories,
       images: [
         {
           url: socialImage,
@@ -293,6 +311,7 @@ export async function generateMetadata(
       card: "summary_large_image",
       title: post.title,
       description: post.summary,
+      creator: siteMetadata.twitterHandle,
       images: [socialImage],
     },
   };

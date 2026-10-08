@@ -4,11 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headlessui/react";
+import { Dialog, DialogPanel, DialogTitle, Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headlessui/react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Check, ChevronDown, Loader2, Plus, X } from "lucide-react";
+import { Check, ChevronDown, FileText, Loader2, Plus, Sparkles, X } from "lucide-react";
 import { BlogImageManager, type BlogMediaItem } from "./BlogImageManager";
 import { BlogDatePicker } from "./BlogDatePicker";
 import { AdminConfirmDialog } from "./AdminConfirmDialog";
@@ -18,6 +18,7 @@ import { isAllowedBlogImageUrl } from "@/app/components/blog/blogImage";
 import { siteMetadata } from "@/app/data/siteMetadata";
 import { useAdminNavigationGuard } from "./useAdminNavigationGuard";
 import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
+import { parseBlogImportTags } from "@/app/lib/admin/blog-import-tags";
 
 const TiptapEditor = dynamic(() => import("./TiptapEditor").then((module) => module.TiptapEditor), { ssr: false });
 const BlogCodeEditor = dynamic(() => import("./BlogCodeEditor").then((module) => module.BlogCodeEditor), { ssr: false });
@@ -77,11 +78,105 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
   );
   const [modeError, setModeError] = useState("");
   const [previewSnapshot, setPreviewSnapshot] = useState<Pick<BlogFormValues, "title" | "slug" | "summary" | "content" | "published_at" | "status" | "tags" | "related_blog_post_ids" | "canonical_url"> | null>(null);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importInput, setImportInput] = useState("");
+  const [importError, setImportError] = useState("");
+  const closeImport = () => { setShowImportModal(false); setImportInput(""); setImportError(""); };
   const slugEdited = useRef(Boolean(initialData?.id));
   const canonicalEdited = useRef(Boolean(initialData?.canonical_url && initialData.canonical_url !== blogCanonicalUrl(initialData.slug, siteMetadata.siteUrl)));
   const publishDateEdited = useRef(false);
   const richContentEdited = useRef(false);
   const richEditor = editorMode === "rich";
+
+  const handleImportMdx = (rawMdx: string) => {
+    if (!rawMdx.trim()) return;
+    setImportError("");
+    let text = rawMdx.trim();
+    let titleVal = "";
+    let slugVal = "";
+    let descVal = "";
+    let dateVal = "";
+    let coverVal = "";
+    let importedTags: string[] | null = null;
+
+    const match = /^---\s*[\r\n]+([\s\S]*?)[\r\n]+---\s*[\r\n]*/.exec(text);
+    if (match) {
+      const frontmatter = match[1];
+      text = text.slice(match[0].length);
+
+      const titleMatch = /^title:\s*["']?(.*?)["']?\s*$/m.exec(frontmatter);
+      if (titleMatch) titleVal = titleMatch[1].trim();
+
+      const slugMatch = /^slug:\s*["']?(.*?)["']?\s*$/m.exec(frontmatter);
+      if (slugMatch) slugVal = slugMatch[1].trim();
+
+      const descMatch = /^(?:description|summary):\s*["']?(.*?)["']?\s*$/m.exec(frontmatter);
+      if (descMatch) descVal = descMatch[1].trim();
+
+      const dateMatch = /^date:\s*["']?(.*?)["']?\s*$/m.exec(frontmatter);
+      if (dateMatch) dateVal = dateMatch[1].trim();
+
+      const coverMatch = /^(?:coverImage|image):\s*["']?(.*?)["']?\s*$/m.exec(frontmatter);
+      if (coverMatch) coverVal = coverMatch[1].trim();
+
+      try {
+        importedTags = parseBlogImportTags(frontmatter);
+      } catch (error) {
+        setImportError(error instanceof Error ? error.message : "Could not read tags. No fields were changed.");
+        return;
+      }
+    }
+
+    if (titleVal) {
+      const escaped = titleVal.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const topH1Regex = new RegExp(`^#\\s+${escaped}\\s*[\\r\\n]+`, "i");
+      text = text.replace(topH1Regex, "");
+    } else {
+      const anyTopH1 = /^#\s+(.*?)[\r\n]+/.exec(text);
+      if (anyTopH1) {
+        titleVal = anyTopH1[1].trim();
+        text = text.slice(anyTopH1[0].length);
+      }
+    }
+
+    text = text.trim();
+    if (!text) {
+      setImportError("The MDX article body is empty. No fields were changed.");
+      return;
+    }
+    if (dateVal && !isValidBlogDate(dateVal)) {
+      setImportError("The frontmatter date is invalid. No fields were changed.");
+      return;
+    }
+
+    if (titleVal) {
+      setValue("title", titleVal, { shouldDirty: true, shouldValidate: true });
+      if (!slugVal && !initialData?.id) slugVal = normalizeBlogSlug(titleVal);
+    }
+    if (slugVal) {
+      slugEdited.current = true;
+      setValue("slug", normalizeBlogSlug(slugVal), { shouldDirty: true, shouldValidate: true });
+    }
+    if (descVal) {
+      setValue("summary", descVal, { shouldDirty: true, shouldValidate: true });
+    }
+    if (dateVal && isValidBlogDate(dateVal)) {
+      publishDateEdited.current = true;
+      setValue("published_at", dateVal, { shouldDirty: true, shouldValidate: true });
+    }
+    if (coverVal) {
+      if (coverVal !== getValues("cover_image_url")) setValue("cover_image_id", "", { shouldDirty: true });
+      setValue("cover_image_url", coverVal, { shouldDirty: true, shouldValidate: true });
+    }
+    if (importedTags !== null) setValue("tags", importedTags, { shouldDirty: true, shouldValidate: true });
+    if (text) {
+      richContentEdited.current = true;
+      setValue("content", text, { shouldDirty: true, shouldValidate: true });
+    }
+
+    setEditorMode("source");
+    closeImport();
+  };
 
   const {
     register,
@@ -124,8 +219,12 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
   const tags = watch("tags") || [];
   const status = watch("status");
   const slug = watch("slug");
+  const titleWatch = watch("title") || "";
+  const summaryWatch = watch("summary") || "";
   const coverUrl = watch("cover_image_url") || "";
   const content = watch("content") || "";
+  const wordCount = content.trim() ? content.trim().split(/\s+/).filter(Boolean).length : 0;
+  const estimatedReadMinutes = Math.max(1, Math.ceil(wordCount / 200));
   const ownCanonical = blogCanonicalUrl(slug || "", siteMetadata.siteUrl);
   const selectedRelatedIds = watch("related_blog_post_ids") || [];
   const relatedOptions = availablePosts.filter((item) => item.id !== initialData?.id && `${item.title} ${item.slug}`.toLowerCase().includes(relatedSearch.trim().toLowerCase()));
@@ -279,6 +378,9 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
             }
           }
         }
+        if (res.status === 409 && err.error?.toLowerCase().includes("slug")) {
+          setError("slug", { message: err.error });
+        }
         throw new Error(err.error || "Failed to save blog post");
       }
       if (!result?.id) throw new Error("Blog save could not be confirmed. Refresh the list before retrying.");
@@ -328,10 +430,32 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
           {errorMsg}
         </div>
       )}
+
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border-hairline bg-surface-base p-4">
+        <div>
+          <p className="font-mono text-xs uppercase tracking-widest text-ink-secondary">
+            {initialData?.id ? "Edit Article" : "Create Article"}
+          </p>
+          <p className="mt-0.5 text-xs text-ink-secondary">Fill in details below or import an existing MDX file directly.</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => { setImportError(""); setShowImportModal(true); }}
+          className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border-hairline bg-surface-raised px-4 py-1.5 text-xs font-medium text-ink-primary hover:border-accent-signal/50 hover:bg-surface-base transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-signal"
+        >
+          <FileText className="size-3.5 text-accent-signal" />
+          <span>Paste MDX article</span>
+        </button>
+      </div>
       
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-2">
-          <label htmlFor="blog-title" className="text-sm font-medium">Title</label>
+          <div className="flex items-center justify-between">
+            <label htmlFor="blog-title" className="text-sm font-medium">Title</label>
+            <span className={`font-mono text-[11px] ${titleWatch.length > 70 ? "text-amber-400 font-semibold" : "text-ink-secondary"}`}>
+              {titleWatch.length} / 70 chars
+            </span>
+          </div>
           <input
             {...register("title", {
               onChange: (event) => {
@@ -341,35 +465,50 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
             id="blog-title"
             aria-invalid={Boolean(errors.title)}
             aria-describedby={errors.title ? "blog-title-error" : undefined}
-            className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
+            className="w-full rounded-xl border border-border-hairline bg-surface-base px-3.5 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent-signal"
             placeholder="Post Title"
           />
           {errors.title && <p id="blog-title-error" role="alert" className="text-xs text-red-500">{errors.title.message}</p>}
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="blog-slug" className="text-sm font-medium">Slug</label>
-          <input
-            {...register("slug", { onChange: () => { slugEdited.current = true; } })}
-            id="blog-slug"
-            aria-invalid={Boolean(errors.slug)}
-            aria-describedby={errors.slug ? "blog-slug-error" : undefined}
-            className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
-            placeholder="post-slug"
-          />
+          <div className="flex items-center justify-between">
+            <label htmlFor="blog-slug" className="text-sm font-medium">Slug</label>
+            <span className="font-mono text-[11px] text-ink-secondary">
+              Canonical URL path
+            </span>
+          </div>
+          <div className="flex items-center overflow-hidden rounded-xl border border-border-hairline bg-surface-base focus-within:ring-2 focus-within:ring-accent-signal">
+            <span className="select-none border-r border-border-hairline bg-surface-raised px-3 py-2.5 font-mono text-xs text-ink-secondary">
+              /blog/
+            </span>
+            <input
+              {...register("slug", { onChange: () => { slugEdited.current = true; } })}
+              id="blog-slug"
+              aria-invalid={Boolean(errors.slug)}
+              aria-describedby={errors.slug ? "blog-slug-error" : undefined}
+              className="w-full bg-transparent px-3 py-2.5 font-mono text-sm focus:outline-none"
+              placeholder="post-slug"
+            />
+          </div>
           {errors.slug && <p id="blog-slug-error" role="alert" className="text-xs text-red-500">{errors.slug.message}</p>}
         </div>
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="blog-summary" className="text-sm font-medium">Summary</label>
+        <div className="flex items-center justify-between">
+          <label htmlFor="blog-summary" className="text-sm font-medium">Summary</label>
+          <span className={`font-mono text-[11px] ${summaryWatch.length > 160 ? "text-amber-400 font-semibold" : "text-ink-secondary"}`}>
+            {summaryWatch.length} / 160 chars
+          </span>
+        </div>
         <textarea
           {...register("summary")}
           id="blog-summary"
           aria-invalid={Boolean(errors.summary)}
           aria-describedby={errors.summary ? "blog-summary-error" : undefined}
           rows={3}
-          className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal"
+          className="w-full rounded-xl border border-border-hairline bg-surface-base px-3.5 py-2.5 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-accent-signal"
           placeholder="Optional: generated from the article on first save"
         />
         {errors.summary && <p id="blog-summary-error" role="alert" className="text-xs text-red-500">{errors.summary.message}</p>}
@@ -416,6 +555,23 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
               placeholder="https://... or choose from library"
             />
           </div>
+          {coverUrl && (
+            <div className="mt-2 flex items-center gap-3 rounded-xl border border-border-hairline bg-surface-base p-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={coverUrl.startsWith("http") || coverUrl.startsWith("/") ? coverUrl : `/blog/${coverUrl}`}
+                alt="Cover preview"
+                className="h-12 w-20 rounded-lg object-cover border border-border-hairline"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = "none";
+                }}
+              />
+              <div className="min-w-0 flex-1 text-xs text-ink-secondary">
+                <p className="font-medium text-ink-primary truncate">Cover preview</p>
+                <p className="truncate text-ink-secondary">{coverUrl}</p>
+              </div>
+            </div>
+          )}
           {errors.cover_image_url && <p id="blog-cover-url-error" role="alert" className="text-xs text-red-500">{errors.cover_image_url.message}</p>}
         </div>
 
@@ -516,7 +672,14 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
       <div className="space-y-2">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="text-sm font-medium">Content</p>
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium">Content</p>
+              {wordCount > 0 && (
+                <span className="rounded-full border border-border-hairline bg-surface-base px-2 py-0.5 text-xs text-ink-secondary">
+                  {wordCount.toLocaleString()} words · {estimatedReadMinutes} min read
+                </span>
+              )}
+            </div>
             <p className="mt-1 text-xs text-ink-secondary">Write visually, edit MDX directly, or inspect an unsaved article preview.</p>
           </div>
           <div role="tablist" aria-label="Blog writing mode" className="inline-flex flex-wrap gap-1 rounded-2xl border border-border-hairline bg-surface-base p-1">
@@ -549,7 +712,12 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
           control={control}
           render={({ field }) => (
             editorMode === "source" ? (
-              <BlogCodeEditor value={field.value || ""} onChange={field.onChange} errorId={errors.content ? "blog-content-error" : undefined} />
+              <BlogCodeEditor
+                value={field.value || ""}
+                onChange={field.onChange}
+                errorId={errors.content ? "blog-content-error" : undefined}
+                onExtractFrontmatter={handleImportMdx}
+              />
             ) : (
               <TiptapEditor value={field.value} errorId={errors.content ? "blog-content-error" : undefined} onChange={(value) => {
                 richContentEdited.current = true;
@@ -568,7 +736,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
               href={`/admin/blogs/${initialData.id}/preview`}
               data-admin-unguarded
               onClick={(event) => { if (isDirty || tagInput.trim()) { event.preventDefault(); leave("preview"); } }}
-            className="inline-flex min-h-11 items-center rounded-xl px-4 py-2 text-sm font-medium text-accent-signal underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-signal"
+            className="inline-flex min-h-11 items-center rounded-full px-5 py-2 text-sm font-medium text-accent-signal underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-signal hover:bg-surface-base transition-colors"
           >
             Preview saved post
           </Link>
@@ -576,14 +744,14 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
         <button
           type="button"
           onClick={() => leave("list")}
-          className="min-h-11 rounded-xl px-4 py-2 text-sm font-medium text-ink-secondary hover:bg-surface-base transition-colors"
+          className="min-h-11 rounded-full border border-border-hairline px-5 py-2 text-sm font-medium text-ink-secondary hover:bg-surface-base transition-colors"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={isSubmitting || isUploadingImages || isCleaningImages}
-          className="inline-flex items-center justify-center rounded-xl bg-accent-signal px-6 py-2 text-sm font-medium text-white shadow hover:bg-accent-signal/90 focus:outline-none disabled:opacity-50 transition-all"
+          className="inline-flex items-center justify-center rounded-full bg-accent-signal px-6 py-2 text-sm font-medium text-white shadow hover:bg-accent-signal/90 focus:outline-none disabled:opacity-50 transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-signal"
         >
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {publishingNow ? "Publish Now" : status === "draft" ? initialData?.status === "published" ? "Unpublish Post" : initialData?.id ? "Save Post" : "Save Draft"
@@ -626,6 +794,77 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
       }}
     />
     <AdminConfirmDialog open={navigationTarget !== null} title="Discard unsaved Blog changes?" description="Your unsaved article, tags and image selections will be lost. Images uploaded in this session will be removed if they are unused." confirmLabel="Discard changes" cancelLabel="Keep editing" destructive pending={isCleaningImages || isUploadingImages} onClose={() => setNavigationTarget(null)} onConfirm={() => { void (async () => { const cleaned = await discardUploadedImages(); if (cleaned) confirmLeave(router.push); else setNavigationTarget(null); })(); }} />
+    {showImportModal && (() => {
+      const trimmed = importInput.trim();
+      const fmMatch = /^---\s*[\r\n]+([\s\S]*?)[\r\n]+---\s*[\r\n]*/.exec(trimmed);
+      const fm = fmMatch ? fmMatch[1] : "";
+      const tMatch = fm ? /^title:\s*["']?(.*?)["']?\s*$/m.exec(fm) : null;
+      const sMatch = fm ? /^slug:\s*["']?(.*?)["']?\s*$/m.exec(fm) : null;
+      const dMatch = fm ? /^(?:description|summary):\s*["']?(.*?)["']?\s*$/m.exec(fm) : null;
+      const dateMatch = fm ? /^date:\s*["']?(.*?)["']?\s*$/m.exec(fm) : null;
+      return (
+      <Dialog open={showImportModal} onClose={closeImport} className="fixed inset-0 z-[7000] dark">
+        <div className="fixed inset-0 flex items-center justify-center overflow-y-auto bg-black/75 p-4 backdrop-blur-md">
+        <DialogPanel className="w-full max-w-2xl rounded-2xl border border-border-primary bg-surface-raised p-6 shadow-2xl">
+          <div className="flex items-center justify-between border-b border-border-hairline pb-3">
+            <div className="flex items-center gap-2">
+              <Sparkles className="size-4 text-accent-signal" />
+              <DialogTitle className="text-base font-semibold text-ink-primary">Import MDX source</DialogTitle>
+            </div>
+            <button
+              type="button"
+              onClick={closeImport}
+              aria-label="Close dialog"
+              className="inline-flex size-11 items-center justify-center rounded-lg text-ink-secondary hover:bg-surface-base hover:text-ink-primary"
+            >
+              <X className="size-4" />
+            </button>
+          </div>
+          <p className="mt-3 text-xs text-ink-secondary leading-relaxed">
+            Paste your MDX source below. Supported YAML frontmatter fields include title, slug, summary, date, cover image and tags (as a list or inline list). Review the populated fields before saving.
+          </p>
+          <textarea
+            aria-label="MDX source to import"
+            aria-describedby={importError ? "import-mdx-error" : undefined}
+            autoFocus
+            value={importInput}
+            onChange={(e) => { setImportInput(e.target.value); setImportError(""); }}
+            rows={10}
+            className="mt-3 w-full rounded-xl border border-border-hairline bg-surface-base p-3 font-mono text-xs text-ink-primary focus:outline-none focus:ring-2 focus:ring-accent-signal"
+            placeholder="Paste your .mdx content here..."
+          />
+          {importError && <p id="import-mdx-error" role="alert" className="mt-2 text-sm text-red-300">{importError}</p>}
+          {fm && (
+            <div className="mt-3 rounded-xl border border-indigo-500/30 bg-indigo-950/20 p-3 text-xs font-mono space-y-1">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-accent-signal">Detected Frontmatter</p>
+              {tMatch && <p className="truncate text-ink-primary"><span className="text-ink-secondary">Title:</span> {tMatch[1]}</p>}
+              {sMatch && <p className="truncate text-ink-primary"><span className="text-ink-secondary">Slug:</span> /blog/{sMatch[1]}</p>}
+              {dMatch && <p className="truncate text-ink-primary"><span className="text-ink-secondary">Summary:</span> {dMatch[1]}</p>}
+              {dateMatch && <p className="text-ink-primary"><span className="text-ink-secondary">Date:</span> {dateMatch[1]}</p>}
+            </div>
+          )}
+          <div className="mt-4 flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={closeImport}
+              className="min-h-11 rounded-full border border-border-hairline px-4 py-2 text-xs font-medium text-ink-secondary hover:bg-surface-base"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              disabled={!importInput.trim()}
+              onClick={() => handleImportMdx(importInput)}
+              className="min-h-11 rounded-full bg-accent-signal px-5 py-2 text-xs font-medium text-white shadow hover:bg-accent-signal/90 disabled:opacity-50"
+            >
+              Populate Form Fields
+            </button>
+          </div>
+        </DialogPanel>
+        </div>
+      </Dialog>
+      );
+    })()}
     </>
   );
 }

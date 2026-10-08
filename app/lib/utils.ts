@@ -6,6 +6,7 @@ export interface Blog {
   content: string;
   code: string;
   publishedAt: string;
+  modifiedAt?: string;
   imageName: string;
   categories: string[];
   featured?: boolean;
@@ -161,12 +162,12 @@ export async function getBlogPostBySlug(slug: string): Promise<Blog | null> {
   if (!supabase) throw new Error("Blog data is unavailable");
   const now = new Date().toISOString();
   let { data, error } = await supabase.from('blog_posts').select(`
-    id, title, slug, summary, content, published_at, cover_image_url, status, canonical_url, reading_time_minutes, related_blog_post_ids,
+    id, title, slug, summary, content, published_at, updated_at, cover_image_url, status, canonical_url, reading_time_minutes, related_blog_post_ids,
     blog_post_tags ( tags ( name, slug ) )
   `).eq('slug', slug).eq('status', 'published').lte('published_at', now).single();
   if (error && ['42703', 'PGRST204'].includes(error.code) && error.message.includes('related_blog_post_ids')) {
     const fallback = await supabase.from('blog_posts').select(`
-      id, title, slug, summary, content, published_at, cover_image_url, status, canonical_url, reading_time_minutes,
+      id, title, slug, summary, content, published_at, updated_at, cover_image_url, status, canonical_url, reading_time_minutes,
       blog_post_tags ( tags ( name, slug ) )
     `).eq('slug', slug).eq('status', 'published').lte('published_at', now).single();
     data = fallback.data as typeof data;
@@ -189,6 +190,7 @@ export async function getBlogPostBySlug(slug: string): Promise<Blog | null> {
     content: data.content,
     code: data.content, // Pass raw content so next-mdx-remote can render it
     publishedAt: data.published_at || new Date().toISOString(),
+    modifiedAt: data.updated_at || undefined,
     imageName: data.cover_image_url || '',
     categories: categories as string[],
     canonicalUrl: data.canonical_url || undefined,

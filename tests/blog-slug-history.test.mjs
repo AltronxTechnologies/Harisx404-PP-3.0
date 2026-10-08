@@ -3,10 +3,11 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 test("published slug aliases resolve only to live articles without redirect chains", async () => {
-  const [middleware, page, migration] = await Promise.all([
+  const [middleware, page, migration, api] = await Promise.all([
     readFile(new URL("../middleware.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/blog/[slug]/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../migrations/2026_blog_editor_delete_slug_history.sql", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/admin/blogs/route.ts", import.meta.url), "utf8"),
   ]);
   assert.match(middleware, /\.from\("blog_slug_history"\)/);
   assert.match(middleware, /status: 308/);
@@ -16,4 +17,5 @@ test("published slug aliases resolve only to live articles without redirect chai
   assert.match(migration, /CREATE TABLE IF NOT EXISTS public\.blog_slug_history/);
   assert.match(migration, /BLOG_SLUG_RESERVED/);
   assert.match(migration, /ON DELETE SET NULL/);
+  assert.doesNotMatch(api.slice(api.indexOf("export async function DELETE")), /\.from\("blog_slug_history"\)\.delete\(/);
 });
