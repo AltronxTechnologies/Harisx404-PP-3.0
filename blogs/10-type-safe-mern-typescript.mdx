@@ -22,8 +22,8 @@ keywords:
   - type safe API
 readingTime: "8 min read"
 featured: false
-coverImage: "/images/blog/type-safe-mern-typescript/cover.webp"
-coverImageAlt: "A shared schema package feeding a React client and an Express API, with validation gates at each boundary"
+coverImage: "/blog/production-placeholder.jpg"
+coverImageAlt: "Temporary Harisx404 branded cover for Type-Safe MERN; final artwork pending"
 ---
 
 # End-to-End Type Safety: Building a Type-Safe MERN Application
@@ -65,11 +65,6 @@ export type TodoDto = z.infer<typeof TodoDto>;
 ```
 
 `strictObject` rejects unknown keys, which catches typos and stops callers from smuggling in extra fields. Notice that the DTO (data transfer object, the shape that crosses the network) is separate from the database document. You'll see why below.
-
-> **Image Prompt**
-> Create a clean architecture diagram on a cool graphite background showing a monorepo: a central "contracts" package block in amber feeding two blocks, a React client and an Express API, with signal-blue arrows. Small validation gate icons sit on the client's fetch boundary, the API's request boundary, and the database boundary. Minimal geometric style, subtle depth, no logos, no text labels, 16:9.
->
-> **Placement:** directly under the contracts package code.
 
 ## The API: validate in, shape out
 

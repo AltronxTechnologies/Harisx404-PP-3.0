@@ -21,8 +21,8 @@ keywords:
   - MCP security
 readingTime: "7 min read"
 featured: true
-coverImage: "/images/blog/securing-ai-agents/cover.webp"
-coverImageAlt: "An AI agent node connected to tools through amber gates, with untrusted content arriving across a dashed boundary"
+coverImage: "/blog/production-placeholder.jpg"
+coverImageAlt: "Temporary Harisx404 branded cover for Securing AI Agents; final artwork pending"
 ---
 
 # Securing AI Agents: Prompt Injection, Tool Abuse, and Least Privilege
@@ -68,11 +68,6 @@ Meta's security team published a simple heuristic in October 2025, the [Agents R
 If all three are unavoidable, the agent should not run autonomously. It needs a human approval step or a fresh session with a clean context. Meta presents the rule as a supplement to least privilege, not a replacement. It builds on Simon Willison's earlier [lethal trifecta](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/).
 
 Try it on a hypothetical mail assistant. Reading inbound email is A. Reading the user's mailbox is B. Sending replies is C. Drop C (draft, but never send) and the worst case becomes a bad draft instead of a data leak.
-
-> **Image Prompt**
-> Create a clean editorial-style technical illustration of the "Rule of Two": three overlapping circles labelled only A, B and C, on a cool graphite background. The three pairwise overlaps glow softly in signal-blue; the center where all three meet is marked in amber as the danger zone. Minimal geometric shapes, thin lines, subtle depth, professional engineering-blog aesthetic, 4:3, no logos, no other text.
->
-> **Placement:** directly under the Rule of Two section.
 
 ## Controls that work
 
@@ -120,11 +115,6 @@ Run code and browsing tools in a sandbox with no network by default, then allow-
 ### 5. Log for the postmortem
 
 Record the prompt, the sources retrieved, every tool call with arguments and results, approvals, and which identity acted. Alert on bursts of calls or destinations you have never seen. If a security team will triage this, [the SOC side of AI agents](/blog/ai-security-operations-center) shows what they will want from those logs.
-
-> **Image Prompt**
-> Create a premium technical illustration of layered defenses around an AI agent, drawn as concentric rings on a cool graphite background. Center: a small agent node. Rings outward: approval gate, tool validation, scoped identity, sandbox and egress filter. A few thin signal-blue lines try to reach the center from outside and stop at different rings; one amber spark marks the point where an injected instruction enters. Minimal geometric style, subtle depth, no logos, no text labels, 16:9.
->
-> **Placement:** after the "Controls that work" heading, before control 1.
 
 ## What not to lean on
 

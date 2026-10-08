@@ -100,13 +100,11 @@ lessons_learned: |
 
 The production model was selected through a rigorous 5-experiment empirical benchmark evaluated on identical stratified partitions:
 
-| Experiment | Model Architecture | Feature Representation | Accuracy | Macro F1 | Status |
-|---|---|---|---:|---:|---|
-| E1 | Logistic Regression | TF-IDF (10,000 n-grams) | 97.33% | 0.9717 | Baseline |
-| E2 | Multinomial Naive Bayes | TF-IDF (10,000 n-grams) | 96.05% | 0.8922 | Baseline |
-| **E3** | **Calibrated Linear SVM** | **TF-IDF (10,000 n-grams)** | **97.94%** | **0.9760** | **Production Champion** |
-| E4 | Logistic Regression | TF-IDF + 20 Security Heuristics | 97.44% | 0.9725 | Evaluated |
-| E5 | Calibrated Linear SVM | TF-IDF + 20 Security Heuristics | 97.88% | 0.9752 | Evaluated |
+- **E1, baseline:** Logistic Regression with TF-IDF (10,000 n-grams); 97.33% accuracy and 0.9717 macro F1.
+- **E2, baseline:** Multinomial Naive Bayes with the same TF-IDF features; 96.05% accuracy and 0.8922 macro F1.
+- **E3, selected model:** Calibrated Linear SVM with TF-IDF (10,000 n-grams); 97.94% accuracy and 0.9760 macro F1.
+- **E4, evaluated:** Logistic Regression with TF-IDF and 20 security heuristics; 97.44% accuracy and 0.9725 macro F1.
+- **E5, evaluated:** Calibrated Linear SVM with TF-IDF and 20 security heuristics; 97.88% accuracy and 0.9752 macro F1.
 
 ### Independent Holdout Test Metrics (3,592 Samples)
 * **Overall Accuracy**: **98.64%**

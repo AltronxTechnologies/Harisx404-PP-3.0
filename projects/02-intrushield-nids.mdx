@@ -112,17 +112,15 @@ The platform provides small-to-medium security teams, homelab operators, and inf
 
 The platform was systematically tested against offensive cyber operations generated from an isolated Kali Linux testbed:
 
-| Attack Vector | Simulated Technique | Detection Signature | System Action |
-|---------------|---------------------|---------------------|---------------|
-| **Reconnaissance** | `nmap -sS -A -T4` aggressive sweep | ET SCAN Nmap Scripting Engine User-Agent | Flagged severity High, port scan grouped |
-| **Brute Force** | `hydra -l root -P pass.txt ssh://` | ET SCAN Potential SSH Scan / Brute Force | Deduplicated 250 attempts into single incident |
-| **Exploitation** | Replay of Log4j JNDI string payload | ET EXPLOIT Apache Log4j RCE Attempt | Immediate Critical alert with GeoIP attribution |
-| **Denial of Service** | `hping3 --flood -S -p 80` | ET DOS Possible SYN Flood | Dedup buffer engaged, packet rate graphed |
+- **Reconnaissance:** An isolated `nmap -sS -A -T4` sweep triggered ET SCAN Nmap Scripting Engine User-Agent. The sample was grouped as a high-severity port scan.
+- **Brute force:** A test using `hydra -l root -P pass.txt ssh://` triggered ET SCAN Potential SSH Scan / Brute Force. The case study reports that 250 attempts were grouped into one incident.
+- **Exploitation:** Replaying a Log4j JNDI string triggered ET EXPLOIT Apache Log4j RCE Attempt and a critical alert with GeoIP context.
+- **Denial of service:** A test with `hping3 --flood -S -p 80` triggered ET DOS Possible SYN Flood; the deduplication buffer and packet-rate chart were used to review it.
 
 ---
 
 ## Production Verification & Tooling
 
-* **Live Cloud Demo**: [https://intrushield-nids.vercel.app](https://intrushield-nids.vercel.app) *(Default Demo: `admin` / `admin`)*
+* **Live Cloud Demo**: [https://intrushield-nids.vercel.app](https://intrushield-nids.vercel.app) (confirm demo access with the owner before linking publicly)
 * **GitHub Repository**: [https://github.com/harisx404/intrushield-nids](https://github.com/harisx404/intrushield-nids)
 * **Packaging**: Production multi-stage `Dockerfile` and `docker-compose.yml` orchestrating API, database, and background workers with health checks.

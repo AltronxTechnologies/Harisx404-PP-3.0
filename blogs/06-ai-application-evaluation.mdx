@@ -22,11 +22,11 @@ keywords:
   - production AI
 readingTime: "6 min read"
 featured: false
-coverImage: "/images/blog/ai-application-evaluation/cover.webp"
-coverImageAlt: "A test dataset flowing through graders into a release gate, drawn as clean connected blocks on a graphite background"
+coverImage: "/blog/production-placeholder.jpg"
+coverImageAlt: "Temporary Harisx404 branded cover for AI Application Evaluation; final artwork pending"
 ---
 
-# How to Evaluate an AI Application Before Calling It "Production Ready"
+# How to Evaluate an AI Application Before Calling It Production Ready
 
 An AI application is production ready when you can answer two questions with evidence: how do you know it works, and how will you know when it stops working? The short recipe is to build a test set from real tasks, grade it with code wherever you can and with models or humans where you must, run it on every change, and keep watching after launch.
 
@@ -118,11 +118,6 @@ export async function runEvals(
 // const failing = (await runEvals(regressionCases, myApp)).filter((r) => r.passRate < 1);
 // if (failing.length > 0) process.exit(1);
 ```
-
-> **Image Prompt**
-> Create a clean technical illustration of an evaluation loop on a cool graphite background. A dataset block feeds an AI application node; its outputs pass through three small grader gates (code, model, human) into a scoreboard panel with abstract bar shapes, and an amber arrow returns failures to the dataset block. Signal-blue lines for data flow, minimal geometric style, subtle depth, no logos, no text labels, 16:9.
->
-> **Placement:** after the minimal runner section.
 
 ## Set release gates, then keep watching
 

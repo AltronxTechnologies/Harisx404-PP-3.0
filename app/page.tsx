@@ -21,6 +21,7 @@ import {
   type HomeProject,
 } from "./data/fallback-home";
 import { withProjectPreview } from "./data/project-preview-fixtures";
+import { getSupabaseEnv } from "./lib/supabase/safe";
 import { fetchCredentialCollection } from "./credentials/data";
 import { summarizeCredentials } from "./credentials/summary";
 import {
@@ -77,6 +78,7 @@ const personJsonLd = {
 };
 
 export default async function Home() {
+  const hasConnectedContent = process.env.NODE_ENV !== "development" || Boolean(getSupabaseEnv());
   const [dbProjects, dbPosts, dbTestimonials, credentials] =
     await Promise.all([
       fetchCachedProjects(),
@@ -119,7 +121,7 @@ export default async function Home() {
           tags: Array.isArray(p.tags) ? p.tags.slice(0, 3) : [],
           features: Array.isArray(p.features) ? p.features : [],
         }))
-      : fallbackProjects.slice(0, 3)
+      : hasConnectedContent ? [] : fallbackProjects.slice(0, 3)
   );
 
   const reactionSummaries = await fetchBlogReactionSummaries(
@@ -150,7 +152,7 @@ export default async function Home() {
           badge: index === 0 ? "Featured" : "Latest",
           reactionSummary: reactionSummaries[post.slug],
         }))
-      : fallbackPosts.slice(0, 3).map((post, index) => ({
+       : (hasConnectedContent ? [] : fallbackPosts.slice(0, 3)).map((post, index) => ({
           ...post,
           badge: index === 0 ? "Featured" : "Latest",
         }));
@@ -173,13 +175,15 @@ export default async function Home() {
         name: latestProject.title as string,
         href: `/projects/${latestProject.slug}`,
       }
-    : null;
+    : hasConnectedContent
+      ? { name: "Case studies coming soon", href: "/projects", label: "Projects", subline: "Work in progress" }
+      : null;
 
   // Live stats for the status strip under the hero. Reuses the data
   // already fetched above; falls back to static copy when offline.
   const latestPost = posts[0];
   // Bucket every project into one of the three domains shown in the hero.
-  const sourceProjects = dbProjects.length > 0 ? dbProjects : fallbackProjects;
+  const sourceProjects = dbProjects.length > 0 ? dbProjects : hasConnectedContent ? [] : fallbackProjects;
   const domainCounts = { web: 0, cyber: 0, ai: 0 };
   /* Tech pulled from project rows, bucketed by the same domain rules —
      the bento's tech-stack marquee merges these in (deduped) so the
@@ -213,7 +217,8 @@ export default async function Home() {
   const statusData = {
     projectCount: sourceProjects.length,
     domainCounts,
-    latestPostTitle: latestPost?.title,
+    latestPostLabel: hasConnectedContent && !latestPost ? "Blog" : undefined,
+    latestPostTitle: latestPost?.title ?? (hasConnectedContent ? "Articles coming soon" : undefined),
     latestPostMeta: latestPost
       ? `${latestPost.readingTime} · ${formatDate(latestPost.publishedAt)}`
       : undefined,
@@ -238,7 +243,7 @@ export default async function Home() {
               </Suspense>
             }
           />
-          <CaseStudies projects={projects} />
+          {projects.length > 0 && <CaseStudies projects={projects} />}
           <Writings posts={posts} formattedDates={formattedDates} />
           <AboutTeaser />
           <Testimonials items={dbTestimonials} />

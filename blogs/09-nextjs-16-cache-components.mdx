@@ -22,8 +22,8 @@ keywords:
   - Turbopack
 readingTime: "7 min read"
 featured: true
-coverImage: "/images/blog/nextjs-16-cache-components/cover.webp"
-coverImageAlt: "A page split into a static shell, cached blocks, and streaming regions, drawn as layered panels on a graphite background"
+coverImage: "/blog/production-placeholder.jpg"
+coverImageAlt: "Temporary Harisx404 branded cover for Next.js Cache Components; final artwork pending"
 ---
 
 # Next.js 16 in Practice: Cache Components, Instant Navigations, and Modern App Architecture
@@ -50,11 +50,6 @@ Every piece of data on a page then gets one of three treatments:
 | Stream | Wrap in `<Suspense>` | Per-request or user-specific data that must be fresh |
 | Cache | `use cache` with `cacheLife` | Data that changes slowly, such as article content or a product catalog |
 | Block | `export const instant = false` | Routes where waiting on the server is acceptable, and instant validation isn't worth the effort |
-
-> **Image Prompt**
-> Create a clean technical illustration of a web page decomposed into three layers on a cool graphite background: a solid signal-blue static shell with placeholder blocks, amber cached blocks slotted into it, and thin streaming lines filling empty regions from the right. Minimal geometric style, subtle depth, no logos, no text labels, 16:9.
->
-> **Placement:** directly under the choices table.
 
 ## A small example
 

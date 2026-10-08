@@ -75,6 +75,7 @@ export type StatusRowData = {
   domainCounts?: { web: number; cyber: number; ai: number };
   /** Latest published post title. */
   latestPostTitle?: string;
+  latestPostLabel?: string;
   /** e.g. "2 min read · Jul 2026" (kept for API compat). */
   latestPostMeta?: string;
   /** Deep link to the latest post. */
@@ -316,7 +317,7 @@ export function StatusRow({ data }: { data?: StatusRowData }) {
       {/* LATEST WRITE-UP — real post title, truncates, never wraps */}
       <Segment
         href={data?.latestPostHref ?? writingFallback?.href ?? "/blog"}
-        label="Latest write-up"
+         label={data?.latestPostLabel ?? "Latest write-up"}
         dot="bg-blue-500"
         hoverGlow="hover:bg-blue-500/[0.04]"
         className="border-t border-border-primary md:border-l md:border-t-0"

@@ -117,13 +117,11 @@ MedicaLink HMS provides 25+ integrated clinical and administrative modules:
 
 ## Security & Defense-in-Depth
 
-| Security Vector | Implementation Detail |
-|---|---|
-| **Tenant Isolation** | Dynamic database connection resolution completely prevents cross-tenant data leakage. |
-| **Authentication** | In-memory JWT access tokens with rotating HttpOnly refresh cookies and optional TOTP 2FA. |
-| **Input Sanitization** | `express-mongo-sanitize` on all endpoints strips NoSQL operators; DOMPurify prevents stored XSS. |
-| **PII Encryption** | Sensitive patient fields (national IDs, insurance numbers) encrypted with AES-256-GCM. |
-| **Audit Trails** | Immutable audit logs record every clinical read and write with user ID, role, IP, and timestamp. |
+- **Tenant isolation:** Dynamic database connection resolution is designed to separate tenant data. Verify the isolation tests before describing it as a guarantee against cross-tenant access.
+- **Authentication:** In-memory JWT access tokens, rotating HttpOnly refresh cookies and optional TOTP 2FA.
+- **Input sanitization:** `express-mongo-sanitize` on API requests and DOMPurify for rendered content.
+- **Sensitive data:** Patient identifiers and insurance numbers are described as encrypted with AES-256-GCM; verify the implementation and key management before publishing this claim.
+- **Audit trails:** Clinical reads and writes are described as logged with user ID, role, IP and timestamp; verify retention and tamper protections before calling the logs immutable.
 
 ---
 

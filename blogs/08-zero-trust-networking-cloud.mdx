@@ -21,8 +21,8 @@ keywords:
   - service to service authentication
 readingTime: "5 min read"
 featured: false
-coverImage: "/images/blog/zero-trust-networking-cloud/cover.webp"
-coverImageAlt: "Services in a cloud network each guarded by a small gate, with a policy engine deciding which connections open"
+coverImage: "/blog/production-placeholder.jpg"
+coverImageAlt: "Temporary Harisx404 branded cover for Zero Trust Networking; final artwork pending"
 ---
 
 # Zero Trust Networking for Modern Cloud Applications
@@ -88,14 +88,28 @@ spec:
       ports:
         - protocol: TCP
           port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-checkout-egress-to-orders
+  namespace: shop
+spec:
+  podSelector:
+    matchLabels:
+      app: checkout
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: orders
+      ports:
+        - protocol: TCP
+          port: 8080
 ```
 
-Two cautions. First, the deny-all policy above also blocks outbound DNS, so add an explicit egress rule for it before you apply it to a live namespace. Second, NetworkPolicy works at layers 3 and 4. It tells you *which workloads* may connect, not *who is calling* or *what they may do*. The identity and request-level checks come from the mesh or gateway layer.
-
-> **Image Prompt**
-> Create a clean architecture diagram of zero trust in a cloud cluster on a graphite background. Show a request path: a user device passes an identity-aware proxy, then services inside a cluster, each service wrapped by a thin gate (enforcement point). A separate policy-engine node above sends signal-blue decision lines to every gate. One blocked lateral connection between two services is marked in amber. Minimal geometric style, subtle depth, no logos, no text labels, 16:9.
->
-> **Placement:** under the "Two kinds of traffic to protect" section.
+This permits checkout to reach orders on port 8080: orders accepts the connection, and checkout may initiate it. Two cautions. First, the deny-all policy also blocks outbound DNS, so add an explicit DNS egress rule before applying it to a live namespace. Second, NetworkPolicy works at layers 3 and 4. It tells you *which workloads* may connect, not *who is calling* or *what they may do*. The identity and request-level checks come from the mesh or gateway layer.
 
 ## A roadmap, not a product
 

@@ -7,29 +7,34 @@ const baseUrl = process.env.PROJECTS_BASE_URL || "http://localhost:3000";
 test("published project cards resolve to authored detail pages", async () => {
   const index = await fetch(`${baseUrl}/projects`);
   assert.equal(index.status, 200);
-  const slugs = [...(await index.text()).matchAll(/href="\/projects\/([a-z0-9-]+)"/g)]
+  const html = await index.text();
+  const slugs = [...html.matchAll(/href="\/projects\/([a-z0-9-]+)"/g)]
     .map((match) => match[1]);
   const uniqueSlugs = [...new Set(slugs)];
-  assert.ok(uniqueSlugs.length > 0, "the projects index should link to published projects");
+  if (!uniqueSlugs.length) {
+    assert.match(html, /No projects yet/);
+    assert.doesNotMatch(html, /href="\/projects\/(?:securevault|shoplift|pulseboard|taskforge|nimbusnotes)"/);
+    return;
+  }
 
   for (const slug of uniqueSlugs) {
     const response = await fetch(`${baseUrl}/projects/${slug}`);
     assert.equal(response.status, 200, slug);
-    let html = await response.text();
-    if (!html.includes("At a glance")) {
+    let detailHtml = await response.text();
+    if (!detailHtml.includes("At a glance")) {
       // The dev server can stream a loading shell while another route sweep is compiling.
-      html = await (await fetch(`${baseUrl}/projects/${slug}`)).text();
+      detailHtml = await (await fetch(`${baseUrl}/projects/${slug}`)).text();
     }
-    assert.ok(html.includes("Share project"), `${slug} should render sharing`);
-    assert.ok(html.includes("At a glance"), `${slug} should render its facts`);
-    assert.doesNotMatch(html, /Preview-only case study\.|Case study \/ /, slug);
-    const facts = [...html.matchAll(/<dt[^>]*>(.*?)<\/dt>/g)].map((match) => match[1].includes("Expected completion") ? "Expected completion" : match[1]);
+    assert.ok(detailHtml.includes("Share project"), `${slug} should render sharing`);
+    assert.ok(detailHtml.includes("At a glance"), `${slug} should render its facts`);
+    assert.doesNotMatch(detailHtml, /Preview-only case study\.|Case study \/ /, slug);
+    const facts = [...detailHtml.matchAll(/<dt[^>]*>(.*?)<\/dt>/g)].map((match) => match[1].includes("Expected completion") ? "Expected completion" : match[1]);
     assert.deepEqual(facts, facts[0] === "Stage" ? ["Stage", "Expected completion", "Visit", "Source"] : ["Built", "Latest update", "Visit", "Source"], slug);
-    assert.doesNotMatch(html, /Category &amp; tags|<dt[^>]*>Category<\/dt>|<dt[^>]*>Tags<\/dt>/, slug);
-    assert.match(html, />Tech stack<\/h2>/, slug);
-    assert.match(html, />Tags<\/h2>/, slug);
-    assert.ok(html.includes("<h1"), `${slug} should render a heading`);
-    assert.doesNotMatch(html, /Why I Built This|Key Decisions|Performance-first build: optimized images/, slug);
+    assert.doesNotMatch(detailHtml, /Category &amp; tags|<dt[^>]*>Category<\/dt>|<dt[^>]*>Tags<\/dt>/, slug);
+    assert.match(detailHtml, />Tech stack<\/h2>/, slug);
+    assert.match(detailHtml, />Tags<\/h2>/, slug);
+    assert.ok(detailHtml.includes("<h1"), `${slug} should render a heading`);
+    assert.doesNotMatch(detailHtml, /Why I Built This|Key Decisions|Performance-first build: optimized images/, slug);
   }
 });
 

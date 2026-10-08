@@ -22,8 +22,8 @@ keywords:
   - east-west traffic
 readingTime: "6 min read"
 featured: false
-coverImage: "/images/blog/ai-workloads-network-architecture/cover.webp"
-coverImageAlt: "Racks of GPU nodes connected by a leaf-and-spine fabric with one congested link highlighted in amber"
+coverImage: "/blog/production-placeholder.jpg"
+coverImageAlt: "Temporary Harisx404 branded cover for AI Network Architecture; final artwork pending"
 ---
 
 # How AI Workloads Are Changing Modern Network Architecture
@@ -55,11 +55,6 @@ Meta described its training network in a 2024 [engineering post](https://enginee
 
 The lesson is not "copy Meta." It is that workload behavior should drive the network design, and that assumptions from web-scale networks, such as many flows hashing evenly, may not hold.
 
-> **Image Prompt**
-> Create a technical illustration of ECMP flow collisions in a leaf-and-spine fabric, on a cool graphite background. Show two leaf switches linked by four parallel spine paths. Three thick amber flows pile onto the same path while three other paths stay thin and unused in signal-blue. Minimal geometric style, thin lines, subtle depth, no logos, no text labels, 16:9.
->
-> **Placement:** under "What Meta found at scale".
-
 ## Up, out, and across
 
 Engineers describe AI networks in three domains:
@@ -90,11 +85,6 @@ Inference adds different patterns: many smaller, latency-sensitive requests rath
 ## Security belongs in the design
 
 A training fabric is a high-value, high-bandwidth environment, and Meta's separation of backend from front-end networks is also a segmentation decision. Keep management planes tightly controlled, restrict which systems can reach the backend, and apply the same identity-based thinking described in [zero trust networking](/blog/zero-trust-networking-cloud). If you run models close to users, [small models on edge devices](/blog/small-vs-large-language-models) change where this traffic flows in the first place.
-
-> **Image Prompt**
-> Create a clean diagram of the three AI network domains as nested layers on a graphite background: a small cluster of GPU nodes joined by thick short links (scale-up), many racks joined by a leaf-and-spine mesh (scale-out), and two data-center blocks joined by a long thin line (scale-across). Use signal-blue for links and amber for the long-haul connection. Minimal geometric style, subtle depth, no logos, no text labels, 16:9.
->
-> **Placement:** under the "Up, out, and across" table.
 
 ## Key takeaways
 

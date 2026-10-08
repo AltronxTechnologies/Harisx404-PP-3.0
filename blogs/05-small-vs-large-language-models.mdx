@@ -21,8 +21,8 @@ keywords:
   - on-device AI
 readingTime: "5 min read"
 featured: false
-coverImage: "/images/blog/small-vs-large-language-models/cover.webp"
-coverImageAlt: "A small model node and a large model node connected by a router, drawn with thin lines on a graphite background"
+coverImage: "/blog/production-placeholder.jpg"
+coverImageAlt: "Temporary Harisx404 branded cover for Small and Large Language Models; final artwork pending"
 ---
 
 # Small Language Models vs Large Language Models: When Smaller Makes More Sense
@@ -51,11 +51,6 @@ It is worth being precise about what that is. A position paper makes an argument
 
 The model supply has grown too. Google released [Gemma 4](https://blog.google/innovation-and-ai/technology/developers-tools/gemma-4/) on April 2, 2026, in four sizes (E2B, E4B, a 26B mixture-of-experts model, and a 31B dense model) under the Apache 2.0 license, with the two smallest aimed at phones and edge devices. Model lineups change monthly, so check current model cards rather than any list, including this one.
 
-> **Image Prompt**
-> Create an editorial-style comparison illustration of a small model and a large model as two nodes on a balance beam, on a cool graphite background. The small node is compact and signal-blue with thin icons for speed, privacy and low cost orbiting it. The large node is bigger with amber icons for reasoning, breadth and context. A subtle fulcrum labelled only "task" sits in the middle. Minimal geometric style, subtle depth, no logos, 16:9.
->
-> **Placement:** under "The short version" table.
-
 ## What "cheaper" leaves out
 
 Per-token price is not the cost of a solved task. A small model you host brings GPU or CPU capacity, updates, monitoring, and your own evaluation work. If it needs retries or often escalates to a bigger model, the savings shrink. Count the whole pipeline: hardware, engineering time, failure handling, and the cost of a wrong answer.
@@ -81,11 +76,6 @@ request -> router (rules or a tiny classifier) -> small model -> deterministic c
 ```
 
 The check can be a schema validation, a confidence threshold, or a business rule. It is what keeps the cheap path honest.
-
-> **Image Prompt**
-> Create a clean architecture diagram of a model-routing flow on a graphite background. A request enters a router, which sends most traffic along a short signal-blue lane to a small model node and a checkpoint gate. Requests that fail the gate are redirected along an amber lane to a larger model node. Minimal geometric shapes, thin lines, subtle depth, no logos, no text labels, 16:9.
->
-> **Placement:** next to the routing text block.
 
 The only way to tune this is to measure. Run both models on the same set of real tasks and compare quality, latency, and cost per successful task. [Building that evaluation set](/blog/ai-application-evaluation) matters more than any benchmark table. If your task is question answering over your own documents, [retrieval quality](/blog/reliable-rag) will often move the result more than model size does.
 
