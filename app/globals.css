@@ -46,6 +46,29 @@ body {
   overflow-x: clip;
 }
 
+html:not(:has([data-admin-root])) {
+  scrollbar-width: thin;
+  scrollbar-color: var(--text-secondary) var(--bg-primary);
+}
+
+html:not(:has([data-admin-root]))::-webkit-scrollbar {
+  width: 10px;
+}
+
+html:not(:has([data-admin-root]))::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+html:not(:has([data-admin-root]))::-webkit-scrollbar-thumb {
+  border: 2px solid var(--bg-primary);
+  border-radius: 999px;
+  background: var(--text-secondary);
+}
+
+html:not(:has([data-admin-root]))::-webkit-scrollbar-thumb:hover {
+  background: var(--text-primary);
+}
+
 :root {
   --sh-class: #0d9488;
   --sh-identifier: #2252d9;

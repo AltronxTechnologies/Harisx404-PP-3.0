@@ -141,7 +141,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <div
             className={cx(
-              "relative flex flex-1 flex-col overflow-x-clip border-x border-border-primary/50",
+              "relative flex flex-1 flex-col overflow-x-clip",
             )}
           >
           <a
