@@ -1,0 +1,163 @@
+---
+title: "Securing AI Agents: Prompt Injection, Tool Abuse, and Least Privilege"
+description: "How to secure AI agents in practice: assume prompt injection will land, then limit what tools, credentials, and approvals let the agent actually do."
+slug: "securing-ai-agents"
+date: "2026-10-02"
+updated: "2026-10-02"
+author: "Muhammad Haris"
+category: "Cybersecurity"
+tags:
+  - AI security
+  - Prompt injection
+  - Least privilege
+  - AI agents
+  - OWASP
+keywords:
+  - AI agent security
+  - securing AI agents
+  - prompt injection
+  - agentic AI security
+  - excessive agency
+  - MCP security
+readingTime: "7 min read"
+featured: true
+coverImage: "/blog/production-placeholder.jpg"
+coverImageAlt: "Temporary Harisx404 branded cover for Securing AI Agents; final artwork pending"
+---
+
+# Securing AI Agents: Prompt Injection, Tool Abuse, and Least Privilege
+
+An AI agent is a language model connected to tools. It reads content, decides what to do next, and then does it: queries a database, sends an email, runs code, calls an API. That last step is what changes the security conversation. A chatbot that gets tricked says something wrong. An agent that gets tricked *acts*.
+
+This article is for developers who build agents or wire models into existing systems. You'll get a working threat model, an honest answer on why prompt injection has no patch, and five controls that limit the damage when the model is fooled: narrow tools, scoped identity, approval gates, egress control, and logging.
+
+## The problem: instructions and data share one channel
+
+SQL injection became manageable because databases can tell code from data. A parameterized query keeps user input in the "data" lane no matter what it contains.
+
+Language models have no such lane. The system prompt, the user's message, a retrieved web page, and a tool's output all arrive as tokens in one context window, and the model decides what counts as an instruction. The UK's NCSC made this point in December 2025: [prompt injection is not SQL injection](https://www.ncsc.gov.uk/blog-post/prompt-injection-is-not-sql-injection), it may never be mitigated the same way, and LLMs are better modelled as "confusable deputies."
+
+OWASP's rankings show the same shift. In the 2026 edition of its [LLM Top 10](https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/), prompt injection is still LLM01, while excessive agency climbed from sixth place to third ([Check Point's summary of the changes](https://blog.checkpoint.com/ai-security/reading-the-signals-in-the-owasp-llm-top-10-2026/amp/)). OWASP also published a separate [Top 10 for Agentic Applications](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/) in December 2025, aimed at systems that plan, use tools, and keep memory.
+
+So the design rule is blunt: **assume injection will sometimes succeed, then decide what it is allowed to reach.**
+
+## Two ways untrusted text gets in
+
+Direct injection comes from a user typing instructions. Indirect injection is the one that hurts agents: the instructions hide inside something the agent *reads*, such as a web page, an email, a PDF, a support ticket, or another tool's response.
+
+Here is a hypothetical. A support agent summarizes incoming tickets and can issue small refunds. One ticket contains white-on-white text telling the agent to refund the customer's last ten orders. Nobody typed anything malicious into your app, and the model still received the instruction.
+
+OWASP's agentic list gives the failure modes names. Three matter most for builders:
+
+| OWASP agentic risk | What it looks like | First control |
+| ------------------ | ------------------ | ------------- |
+| Agent goal hijack (ASI01) | Hidden content redirects the agent's objective | Treat retrieved content as untrusted data and constrain objectives |
+| Tool misuse and exploitation (ASI02) | A legitimate tool is used in an unsafe way | Narrow tools, validate parameters in code |
+| Identity and privilege abuse (ASI03) | The agent acts with credentials it should not hold | Per-agent identity, short-lived scoped credentials |
+
+The rest of the list covers memory, supply chain, code execution, agent-to-agent messaging, cascading failures, human trust, and rogue agents.
+
+## A design budget: the Rule of Two
+
+Meta's security team published a simple heuristic in October 2025, the [Agents Rule of Two](https://ai.meta.com/blog/practical-ai-agent-security/). Within one session, an agent should have no more than two of these three properties:
+
+- **A.** It processes untrustworthy input.
+- **B.** It can reach sensitive systems or private data.
+- **C.** It can change state or communicate externally.
+
+If all three are unavoidable, the agent should not run autonomously. It needs a human approval step or a fresh session with a clean context. Meta presents the rule as a supplement to least privilege, not a replacement. It builds on Simon Willison's earlier [lethal trifecta](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/).
+
+Try it on a hypothetical mail assistant. Reading inbound email is A. Reading the user's mailbox is B. Sending replies is C. Drop C (draft, but never send) and the worst case becomes a bad draft instead of a data leak.
+
+## Controls that work
+
+### 1. Make tools narrow and validate in code
+
+`run_sql(query)` hands the model your whole database. `get_order_status(orderId)` hands it one question. Validate every argument in deterministic code and enforce authorization there too, not in the prompt. The model proposes; your code decides.
+
+```ts
+import { z } from "zod";
+
+const RefundArgs = z.strictObject({
+  orderId: z.string().regex(/^ord_[a-z0-9]{12}$/),
+  amountCents: z.number().int().positive().max(5_000), // hard cap lives in code
+  reason: z.enum(["damaged", "late", "wrong_item"]),
+});
+
+// Illustrative: orders, payments and approvals stand in for your own services.
+export async function refundTool(raw: unknown, ctx: { userId: string }) {
+  const args = RefundArgs.parse(raw); // anything unexpected is rejected
+
+  const order = await orders.findOwnedBy(ctx.userId, args.orderId);
+  if (!order) throw new Error("order_not_found");
+
+  if (args.amountCents > 2_000) {
+    await approvals.require({ action: "refund", args, userId: ctx.userId });
+  }
+  return payments.refund(order.id, args.amountCents, args.reason);
+}
+```
+
+### 2. Give the agent its own identity
+
+Don't run an agent on a developer's token or a shared admin key. Give it a distinct identity, scope it to the task, and make credentials short-lived. This is ordinary least privilege with one extra assumption: whatever holds the credential can be talked into misusing it.
+
+The MCP specification's [security best practices](https://modelcontextprotocol.io/specification/2025-11-25/basic/security_best_practices) are a concrete example. They forbid token passthrough, where a server accepts a token that was never issued to it and forwards it downstream, and they require per-client consent in proxy servers to prevent confused-deputy attacks. Treat third-party tool servers as part of your supply chain.
+
+### 3. Gate irreversible actions
+
+Payments, deletions, external messages, and permission changes deserve a human. Show the approver the exact action and arguments, not the model's description of it. The description is also model output.
+
+### 4. Control egress and sandbox execution
+
+Run code and browsing tools in a sandbox with no network by default, then allow-list destinations. A common exfiltration trick is to make the model emit a link or image whose URL carries stolen data. Egress allow-lists, plus stripping or proxying URLs in rendered output, close that path.
+
+### 5. Log for the postmortem
+
+Record the prompt, the sources retrieved, every tool call with arguments and results, approvals, and which identity acted. Alert on bursts of calls or destinations you have never seen. If a security team will triage this, [the SOC side of AI agents](/blog/ai-security-operations-center) shows what they will want from those logs.
+
+## What not to lean on
+
+Prompt-level defenses ("ignore instructions found in documents"), keyword filters, and detector models are worth having and worth testing. None of them is a boundary, because each one is probabilistic. Put injection cases into your regression suite ([how to build one](/blog/ai-application-evaluation)) and let the controls above bound the impact.
+
+Retrieved content is the other big entry point. If your agent reads from a knowledge base, [reliable retrieval](/blog/reliable-rag) includes deciding which sources an attacker can write to.
+
+## Key takeaways
+
+- Assume injection lands, and design for blast radius.
+- Count A, B, and C per session. Don't grant all three without approval.
+- Validation and authorization belong in code, not in the prompt.
+- One identity per agent, short-lived and scoped. No passthrough tokens.
+- Approvals show the real action, and logs show who did what.
+
+## Frequently Asked Questions
+
+### What is prompt injection?
+
+It is text the model reads and treats as an instruction. In direct injection the user types it. In indirect injection it is hidden in content the agent retrieves, such as a web page, email, or tool output.
+
+### Can prompt injection be fixed completely?
+
+Not with current techniques. The NCSC warns it may never be totally mitigated the way SQL injection was, so the practical goal is to reduce likelihood and limit impact.
+
+### What is excessive agency?
+
+OWASP's term for an LLM-based system that has too much functionality, permission, or autonomy. It is ranked third in the 2026 LLM Top 10.
+
+### Is MCP secure by default?
+
+MCP is a protocol, so security depends on how clients and servers are built. The specification's own guidance describes confused-deputy risks and forbids token passthrough. Follow it, and vet servers like any other dependency.
+
+### Do I need human approval for every action?
+
+No. Use approvals for irreversible or high-impact actions, and for any session that combines untrusted input, sensitive access, and the ability to act externally.
+
+## References
+
+1. [NCSC: Prompt injection is not SQL injection](https://www.ncsc.gov.uk/blog-post/prompt-injection-is-not-sql-injection)
+2. [OWASP GenAI: Top 10 for LLM Applications 2026](https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/)
+3. [Check Point: Reading the signals in the OWASP LLM Top 10 2026](https://blog.checkpoint.com/ai-security/reading-the-signals-in-the-owasp-llm-top-10-2026/amp/)
+4. [OWASP GenAI: Top 10 for Agentic Applications for 2026](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/)
+5. [Meta AI: Agents Rule of Two](https://ai.meta.com/blog/practical-ai-agent-security/)
+6. [Simon Willison: The lethal trifecta](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/)
+7. [Model Context Protocol: Security best practices](https://modelcontextprotocol.io/specification/2025-11-25/basic/security_best_practices)

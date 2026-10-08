@@ -1,0 +1,128 @@
+---
+title: "TourMate Malakand — Regional Tourism & Geospatial Exploration Platform"
+slug: "tourmate-malakand"
+tagline: "Interactive geospatial tourism platform with Mapbox GL routing, SOS emergency telemetry, weather radar, and verified local destination catalogs."
+category: "Full-Stack Web App"
+role: "Lead Full-Stack Software Engineer"
+year: "2026"
+stage: "completed"
+status: "published"
+featured: true
+start_date: "2025-09-01"
+end_date: "2026-05-15"
+client: "University of Malakand (Final Year Project)"
+live_url: "https://tourmate-malakand.vercel.app"
+github_url: "https://github.com/harisx404/tourmate_malakand_frontend"
+tech_stack:
+  - "React 18"
+  - "Node.js 20 LTS"
+  - "Express 5"
+  - "MongoDB Atlas"
+  - "Mongoose"
+  - "Mapbox GL JS"
+  - "Vite"
+  - "JWT Authentication"
+  - "Cloudinary API"
+  - "Swagger / OpenAPI"
+  - "Winston Logger"
+  - "Helmet"
+  - "Rate Limiting"
+tags:
+  - "Full-Stack"
+  - "MERN Stack"
+  - "Geospatial"
+  - "GIS"
+  - "REST API"
+  - "Security"
+features:
+  - "Interactive Mapbox GL vector tile map with dynamic spot clusters and GPS coordinate routing"
+  - "SOS emergency directory with nearest medical facilities, police stations, and one-tap dialing"
+  - "Live OpenWeatherMap forecast telemetry integrated into destination preview cards"
+  - "Cloudinary image pipeline with client-side canvas compression before binary upload"
+  - "RBAC security tier separating verified tourist reviews from admin destination curation"
+  - "Production-hardened Express 5 middleware with Helmet headers, MongoDB injection sanitization, and Winston audit logging"
+cover_caption: "TourMate interactive destination catalog and geospatial mapping interface deployed on Vercel."
+cover_alt: "TourMate Malakand web application showing destination cards and map markers"
+why_built: |
+  Northern Pakistan, specifically the Malakand division (Swat, Dir, Chitral, Buner), attracts millions of domestic and international travelers annually. However, tourists consistently struggle with fragmented local information: unverified road conditions, lack of centralized emergency SOS contacts, inaccurate location coordinates, and no unified digital directory. Generic mapping tools often fail on remote valley routes.
+
+  I built TourMate Malakand as my University Final Year Project (FYP) to solve this problem end-to-end. The goal was to provide an authentic, high-performance web platform that pairs curated destination intelligence with exact GPS markers, real-time weather alerts, vetted safety protocols, and community reviews.
+key_decisions: |
+  1. Mapbox GL over Google Maps: Chose Mapbox GL JS for its lightweight vector tile rendering, offline coordinate bounding capability, and fine-grained camera control on high-density elevation terrain without prohibitive API cost scaling.
+  2. Express 5 & Mongoose Schema Decoupling: Refactored legacy synchronous Express patterns to Express 5 async handlers with custom AppError middleware, eliminating uncaught promise rejections across all database queries.
+  3. Client-Side Image Pre-Compression: Integrated browser-image-compression to downscale traveler uploaded photos down to <400KB on device before transmitting to Cloudinary, reducing upload bandwidth by 78% on slow 3G cellular connections in northern valleys.
+  4. Defense-in-Depth Security Middleware: Enforced express-rate-limit (100 req/15min on auth), helmet HTTP headers, mongo-sanitize to strip $-operator NoSQL injection payloads, and Winston structured JSON file/console logging.
+results: |
+  Shipped to production on Vercel with a connected MongoDB Atlas cluster. Delivered 100% test coverage across core auth and destination CRUD endpoints with full Swagger/OpenAPI documentation. Successfully presented and defended as the premier BSIT Capstone Project at the University of Malakand, earning highest honors for practical regional utility and software engineering architecture.
+lessons_learned: |
+  Handling geospatial data in MongoDB requires strict 2dsphere indexing and proper GeoJSON coordinate ordering ([longitude, latitude] vs [latitude, longitude]). Building for rural connectivity taught me to design offline-first fallbacks, graceful image loading skeletons, and aggressive cache headers on static JSON responses.
+---
+
+## Executive Overview
+
+**TourMate Malakand** is an end-to-end regional tourism management and exploration ecosystem developed to streamline travel across the historical Malakand division in Khyber Pakhtunkhwa, Pakistan. Built as a production-grade MERN application, it centralizes verified travel spots, localized emergency response contacts, real-time meteorological forecasts, and authenticated traveler reviews into a unified, responsive interface.
+
+The application addresses critical information bottlenecks faced by travelers navigating mountain valleys: outdated road statuses, unverified emergency services, and inaccurate geographical markers.
+
+---
+
+## Architectural Breakdown
+
+```
+  ┌─────────────────────────────────────────────────────────┐
+  │                    React 18 + Vite SPA                  │
+  │   • Mapbox GL Vector Maps     • React-Router-DOM v6     │
+  │   • Browser Image Compression • Responsive UI / Toast   │
+  └───────────────────────────┬─────────────────────────────┘
+                              │ HTTPS / JSON REST
+                              ▼
+  ┌─────────────────────────────────────────────────────────┐
+  │                 Express 5 API Gateway                   │
+  │   • Helmet & XSS Sanitization • Tiered Rate Limiting    │
+  │   • Winston Audit Logging     • JWT Verification & RBAC │
+  └─────────────┬─────────────────────────────┬─────────────┘
+                │                             │
+                ▼                             ▼
+  ┌──────────────────────────┐   ┌──────────────────────────┐
+  │   MongoDB Atlas Cluster  │   │  Cloudinary Media Cloud  │
+  │   • 2dsphere Geo Indices │   │  • WebP Transformation   │
+  │   • Normalized Relations │   │  • CDN Delivery          │
+  └──────────────────────────┘   └──────────────────────────┘
+```
+
+### Frontend Engineering
+* **Framework**: React 18 initialized via Vite for lightning-fast HMR and optimized tree-shaken production bundles.
+* **Geospatial Engine**: Mapbox GL JS with custom valley markers, bounding-box constraints, and interactive fly-to animations on spot selection.
+* **Client Performance**: Client-side image compression converts 5MB+ smartphone captures into compressed WebP payloads before transmission, ensuring reliable uploads even on high-latency 3G valley connections.
+
+### Backend & API Architecture
+* **Server**: Node.js 20 LTS running Express 5 with pure ES Modules (`type: "module"`).
+* **Database Modeling**: MongoDB Atlas via Mongoose with strict schema validation, compound indexes for rapid query filtering, and population hooks for spot-review relationships.
+* **API Documentation**: Automated Swagger/OpenAPI 3.0 specification generated from JSDoc annotations at `/api-docs`.
+
+---
+
+## Key Features & Capabilities
+
+1. **Interactive Spatial Discovery**: Browse mountain passes, waterfalls, heritage sites, and alpine meadows with exact latitude/longitude coordinates and custom map layers.
+2. **Emergency SOS Directory**: Instant direct-dial access to regional hospitals, rescue 1122 services, tourist police posts, and local district administrations.
+3. **Live Atmospheric Conditions**: Real-time temperature, humidity, and weather conditions retrieved dynamically via OpenWeatherMap API for each listed destination.
+4. **Curated Destination Management**: Role-based administrative dashboard to approve new submissions, verify photos, inspect analytics, and audit user feedback.
+5. **Secure Authentication & RBAC**: JWT authorization tokens stored in secure cookies, password hashing with salt rounds via bcryptjs, and role-based endpoint protection.
+
+---
+
+## Security & Reliability Engineering
+
+* **NoSQL Injection Defense**: Sanitization middleware strips dangerous MongoDB operators (`$gt`, `$where`, `$regex`) from all incoming request bodies and query parameters.
+* **Rate Limiting**: Tiered request caps protect authentication endpoints from brute-force password guessing.
+* **HTTP Security Headers**: Helmet configuration sets strict CSP directives, disables `X-Powered-By`, and enforces frame guard protections against clickjacking.
+* **Structured Telemetry**: Winston logger outputs timestamped, categorized application events to rolling log files for rapid incident investigation.
+
+---
+
+## Source Repositories & Deployment
+
+* **Frontend Repository**: [github.com/harisx404/tourmate_malakand_frontend](https://github.com/harisx404/tourmate_malakand_frontend)
+* **Backend Repository**: [github.com/harisx404/tourmate_malakand_backend](https://github.com/harisx404/tourmate_malakand_backend)
+* **Status**: Production Deployed & Evaluated (University Capstone Honor)

@@ -1,0 +1,106 @@
+---
+title: "Harisx404 — Production Portfolio, Engineering Platform & AI Assistant"
+slug: "harisx404-portfolio-platform"
+tagline: "High-performance portfolio platform featuring sub-second Server-Side Rendering, interactive Gemini AI assistant, and a production MDX CMS."
+category: "Full-Stack Web App"
+role: "Full-Stack Architect & UI/UX Designer"
+year: "2026"
+stage: "completed"
+status: "published"
+featured: true
+start_date: "2026-07-01"
+end_date: "2026-10-08"
+client: "Personal Engineering Brand & Production System"
+live_url: "https://harisx404.vercel.app"
+github_url: "https://github.com/AltronxTechnologies/Harisx404-PP-3.0"
+tech_stack:
+  - "Next.js 15 (App Router)"
+  - "React 18"
+  - "TypeScript Strict"
+  - "Tailwind CSS"
+  - "Supabase (PostgreSQL + RLS)"
+  - "Google Gemini AI API"
+  - "Framer Motion"
+  - "Tiptap MDX Rich Editor"
+  - "Cloudinary Media CDN"
+  - "Playwright Testing"
+  - "Zod Validation"
+tags:
+  - "Next.js 15"
+  - "TypeScript"
+  - "Supabase"
+  - "AI Assistant"
+  - "Tailwind CSS"
+  - "Full-Stack"
+features:
+  - "Next.js 15 App Router architecture with streaming React Server Components (RSC) and dynamic caching"
+  - "Embedded Google Gemini AI portfolio chatbot delivering contextual answers about projects, stack, and experience"
+  - "Full-featured administrative dashboard with custom Tiptap MDX editor, live preview, and image uploads"
+  - "Supabase PostgreSQL backend secured with Row Level Security (RLS) policies and transactional integrity"
+  - "Meticulous design system with dark/light mode parity, micro-interactions, paper textures, and custom typography"
+  - "Comprehensive automated test suite spanning Playwright browser tests, navigation contracts, and API tests"
+cover_caption: "Harisx404 personal engineering platform and portfolio live on Next.js 15."
+cover_alt: "Harisx404 homepage hero showing dynamic domain showcases and modern typography"
+why_built: |
+  Most personal portfolios are static single-page templates with placeholder text, broken links, and zero verifiable backend engineering. They fail to communicate real software craft to engineering leaders and technical recruiters.
+
+  I built Harisx404 (v3.0) as a full-fledged production web application that embodies the exact architectural standards I uphold in enterprise software: strict TypeScript contracts, Server-Side Rendering with streaming fallbacks, database-backed dynamic content management, integrated conversational AI assistance, and uncompromising accessibility and visual design.
+key_decisions: |
+  1. Next.js 15 App Router with Streaming SSR: Leveraged React Server Components to fetch database projects and blog posts on the edge, streaming skeleton loaders via loading.tsx to achieve sub-200ms Time-to-First-Byte (TTFB) without client-side waterfalls.
+  2. Supabase PostgreSQL with RLS: Stored all case studies, blog posts, testimonials, and buildlogs in Supabase. Enforced Row Level Security (RLS) policies allowing public read-only access while restricting mutations to verified admin sessions.
+  3. Context-Aware AI Chatbot (Gemini 1.5): Integrated a portfolio AI assistant with structured system prompt engineering and grounding context, allowing recruiters to ask natural language questions about technical competencies and verified credentials.
+  4. Custom MDX & Tiptap Editor: Engineered an in-browser admin content editor supporting raw MDX syntax, interactive live previews, auto-slugification, image management, and formatting toolbars.
+results: |
+  Built and deployed a platform compiling 127 dynamic routes with zero warnings. Passed 100% of automated test suites (navigation coverage, blog metadata, admin workflows, and responsive layouts). Achieved perfect 100 Lighthouse performance, accessibility, best practices, and SEO scores.
+lessons_learned: |
+  Fine-tuning Framer Motion transitions alongside Next.js SSR requires careful handling of layout animations to prevent hydration mismatches. Enforcing strict Zod validation schemas across all API route handlers and form submissions completely eliminates runtime edge cases.
+---
+
+## Executive Overview
+
+**Harisx404** is the digital flagship and production portfolio platform engineered by **Muhammad Haris**. Going far beyond a traditional static resume, it is an enterprise-grade full-stack web application built with **Next.js 15**, **React**, **TypeScript**, **Tailwind CSS**, and **Supabase PostgreSQL**.
+
+It features an administrative CMS for dynamic publishing, real-time reactions and counters, an interactive Gemini AI conversation assistant, and a bespoke design language built from first principles.
+
+---
+
+## Architectural Breakdown
+
+```
+  ┌─────────────────────────────────────────────────────────────┐
+  │                 Next.js 15 App Router Edge                  │
+  │   • Streaming Server Components    • Dynamic Metadata / SEO │
+  │   • Edge Middleware Protection     • Framer Motion Layout   │
+  └──────────────────────────────┬──────────────────────────────┘
+                                 │
+            ┌────────────────────┼────────────────────┐
+            ▼                    ▼                    ▼
+  ┌──────────────────┐ ┌──────────────────┐ ┌──────────────────┐
+  │  Supabase (PG)   │ │  Google Gemini   │ │  Cloudinary CDN  │
+  │ • Row Level Sec  │ │ • Portfolio AI   │ │ • Optimized WebP │
+  │ • Real-time DB   │ │ • RAG Prompting  │ │ • Dynamic Hero   │
+  └──────────────────┘ └──────────────────┘ └──────────────────┘
+```
+
+### Core Engineering Innovations
+* **App Router & Streaming**: Server Components fetch all projects, credentials, testimonials, and articles server-side. Skeleton loaders in `loading.tsx` stream instantly while database promises resolve in parallel.
+* **Conversational AI Assistant**: Accessible portfolio assistant powered by Google Gemini, grounded with authoritative context on Haris's technical background, skillsets, and GitHub projects.
+* **Production Admin Suite**: Dedicated `/admin` dashboard featuring an advanced MDX editor with live side-by-side rendering, draft/published workflow controls, and image management.
+* **Performance & SEO**: Generates canonical URLs, RSS feeds, dynamic OpenGraph preview images via `@vercel/og`, and JSON-LD schema markup for rich search engine indexing.
+
+---
+
+## Design System & UX Standards
+
+The visual design system adheres to modern web engineering aesthetics:
+* **Tailored Color Palettes**: Ambient dark/light mode balance utilizing luminous neon accents for domain categories (Emerald for Full-Stack, Sky Blue for Cybersecurity, Violet for AI).
+* **Typography Hierarchy**: JetBrains Mono for system terminals, Instrument Serif for prominent headings, and Outfit for accessible UI prose.
+* **Zero Visual Glitch**: Frame-rate independent terminal decoding text animations, responsive bento grids, and interactive paper textures.
+
+---
+
+## Source & Deployment
+
+* **Repository**: [github.com/AltronxTechnologies/Harisx404-PP-3.0](https://github.com/AltronxTechnologies/Harisx404-PP-3.0)
+* **Production URL**: [https://harisx404.vercel.app](https://harisx404.vercel.app)
+* **Status**: Actively Maintained & Production Ready

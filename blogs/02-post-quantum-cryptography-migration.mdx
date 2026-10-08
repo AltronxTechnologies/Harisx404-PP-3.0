@@ -1,0 +1,133 @@
+---
+title: "Post-Quantum Cryptography: What Developers Need to Know Before Migrating"
+description: "A developer's guide to post-quantum cryptography: what ML-KEM and ML-DSA replace, what the 2030 and 2031 deadlines mean, and where to start the migration."
+slug: "post-quantum-cryptography-migration"
+date: "2026-10-02"
+updated: "2026-10-02"
+author: "Muhammad Haris"
+category: "Cybersecurity"
+tags:
+  - Post-quantum cryptography
+  - ML-KEM
+  - ML-DSA
+  - Cryptographic agility
+  - TLS
+keywords:
+  - post quantum cryptography
+  - PQC migration
+  - ML-KEM
+  - ML-DSA
+  - cryptographic agility
+  - quantum safe encryption
+readingTime: "6 min read"
+featured: false
+coverImage: "/blog/production-placeholder.jpg"
+coverImageAlt: "Temporary Harisx404 branded cover for Post-Quantum Cryptography; final artwork pending"
+---
+
+# Post-Quantum Cryptography: What Developers Need to Know Before Migrating
+
+Post-quantum cryptography (PQC) is a family of public-key algorithms designed to stay secure against attacks from both classical and quantum computers. It replaces the parts of today's cryptography that a large quantum computer could break: RSA, Diffie-Hellman, and elliptic-curve schemes, which are used for key exchange and digital signatures.
+
+If you work on anything that touches TLS, SSH, certificates, code signing, or token signing, this concerns you. Below: what is actually at risk, what NIST has standardized, how far deployment has already gone, and a sensible first move for a team that hasn't started.
+
+## What is at risk, and why now
+
+A sufficiently large quantum computer running Shor's algorithm could break RSA, finite-field Diffie-Hellman, and elliptic-curve cryptography. Nobody has built one that can. The urgency comes from timing: an adversary can record encrypted traffic today and decrypt it years later. The June 2026 U.S. executive order, [EO 14412](https://www.whitehouse.gov/presidential-actions/2026/06/securing-the-nation-against-advanced-cryptographic-attacks/), names that "collect now, decrypt later" risk directly.
+
+Symmetric ciphers and hash functions are affected far less. The migration pressure is on public-key cryptography.
+
+The order also turned a long-range worry into dates. Per [Cloudflare's summary](https://blog.cloudflare.com/post-quantum-eo-2026/), federal high-value assets and high-impact systems must move to PQC for key establishment by December 31, 2030, and for digital signatures by December 31, 2031, and federal contractors are expected to meet post-quantum FIPS requirements by the end of 2030. You may not work for a federal agency, but vendors, customers, and auditors tend to inherit these timelines.
+
+## What NIST has standardized
+
+| Standard | Algorithm | Used for | Status |
+| -------- | --------- | -------- | ------ |
+| FIPS 203 | ML-KEM (from CRYSTALS-Kyber) | Key establishment | Final, August 2024 |
+| FIPS 204 | ML-DSA (from CRYSTALS-Dilithium) | Digital signatures | Final, August 2024 |
+| FIPS 205 | SLH-DSA (from SPHINCS+) | Hash-based signatures | Final, August 2024 |
+| FIPS 206 | FN-DSA (from Falcon) | Compact signatures | Still in draft at the time of writing |
+| Not yet a standard | HQC | Backup key encapsulation | Selected March 2025, standard pending |
+
+NIST published the first three in August 2024 and [described them as ready for immediate use](https://www.nist.gov/news-events/news/2024/08/nist-releases-first-3-finalized-post-quantum-encryption-standards). HQC is a backup built on different math (error-correcting codes), chosen so there is a fallback if ML-KEM is ever weakened. NIST's own announcement says [ML-KEM remains the primary choice](https://www.nist.gov/news-events/news/2025/03/nist-selects-hqc-fifth-algorithm-post-quantum-encryption) for general encryption. FN-DSA's final publication is expected around the turn of 2027 according to secondary sources, so check NIST's page before you depend on it.
+
+There is also a transition timeline. The initial public draft of [NIST IR 8547](https://csrc.nist.gov/pubs/ir/8547/ipd) proposes deprecating quantum-vulnerable public-key algorithms after 2030 and disallowing them after 2035. It is still a draft, but it is the baseline most planning is built on.
+
+## Hybrid key exchange is already in production
+
+The first PQC you meet is probably not in your code. Browsers and CDNs negotiate a **hybrid** key exchange called X25519MLKEM768, which combines classical X25519 with ML-KEM-768. If either half holds up, the session key stays safe. Cloudflare reported that [over 60% of human TLS traffic](https://blog.cloudflare.com/radar-origin-pq-key-transparency-aspa/) on its network used a post-quantum hybrid by February 2026, up from under 3% at the start of 2024.
+
+That is the client-to-edge hop. The links behind it (origin servers, service-to-service calls, VPNs) often lag, because each is configured separately. You can check what a server negotiates from the command line:
+
+```bash
+# Requires OpenSSL 3.5 or newer
+openssl s_client -groups X25519MLKEM768 -connect example.com:443 -brief
+```
+
+Hybrid key shares are larger, so test any middlebox or load balancer that inspects TLS handshakes before you enable it everywhere.
+
+## Signatures are the slower half
+
+Key exchange protects today's traffic against future decryption, so it moves first. Signatures protect against forgery, which needs a quantum computer to exist *at the time of attack*, so they move later. They are also harder. ML-DSA signatures run to kilobytes, compared with 64 bytes for Ed25519, and certificates, code signing, and firmware updates all depend on an ecosystem (CAs, browsers, hardware) that you don't control. The executive order's 2031 date for signatures is a reminder to start planning, not to rush.
+
+## Where to start: inventory, then agility
+
+1. **Inventory.** List where public-key cryptography is used: TLS termination, mutual TLS, SSH, JWT signing, code signing, VPNs, database connections, and third-party SDKs. The executive order asks for guidance on a [cryptographic bill of materials](https://www.whitehouse.gov/wp-content/uploads/2026/06/eo-14412.pdf) for this reason: most of it hides in libraries and vendors, not in your own code.
+2. **Rank by data lifetime.** Data that must stay secret for a decade is exposed to recording today. Short-lived session data is not.
+3. **Make algorithms configurable.** This is *cryptographic agility*: changing an algorithm should be a policy change, not a refactor across forty services.
+4. **Turn on hybrid key exchange** where your platform supports it, and watch for handshake failures.
+5. **Plan signatures separately**, and track library and CA support.
+
+Agility in code can be as simple as putting the decision in one place:
+
+```ts
+// Anti-pattern: the algorithm is baked into every call site.
+// jwt.sign(payload, key, { algorithm: "RS256" });
+
+// Better: one module owns the policy; call sites never name an algorithm.
+export const signingPolicy = {
+  current: { alg: "ES256", kid: "2026-10" },
+  accepted: ["ES256", "RS256"], // verify-side allow-list; shrink it over time
+} as const;
+```
+
+When post-quantum JWT or certificate options mature in your stack, you change the policy and rotate keys. Services that do mutual TLS between workloads are a natural place to begin, which connects to [zero trust networking](/blog/zero-trust-networking-cloud), where certificates carry workload identity.
+
+## Key takeaways
+
+- PQC replaces public-key crypto (key exchange and signatures), not symmetric encryption.
+- FIPS 203, 204, and 205 are final. Don't wait for FN-DSA or HQC to begin.
+- Hybrid key exchange is already common on the web. Check your own links.
+- Inventory first, then agility, then signatures.
+
+## Frequently Asked Questions
+
+### Is RSA broken today?
+
+No. No quantum computer today can break it. The risk is future decryption of data recorded now, plus the long lead time of migrations.
+
+### Do I need to replace AES?
+
+Generally not. Symmetric cryptography is affected much less than public-key cryptography, so the migration focuses on key exchange and signatures.
+
+### What is ML-KEM?
+
+ML-KEM is the NIST-standardized key encapsulation mechanism in FIPS 203. It lets two parties agree on a shared secret and is the main post-quantum replacement for Diffie-Hellman-style key exchange.
+
+### What is a hybrid key exchange?
+
+It combines a classical algorithm and a post-quantum one in the same handshake, so the session stays secure if either one holds. X25519MLKEM768 is the common TLS example.
+
+### Is quantum key distribution the same as PQC?
+
+No. QKD needs specialized hardware and dedicated links. PQC is ordinary software cryptography that runs on today's devices, and it is what the executive order points agencies toward.
+
+## References
+
+1. [The White House: Executive Order 14412, Securing the Nation Against Advanced Cryptographic Attacks](https://www.whitehouse.gov/presidential-actions/2026/06/securing-the-nation-against-advanced-cryptographic-attacks/)
+2. [EO 14412 as published (PDF)](https://www.whitehouse.gov/wp-content/uploads/2026/06/eo-14412.pdf)
+3. [Cloudflare: Post-quantum and the 2026 executive order](https://blog.cloudflare.com/post-quantum-eo-2026/)
+4. [NIST: First 3 finalized post-quantum encryption standards](https://www.nist.gov/news-events/news/2024/08/nist-releases-first-3-finalized-post-quantum-encryption-standards)
+5. [NIST: HQC selected as fifth algorithm](https://www.nist.gov/news-events/news/2025/03/nist-selects-hqc-fifth-algorithm-post-quantum-encryption)
+6. [NIST IR 8547 (initial public draft): Transition to Post-Quantum Cryptography Standards](https://csrc.nist.gov/pubs/ir/8547/ipd)
+7. [Cloudflare: Radar adds origin post-quantum support](https://blog.cloudflare.com/radar-origin-pq-key-transparency-aspa/)
