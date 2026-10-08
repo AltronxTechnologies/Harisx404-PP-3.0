@@ -504,17 +504,19 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
                     : "Return to the complete collection to continue browsing."
             }
           >
-          <button
-            type="button"
-            onClick={() => {
-              skipNextSearchSyncRef.current = query !== "";
-              setQuery("");
-              setParams({ tag: "All", q: "", page: 1 });
-            }}
-            className="inline-flex min-h-9 items-center rounded-full border border-border-primary px-5 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25"
-          >
-            View all projects
-          </button>
+            {projects.length > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  skipNextSearchSyncRef.current = query !== "";
+                  setQuery("");
+                  setParams({ tag: "All", q: "", page: 1 });
+                }}
+                className="inline-flex min-h-9 items-center rounded-full border border-border-primary px-5 font-mono text-[11px] uppercase tracking-widest text-text-secondary transition-colors hover:border-neutral-400/70 hover:text-text-primary active:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25 dark:active:border-white/25"
+              >
+                View all projects
+              </button>
+            )}
           </BlogStatePanel>
         </div>
       )}

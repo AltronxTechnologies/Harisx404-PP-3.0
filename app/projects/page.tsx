@@ -7,6 +7,7 @@ import {
   type HomeProject,
 } from "@/app/data/fallback-home";
 import { withProjectPreview } from "@/app/data/project-preview-fixtures";
+import { getSupabaseEnv } from "@/app/lib/supabase/safe";
 import { ProjectsIndex } from "./ProjectsIndex";
 import { CtaSection } from "@/app/components/home/CtaSection";
 import { siteMetadata } from "app/data/siteMetadata";
@@ -53,7 +54,7 @@ export default async function ProjectsPage() {
           tags: Array.isArray(p.tags) ? p.tags : [],
           features: Array.isArray(p.features) ? p.features : [],
         }))
-      : fallbackProjects;
+       : process.env.NODE_ENV === "development" && !getSupabaseEnv() ? fallbackProjects : [];
 
   /* JSON-LD: ItemList of case studies for rich search results. */
   const itemListJsonLd = {

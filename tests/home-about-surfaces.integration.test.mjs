@@ -32,6 +32,13 @@ test("Home and About render live GitHub and credential surfaces", async () => {
   }
 });
 
+test("a connected site does not link to local demo projects or posts", async (t) => {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) return t.skip("No connected content source");
+  const html = await (await fetch(`${baseUrl}/`)).text();
+  assert.doesNotMatch(html, /href="\/projects\/(?:securevault|shoplift|pulseboard|taskforge|nimbusnotes)"/);
+  assert.doesNotMatch(html, /Shipping Faster with a Boring Tech Stack|Threat Modeling for Frontend Developers/);
+});
+
 test("public Stats discovery is retired without duplicate Buildlog links", async () => {
   const [navbar, footer, sitemap, home, about, certificationApi, search, llms] = await Promise.all([
     readFile(new URL("../app/components/Navbar.tsx", import.meta.url), "utf8"),

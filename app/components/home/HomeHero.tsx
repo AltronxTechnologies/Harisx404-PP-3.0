@@ -278,6 +278,8 @@ function HeadlineRotator({
 export type HeroLaunch = {
   name: string;
   href: string;
+  label?: string;
+  subline?: string;
 };
 
 export function HomeHero({
@@ -392,7 +394,7 @@ export function HomeHero({
                   <span className="relative inline-flex size-1.5 rounded-full bg-blue-500" />
                 </span>
                 <span className="whitespace-nowrap font-mono text-[9px] uppercase tracking-widest text-blue-600 dark:text-blue-300">
-                  New launch
+                  {launch.label ?? "New launch"}
                 </span>
               </span>
               <span className="min-w-0 flex-1 truncate font-display text-base leading-none text-text-primary">
@@ -415,7 +417,7 @@ export function HomeHero({
                   <span className="relative inline-flex size-1.5 rounded-full bg-blue-500" />
                 </span>
                 <span className="whitespace-nowrap font-mono text-xs uppercase tracking-widest text-text-secondary">
-                  New launch
+                  {launch.label ?? "New launch"}
                 </span>
                 <span
                   aria-hidden
@@ -434,7 +436,7 @@ export function HomeHero({
               </span>
               <span className="mt-1.5 flex w-full items-center justify-between gap-3 lg:mt-2">
                 <span className="font-mono text-xs uppercase tracking-widest text-text-secondary">
-                  {hero.newLaunch.subline}
+                   {launch.subline ?? hero.newLaunch.subline}
                 </span>
                 <span className="flex size-5 shrink-0 items-center justify-center rounded-full border border-border-primary text-text-secondary transition-colors group-hover:border-neutral-400/70 group-active:border-neutral-400/70 group-hover:bg-text-primary group-hover:text-bg-primary dark:group-hover:border-white/25 dark:group-active:border-white/25">
                   <ArrowUpRight className="size-2.5" aria-hidden />
