@@ -1,0 +1,134 @@
+---
+title: "How AI Workloads Are Changing Modern Network Architecture"
+description: "Why GPU clusters stress networks differently from web traffic: synchronized collectives, tail latency, ECMP collisions, and the shift to scale-up, scale-out and scale-across."
+slug: "ai-workloads-network-architecture"
+date: "2026-10-02"
+updated: "2026-10-02"
+author: "Muhammad Haris"
+category: "Networking"
+tags:
+  - AI networking
+  - Data center networking
+  - RoCE
+  - Ultra Ethernet
+  - GPU clusters
+keywords:
+  - AI networking
+  - networking for AI
+  - AI workloads
+  - data center networking
+  - GPU networking
+  - Ultra Ethernet
+  - east-west traffic
+readingTime: "6 min read"
+featured: false
+coverImage: "/images/blog/ai-workloads-network-architecture/cover.webp"
+coverImageAlt: "Racks of GPU nodes connected by a leaf-and-spine fabric with one congested link highlighted in amber"
+---
+
+# How AI Workloads Are Changing Modern Network Architecture
+
+Training a large AI model means thousands of GPUs working on one problem. After each step they exchange results, and no GPU can start the next step until the exchange finishes. That turns the network from a supporting cast into part of the computer itself. If one transfer is slow, every GPU waits.
+
+This article explains why AI traffic is hard on conventional data-center networks, what Meta and the Ultra Ethernet Consortium have published about fixing that, and which terms an IT student should learn first. It is deliberately about architecture, not products.
+
+## Why AI traffic is different
+
+Most web traffic is many small, independent requests between users and servers. A late response affects one user. A training cluster is closer to a group project in which nobody can move to the next section until everyone has finished their part.
+
+Three properties follow:
+
+- **Synchronized collectives.** GPUs exchange data in coordinated patterns (an "all-reduce" is the classic one), so many transfers start and end together.
+- **Tail latency beats average bandwidth.** The slowest path decides when the whole step finishes. A network with great average throughput and an occasional slow link can still stall the job.
+- **Traffic is mostly east-west.** Data moves between servers inside the facility, not between users and servers.
+
+The standard tool is RDMA (remote direct memory access), which lets one machine move data to another's memory without involving the CPU on the data path. On Ethernet networks the usual flavor is RoCEv2, RDMA over Converged Ethernet.
+
+## What Meta found at scale
+
+Meta described its training network in a 2024 [engineering post](https://engineering.fb.com/2024/08/05/data-center-engineering/roce-network-distributed-ai-training-at-scale/) and a [SIGCOMM paper](https://engineering.fb.com/wp-content/uploads/2024/08/sigcomm24-final246.pdf). A few points are useful for any architect:
+
+- It chose RoCEv2 for most of its AI capacity and built a **dedicated backend network** for training, separate from the front-end network.
+- Racks sit in a two-stage Clos (leaf-and-spine) topology it calls an AI Zone. The job scheduler tries to keep a job's nodes together so less traffic crosses zones.
+- Conventional load balancing struggled. ECMP assigns each flow to one path by hashing packet headers. AI training produces a small number of enormous flows with similar headers, so several can land on the same link while others sit idle. The write-up calls this **flow collisions**, and a temporary fix was adding uplink bandwidth.
+- Meta's paper says it first tried the standard congestion-control scheme for RoCE (DCQCN) and then moved away from it, using the collective communication library itself to manage congestion.
+
+The lesson is not "copy Meta." It is that workload behavior should drive the network design, and that assumptions from web-scale networks, such as many flows hashing evenly, may not hold.
+
+> **Image Prompt**
+> Create a technical illustration of ECMP flow collisions in a leaf-and-spine fabric, on a cool graphite background. Show two leaf switches linked by four parallel spine paths. Three thick amber flows pile onto the same path while three other paths stay thin and unused in signal-blue. Minimal geometric style, thin lines, subtle depth, no logos, no text labels, 16:9.
+>
+> **Placement:** under "What Meta found at scale".
+
+## Up, out, and across
+
+Engineers describe AI networks in three domains:
+
+| Domain | What it connects | Typical technologies | Main constraint |
+| ------ | ---------------- | -------------------- | --------------- |
+| Scale-up | Accelerators inside a node or rack | Proprietary links such as NVLink today; Ethernet-based efforts like ESUN | Extreme bandwidth at the lowest latency |
+| Scale-out | Racks across a cluster | InfiniBand or RoCEv2 Ethernet; Ultra Ethernet | Congestion, load balancing, tail latency |
+| Scale-across | Separate data centers | WAN and long-haul Ethernet | Distance, cost, and reliability |
+
+The Open Compute Project [announced ESUN](https://www.sdxcentral.com/news/ocp-forms-group-to-advance-ethernet-for-ai-scale-up-networking/) (Ethernet for Scale-Up Networking) at its October 2025 summit as a workstream to bring open Ethernet to the scale-up domain. Whether it displaces proprietary scale-up links is an open question, so read vendor claims in this area as positioning.
+
+## Ultra Ethernet: rebuilding the transport
+
+The Ultra Ethernet Consortium published its [1.0 specification](https://ultraethernet.org/wp-content/uploads/sites/20/2025/06/UE-Specification-6.11.25.pdf) in June 2025. It defines a new transport for AI and HPC traffic over Ethernet and IP. Two ideas map directly onto the problems above:
+
+- **Packet spraying** spreads a flow's packets across many paths instead of pinning the flow to one, which attacks ECMP collisions. The trade-off is reordering, which makes detecting real packet loss harder, so the spec pairs spraying with new loss-detection and congestion-control mechanisms.
+- **Profiles** (AI Base, AI Full, and HPC) let implementations support different feature sets.
+
+It is still early. Check which spec revision and which profile a product claims before you compare it with anything.
+
+## Observability and reliability
+
+Averages hide the problems. Watch tail latency and collective completion time, plus per-link error counters, optical errors, link flaps, and NIC counters such as out-of-sequence packets and timeouts. One degraded link can slow an entire job, so detect it quickly and route around it.
+
+Inference adds different patterns: many smaller, latency-sensitive requests rather than long synchronized collectives. That area is still moving fast, so treat generalizations (including mine) with caution.
+
+## Security belongs in the design
+
+A training fabric is a high-value, high-bandwidth environment, and Meta's separation of backend from front-end networks is also a segmentation decision. Keep management planes tightly controlled, restrict which systems can reach the backend, and apply the same identity-based thinking described in [zero trust networking](/blog/zero-trust-networking-cloud). If you run models close to users, [small models on edge devices](/blog/small-vs-large-language-models) change where this traffic flows in the first place.
+
+> **Image Prompt**
+> Create a clean diagram of the three AI network domains as nested layers on a graphite background: a small cluster of GPU nodes joined by thick short links (scale-up), many racks joined by a leaf-and-spine mesh (scale-out), and two data-center blocks joined by a long thin line (scale-across). Use signal-blue for links and amber for the long-haul connection. Minimal geometric style, subtle depth, no logos, no text labels, 16:9.
+>
+> **Placement:** under the "Up, out, and across" table.
+
+## Key takeaways
+
+- Synchronized GPU traffic makes tail latency, not average throughput, the key metric.
+- Few huge flows break assumptions that ECMP relies on.
+- Scale-up, scale-out, and scale-across have different constraints and technologies.
+- Ultra Ethernet is a new transport spec, and it is still maturing.
+- Segment and monitor the training fabric like any high-value network.
+
+## Frequently Asked Questions
+
+### Why can't a GPU cluster use an ordinary data-center network?
+
+It can, but performance suffers. Synchronized collectives and a few very large flows cause congestion and uneven link use, and any slow transfer stalls all the GPUs waiting for it.
+
+### What is RoCE?
+
+RDMA over Converged Ethernet lets servers move data directly between memories over Ethernet with low CPU overhead. RoCEv2 runs over IP, so it can be routed across a larger network.
+
+### Is InfiniBand or Ethernet better for AI clusters?
+
+Both are used. InfiniBand is purpose-built for low-latency fabrics, and Ethernet offers open multi-vendor ecosystems and is used at very large scale. The right choice depends on cluster size, vendor, and operations skill.
+
+### What is the difference between scale-up and scale-out?
+
+Scale-up connects accelerators inside a node or rack into a tightly coupled domain. Scale-out connects many racks across a cluster with a switched network.
+
+### What should a student learn first?
+
+Clos topologies, ECMP and flow hashing, congestion control, and what RDMA does. Those four ideas explain most of this article.
+
+## References
+
+1. [Engineering at Meta: RoCE networks for distributed AI training at scale](https://engineering.fb.com/2024/08/05/data-center-engineering/roce-network-distributed-ai-training-at-scale/)
+2. [Gangidi et al.: RDMA over Ethernet for Distributed AI Training at Meta Scale (SIGCOMM 2024)](https://engineering.fb.com/wp-content/uploads/2024/08/sigcomm24-final246.pdf)
+3. [Ultra Ethernet Consortium: Specification 1.0 (June 2025)](https://ultraethernet.org/wp-content/uploads/sites/20/2025/06/UE-Specification-6.11.25.pdf)
+4. [SDxCentral: OCP forms group to advance Ethernet for AI scale-up networking](https://www.sdxcentral.com/news/ocp-forms-group-to-advance-ethernet-for-ai-scale-up-networking/)

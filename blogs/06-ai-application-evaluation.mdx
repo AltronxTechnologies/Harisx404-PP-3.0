@@ -1,0 +1,168 @@
+---
+title: "How to Evaluate an AI Application Before Calling It Production Ready"
+description: "A practical guide to LLM evaluation: build a test set, choose graders, measure correctness, grounding, latency and cost, and gate releases with regression suites."
+slug: "ai-application-evaluation"
+date: "2026-10-02"
+updated: "2026-10-02"
+author: "Muhammad Haris"
+category: "AI / Machine Learning"
+tags:
+  - LLM evaluation
+  - AI testing
+  - Regression testing
+  - Production AI
+  - Reliability
+keywords:
+  - AI evaluation
+  - LLM evaluation
+  - AI reliability
+  - AI testing
+  - hallucination testing
+  - AI quality metrics
+  - production AI
+readingTime: "6 min read"
+featured: false
+coverImage: "/images/blog/ai-application-evaluation/cover.webp"
+coverImageAlt: "A test dataset flowing through graders into a release gate, drawn as clean connected blocks on a graphite background"
+---
+
+# How to Evaluate an AI Application Before Calling It "Production Ready"
+
+An AI application is production ready when you can answer two questions with evidence: how do you know it works, and how will you know when it stops working? The short recipe is to build a test set from real tasks, grade it with code wherever you can and with models or humans where you must, run it on every change, and keep watching after launch.
+
+This guide is for developers shipping LLM features: chat assistants, RAG systems, agents, extraction pipelines. It's written as an engineering checklist, with one small piece of code you can adapt.
+
+## Start with the failures you would hate most
+
+Before writing a single test, list what "bad" means for your product. A wrong answer? A made-up citation? An unsafe action? A response that takes eight seconds? Each item on that list becomes something you can measure. OpenAI's evaluation guide names the opposite approach, ["vibe-based" evals](https://developers.openai.com/api/docs/guides/evaluation-best-practices), where "it seems to work" is the strategy or testing waits until after you ship, and recommends evaluating early and often instead.
+
+## Build the dataset first
+
+The dataset is the real work, and it's more valuable than any tool. Collect:
+
+- real user requests, from logs or support tickets once you have them
+- cases written by someone who knows the domain
+- edge cases: empty input, very long input, other languages, contradictory instructions
+- adversarial cases, such as prompt injection attempts
+- cases where the right behavior is to refuse or say "I don't know"
+
+Start with 30 to 100 cases and keep them in version control. Every failure you meet in production becomes a new case, so the set grows from reality. Keep a held-out slice you never tune against, otherwise you are measuring how well you memorized your own tests.
+
+## Choose your graders
+
+Anthropic's guide to evaluating agents describes [three kinds of graders](https://anthropic.com/engineering/demystifying-evals-for-ai-agents): code-based, model-based, and human. Most systems need all three.
+
+| Grader | Good for | Watch out for |
+| ------ | -------- | ------------- |
+| Code-based | Schema validity, exact facts, correct tool and arguments, latency, citation ids that exist | Brittle, and blind to nuance |
+| Model-based (LLM as judge) | Tone, helpfulness, whether an answer follows a rubric | Needs calibration against human judgments, and costs more |
+| Human | Calibrating the other two, subjective or high-stakes cases | Slow, so use samples |
+
+Prefer code-based checks whenever the requirement can be stated precisely. Add a model judge for what code can't see, and check it against a handful of human labels so you know whether to trust it.
+
+## What to measure
+
+| Dimension | Question | Example check |
+| --------- | -------- | ------------- |
+| Correctness | Does it complete the task? | Pass or fail per gold case |
+| Grounding | Are claims supported by the sources? | Citation check, groundedness grader, abstention cases |
+| Retrieval | Did the right passages arrive? | Recall at k ([see the RAG article](/blog/reliable-rag)) |
+| Safety | Does it resist injection and misuse? | Adversarial cases, tool-permission tests ([agent security](/blog/securing-ai-agents)) |
+| Latency | How long until a useful answer? | p50 and p95 against a budget |
+| Cost | What does one successful task cost? | Tokens, retries, and tool calls included |
+| Reliability | How often does it fail or vary? | Pass rate over repeated runs |
+
+Outputs vary from run to run, so run each case several times and report how often it passes every time, not whether it passed once.
+
+## Capability evals and regression evals
+
+Anthropic separates two suites. **Capability evals** cover hard tasks you are still improving, so low pass rates are expected. **Regression evals** cover what must keep working, where you expect close to 100%. When a capability case becomes reliable, move it into the regression suite. Run the regression suite on every prompt change, model upgrade, retrieval change, and tool change. Model upgrades are the ones people skip, and they are the ones most likely to quietly change behavior.
+
+## A minimal runner
+
+You don't need a platform to start. This runs each case a few times and reports pass rates:
+
+```ts
+type Case = {
+  id: string;
+  input: string;
+  mustInclude?: string[];
+  mustNotInclude?: string[];
+  expectTool?: string;
+};
+
+type AppOutput = { text: string; toolCalls: string[] };
+
+export async function runEvals(
+  cases: Case[],
+  app: (input: string) => Promise<AppOutput>,
+  runsPerCase = 3,
+): Promise<{ id: string; passRate: number }[]> {
+  const summary: { id: string; passRate: number }[] = [];
+
+  for (const c of cases) {
+    let passes = 0;
+    for (let i = 0; i < runsPerCase; i++) {
+      const out = await app(c.input);
+      const missing = (c.mustInclude ?? []).filter((s) => !out.text.includes(s));
+      const forbidden = (c.mustNotInclude ?? []).filter((s) => out.text.includes(s));
+      const toolOk = !c.expectTool || out.toolCalls.includes(c.expectTool);
+      if (missing.length === 0 && forbidden.length === 0 && toolOk) passes++;
+    }
+    summary.push({ id: c.id, passRate: passes / runsPerCase });
+  }
+  return summary;
+}
+
+// In CI: fail the job if any regression case is not perfect.
+// const failing = (await runEvals(regressionCases, myApp)).filter((r) => r.passRate < 1);
+// if (failing.length > 0) process.exit(1);
+```
+
+> **Image Prompt**
+> Create a clean technical illustration of an evaluation loop on a cool graphite background. A dataset block feeds an AI application node; its outputs pass through three small grader gates (code, model, human) into a scoreboard panel with abstract bar shapes, and an amber arrow returns failures to the dataset block. Signal-blue lines for data flow, minimal geometric style, subtle depth, no logos, no text labels, 16:9.
+>
+> **Placement:** after the minimal runner section.
+
+## Set release gates, then keep watching
+
+Turn the table above into thresholds your team agrees on before the launch: no regression failures, a minimum groundedness score on the gold set, p95 latency under budget, cost per task under a ceiling. A gate that fails is a conversation, not a surprise in production.
+
+After launch, sample real traces, collect user feedback, and watch for drift and cost spikes. OpenAI's guide calls this continuous evaluation: run evals on every change and keep growing the set. One planning note for anyone using hosted tooling: OpenAI says its Evals platform becomes read-only on October 31, 2026 and shuts down on November 30, 2026. Keep your dataset and runner in your own repository so a vendor change never takes your tests with it.
+
+For AI features that read untrusted text or take actions, include security cases as first-class tests, because [a security team monitoring AI systems](/blog/ai-security-operations-center) will care about the same failures you do.
+
+## Key takeaways
+
+- Define what "bad" means first, then build a dataset from real cases.
+- Use code graders where possible, calibrated model judges where needed, humans for calibration.
+- Measure correctness, grounding, safety, latency, cost, and reliability separately.
+- Keep capability and regression suites apart, and run regressions on every change.
+- Gate the release, then keep evaluating in production.
+
+## Frequently Asked Questions
+
+### What is an LLM eval?
+
+A repeatable test of an AI system's behavior: a set of inputs, a way to grade the outputs, and a score you can compare across versions.
+
+### How many test cases do I need?
+
+Start with a few dozen real cases and grow from failures. A small, representative set that you run on every change is worth more than a large one that you run once.
+
+### Can I use an LLM to grade another LLM's output?
+
+Yes, and it scales well, but it needs calibration. Compare the judge's scores with a sample of human labels, use a clear rubric, and re-check periodically.
+
+### How do I test for hallucinations?
+
+Check that each claim is supported by the provided sources, verify that cited sources exist, and include questions the system can't answer so you can confirm it declines instead of guessing.
+
+### How often should I run evaluations?
+
+Run the regression suite on every change to prompts, models, retrieval, or tools, and sample production traffic continuously.
+
+## References
+
+1. [OpenAI: Evaluation best practices](https://developers.openai.com/api/docs/guides/evaluation-best-practices)
+2. [Anthropic Engineering: Demystifying evals for AI agents](https://anthropic.com/engineering/demystifying-evals-for-ai-agents)
