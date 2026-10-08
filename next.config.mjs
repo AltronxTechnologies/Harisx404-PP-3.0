@@ -97,10 +97,10 @@ const config = {
             key: "X-Content-Type-Options",
             value: "nosniff",
           },
-          {
+          ...(process.env.IS_ALLOY === "true" ? [] : [{
             key: "X-Frame-Options",
             value: "SAMEORIGIN",
-          },
+          }]),
           {
             key: "Referrer-Policy",
             value: "strict-origin-when-cross-origin",
