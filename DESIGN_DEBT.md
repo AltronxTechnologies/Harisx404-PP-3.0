@@ -88,7 +88,7 @@ The modal system uses a strict two-tier rule: **24px outer** (`rounded-3xl`) /
 - These are the **same share menu**, four different radii between them.
 
 ### Card / tile / button radii (lower priority)
-- Cards: `rounded-2xl` (BentoCard:27, StatCard:70, BlogCard:47, links:204, ContactClient:91) vs `rounded-3xl` (AboutTeaser:109, ContactClient:128/138/203, FeaturedBlogCard:23) vs `rounded-[20px]` (BorderCard:6, ShadowBox:11, HomeBento:84) vs `rounded-[22px]` (CaseStudies:438) vs `rounded-[26px]` (TableOfContents:83) vs `rounded-xl` (links:133, privacy:68/200) vs `rounded-lg` (privacy:82, links:246/255/261/271, CaseStudies:377)
+- Cards: `rounded-2xl` (BentoCard:27, StatCard:70, BlogCard:47, links:204, ContactClient:91) vs `rounded-3xl` (AboutTeaser:109, ContactClient:128/138/203, FeaturedBlogCard:23) vs `rounded-[20px]` (ShadowBox:11, HomeBento:84) vs `rounded-[22px]` (CaseStudies:438) vs `rounded-[26px]` (TableOfContents:83) vs `rounded-xl` (links:133, privacy:68/200) vs `rounded-lg` (privacy:82, links:246/255/261/271, CaseStudies:377)
 - Recessed-tile idiom uses two different pairs: `HomeBento:84` 20px frame + 12px inset, `HomeBento:866` 14px frame + 10px inset, `ShadowBox:11` 20px + 12px. Also two different greys (`#EDEEF0` vs `#E7E9ED`).
 - Buttons: `rounded-full` (CtaSection:70/95, ProjectsIndex:596/609/630/686) vs `rounded-xl` (ReachOutModal:275, ContactClient:98) vs `rounded-lg` (BlogFilterBar:73/103, links:246/271, GuestbookActionCard:47)
 
