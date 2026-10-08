@@ -222,6 +222,8 @@ export function withProjectPreview<T extends { slug: string; title?: string; cov
   if (process.env.NODE_ENV !== "development" || process.env.IS_ALLOY !== "true" || process.env.PROJECT_DETAIL_PREVIEW_SEED === "false") return project;
   const seed = projectPreviewFixtures[project.slug];
   if (!seed) return project;
+  const authored = project as T & { content?: string; case_study_sections?: Record<string, unknown> };
+  if (authored.content?.trim() && Object.values(authored.case_study_sections ?? {}).some((value) => typeof value === "string" && value.trim())) return project;
 
   const { gallery, cover_photo, ...fields } = seed;
   const galleryDetails = gallery
