@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { BentoCard } from "./BentoCard";
 
 export function CurrentlyReadingBento() {
@@ -19,10 +20,12 @@ function BookCover() {
   return (
     <div className="relative aspect-video h-full w-96 overflow-hidden rounded bg-red-500">
       <div className="absolute left-5 h-full w-2 bg-slate-900/20 blur-sm"></div>
-      <img
+      <Image
         src="/red_rising_cover.jpeg"
         alt="Dune book cover"
-        className="h-full"
+        width={384}
+        height={216}
+        className="h-full w-auto object-cover"
       />
     </div>
   );

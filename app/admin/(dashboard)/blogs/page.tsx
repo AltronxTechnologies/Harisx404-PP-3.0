@@ -2,7 +2,7 @@ import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 import { requireAdmin } from "@/app/lib/admin-auth";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Plus, Edit, ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react";
+import { Plus, Edit, ExternalLink, ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react";
 import { BlogFilters } from "@/app/components/admin/BlogFilters";
 import { BlogArchiveAction } from "./BlogArchiveAction";
 import { blogListStatus, blogListUrl, PAGE_SIZE, parseBlogListParams } from "./blogList";
@@ -61,12 +61,13 @@ export default async function AdminBlogsPage({
     <div className="flex min-w-0 flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Blog Posts</h1>
+          <p className="font-mono text-xs uppercase tracking-widest text-ink-secondary">Admin · Editorial</p>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-ink-primary">Blog Posts</h1>
           <p className="text-sm text-ink-secondary">Manage your blog posts here.</p>
         </div>
         <Link
           href="/admin/blogs/new"
-          className="inline-flex min-h-11 items-center justify-center rounded-xl bg-accent-signal px-4 py-2 text-sm font-medium text-white shadow hover:bg-accent-signal/90 transition-all"
+          className="inline-flex min-h-11 items-center justify-center rounded-full bg-accent-signal px-5 py-2 text-sm font-medium text-white shadow hover:bg-accent-signal/90 transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-signal"
         >
           <Plus className="mr-2 h-4 w-4" />
           New Post
@@ -128,6 +129,17 @@ export default async function AdminBlogsPage({
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
+                          {blog.status === "published" && (
+                            <a
+                              href={`/blog/${blog.slug}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              aria-label={`View live post ${blog.title}`}
+                              className="inline-flex size-11 items-center justify-center rounded-lg text-ink-secondary transition-colors hover:bg-surface-base hover:text-accent-signal focus-visible:outline focus-visible:outline-2 focus-visible:outline-current"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </a>
+                          )}
                           {blog.status !== "archived" && (
                             <Link
                               href={`/admin/blogs/${blog.id}`}

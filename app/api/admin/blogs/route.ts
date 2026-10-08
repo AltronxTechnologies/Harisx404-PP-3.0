@@ -261,7 +261,11 @@ function errorResponse(error: unknown, fallback = "Unable to save blog post. Ple
     );
   }
 
-  const message = error instanceof Error ? error.message : "Unable to save blog post";
+  const message = error instanceof Error
+    ? error.message
+    : typeof error === "object" && error !== null && "message" in error && typeof (error as any).message === "string"
+      ? (error as any).message
+      : "Unable to save blog post";
   if (message.includes("BLOG_POST_CONFLICT")) {
     return NextResponse.json(
       { error: "This post was changed elsewhere. Reload the page before saving again." },
@@ -272,7 +276,7 @@ function errorResponse(error: unknown, fallback = "Unable to save blog post. Ple
     return NextResponse.json({ error: "Blog post not found" }, { status: 404 });
   }
   if (message.includes("BLOG_SLUG_RESERVED")) {
-    return NextResponse.json({ error: "This slug belongs to a previously published post. Choose another slug." }, { status: 409 });
+    return NextResponse.json({ error: "This slug belongs to an existing post. Edit the existing article from the Blog list, or choose a distinct slug." }, { status: 409 });
   }
   if (message.includes("BLOG_RELATED_INVALID")) {
     return NextResponse.json({ error: message.replace(/^.*BLOG_RELATED_INVALID: /, "Invalid related posts: ") }, { status: 400 });
@@ -483,6 +487,7 @@ export async function DELETE(request: Request) {
     for (const alias of data.aliases) {
       if (typeof alias === "string") revalidateBlogPaths(alias);
     }
+    await admin.from("blog_slug_history").delete().eq("slug", data.deleted_slug).is("post_id", null);
     let failedCount = 0;
     let retainedCount = 0;
     for (const mediaId of candidates) {

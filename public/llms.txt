@@ -12,8 +12,13 @@
 - [About](https://harisx404.vercel.app/about): Background, education (BSIT, University of Malakand, CGPA 3.5/4.0, Top 15% NSCT nationwide), tech stack, experience, certifications.
 - [Projects](https://harisx404.vercel.app/projects): Case studies including IntruShield NIDS (real-time SOC platform with Suricata 7), MedicaLink-HMS (hospital management SaaS), PacketVision (network sniffer), TaskFlow Workspace, NeuroDoc AI Assistant (RAG), VisionForge ML Studio.
 - [Blog](https://harisx404.vercel.app/blog): Technical write-ups on web development, security, and AI.
+- [Buildlog](https://harisx404.vercel.app/buildlog): Real-time engineering changelog, version progression, and system architecture updates.
+- [Credentials](https://harisx404.vercel.app/credentials): Professional certifications, industry licenses, and verified skill badges.
+- [Community Wall](https://harisx404.vercel.app/community-wall): Visitor guestbook, messages, and peer endorsements.
 - [Contact](https://harisx404.vercel.app/contact): Hire or reach out — itsharis.tech@gmail.com.
 - [Resume](https://harisx404.vercel.app/resume): Downloadable resume.
+- [Sitemap](https://harisx404.vercel.app/sitemap.xml): XML sitemap listing all published routes.
+- [RSS Feed](https://harisx404.vercel.app/rss.xml): RSS 2.0 syndication feed for public blog articles.
 
 ## Facts
 
