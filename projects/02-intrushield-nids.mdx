@@ -1,0 +1,128 @@
+---
+title: "IntruShield NIDS — Autonomous Network Intrusion Detection & Threat Telemetry Platform"
+slug: "intrushield-nids"
+tagline: "Real-time SOC platform streaming Suricata 7 deep packet inspection, EVE JSON telemetry, and GeoIP threat intelligence via non-blocking WebSockets."
+category: "Cybersecurity & SOC"
+role: "Creator & Security Systems Architect"
+year: "2026"
+stage: "completed"
+status: "published"
+featured: true
+start_date: "2026-01-10"
+end_date: "2026-04-20"
+client: "Open Source / Independent Security Engineering"
+live_url: "https://intrushield-nids.vercel.app"
+github_url: "https://github.com/harisx404/intrushield-nids"
+tech_stack:
+  - "Python 3.12"
+  - "FastAPI"
+  - "Suricata 7.0"
+  - "Next.js 14"
+  - "WebSockets"
+  - "SQLAlchemy Async"
+  - "SQLite / PostgreSQL"
+  - "GeoIP2 (MaxMind)"
+  - "Docker Compose"
+  - "Zustand"
+  - "Recharts"
+  - "Tailwind CSS"
+  - "JWT Security"
+tags:
+  - "Cybersecurity"
+  - "NIDS"
+  - "SOC"
+  - "Deep Packet Inspection"
+  - "FastAPI"
+  - "Real-Time Telemetry"
+features:
+  - "Zero-latency real-time threat feed broadcasting Suricata 7 alerts directly over WebSockets"
+  - "EVE JSON ingestion engine with async file-tailing and sliding-window event deduplication"
+  - "Automated GeoIP2 telemetry enriching external malicious IP addresses with country codes and coordinates"
+  - "Interactive SOC command dashboard with protocol breakdown, severity distribution, and throughput charts"
+  - "Full rule management interface allowing security analysts to inspect, enable, and tune Suricata signatures"
+  - "Multi-container Docker Compose deployment with automated SQLite/Postgres seeding and health checks"
+cover_caption: "IntruShield NIDS Security Operations Center real-time telemetry dashboard deployed on Vercel."
+cover_alt: "IntruShield NIDS SOC Dashboard showing threat metrics, protocol gauges, and live alerts"
+why_built: |
+  Enterprise network environments process millions of raw packets per second, making signature detection engines like Suricata indispensable. However, Suricata outputs its forensic data into high-volume EVE JSON log streams on disk, creating a major barrier for security analysts who need instantaneous visibility without operating heavy, resource-draining enterprise SIEM stacks (like Splunk or Elastic) for smaller infrastructure footprints.
+
+  I engineered IntruShield NIDS to eliminate this operational friction. The goal was to build a turnkey, resource-efficient platform that couples Suricata 7 deep packet inspection directly with an ultra-responsive Next.js 14 SOC dashboard through an async FastAPI WebSocket pipeline—turning raw wire alerts into actionable threat intelligence in milliseconds.
+key_decisions: |
+  1. Async Python Pipeline (FastAPI + aiofiles): Suricata produces relentless JSON log writes. Using synchronous file reading would block the event loop. Implemented non-blocking aiofiles tailing paired with an async generator pipeline that ingests, parses, and broadcasts events in under 2ms.
+  2. In-Memory Sliding Window Deduplication: Port scans, DoS attacks, and brute-force bursts generate thousands of identical signature hits in seconds. Implemented an in-memory ring buffer tracking (src_ip, signature_id, timestamp_window) that collapses redundant flood alerts before persisting to database storage.
+  3. WebSocket Broadcast Hub over REST Polling: Polling a REST endpoint every second consumes substantial network overhead and introduces latency. Built a pub/sub WebSocket connection manager in FastAPI that fans out parsed alerts to all connected SOC analysts simultaneously with automated client-side reconnect backoff.
+  4. Decoupled Hybrid Deployment: Dockerized the capture and ingest pipeline for Linux network edge gateways while structuring the Next.js analytics layer to deploy either alongside the engine via Docker Compose or on Vercel for remote analyst teams.
+results: |
+  Achieved sub-5ms latency from the moment Suricata logs an alert to its visual rendering on the analyst's dashboard. Validated under simulated attack vectors including SYN floods, Nmap aggressive sweeps, SSH brute-forcing, and CVE exploit payload replay. Containerized image boots completely with database seed data in under 15 seconds via docker-compose up.
+lessons_learned: |
+  Real-world IDS deployments produce dirty JSON streams: malformed payloads, truncated TCP packets, and sudden log rotations. Robust schema coercion with Pydantic and graceful log file descriptor re-opening on rotation (`SIGHUP`) are critical for 24/7 autonomous monitoring stability.
+---
+
+## Executive Overview
+
+**IntruShield NIDS** is an autonomous Network Intrusion Detection System and Security Operations Center (SOC) telemetry platform engineered by **Muhammad Haris**. It unifies the forensic deep-packet inspection capabilities of **Suricata 7** with an asynchronous **FastAPI** backend and an interactive **Next.js 14** web command center.
+
+The platform provides small-to-medium security teams, homelab operators, and infrastructure engineers with instantaneous, visual threat monitoring without requiring complex SIEM infrastructure.
+
+---
+
+## Architectural Breakdown
+
+```
+  ┌──────────────────────────┐
+  │   Raw Network Traffic    │
+  └─────────────┬────────────┘
+                │ Raw Sockets / NIC
+                ▼
+  ┌──────────────────────────┐
+  │     Suricata 7 Engine    │
+  │  • Deep Packet Inspection│
+  │  • ET Open Signatures    │
+  └─────────────┬────────────┘
+                │ eve.json log stream
+                ▼
+  ┌──────────────────────────┐
+  │    FastAPI Async Core    │
+  │  • aiofiles Log Tailing  │ ── GeoIP2 Enrichment (MaxMind)
+  │  • Sliding-Window Dedup  │ ── SQLAlchemy Async ORM
+  │  • WebSocket Broadcast   │
+  └─────────────┬────────────┘
+                │ WebSockets (Zero-Polling Latency)
+                ▼
+  ┌──────────────────────────┐
+  │   Next.js 14 SOC Front   │
+  │  • Live Incident Table   │
+  │  • Recharts Telemetry    │
+  │  • Rule Management Suite │
+  └──────────────────────────┘
+```
+
+### Ingestion & Stream Processing
+* **Engine**: Suricata 7 configured in AF_PACKET mode for high-throughput packet acquisition.
+* **Log Pipeline**: Non-blocking `aiofiles` reader continuously tails `eve.json`. Incoming alerts undergo immediate JSON normalization, schema validation via Pydantic, and MaxMind GeoIP2 coordinate lookup for foreign IP addresses.
+* **Deduplication Engine**: A sliding time-window memory buffer suppresses redundant signature notifications during active flood attacks, preserving database integrity and analyst focus.
+
+### Real-Time Delivery & Visualization
+* **WebSockets**: Custom connection manager in FastAPI maintains heartbeat pings, broadcasts structured alert payloads to all authenticated client sessions, and manages disconnect lifecycles.
+* **Analyst Dashboard**: Next.js 14 App Router dashboard with Zustand state management. Displays live severity badges (Critical, High, Medium, Low), protocol breakdown (TCP, UDP, ICMP, DNS, TLS), and timeline activity histograms rendered via Recharts.
+
+---
+
+## Security Verification & Attack Simulations
+
+The platform was systematically tested against offensive cyber operations generated from an isolated Kali Linux testbed:
+
+| Attack Vector | Simulated Technique | Detection Signature | System Action |
+|---------------|---------------------|---------------------|---------------|
+| **Reconnaissance** | `nmap -sS -A -T4` aggressive sweep | ET SCAN Nmap Scripting Engine User-Agent | Flagged severity High, port scan grouped |
+| **Brute Force** | `hydra -l root -P pass.txt ssh://` | ET SCAN Potential SSH Scan / Brute Force | Deduplicated 250 attempts into single incident |
+| **Exploitation** | Replay of Log4j JNDI string payload | ET EXPLOIT Apache Log4j RCE Attempt | Immediate Critical alert with GeoIP attribution |
+| **Denial of Service** | `hping3 --flood -S -p 80` | ET DOS Possible SYN Flood | Dedup buffer engaged, packet rate graphed |
+
+---
+
+## Production Verification & Tooling
+
+* **Live Cloud Demo**: [https://intrushield-nids.vercel.app](https://intrushield-nids.vercel.app) *(Default Demo: `admin` / `admin`)*
+* **GitHub Repository**: [https://github.com/harisx404/intrushield-nids](https://github.com/harisx404/intrushield-nids)
+* **Packaging**: Production multi-stage `Dockerfile` and `docker-compose.yml` orchestrating API, database, and background workers with health checks.

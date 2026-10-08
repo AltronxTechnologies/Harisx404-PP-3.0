@@ -1,0 +1,133 @@
+---
+title: "Mail-Lens AI — NLP Email Threat Intelligence & Explainable AI (XAI) System"
+slug: "mail-lens-ai-phishguard"
+tagline: "NLP email threat classification and explainability engine detecting phishing and social engineering with 98.64% accuracy and sub-15ms CPU inference."
+category: "AI & Threat Intelligence"
+role: "AI & Machine Learning Engineer"
+year: "2026"
+stage: "completed"
+status: "published"
+featured: true
+start_date: "2026-02-01"
+end_date: "2026-05-30"
+client: "KPITB AI Fellowship (Government of Khyber Pakhtunkhwa)"
+github_url: "https://github.com/harisx404/phishguard-ai"
+tech_stack:
+  - "Python 3.10+"
+  - "Scikit-Learn 1.6+"
+  - "Streamlit"
+  - "NLTK"
+  - "BeautifulSoup4"
+  - "Calibrated LinearSVC"
+  - "TF-IDF Vectorization"
+  - "Levenshtein Distance"
+  - "Docker"
+  - "Pytest"
+  - "Explainable AI (XAI)"
+tags:
+  - "Artificial Intelligence"
+  - "Machine Learning"
+  - "NLP"
+  - "Cybersecurity"
+  - "Threat Intelligence"
+  - "Explainable AI"
+features:
+  - "3-class email threat classifier categorizing messages into Legitimate, Phishing, and Malicious categories"
+  - "High-dimensional NLP pipeline with 10,000 sublinear TF-IDF n-grams extracting subtle social engineering signals"
+  - "20 domain-specific cybersecurity heuristics including lookalike brand typosquatting, urgency density, and executable lures"
+  - "Platt-calibrated decision boundaries providing true, mathematically verified probability distributions"
+  - "Explainable AI (XAI) hyperplane projection surfacing top threat keywords, safe tokens, and 4 plain-English summary bullets"
+  - "Ultra-low latency inference executing in under 15ms on standard CPU hardware with 100% offline privacy"
+cover_caption: "Mail-Lens AI threat intelligence interface analyzing an incoming email and rendering XAI attribution."
+cover_alt: "Mail-Lens AI interface showing email classification probability and keyword threat attribution chips"
+why_built: |
+  Email remains the initial infection vector for over 90% of cyber breaches. Traditional rule-based secure email gateways (SEGs) struggle with novel zero-day phishing lures that contain no blacklisted URLs or known malicious hashes. Conversely, black-box deep learning models predict risk scores without explaining *why* an email is suspicious, frustrating security analysts who must justify incident escalation.
+
+  I engineered Mail-Lens AI (developed as my Capstone Project for the prestigious KPITB AI Fellowship) to bridge this gap. The platform unites high-accuracy statistical NLP and domain-specific cybersecurity heuristics with Explainable AI (XAI), delivering sub-15ms threat detection alongside plain-English reasoning that security analysts can immediately audit and act upon.
+key_decisions: |
+  1. Systematic 5-Model Benchmark: Evaluated Logistic Regression, Multinomial Naive Bayes, and Linear Support Vector Machines across raw TF-IDF and hybrid feature sets. Selected Calibrated Linear Support Vector Machine (LinearSVC with 3-fold Platt scaling) as the production champion for its superior 0.9760 Macro F1 on high-dimensional text data.
+  2. Explainable AI (XAI) via Hyperplane Projection: Instead of relying on slow post-hoc explainers like SHAP or LIME, I projected the TF-IDF feature weights directly against the learned SVM hyperplane coefficients. This generates instantaneous token attribution chips (<1ms overhead) highlighting exact deceptive phrases.
+  3. Hybrid Feature Fusion: Engineered 20 quantitative heuristic signals extracted directly from raw email headers and bodies: Levenshtein distance for brand typosquatting (e.g., paypa1 vs paypal), suspicious TLD ratios, urgency word density, and attachment extension risk.
+  4. Privacy-First Offline Architecture: Designed the entire inference pipeline to operate 100% locally on CPU without external API calls or telemetry leaks, allowing sensitive corporate emails to be evaluated in strict compliance with enterprise privacy standards.
+results: |
+  Evaluated across an independent holdout test partition of 3,592 unseen emails: achieved 98.64% overall accuracy and 0.9761 Macro-Averaged F1-score. Precision reached 99.09% on Legitimate mail, 97.95% on Phishing, and 97.06% on Malicious payloads. Passed 71 automated Pytest unit and integration tests with zero failures.
+lessons_learned: |
+  Raw text extraction from HTML emails is messy: hidden CSS divs, zero-width spaces, and HTML comment evasion tricks are actively used by phishing actors. Preprocessing with BeautifulSoup4 and entity normalization is critical before feeding tokens to the vectorizer.
+---
+
+## Executive Overview
+
+**Mail-Lens AI** (formerly PhishGuard AI) is an advanced Natural Language Processing and Explainable AI (XAI) email threat intelligence system engineered by **Muhammad Haris**. Developed as the final capstone project for the **KPITB AI Fellowship** (Government of Khyber Pakhtunkhwa), it classifies incoming emails into **Legitimate**, **Phishing**, and **Malicious** threat tiers while providing transparent, human-readable explanations of its decisions.
+
+---
+
+## Technical Pipeline & Architecture
+
+```
+                      Raw Email (Header, Subject, Body)
+                                      │
+         ┌────────────────────────────┴────────────────────────────┐
+         ▼                                                         ▼
+  NLP Text Cleaning Pipeline                              Cybersecurity Heuristics
+  • HTML tag stripping (BS4)                              • 20 quantitative threat signals
+  • URL/Email entity normalization                        • Homoglyph / Typosquatting check
+  • NLTK WordNet Lemmatization                            • Urgency & credential density
+         │                                                         │
+         ▼                                                         │
+  TF-IDF Vectorizer                                                │
+  • 10,000 unigram/bigram n-grams                                  │
+  • Sublinear term frequency scaling                               │
+         │                                                         │
+         ▼                                                         │
+  Calibrated Linear SVM Engine                                     │
+  • LinearSVC with balanced class weights                          │
+  • 3-Fold Platt probability scaling                               │
+         │                                                         │
+         └────────────────────────────┬────────────────────────────┘
+                                      ▼
+                        Risk Scoring & XAI Attribution
+                        • Hyperplane token projection
+                        • Keyword threat chips (Red/Green)
+                        • 4 plain-English diagnostic bullets
+                                      │
+                                      ▼
+                           Streamlit Telemetry UI
+```
+
+---
+
+## Machine Learning Benchmark & Validation
+
+The production model was selected through a rigorous 5-experiment empirical benchmark evaluated on identical stratified partitions:
+
+| Experiment | Model Architecture | Feature Representation | Accuracy | Macro F1 | Status |
+|---|---|---|---:|---:|---|
+| E1 | Logistic Regression | TF-IDF (10,000 n-grams) | 97.33% | 0.9717 | Baseline |
+| E2 | Multinomial Naive Bayes | TF-IDF (10,000 n-grams) | 96.05% | 0.8922 | Baseline |
+| **E3** | **Calibrated Linear SVM** | **TF-IDF (10,000 n-grams)** | **97.94%** | **0.9760** | **Production Champion** |
+| E4 | Logistic Regression | TF-IDF + 20 Security Heuristics | 97.44% | 0.9725 | Evaluated |
+| E5 | Calibrated Linear SVM | TF-IDF + 20 Security Heuristics | 97.88% | 0.9752 | Evaluated |
+
+### Independent Holdout Test Metrics (3,592 Samples)
+* **Overall Accuracy**: **98.64%**
+* **Macro-Averaged F1**: **0.9761**
+* **Inference Latency**: **< 15ms per email (on CPU)**
+* **Code Coverage**: **71 Pytest suites passing (76.7% coverage)**
+
+---
+
+## Explainable AI (XAI) in Action
+
+Rather than presenting an uninterpretable score, Mail-Lens AI outputs:
+1. **Calibrated Confidence**: Mathematically normalized probability distribution across the three classes.
+2. **Visual Threat Chips**: Top positively-attributed tokens (e.g., `verify account`, `urgent action`, `suspended`) highlighted in crimson, and benign tokens in emerald.
+3. **Analyst Briefing**: 4 automated bullet points outlining the specific triggers (e.g., *"Detected brand impersonation targeting Financial Services with an urgent 24-hour deadline"*).
+4. **Actionable Remediation**: Concrete containment recommendation (e.g., block sender domain, quarantine mailbox, or safe to deliver).
+
+---
+
+## Source & Reproduction
+
+* **GitHub Repository**: [github.com/harisx404/phishguard-ai](https://github.com/harisx404/phishguard-ai)
+* **License**: MIT Open Source License
+* **Containerization**: Turnkey `Dockerfile` with zero external cloud dependencies.

@@ -1,0 +1,134 @@
+---
+title: "MedicaLink HMS — Enterprise Multi-Tenant Hospital Management SaaS"
+slug: "medicalink-hms"
+tagline: "Enterprise multi-tenant hospital management SaaS with database-per-tenant isolation, real-time clinical workflows, and Google Gemini AI assistance."
+category: "Enterprise Multi-Tenant SaaS"
+role: "Full-Stack Software Architect"
+year: "2026"
+stage: "completed"
+status: "published"
+featured: true
+start_date: "2025-07-20"
+end_date: "2026-03-30"
+client: "HealthTech Enterprise B2B SaaS"
+github_url: "https://github.com/harisx404/MedicaLink-HMS"
+tech_stack:
+  - "TypeScript Strict"
+  - "Turborepo Monorepo"
+  - "React 18"
+  - "Vite"
+  - "Node.js 20 LTS"
+  - "Express 4"
+  - "MongoDB Atlas"
+  - "Mongoose 8"
+  - "Redis (Upstash / Local)"
+  - "Socket.io"
+  - "Google Gemini 1.5 Flash"
+  - "WebRTC (Telemedicine)"
+  - "Tailwind CSS v3"
+  - "shadcn/ui (Radix)"
+  - "Zod"
+  - "Vitest"
+tags:
+  - "Multi-Tenant"
+  - "SaaS"
+  - "Healthcare"
+  - "Turborepo"
+  - "Full-Stack"
+  - "WebSockets"
+features:
+  - "Strict database-per-tenant multitenancy ensuring total physical and logical data isolation between hospitals"
+  - "15 granular RBAC user roles governing permissions across 25+ clinical and administrative modules"
+  - "Real-time clinical event engine via Socket.io powering live patient queues, ICU bed trackers, and emergency triage"
+  - "Integrated Google Gemini 1.5 Flash assistant generating automated clinical visit summaries and drug interaction checks"
+  - "WebRTC telemedicine suite supporting browser-to-browser encrypted video consultations with virtual waiting rooms"
+  - "Comprehensive pharmacy inventory managing FEFO (First-Expired, First-Out) batch dispensing and narcotics auditing"
+cover_caption: "MedicaLink HMS clinical command interface showing multi-tenant metrics and real-time patient triage."
+cover_alt: "MedicaLink HMS multi-tenant dashboard with patient queue metrics and clinical modules"
+why_built: |
+  Healthcare management systems are historically fragmented, expensive to license, and vulnerable to catastrophic data leakages when built on shared-table multitenant databases. Hospital networks need an enterprise-grade platform capable of handling intense clinical concurrency—from emergency room triage and WebRTC telemedicine to pharmacy inventory and lab diagnostics—while strictly guaranteeing that patient medical records never cross hospital tenant boundaries.
+
+  I architected MedicaLink HMS to establish a new benchmark in modern HealthTech engineering. Built as a high-scalability Turborepo monorepo with strict TypeScript end-to-end, it enforces a database-per-tenant architecture, enterprise-grade RBAC/ABAC security, and real-time event streaming to deliver a dependable clinical operating system.
+key_decisions: |
+  1. Database-Per-Tenant Isolation: Instead of relying on vulnerable `tenant_id` WHERE clauses in a shared database, I engineered a dynamic Mongoose connection multiplexer. Each hospital tenant connects to an isolated MongoDB database pool resolved dynamically from tenant subdomain headers.
+  2. Monorepo Architecture with Turborepo & pnpm: Structured the system into decoupled packages (`apps/web`, `apps/api`, `packages/shared-types`, `packages/ui`) to share strict Zod validation schemas and TypeScript interfaces between backend and frontend without duplicate code.
+  3. Real-Time Telemetry via Socket.io & Redis: Backed Socket.io real-time queue updates with Redis pub/sub, ensuring horizontal scalability when hospital staff update bed allocations or patient triage states across multiple hospital floors.
+  4. Clinical AI Copilot (Gemini 1.5 Flash): Integrated generative AI for medical staff to summarize unstructured doctor visit notes into formatted SOAP (Subjective, Objective, Assessment, Plan) records, accelerating clinical documentation by 40%.
+results: |
+  Delivered a system supporting 15 distinct hospital roles (Chief Medical Officer, Nurse, Pharmacist, Lab Technician, Billing Officer, Radiologist, Patient, etc.) across 25+ clinical modules and 200+ views. Maintained 46 passing automated integration and security tests. Zero cross-tenant data leakage verified across stress testing.
+lessons_learned: |
+  Managing multi-tenant database connection pools requires careful lifecycle management (caching active connections with idle timeouts in an LRU map) to avoid exhausting MongoDB socket limits during sudden traffic spikes across multiple tenant hospitals.
+---
+
+## Executive Overview
+
+**MedicaLink HMS** is an enterprise-grade, multi-tenant B2B SaaS Hospital Management System architected and developed by **Muhammad Haris**. Designed for clinical networks, private hospitals, and healthcare systems, it manages the full continuum of care from outpatient scheduling to ICU triage, lab telemetry, and billing.
+
+The platform provides complete tenant isolation, HIPAA-ready architectural patterns, real-time collaboration, and clinical AI acceleration within a modern monorepo.
+
+---
+
+## System Architecture
+
+```
+  ┌─────────────────────────────────────────────────────────────┐
+  │                   Client Applications                       │
+  │   • apps/web (React 18 + Vite + TypeScript + shadcn/ui)     │
+  │   • WebRTC Telemedicine Client • Socket.io Live Subscriptions│
+  └──────────────────────────────┬──────────────────────────────┘
+                                 │ HTTPS / WebSockets (Tenant Subdomain)
+                                 ▼
+  ┌─────────────────────────────────────────────────────────────┐
+  │                 apps/api (Node.js 20 LTS + Express)         │
+  │   • Subdomain Tenant Resolver Middleware                    │
+  │   • Zod Schema Validation    • 15-Role RBAC / ABAC Enforcer │
+  │   • Redis Cache & Pub/Sub    • Gemini 1.5 Clinical AI Layer │
+  └──────────────────────────────┬──────────────────────────────┘
+                                 │
+             ┌───────────────────┴───────────────────┐
+             ▼                                       ▼
+  ┌─────────────────────────────┐         ┌─────────────────────┐
+  │    Dynamic Connection Pool  │         │   Upstash Redis     │
+  │  ┌───────────────────────┐  │         │  • Live Queues      │
+  │  │ Hospital Tenant A (DB)│  │         │  • Rate Limiting    │
+  │  ├───────────────────────┤  │         │  • Session Cache    │
+  │  │ Hospital Tenant B (DB)│  │         └─────────────────────┘
+  │  ├───────────────────────┤  │
+  │  │ Hospital Tenant C (DB)│  │
+  │  └───────────────────────┘  │
+  └─────────────────────────────┘
+```
+
+---
+
+## Comprehensive Module Ecosystem
+
+MedicaLink HMS provides 25+ integrated clinical and administrative modules:
+
+1. **Multi-Tenant Administration**: Tenant provisioning, custom branding, subscription tiers, and audit logs.
+2. **Clinical Workflows**: Electronic Health Records (EHR), SOAP consultations, ICD-10 diagnostic coding, and digital prescriptions.
+3. **Emergency & ICU**: Manchester triage classification, real-time ambulance dispatch tracking, and critical ventilator metrics.
+4. **Telemedicine**: Low-latency peer-to-peer WebRTC video consultations with encrypted chat and waiting rooms.
+5. **Smart Pharmacy**: First-Expired, First-Out (FEFO) dispensing, batch tracking, narcotics registry, and automated reorder alerts.
+6. **Laboratory Diagnostics**: Sample barcoding, automated delta checks, and pathologist digital sign-off.
+7. **Billing & Invoicing**: Multi-currency invoicing, insurance claim processing, and automated ledger balancing.
+
+---
+
+## Security & Defense-in-Depth
+
+| Security Vector | Implementation Detail |
+|---|---|
+| **Tenant Isolation** | Dynamic database connection resolution completely prevents cross-tenant data leakage. |
+| **Authentication** | In-memory JWT access tokens with rotating HttpOnly refresh cookies and optional TOTP 2FA. |
+| **Input Sanitization** | `express-mongo-sanitize` on all endpoints strips NoSQL operators; DOMPurify prevents stored XSS. |
+| **PII Encryption** | Sensitive patient fields (national IDs, insurance numbers) encrypted with AES-256-GCM. |
+| **Audit Trails** | Immutable audit logs record every clinical read and write with user ID, role, IP, and timestamp. |
+
+---
+
+## Source & Tooling
+
+* **GitHub Repository**: [github.com/harisx404/MedicaLink-HMS](https://github.com/harisx404/MedicaLink-HMS)
+* **Monorepo Engine**: Turborepo with pnpm workspaces
+* **License**: MIT Open Source License
