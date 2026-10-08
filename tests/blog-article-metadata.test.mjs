@@ -13,6 +13,10 @@ test("published article uses truthful dates, no invented author, and an absolute
 
   assert.ok(article, "BlogPosting JSON-LD should render");
   assert.ok(article.datePublished);
+  if (article.dateModified) {
+    assert.ok(Date.parse(article.dateModified) >= Date.parse(article.datePublished));
+    assert.ok(html.includes(`<meta property="article:modified_time" content="${article.dateModified}"`));
+  }
   assert.equal(Object.hasOwn(article, "author"), false);
   assert.doesNotMatch(html, /<span class="hidden sm:inline">Published <\/span>/);
   assert.ok(html.includes(`<time dateTime="${article.datePublished}"`));
@@ -38,6 +42,16 @@ test("canonical values are constrained both at Admin input and on legacy article
   assert.match(page, /canonical: safeCanonicalUrl\(post\.canonicalUrl, post\.slug\)/);
   assert.match(page, /return `\/blog\/\$\{slug\}`/);
   assert.match(page, /\.replace\(\/<\/g, "\\\\u003c"\)/);
+});
+
+test("modification metadata uses the stored update date rather than inventing one", async () => {
+  const [source, page] = await Promise.all([
+    readFile(new URL("../app/lib/utils.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/blog/[slug]/page.tsx", import.meta.url), "utf8"),
+  ]);
+  assert.match(source, /published_at, updated_at, cover_image_url/);
+  assert.match(source, /modifiedAt: data\.updated_at \|\| undefined/);
+  assert.doesNotMatch(page, /(?:dateModified|modifiedTime): post\.publishedAt/);
 });
 
 test("Blog feed does not assign all imported posts to one author", async () => {

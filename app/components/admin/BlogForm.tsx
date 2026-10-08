@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headlessui/react";
+import { Dialog, DialogPanel, DialogTitle, Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headlessui/react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -18,6 +18,7 @@ import { isAllowedBlogImageUrl } from "@/app/components/blog/blogImage";
 import { siteMetadata } from "@/app/data/siteMetadata";
 import { useAdminNavigationGuard } from "./useAdminNavigationGuard";
 import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
+import { parseBlogImportTags } from "@/app/lib/admin/blog-import-tags";
 
 const TiptapEditor = dynamic(() => import("./TiptapEditor").then((module) => module.TiptapEditor), { ssr: false });
 const BlogCodeEditor = dynamic(() => import("./BlogCodeEditor").then((module) => module.BlogCodeEditor), { ssr: false });
@@ -79,6 +80,8 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
   const [previewSnapshot, setPreviewSnapshot] = useState<Pick<BlogFormValues, "title" | "slug" | "summary" | "content" | "published_at" | "status" | "tags" | "related_blog_post_ids" | "canonical_url"> | null>(null);
   const [showImportModal, setShowImportModal] = useState(false);
   const [importInput, setImportInput] = useState("");
+  const [importError, setImportError] = useState("");
+  const closeImport = () => { setShowImportModal(false); setImportInput(""); setImportError(""); };
   const slugEdited = useRef(Boolean(initialData?.id));
   const canonicalEdited = useRef(Boolean(initialData?.canonical_url && initialData.canonical_url !== blogCanonicalUrl(initialData.slug, siteMetadata.siteUrl)));
   const publishDateEdited = useRef(false);
@@ -87,13 +90,14 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
 
   const handleImportMdx = (rawMdx: string) => {
     if (!rawMdx.trim()) return;
+    setImportError("");
     let text = rawMdx.trim();
     let titleVal = "";
     let slugVal = "";
     let descVal = "";
     let dateVal = "";
     let coverVal = "";
-    const tagsList: string[] = [];
+    let importedTags: string[] | null = null;
 
     const match = /^---\s*[\r\n]+([\s\S]*?)[\r\n]+---\s*[\r\n]*/.exec(text);
     if (match) {
@@ -115,12 +119,11 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
       const coverMatch = /^(?:coverImage|image):\s*["']?(.*?)["']?\s*$/m.exec(frontmatter);
       if (coverMatch) coverVal = coverMatch[1].trim();
 
-      const tagsBlockMatch = /tags:\s*[\r\n]+((?:\s*-\s*.*[\r\n]*)+)/m.exec(frontmatter);
-      if (tagsBlockMatch) {
-        const itemMatches = tagsBlockMatch[1].matchAll(/^\s*-\s*["']?(.*?)["']?\s*$/gm);
-        for (const m of itemMatches) {
-          if (m[1].trim()) tagsList.push(m[1].trim());
-        }
+      try {
+        importedTags = parseBlogImportTags(frontmatter);
+      } catch (error) {
+        setImportError(error instanceof Error ? error.message : "Could not read tags. No fields were changed.");
+        return;
       }
     }
 
@@ -137,10 +140,18 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
     }
 
     text = text.trim();
+    if (!text) {
+      setImportError("The MDX article body is empty. No fields were changed.");
+      return;
+    }
+    if (dateVal && !isValidBlogDate(dateVal)) {
+      setImportError("The frontmatter date is invalid. No fields were changed.");
+      return;
+    }
 
     if (titleVal) {
       setValue("title", titleVal, { shouldDirty: true, shouldValidate: true });
-      if (!slugVal) slugVal = normalizeBlogSlug(titleVal);
+      if (!slugVal && !initialData?.id) slugVal = normalizeBlogSlug(titleVal);
     }
     if (slugVal) {
       slugEdited.current = true;
@@ -154,20 +165,17 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
       setValue("published_at", dateVal, { shouldDirty: true, shouldValidate: true });
     }
     if (coverVal) {
+      if (coverVal !== getValues("cover_image_url")) setValue("cover_image_id", "", { shouldDirty: true });
       setValue("cover_image_url", coverVal, { shouldDirty: true, shouldValidate: true });
     }
-    if (tagsList.length > 0) {
-      const uniqueTags = Array.from(new Set(tagsList)).slice(0, 10);
-      setValue("tags", uniqueTags, { shouldDirty: true, shouldValidate: true });
-    }
+    if (importedTags !== null) setValue("tags", importedTags, { shouldDirty: true, shouldValidate: true });
     if (text) {
       richContentEdited.current = true;
       setValue("content", text, { shouldDirty: true, shouldValidate: true });
     }
 
     setEditorMode("source");
-    setShowImportModal(false);
-    setImportInput("");
+    closeImport();
   };
 
   const {
@@ -432,11 +440,11 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
         </div>
         <button
           type="button"
-          onClick={() => setShowImportModal(true)}
+          onClick={() => { setImportError(""); setShowImportModal(true); }}
           className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border-hairline bg-surface-raised px-4 py-1.5 text-xs font-medium text-ink-primary hover:border-accent-signal/50 hover:bg-surface-base transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-signal"
         >
           <FileText className="size-3.5 text-accent-signal" />
-          <span>Import from MDX File</span>
+          <span>Paste MDX article</span>
         </button>
       </div>
       
@@ -795,32 +803,37 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
       const dMatch = fm ? /^(?:description|summary):\s*["']?(.*?)["']?\s*$/m.exec(fm) : null;
       const dateMatch = fm ? /^date:\s*["']?(.*?)["']?\s*$/m.exec(fm) : null;
       return (
-      <div role="dialog" aria-modal="true" aria-labelledby="import-mdx-title" className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-md">
-        <div className="w-full max-w-2xl rounded-2xl border border-border-primary bg-surface-raised p-6 shadow-2xl">
+      <Dialog open={showImportModal} onClose={closeImport} className="fixed inset-0 z-[7000] dark">
+        <div className="fixed inset-0 flex items-center justify-center overflow-y-auto bg-black/75 p-4 backdrop-blur-md">
+        <DialogPanel className="w-full max-w-2xl rounded-2xl border border-border-primary bg-surface-raised p-6 shadow-2xl">
           <div className="flex items-center justify-between border-b border-border-hairline pb-3">
             <div className="flex items-center gap-2">
               <Sparkles className="size-4 text-accent-signal" />
-              <h2 id="import-mdx-title" className="text-base font-semibold text-ink-primary">Import from MDX Document</h2>
+              <DialogTitle className="text-base font-semibold text-ink-primary">Import MDX source</DialogTitle>
             </div>
             <button
               type="button"
-              onClick={() => { setShowImportModal(false); setImportInput(""); }}
+              onClick={closeImport}
               aria-label="Close dialog"
-              className="rounded-lg p-1.5 text-ink-secondary hover:bg-surface-base hover:text-ink-primary"
+              className="inline-flex size-11 items-center justify-center rounded-lg text-ink-secondary hover:bg-surface-base hover:text-ink-primary"
             >
               <X className="size-4" />
             </button>
           </div>
           <p className="mt-3 text-xs text-ink-secondary leading-relaxed">
-            Paste your complete raw MDX file below (including YAML frontmatter <code>--- ... ---</code>). We will automatically extract the Title, Slug, Summary, Tags, Publish Date, and clean the body into MDX!
+            Paste your MDX source below. Supported YAML frontmatter fields include title, slug, summary, date, cover image and tags (as a list or inline list). Review the populated fields before saving.
           </p>
           <textarea
+            aria-label="MDX source to import"
+            aria-describedby={importError ? "import-mdx-error" : undefined}
+            autoFocus
             value={importInput}
-            onChange={(e) => setImportInput(e.target.value)}
+            onChange={(e) => { setImportInput(e.target.value); setImportError(""); }}
             rows={10}
             className="mt-3 w-full rounded-xl border border-border-hairline bg-surface-base p-3 font-mono text-xs text-ink-primary focus:outline-none focus:ring-2 focus:ring-accent-signal"
             placeholder="Paste your .mdx content here..."
           />
+          {importError && <p id="import-mdx-error" role="alert" className="mt-2 text-sm text-red-300">{importError}</p>}
           {fm && (
             <div className="mt-3 rounded-xl border border-indigo-500/30 bg-indigo-950/20 p-3 text-xs font-mono space-y-1">
               <p className="text-[10px] font-semibold uppercase tracking-wider text-accent-signal">Detected Frontmatter</p>
@@ -833,8 +846,8 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
           <div className="mt-4 flex justify-end gap-3">
             <button
               type="button"
-              onClick={() => { setShowImportModal(false); setImportInput(""); }}
-              className="rounded-full border border-border-hairline px-4 py-2 text-xs font-medium text-ink-secondary hover:bg-surface-base"
+              onClick={closeImport}
+              className="min-h-11 rounded-full border border-border-hairline px-4 py-2 text-xs font-medium text-ink-secondary hover:bg-surface-base"
             >
               Cancel
             </button>
@@ -842,13 +855,14 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
               type="button"
               disabled={!importInput.trim()}
               onClick={() => handleImportMdx(importInput)}
-              className="rounded-full bg-accent-signal px-5 py-2 text-xs font-medium text-white shadow hover:bg-accent-signal/90 disabled:opacity-50"
+              className="min-h-11 rounded-full bg-accent-signal px-5 py-2 text-xs font-medium text-white shadow hover:bg-accent-signal/90 disabled:opacity-50"
             >
               Populate Form Fields
             </button>
           </div>
+        </DialogPanel>
         </div>
-      </div>
+      </Dialog>
       );
     })()}
     </>

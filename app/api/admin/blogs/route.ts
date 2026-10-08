@@ -487,7 +487,6 @@ export async function DELETE(request: Request) {
     for (const alias of data.aliases) {
       if (typeof alias === "string") revalidateBlogPaths(alias);
     }
-    await admin.from("blog_slug_history").delete().eq("slug", data.deleted_slug).is("post_id", null);
     let failedCount = 0;
     let retainedCount = 0;
     for (const mediaId of candidates) {

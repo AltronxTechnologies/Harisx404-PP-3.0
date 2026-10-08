@@ -576,12 +576,9 @@ the active copies.
 
 - Font-family declarations inside MDX code examples are displayed article
   content, not active global CSS.
-- Files under `guide/` are reference/starter material and are not part of the
-  active Tailwind content configuration.
-- `guide/core.tsx` assumes variables such as `--font-serif` and
-  `--font-display` that are not the application's actual variable names.
-- Bricolage Grotesque is mentioned in guide material but is not loaded or used
-  by the active application.
+- The retired `guide/` reference/starter material was not part of the active
+  Tailwind content configuration. Its `core.tsx` assumed font variables that
+  did not match the application; Bricolage Grotesque was never loaded here.
 
 ## Synthetic face audit
 
@@ -753,11 +750,11 @@ not those historical statements, determines actual rendering.
   Serif Regular, so the visual result is Instrument Serif.
 - An older lock note says the hero headline uses Space Grotesk. It currently
   uses JetBrains Mono.
-- Guide material mentions Bricolage Grotesque. It is not loaded or used.
+- Retired guide material mentioned Bricolage Grotesque. It was not loaded or used.
 
 Known stale references include `AI_GUIDE.md`, `PROJECT_PHASES.md`,
 `PARITY_AUDIT.md`, `docs/09_DESIGN_SYSTEM.md`, selected files under
-`docs/blueprints/`, `audit/01-global.md`, `guide/DESIGN_SPEC.md`, and historical
+`docs/blueprints/`, `audit/01-global.md`, the retired `guide/DESIGN_SPEC.md`, and historical
 entries in `LOCKED_PERFECT.md`.
 
 Historical lock entries should not be rewritten casually. A future approved

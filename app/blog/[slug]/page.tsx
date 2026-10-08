@@ -114,6 +114,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
     : formatReadingTime(post.code);
 
   const coverSrc = blogCoverSrc(post.imageName);
+  const modifiedAt = post.modifiedAt && Date.parse(post.modifiedAt) >= Date.parse(post.publishedAt) ? post.modifiedAt : undefined;
 
   return (
     <div className="blog-detail relative mt-14 min-w-0">
@@ -126,7 +127,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
             headline: post.title,
             ...(coverSrc ? { image: new URL(coverSrc, siteMetadata.siteUrl).href } : {}),
             datePublished: post.publishedAt,
-            dateModified: post.publishedAt,
+            ...(modifiedAt ? { dateModified: modifiedAt } : {}),
             description: post.summary,
             mainEntityOfPage: {
               "@type": "WebPage",
@@ -280,6 +281,7 @@ export async function generateMetadata(
   const socialImage = coverSrc
     ? new URL(coverSrc, siteMetadata.siteUrl).href
     : `/api/og?title=${encodeURIComponent(post.title)}&category=Blog`;
+  const modifiedAt = post.modifiedAt && Date.parse(post.modifiedAt) >= Date.parse(post.publishedAt) ? post.modifiedAt : undefined;
 
   return {
     title: post.title,
@@ -295,7 +297,7 @@ export async function generateMetadata(
       description: post.summary,
       type: "article",
       publishedTime: post.publishedAt,
-      modifiedTime: post.publishedAt,
+      ...(modifiedAt ? { modifiedTime: modifiedAt } : {}),
       tags: post.categories,
       images: [
         {
