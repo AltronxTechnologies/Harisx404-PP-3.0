@@ -27,3 +27,15 @@ test("Projects index still uses the established shared card recipe", () => {
   assert.match(source, /bodyHiddenOnXl \? \(/);
   assert.match(source, /frame-light-edge group relative block/);
 });
+
+test("Home-only covers get a reduced-motion-safe sheen and the sticky stack reserves the real overflow badge width", () => {
+  const source = readFileSync(new URL("../app/components/home/CaseStudies.tsx", import.meta.url), "utf8");
+  const homeCover = source.split("{bodyHiddenOnXl ? (")[1]?.split("\n        ) : (\n        <div\n          ref={panelRef}")[0];
+  assert.ok(homeCover, "the Home cover has its own rendering branch");
+  assert.match(homeCover, /transition-\[border-color,box-shadow\]/);
+  assert.match(homeCover, /shadow-\[inset_/);
+  assert.match(homeCover, /motion-reduce:transition-none/);
+  assert.match(source, /probe\.textContent = `\+\$\{chips\.length - count\}`/);
+  assert.match(source, /project\.tech\.slice\(0, visibleTechCount\)/);
+  assert.match(source, /\+\{project\.tech\.length - visibleTechCount\}/);
+});

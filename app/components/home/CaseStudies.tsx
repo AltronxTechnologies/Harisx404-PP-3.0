@@ -483,7 +483,12 @@ export function CaseStudyCard({
         {bodyHiddenOnXl ? (
           <div
             ref={panelRef}
-            className="relative h-full w-full overflow-hidden rounded-[22px] border-8 border-white shadow-[0_0_0_0.8px_rgba(0,0,0,0.2),0_9.5px_28.5px_-11.4px_rgba(0,0,0,0.4)] dark:border-zinc-800 dark:shadow-[0_0_0_1px_#4d4d4d,0_9.5px_28.5px_-11.4px_rgba(0,0,0,0.4)]"
+            className={clsx(
+              "relative h-full w-full overflow-hidden rounded-[22px] border-8 border-white shadow-[0_0_0_0.8px_rgba(0,0,0,0.2),0_9.5px_28.5px_-11.4px_rgba(0,0,0,0.4)] transition-[border-color,box-shadow] duration-300 motion-reduce:transition-none dark:border-zinc-800 dark:shadow-[0_0_0_1px_#4d4d4d,0_9.5px_28.5px_-11.4px_rgba(0,0,0,0.4)]",
+              "[@media(hover:hover)]:group-hover:border-neutral-100 [@media(hover:hover)]:group-hover:shadow-[0_0_0_1px_rgba(120,140,165,0.35),0_18px_36px_-16px_rgba(15,23,42,0.45)] dark:[@media(hover:hover)]:group-hover:border-zinc-700 dark:[@media(hover:hover)]:group-hover:shadow-[0_0_0_1px_rgba(255,255,255,0.22),0_18px_36px_-16px_rgba(0,0,0,0.7)]",
+              "group-active:border-neutral-100 dark:group-active:border-zinc-700",
+              active && "border-neutral-100 dark:border-zinc-700"
+            )}
             style={{ backgroundImage: panelGradients[i % panelGradients.length] }}
           >
             {(project.images?.[0] || project.image_url) ? (
@@ -500,6 +505,13 @@ export function CaseStudyCard({
                 {project.title}
               </span>
             )}
+            <span
+              aria-hidden
+              className={clsx(
+                "pointer-events-none absolute inset-0 opacity-0 shadow-[inset_0_2px_0_rgba(255,255,255,0.22),inset_0_-18px_28px_-24px_rgba(0,0,0,0.55)] transition-opacity duration-300 [@media(hover:hover)]:group-hover:opacity-100 group-active:opacity-100 motion-reduce:transition-none",
+                active && "opacity-100"
+              )}
+            />
             <span aria-hidden className="absolute right-6 top-6 text-white/85 drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] transition-transform duration-300 group-hover:translate-x-1 max-[380px]:right-4 max-[380px]:top-4 md:right-8 md:top-8">
               <svg viewBox="0 0 24 16" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-6">
                 <path d="M2 8h19" />
@@ -899,6 +911,43 @@ function StickyProjectPanel({
       ? project.features
       : genericBullets(project.title)
   ).slice(0, 3);
+  const techMeasureRef = useRef<HTMLDivElement>(null);
+  const [visibleTechCount, setVisibleTechCount] = useState(project.tech.length);
+
+  useEffect(() => {
+    const measure = () => {
+      const row = techMeasureRef.current;
+      if (!row) return;
+      const chips = [...row.children].slice(0, -1) as HTMLElement[];
+      const badge = row.lastElementChild as HTMLElement;
+      const tops = [...new Set(chips.map((chip) => chip.offsetTop))];
+      const thirdTop = tops[2];
+      let count = thirdTop === undefined
+        ? chips.length
+        : chips.findIndex((chip) => chip.offsetTop > thirdTop);
+      if (count < 0) count = chips.length;
+      if (count < chips.length && thirdTop !== undefined) {
+        const probe = badge.cloneNode(true) as HTMLElement;
+        row.appendChild(probe);
+        const edge = row.getBoundingClientRect().right;
+        while (count > 0 && chips[count - 1].offsetTop === thirdTop) {
+          probe.textContent = `+${chips.length - count}`;
+          if (chips[count - 1].getBoundingClientRect().right + 8 + probe.getBoundingClientRect().width <= edge) break;
+          count--;
+        }
+        probe.remove();
+      }
+      setVisibleTechCount(count);
+    };
+    measure();
+    const observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(measure) : null;
+    if (techMeasureRef.current) observer?.observe(techMeasureRef.current);
+    window.addEventListener("resize", measure);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [project.tech]);
 
   return (
     <div key={project.slug}>
@@ -930,10 +979,23 @@ function StickyProjectPanel({
         ))}
       </ul>
       {project.tech.length > 0 && (
-        <div className="mt-[22px] flex max-h-[124px] flex-wrap gap-2 overflow-hidden">
-          {project.tech.map((t) => (
-            <TechChip key={t} name={t} />
-          ))}
+        <div className="relative mt-[22px]">
+          <div ref={techMeasureRef} aria-hidden="true" className="invisible pointer-events-none absolute inset-x-0 top-0 flex flex-wrap gap-2">
+            {project.tech.map((t) => (
+              <TechChip key={t} name={t} />
+            ))}
+            <span className="rounded-full border border-border-primary px-3 py-1 font-mono text-xs text-text-secondary">+{project.tech.length}</span>
+          </div>
+          <div className="flex max-h-[96px] flex-wrap gap-2 overflow-hidden">
+            {project.tech.slice(0, visibleTechCount).map((t) => (
+              <TechChip key={t} name={t} />
+            ))}
+            {visibleTechCount < project.tech.length && (
+              <span className="inline-flex items-center rounded-full border border-dashed border-border-primary px-3 py-1 font-mono text-xs text-text-secondary">
+                +{project.tech.length - visibleTechCount}
+              </span>
+            )}
+          </div>
         </div>
       )}
       {/* CTA — mouse-clickable; tabIndex -1 keeps it out of the tab order
