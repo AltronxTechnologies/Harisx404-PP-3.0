@@ -471,13 +471,45 @@ export function CaseStudyCard({
 
       <Link
         href={`/projects/${project.slug}`}
+        aria-label={bodyHiddenOnXl ? `View ${project.title} case study` : undefined}
         className={clsx(
-          "frame-light-edge group relative block",
+          bodyHiddenOnXl ? "group relative block focus-visible:rounded-[22px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary" : "frame-light-edge group relative block",
           /* Projects page: the cover panel itself rises 6px on hover, so the
              frame hairline must ride along or it visibly detaches. */
-          !liftOnHover && "frame-light-edge-lift"
+          !liftOnHover && !bodyHiddenOnXl && "frame-light-edge-lift"
         )}
       >
+        {bodyHiddenOnXl ? (
+          <div
+            ref={panelRef}
+            className="relative aspect-[3/2] overflow-hidden rounded-[22px] border-[6px] shadow-[0_9.5px_28.5px_-11.4px_rgba(0,0,0,0.4)]"
+            style={{
+              borderColor: hueHex[i % hueHex.length],
+              backgroundImage: panelGradients[i % panelGradients.length],
+            }}
+          >
+            {(project.images?.[0] || project.image_url) ? (
+              <Image
+                src={optimizeImageUrl(project.images?.[0] || project.image_url, 1200)}
+                alt=""
+                fill
+                priority={imagePriority}
+                sizes={imageSizes}
+                className="object-cover object-top"
+              />
+            ) : (
+              <span className="absolute inset-0 flex items-center justify-center px-6 text-center font-display text-2xl text-white">
+                {project.title}
+              </span>
+            )}
+            <span aria-hidden className="absolute right-4 top-4 flex size-11 items-center justify-center rounded-full border border-white/25 bg-black/60 text-white transition-colors group-hover:bg-black/80 max-[380px]:right-3 max-[380px]:top-3">
+              <svg viewBox="0 0 24 16" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" className="size-5">
+                <path d="M2 8h19" />
+                <path d="m15 2 6 6-6 6" />
+              </svg>
+            </span>
+          </div>
+        ) : (
         <div
           ref={panelRef}
           className={clsx(
@@ -697,6 +729,7 @@ export function CaseStudyCard({
             </div>
           </div>
         </div>
+        )}
       </Link>
 
       {/* Compact description + project story — visible below xl; hidden at xl
