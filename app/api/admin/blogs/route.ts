@@ -88,7 +88,10 @@ const blogSchema = z
       .max(300)
       .transform(normalizeBlogSlug)
       .pipe(z.string().min(1, "Slug is required").max(200)),
-    summary: optionalText(1000),
+    summary: z
+      .union([z.string(), z.null()])
+      .optional()
+      .transform((value) => (value?.trim() ? value.trim() : null)),
     content: z
       .string()
       .max(1_000_000)

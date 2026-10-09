@@ -27,7 +27,7 @@ const BlogUnsavedPreview = dynamic(() => import("./BlogUnsavedPreview").then((mo
 const blogSchema = z.object({
   title: z.string().min(1, "Title is required").max(200, "Title must be 200 characters or fewer"),
   slug: z.string().min(1, "Slug is required").max(300).refine((value) => normalizeBlogSlug(value).length <= 200, "Slug must be 200 characters or fewer"),
-  summary: z.string().max(1000, "Summary must be 1000 characters or fewer").optional(),
+  summary: z.string().optional(),
   content: z.string().min(1, "Content is required").max(1_000_000, "Article is too long").refine((value) => value.trim().length > 0, "Content is required"),
   status: z.enum(["draft", "published"]),
   cover_image_url: z
@@ -110,8 +110,13 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
       const slugMatch = /^slug:\s*["']?(.*?)["']?\s*$/m.exec(frontmatter);
       if (slugMatch) slugVal = slugMatch[1].trim();
 
-      const descMatch = /^(?:description|summary):\s*["']?(.*?)["']?\s*$/m.exec(frontmatter);
-      if (descMatch) descVal = descMatch[1].trim();
+      const descMatch = /^(?:description|summary):\s*(?:[>|]\s*[\r\n]+((?:[ \t]+[^\r\n]+[\r\n]*)+)|["']?([\s\S]*?)["']?\s*$(?:\r?\n(?![\w-]+:)))/m.exec(frontmatter);
+      if (descMatch) {
+        descVal = (descMatch[1] || descMatch[2] || "").trim().replace(/\s+/g, " ");
+      } else {
+        const singleDescMatch = /^(?:description|summary):\s*["']?(.*?)["']?\s*$/m.exec(frontmatter);
+        if (singleDescMatch) descVal = singleDescMatch[1].trim();
+      }
 
       const dateMatch = /^date:\s*["']?(.*?)["']?\s*$/m.exec(frontmatter);
       if (dateMatch) dateVal = dateMatch[1].trim();
@@ -498,8 +503,8 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <label htmlFor="blog-summary" className="text-sm font-medium">Summary</label>
-          <span className={`font-mono text-[11px] ${summaryWatch.length > 160 ? "text-amber-400 font-semibold" : "text-ink-secondary"}`}>
-            {summaryWatch.length} / 160 chars
+          <span className="font-mono text-[11px] text-ink-secondary">
+            {summaryWatch.length} chars (no limit)
           </span>
         </div>
         <textarea
@@ -507,7 +512,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
           id="blog-summary"
           aria-invalid={Boolean(errors.summary)}
           aria-describedby={errors.summary ? "blog-summary-error" : undefined}
-          rows={3}
+          rows={4}
           className="w-full rounded-xl border border-border-hairline bg-surface-base px-3.5 py-2.5 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-accent-signal"
           placeholder="Optional: generated from the article on first save"
         />
