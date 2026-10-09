@@ -172,15 +172,26 @@ export default async function Home() {
     ai: [] as string[],
   };
   for (const p of sourceProjects as any[]) {
-    // Classify by category + title + tags (tech stacks mention AI/security
-    // tools too often to be a reliable signal for the project's domain).
-    const tags = Array.isArray(p.tags) ? p.tags.join(" ") : "";
-    const hay = `${p.category ?? ""} ${p.title ?? ""} ${tags}`.toLowerCase();
+    // Classify primarily by the curated Project Domain/Category selected in Admin,
+    // with fallback to title/tags for legacy unclassified entries.
+    const cat = String(p.category ?? "").trim().toLowerCase();
     let bucket: "web" | "security" | "ai" = "web";
-    if (/cyber|security|nids|intrusion|packet|sniff|pentest|forensic/.test(hay))
+    if (cat === "cybersecurity" || cat.includes("security") || cat.includes("cyber")) {
       bucket = "security";
-    else if (/\bai\b|machine.?learning|\bml\b|gpt|llm|neural/.test(hay))
+    } else if (cat === "ai / ml" || cat === "ai" || cat.includes("machine learning") || cat.includes("ai &")) {
       bucket = "ai";
+    } else if (cat === "web development" || cat.includes("web") || cat.includes("saas")) {
+      bucket = "web";
+    } else {
+      const tags = Array.isArray(p.tags) ? p.tags.join(" ") : "";
+      const hay = `${p.title ?? ""} ${tags}`.toLowerCase();
+      if (/cyber|security|nids|intrusion|packet|sniff|pentest|forensic/.test(hay))
+        bucket = "security";
+      else if (/\bai\b|machine.?learning|\bml\b|gpt|llm|neural/.test(hay))
+        bucket = "ai";
+      else
+        bucket = "web";
+    }
     if (bucket === "security") domainCounts.cyber++;
     else if (bucket === "ai") domainCounts.ai++;
     else domainCounts.web++;

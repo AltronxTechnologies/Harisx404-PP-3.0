@@ -129,7 +129,7 @@ test("Admin editors and mobile lists keep labelled controls and reachable action
     source("app/components/admin/TiptapEditor.tsx"),
     source("app/components/admin/MediaPickerModal.tsx"),
   ]);
-  for (const field of ["title", "slug", "tagline", "category", "latest-update", "features", "status", "start-date"]) {
+  for (const field of ["title", "slug", "tagline", "category", "latest-update", "features", "status"]) {
     if (field === "status") {
       assert.match(project, /<BuildlogSelect id="project-status" label="Publication status"/);
     } else {

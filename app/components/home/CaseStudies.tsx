@@ -116,6 +116,13 @@ function TechChip({ name, pill = false }: { name: string; pill?: boolean }) {
 /* Honest domain label — same classifier the StatusRow uses; used as the
    fallback chip when a project has no curated tags yet. */
 function domainLabel(project: HomeProject): string {
+  const cat = String(project.category ?? "").trim().toLowerCase();
+  if (cat === "cybersecurity" || cat.includes("security") || cat.includes("cyber"))
+    return "Cybersecurity";
+  if (cat === "ai / ml" || cat === "ai" || cat.includes("machine learning"))
+    return "AI/ML";
+  if (cat === "web development" || cat.includes("web"))
+    return "Web Development";
   const hay = `${project.category} ${project.title}`.toLowerCase();
   if (/cyber|security|nids|intrusion|packet|sniff|pentest|forensic/.test(hay))
     return "Cybersecurity";

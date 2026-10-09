@@ -10,12 +10,13 @@ import { TiptapEditor } from "./TiptapEditor";
 import { MediaPickerModal } from "./MediaPickerModal";
 import { AdminConfirmDialog } from "./AdminConfirmDialog";
 import { BuildlogSelect } from "./BuildlogSelect";
+import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headlessui/react";
 import { useAdminNavigationGuard } from "./useAdminNavigationGuard";
 import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
 import { captionWordCount } from "@/app/lib/project-captions";
 import { projectStages, projectStageLabels } from "@/app/lib/project-stage";
 import { normalizeBlogSlug } from "@/app/lib/blog-defaults";
-import { Image as ImageIcon, Loader2, Sparkles, ArrowUp, ArrowDown, Trash2, UploadCloud, X } from "lucide-react";
+import { Image as ImageIcon, Loader2, Sparkles, ArrowUp, ArrowDown, Trash2, UploadCloud, X, Globe, Shield, Check, ChevronDown } from "lucide-react";
 
 type GalleryImage = { mediaId: string; url: string; caption: string; altText: string; fileName?: string };
 type StagedImage = { id: string; file: File; url: string; caption: string; altText: string };
@@ -32,6 +33,22 @@ const statusOptions = [
   { value: "published", label: "Published", hint: "Visible on the public Projects page" },
   { value: "archived", label: "Archived", hint: "Hidden from visitors" },
 ] as const;
+
+export const projectDomainOptions = [
+  { value: "Web Development", label: "Web Development", hint: "Full-stack apps, SaaS, frontends, APIs" },
+  { value: "Cybersecurity", label: "Cybersecurity", hint: "SOC, defense, penetration testing & tools" },
+  { value: "AI / ML", label: "AI / ML", hint: "Machine learning, LLMs, NLP, predictive models" },
+] as const;
+
+export type ProjectDomain = (typeof projectDomainOptions)[number]["value"];
+
+function normalizeDomain(val?: string | null): ProjectDomain {
+  if (!val) return "Web Development";
+  const lower = val.toLowerCase();
+  if (/cyber|security|nids|sniff|packet/.test(lower)) return "Cybersecurity";
+  if (/\bai\b|machine.?learning|\bml\b|gpt|llm/.test(lower)) return "AI / ML";
+  return "Web Development";
+}
 
 type CaseStudySections = Record<(typeof sectionFields)[number]["key"], string>;
 const emptySections: CaseStudySections = { why_built: "", key_decisions: "", results: "", lessons_learned: "" };
@@ -77,6 +94,135 @@ function ProjectPillEditor({ id, label, value, draft, onDraftChange, onChange, s
     </div>
     {(error || inputError) && <p id={`${id}-error`} role="alert" className="text-xs text-red-300">{error || inputError}</p>}
   </div>;
+}
+
+export function ProjectDomainSelect({
+  id = "project-category",
+  value,
+  onChange,
+  errorId,
+}: {
+  id?: string;
+  value?: string | null;
+  onChange: (value: ProjectDomain) => void;
+  errorId?: string;
+}) {
+  const normalized = normalizeDomain(value);
+  const current = projectDomainOptions.find((opt) => opt.value === normalized) ?? projectDomainOptions[0];
+
+  return (
+    <Listbox value={normalized} onChange={onChange}>
+      <div className="relative min-w-0">
+        <ListboxButton
+          id={id}
+          aria-invalid={Boolean(errorId)}
+          aria-describedby={errorId}
+          className="group flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border border-border-hairline bg-surface-base px-3 text-left text-sm text-ink-primary transition-all duration-150 hover:border-[#55555e] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        >
+          <span className="flex min-w-0 items-center gap-2.5">
+            <span
+              className={`flex size-6 shrink-0 items-center justify-center rounded-lg border text-xs ${
+                current.value === "Cybersecurity"
+                  ? "border-sky-500/30 bg-sky-500/10 text-sky-400"
+                  : current.value === "AI / ML"
+                  ? "border-violet-500/30 bg-violet-500/10 text-violet-400"
+                  : "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+              }`}
+            >
+              {current.value === "Cybersecurity" ? (
+                <Shield className="size-3.5" />
+              ) : current.value === "AI / ML" ? (
+                <Sparkles className="size-3.5" />
+              ) : (
+                <Globe className="size-3.5" />
+              )}
+            </span>
+            <span className="truncate font-medium">{current.label}</span>
+          </span>
+          <div className="flex shrink-0 items-center gap-2">
+            <span
+              className={`hidden sm:inline-flex items-center rounded-md px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider border ${
+                current.value === "Cybersecurity"
+                  ? "border-sky-500/20 bg-sky-500/5 text-sky-300"
+                  : current.value === "AI / ML"
+                  ? "border-violet-500/20 bg-violet-500/5 text-violet-300"
+                  : "border-emerald-500/20 bg-emerald-500/5 text-emerald-300"
+              }`}
+            >
+              {current.value === "Cybersecurity"
+                ? "Header: Cyber"
+                : current.value === "AI / ML"
+                ? "Header: AI"
+                : "Header: Web"}
+            </span>
+            <ChevronDown
+              aria-hidden
+              className="size-4 text-ink-secondary transition-transform duration-200 group-data-[open]:rotate-180"
+            />
+          </div>
+        </ListboxButton>
+
+        <ListboxOptions
+          anchor="bottom"
+          modal={false}
+          className="z-50 max-h-[min(24rem,calc(100dvh-6rem))] w-[var(--button-width)] overflow-y-auto rounded-xl border border-[#55555e] bg-[#1b1b1f] p-1.5 text-sm text-white shadow-2xl outline-none [--anchor-gap:6px]"
+        >
+          {projectDomainOptions.map((option) => {
+            const isCyber = option.value === "Cybersecurity";
+            const isAI = option.value === "AI / ML";
+            const isWeb = option.value === "Web Development";
+
+            return (
+              <ListboxOption
+                key={option.value}
+                value={option.value}
+                className="group flex min-h-12 cursor-pointer items-center justify-between gap-3 rounded-lg px-3 py-2 text-white transition-colors data-[focus]:bg-[#303036] data-[selected]:bg-white data-[selected]:text-[#101013]"
+              >
+                <div className="flex min-w-0 items-center gap-3">
+                  <div
+                    className={`flex size-8 shrink-0 items-center justify-center rounded-lg border text-sm transition-colors group-data-[selected]:bg-[#101013]/10 group-data-[selected]:border-[#101013]/20 group-data-[selected]:text-[#101013] ${
+                      isCyber
+                        ? "border-sky-500/30 bg-sky-500/10 text-sky-400"
+                        : isAI
+                        ? "border-violet-500/30 bg-violet-500/10 text-violet-400"
+                        : "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                    }`}
+                  >
+                    {isCyber ? (
+                      <Shield className="size-4" />
+                    ) : isAI ? (
+                      <Sparkles className="size-4" />
+                    ) : (
+                      <Globe className="size-4" />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{option.label}</span>
+                      <span className="font-mono text-[10px] opacity-70 group-data-[selected]:opacity-90">
+                        {isCyber
+                          ? "● Shipped: Cyber"
+                          : isAI
+                          ? "● Shipped: AI"
+                          : "● Shipped: Web"}
+                      </span>
+                    </div>
+                    {option.hint && (
+                      <span className="block text-xs opacity-75">{option.hint}</span>
+                    )}
+                  </div>
+                </div>
+                <Check
+                  aria-hidden
+                  className="size-4 shrink-0 opacity-0 transition-opacity group-data-[selected]:opacity-100"
+                />
+              </ListboxOption>
+            );
+          })}
+        </ListboxOptions>
+      </div>
+    </Listbox>
+  );
 }
 
 const projectSchema = z.object({
@@ -170,7 +316,7 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
       slug: initialData?.slug ?? "",
       description: initialData?.description ?? "",
       tagline: initialData?.tagline || (initialData?.description || "").slice(0, 160),
-      category: initialData?.category ?? "Web App",
+      category: normalizeDomain(initialData?.category),
       year: initialData?.year ?? "",
       latest_update_label: initialData?.latest_update_label ?? "",
       project_stage: initialData?.project_stage ?? "completed",
@@ -530,15 +676,42 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
          {completed && <div className="min-w-0 space-y-2"><label htmlFor="project-latest-update" className="text-sm font-medium">Latest project update (Optional)</label><input id="project-latest-update" {...register("latest_update_label")} maxLength={32} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="Q3 2026" /><p className="text-xs text-ink-secondary">Update this when the project itself changes.</p></div>}
        </div>
 
-        <div className="space-y-2"><label htmlFor="project-category" className="text-sm font-medium">Project type</label><input id="project-category" {...register("category")} aria-invalid={Boolean(errors.category)} aria-describedby={errors.category ? "project-category-error" : "project-category-hint"} maxLength={60} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="Web App, Cybersecurity, AI/ML..." /><p id="project-category-hint" className="text-xs text-ink-secondary">Used for fallback chips and related-project matching; tags drive the visible filters.</p>{errors.category && <p id="project-category-error" role="alert" className="text-xs text-red-300">{errors.category.message}</p>}</div>
+       <div className="grid gap-5 md:grid-cols-2">
+         {/* Column 1: Project domain / type */}
+         <div className="min-w-0 space-y-2">
+           <label htmlFor="project-category" className="block text-sm font-medium text-ink-primary">
+             Project domain / type
+           </label>
+           <Controller
+             name="category"
+             control={control}
+             render={({ field }) => (
+               <ProjectDomainSelect
+                 id="project-category"
+                 value={field.value}
+                 onChange={field.onChange}
+                 errorId={errors.category ? "project-category-error" : undefined}
+               />
+             )}
+           />
+           <p id="project-category-hint" className="text-xs text-ink-secondary">
+             Select the primary domain. Directly controls the homepage Shipped domain counters (Web, Cybersecurity, AI).
+           </p>
+           {errors.category && <p id="project-category-error" role="alert" className="text-xs text-red-300">{errors.category.message}</p>}
+         </div>
+
+         {/* Column 2: Publication status */}
+         <div className="min-w-0 space-y-2">
+           <Controller name="status" control={control} render={({ field }) => <BuildlogSelect id="project-status" label="Publication status" value={field.value} onChange={field.onChange} options={statusOptions} />} />
+           <p className="text-xs text-ink-secondary">
+             Control whether this project is published publicly, kept as draft, or archived.
+           </p>
+         </div>
+       </div>
 
        <div className="grid gap-4 lg:grid-cols-2">
          <ProjectPillEditor id="project-tech-stack" label="Tech stack" value={watch("tech_stack") || ""} draft={techDraft} onDraftChange={setTechDraft} onChange={(value) => setValue("tech_stack", value, { shouldDirty: true, shouldValidate: true })} separator={"\n"} hint="Shown in the case study and project card details." error={errors.tech_stack?.message} />
          <ProjectPillEditor id="project-tags" label="Tags" value={watch("tags") || ""} draft={tagDraft} onDraftChange={setTagDraft} onChange={(value) => setValue("tags", value, { shouldDirty: true, shouldValidate: true })} separator="," hint="Drive project filters and card chips; up to three show on each card." error={errors.tags?.message} />
-       </div>
-
-       <div className="space-y-2">
-         <Controller name="status" control={control} render={({ field }) => <BuildlogSelect id="project-status" label="Publication status" value={field.value} onChange={field.onChange} options={statusOptions} />} />
        </div>
 
       <div className="grid gap-6 md:grid-cols-2">
