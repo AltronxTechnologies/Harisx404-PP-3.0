@@ -471,6 +471,7 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
         const fileToUpload = await prepareImageForUpload(staged.file);
         const body = new FormData();
         body.append("file", fileToUpload);
+        body.append("original_filename", staged.file.name);
         const response = await fetch("/api/admin/media/upload", { method: "POST", body });
         const result = await readAdminResponse(response, "Project image upload");
         if (!response.ok || !result.data?.id) throw new Error(result.error || "Project image upload could not be confirmed. Check the Media Library before retrying.");

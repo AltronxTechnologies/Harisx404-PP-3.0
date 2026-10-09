@@ -145,6 +145,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
       const fileToUpload = await prepareImageForUpload(file);
       const formData = new FormData();
       formData.append("file", fileToUpload);
+      formData.append("original_filename", file.name);
       if (blogPostId) formData.append("blog_post_id", blogPostId);
 
       const res = await fetch("/api/admin/media/upload", {
