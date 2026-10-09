@@ -39,9 +39,15 @@ export default {
       },
       animation: {
         "spin-slow": "spin 14s linear infinite",
-        marquee: "marquee var(--marquee-duration, 30s) linear infinite",
-        "marquee-reverse":
-          "marquee var(--marquee-duration, 30s) linear infinite reverse",
+        "marquee-pair": "marquee-pair var(--marquee-duration, 30s) linear infinite",
+        "marquee-pair-reverse":
+          "marquee-pair var(--marquee-duration, 30s) linear infinite reverse",
+      },
+      keyframes: {
+        "marquee-pair": {
+          from: { transform: "translateX(0)" },
+          to: { transform: "translateX(-50%)" },
+        },
       },
     },
   },

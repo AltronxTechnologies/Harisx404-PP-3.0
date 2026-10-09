@@ -162,7 +162,7 @@ export function MySiteGrid({ credentialSummary }: { credentialSummary: Credentia
 
   return (
     <section className="px-2 sm:px-4">
-      <SectionHeading kicker="Behind the site" animateWords>
+      <SectionHeading kicker="Behind the site" className="xl:[&>p]:text-[13px]" animateWords>
         Built in the open,{" "}
         {/* Line break only where there's room for two clean lines —
             on small screens the text wraps naturally instead. */}

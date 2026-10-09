@@ -143,7 +143,7 @@ export function Testimonials({ items: itemsProp }: { items?: Testimonial[] }) {
 
   return (
     <section id="testimonials" className="scroll-mt-24 overflow-hidden px-2 sm:px-4">
-      <SectionHeading kicker="Testimonials" animateWords>
+      <SectionHeading kicker="Testimonials" className="xl:[&>p]:text-[13px]" animateWords>
         Word on the street{" "}
         <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
           about me.

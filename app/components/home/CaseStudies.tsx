@@ -1044,7 +1044,7 @@ export function CaseStudies({ projects }: { projects: HomeProject[] }) {
         viewport={{ once: true, margin: "-80px" }}
         transition={{ duration: 0.6 }}
       >
-        <SectionHeading kicker="Case Studies">
+        <SectionHeading kicker="Case Studies" className="xl:[&>p]:text-[13px]">
           Selected{" "}
           <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
             builds.
@@ -1067,7 +1067,9 @@ export function CaseStudies({ projects }: { projects: HomeProject[] }) {
                   both pages share one identical card system. */}
               <CaseStudyCard
                 project={project}
-                index={i}
+                  index={i}
+                  imagePriority={i === 0}
+                  imageSizes="(min-width: 1280px) 56vw, (min-width: 640px) calc(100vw - 64px), calc(100vw - 32px)"
                 coverMinHClass="xl:min-h-[392px]"
                 liftOnHover={false}
                 coverHeading="title"

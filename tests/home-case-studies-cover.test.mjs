@@ -41,3 +41,20 @@ test("Home-only covers softly zoom the image and both Home layouts share the mea
   assert.match(source, /tech\.slice\(0, visibleTechCount\)/);
   assert.match(source, /\+\{tech\.length - visibleTechCount\}/);
 });
+
+test("Home laptop kickers, chip speed, and Blog image hover stay consistent", () => {
+  const dir = new URL("../app/components/home/", import.meta.url);
+  for (const name of ["HomeBento", "CaseStudies", "Writings", "AboutTeaser", "Testimonials", "MySiteGrid", "HomeFaq"]) {
+    assert.match(readFileSync(new URL(`${name}.tsx`, dir), "utf8"), /xl:\[&>p\]:text-\[13px\]/, `${name} scopes the kicker to laptops`);
+  }
+  assert.match(readFileSync(new URL("CtaSection.tsx", dir), "utf8"), /xl:text-\[13px\]/);
+  const bento = readFileSync(new URL("HomeBento.tsx", dir), "utf8");
+  assert.match(bento, /group\.getBoundingClientRect\(\)\.width \/ 60/);
+  assert.match(bento, /animate-marquee-pair/);
+  assert.doesNotMatch(bento, /duration=\{(?:40|43|46)\}/);
+  const writings = readFileSync(new URL("Writings.tsx", dir), "utf8");
+  assert.equal((writings.match(/group-hover:scale-\[1\.03\]/g) || []).length, 4);
+  const studies = readFileSync(new URL("CaseStudies.tsx", dir), "utf8");
+  assert.match(studies, /imagePriority=\{i === 0\}/);
+  assert.match(studies, /imageSizes="\(min-width: 1280px\)/);
+});

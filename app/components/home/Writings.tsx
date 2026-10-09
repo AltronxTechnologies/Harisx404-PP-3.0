@@ -96,7 +96,7 @@ export function Writings({
         viewport={{ once: true, margin: "-80px" }}
         transition={{ duration: 0.6 }}
       >
-        <SectionHeading kicker="The Blog">
+        <SectionHeading kicker="The Blog" className="xl:[&>p]:text-[13px]">
           Latest{" "}
           <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
             write-ups.
@@ -136,12 +136,12 @@ export function Writings({
                   sizes={
                     hasCompanions ? "(max-width: 1024px) 100vw, 60vw" : "100vw"
                   }
-                  className="object-cover transition-transform duration-500 ease-out group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+                   className="object-cover transition-transform duration-500 ease-out motion-safe:[@media(hover:hover)]:group-hover:scale-[1.03] motion-reduce:transition-none"
                 />
               ) : (
                 <>
                   <div
-                    className={`h-full w-full bg-gradient-to-br transition-transform duration-500 ease-out group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100 ${covers[0]}`}
+                     className={`h-full w-full bg-gradient-to-br transition-transform duration-500 ease-out motion-safe:[@media(hover:hover)]:group-hover:scale-[1.03] motion-reduce:transition-none ${covers[0]}`}
                   />
                   <span
                     aria-hidden
@@ -216,7 +216,7 @@ export function Writings({
                             alt=""
                             fill
                             sizes="140px"
-                            className="object-cover transition-transform duration-500 ease-out group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+                             className="object-cover transition-transform duration-500 ease-out motion-safe:[@media(hover:hover)]:group-hover:scale-[1.03] motion-reduce:transition-none"
                           />
                           {/* Subtle inset ring + scrim so tall crops read as a
                               deliberate cover panel rather than a raw photo. */}
@@ -227,7 +227,7 @@ export function Writings({
                         </>
                       ) : (
                         <div
-                          className={`h-full w-full bg-gradient-to-br transition-transform duration-500 ease-out group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100 ${covers[(i + 1) % covers.length]}`}
+                           className={`h-full w-full bg-gradient-to-br transition-transform duration-500 ease-out motion-safe:[@media(hover:hover)]:group-hover:scale-[1.03] motion-reduce:transition-none ${covers[(i + 1) % covers.length]}`}
                         />
                       )}
                       <span className="absolute left-2.5 top-2.5 rounded-full border border-white/30 bg-black/70 px-2.5 py-1 font-mono text-[9px] uppercase tracking-widest text-white backdrop-blur-sm sm:left-3 sm:top-3 sm:px-3 sm:text-[10px]">
