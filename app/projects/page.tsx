@@ -23,11 +23,10 @@ export const metadata: Metadata = {
 export default async function ProjectsPage() {
   const dbProjects = await fetchProjects();
 
-  // Newest first — most recent start_date (or created_at) at the top,
-  // so a freshly added project always leads the page.
+  // The full collection stays newest-added first; Home has its own curated order.
   const sorted = [...dbProjects].sort((a: any, b: any) => {
-    const ta = new Date(a.start_date || a.created_at || 0).getTime();
-    const tb = new Date(b.start_date || b.created_at || 0).getTime();
+    const ta = new Date(a.created_at || 0).getTime();
+    const tb = new Date(b.created_at || 0).getTime();
     return tb - ta;
   }).map((project: any) => withProjectPreview(project));
 
@@ -37,15 +36,9 @@ export default async function ProjectsPage() {
           title: p.title,
           slug: p.slug,
           tagline: (p.tagline || p.short_description || p.description || "").slice(0, 160),
-           description: (p.tagline || p.short_description || p.description || "").slice(0, 160),
+          description: (p.tagline || p.short_description || p.description || "").slice(0, 160),
           tech: Array.isArray(p.tech_stack) ? p.tech_stack : [],
-          // Quarter label like "Q2 2026" — identical to the homepage cards.
-          year: (() => {
-            const d = p.start_date || p.created_at;
-            if (!d) return "";
-            const dt = new Date(d);
-            return `Q${Math.floor(dt.getMonth() / 3) + 1} ${dt.getFullYear()}`;
-          })(),
+          year: p.year || p.created_at?.slice(0, 4) || "",
           category: (p.category as HomeProject["category"]) || "Web App",
           image_url: p.cover_image_url || "",
           images: [p.cover_image_url, ...(Array.isArray(p.gallery) ? p.gallery : [])]

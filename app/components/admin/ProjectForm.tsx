@@ -14,7 +14,7 @@ import { useAdminNavigationGuard } from "./useAdminNavigationGuard";
 import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
 import { captionWordCount } from "@/app/lib/project-captions";
 import { projectStages, projectStageLabels } from "@/app/lib/project-stage";
-import { normalizeBlogSlug, isValidBlogDate } from "@/app/lib/blog-defaults";
+import { normalizeBlogSlug } from "@/app/lib/blog-defaults";
 import { Image as ImageIcon, Loader2, Sparkles, ArrowUp, ArrowDown, Trash2, UploadCloud, X } from "lucide-react";
 
 type GalleryImage = { mediaId: string; url: string; caption: string; altText: string; fileName?: string };
@@ -108,9 +108,6 @@ const projectSchema = z.object({
   cover_image_id: z.string().uuid().optional().or(z.literal("")),
   live_url: optionalHttpUrl.optional(),
   github_url: optionalHttpUrl.optional(),
-  start_date: z.string().refine((date) => !date || isValidBlogDate(date), "Choose a valid start date").optional(),
-  end_date: z.string().refine((date) => !date || isValidBlogDate(date), "Choose a valid end date").optional(),
-  featured: z.boolean().optional(),
 });
 
 type ProjectFormValues = z.infer<typeof projectSchema>;
@@ -128,6 +125,9 @@ interface ProjectFormProps {
     latest_update_label?: string | null;
     expected_completion_label?: string | null;
     source_note?: string | null;
+    start_date?: string | null;
+    end_date?: string | null;
+    featured?: boolean;
     case_study_sections?: Partial<CaseStudySections & { cover_caption: string; cover_alt: string }> | null;
   };
 }
@@ -193,9 +193,6 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
       cover_image_id: initialData?.cover_image_id ?? "",
       live_url: initialData?.live_url ?? "",
       github_url: initialData?.github_url ?? "",
-      start_date: initialData?.start_date ?? "",
-      end_date: initialData?.end_date ?? "",
-      featured: initialData?.featured ?? false,
     },
   });
   const coverUrl = watch("cover_image_url") || "";
@@ -344,6 +341,9 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
       if (fullGallery.length > 20) throw new Error("Choose no more than 20 gallery images after selecting the cover.");
       const payload = {
         ...data,
+        start_date: initialData?.start_date || "",
+        end_date: initialData?.end_date || "",
+        featured: initialData?.featured === true,
         cover_image_url: chosenCover?.url || data.cover_image_url,
         cover_image_id: chosenCover?.id || data.cover_image_id,
         case_study_sections: chosenCover ? { ...data.case_study_sections, cover_caption: stagedCover?.caption || "", cover_alt: stagedCover?.altText || "" } : data.case_study_sections,
@@ -409,11 +409,6 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
     setTagDraft("");
     if (isSubmitting || isCleaningMedia) {
       setErrorMsg("Wait for image uploads or cleanup to finish before saving.");
-      return;
-    }
-    if (data.start_date && data.end_date && data.end_date < data.start_date) {
-      setError("end_date", { message: "End date must be on or after the start date" });
-      setErrorMsg("Check the project dates before saving.");
       return;
     }
     if (data.status !== initialData?.status && (data.status === "published" || initialData?.status === "published")) {
@@ -535,32 +530,16 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
          {completed && <div className="min-w-0 space-y-2"><label htmlFor="project-latest-update" className="text-sm font-medium">Latest project update (Optional)</label><input id="project-latest-update" {...register("latest_update_label")} maxLength={32} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="Q3 2026" /><p className="text-xs text-ink-secondary">Update this when the project itself changes.</p></div>}
        </div>
 
-       <div className="grid gap-4 md:grid-cols-2">
-         <div className="min-w-0 space-y-2"><label htmlFor="project-category" className="text-sm font-medium">Project type</label><input id="project-category" {...register("category")} aria-invalid={Boolean(errors.category)} aria-describedby={errors.category ? "project-category-error" : "project-category-hint"} maxLength={60} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="Web App, Cybersecurity, AI/ML..." /><p id="project-category-hint" className="text-xs text-ink-secondary">Used for fallback chips and related-project matching; tags drive the visible filters.</p>{errors.category && <p id="project-category-error" role="alert" className="text-xs text-red-300">{errors.category.message}</p>}</div>
-         <div className="min-w-0 space-y-2"><label htmlFor="project-start-date" className="text-sm font-medium">Start date (Optional)</label><input id="project-start-date" type="date" {...register("start_date")} aria-invalid={Boolean(errors.start_date)} aria-describedby={errors.start_date ? "project-start-date-error" : "project-start-date-hint"} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" /><p id="project-start-date-hint" className="text-xs text-ink-secondary">Controls project ordering and the quarter label on cards. Defaults to creation date if empty.</p>{errors.start_date && <p id="project-start-date-error" role="alert" className="text-xs text-red-300">{errors.start_date.message}</p>}</div>
-       </div>
+        <div className="space-y-2"><label htmlFor="project-category" className="text-sm font-medium">Project type</label><input id="project-category" {...register("category")} aria-invalid={Boolean(errors.category)} aria-describedby={errors.category ? "project-category-error" : "project-category-hint"} maxLength={60} className="w-full rounded-xl border border-border-hairline bg-surface-base px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-signal" placeholder="Web App, Cybersecurity, AI/ML..." /><p id="project-category-hint" className="text-xs text-ink-secondary">Used for fallback chips and related-project matching; tags drive the visible filters.</p>{errors.category && <p id="project-category-error" role="alert" className="text-xs text-red-300">{errors.category.message}</p>}</div>
 
        <div className="grid gap-4 lg:grid-cols-2">
          <ProjectPillEditor id="project-tech-stack" label="Tech stack" value={watch("tech_stack") || ""} draft={techDraft} onDraftChange={setTechDraft} onChange={(value) => setValue("tech_stack", value, { shouldDirty: true, shouldValidate: true })} separator={"\n"} hint="Shown in the case study and project card details." error={errors.tech_stack?.message} />
          <ProjectPillEditor id="project-tags" label="Tags" value={watch("tags") || ""} draft={tagDraft} onDraftChange={setTagDraft} onChange={(value) => setValue("tags", value, { shouldDirty: true, shouldValidate: true })} separator="," hint="Drive project filters and card chips; up to three show on each card." error={errors.tags?.message} />
        </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
-        <div className="space-y-2">
-          <Controller name="status" control={control} render={({ field }) => <BuildlogSelect id="project-status" label="Publication status" value={field.value} onChange={field.onChange} options={statusOptions} />} />
-        </div>
-
-        <div className="space-y-2 flex flex-col justify-end">
-          <label className="flex min-h-11 items-center gap-2 cursor-pointer text-sm font-medium p-2 border border-border-hairline rounded-xl bg-surface-base hover:bg-surface-raised transition-colors">
-            <input
-              type="checkbox"
-              {...register("featured")}
-              className="rounded text-accent-signal focus:ring-accent-signal bg-surface-base border-border-hairline h-4 w-4"
-            />
-            Featured Project
-          </label>
-        </div>
-      </div>
+       <div className="space-y-2">
+         <Controller name="status" control={control} render={({ field }) => <BuildlogSelect id="project-status" label="Publication status" value={field.value} onChange={field.onChange} options={statusOptions} />} />
+       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-2">
