@@ -2,9 +2,10 @@ import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 import { requireAdmin } from "@/app/lib/admin-auth";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Plus, Edit, ExternalLink, ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react";
+import { Plus, Edit, ExternalLink, ChevronLeft, ChevronRight, CheckCircle2, Star } from "lucide-react";
 import { BlogFilters } from "@/app/components/admin/BlogFilters";
 import { BlogArchiveAction } from "./BlogArchiveAction";
+import { BlogFeaturedAction } from "./BlogFeaturedAction";
 import { blogListStatus, blogListUrl, PAGE_SIZE, parseBlogListParams } from "./blogList";
 
 export default async function AdminBlogsPage({
@@ -21,7 +22,7 @@ export default async function AdminBlogsPage({
   const supabase = await createSupabaseAdminClient();
   const filteredQuery = (head: boolean) => {
     let query = supabase.from("blog_posts")
-      .select("id, title, slug, status, published_at, updated_at", head ? { count: "exact", head: true } : undefined);
+      .select("id, title, slug, status, published_at, updated_at, featured", head ? { count: "exact", head: true } : undefined);
 
     if (params.q) query = query.ilike("title", `%${params.q.replace(/[\\%_]/g, "\\$&")}%`);
     if (params.status === "draft" || params.status === "archived") {
@@ -36,7 +37,14 @@ export default async function AdminBlogsPage({
     return query;
   };
 
-  const { count, error: countError } = await filteredQuery(true);
+  const [{ count, error: countError }, { data: currentFeaturedPost }] = await Promise.all([
+    filteredQuery(true),
+    supabase
+      .from("blog_posts")
+      .select("id, title, slug")
+      .eq("featured", true)
+      .maybeSingle(),
+  ]);
   const totalPages = count === null ? 0 : Math.max(1, Math.ceil(count / PAGE_SIZE));
   if (!countError && count !== null && params.page > totalPages) {
     redirect(blogListUrl(params, totalPages));
@@ -74,6 +82,23 @@ export default async function AdminBlogsPage({
         </Link>
       </div>
 
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-amber-400/25 bg-amber-950/20 px-5 py-4 text-sm">
+        <div className="flex items-center gap-3.5 min-w-0">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-amber-400/15 text-amber-300">
+            <Star className="size-4.5 fill-amber-400 text-amber-400" />
+          </span>
+          <div className="min-w-0">
+            <p className="text-[11px] font-mono uppercase tracking-wider text-amber-400/90 font-medium">Single Featured Article</p>
+            <p className="font-semibold text-ink-primary truncate">
+              {currentFeaturedPost ? currentFeaturedPost.title : "No article currently set as featured"}
+            </p>
+          </div>
+        </div>
+        <p className="text-xs text-ink-secondary">
+          Only 1 article is featured site-wide on the homepage and blog hero. Select any article below to set it as featured.
+        </p>
+      </div>
+
       {successMessage && (
         <p role="status" className="flex items-center gap-3 rounded-2xl border border-[#315543] bg-[#18271e] px-4 py-3 text-sm text-[#a9e2bc]">
           <CheckCircle2 aria-hidden className="size-5 shrink-0" />{successMessage}
@@ -98,6 +123,7 @@ export default async function AdminBlogsPage({
             <thead className="bg-surface-base border-b border-border-hairline text-ink-secondary">
               <tr>
                 <th scope="col" className="px-6 py-4 font-medium">Title</th>
+                <th scope="col" className="px-6 py-4 font-medium">Featured</th>
                 <th scope="col" className="px-6 py-4 font-medium">Status</th>
                 <th scope="col" className="px-6 py-4 font-medium">Publication date</th>
                 <th scope="col" className="px-6 py-4 font-medium text-right">Actions</th>
@@ -106,7 +132,7 @@ export default async function AdminBlogsPage({
             <tbody className="divide-y divide-border-hairline">
               {posts.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-ink-secondary">
+                  <td colSpan={5} className="px-6 py-8 text-center text-ink-secondary">
                     {filtered ? "No posts match these filters. Try another search or clear the filters." : "No blog posts yet. Create one to get started!"}
                   </td>
                 </tr>
@@ -118,6 +144,17 @@ export default async function AdminBlogsPage({
                       <td className="px-6 py-4 font-medium text-ink-primary">
                         {blog.title}
                         <div className="text-xs text-ink-secondary font-normal mt-1">{blog.slug}</div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <BlogFeaturedAction
+                          post={{
+                            id: blog.id,
+                            title: blog.title,
+                            slug: blog.slug,
+                            featured: blog.featured === true,
+                            status: blog.status,
+                          }}
+                        />
                       </td>
                       <td className="px-6 py-4">
                         <span className={`admin-status ${label === "Live" ? "admin-status--live" : label === "Archived" || label === "Not live" ? "admin-status--neutral" : "admin-status--pending"}`}>

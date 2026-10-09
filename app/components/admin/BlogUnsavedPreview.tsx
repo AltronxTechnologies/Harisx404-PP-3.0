@@ -37,7 +37,7 @@ export function BlogUnsavedPreview({ snapshot: post, isNew, relatedPosts = [] }:
     setRendered({ content: null, error: "", loading: true });
     (async () => {
       try {
-        if (!post.title.trim() || post.title.length > 200 || !post.content.trim() || post.content.length > 1_000_000 || (post.summary?.length ?? 0) > 1000) {
+        if (!post.title.trim() || post.title.length > 200 || !post.content.trim() || post.content.length > 1_000_000) {
           throw new Error("Invalid preview fields");
         }
         validateBlogMdx(post.content);

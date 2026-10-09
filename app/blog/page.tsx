@@ -231,7 +231,8 @@ export default async function BlogPage({
         undefined,
       )
     : undefined;
-  const featuredSource = mostReactedPost || filteredPosts[0];
+  const explicitlyFeatured = filteredPosts.find((post) => post.featured);
+  const featuredSource = explicitlyFeatured || mostReactedPost || filteredPosts[0];
   const orderedPosts = featuredSource
     ? [featuredSource, ...filteredPosts.filter((post) => post !== featuredSource)]
     : filteredPosts;
