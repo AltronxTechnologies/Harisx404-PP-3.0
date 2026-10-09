@@ -152,8 +152,6 @@ export default async function Home() {
       ? {
           name: latestProject.title as string,
           href: `/projects/${latestProject.slug}`,
-          label: "Featured project",
-          subline: latestProject.category || "Selected work",
         }
     : hasConnectedContent
       ? { name: dbProjects.length ? "Explore all projects" : "Case studies coming soon", href: "/projects", label: "Projects", subline: dbProjects.length ? "Browse the full collection" : "Work in progress" }

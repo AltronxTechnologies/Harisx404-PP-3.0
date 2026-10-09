@@ -75,6 +75,7 @@ function revalidateProjectPaths(...slugs: Array<string | null | undefined>) {
     revalidateTag("projects");
     revalidatePath("/");
     revalidatePath("/projects");
+    revalidatePath("/sitemap.xml");
     for (const slug of new Set(slugs)) {
       if (slug) revalidatePath(`/projects/${slug}`);
     }

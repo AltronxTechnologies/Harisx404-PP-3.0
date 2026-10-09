@@ -69,7 +69,7 @@ export default async function ProjectsPage() {
       <div className="px-2 sm:px-4">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd).replace(/</g, "\\u003c") }}
       />
       {/* -mt-8 cancels the frame's internal py-8 top padding so the kicker
           sits at exactly mt-14 (56px) on screen — same as the About page.

@@ -77,4 +77,5 @@ test("Project writes return actionable duplicate-slug and missing-image conflict
   assert.match(api, /fieldErrors: \{ slug: \["Choose a different slug\."\] \}/);
   assert.match(api, /error\.code === "23503"/);
   assert.match(api, /A selected project attachment is no longer available/);
+  assert.match(api, /revalidatePath\("\/sitemap\.xml"\)/);
 });
