@@ -4,7 +4,7 @@ import createSupabaseServerClient, { createSupabaseAdminClient } from '@/app/lib
 
 const BATCH_SIZE = 5;
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
     // Check if user is an admin
     const supabase = await createSupabaseServerClient();
@@ -17,12 +17,30 @@ export async function POST() {
     if (!adminEmail || user.email?.toLowerCase() !== adminEmail) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
+    let body: unknown;
+    try {
+      const text = await request.text();
+      body = text ? JSON.parse(text) : {};
+    } catch {
+      return NextResponse.json({ error: 'Invalid embedding cursor.' }, { status: 400 });
+    }
+    if (!body || typeof body !== 'object' || Array.isArray(body) ||
+        Object.keys(body).some(key => key !== 'cursor')) {
+      return NextResponse.json({ error: 'Invalid embedding cursor.' }, { status: 400 });
+    }
+    const { cursor } = body as { cursor?: unknown };
+    if (cursor !== undefined && (typeof cursor !== 'string' ||
+        !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cursor))) {
+      return NextResponse.json({ error: 'Invalid embedding cursor.' }, { status: 400 });
+    }
     const admin = await createSupabaseAdminClient();
 
-    const { data: posts, count, error: fetchError } = await admin
+    let query = admin
       .from('blog_posts')
       .select('id, title, summary, content, updated_at', { count: 'exact' })
-      .is('content_embedding', null)
+      .is('content_embedding', null);
+    if (cursor) query = query.gt('id', cursor);
+    const { data: posts, count, error: fetchError } = await query
       .order('id', { ascending: true })
       .limit(BATCH_SIZE);
 
@@ -31,7 +49,7 @@ export async function POST() {
     }
 
     if (posts.length === 0) {
-      return NextResponse.json({ embedded: 0, remainingEstimate: 0, hasMore: false });
+      return NextResponse.json({ embedded: 0, failed: 0, remainingAhead: 0, hasMore: false, nextCursor: null });
     }
 
     let successCount = 0;
@@ -68,8 +86,10 @@ export async function POST() {
 
     const progress = {
       embedded: successCount,
-      remainingEstimate: Math.max(0, count - successCount),
-      hasMore: count > successCount,
+      failed: failureCount,
+      remainingAhead: Math.max(0, count - posts.length),
+      hasMore: count > posts.length,
+      nextCursor: posts[posts.length - 1].id,
     };
     if (failureCount) {
       return NextResponse.json({ error: 'Some embeddings could not be saved. Please try again.', ...progress }, { status: 500 });

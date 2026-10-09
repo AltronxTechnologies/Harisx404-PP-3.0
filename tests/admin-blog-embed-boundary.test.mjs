@@ -10,9 +10,9 @@ const source = readFileSync(new URL('../app/api/admin/blogs/embed/route.ts', imp
 const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText;
 const privateDetail = 'private-database-provider-detail';
 
-function route({ user = { email: 'owner@example.com' }, authError = null, rows = [], count = rows.length,
+function route({ user = { email: 'owner@example.com' }, authError = null, rows = [], count,
   readError = null, provider = async () => [0.1, 0.2], write = async () => ({ data: [{ id: 'saved' }], error: null }),
-  authThrows = false, readThrows = false } = {}) {
+  authThrows = false, readThrows = false, persistWrites = false } = {}) {
   const calls = { admin: 0, read: [], writes: [], provider: [], waits: [] };
   const exports = {};
   runInNewContext(compiled, {
@@ -43,16 +43,26 @@ function route({ user = { email: 'owner@example.com' }, authError = null, rows =
               update(value) { state.value = value; return this; },
               is(column, value) { state.filters.push(['is', column, value]); return this; },
               eq(column, value) { state.filters.push(['eq', column, value]); return this; },
+              gt(column, value) { state.filters.push(['gt', column, value]); return this; },
               order(column, options) { state.order = [column, options]; return this; },
               limit(value) { state.limit = value; return this; },
               then(resolve, reject) {
                 if (state.value) {
                   calls.writes.push(state);
-                  return Promise.resolve(write(state)).then(resolve, reject);
+                  return Promise.resolve(write(state)).then((result) => {
+                    if (persistWrites && !result.error && result.data?.length) {
+                      const id = state.filters.find((filter) => filter[1] === 'id')?.[2];
+                      rows.find((row) => row.id === id).content_embedding = state.value.content_embedding;
+                    }
+                    resolve(result);
+                  }, reject);
                 }
                 calls.read.push(state);
                 if (readThrows) return Promise.reject(new Error(privateDetail)).then(resolve, reject);
-                return Promise.resolve({ data: readError ? null : rows.slice(0, state.limit), count, error: readError }).then(resolve, reject);
+                const after = state.filters.find((filter) => filter[0] === 'gt' && filter[1] === 'id')?.[2];
+                const matching = rows.filter((row) => !row.content_embedding && (!after || row.id > after));
+                return Promise.resolve({ data: readError ? null : matching.slice(0, state.limit),
+                  count: count === undefined ? matching.length : count, error: readError }).then(resolve, reject);
               },
             };
             return query;
@@ -65,7 +75,13 @@ function route({ user = { email: 'owner@example.com' }, authError = null, rows =
     setTimeout(resolve, delay) { calls.waits.push(delay); resolve(); },
     Response,
   });
-  return { post: exports.POST, calls };
+  return { post: (body) => exports.POST(new Request('http://localhost/api/admin/blogs/embed', {
+    method: 'POST', ...(body === undefined ? {} : { body: typeof body === 'string' ? body : JSON.stringify(body) }),
+  })), calls };
+}
+
+function id(index) {
+  return `00000000-0000-4000-8000-${String(index).padStart(12, '0')}`;
 }
 
 function post(id, updated_at = '2026-10-09T00:00:00Z') {
@@ -80,11 +96,24 @@ test('owner gate precedes privileged client and provider work', async () => {
     [{ authThrows: true }, 500],
   ]) {
     const { post: invoke, calls } = route(options);
-    const response = await invoke();
+    const response = await invoke('{');
     assert.equal(response.status, status);
     assert.equal(calls.admin, 0);
     assert.equal(calls.provider.length, 0);
     assert.doesNotMatch(JSON.stringify(await response.json()), /private-database-provider-detail/);
+  }
+});
+
+test('malformed cursor is rejected before privileged reads or provider calls', async () => {
+  for (const body of ['{', null, [], { cursor: null }, { cursor: 123 }, { cursor: 'not-a-uuid' },
+    { cursor: id(1), typo: true }]) {
+    const { post: invoke, calls } = route();
+    const response = await invoke(body);
+    assert.equal(response.status, 400);
+    assert.deepEqual(await response.json(), { error: 'Invalid embedding cursor.' });
+    assert.equal(calls.admin, 0);
+    assert.equal(calls.read.length, 0);
+    assert.equal(calls.provider.length, 0);
   }
 });
 
@@ -104,11 +133,11 @@ test('read failure or missing count fails closed without leaking diagnostics', a
 });
 
 test('one invocation reads and embeds at most five, reports remaining and guards every write', async () => {
-  const rows = Array.from({ length: 12 }, (_, index) => post(`private-row-${index}`, index === 0 ? null : '2026-10-09T00:00:00Z'));
+  const rows = Array.from({ length: 12 }, (_, index) => post(id(index), index === 0 ? null : '2026-10-09T00:00:00Z'));
   const { post: invoke, calls } = route({ rows });
   const response = await invoke();
   assert.equal(response.status, 200);
-  assert.deepEqual(await response.json(), { embedded: 5, remainingEstimate: 7, hasMore: true });
+  assert.deepEqual(await response.json(), { embedded: 5, failed: 0, remainingAhead: 7, hasMore: true, nextCursor: id(4) });
   assert.equal(calls.read.length, 1);
   assert.equal(calls.read[0].limit, 5);
   assert.equal(calls.read[0].options.count, 'exact');
@@ -132,21 +161,21 @@ test('no remaining work reports completion without provider calls', async () => 
   const { post: invoke, calls } = route();
   const response = await invoke();
   assert.equal(response.status, 200);
-  assert.deepEqual(await response.json(), { embedded: 0, remainingEstimate: 0, hasMore: false });
+  assert.deepEqual(await response.json(), { embedded: 0, failed: 0, remainingAhead: 0, hasMore: false, nextCursor: null });
   assert.equal(calls.provider.length, 0);
 });
 
 test('provider, write, and stale revision failures are non-200 and never expose row IDs or errors', async () => {
   for (const failure of ['provider', 'write', 'writeThrows', 'stale']) {
-    const rows = [post('private-row-1'), post('private-row-2')];
+    const rows = [post(id(1)), post(id(2))];
     const { post: invoke, calls } = route({
       rows,
       provider: async (text) => {
-        if (failure === 'provider' && text.includes('private-row-1')) throw new Error(privateDetail);
+        if (failure === 'provider' && text.includes(id(1))) throw new Error(privateDetail);
         return [0.1];
       },
       write: async (state) => {
-        if (state.filters.some((filter) => filter[1] === 'id' && filter[2] === 'private-row-1')) {
+        if (state.filters.some((filter) => filter[1] === 'id' && filter[2] === id(1))) {
           if (failure === 'write') return { data: null, error: { message: privateDetail } };
           if (failure === 'writeThrows') throw new Error(privateDetail);
           if (failure === 'stale') return { data: [], error: null };
@@ -159,10 +188,43 @@ test('provider, write, and stale revision failures are non-200 and never expose 
     assert.deepEqual(await response.json(), {
       error: 'Some embeddings could not be saved. Please try again.',
       embedded: 1,
-      remainingEstimate: 1,
-      hasMore: true,
+      failed: 1,
+      remainingAhead: 0,
+      hasMore: false,
+      nextCursor: id(2),
     });
     assert.equal(calls.provider.length, 2);
     assert.equal(calls.writes.length, failure === 'provider' ? 1 : 2);
   }
+});
+
+test('cursor advances past permanently failing first five and a fresh pass retries them', async () => {
+  const rows = Array.from({ length: 8 }, (_, index) => post(id(index)));
+  const { post: invoke, calls } = route({ rows, persistWrites: true,
+    provider: async (text) => {
+      if (Number(text.match(/8000-(\d{12})/)[1]) < 5) throw new Error(privateDetail);
+      return [0.1];
+    },
+  });
+  const first = await invoke();
+  assert.equal(first.status, 500);
+  assert.deepEqual(await first.json(), {
+    error: 'Some embeddings could not be saved. Please try again.',
+    embedded: 0, failed: 5, remainingAhead: 3, hasMore: true, nextCursor: id(4),
+  });
+  const second = await invoke({ cursor: id(4) });
+  assert.equal(second.status, 200);
+  assert.deepEqual(await second.json(), {
+    embedded: 3, failed: 0, remainingAhead: 0, hasMore: false, nextCursor: id(7),
+  });
+  assert.deepEqual(calls.read[1].filters, [['is', 'content_embedding', null], ['gt', 'id', id(4)]]);
+  const restarted = await invoke();
+  assert.equal(restarted.status, 500);
+  assert.deepEqual(await restarted.json(), {
+    error: 'Some embeddings could not be saved. Please try again.',
+    embedded: 0, failed: 5, remainingAhead: 0, hasMore: false, nextCursor: id(4),
+  });
+  assert.equal(calls.read[2].filters.length, 1);
+  assert.equal(calls.provider.length, 13);
+  assert.equal(calls.writes.length, 3);
 });
