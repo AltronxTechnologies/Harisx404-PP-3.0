@@ -27,7 +27,7 @@
 # SUPABASE (Required)
 # ===========================
 NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON=eyJxxxx...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJxxxx...
 SUPABASE_SERVICE_ROLE_KEY=eyJxxxx...
 
 # ===========================
@@ -101,8 +101,11 @@ PAGESPEED_API_KEY=your_key
 ## 5. Supabase Production Setup
 
 ### Database URL
-Your Supabase database is already in the cloud � no extra setup needed for production.
-Just make sure your production Vercel env vars have the correct Supabase URL.
+The database being hosted does not prove that the required application migrations,
+RPCs, row-level policies, and grants are installed. Compare the target catalog
+with the reviewed migrations on a restore-tested clone before applying changes.
+Verify the production Supabase URL, anon key, service-role key, Auth redirects,
+and storage configuration privately; never put credentials in this repository.
 
 ### Supabase Free Tier Limits
 | Resource | Free Limit |
@@ -124,6 +127,10 @@ A personal portfolio will stay well within these limits for years.
 
 ## 6. Pre-Launch Checklist
 
+- [ ] Confirm the intended primary hostname in Vercel; the configured `https://harisx404.vercel.app/` currently returns HTTP 404, including `/sitemap.xml`, `/robots.txt`, `/admin/login`, and the social image. Do not change canonicals to an unverified hostname.
+- [ ] Prove a database, Auth, Storage, and Cloudinary restore on a separate target before applying migrations or running connected mutation tests; see `docs/admin-redesign/08-backup-restore.md`.
+- [ ] Compare effective RLS/grants and required Blog/Project RPCs on that target, then verify authorized owner/non-owner workflows and publication/cache effects with disposable records.
+- [ ] Identify the exact origin and gateway behind the reported HTTP 413 for an approximately 1.3 MB PDF; test valid uploads and cleanup with disposable assets.
 - [ ] All environment variables added to Vercel
 - [ ] Custom domain configured and HTTPS working
 - [ ] siteMetadata.ts updated with production URL
@@ -133,10 +140,10 @@ A personal portfolio will stay well within these limits for years.
 - [ ] Admin dashboard works in production (/admin)
 - [ ] Blog posts load correctly from Supabase
 - [ ] Projects load correctly from Supabase
-- [ ] Images load from Cloudinary (not public/)
-- [ ] Lighthouse score 90+ on homepage
+- [ ] Managed Cloudinary images and intentionally checked-in public assets both load correctly
+- [ ] Measure production Core Web Vitals and a repeatable lab baseline; do not infer field performance from a single score
 - [ ] No console errors in production
-- [ ] Contact/newsletter form works
+- [ ] Contact form works
 - [ ] Supabase RLS policies protecting write operations
 
 ---
@@ -153,7 +160,7 @@ A personal portfolio will stay well within these limits for years.
 ## 8. GitHub Workflow
 
 ### Branch Strategy
-- `main` � production (auto-deploys to Vercel)
+- `main` � production only when the Vercel project and Git integration are confirmed
 - `dev` � development (create PRs to main)
 - `feature/phase-N-description` � feature branches
 
