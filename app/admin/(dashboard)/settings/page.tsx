@@ -32,6 +32,7 @@ export default function AdminSettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [loadFailed, setLoadFailed] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [revision, setRevision] = useState<string | null>(null);
   const [message, setMessage] = useState({ type: "", text: "" });
 
   const { register, handleSubmit, reset, setError, watch, formState: { errors, isDirty } } = useForm<SiteSettings>({ resolver: zodResolver(settingsSchema) });
@@ -61,6 +62,7 @@ export default function AdminSettingsPage() {
       .then((data) => {
         const parsed = settingsSchema.safeParse(data);
         if (!parsed.success) throw new Error("Invalid site settings response");
+        setRevision(typeof data.updated_at === "string" ? data.updated_at : null);
         reset(parsed.data);
         setIsLoading(false);
       })
@@ -79,7 +81,7 @@ export default function AdminSettingsPage() {
       const res = await fetch("/api/admin/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, updated_at: revision }),
       });
 
       const result = await readAdminResponse(res, "Site settings");
@@ -95,6 +97,8 @@ export default function AdminSettingsPage() {
       }
 
       if (result.success !== true) throw new Error("Settings save could not be confirmed. Refresh status before retrying.");
+      if (typeof result.updated_at !== "string" || !result.updated_at) throw new Error("Settings save could not be confirmed. Refresh status before retrying.");
+      setRevision(result.updated_at);
       reset(data);
       setMessage(result.warning ? { type: "warning", text: result.warning } : { type: "success", text: "Settings saved." });
     } catch (err) {

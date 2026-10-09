@@ -40,8 +40,18 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
   const dialogRef = useRef<HTMLDivElement>(null);
   const libraryTabRef = useRef<HTMLButtonElement>(null);
   const uploadTabRef = useRef<HTMLButtonElement>(null);
-  const closeRef = useRef(onClose);
-  closeRef.current = onClose;
+  const uploadPending = useRef(false);
+  const readRequest = useRef(0);
+  const closePicker = () => { if (!uploadPending.current) onClose(); };
+  const closeRef = useRef(closePicker);
+  closeRef.current = closePicker;
+
+  useEffect(() => {
+    if (!isUploading) return;
+    const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [isUploading]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -79,11 +89,14 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
       setActiveTab(libraryOnly ? "library" : initialTab);
       setUploadError("");
       setUploadWarning("");
-      fetchMedia(0);
+      void fetchMedia(0);
+    } else {
+      readRequest.current++;
     }
   }, [isOpen, initialTab, libraryOnly]);
 
   const fetchMedia = async (offset: number) => {
+    const requestId = ++readRequest.current;
     if (offset) setIsLoadingMore(true);
     else setIsLoading(true);
     setError("");
@@ -91,13 +104,17 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
       const res = await fetch(`/api/admin/media?limit=50&offset=${offset}`);
       if (!res.ok) throw new Error("Failed to fetch media");
       const { data, count } = await readAdminResponse(res, "Media library");
+      if (requestId !== readRequest.current) return;
       setMedia((current) => offset ? [...current, ...(data || [])] : data || []);
       setTotalMedia(count ?? 0);
     } catch (err: any) {
+      if (requestId !== readRequest.current) return;
       setError(err.message);
     } finally {
-      setIsLoading(false);
-      setIsLoadingMore(false);
+      if (requestId === readRequest.current) {
+        setIsLoading(false);
+        setIsLoadingMore(false);
+      }
     }
   };
 
@@ -109,14 +126,15 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
         return;
       }
       setSelectionError("");
-      onClose();
+      closePicker();
     }
   };
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || uploadPending.current) return;
 
+    uploadPending.current = true;
     setIsUploading(true);
     onUploadingChange?.(true);
     setUploadError("");
@@ -146,6 +164,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
     } catch (err: any) {
       setUploadError(err.message);
     } finally {
+      uploadPending.current = false;
       setIsUploading(false);
       onUploadingChange?.(false);
     }
@@ -162,6 +181,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
               ref={libraryTabRef}
               type="button"
               onClick={() => setActiveTab("library")}
+              disabled={isUploading}
               className={`text-lg font-semibold flex min-h-11 items-center gap-2 transition-colors ${
                 activeTab === "library" ? "text-text-primary" : "text-text-secondary hover:text-text-primary"
               }`}
@@ -172,6 +192,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
               ref={uploadTabRef}
               type="button"
               onClick={() => setActiveTab("upload")}
+              disabled={isUploading}
               className={`text-lg font-semibold flex min-h-11 items-center gap-2 transition-colors ${
                 activeTab === "upload" ? "text-text-primary" : "text-text-secondary hover:text-text-primary"
               }`}
@@ -179,7 +200,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
               <UploadCloud className="h-5 w-5" /> Upload
             </button>}
           </div>
-          <button type="button" aria-label="Close media picker" onClick={onClose} className="flex size-11 items-center justify-center hover:bg-surface-base rounded-lg transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary">
+          <button type="button" aria-label="Close media picker" disabled={isUploading} onClick={closePicker} className="flex size-11 items-center justify-center hover:bg-surface-base rounded-lg transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary disabled:opacity-50">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -191,8 +212,9 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
                 <Loader2 className="h-8 w-8 animate-spin text-accent-signal" />
               </div>
             ) : error ? (
-              <div className="flex items-center justify-center h-48 text-red-500">
-                {error}
+              <div role="alert" className="flex h-48 flex-col items-center justify-center gap-3 text-red-500">
+                <p>{error}</p>
+                <button type="button" onClick={() => void fetchMedia(0)} className="min-h-11 rounded-xl border border-border-hairline px-4 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-current">Retry loading</button>
               </div>
             ) : media.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-48 text-ink-secondary">
@@ -203,11 +225,11 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
             ) : (
               <div className="space-y-4">
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                  {media.map((item) => (
+                  {media.map((item, index) => (
                   <button
                     key={item.id}
                     type="button"
-                    aria-label={item.alt_text || "Select media image"}
+                    aria-label={`Select ${item.alt_text || item.original_filename || `media image ${index + 1}`}`}
                     aria-pressed={selectedId === item.id}
                      onClick={() => { setSelectedId(item.id); setSelectionError(""); }}
                     className={`relative aspect-square rounded-xl overflow-hidden border-2 cursor-pointer transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-signal ${
@@ -266,15 +288,16 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
         <div className="p-4 border-t border-border-hairline bg-surface-raised flex justify-end gap-3">
           <button
             type="button"
-            onClick={onClose}
-            className="min-h-11 px-4 py-2 rounded-xl text-sm font-medium hover:bg-surface-base transition-colors"
+            onClick={closePicker}
+            disabled={isUploading}
+            className="min-h-11 px-4 py-2 rounded-xl text-sm font-medium hover:bg-surface-base transition-colors disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={handleSelect}
-            disabled={!selectedId}
+            disabled={!selectedId || isUploading}
             className="min-h-11 px-6 py-2 bg-accent-signal text-white rounded-xl text-sm font-medium shadow-sm hover:bg-accent-signal/90 disabled:opacity-50 transition-colors"
           >
             Select Image

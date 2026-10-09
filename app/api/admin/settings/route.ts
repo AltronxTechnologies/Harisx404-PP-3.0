@@ -4,7 +4,7 @@ import { z } from "zod";
 import { requireAdmin } from "@/app/lib/admin-auth";
 import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 
-const SETTINGS_COLUMNS = "id, site_name, seo_description, seo_keywords, github_url, twitter_url, linkedin_url, email_address";
+const SETTINGS_COLUMNS = "id, site_name, seo_description, seo_keywords, github_url, twitter_url, linkedin_url, email_address, updated_at";
 const secureUrl = z.string().trim().max(2048).refine((value) => {
   if (!value) return true;
   try {
@@ -16,6 +16,7 @@ const secureUrl = z.string().trim().max(2048).refine((value) => {
 }, "Use a valid HTTPS URL without embedded credentials");
 
 const settingsSchema = z.object({
+  updated_at: z.string().datetime({ offset: true }),
   site_name: z.string().trim().min(1).max(120).optional(),
   seo_description: z.string().trim().max(500).optional(),
   seo_keywords: z.string().trim().max(500).optional(),
@@ -23,7 +24,7 @@ const settingsSchema = z.object({
   twitter_url: secureUrl.optional(),
   linkedin_url: secureUrl.optional(),
   email_address: z.union([z.literal(""), z.string().trim().email().max(320)]).optional(),
-}).strict().refine((value) => Object.keys(value).length > 0, "Provide at least one setting");
+}).strict().refine((value) => Object.keys(value).some((key) => key !== "updated_at"), "Provide at least one setting");
 
 async function settingsRow() {
   const db = await createSupabaseAdminClient();
@@ -48,6 +49,7 @@ export async function GET() {
       twitter_url: row.twitter_url ?? "",
       linkedin_url: row.linkedin_url ?? "",
       email_address: row.email_address ?? "",
+      updated_at: row.updated_at ?? null,
     }, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) {
     console.error("Unable to read Admin settings:", error);
@@ -72,21 +74,35 @@ export async function PUT(request: Request) {
 
     const result = await settingsRow();
     if (!result) return NextResponse.json({ error: "Site settings are not configured" }, { status: 503 });
+    const { updated_at, ...changes } = parsed.data;
+    const currentRevision = result.row.updated_at;
+    if (typeof currentRevision !== "string" || currentRevision !== updated_at) {
+      return NextResponse.json({ error: "Site settings changed; reload before saving" }, { status: 409 });
+    }
+    const previousTime = Date.parse(currentRevision);
+    if (!Number.isFinite(previousTime)) {
+      return NextResponse.json({ error: "Site settings changed; reload before saving" }, { status: 409 });
+    }
+    const nextUpdatedAt = new Date(Math.max(Date.now(), previousTime + 1)).toISOString();
     const { data, error } = await result.db.from("site_settings")
-      .update(parsed.data)
+      .update({ ...changes, updated_at: nextUpdatedAt })
       .eq("id", result.row.id)
-      .select("id")
+      .eq("updated_at", updated_at)
+      .select("id, updated_at")
       .maybeSingle();
     if (error) throw error;
     if (!data) return NextResponse.json({ error: "Site settings changed; reload before saving" }, { status: 409 });
+    if (typeof data.updated_at !== "string" || Date.parse(data.updated_at) <= previousTime) {
+      return NextResponse.json({ error: "Settings save could not be confirmed; reload before retrying" }, { status: 503 });
+    }
     try {
       revalidatePath("/", "layout");
       revalidatePath("/about");
     } catch (revalidationError) {
       console.error("Admin settings saved, but cache revalidation failed:", revalidationError);
-      return NextResponse.json({ success: true, warning: "Changes saved, but public pages may need a refresh" }, { headers: { "Cache-Control": "private, no-store" } });
+      return NextResponse.json({ success: true, updated_at: data.updated_at, warning: "Changes saved, but public pages may need a refresh" }, { headers: { "Cache-Control": "private, no-store" } });
     }
-    return NextResponse.json({ success: true }, { headers: { "Cache-Control": "private, no-store" } });
+    return NextResponse.json({ success: true, updated_at: data.updated_at }, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) {
     console.error("Unable to save Admin settings:", error);
     return NextResponse.json({ error: "Site settings could not be saved" }, { status: 503 });

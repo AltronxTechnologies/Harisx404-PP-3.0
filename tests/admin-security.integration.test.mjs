@@ -22,7 +22,7 @@ test("Admin settings use the observed singleton schema with a strict write bound
   assert.match(auth, /auth\.getUser\(\)/);
   assert.match(auth, /ADMIN_EMAIL\?\.trim\(\)\.toLowerCase\(\)/);
   assert.match(route, /\.select\(SETTINGS_COLUMNS\)\.limit\(2\)/);
-  assert.match(route, /\.update\(parsed\.data\)[\s\S]*?\.eq\("id", result\.row\.id\)/);
+  assert.match(route, /\.update\(\{ \.\.\.changes, updated_at: nextUpdatedAt \}\)[\s\S]*?\.eq\("id", result\.row\.id\)[\s\S]*?\.eq\("updated_at", updated_at\)/);
   assert.match(route, /\}\)\.strict\(\)/);
   assert.doesNotMatch(route, /\.select\(['"]key, value['"]\)|onConflict: ['"]key['"]/);
   assert.match(settingsMigration, /DROP POLICY IF EXISTS "Authenticated users manage faqs"/);

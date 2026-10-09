@@ -2,7 +2,9 @@ import { NextResponse } from 'next/server';
 import { generateEmbedding } from '@/app/lib/gemini';
 import createSupabaseServerClient, { createSupabaseAdminClient } from '@/app/lib/supabase/server';
 
-export async function POST(request: Request) {
+const BATCH_SIZE = 5;
+
+export async function POST() {
   try {
     // Check if user is an admin
     const supabase = await createSupabaseServerClient();
@@ -17,63 +19,63 @@ export async function POST(request: Request) {
     }
     const admin = await createSupabaseAdminClient();
 
-    // Get all blog posts that don't have an embedding
-    const { data: posts, error: fetchError } = await admin
+    const { data: posts, count, error: fetchError } = await admin
       .from('blog_posts')
-      .select('id, title, summary, content')
-      .is('content_embedding', null);
+      .select('id, title, summary, content, updated_at', { count: 'exact' })
+      .is('content_embedding', null)
+      .order('id', { ascending: true })
+      .limit(BATCH_SIZE);
 
-    if (fetchError) {
-      // Most common cause: pgvector extension / content_embedding column missing.
-      const hint = /content_embedding|column|vector/i.test(fetchError.message)
-        ? ' Hint: the pgvector migration has not been applied — enable the `vector` extension and add the `content_embedding` column (see supabase_schema.sql).'
-        : '';
-      throw new Error(`Failed to fetch posts: ${fetchError.message}.${hint}`);
+    if (fetchError || !posts || typeof count !== 'number') {
+      return NextResponse.json({ error: 'Unable to read posts for embedding. Please try again.' }, { status: 500 });
     }
 
-    if (!posts || posts.length === 0) {
-      return NextResponse.json({ message: 'All posts already have embeddings.' });
+    if (posts.length === 0) {
+      return NextResponse.json({ embedded: 0, remainingEstimate: 0, hasMore: false });
     }
 
     let successCount = 0;
-    const errors: string[] = [];
+    let failureCount = 0;
 
-    // Process sequentially to avoid rate limits
     for (const post of posts) {
       try {
-        // Prepare text for embedding (Title + Summary + Content)
         const textToEmbed = `${post.title}\n\n${post.summary || ''}\n\n${post.content || ''}`;
-        
-        // Truncate if too long (Gemini embed limit is generally large enough, but safe to bound)
-        const truncatedText = textToEmbed.substring(0, 8000); 
-        
+        const truncatedText = textToEmbed.substring(0, 8000);
         const embedding = await generateEmbedding(truncatedText);
         const vectorString = `[${embedding.join(',')}]`;
 
-        const { error: updateError } = await admin
+        let update = admin
           .from('blog_posts')
           .update({ content_embedding: vectorString })
-          .eq('id', post.id);
+          .eq('id', post.id)
+          .is('content_embedding', null);
+        update = post.updated_at === null
+          ? update.is('updated_at', null)
+          : update.eq('updated_at', post.updated_at);
+        const { data: updated, error: updateError } = await update.select('id');
 
-        if (updateError) {
-          errors.push(`Post ${post.id}: ${updateError.message}`);
+        if (updateError || !updated || updated.length !== 1) {
+          failureCount++;
         } else {
           successCount++;
         }
-        
-        // Wait a small amount to avoid rate limits
-        await new Promise(resolve => setTimeout(resolve, 500));
-      } catch (err: any) {
-        errors.push(`Post ${post.id}: ${err.message}`);
+      } catch {
+        failureCount++;
       }
+      // Pace provider requests without delaying the final response.
+      if (successCount + failureCount < posts.length) await new Promise(resolve => setTimeout(resolve, 500));
     }
 
-    return NextResponse.json({
-      message: `Successfully embedded ${successCount}/${posts.length} posts.`,
-      errors: errors.length > 0 ? errors : undefined
-    });
-  } catch (error: any) {
-    console.error('Error in embed route:', error);
-    return NextResponse.json({ error: error.message || 'Failed to process embeddings' }, { status: 500 });
+    const progress = {
+      embedded: successCount,
+      remainingEstimate: Math.max(0, count - successCount),
+      hasMore: count > successCount,
+    };
+    if (failureCount) {
+      return NextResponse.json({ error: 'Some embeddings could not be saved. Please try again.', ...progress }, { status: 500 });
+    }
+    return NextResponse.json(progress);
+  } catch {
+    return NextResponse.json({ error: 'Unable to process embeddings. Please try again.' }, { status: 500 });
   }
 }

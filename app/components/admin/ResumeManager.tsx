@@ -113,7 +113,7 @@ export function ResumeManager() {
     setDeleting(true);
     setMessage(null);
     try {
-      const response = await fetch("/api/admin/resume", { method: "DELETE" });
+      const response = await fetch("/api/admin/resume", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ updatedAt: status.updatedAt }) });
       const body = await readAdminResponse(response, "Resume");
       if (!response.ok) throw new Error(body.error || "Resume deletion failed.");
       setStatus(body.data);

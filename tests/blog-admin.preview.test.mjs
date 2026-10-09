@@ -27,8 +27,9 @@ test("preview is non-indexed, uncached, and authorizes before the service-role r
   assert.match(page, /auth\.auth\.getUser\(\)/);
   assert.ok(page.indexOf("if (!user) redirect") < page.indexOf("createSupabaseAdminClient()"));
   assert.ok(page.indexOf("user.email?.toLowerCase() !== adminEmail") < page.indexOf("createSupabaseAdminClient()"));
-  assert.match(page, /\.from\("blog_posts"\)[\s\S]*?\.eq\("id", id\)\s*\.single\(\)/);
-  assert.match(page, /error \|\| !post \|\| post\.status === "archived"\) notFound\(\)/);
+  assert.match(page, /\.from\("blog_posts"\)[\s\S]*?\.eq\("id", id\)\s*\.maybeSingle\(\)/);
+  assert.match(page, /if \(error\) return <div role="alert"[\s\S]*?Retry/);
+  assert.match(page, /if \(!post \|\| post\.status === "archived"\) notFound\(\)/);
   assert.doesNotMatch(page, /getBlogPostBySlug|fetchBlogIndexPosts|unstable_cache|generateStaticParams|canonicalUrl|openGraph/);
   assert.doesNotMatch(page, /\.insert\(|\.update\(|\.upsert\(|\.delete\(|\.rpc\(/);
 });

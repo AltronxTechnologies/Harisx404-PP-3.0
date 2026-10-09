@@ -9,6 +9,7 @@ import { TableOfContents } from "@/app/components/TableOfContents";
 import { extractHeadingsFromMdx } from "@/app/lib/toc-utils";
 import { formatReadingTime } from "@/app/lib/reading-time";
 import createSupabaseServerClient, { createSupabaseAdminClient } from "@/app/lib/supabase/server";
+import { z } from "zod";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -30,14 +31,16 @@ export default async function SavedBlogPreviewPage({
   if (!adminEmail || user.email?.toLowerCase() !== adminEmail) redirect("/");
 
   const { id } = await params;
+  if (!z.string().uuid().safeParse(id).success) notFound();
   const supabase = await createSupabaseAdminClient();
   const { data: post, error } = await supabase
     .from("blog_posts")
     .select("id, title, summary, content, status, published_at, reading_time_minutes")
     .eq("id", id)
-    .single();
+    .maybeSingle();
 
-  if (error || !post || post.status === "archived") notFound();
+  if (error) return <div role="alert" className="rounded-xl border border-red-500/30 bg-red-950/20 p-5 text-sm text-red-300">Saved preview could not be loaded. No changes were made. <Link prefetch={false} href={`/admin/blogs/${id}/preview?retry=${Date.now()}`} className="font-medium underline underline-offset-2">Retry</Link> or return to <Link href="/admin/blogs" className="font-medium underline underline-offset-2">Blog posts</Link>.</div>;
+  if (!post || post.status === "archived") notFound();
 
   const publicationDate = post.published_at && Number.isFinite(Date.parse(post.published_at))
     ? new Date(post.published_at)
