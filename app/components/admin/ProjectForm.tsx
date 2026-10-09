@@ -13,6 +13,7 @@ import { BuildlogSelect } from "./BuildlogSelect";
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headlessui/react";
 import { useAdminNavigationGuard } from "./useAdminNavigationGuard";
 import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
+import { prepareImageForUpload } from "@/app/lib/admin/prepare-image-upload";
 import { captionWordCount } from "@/app/lib/project-captions";
 import { projectStages, projectStageLabels } from "@/app/lib/project-stage";
 import { normalizeBlogSlug } from "@/app/lib/blog-defaults";
@@ -467,8 +468,9 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
       if (!await discardSessionUploads(preserve)) return;
       const uploaded = new Map<string, { id: string; url: string }>();
       for (const staged of stagedImages) {
+        const fileToUpload = await prepareImageForUpload(staged.file);
         const body = new FormData();
-        body.append("file", staged.file);
+        body.append("file", fileToUpload);
         const response = await fetch("/api/admin/media/upload", { method: "POST", body });
         const result = await readAdminResponse(response, "Project image upload");
         if (!response.ok || !result.data?.id) throw new Error(result.error || "Project image upload could not be confirmed. Check the Media Library before retrying.");

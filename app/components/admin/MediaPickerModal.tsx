@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { X, Image as ImageIcon, Check, Loader2, UploadCloud } from "lucide-react";
 import Image from "next/image";
 import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
+import { prepareImageForUpload } from "@/app/lib/admin/prepare-image-upload";
 
 interface MediaItem {
   id: string;
@@ -122,11 +123,12 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
     setUploadError("");
     setUploadWarning("");
 
-    const formData = new FormData();
-    formData.append("file", file);
-    if (blogPostId) formData.append("blog_post_id", blogPostId);
-
     try {
+      const fileToUpload = await prepareImageForUpload(file);
+      const formData = new FormData();
+      formData.append("file", fileToUpload);
+      if (blogPostId) formData.append("blog_post_id", blogPostId);
+
       const res = await fetch("/api/admin/media/upload", {
         method: "POST",
         body: formData,

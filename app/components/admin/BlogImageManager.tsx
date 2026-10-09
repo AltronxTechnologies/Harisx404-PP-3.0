@@ -7,6 +7,7 @@ import { MediaPickerModal } from "./MediaPickerModal";
 import { AdminConfirmDialog } from "./AdminConfirmDialog";
 import { blogImageUrls } from "@/app/lib/admin/blog-image-urls";
 import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
+import { prepareImageForUpload } from "@/app/lib/admin/prepare-image-upload";
 
 export type BlogMediaItem = { id: string; url: string; secure_url: string; alt_text?: string };
 
@@ -84,8 +85,9 @@ export function BlogImageManager({ postId, images, onImagesChange, onAvailabilit
     let warning = "";
     try {
       for (const file of files) {
+        const fileToUpload = await prepareImageForUpload(file);
         const body = new FormData();
-        body.append("file", file);
+        body.append("file", fileToUpload);
         if (postId) body.append("blog_post_id", postId);
         const response = await fetch("/api/admin/media/upload", { method: "POST", body });
         const result = await readAdminResponse(response, "Blog image upload");

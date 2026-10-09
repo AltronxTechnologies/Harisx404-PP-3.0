@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Check, ChevronLeft, ChevronRight, Copy, Image as ImageIcon, Loader2, Trash2, Upload, X } from "lucide-react";
 import { AdminConfirmDialog } from "@/app/components/admin/AdminConfirmDialog";
 import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
+import { prepareImageForUpload } from "@/app/lib/admin/prepare-image-upload";
 
 const PAGE_SIZE = 12;
 const MAX_UPLOAD_BYTES = 20 * 1024 * 1024;
@@ -78,8 +79,9 @@ export default function AdminMediaPage() {
     setIsUploading(true);
     setMessage({ type: "", text: "" });
     try {
+      const fileToUpload = await prepareImageForUpload(file);
       const body = new FormData();
-      body.append("file", file);
+      body.append("file", fileToUpload);
       const res = await fetch("/api/admin/media/upload", { method: "POST", body });
       const result = await readAdminResponse(res, "Image upload");
       if (!res.ok) throw new Error(result.error || "Image upload could not be confirmed. Check Cloudinary before retrying.");
