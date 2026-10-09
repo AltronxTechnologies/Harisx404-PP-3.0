@@ -473,7 +473,8 @@ export function CaseStudyCard({
         href={`/projects/${project.slug}`}
         aria-label={bodyHiddenOnXl ? `View ${project.title} case study` : undefined}
         className={clsx(
-          bodyHiddenOnXl ? "group relative block focus-visible:rounded-[22px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary" : "frame-light-edge group relative block",
+          "frame-light-edge group relative block",
+          bodyHiddenOnXl && "aspect-[3/2] focus-visible:rounded-[22px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary",
           /* Projects page: the cover panel itself rises 6px on hover, so the
              frame hairline must ride along or it visibly detaches. */
           !liftOnHover && !bodyHiddenOnXl && "frame-light-edge-lift"
@@ -482,11 +483,8 @@ export function CaseStudyCard({
         {bodyHiddenOnXl ? (
           <div
             ref={panelRef}
-            className="relative aspect-[3/2] overflow-hidden rounded-[22px] border-[6px] shadow-[0_9.5px_28.5px_-11.4px_rgba(0,0,0,0.4)]"
-            style={{
-              borderColor: hueHex[i % hueHex.length],
-              backgroundImage: panelGradients[i % panelGradients.length],
-            }}
+            className="relative h-full w-full overflow-hidden rounded-[22px] border-8 border-white shadow-[0_0_0_0.8px_rgba(0,0,0,0.2),0_9.5px_28.5px_-11.4px_rgba(0,0,0,0.4)] dark:border-zinc-800 dark:shadow-[0_0_0_1px_#4d4d4d,0_9.5px_28.5px_-11.4px_rgba(0,0,0,0.4)]"
+            style={{ backgroundImage: panelGradients[i % panelGradients.length] }}
           >
             {(project.images?.[0] || project.image_url) ? (
               <Image
@@ -502,8 +500,8 @@ export function CaseStudyCard({
                 {project.title}
               </span>
             )}
-            <span aria-hidden className="absolute right-4 top-4 flex size-11 items-center justify-center rounded-full border border-white/25 bg-black/60 text-white transition-colors group-hover:bg-black/80 max-[380px]:right-3 max-[380px]:top-3">
-              <svg viewBox="0 0 24 16" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" className="size-5">
+            <span aria-hidden className="absolute right-6 top-6 text-white/85 drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] transition-transform duration-300 group-hover:translate-x-1 max-[380px]:right-4 max-[380px]:top-4 md:right-8 md:top-8">
+              <svg viewBox="0 0 24 16" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-6">
                 <path d="M2 8h19" />
                 <path d="m15 2 6 6-6 6" />
               </svg>
