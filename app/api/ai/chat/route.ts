@@ -80,9 +80,37 @@ export async function POST(request: Request) {
       );
     }
 
-    const { messages } = await request.json();
-
-    if (!messages || !Array.isArray(messages)) {
+    const maxBytes = 32 * 1024;
+    if (Number(request.headers.get('content-length')) > maxBytes) {
+      return NextResponse.json({ error: 'Chat request is too large' }, { status: 413 });
+    }
+    const reader = request.body?.getReader();
+    if (!reader) return NextResponse.json({ error: 'Invalid messages format' }, { status: 400 });
+    const decoder = new TextDecoder();
+    let payload = '';
+    let bytes = 0;
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      bytes += value.byteLength;
+      if (bytes > maxBytes) {
+        await reader.cancel();
+        return NextResponse.json({ error: 'Chat request is too large' }, { status: 413 });
+      }
+      payload += decoder.decode(value, { stream: true });
+    }
+    payload += decoder.decode();
+    let messages: Array<{ role: 'user' | 'model'; content: string }>;
+    try {
+      messages = JSON.parse(payload).messages;
+    } catch {
+      return NextResponse.json({ error: 'Invalid messages format' }, { status: 400 });
+    }
+    if (!Array.isArray(messages) || messages.length === 0 || messages.length > 20 ||
+        messages.some((msg) => !msg || (msg.role !== 'user' && msg.role !== 'model') ||
+          typeof msg.content !== 'string' || !msg.content.trim() || msg.content.length > 2000) ||
+        messages.reduce((length, msg) => length + msg.content.length, 0) > 20000 ||
+        messages[messages.length - 1].role !== 'user') {
       return NextResponse.json({ error: 'Invalid messages format' }, { status: 400 });
     }
 
@@ -103,9 +131,9 @@ Rules:
 6. You may use simple markdown (bold, lists, links to site pages like /projects or /blog).`;
 
     // Convert generic messages to Gemini format
-    const history = messages.map((msg: { role: string; content: string }) => ({
-      role: msg.role === 'user' ? 'user' : 'model',
-      parts: [{ text: String(msg.content ?? '') }],
+    const history = messages.map((msg) => ({
+      role: msg.role,
+      parts: [{ text: msg.content }],
     }));
 
     // Pop the last user message to send it as the prompt
@@ -137,7 +165,7 @@ Rules:
 
     return NextResponse.json({ text });
   } catch (error: any) {
-    console.error('Error in AI chat route:', error?.message || error);
+    console.error('AI chat request failed');
 
     // Gemini overload / transient errors → friendly retry message the widget
     // can render (it displays `data.text` on 200 responses).

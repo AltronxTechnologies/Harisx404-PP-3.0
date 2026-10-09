@@ -6,8 +6,10 @@ import { getSupabaseEnv } from "@/app/lib/supabase/safe";
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  // if "next" is in param, use it as the redirect URL
   const next = searchParams.get("next") ?? "/community-wall";
+  const destination = next.startsWith("/") && !next.startsWith("//") && !next.includes("\\")
+    ? new URL(next, origin)
+    : new URL("/community-wall", origin);
 
   const env = getSupabaseEnv();
   if (code && env) {
@@ -31,7 +33,7 @@ export async function GET(request: Request) {
     );
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
+      return NextResponse.redirect(destination.origin === origin ? destination : new URL("/community-wall", origin));
     }
   }
 
