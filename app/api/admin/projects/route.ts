@@ -173,6 +173,18 @@ function projectWriteError(error: { message: string; code?: string }) {
   if (error.message.includes("PROJECT_NOT_FOUND")) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
   }
+  if (error.code === "23505") {
+    if (error.message.includes("projects_slug_key")) {
+      return NextResponse.json({
+        error: "A project with this slug already exists.",
+        issues: { fieldErrors: { slug: ["Choose a different slug."] } },
+      }, { status: 409 });
+    }
+    return NextResponse.json({ error: "A project or tag with that value already exists." }, { status: 409 });
+  }
+  if (error.code === "23503") {
+    return NextResponse.json({ error: "A selected project attachment is no longer available. Reload before saving." }, { status: 409 });
+  }
   if (["42703", "PGRST204"].includes(error.code || "") && /project_stage|expected_completion_label/.test(error.message)) {
     return NextResponse.json({ error: "Apply migration 2026_project_development_stage.sql before saving project stages." }, { status: 503 });
   }

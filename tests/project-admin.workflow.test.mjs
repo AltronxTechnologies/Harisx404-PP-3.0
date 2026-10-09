@@ -69,3 +69,12 @@ test("Project deletion uses a guarded token and requires the additive RPC", asyn
     /GRANT EXECUTE ON FUNCTION public\.delete_project_and_unlink_related\(uuid, timestamptz\)\s+TO service_role/,
   );
 });
+
+test("Project writes return actionable duplicate-slug and missing-image conflicts", async () => {
+  const api = await source("app/api/admin/projects/route.ts");
+  assert.match(api, /error\.code === "23505"/);
+  assert.match(api, /error\.message\.includes\("projects_slug_key"\)/);
+  assert.match(api, /fieldErrors: \{ slug: \["Choose a different slug\."\] \}/);
+  assert.match(api, /error\.code === "23503"/);
+  assert.match(api, /A selected project attachment is no longer available/);
+});
