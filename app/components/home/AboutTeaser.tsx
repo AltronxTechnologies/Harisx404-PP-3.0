@@ -70,7 +70,7 @@ export function AboutTeaser() {
       {/* Centered kicker + heading — identical system to every other
           homepage section (Case Studies, Writings, Testimonials). */}
       <motion.div {...entrance}>
-        <SectionHeading kicker={aboutTeaser.kicker} className="xl:[&>p]:text-[13px]">
+        <SectionHeading kicker={aboutTeaser.kicker}>
           {aboutTeaser.heading}{" "}
           <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
             {aboutTeaser.headingAccent}

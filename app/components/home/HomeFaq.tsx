@@ -64,7 +64,7 @@ export async function HomeFaq() {
 
   return (
     <section aria-labelledby="faq-heading" className="mx-auto w-full max-w-3xl px-2 sm:px-4">
-      <SectionHeading kicker="FAQs" className="mb-14 xl:[&>p]:text-[13px]" headingId="faq-heading">
+      <SectionHeading kicker="FAQs" className="mb-14" headingId="faq-heading">
         Frequently asked,{" "}
         <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
           questions.

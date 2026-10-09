@@ -96,7 +96,7 @@ export function Writings({
         viewport={{ once: true, margin: "-80px" }}
         transition={{ duration: 0.6 }}
       >
-        <SectionHeading kicker="The Blog" className="xl:[&>p]:text-[13px]">
+        <SectionHeading kicker="The Blog">
           Latest{" "}
           <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
             write-ups.

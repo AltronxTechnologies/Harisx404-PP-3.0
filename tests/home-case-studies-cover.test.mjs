@@ -42,12 +42,12 @@ test("Home-only covers softly zoom the image and both Home layouts share the mea
   assert.match(source, /\+\{tech\.length - visibleTechCount\}/);
 });
 
-test("Home laptop kickers, chip speed, and Blog image hover stay consistent", () => {
+test("Home kickers remain 12px, while chip speed and Blog image hover stay consistent", () => {
   const dir = new URL("../app/components/home/", import.meta.url);
   for (const name of ["HomeBento", "CaseStudies", "Writings", "AboutTeaser", "Testimonials", "MySiteGrid", "HomeFaq"]) {
-    assert.match(readFileSync(new URL(`${name}.tsx`, dir), "utf8"), /xl:\[&>p\]:text-\[13px\]/, `${name} scopes the kicker to laptops`);
+    assert.doesNotMatch(readFileSync(new URL(`${name}.tsx`, dir), "utf8"), /xl:\[&>p\]:text-\[13px\]/, `${name} keeps the shared 12px kicker`);
   }
-  assert.match(readFileSync(new URL("CtaSection.tsx", dir), "utf8"), /xl:text-\[13px\]/);
+  assert.doesNotMatch(readFileSync(new URL("CtaSection.tsx", dir), "utf8"), /xl:text-\[13px\]/);
   const bento = readFileSync(new URL("HomeBento.tsx", dir), "utf8");
   assert.match(bento, /group\.getBoundingClientRect\(\)\.width \/ 60/);
   assert.match(bento, /animate-marquee-pair/);

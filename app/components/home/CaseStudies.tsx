@@ -196,14 +196,10 @@ const hueHex = [
 ];
 
 
-// Mirrors genericFeatures on the project detail page — used when a project
-// has no owner-provided features yet (original placeholder copy).
+// Keep the missing-features state factual rather than inventing delivery claims.
 function genericBullets(title: string): string[] {
   return [
-    `Thoughtful, accessible UI with full dark and light theme support across ${title}.`,
-    "Type-safe end-to-end architecture with defensive data handling and graceful fallbacks.",
-    "Performance-first build: optimized images, minimal client JavaScript, fast transitions.",
-    "Shipped with CI checks, error monitoring, and a zero-downtime deploy pipeline.",
+    `Explore the ${title} case study for its scope, implementation, and results.`,
   ];
 }
 
@@ -1044,7 +1040,7 @@ export function CaseStudies({ projects }: { projects: HomeProject[] }) {
         viewport={{ once: true, margin: "-80px" }}
         transition={{ duration: 0.6 }}
       >
-        <SectionHeading kicker="Case Studies" className="xl:[&>p]:text-[13px]">
+        <SectionHeading kicker="Case Studies">
           Selected{" "}
           <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
             builds.

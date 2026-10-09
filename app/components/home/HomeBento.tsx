@@ -350,7 +350,7 @@ function GlobeBento() {
   }, [isDark]);
 
   return (
-    <BentoCard linkTo="/contact" height="h-[300px]" appearance="home">
+    <BentoCard linkTo="/contact" accessibleLabel="Contact me about a project" height="h-[300px]" appearance="home">
       <div className="z-20 text-center">
         <h3 className="text-base font-medium text-text-primary">
           Open to work — worldwide
@@ -685,7 +685,7 @@ function TechStackBento({
      when the (server-provided) project tech actually changes. */
   const rows = React.useMemo(() => buildStackRows(projectTech), [projectTech]);
   return (
-    <BentoCard height="h-[300px]" linkTo={linkTo} appearance="home">
+    <BentoCard height="h-[300px]" linkTo={linkTo} accessibleLabel="Explore my tech stack" appearance="home">
       {/* Header voice matches the sibling bento cards */}
       <div className="z-20 text-center">
         <h3 className="text-base font-medium text-text-primary">Tech stack</h3>
@@ -928,7 +928,7 @@ export function HomeBento({
   return (
     <section className="relative space-y-14 px-2 sm:px-4">
       {/* Section header — identical system to every other homepage section */}
-      <SectionHeading kicker="Let's connect" className="xl:[&>p]:text-[13px]" animateWords>
+      <SectionHeading kicker="Let's connect" animateWords>
         Find me across the{" "}
         <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">
           web.

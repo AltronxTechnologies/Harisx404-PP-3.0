@@ -237,7 +237,7 @@ export default async function Home() {
           {projects.length > 0 && <CaseStudies projects={projects} />}
           <Writings posts={posts} formattedDates={formattedDates} />
           <AboutTeaser />
-          <Testimonials items={dbTestimonials} />
+          <Testimonials items={hasConnectedContent ? dbTestimonials : undefined} />
           <MySiteGrid credentialSummary={credentialSummary} />
           <HomeFaq />
           <CtaSection />

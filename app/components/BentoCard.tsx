@@ -8,6 +8,7 @@ interface BentoCardProps {
   showHoverGradient?: boolean;
   hideOverflow?: boolean;
   linkTo?: string;
+  accessibleLabel?: string;
   appearance?: "default" | "home";
 }
 
@@ -18,6 +19,7 @@ export function BentoCard({
   showHoverGradient = true,
   hideOverflow = true,
   linkTo,
+  accessibleLabel,
   appearance = "default",
 }: BentoCardProps) {
   const isHome = appearance === "home";
@@ -78,6 +80,7 @@ export function BentoCard({
     return linkTo.startsWith("/") ? (
       <Link
         href={linkTo}
+        aria-label={accessibleLabel}
         className="block h-full rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary"
       >
         {cardContent}
@@ -85,6 +88,7 @@ export function BentoCard({
     ) : (
       <a
         href={linkTo}
+        aria-label={accessibleLabel}
         target="_blank"
         rel="noopener noreferrer"
         className="block h-full rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary"

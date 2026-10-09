@@ -39,7 +39,6 @@ function TaglineRotator() {
   return (
     <div
       className="flex items-center gap-2.5 font-mono text-xs font-normal uppercase tracking-widest text-text-secondary"
-      aria-live="polite"
     >
       {/* Dot lives outside the clipped rotator so its ping ring never cuts */}
       <span aria-hidden className="relative flex size-1.5 shrink-0">
@@ -250,8 +249,7 @@ function HeadlineRotator({
       <h1
         onPointerEnter={handleHover}
         className="relative [font-family:var(--font-jetbrains-mono),monospace] text-[35.6px] font-bold uppercase leading-[0.96] tracking-[-0.045em] text-text-primary sm:text-[50px] md:text-[42px] lg:text-[59.6px]"
-        aria-live="polite"
-        aria-label={`${current.line1} ${current.line2}`}
+        aria-label="Full-stack developer, cybersecurity professional, and AI engineer"
       >
         {/* Invisible sizer (longest phrase) keeps the heading height stable */}
         <span className="invisible block" aria-hidden>
