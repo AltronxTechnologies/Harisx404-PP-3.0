@@ -109,3 +109,115 @@ These are previously documented gaps, **not** automatically current connected fi
 ## Release Decision and Owner Gates
 
 **Verdict: BLOCKED, not production-ready.** Local browser, mock, source, and build evidence is positive, but the release phases are not complete. Phase 7 cannot pass while the intended origin returns 404. Phases 2–5 need an owner-reviewed backup or disposable clone with a restore drill, exact connected RLS/grant/RPC catalog, scoped disposable owner/non-owner CRUD and external asset tests, verified cleanup, and an observed failing production upload size/origin before claiming the 413 is fixed. `07-owner-actions.md` and `08-backup-restore.md` describe the private prerequisite steps; do not paste credentials or dataset exports into chat. The owner must separately accept visual/content changes and any locked-scope fixes before a release sign-off.
+
+## 2026-10-09 Audit Refresh: Baseline
+
+This refresh supplements, rather than retroactively re-labels, the 2026-10-07 evidence above. Starting tree: clean `haris-dev/set-up-this-codebase-for-FcY5YL` at `ec60b2c`. Docker Compose `web` remained running with host networking on port 3000; Alloy proxies it at 8080. No schema, Auth, Storage, Cloudinary, content or Settings writes were made. Earlier disposable-fixture results are historical and do not prove today's deployed schema.
+
+Architecture: Next.js 15.5.26 App Router/React 18 with server pages, route handlers and server actions; Supabase Postgres/Auth/Storage with service-role Admin reads and transactional RPCs where installed; Cloudinary media; Next tagged/path revalidation and ISR; React Hook Form/Zod, Tiptap and source MDX editor; Tailwind and Admin-scoped CSS. Routes are protected by middleware, dashboard layout and method-level owner checks. The canonical public origin is `https://harisx404.vercel.app/`. Docker scripts are in `package.json` and `docker-compose.alloy.yaml`; there is no comprehensive CI release gate in the inspected GitHub check run (zero checks for the previous PR). `supabase_schema.sql` and `migrations/` are source, not proof of installed policies, grants or functions. Shared public data reads in `app/lib/utils.ts`, `app/blog/data.ts`, `app/lib/public-page-data.ts` and shared layout require a public-regression review before edits.
+
+| Baseline check | Actual result | Limit |
+| --- | --- | --- |
+| Docker `npx tsc --noEmit`, `npm run lint` | Both passed; Next lint deprecation notice | No connected workflow guarantee |
+| Docker selected 12-file Admin/Blog/Project/public Node suite | 66 cases: **62 passed, 2 failed, 2 skipped** | Failures are stale source expectations: `admin-security.integration.test.mjs:132` expects removed Project start date; `blog-admin.archive.test.mjs:81` expects the old Blog editor prop. Deliberately excluded destructive `blog-featured.test.mjs`. |
+| Docker `NEXT_DIST_DIR=.next-build npm run build` | Passed; 83 static pages; pre-existing Edge/static-generation and Webpack cache notices | Dev `.next` untouched; build does not prove deployed behavior |
+| Docker `npm audit --omit=dev --audit-level=high` | Zero high; five moderate reports (Next SSG/ISR cache advisories and sprintf-js chain) | No major dependency upgrades authorized |
+| Intended origin status-only HTTPS GET | **404** | OAuth, deployed cache, SEO, upload gateway and rollback unverified |
+| Read-only local public screenshots | Home 390 and 1440; Projects 1440; Blog 1440, saved outside repo under `/tmp/playwright/-tmp-opencode-audit-*-before.png` | No public code edits in this refresh. Live content titles/years changed during sampling; screenshots are not a pixel-perfect or same-data comparison. |
+
+The route inventory and current findings are recorded below. This refresh is **in progress**, not a complete page-by-page or CRUD audit. A logged-in owner browser session, verified restore-tested clone and disposable credentials are not available for current valid mutation/reopen, non-owner and effective-RLS tests. At baseline, `tests/blog-featured.test.mjs` directly mass-updated existing Blog posts; its default-run gate was added later in this refresh.
+
+### Current Route And Data Inventory
+
+Inventory from route files, not merely Sidebar links: **33 Admin page patterns, 18 Admin API files with 46 exported HTTP methods, two Admin server-action files**. All active pages use the dashboard layout's owner guard except `/admin/login`; middleware and individual handlers also check identity. A prior 21-route owner read-only browser sweep is historical, not a current 33-route sign-off. In the table, **blocked** means the route is inventoried but its authenticated workflow/states are not fully verified this pass; **in progress** means current anonymous rendering was sampled. None is marked passed on source inspection alone. CRUD N/A on the three legacy redirects does not mean their authenticated redirect was rechecked.
+
+| Admin route | Responsibility, principal component and data/action | Public consumer | Audit status |
+| --- | --- | --- | --- |
+| `/admin/login` | Login form; Supabase Auth | None | In progress: anonymous form rendered; real login/logout/non-owner blocked |
+| `/admin` | Dashboard; counts/recent `blog_posts`, `projects` | Published metrics | Blocked: owner read historical |
+| `/admin/analytics` | Analytics; content counts, PageSpeed and stats helpers | Published article links | Blocked: owner read historical; deployed PageSpeed 404 |
+| `/admin/blogs` | BlogFilters, BlogFeaturedAction, BlogArchiveAction; `blog_posts`, tags, media; Blog action and API | Home, Blog index/detail/category, RSS, sitemap, AI | Blocked: latest featured workflow P1 |
+| `/admin/blogs/new` | BlogForm, BlogCodeEditor, image manager; Blog POST | Same Blog consumers | Blocked: valid save/reopen and new editor keyboard review |
+| `/admin/blogs/[id]` | BlogForm, BlogCodeEditor; Blog PUT/PATCH/DELETE | Same Blog consumers | Blocked: draft/publish/archive lifecycle |
+| `/admin/blogs/[id]/preview` | Saved preview; Blog data, MDX renderer | Compare Blog detail | Blocked: owner preview parity not rechecked |
+| `/admin/projects` | FeaturedProjectsManager, filters, delete; `projects`, tags/images; Project featured RPC | Home, Projects index/detail, sitemap | Blocked: featured RPC not verified installed |
+| `/admin/projects/new` | ProjectForm, media picker; Project POST | Project consumers above | Blocked: disposable create/reopen |
+| `/admin/projects/[id]` | ProjectForm, media picker; Project PUT/DELETE | Project consumers above | Blocked: concurrency/selection interplay |
+| `/admin/buildlog` | List/filter/delete; `buildlog_projects` | `/buildlog` public view | Blocked: current owner lifecycle |
+| `/admin/buildlog/new` | BuildlogForm; Buildlog POST | `/buildlog` | Blocked: disposable lifecycle |
+| `/admin/buildlog/[id]` | BuildlogForm; PUT/DELETE | `/buildlog` | Blocked: current save/delete/reopen |
+| `/admin/community-wall` | Moderation actions; `messages` | `/community-wall` public view | Blocked: owner moderation/roles |
+| `/admin/testimonials` | List/moderation/delete; `testimonials` | Home carousel | Blocked: owner moderation/public effect |
+| `/admin/testimonials/new` | TestimonialForm; POST | Home carousel | Blocked: owner create/reopen |
+| `/admin/testimonials/[id]` | TestimonialForm; PUT/DELETE | Home carousel | Blocked: owner update/delete |
+| `/admin/faqs` | List/toggles; `faqs` and `site_settings` | Home FAQ section | Blocked: visibility and migration/grants |
+| `/admin/faqs/new` | FaqForm; POST | Home FAQ | Blocked: current owner create/reopen |
+| `/admin/faqs/[id]` | FaqForm; PUT/DELETE | Home FAQ | Blocked: owner update/delete |
+| `/admin/experience` | List/delete; `experience` | `/about` | Blocked: owner lifecycle |
+| `/admin/experience/new` | ExperienceForm; POST | `/about` | Blocked: owner create/reopen |
+| `/admin/experience/[id]` | ExperienceForm; PUT/DELETE | `/about` | Blocked: owner update/delete |
+| `/admin/certifications` | List/delete; `certifications` | `/credentials`, Home credential preview | Blocked: owner lifecycle |
+| `/admin/certifications/new` | CertificationForm; POST | `/credentials`, Home | Blocked: owner create/reopen |
+| `/admin/certifications/[id]` | CertificationForm; PUT/DELETE | `/credentials`, Home | Blocked: owner update/delete |
+| `/admin/media` | Media library and picker; `media`, `blog_post_media`, Cloudinary | Blog/Projects and other stored image URLs | Blocked: reference race/413/recovery |
+| `/admin/resume` | ResumeManager; `resume_document`, private Storage signed upload | `/resume`, `/resume/file` | Blocked: restore/storage lifecycle |
+| `/admin/settings` | Singleton `site_settings`; PUT | Metadata, AI context; FAQ visibility elsewhere | Blocked: save/reopen and non-owner grant proof |
+| `/admin/logs` | Logs client and four actions; `system_logs` | Operational diagnostics | Blocked: bulk clear/retention/non-owner proof |
+| `/admin/changelogs/[[...slug]]` | Legacy redirect to Buildlog; no editor | `/buildlog` | Blocked: authenticated redirect not rechecked; CRUD N/A |
+| `/admin/buildlog/settings` | Legacy redirect; no separate settings editor | `/buildlog` | Blocked: authenticated redirect not rechecked; CRUD N/A |
+| `/admin/community-wall/settings` | Legacy redirect; no separate settings editor | `/community-wall` | Blocked: authenticated redirect not rechecked; CRUD N/A |
+
+The API inventory below records exported methods, not proof of the complete 401/403/owner matrix. Pages primarily read on the server; there is no Admin Blog/Project listing GET handler. Every handler needs authorization and validation checked per method. `app/admin/(dashboard)/blogs/actions.ts` (featured mutation) and `app/admin/(dashboard)/logs/actions.ts` (get page, resolve one/all, clear resolved) also require a method/state matrix.
+
+| `/api/admin/` endpoint | Methods | Persistent/external boundary | Current evidence |
+| --- | --- | --- | --- |
+| `blogs` | POST PUT PATCH DELETE | Blog rows, tags/media, transactional save/transition/delete | Source and anonymous probes; owner lifecycle blocked |
+| `blogs/images` | GET | Blog media picker | Source; owner read blocked |
+| `blogs/featured` | POST | Blog featured flags | P1 two-step write; owner success not tested |
+| `blogs/embed` | POST | Blog bulk embeddings/external AI | Source only; rate/rollback unverified |
+| `projects` | POST PUT DELETE | Project rows, tags/gallery RPCs | Source and anonymous probes; valid save blocked |
+| `projects/featured` | POST | Ordered Project featured RPC | Source/anonymous; installed RPC unverified |
+| `buildlog` | GET POST PUT DELETE | Buildlog projects/items | Source and anonymous; owner lifecycle blocked |
+| `community-wall` | GET PATCH DELETE | Messages/moderation | Source and anonymous; owner lifecycle blocked |
+| `testimonials` | GET POST PUT DELETE | Testimonials/moderation | Source and anonymous; owner lifecycle blocked |
+| `faqs` | GET POST PUT PATCH DELETE | FAQs and FAQ visibility Settings | Source and anonymous; effective grants blocked |
+| `experience` | GET POST PUT DELETE | Experience | Historical non-owner evidence; current lifecycle blocked |
+| `certifications` | GET POST PUT DELETE | Certifications/public view | Source and anonymous; owner lifecycle blocked |
+| `media` | GET PATCH DELETE | Media row, reference checks, Cloudinary | Source and mocks; concurrent deletion blocked |
+| `media/upload` | POST | Multipart media and Cloudinary | Source and invalid probes; real 413 blocked |
+| `resume` | GET POST DELETE | Resume row/private Storage | Source and anonymous; real replacement blocked |
+| `resume/prepare` | POST | Signed private Storage grant | Source and invalid probes; valid upload blocked |
+| `resume/finish` | POST | Signed grant finalization | Source and invalid probes; orphan recovery blocked |
+| `settings` | GET PUT | Singleton site settings | Source/invalid probes; owner save/reopen blocked |
+
+### Current Findings And Disposition
+
+| ID / priority | Expected vs actual and supporting evidence | Disposition / required verification |
+| --- | --- | --- |
+| R1 / P1 | A single Blog featured switch should be atomic. `app/admin/(dashboard)/blogs/actions.ts:15-30` and `app/api/admin/blogs/featured/route.ts:54-69` clear others and set the target in **separate requests**. A failure between them leaves none selected; concurrent switches can leave more than one. The action does not verify live eligibility. No uniqueness invariant in `supabase_schema.sql:37-49`. | **Unresolved release blocker.** Replace both paths with one guarded, transactional, serialized service-role RPC and verify a database invariant on a restore-tested clone. Then test second-step failure, stale/concurrent requests, draft/scheduled targets and re-open. No connected writes in this pass. |
+| R2 / P1 | Admin Blog says one selected article is featured on Home and Blog (`blogs/page.tsx:91-99`). `/blog` prefers `post.featured`, but Home (`app/page.tsx:114-140`) selects by reaction count. Read-only local browser showed Blog's lead `Securing AI Agents` while Home's lead was `How AI Is Changing the Security Operations Center`. | **Unresolved release blocker.** Correct the data-selection contract without changing locked public visual layout; obtain scoped owner permission if changing the locked Home data mapping. Recheck empty/non-live/reaction cases and metadata/cache. |
+| R3 / P1 conditional | `app/lib/admin/delete-media.ts:44-54,126-149` checks references before a separate delete; checked-in `supabase_schema.sql:118-125` defines Project gallery `media_id ON DELETE CASCADE`. A concurrently attached gallery link could disappear. `2026_project_public_joins.sql` stages `RESTRICT`, but installed FK is unknown; URL-only references remain outside FK protection. | **Blocked on catalog/restore-tested clone**, not a confirmed live exploit. Verify installed FK and policies; add locked transactional deletion/reconciliation with disposable Cloudinary fixtures before production approval. |
+| R4 / P1 release gate | Current status-only GET of canonical `https://harisx404.vercel.app/` returned **HTTP 404**, as in prior audit. Local build cannot establish deployed Auth, cache, uploads or SEO. | **Blocked** until target domain serves the candidate and OAuth/rollback smoke passes. No deployment performed. |
+| R5 / P1 release gate | Effective RLS/grants/RPCs and a full database/Auth/Storage/Cloudinary restore are unverified. `2026_faqs.sql` could reopen broad authenticated FAQ/Settings writes if replayed after hardening. The Project featured and join-hardening SQL files are staged, not proof of installation. | **Blocked** on `08-backup-restore.md` and privately reviewed catalog/ordered migration plan on disposable clone; do not replay or mutate connected schema here. |
+| R6 / P2 | General Project save accepts and writes `featured` (`app/api/admin/projects/route.ts:25,108`, `migrations/2026_project_admin_atomic_save.sql:73-114`) independently of the ordered-selection RPC; an authorized API client can bypass curated positions. | **Unresolved.** Make selection RPC authoritative in a reviewed migration; test edit/publish around reordered selection on clone. |
+| R7 / P2 | `FeaturedProjectsManager.tsx:23-31,93-96` tracks unsaved selections but has no navigation/unload guard; filtering, Back or Sign Out can discard reorder without warning. | **Unresolved.** Match Admin unsaved-navigation contract with mocked interactions, without changing public UI. |
+| R8 / P2 accessibility | `BlogCodeEditor.tsx:179-251` prevents default Tab and Shift+Tab in the source textarea, trapping normal keyboard navigation; toolbar buttons at `:537-553` use 28px `size-7`. Current owner keyboard geometry was unavailable. | **Unresolved.** Verify in authenticated keyboard browser, then allow a deliberate exit path and retest all editor modes/targets. Avoid broad editor restyling. |
+| R9 / P2 | Raw error messages can reach browser responses in Project/FAQ/AI paths (`app/api/admin/projects/route.ts:154-185`, `app/api/admin/faqs/route.ts`, `app/api/ai/assist/route.ts`, `app/api/ai/project-from-github/route.ts`). No actual secret leak observed. Project-from-GitHub uses substring hostname checking and reads an unbounded README before truncation. | **Unresolved.** Return stable safe messages; validate URL host and bound response bytes/time. Test with authorized mocks, not external writes. |
+| R10 / P2 operations | The reported deployed media-upload 413 lacks failing origin/size; Storage and Cloudinary rollback/orphans remain untested with valid disposable fixtures. `tests/blog-featured.test.mjs` previously mass-updated shared Blog rows under the service role. | **Partially mitigated:** test now skips by default and requires two explicit disposable-target opt-ins and separate test credentials. Live upload/orphan behavior remains blocked. |
+| R11 / P3 test debt | Two baseline source tests asserted removed Project date controls and old Blog code-editor props; broader run found a third test expecting a sequential Blog count rather than `Promise.all`. These were failures of test expectations, not proof of UI breakage. | **Fixed locally and rechecked:** `admin-security.integration.test.mjs`, `blog-admin.archive.test.mjs`, `blog-admin.list.test.mjs`. New expectations retain field/preview/count coverage. |
+
+### Current Verification And Release Decision
+
+| Workflow/state | Expected | Actual evidence | Status / issue |
+| --- | --- | --- | --- |
+| Anonymous `/admin/projects` navigation | Redirect to login | Playwright URL became `/admin/login`; labelled form rendered | Passed for this route only |
+| Anonymous sampled Admin APIs | 401/403 before privileged reads | `admin-security.integration.test.mjs` passed; Project featured anonymous contract passed | Partial pass; full 46-method role matrix blocked (R5) |
+| Blog featured selection to public Home | Same live selected article as Blog | Source inspection plus local read-only Home/Blog mismatch | Failed (R1, R2) |
+| Blog/Project create, save, reopen, publish and delete | Persist only intended fields; public visibility/cache consistent | Source/mocked tests and historical disposable results only; no current valid connected workflow | Blocked (R1, R5, R6) |
+| Media/Resume valid upload, failed rollback and delete | No orphan or broken reference; actionable size error | Source/mocks; current valid external lifecycle not tested | Blocked (R3, R10) |
+| Project/Home and Blog/public rendering | No new page errors or visual drift | Local 390/1440 Home and 1440 Projects/Blog snapshots before test-only edits; public integration cases passed | Sampled read pass, not pixel-equivalence or all public routes |
+| Admin keyboard/editor and responsive owner UI | No trap/overflow at 320-1440, actionable pending/error states | Historical owner browser sweep; current anonymous login only | Blocked (R7, R8) |
+| Safe regression after test-only fixes | No new failures | Docker 29-file Node allowlist **139 pass, 3 skip, 0 fail**; five mocked component suites **10 pass**. Type-check, lint and isolated production build passed again (83 static pages). `blog-featured` is one deliberate skip. | Passed for selected cases; connected cases excluded |
+| Deployment/rollback | HTTP 200 origin, safe migration and recovery proof | Origin HTTP 404; no current restore-tested clone or deployment smoke | Failed/blocked (R4, R5) |
+
+This refresh changed **only four test files plus this document**, not public or Admin application code, CSS, routes or database rows. Public screenshots are baseline artifacts outside the repository; no post-change pixel comparison is claimed because the fixes cannot alter rendered code and live content drifted during sampling. Isolated builds passed before and after test-only fixes; the selected Node/component suites passed and the dev Compose service remains up. A complete owner/non-owner browser control matrix, every CRUD state and effective connected policies were **not** verified. **Overall outcome: NOT READY FOR DEPLOYMENT.** Keep R1-R10 open for a separately approved, restore-tested iteration; do not infer readiness from green static tests.

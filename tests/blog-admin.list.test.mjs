@@ -44,7 +44,7 @@ test("server list counts filtered posts before bounded fetch and reports failure
   assert.match(page, /\.eq\("status", "published"\)\.is\("published_at", null\)/);
   assert.match(page, /admin-status--live/);
   assert.match(page, /head \? \{ count: "exact", head: true \} : undefined/);
-  assert.match(page, /await filteredQuery\(true\)/);
+  assert.match(page, /filteredQuery\(true\),/);
   assert.match(page, /count === null/);
   assert.match(page, /redirect\(blogListUrl\(params, totalPages\)\)/);
   assert.match(page, /\.range\(start, start \+ PAGE_SIZE - 1\)/);
