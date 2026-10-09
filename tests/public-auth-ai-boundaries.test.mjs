@@ -14,6 +14,8 @@ function load(path, mocks) {
   runInNewContext(compiled, {
     exports,
     require(name) { return mocks[name] ?? require(name); },
+    process: { env: { GROQ_API_KEY: "", GOOGLE_AI_API_KEY: "test-only" } },
+    setTimeout, clearTimeout,
     URL, Response, TextDecoder, console: { error() {} },
   });
   return exports;
@@ -80,19 +82,19 @@ test("chat rejects oversized, malformed and invalid histories before any provide
 
 test("shared chat widget bounds requests and exposes named, reachable controls", () => {
   const source = readFileSync(new URL("../app/components/ChatbotWidget.tsx", import.meta.url), "utf8");
-  assert.match(source, /newMessages\.slice\(-20\)/);
+  assert.match(source, /outgoing\.slice\(-20\)/);
   assert.match(source, /maxLength=\{2000\}/);
   assert.match(source, /aria-label="Close chat"/);
   assert.match(source, /aria-label="Send chat message"/);
   assert.match(source, /toggleRef\.current\?\.focus\(\)/);
-  assert.match(source, /w-\[min\(20rem,calc\(100vw-3rem\)\)\]/);
+  assert.match(source, /width: "min\(400px, calc\(100vw - 24px\)\)"/);
 });
 
 test("server HTML uses the current chat widget markup before hydration", async () => {
   const response = await fetch(process.env.PREVIEW_BASE_URL || "http://localhost:3000/");
   assert.equal(response.status, 200);
   const html = await response.text();
-  assert.match(html, /fixed bottom-6 right-6 z-\[5500\] flex flex-col items-end/);
+  assert.match(html, /fixed bottom-3 right-3 z-\[5500\] flex flex-col items-end/);
   assert.match(html, /aria-label="Toggle chat" aria-expanded="false" aria-controls="portfolio-chat-panel"/);
   assert.doesNotMatch(html, /fixed bottom-6 right-6 z-\[4000\] flex flex-col items-end/);
 });
