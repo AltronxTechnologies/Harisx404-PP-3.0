@@ -18,6 +18,8 @@ test("picker stays open during upload and reports the resulting library asset", 
     import("react-dom/client"), import("react-dom/test-utils"), import("../app/components/admin/MediaPickerModal"),
   ]);
   const originalFetch = globalThis.fetch;
+  const originalObjectUrl = URL.createObjectURL;
+  URL.createObjectURL = () => { throw new Error("No browser encoder in this DOM test"); };
   let finishUpload!: (response: Response) => void;
   let closes = 0;
   let uploaded = 0;
@@ -37,6 +39,8 @@ test("picker stays open during upload and reports the resulting library asset", 
     const input = host.querySelector<HTMLInputElement>('input[type="file"]')!;
     Object.defineProperty(input, "files", { configurable: true, value: [new File(["image"], "picture.png", { type: "image/png" })] });
     await act(async () => input.dispatchEvent(new browser.Event("change", { bubbles: true }) as unknown as Event));
+    for (let attempt = 0; attempt < 20 && !finishUpload; attempt++) await act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
+    assert.equal(typeof finishUpload, "function");
     const close = host.querySelector<HTMLButtonElement>('[aria-label="Close media picker"]')!;
     assert.equal(close.disabled, true);
     assert.equal([...host.querySelectorAll<HTMLButtonElement>("button")].find((button) => button.textContent === "Cancel")!.disabled, true);
@@ -54,6 +58,7 @@ test("picker stays open during upload and reports the resulting library asset", 
     await act(async () => root.unmount());
     host.remove();
     globalThis.fetch = originalFetch;
+    URL.createObjectURL = originalObjectUrl;
   }
 });
 

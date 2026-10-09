@@ -1,10 +1,26 @@
-/** Best-effort browser conversion of large raster images before upload.
- * High-quality WebP may reduce transfer size, but gateway limits and visual
- * equivalence depend on the actual image and must be verified separately. */
+/** Best-effort WebP conversion for still JPEG/PNG uploads. Keep the original
+ * when the result is larger, the browser cannot encode WebP, or animation is present. */
 
-const MAX_SAFE_UPLOAD_BYTES = 800 * 1024; // 800 KB threshold
 const MAX_DIMENSION_PX = 3840; // 4K Ultra-HD retina max dimension
 const WEBP_QUALITY = 0.94; // 94% studio master quality (pristine visual clarity)
+
+async function isAnimatedPng(file: File): Promise<boolean> {
+  // APNG's acTL chunk precedes the first IDAT. If the header is too large to
+  // reach IDAT, preserve the source rather than risk flattening its frames.
+  const bytes = new Uint8Array(await file.slice(0, 64 * 1024).arrayBuffer());
+  if (bytes.length < 8 || ![137, 80, 78, 71, 13, 10, 26, 10].every((byte, index) => bytes[index] === byte)) return false;
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  let offset = 8;
+  while (offset + 12 <= bytes.length) {
+    const length = view.getUint32(offset);
+    const type = String.fromCharCode(...bytes.subarray(offset + 4, offset + 8));
+    if (type === "acTL") return true;
+    if (type === "IDAT") return false;
+    if (length > bytes.length - offset - 12) return true;
+    offset += length + 12;
+  }
+  return true;
+}
 
 export async function prepareImageForUpload(file: File): Promise<File> {
   // If not running in a browser environment, return original safely
@@ -27,21 +43,17 @@ export async function prepareImageForUpload(file: File): Promise<File> {
     return file;
   }
 
-  // Non-images should pass through untouched
-  if (file.type && !file.type.startsWith("image/")) {
-    return file;
-  }
-
-  // Avoid recompression of smaller files; the gateway limit is not known here.
-  if (file.size <= MAX_SAFE_UPLOAD_BYTES) {
-    return file;
-  }
+  // AVIF, HEIC, TIFF and other multi-frame or already efficient formats are
+  // kept intact. Canvas would otherwise silently export only their first frame.
+  const jpeg = file.type === "image/jpeg" || (file.type === "" && /\.jpe?g$/i.test(file.name));
+  const png = file.type === "image/png" || (file.type === "" && /\.png$/i.test(file.name));
+  if (!jpeg && !png) return file;
 
   try {
+    if (png && await isAnimatedPng(file)) return file;
     return await convertImageToWebP(file);
-  } catch (error) {
-    // Fail safe: if anything goes wrong, return the original file
-    console.warn("Client-side image preparation fallback to original:", error);
+  } catch {
+    // Browser support varies; a failed optimization must not block uploads.
     return file;
   }
 }

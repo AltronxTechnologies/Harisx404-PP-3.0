@@ -9,7 +9,7 @@ const source = readFileSync(new URL("../app/lib/admin/prepare-image-upload.ts", 
 const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
 
 function browserConversion({ blob, delayed = false }) {
-  const calls = { created: 0, revoked: 0, dimensions: null, deadline: null, finishBlob: null };
+  const calls = { created: 0, revoked: 0, dimensions: null, deadline: null, finishBlob: null, quality: null };
   const exports = {};
   class Image {
     naturalWidth = 4000;
@@ -25,7 +25,7 @@ function browserConversion({ blob, delayed = false }) {
     document: { createElement() { return {
       width: 0, height: 0,
       getContext() { return { drawImage() { calls.dimensions = [this.canvas.width, this.canvas.height]; }, canvas: this }; },
-      toBlob(callback) { if (delayed) calls.finishBlob = () => callback(blob); else callback(blob); },
+      toBlob(callback, _type, quality) { calls.quality = quality; if (delayed) calls.finishBlob = () => callback(blob); else callback(blob); },
     }; } },
     setTimeout(callback) { calls.deadline = callback; return 1; },
     clearTimeout() {},
@@ -71,6 +71,8 @@ test("timeout cleans up once and late encoder callbacks cannot change the result
   const { prepare, calls } = browserConversion({ blob: new Blob(["optimized"], { type: "image/webp" }), delayed: true });
   const original = new File([new Uint8Array(900 * 1024)], "image.png", { type: "image/png" });
   const pending = prepare(original);
+  for (let attempt = 0; attempt < 20 && !calls.deadline; attempt++) await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(typeof calls.deadline, "function");
   calls.deadline();
   assert.equal(await pending, original);
   assert.equal(calls.revoked, 1, "timeout must release the object URL without waiting for encoding");
@@ -91,4 +93,37 @@ test("generated WebP filenames stay within the server's 255-character limit", as
   const result = await prepare(original);
   assert.equal(result.type, "image/webp");
   assert.equal(result.name.length, 255);
+});
+
+test("small still JPEG and PNG images become high-quality WebP when smaller", async () => {
+  for (const [name, type] of [["portrait.jpg", "image/jpeg"], ["photo.png", "image/png"]]) {
+    const { prepare, calls } = browserConversion({ blob: new Blob(["smaller image"], { type: "image/webp" }) });
+    const original = new File([new Uint8Array(120 * 1024)], name, { type });
+    const result = await prepare(original);
+    assert.equal(result.type, "image/webp", name);
+    assert.ok(result.size < original.size);
+    assert.equal(calls.quality, 0.94);
+  }
+});
+
+test("a larger WebP or already efficient AVIF stays in its original format", async () => {
+  const original = new File([new Uint8Array(120 * 1024)], "portrait.jpg", { type: "image/jpeg" });
+  const larger = browserConversion({ blob: new Blob([new Uint8Array(150 * 1024)], { type: "image/webp" }) });
+  assert.equal(await larger.prepare(original), original);
+  const avif = new File([new Uint8Array(900 * 1024)], "photo.avif", { type: "image/avif" });
+  const efficient = browserConversion({ blob: new Blob(["still"], { type: "image/webp" }) });
+  assert.equal(await efficient.prepare(avif), avif);
+  assert.equal(efficient.calls.created, 0);
+});
+
+test("animated PNGs are not flattened by canvas conversion", async () => {
+  const header = new Uint8Array(65);
+  header.set([137, 80, 78, 71, 13, 10, 26, 10]);
+  header.set([0, 0, 0, 13, 73, 72, 68, 82], 8); // IHDR
+  header.set([0, 0, 0, 8, 97, 99, 84, 76], 33); // acTL before IDAT
+  header.set([0, 0, 0, 0, 73, 68, 65, 84], 53); // IDAT
+  const file = new File([header, new Uint8Array(900 * 1024)], "animated.png", { type: "image/png" });
+  const { prepare, calls } = browserConversion({ blob: new Blob(["smaller"], { type: "image/webp" }) });
+  assert.equal(await prepare(file), file);
+  assert.equal(calls.created, 0);
 });
