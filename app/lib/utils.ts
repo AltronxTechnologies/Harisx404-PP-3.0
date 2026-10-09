@@ -38,6 +38,7 @@ import { twMerge } from "tailwind-merge";
 import { createClient } from "@supabase/supabase-js";
 import { getPublicSupabase } from "@/app/lib/supabase/safe";
 import { extractHeadingsFromMdx } from "@/app/lib/toc-utils";
+import { stripRepeatedBlogHeading } from "@/app/lib/blog-content";
 
 const supabase = getPublicSupabase();
 
@@ -182,13 +183,14 @@ export async function getBlogPostBySlug(slug: string): Promise<Blog | null> {
   }
 
   const categories = data.blog_post_tags?.map((bpt: any) => bpt.tags?.name).filter(Boolean) || [];
+  const articleContent = stripRepeatedBlogHeading(data.content, data.title);
   return {
     title: data.title,
     slug: data.slug,
     slugAsParams: data.slug,
     summary: data.summary,
-    content: data.content,
-    code: data.content, // Pass raw content so next-mdx-remote can render it
+    content: articleContent,
+    code: articleContent,
     publishedAt: data.published_at || new Date().toISOString(),
     modifiedAt: data.updated_at || undefined,
     imageName: data.cover_image_url || '',
@@ -197,7 +199,7 @@ export async function getBlogPostBySlug(slug: string): Promise<Blog | null> {
     readingTimeMinutes: data.reading_time_minutes || undefined,
     relatedBlogPostIds: data.related_blog_post_ids ?? [],
     draft: false,
-    headings: extractHeadingsFromMdx(data.content)
+    headings: extractHeadingsFromMdx(articleContent)
   } as any;
 }
 
