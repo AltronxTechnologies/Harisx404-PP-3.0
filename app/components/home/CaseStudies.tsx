@@ -483,12 +483,7 @@ export function CaseStudyCard({
         {bodyHiddenOnXl ? (
           <div
             ref={panelRef}
-            className={clsx(
-              "relative h-full w-full overflow-hidden rounded-[22px] border-8 border-white shadow-[0_0_0_0.8px_rgba(0,0,0,0.2),0_9.5px_28.5px_-11.4px_rgba(0,0,0,0.4)] transition-[border-color,box-shadow] duration-300 motion-reduce:transition-none dark:border-zinc-800 dark:shadow-[0_0_0_1px_#4d4d4d,0_9.5px_28.5px_-11.4px_rgba(0,0,0,0.4)]",
-              "[@media(hover:hover)]:group-hover:border-neutral-100 [@media(hover:hover)]:group-hover:shadow-[0_0_0_1px_rgba(120,140,165,0.35),0_18px_36px_-16px_rgba(15,23,42,0.45)] dark:[@media(hover:hover)]:group-hover:border-zinc-700 dark:[@media(hover:hover)]:group-hover:shadow-[0_0_0_1px_rgba(255,255,255,0.22),0_18px_36px_-16px_rgba(0,0,0,0.7)]",
-              "group-active:border-neutral-100 dark:group-active:border-zinc-700",
-              active && "border-neutral-100 dark:border-zinc-700"
-            )}
+            className="relative h-full w-full overflow-hidden rounded-[22px] border-8 border-white shadow-[0_0_0_0.8px_rgba(0,0,0,0.2),0_9.5px_28.5px_-11.4px_rgba(0,0,0,0.4)] dark:border-zinc-800 dark:shadow-[0_0_0_1px_#4d4d4d,0_9.5px_28.5px_-11.4px_rgba(0,0,0,0.4)]"
             style={{ backgroundImage: panelGradients[i % panelGradients.length] }}
           >
             {(project.images?.[0] || project.image_url) ? (
@@ -498,20 +493,16 @@ export function CaseStudyCard({
                 fill
                 priority={imagePriority}
                 sizes={imageSizes}
-                className="object-cover object-top"
+                className={clsx(
+                  "object-cover object-top transition-transform duration-500 ease-out motion-safe:[@media(hover:hover)]:group-hover:scale-[1.03] motion-reduce:transition-none",
+                  active && "scale-[1.03]"
+                )}
               />
             ) : (
               <span className="absolute inset-0 flex items-center justify-center px-6 text-center font-display text-2xl text-white">
                 {project.title}
               </span>
             )}
-            <span
-              aria-hidden
-              className={clsx(
-                "pointer-events-none absolute inset-0 opacity-0 shadow-[inset_0_2px_0_rgba(255,255,255,0.22),inset_0_-18px_28px_-24px_rgba(0,0,0,0.55)] transition-opacity duration-300 [@media(hover:hover)]:group-hover:opacity-100 group-active:opacity-100 motion-reduce:transition-none",
-                active && "opacity-100"
-              )}
-            />
             <span aria-hidden className="absolute right-6 top-6 text-white/85 drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] transition-transform duration-300 group-hover:translate-x-1 max-[380px]:right-4 max-[380px]:top-4 md:right-8 md:top-8">
               <svg viewBox="0 0 24 16" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-6">
                 <path d="M2 8h19" />
@@ -861,23 +852,20 @@ export function CaseStudyCard({
                   </li>
                 ))}
             </ul>
-            {project.tech.length > 0 && (
+            {bodyHiddenOnXl ? (
+              <HomeTechStack tech={project.tech} className="mt-4" />
+            ) : project.tech.length > 0 ? (
               <div className="mt-4 flex max-h-[124px] flex-wrap gap-2 overflow-hidden">
-                {(coverHeading === "title"
-                  ? project.tech.slice(0, 5)
-                  : project.tech
-                ).map((t) => (
+                {project.tech.slice(0, 5).map((t) => (
                   <TechChip key={t} name={t} />
                 ))}
-                {coverHeading === "title" && project.tech.length > 5 && (
-                  /* Cap at five chips — the full stack lives on the case
-                     study page. Keeps the panel tidy and even per project. */
+                {project.tech.length > 5 && (
                   <span className="inline-flex items-center rounded-full border border-dashed border-border-primary px-3 py-1 font-mono text-xs text-text-secondary">
                     +{project.tech.length - 5}
                   </span>
                 )}
               </div>
-            )}
+            ) : null}
           </div>
         </div>
         {coverHeading !== "title" && (
@@ -899,20 +887,9 @@ export function CaseStudyCard({
   );
 }
 
-function StickyProjectPanel({
-  project,
-  index,
-}: {
-  project: HomeProject;
-  index: number;
-}) {
-  const bullets = (
-    project.features && project.features.length > 0
-      ? project.features
-      : genericBullets(project.title)
-  ).slice(0, 3);
+function HomeTechStack({ tech, className }: { tech: string[]; className: string }) {
   const techMeasureRef = useRef<HTMLDivElement>(null);
-  const [visibleTechCount, setVisibleTechCount] = useState(project.tech.length);
+  const [visibleTechCount, setVisibleTechCount] = useState(tech.length);
 
   useEffect(() => {
     const measure = () => {
@@ -947,7 +924,44 @@ function StickyProjectPanel({
       observer?.disconnect();
       window.removeEventListener("resize", measure);
     };
-  }, [project.tech]);
+  }, [tech]);
+
+  if (!tech.length) return null;
+
+  return (
+    <div className={clsx("relative", className)}>
+      <div ref={techMeasureRef} aria-hidden="true" className="invisible pointer-events-none absolute inset-x-0 top-0 flex flex-wrap gap-2">
+        {tech.map((t) => (
+          <TechChip key={t} name={t} />
+        ))}
+        <span className="rounded-full border border-border-primary px-3 py-1 font-mono text-xs text-text-secondary">+{tech.length}</span>
+      </div>
+      <div className="flex max-h-[96px] flex-wrap gap-2 overflow-hidden">
+        {tech.slice(0, visibleTechCount).map((t) => (
+          <TechChip key={t} name={t} />
+        ))}
+        {visibleTechCount < tech.length && (
+          <span className="inline-flex items-center rounded-full border border-dashed border-border-primary px-3 py-1 font-mono text-xs text-text-secondary">
+            +{tech.length - visibleTechCount}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function StickyProjectPanel({
+  project,
+  index,
+}: {
+  project: HomeProject;
+  index: number;
+}) {
+  const bullets = (
+    project.features && project.features.length > 0
+      ? project.features
+      : genericBullets(project.title)
+  ).slice(0, 3);
 
   return (
     <div key={project.slug}>
@@ -978,26 +992,7 @@ function StickyProjectPanel({
           </li>
         ))}
       </ul>
-      {project.tech.length > 0 && (
-        <div className="relative mt-[22px]">
-          <div ref={techMeasureRef} aria-hidden="true" className="invisible pointer-events-none absolute inset-x-0 top-0 flex flex-wrap gap-2">
-            {project.tech.map((t) => (
-              <TechChip key={t} name={t} />
-            ))}
-            <span className="rounded-full border border-border-primary px-3 py-1 font-mono text-xs text-text-secondary">+{project.tech.length}</span>
-          </div>
-          <div className="flex max-h-[96px] flex-wrap gap-2 overflow-hidden">
-            {project.tech.slice(0, visibleTechCount).map((t) => (
-              <TechChip key={t} name={t} />
-            ))}
-            {visibleTechCount < project.tech.length && (
-              <span className="inline-flex items-center rounded-full border border-dashed border-border-primary px-3 py-1 font-mono text-xs text-text-secondary">
-                +{project.tech.length - visibleTechCount}
-              </span>
-            )}
-          </div>
-        </div>
-      )}
+      <HomeTechStack tech={project.tech} className="mt-[22px]" />
       {/* CTA — mouse-clickable; tabIndex -1 keeps it out of the tab order
           since the panel is aria-hidden (the card link is the a11y path). */}
       <Link

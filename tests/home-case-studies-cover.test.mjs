@@ -28,14 +28,16 @@ test("Projects index still uses the established shared card recipe", () => {
   assert.match(source, /frame-light-edge group relative block/);
 });
 
-test("Home-only covers get a reduced-motion-safe sheen and the sticky stack reserves the real overflow badge width", () => {
+test("Home-only covers softly zoom the image and both Home layouts share the measured three-row tech stack", () => {
   const source = readFileSync(new URL("../app/components/home/CaseStudies.tsx", import.meta.url), "utf8");
   const homeCover = source.split("{bodyHiddenOnXl ? (")[1]?.split("\n        ) : (\n        <div\n          ref={panelRef}")[0];
   assert.ok(homeCover, "the Home cover has its own rendering branch");
-  assert.match(homeCover, /transition-\[border-color,box-shadow\]/);
-  assert.match(homeCover, /shadow-\[inset_/);
+  assert.match(homeCover, /group-hover:scale-\[1\.03\]/);
+  assert.doesNotMatch(homeCover, /group-hover:border-|shadow-\[inset_/);
   assert.match(homeCover, /motion-reduce:transition-none/);
   assert.match(source, /probe\.textContent = `\+\$\{chips\.length - count\}`/);
-  assert.match(source, /project\.tech\.slice\(0, visibleTechCount\)/);
-  assert.match(source, /\+\{project\.tech\.length - visibleTechCount\}/);
+  assert.match(source, /<HomeTechStack tech=\{project\.tech\} className="mt-4"/);
+  assert.match(source, /<HomeTechStack tech=\{project\.tech\} className="mt-\[22px\]"/);
+  assert.match(source, /tech\.slice\(0, visibleTechCount\)/);
+  assert.match(source, /\+\{tech\.length - visibleTechCount\}/);
 });
