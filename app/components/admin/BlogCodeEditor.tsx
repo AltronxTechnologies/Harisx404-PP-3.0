@@ -176,10 +176,11 @@ export function BlogCodeEditor({
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
 
-    // 1. Tab / Shift+Tab indent
-    if (e.key === "Tab") {
+    // Keep Tab and Shift+Tab available for normal keyboard navigation.
+    // Ctrl/Cmd + ] or [ performs indentation instead.
+    if ((e.ctrlKey || e.metaKey) && (e.key === "]" || e.key === "[")) {
       e.preventDefault();
-      if (e.shiftKey) {
+      if (e.key === "[") {
         // Shift+Tab: Unindent
         if (start === end) {
           // Single line unindent
@@ -216,7 +217,7 @@ export function BlogCodeEditor({
           }, 0);
         }
       } else {
-        // Tab: Indent
+        // Indent
         if (start === end) {
           // Insert 2 spaces
           const nextVal = value.slice(0, start) + "  " + value.slice(end);
@@ -802,7 +803,8 @@ export function BlogCodeEditor({
             </div>
 
             {/* Code Textarea with High-Performance Monospace Typography */}
-            <textarea
+                <span id="blog-mdx-keyboard-hint" className="sr-only">Tab moves to the next control. Control or Command plus right bracket indents; left bracket outdents.</span>
+                <textarea
               ref={textareaRef}
               value={value}
               onChange={(e) => onChange(e.target.value)}
@@ -811,8 +813,8 @@ export function BlogCodeEditor({
               onKeyUp={updateCursorAndSelection}
               onClick={updateCursorAndSelection}
               onSelect={updateCursorAndSelection}
-              aria-label="Blog article MDX source"
-              aria-describedby={errorId}
+                  aria-label="Blog article MDX source"
+                  aria-describedby={[errorId, "blog-mdx-keyboard-hint"].filter(Boolean).join(" ")}
               aria-invalid={Boolean(errorId)}
               spellCheck={false}
               className="flex-1 resize-none bg-transparent py-4 px-4 font-mono text-[13.5px] leading-[23px] text-[#f8fafc] placeholder-slate-600 outline-none caret-[#818cf8] selection:bg-indigo-600/40"

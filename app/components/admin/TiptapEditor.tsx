@@ -8,6 +8,7 @@ import { Markdown } from "tiptap-markdown";
 import { Bold, Italic, List, ListOrdered, Quote, Heading2, Heading3, Minus, Link as LinkIcon, Image as ImageIcon, Table as TableIcon, Code, Undo, Redo, Code2, Sparkles, Loader2, ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import { MediaPickerModal } from "./MediaPickerModal";
+import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
 
 interface TiptapEditorProps {
   value: string;
@@ -135,7 +136,10 @@ const MenuBar = ({ editor, story, blogTools }: { editor: Editor | null; story: b
         body: JSON.stringify({ action, content })
       });
 
-      if (!res.ok) throw new Error("AI request failed");
+      if (!res.ok) {
+        const failed = await readAdminResponse(res, "AI assistance");
+        throw new Error(failed.error || "AI request failed");
+      }
       
       const data = await res.json();
       
@@ -145,8 +149,7 @@ const MenuBar = ({ editor, story, blogTools }: { editor: Editor | null; story: b
         alert(`AI Suggestion:\n\n${data.result}`);
       }
     } catch (err) {
-      console.error(err);
-      alert("Failed to get AI assistance.");
+      alert(err instanceof Error ? err.message : "Failed to get AI assistance.");
     } finally {
       setAiLoading(false);
     }

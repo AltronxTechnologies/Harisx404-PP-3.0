@@ -13,6 +13,11 @@ const faqSchema = z.object({
 const updateSchema = faqSchema.partial().extend({ id: z.string().uuid() }).strict()
   .refine((value) => Object.keys(value).length > 1, "Provide at least one change");
 
+function fail(error: unknown) {
+  console.error("FAQ request failed:", error && typeof error === "object" && "code" in error ? error.code : "unexpected");
+  return NextResponse.json({ error: "FAQ request could not be completed. Refresh before retrying." }, { status: 500 });
+}
+
 // Best-effort ISR invalidation — must never fail the mutation itself.
 function revalidateFaqPaths() {
   try {
@@ -37,8 +42,8 @@ export async function GET() {
 
     if (error) throw error;
     return NextResponse.json({ data }, { headers: { "Cache-Control": "private, no-store" } });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (error) {
+    return fail(error);
   }
 }
 
@@ -60,8 +65,8 @@ export async function POST(request: Request) {
     if (error) throw error;
     const warning = revalidateFaqPaths();
     return NextResponse.json({ data: faq, ...(warning ? { warning } : {}) });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (error) {
+    return fail(error);
   }
 }
 
@@ -86,8 +91,8 @@ export async function PUT(request: Request) {
     if (!faq) return NextResponse.json({ error: "FAQ not found. Refresh the list before retrying." }, { status: 404 });
     const warning = revalidateFaqPaths();
     return NextResponse.json({ data: faq, ...(warning ? { warning } : {}) });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (error) {
+    return fail(error);
   }
 }
 
@@ -124,8 +129,8 @@ export async function PATCH(request: Request) {
     if (!saved) return NextResponse.json({ error: "FAQ section settings changed. Refresh before retrying." }, { status: 409 });
     const warning = revalidateFaqPaths();
     return NextResponse.json({ success: true, ...(warning ? { warning } : {}) });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (error) {
+    return fail(error);
   }
 }
 
@@ -151,7 +156,7 @@ export async function DELETE(request: Request) {
     if (!deleted) return NextResponse.json({ error: "FAQ not found. Refresh the list before retrying." }, { status: 404 });
     const warning = revalidateFaqPaths();
     return NextResponse.json({ success: true, ...(warning ? { warning } : {}) });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (error) {
+    return fail(error);
   }
 }

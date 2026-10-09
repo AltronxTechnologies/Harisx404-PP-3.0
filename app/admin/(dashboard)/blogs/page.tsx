@@ -37,7 +37,7 @@ export default async function AdminBlogsPage({
     return query;
   };
 
-  const [{ count, error: countError }, { data: currentFeaturedPost }] = await Promise.all([
+  const [{ count, error: countError }, { data: currentFeaturedPost, error: featuredError }] = await Promise.all([
     filteredQuery(true),
     supabase
       .from("blog_posts")
@@ -56,7 +56,7 @@ export default async function AdminBlogsPage({
       .order(params.sort, { ascending: params.direction === "asc", nullsFirst: false })
       .order("id", { ascending: true })
       .range(start, start + PAGE_SIZE - 1);
-  const error = countError || count === null || postsError;
+  const error = countError || count === null || postsError || featuredError;
   const posts = blogs ?? [];
   const filtered = Boolean(params.q || params.status !== "all");
   const successMessage = rawParams.saved === "1" ? "Post saved successfully."
@@ -90,12 +90,12 @@ export default async function AdminBlogsPage({
           <div className="min-w-0">
             <p className="text-[11px] font-mono uppercase tracking-wider text-amber-400/90 font-medium">Single Featured Article</p>
             <p className="font-semibold text-ink-primary truncate">
-              {currentFeaturedPost ? currentFeaturedPost.title : "No article currently set as featured"}
+              {featuredError ? "Featured selection could not be loaded" : currentFeaturedPost ? currentFeaturedPost.title : "No article currently set as featured"}
             </p>
           </div>
         </div>
         <p className="text-xs text-ink-secondary">
-          Only 1 article is featured site-wide on the homepage and blog hero. Select any article below to set it as featured.
+          Only 1 live article is featured on Home and the Blog hero. Select a published article below.
         </p>
       </div>
 
@@ -152,7 +152,7 @@ export default async function AdminBlogsPage({
                             title: blog.title,
                             slug: blog.slug,
                             featured: blog.featured === true,
-                            status: blog.status,
+                            canFeature: label === "Live",
                           }}
                         />
                       </td>

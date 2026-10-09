@@ -1,6 +1,14 @@
 import { NextResponse } from 'next/server';
 import { generateText } from '@/app/lib/gemini';
 import createSupabaseServerClient from '@/app/lib/supabase/server';
+import { z } from 'zod';
+
+const requestSchema = z.object({ github_url: z.string().max(2048) }).strict();
+const suggestionSchema = z.object({
+  summary: z.string().max(1000),
+  description: z.string().max(10000),
+  tags: z.array(z.string().max(100)).max(32),
+});
 
 export async function POST(request: Request) {
   try {
@@ -18,34 +26,53 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const { github_url } = await request.json();
-
-    if (!github_url || !github_url.includes('github.com')) {
+    const parsed = requestSchema.safeParse(await request.json().catch(() => null));
+    if (!parsed.success) return NextResponse.json({ error: 'Valid GitHub URL is required' }, { status: 400 });
+    let githubUrl: URL;
+    try {
+      githubUrl = new URL(parsed.data.github_url);
+    } catch {
       return NextResponse.json({ error: 'Valid GitHub URL is required' }, { status: 400 });
     }
-
-    // Extract owner and repo from URL
-    const urlParts = new URL(github_url).pathname.split('/').filter(Boolean);
-    if (urlParts.length < 2) {
-      return NextResponse.json({ error: 'Invalid GitHub URL format' }, { status: 400 });
+    const parts = githubUrl.pathname.split('/').filter(Boolean);
+    const owner = parts[0];
+    const repo = parts[1]?.replace(/\.git$/, '');
+    if (githubUrl.protocol !== 'https:' || githubUrl.hostname !== 'github.com' || githubUrl.port || githubUrl.username || githubUrl.password
+      || parts.length !== 2 || !/^[A-Za-z0-9-]{1,39}$/.test(owner || '') || !/^[A-Za-z0-9._-]{1,100}$/.test(repo || '')
+      || repo === '.' || repo === '..') {
+      return NextResponse.json({ error: 'Use a GitHub repository URL such as https://github.com/owner/repo.' }, { status: 400 });
     }
 
-    const owner = urlParts[0];
-    const repo = urlParts[1];
-
     // Fetch README from GitHub API
-    const readmeRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/readme`, {
+    const readmeRes = await fetch(`https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/readme`, {
       headers: {
         'Accept': 'application/vnd.github.v3.raw',
         'User-Agent': 'Portfolio-AI-Generator'
-      }
+      },
+      redirect: 'error',
+      signal: AbortSignal.timeout(10000),
     });
 
     if (!readmeRes.ok) {
-      return NextResponse.json({ error: `Failed to fetch README from GitHub: ${readmeRes.statusText}` }, { status: 400 });
+      return NextResponse.json({ error: readmeRes.status === 404 ? 'GitHub README not found.' : 'GitHub README could not be loaded. Try again later.' }, { status: readmeRes.status === 404 ? 404 : 503 });
     }
 
-    const readmeContent = await readmeRes.text();
+    const reader = readmeRes.body?.getReader();
+    if (!reader) return NextResponse.json({ error: 'GitHub README could not be loaded. Try again later.' }, { status: 503 });
+    const decoder = new TextDecoder();
+    let readmeContent = '';
+    let bytes = 0;
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      bytes += value.byteLength;
+      if (bytes > 65536) {
+        await reader.cancel();
+        return NextResponse.json({ error: 'GitHub README is too large to generate from.' }, { status: 413 });
+      }
+      readmeContent += decoder.decode(value, { stream: true });
+    }
+    readmeContent += decoder.decode();
 
     if (!readmeContent || readmeContent.length < 50) {
       return NextResponse.json({ error: 'README is too short or empty' }, { status: 400 });
@@ -55,7 +82,7 @@ export async function POST(request: Request) {
     const prompt = `Based on the following GitHub README content, generate a professional project description, a short summary, and suggest a few technology tags.
 
 README Content:
-${readmeContent.substring(0, 10000)} // truncate to avoid token limits just in case
+${readmeContent.substring(0, 10000)}
 
 Respond in the following JSON format strictly:
 {
@@ -72,15 +99,15 @@ Respond in the following JSON format strictly:
     let parsedData;
     try {
       const cleanText = resultText.replace(/```json\n?/, '').replace(/```\n?$/, '').trim();
-      parsedData = JSON.parse(cleanText);
-    } catch (e) {
-      console.error("Failed to parse Gemini JSON:", resultText);
+      parsedData = suggestionSchema.safeParse(JSON.parse(cleanText));
+      if (!parsedData.success) throw new Error('Invalid suggestion shape');
+    } catch {
       return NextResponse.json({ error: 'AI returned invalid format' }, { status: 500 });
     }
 
-    return NextResponse.json({ result: parsedData });
-  } catch (error: any) {
-    console.error('Error in AI project gen route:', error);
-    return NextResponse.json({ error: error.message || 'Failed to generate project' }, { status: 500 });
+    return NextResponse.json({ result: parsedData.data });
+  } catch (error) {
+    console.error('AI Project generation failed:', error && typeof error === 'object' && 'code' in error ? error.code : 'unexpected');
+    return NextResponse.json({ error: 'Project generation is unavailable. Try again later.' }, { status: 503 });
   }
 }

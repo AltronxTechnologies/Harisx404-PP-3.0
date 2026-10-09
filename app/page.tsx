@@ -114,7 +114,7 @@ export default async function Home() {
   const reactionSummaries = await fetchBlogReactionSummaries(
     dbPosts.map((post) => post.slug),
   );
-  const featuredPost = dbPosts.reduce<BlogIndexPost | undefined>(
+  const featuredPost = dbPosts.find((post) => post.featured) || dbPosts.reduce<BlogIndexPost | undefined>(
     (best, post) =>
       !best ||
       (reactionSummaries[post.slug]?.total || 0) >

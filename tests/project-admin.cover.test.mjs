@@ -37,7 +37,7 @@ const payload = {
   cover_image_id: coverId, cover_image_url: tracked.secure_url,
 };
 
-function database({ media = tracked, error = null, throws = false } = {}) {
+function database({ media = tracked, error = null, throws = false, featured = false } = {}) {
   const reads = [];
   const writes = [];
   db = {
@@ -45,6 +45,8 @@ function database({ media = tracked, error = null, throws = false } = {}) {
       if (table === "projects") return {
         select() { return this; },
         async contains() { return { data: [], error: null }; },
+        eq() { return this; },
+        async maybeSingle() { return { data: { featured }, error: null }; },
       };
       assert.equal(table, "media");
       return {
@@ -63,6 +65,24 @@ function database({ media = tracked, error = null, throws = false } = {}) {
   };
   return { reads, writes };
 }
+
+test("ordinary Project saves cannot bypass or silently drop the Home selection", async () => {
+  let state = database();
+  assert.equal((await save("POST", { featured: true })).status, 400);
+  assert.equal(state.writes.length, 0);
+
+  state = database({ featured: true });
+  assert.equal((await save("PUT", { featured: false })).status, 409);
+  assert.equal(state.writes.length, 0);
+
+  state = database({ featured: true });
+  assert.equal((await save("PUT", { featured: true, status: "archived" })).status, 409);
+  assert.equal(state.writes.length, 0);
+
+  state = database({ featured: null });
+  assert.equal((await save("PUT", { featured: false })).status, 200);
+  assert.equal(state.writes.length, 1);
+});
 
 async function save(method, fields = {}) {
   const body = { ...payload, ...fields };

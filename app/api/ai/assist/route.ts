@@ -1,6 +1,13 @@
 import { NextResponse } from 'next/server';
 import { generateText } from '@/app/lib/gemini';
 import createSupabaseServerClient from '@/app/lib/supabase/server';
+import { z } from 'zod';
+
+const payloadSchema = z.object({
+  action: z.enum(['improve', 'summary', 'title', 'tags', 'grammar']),
+  content: z.string().min(1).max(50000),
+  context: z.string().max(10000).optional(),
+}).strict();
 
 export async function POST(request: Request) {
   try {
@@ -19,11 +26,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const { action, content, context } = await request.json();
-
-    if (!action || !content) {
-      return NextResponse.json({ error: 'Missing action or content' }, { status: 400 });
-    }
+    const parsed = payloadSchema.safeParse(await request.json().catch(() => null));
+    if (!parsed.success) return NextResponse.json({ error: 'Choose an action and text within 50,000 characters.' }, { status: 400 });
+    const { action, content, context } = parsed.data;
 
     let prompt = '';
     let systemInstruction = 'You are an expert AI writing assistant for a technical blog.';
@@ -55,8 +60,8 @@ export async function POST(request: Request) {
     const resultText = await generateText(prompt, systemInstruction);
 
     return NextResponse.json({ result: resultText.trim() });
-  } catch (error: any) {
-    console.error('Error in AI assist route:', error);
-    return NextResponse.json({ error: error.message || 'Failed to process AI assist' }, { status: 500 });
+  } catch (error) {
+    console.error('AI assist request failed:', error && typeof error === 'object' && 'code' in error ? error.code : 'unexpected');
+    return NextResponse.json({ error: 'AI assistance is unavailable. Try again later.' }, { status: 503 });
   }
 }
