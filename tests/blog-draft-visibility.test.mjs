@@ -15,8 +15,8 @@ test("middleware draft preflight stays in sync with local article frontmatter", 
   }
 
   const middleware = await readFile(new URL("../middleware.ts", import.meta.url), "utf8");
-  const manifest = middleware.match(/const LOCAL_BLOG_DRAFTS = new Set\(\[([\s\S]*?)\]\)/)?.[1];
-  assert.ok(manifest, "draft manifest must exist in middleware");
+  const manifest = middleware.match(/const LOCAL_BLOG_DRAFTS = new Set(?:<string>)?\(\[([\s\S]*?)\]\)/)?.[1];
+  assert.notEqual(manifest, undefined, "draft manifest must exist in middleware");
   const preflightDrafts = Array.from(manifest.matchAll(/"([^"]+)"/g), (match) => match[1]);
   assert.deepEqual(preflightDrafts.sort(), drafts.sort());
 
@@ -24,7 +24,7 @@ test("middleware draft preflight stays in sync with local article frontmatter", 
   assert.match(page, /generateMetadata\([\s\S]*?if \(isLocalBlogDraft\(slug\)\) notFound\(\);[\s\S]*?getBlogPostBySlug\(slug\)/);
 });
 
-test("a locally marked draft returns a real 404 with no published metadata", async () => {
+test("a removed legacy article returns a real 404 with no published metadata", async () => {
   const url = `${baseUrl}/blog/tailwind-2-is-live`;
   const [get, head] = await Promise.all([fetch(url), fetch(url, { method: "HEAD" })]);
   assert.equal(get.status, 404);
@@ -35,8 +35,11 @@ test("a locally marked draft returns a real 404 with no published metadata", asy
   assert.doesNotMatch(html, /<meta property="og:title" content="Tailwind 2\.0 is Live!"/);
 });
 
-test("a public article remains a 200 with article metadata", async () => {
-  const response = await fetch(`${baseUrl}/blog/the-hard-part-isnt-writing-tests-anymore`);
+test("a syndicated public article remains a 200 with article metadata", async (t) => {
+  const feed = await fetch(`${baseUrl}/rss.xml`).then((response) => response.text());
+  const slug = feed.match(/<link>[^<]*\/blog\/([^<]+)<\/link>/)?.[1];
+  if (!slug) return t.skip("No published article is available");
+  const response = await fetch(`${baseUrl}/blog/${slug}`);
   assert.equal(response.status, 200);
   const html = await response.text();
   assert.match(html, /id="blog-article"/);

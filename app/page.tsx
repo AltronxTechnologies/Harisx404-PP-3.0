@@ -49,11 +49,13 @@ export const metadata: Metadata = {
     description: siteMetadata.description,
     url: siteMetadata.siteUrl,
     type: "website",
+    images: [{ url: `${siteMetadata.siteUrl}/brand/logo-wide.png`, width: 1200, height: 630, alt: siteMetadata.title }],
   },
   twitter: {
     card: "summary_large_image",
     title: siteMetadata.title,
     description: siteMetadata.description,
+    images: [`${siteMetadata.siteUrl}/brand/logo-wide.png`],
   },
 };
 

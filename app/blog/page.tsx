@@ -8,6 +8,7 @@ import { BlogStatePanel } from "@/app/components/blog/BlogStatePanel";
 import { GridWrapper } from "@/app/components/GridWrapper";
 import { PaperHeroTexture } from "@/app/components/PaperHeroTexture";
 import { CtaSection } from "@/app/components/home/CtaSection";
+import { siteMetadata } from "@/app/data/siteMetadata";
 import {
   fetchBlogIndexPosts,
   fetchBlogReactionSummaries,
@@ -118,7 +119,9 @@ export async function generateMetadata({
       title,
       description,
       type: "website",
+      images: [{ url: `${siteMetadata.siteUrl}/brand/logo-wide.png`, width: 1200, height: 630, alt: siteMetadata.title }],
     },
+    twitter: { card: "summary_large_image", title, description, images: [`${siteMetadata.siteUrl}/brand/logo-wide.png`] },
   };
 }
 

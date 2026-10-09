@@ -14,10 +14,13 @@ import { siteMetadata } from "app/data/siteMetadata";
 
 export const revalidate = 3600;
 
+const projectsDescription = "A curated collection of case studies — web apps, mobile apps, and experiments built by Muhammad Haris.";
+
 export const metadata: Metadata = {
   title: "Projects",
-  description:
-    "A curated collection of case studies — web apps, mobile apps, and experiments built by Muhammad Haris.",
+  description: projectsDescription,
+  openGraph: { title: "Projects", description: projectsDescription, images: [{ url: `${siteMetadata.siteUrl}/brand/logo-wide.png`, width: 1200, height: 630, alt: siteMetadata.title }] },
+  twitter: { card: "summary_large_image", title: "Projects", description: projectsDescription, images: [`${siteMetadata.siteUrl}/brand/logo-wide.png`] },
 };
 
 export default async function ProjectsPage() {
