@@ -252,28 +252,39 @@ export async function fetchProjects() {
     serviceKey && process.env.NEXT_PUBLIC_SUPABASE_URL
       ? createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, serviceKey)
       : supabase;
-  const selectProjects = (withAlt: boolean) => db
-    .from('projects')
-    .select(withAlt
-      ? '*, project_tags ( tags ( name, slug ) ), project_images ( display_order, caption, alt_text, media ( secure_url, url, alt_text ) )'
-      : '*, project_tags ( tags ( name, slug ) ), project_images ( display_order, caption, media ( secure_url, url, alt_text ) )')
-      .eq('status', 'published')
-      .order('display_order', { ascending: true })
-      .order('created_at', { ascending: true });
-  let { data, error } = await selectProjects(true);
-  if (error && ['42703', 'PGRST200', 'PGRST204'].includes(error.code) && /alt_text/.test(error.message)) {
-    ({ data, error } = await selectProjects(false));
+  const pageSize = 500;
+  const projects: any[] = [];
+  let lastId: string | undefined;
+  while (true) {
+    const selectProjects = (withAlt: boolean) => {
+      let query = db.from('projects')
+        .select(withAlt
+          ? '*, project_tags ( tags ( name, slug ) ), project_images ( display_order, caption, alt_text, media ( secure_url, url, alt_text ) )'
+          : '*, project_tags ( tags ( name, slug ) ), project_images ( display_order, caption, media ( secure_url, url, alt_text ) )')
+        .eq('status', 'published')
+        .order('id', { ascending: true })
+        .limit(pageSize);
+      if (lastId) query = query.gt('id', lastId);
+      return query;
+    };
+    let { data, error } = await selectProjects(true);
+    if (error && ['42703', 'PGRST200', 'PGRST204'].includes(error.code) && /alt_text/.test(error.message)) {
+      ({ data, error } = await selectProjects(false));
+    }
+    if (error || !data) throw new Error('Project collection is unavailable');
+    projects.push(...data);
+    if (data.length < pageSize) break;
+    lastId = data[data.length - 1].id;
   }
-
-  if (error || !data) {
-    console.warn("Supabase unavailable, using fallback content.");
-    return [];
-  }
+  projects.sort((a, b) =>
+    (a.display_order ?? Number.MAX_SAFE_INTEGER) - (b.display_order ?? Number.MAX_SAFE_INTEGER)
+    || (a.created_at ?? '').localeCompare(b.created_at ?? '')
+    || a.id.localeCompare(b.id));
   // Flatten the tag join into a simple string[] so consumers (e.g. the
   // homepage StatusRow domain classifier) can read `project.tags` directly.
   // Gallery images flatten the same way: `project.gallery` is a sorted
   // string[] of extra screenshot URLs (cover image not included).
-  return data.map((p: any) => {
+  return projects.map((p: any) => {
     const tags = p.project_tags?.map((pt: any) => pt.tags?.name).filter(Boolean) || [];
     const galleryDetails = (p.project_images || [])
       .slice()

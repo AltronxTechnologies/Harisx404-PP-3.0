@@ -88,15 +88,9 @@ export default async function Home() {
     ]);
   const credentialSummary = summarizeCredentials(credentials);
 
-  /* Homepage case studies are owner-curated from the admin panel: any
-     project with the "Featured Project" toggle on shows here (up to 6,
-     in display order). If nothing is featured yet, fall back to the
-     first three published projects. */
+  /* Homepage case studies are explicitly selected and ordered in Admin. */
   const featuredDb = dbProjects.filter((p: any) => p.featured);
-  const homeDb = (featuredDb.length > 0 ? featuredDb : dbProjects).slice(
-    0,
-    featuredDb.length > 0 ? 6 : 3
-  ).map((project: any) => withProjectPreview(project));
+  const homeDb = featuredDb.map((project: any) => withProjectPreview(project));
   const projects: HomeProject[] = (
     dbProjects.length > 0
       ? homeDb.map((p: any) => ({
@@ -105,14 +99,7 @@ export default async function Home() {
           tagline: (p.tagline || p.short_description || p.description || "").slice(0, 160),
           description: (p.tagline || p.short_description || p.description || "").slice(0, 160),
           tech: Array.isArray(p.tech_stack) ? p.tech_stack : [],
-          // Quarter label like "Q2 2026" — uses start_date when set in
-          // admin, otherwise falls back to the row's created_at.
-          year: (() => {
-            const d = p.start_date || p.created_at;
-            if (!d) return "";
-            const dt = new Date(d);
-            return `Q${Math.floor(dt.getMonth() / 3) + 1} ${dt.getFullYear()}`;
-          })(),
+          year: p.year || p.created_at?.slice(0, 4) || "",
           category: (p.category as HomeProject["category"]) || "Web App",
           image_url: p.cover_image_url || "",
           images: [p.cover_image_url, ...(Array.isArray(p.gallery) ? p.gallery : [])]
@@ -159,24 +146,15 @@ export default async function Home() {
 
   const formattedDates = posts.map((post) => formatDate(post.publishedAt));
 
-  // Latest project drives the hero "New launch" block. Recency follows the
-  // same date the case studies use: start_date, falling back to created_at.
-  const latestProject =
-    dbProjects.length > 0
-      ? [...dbProjects].sort(
-          (a: any, b: any) =>
-            new Date(b.start_date || b.created_at || 0).getTime() -
-            new Date(a.start_date || a.created_at || 0).getTime()
-        )[0]
-      : null;
+  const latestProject = featuredDb[0];
 
   const latestLaunch = latestProject
-    ? {
-        name: latestProject.title as string,
-        href: `/projects/${latestProject.slug}`,
-      }
+      ? {
+          name: latestProject.title as string,
+          href: `/projects/${latestProject.slug}`,
+        }
     : hasConnectedContent
-      ? { name: "Case studies coming soon", href: "/projects", label: "Projects", subline: "Work in progress" }
+      ? { name: dbProjects.length ? "Explore all projects" : "Case studies coming soon", href: "/projects", label: "Projects", subline: dbProjects.length ? "Browse the full collection" : "Work in progress" }
       : null;
 
   // Live stats for the status strip under the hero. Reuses the data
