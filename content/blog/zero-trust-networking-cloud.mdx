@@ -1,0 +1,164 @@
+---
+title: "Zero Trust Networking for Modern Cloud Applications"
+description: "How zero trust networking works for cloud apps: policy decision and enforcement points, workload identity, microsegmentation, and a default-deny example you can run."
+slug: "zero-trust-networking-cloud"
+date: "2026-10-02"
+updated: "2026-10-02"
+author: "Muhammad Haris"
+category: "Networking"
+tags:
+  - Zero Trust
+  - Microsegmentation
+  - Cloud security
+  - Kubernetes
+  - Network security
+keywords:
+  - zero trust networking
+  - zero trust architecture
+  - microsegmentation
+  - identity based access
+  - cloud network security
+  - service to service authentication
+readingTime: "5 min read"
+featured: false
+coverImage: "/blog/production-placeholder.jpg"
+coverImageAlt: "Temporary Harisx404 branded cover for Zero Trust Networking; final artwork pending"
+---
+
+# Zero Trust Networking for Modern Cloud Applications
+
+Zero trust networking means a connection is allowed because of who or what is asking and in what state, not because it arrived from a "trusted" network. NIST's reference document, [SP 800-207](https://csrc.nist.gov/pubs/sp/800/207/final), puts it this way: no implicit trust based on network location or asset ownership, and authentication and authorization happen before each session to a resource starts.
+
+This is the networking and architecture view for people building cloud applications. You'll see how the pieces fit together, what microsegmentation actually does, and a default-deny Kubernetes example to try.
+
+## From castle-and-moat to per-request decisions
+
+The old model assumed a hard perimeter and a soft inside. Once something got in (a stolen VPN login, a compromised laptop), it could often reach most internal systems, because internal traffic was trusted by default.
+
+Cloud applications break that picture. Users work from anywhere, services call each other across clusters and providers, and there is no single inside. NIST describes zero trust as protecting resources (assets, services, workflows) rather than network segments, because network location is no longer a reliable signal.
+
+## The pieces: decide, then enforce
+
+NIST's model separates two jobs.
+
+| Component | Job | Cloud examples |
+| --------- | --- | -------------- |
+| Policy decision point (policy engine plus policy administrator) | Decides whether access is granted, then sets up or tears down the path | Identity provider plus a policy service |
+| Policy enforcement point | Sits in the path and allows or blocks | API gateway, service-mesh sidecar, identity-aware proxy, host firewall, network plugin |
+
+Every request is checked against dynamic policy using identity, device or workload state, and context. Enforcement points report back what happened, which gives you the monitoring signal.
+
+## Two kinds of traffic to protect
+
+**User to application.** Put an identity-aware proxy or gateway in front, authenticate the person, check device posture, and grant access to one application at a time instead of a whole network.
+
+**Service to service.** This is the part teams forget. Inside a cluster, any compromised workload can try to call any other. NIST's follow-up, [SP 800-207A](https://csrc.nist.gov/pubs/sp/800/207/a/final), addresses cloud-native apps directly. It describes moving from controls based on IP addresses and subnets to policies based on service and user identities, enforced by API gateways, sidecar proxies, and an application identity framework such as SPIFFE, wherever the services run. In practice that means workload identities, mutual TLS, and authorization rules like "checkout may call orders, and nothing else may."
+
+## Microsegmentation: shrink the blast radius
+
+CISA's 2025 guidance, [Microsegmentation in Zero Trust (Part One)](https://www.cisa.gov/news-events/alerts/2025/07/29/cisa-releases-part-one-zero-trust-microsegmentation-guidance), describes microsegmentation as a networking control that limits connections to a zone or segment, with benefits that include reducing the attack surface, limiting lateral movement, and improving visibility. When it is applied at enforcement points, the guidance notes, rules can go beyond IP addresses to include context about the connection.
+
+In Kubernetes the baseline is [NetworkPolicy](https://kubernetes.io/docs/concepts/services-networking/network-policies/). By default, pods are not isolated: if no policy selects them, all traffic is allowed. Policies are additive, and a network plugin must implement them. The pattern is to deny everything, then allow what you can name:
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: shop
+spec:
+  podSelector: {}
+  policyTypes: [Ingress, Egress]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-checkout-to-orders
+  namespace: shop
+spec:
+  podSelector:
+    matchLabels:
+      app: orders
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: checkout
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-checkout-egress-to-orders
+  namespace: shop
+spec:
+  podSelector:
+    matchLabels:
+      app: checkout
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: orders
+      ports:
+        - protocol: TCP
+          port: 8080
+```
+
+This permits checkout to reach orders on port 8080: orders accepts the connection, and checkout may initiate it. Two cautions. First, the deny-all policy also blocks outbound DNS, so add an explicit DNS egress rule before applying it to a live namespace. Second, NetworkPolicy works at layers 3 and 4. It tells you *which workloads* may connect, not *who is calling* or *what they may do*. The identity and request-level checks come from the mesh or gateway layer.
+
+## A roadmap, not a product
+
+CISA's [Zero Trust Maturity Model](https://www.cisa.gov/zero-trust-maturity-model) is one of several roadmaps. It organizes the work into five pillars (identity, devices, networks, applications and workloads, data) plus cross-cutting capabilities for visibility, automation, and governance. Use it to check what you are missing, not as a purchase list. No single product delivers zero trust.
+
+A sensible order for a team:
+
+1. **Map the flows.** Learn who and what actually talks to whom, using logs.
+2. **Add identity.** Give workloads identities and enable mutual TLS.
+3. **Default-deny in a test namespace.** Watch what breaks, fix it, then widen.
+4. **Write least-privilege rules** between services and log every deny.
+5. **Re-evaluate continuously.** Policy should react when posture or context changes.
+
+Certificates sit at the center of step 2, so it is worth knowing how [post-quantum cryptography](/blog/post-quantum-cryptography-migration) will eventually affect them. AI agents are new identities that need the same treatment, as covered in [securing AI agents](/blog/securing-ai-agents).
+
+## Key takeaways
+
+- Zero trust decides per request, using identity and context, not network location.
+- Separate the decision point from the enforcement point, and log both.
+- Protect service-to-service traffic, not just user access.
+- Start with default-deny in a test environment, and don't forget DNS.
+- Treat maturity models as roadmaps, not shopping lists.
+
+## Frequently Asked Questions
+
+### Is zero trust a product I can buy?
+
+No. It is an architecture and a set of principles. Products can enforce parts of it, but the work is in identity, policy, and monitoring across your environment.
+
+### How is zero trust different from a VPN?
+
+A VPN typically grants network-level access once you connect. Zero trust grants access to specific resources per session, based on identity and context.
+
+### Does zero trust mean no firewalls?
+
+No. Network controls such as segmentation and firewalls remain useful as enforcement points. What changes is that they no longer imply trust.
+
+### What is the difference between microsegmentation and zero trust?
+
+Microsegmentation limits which workloads can connect. It is one important control inside a zero trust architecture, alongside identity, device posture, and continuous monitoring.
+
+### Where should I start?
+
+Map real traffic flows, then apply default-deny in a non-production namespace and fix what breaks. Early visibility is worth more than early enforcement.
+
+## References
+
+1. [NIST SP 800-207: Zero Trust Architecture](https://csrc.nist.gov/pubs/sp/800/207/final)
+2. [NIST SP 800-207A: A Zero Trust Architecture Model for Access Control in Cloud-Native Applications in Multi-Cloud Environments](https://csrc.nist.gov/pubs/sp/800/207/a/final)
+3. [CISA: Microsegmentation in Zero Trust, Part One](https://www.cisa.gov/news-events/alerts/2025/07/29/cisa-releases-part-one-zero-trust-microsegmentation-guidance)
+4. [CISA: Zero Trust Maturity Model](https://www.cisa.gov/zero-trust-maturity-model)
+5. [Kubernetes documentation: Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
