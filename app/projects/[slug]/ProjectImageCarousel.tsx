@@ -24,6 +24,7 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
   const [direction, setDirection] = useState(1);
   const [displayed, setDisplayed] = useState<Slide | null>(images[0] ?? null);
   const [imageError, setImageError] = useState(false);
+  const [secondaryError, setSecondaryError] = useState<string | null>(null);
   const [showLoading, setShowLoading] = useState(false);
   const figureRef = useRef<HTMLElement>(null);
   const captionBoxRef = useRef<HTMLDivElement>(null);
@@ -35,6 +36,7 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
   const current = images[index];
   const shown = displayed ?? current;
   const shownIndex = images.findIndex((image) => image.src === shown?.src);
+  const following = images.length > 1 ? images[(shownIndex + 1) % images.length] : null;
   const loading = Boolean(current && shown && current.src !== shown.src);
   const adjacent = images.length > 1 && visible
     ? [images[(shownIndex + 1) % images.length], images[(shownIndex - 1 + images.length) % images.length]]
@@ -108,7 +110,7 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
         className="isolate overflow-hidden rounded-2xl border border-border-primary bg-white dark:bg-white/[0.02] sm:rounded-3xl"
       >
         <motion.div
-          className="relative aspect-[3/2] overflow-hidden bg-neutral-100 dark:bg-white/[0.04]"
+          className={`relative aspect-[3/2] overflow-hidden bg-neutral-100 dark:bg-white/[0.04] ${following ? "lg:aspect-[3/1]" : ""}`}
         drag={images.length > 1 ? "x" : false}
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.08}
@@ -119,11 +121,17 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
           {adjacent.map((image) => <Image key={`prepared-${image.src}`} src={image.src} alt="" aria-hidden fill loading="eager" sizes="(max-width: 1280px) 100vw, 1152px" loader={isCloudinary(image.src) ? cloudinaryLoader : undefined} unoptimized={!isOptimizedHost(image.src)} className="pointer-events-none opacity-0" onLoad={() => { readyUrlsRef.current.add(image.src); if (wantedSrcRef.current === image.src) { setDisplayed(image); setImageError(false); } }} onError={() => { if (wantedSrcRef.current === image.src) setImageError(true); }} />)}
           {loading && !adjacent.some((image) => image.src === current.src) && <Image src={current.src} alt="" aria-hidden fill priority sizes="(max-width: 1280px) 100vw, 1152px" loader={isCloudinary(current.src) ? cloudinaryLoader : undefined} unoptimized={!isOptimizedHost(current.src)} className="pointer-events-none opacity-0" onLoad={() => { readyUrlsRef.current.add(current.src); if (wantedSrcRef.current === current.src) { setDisplayed(current); setImageError(false); } }} onError={() => setImageError(true)} />}
           <AnimatePresence initial={false} custom={direction}>
-            <motion.div key={shown.src} custom={direction} variants={{ enter: (travel: number) => ({ x: `${travel * 100}%` }), center: { x: "0%" }, exit: (travel: number) => ({ x: `${-travel * 100}%` }) }} initial={reducedMotion ? false : "enter"} animate="center" exit="exit" transition={{ duration: reducedMotion ? 0 : 0.48, ease: [0.22, 1, 0.36, 1] }} className="absolute inset-0">
-              <Image src={shown.src} alt={shown.alt || (shownIndex === 0 ? `${title} cover image` : `${title} image ${shownIndex + 1}`)} aria-hidden={imageError && !loading} fill priority sizes="(max-width: 1280px) 100vw, 1152px" loader={isCloudinary(shown.src) ? cloudinaryLoader : undefined} unoptimized={!isOptimizedHost(shown.src)} draggable={false} className={`pointer-events-none select-none object-cover ${imageError && !loading ? "opacity-0" : ""}`} onLoad={() => { readyUrlsRef.current.add(shown.src); if (wantedSrcRef.current === shown.src) setImageError(false); }} onError={() => { if (wantedSrcRef.current === shown.src) setImageError(true); }} />
+            <motion.div key={shown.src} custom={direction} variants={{ enter: (travel: number) => ({ x: `${travel * 100}%` }), center: { x: "0%" }, exit: (travel: number) => ({ x: `${-travel * 100}%` }) }} initial={reducedMotion ? false : "enter"} animate="center" exit="exit" transition={{ duration: reducedMotion ? 0 : 0.48, ease: [0.22, 1, 0.36, 1] }} className={`absolute inset-0 ${following ? "lg:grid lg:grid-cols-2" : ""}`}>
+              <div className="relative h-full min-w-0">
+                <Image src={shown.src} alt={shown.alt || (shownIndex === 0 ? `${title} cover image` : `${title} image ${shownIndex + 1}`)} aria-hidden={imageError && !loading} fill priority sizes={following ? "(min-width: 1280px) 576px, (min-width: 1024px) 50vw, 100vw" : "(max-width: 1280px) 100vw, 1152px"} loader={isCloudinary(shown.src) ? cloudinaryLoader : undefined} unoptimized={!isOptimizedHost(shown.src)} draggable={false} className={`pointer-events-none select-none object-cover ${imageError && !loading ? "opacity-0" : ""}`} onLoad={() => { readyUrlsRef.current.add(shown.src); if (wantedSrcRef.current === shown.src) setImageError(false); }} onError={() => { if (wantedSrcRef.current === shown.src) setImageError(true); }} />
+              </div>
+              {following && <div className="relative hidden h-full min-w-0 border-l border-border-primary lg:block">
+                <Image src={following.src} alt={following.alt || `${title} image ${(shownIndex + 1) % images.length + 1}`} fill loading="eager" sizes="(min-width: 1280px) 576px, 50vw" loader={isCloudinary(following.src) ? cloudinaryLoader : undefined} unoptimized={!isOptimizedHost(following.src)} draggable={false} className={`pointer-events-none select-none object-cover ${secondaryError === following.src ? "opacity-0" : ""}`} onLoad={() => { readyUrlsRef.current.add(following.src); if (secondaryError === following.src) setSecondaryError(null); }} onError={() => setSecondaryError(following.src)} />
+                {secondaryError === following.src && <div role="status" className="absolute inset-0 flex items-center justify-center bg-bg-primary p-3 text-sm text-text-primary">Image unavailable.</div>}
+              </div>}
             </motion.div>
           </AnimatePresence>
-          {imageError && <div role="status" className={`absolute z-10 flex items-center gap-3 text-sm text-text-primary ${loading ? "bottom-3 left-3 max-w-[calc(100%-1.5rem)] rounded-xl bg-bg-primary px-3 py-2 shadow-md" : "inset-0 justify-center bg-bg-primary p-3"}`}>
+          {imageError && <div role="status" className={`absolute z-10 flex items-center gap-3 text-sm text-text-primary ${loading ? "bottom-3 left-3 max-w-[calc(100%-1.5rem)] rounded-xl bg-bg-primary px-3 py-2 shadow-md" : `inset-0 justify-center bg-bg-primary p-3 ${following ? "lg:right-1/2" : ""}`}`}>
             <span>Image unavailable.</span>
             {images.length > 1 && <button type="button" onClick={() => { goTo(index + 1); requestAnimationFrame(() => nextButtonRef.current?.focus()); }} className="shrink-0 rounded-md border border-border-primary px-2 py-1 text-xs font-medium hover:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25">Skip image</button>}
           </div>}
