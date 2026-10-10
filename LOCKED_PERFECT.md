@@ -1735,6 +1735,21 @@ static and route checks.
 Do not modify Credentials, its Admin controls, schema, data source, or public
 presentation without a new explicit owner unlock.
 
+### 2026-10-10 owner-authorized Credentials toolbar copy amendment
+
+The owner requested removal of the collection subtitle "Professional learning
+with direct verification where available." and shortening the count from
+"05 published credentials" to "05 published". Only those toolbar lines in
+`app/credentials/page.tsx`, the matching loading subtitle placeholder, and
+the related integration assertion changed. Five published records, cards,
+issuer data, status copy, actions and shared UI were not modified. Local
+browser/source tests, lint, isolated build and TypeScript passed. The later
+page-specific checkup at `docs/final-checkups/credentials.md` measured a
+**pre-existing 320px and enlarged-text card clipping defect** that the old
+lock-time responsive note did not detect. This narrow copy amendment is
+re-locked; it is not permission to alter card geometry, nor a claim of
+production readiness.
+
 ### 2026-10-06 owner-authorized Certifications Admin follow-up
 
 The owner requested the next Admin quality pass for Certifications. Only the

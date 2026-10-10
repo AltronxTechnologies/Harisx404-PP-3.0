@@ -38,11 +38,10 @@ export default async function CredentialsPage() {
         <div className="mb-6 flex flex-col gap-3 border-y border-border-primary px-2 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-4">
           <div>
             <h2 id="credential-collection-heading" className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary">Credential collection</h2>
-            <p className="mt-1.5 text-sm text-text-secondary">Professional learning with direct verification where available.</p>
           </div>
           {credentials.length > 0 && (
             <p className="font-mono text-[10px] uppercase tracking-widest text-text-secondary">
-              {String(credentials.length).padStart(2, "0")} published {credentials.length === 1 ? "credential" : "credentials"}
+              {String(credentials.length).padStart(2, "0")} published
             </p>
           )}
         </div>
