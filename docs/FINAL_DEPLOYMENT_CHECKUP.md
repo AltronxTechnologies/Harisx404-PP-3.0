@@ -52,7 +52,7 @@ This is a **source inventory**, not a pass matrix. A checked route gets a separa
 | `/contact` | Valid/invalid form, duplicate prevention, safe test SMTP destination and provider failure. | BLOCKED: not run for candidate |
 | `/credentials` | Issuer/claim accuracy, proof links, demo visibility, media. | BLOCKED for release: [local Credentials checkup](final-checkups/credentials.md) verified scoped copy but found 320px/enlarged-text card clipping; host 404 and owner/manual gates remain open |
 | `/links` | Destination accuracy, external targets, shared CTA copy and narrow-screen reflow; no Links-specific preview widget. | BLOCKED for release: [local Links checkup](final-checkups/links.md) confirms 320px/200%-text clipping; host 404 and owner/manual gates remain open |
-| `/resume` | PDF view/download/fallback, managed Storage file, file headers and mobile reader. | BLOCKED: not run for candidate |
+| `/resume` | PDF view/download/fallback, managed Storage file, file headers and mobile reader. | BLOCKED for release: [local Resume checkup](final-checkups/resume.md) verified current PDF gateway but found 320px enlarged-text clipping; host 404 and connected/mobile-reader/manual gates remain open |
 | `/legal/privacy` | Actual data practices, contact details and owner/legal approval. | BLOCKED: not run for candidate |
 | `/legal/terms` | Rights, terms/attribution and owner/legal approval; do not invent legal claims. | BLOCKED: not run for candidate |
 | `/project-data-unavailable` | Direct URL vs outage redirect context, noindex, useful retry and no leakage. | BLOCKED: not run for candidate |
