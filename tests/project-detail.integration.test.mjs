@@ -134,6 +134,9 @@ test("project images enforce a cover, allow ordered additions, and deliver respo
   assert.match(upload, /createSupabaseAdminClient\(\)/);
   assert.doesNotMatch(upload, /10_000_000/);
   assert.match(detail, /<ProjectImageCarousel images=\{images\}/);
+  assert.match(detail, /related\.map\(\(item\) => <Link/);
+  assert.match(detail, /<span className="relative block aspect-\[3\/2\] overflow-hidden rounded-xl bg-neutral-100/);
+  assert.doesNotMatch(detail, /aspect-\[16\/9\]|\{String\(index \+ 1\)\.padStart\(2, "0"\)\}<\/span>\s*<\/span>/);
   assert.doesNotMatch(detail, /title: "Gallery"/);
   assert.match(carousel, /f_webp,q_auto:good,c_limit,w_/);
   assert.match(carousel, /drag=\{images\.length > 1/);
@@ -228,7 +231,7 @@ test("project gallery and narrative are sourced from Admin-authored data", async
   assert.match(detail, /grid gap-3 text-\[15px\]/);
   assert.match(detail, /grid gap-3 text-\[15px\] md:grid-cols-2/);
   assert.doesNotMatch(detail, /<ol className="[^"]*lg:grid-cols-1/);
-  assert.match(detail, /aspect-\[16\/9\] overflow-hidden rounded-xl/);
+  assert.match(detail, /aspect-\[3\/2\] overflow-hidden rounded-xl/);
   assert.match(detail, /title=\{item\.title\} className="block max-w-full truncate/);
   assert.match(detail, /item\.tagline && <span className="mt-3 line-clamp-2/);
   assert.doesNotMatch(detail, /<span className="font-mono text-\[11px\] uppercase tracking-widest text-text-secondary">\{item\.category\}<\/span>/);
@@ -356,7 +359,7 @@ test("related projects are selected in Admin and only published choices render i
   assert.match(edit, /availableProjects=\{availableProjects \?\? \[\]\}/);
   assert.match(create, /availableProjects=\{availableProjects \?\? \[\]\}/);
   assert.match(page, /project\.relatedProjectIds\.map\(\(id\) => list\.find/);
-  assert.match(detail, /related\.map\(\(item, index\) => <Link/);
+  assert.match(detail, /related\.map\(\(item\) => <Link/);
 });
 
 test("development stage chooses between completed and in-progress project facts", async () => {
