@@ -1,3 +1,8 @@
+"use client";
+
+import { usePathname } from "next/navigation";
+import ProjectDetailLoading from "./ProjectDetailLoading";
+
 /* Route-level loading skeleton for /projects. It mirrors the live blueprint
    header, controls, card frame, and responsive grid so content fills in without
    changing composition. */
@@ -88,6 +93,9 @@ function ControlsSkeleton() {
 }
 
 export default function ProjectsLoading() {
+  const pathname = usePathname();
+  if (pathname && pathname !== "/projects" && pathname !== "/projects/") return <ProjectDetailLoading />;
+
   return (
     <div className="mt-14 bg-bg-primary">
       <p className="sr-only" role="status">Loading projects</p>

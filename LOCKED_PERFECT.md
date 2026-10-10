@@ -2602,6 +2602,20 @@ visibility, settled two-card geometry, both directions, wraparound, captions,
 light/dark and phone layout. This corrects only the transition artifact;
 the rest of the approved presentation remains locked.
 
+### 2026-10-10 owner-authorized project-detail loading correction
+
+The owner requested fixes for the project-detail checkup. The parent Projects
+loading boundary was showing the index filter/card skeleton before detail
+content streamed. `app/projects/loading.tsx` now uses the route pathname to
+render `app/projects/ProjectDetailLoading.tsx` for detail URLs; `/projects`
+still renders its existing index skeleton. The detail placeholder mirrors
+the approved hero/facts/image spacing and 3:2 cards without fake controls.
+A read-only streamed-HTML browser regression checks one detail loading status
+and no index status on detail routes, plus the unchanged index loading status
+on `/projects`. The actual project-detail page, shared components, and global
+styles were not modified. This narrow loading change is re-locked; it is not
+proof of deployed readiness or an unlock of other presentation.
+
 ### 2026-09-28 owner-authorized legal-divider amendment
 
 The owner requested that Privacy and Terms horizontal dividers match the

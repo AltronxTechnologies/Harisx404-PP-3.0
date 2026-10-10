@@ -129,3 +129,49 @@ test("project detail carousel respects reduced motion without losing keyboard co
     await browser.close();
   }
 });
+
+test("streamed detail loading never flashes the Projects index skeleton", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    const detailResponse = await page.request.get(`${baseUrl}/projects/${slug}?loading-check=1`);
+    const indexResponse = await page.request.get(`${baseUrl}/projects?loading-check=1`);
+    assert.equal(detailResponse.status(), 200);
+    assert.equal(indexResponse.status(), 200);
+    const detailHtml = await detailResponse.text();
+    const indexHtml = await indexResponse.text();
+    assert.match(detailHtml, /role="status" aria-label="Loading project details"/);
+    assert.equal((detailHtml.match(/role="status" aria-label="Loading project details"/g) || []).length, 1);
+    assert.doesNotMatch(detailHtml, /role="status">Loading projects/);
+    assert.match(indexHtml, /role="status">Loading projects/);
+    assert.doesNotMatch(indexHtml, /aria-label="Loading project details"/);
+
+    await page.goto(`${baseUrl}/projects/${slug}`, { waitUntil: "domcontentloaded" });
+    await page.getByRole("heading", { name: "MedicaLink HMS", level: 1 }).waitFor();
+    for (const width of [390, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      const geometry = await page.evaluate((html) => {
+        const main = document.querySelector("main");
+        const actual = main.querySelector('section[aria-labelledby="project-facts-heading"]').getBoundingClientRect();
+        const loader = new DOMParser().parseFromString(html, "text/html").querySelector('[aria-label="Loading project details"]');
+        [...main.children].forEach((node) => { node.style.display = "none"; });
+        main.append(document.importNode(loader, true));
+        const skeleton = main.querySelector('[aria-label="Loading project details"]');
+        const frame = skeleton.querySelector(".rounded-3xl.border").getBoundingClientRect();
+        const cards = [...skeleton.querySelectorAll(".aspect-\\[3\\/2\\]")]
+          .filter((node) => node.getBoundingClientRect().width > 0)
+          .map((node) => { const rect = node.getBoundingClientRect(); return rect.width / rect.height; });
+        const result = { factOffset: Math.abs(frame.top - actual.top), overflow: document.documentElement.scrollWidth - innerWidth, cards };
+        skeleton.remove();
+        [...main.children].forEach((node) => { node.style.display = ""; });
+        return result;
+      }, detailHtml);
+      assert.ok(geometry.factOffset < 40, `${width}: facts loading frame offset ${geometry.factOffset}px`);
+      assert.ok(geometry.overflow <= 1, `${width}: loading overflow ${geometry.overflow}px`);
+      assert.equal(geometry.cards.length, width >= 1024 ? 2 : 1);
+      assert.ok(geometry.cards.every((ratio) => Math.abs(ratio - 1.5) < 0.01));
+    }
+  } finally {
+    await browser.close();
+  }
+});
