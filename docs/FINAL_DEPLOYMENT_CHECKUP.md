@@ -43,7 +43,7 @@ This is a **source inventory**, not a pass matrix. A checked route gets a separa
 | --- | --- | --- |
 | `/` | Home featured project order, testimonial provenance, article lead, stats, CTA, chatbot and consent/privacy claims. | BLOCKED for release: [local Home checkup](final-checkups/home.md) completed; editorial/deployed gates open |
 | `/about` | Biography, experience/certifications source, timeline, links, images, factual owner sign-off. | BLOCKED for release: [local About checkup](final-checkups/about.md) and scoped fixes completed; connected Experience/deployed gates open |
-| `/projects` | Published-only collection, saved Admin order/new-first, search/tag filters, pagination, cards and empty state. | FAIL/BLOCKED for release: [local Projects index checkup](final-checkups/projects-index.md) found URL race, reading-order mismatch and missing index migration |
+| `/projects` | Published-only collection, saved Admin order/new-first, search/tag filters, pagination, cards and empty state. | BLOCKED for release: [Projects index checkup](final-checkups/projects-index.md) verified scoped UI fixes locally; index migration and deployed gates remain open |
 | `/projects/[slug]` | Cover/gallery 3:2 carousel, captions/controls, related projects, missing/draft 404/noindex, metadata. | BLOCKED: not run for candidate |
 | `/blog` | Published/scheduled eligibility, category/search/pagination, featured result and empty state. | BLOCKED: not run for candidate |
 | `/blog/[slug]` | Current and legacy slugs, missing/gone/draft, MDX/images/code, reactions/views, attribution/canonical. | BLOCKED: not run for candidate |

@@ -1,6 +1,8 @@
 # Projects index: final deployment checkup
 
-**Route:** `/projects` | **Candidate:** `fcabdb9`, branch `haris-dev/set-up-this-codebase-for-FcY5YL` | **Checked:** 2026-10-10 | **Verdict:** **NOT READY - RELEASE BLOCKERS REMAIN**. This report follows `docs/FINAL_DEPLOYMENT_CHECKUP.md`. The index and shared card presentation are locked by `LOCKED_PERFECT.md:1444-1494,1534-1554`. No public code, connected data or production environment was changed in this checkup.
+**Route:** `/projects` | **Baseline:** `fcabdb9`, branch `haris-dev/set-up-this-codebase-for-FcY5YL` | **Checked/amended:** 2026-10-10 | **Verdict:** **NOT READY - RELEASE BLOCKERS REMAIN**. This report follows `docs/FINAL_DEPLOYMENT_CHECKUP.md`. The index and shared card presentation are locked by `LOCKED_PERFECT.md:1444-1494,1534-1554`; the owner's later scoped permission for PI-02..PI-05 is recorded there. No connected data, schema or production environment was changed.
+
+The initial measurements and findings below are retained as **pre-fix reproduction evidence**. Current results and status after the approved code amendment are in [Verification After Scoped Fixes](#verification-after-scoped-fixes).
 
 ## Scope And Evidence Boundary
 
@@ -8,7 +10,7 @@
 - Local app ran in Docker at `http://localhost:3000/projects` with Alloy preview `http://localhost:8080/projects`. Chromium browser tests used a local read-only session. Viewport screenshots `projects-index-checkup-390.png` and `projects-index-checkup-1440.png` were saved in `/tmp/playwright/`, not the repository. The approved historical presentation is `audit/06-projects-page.md`, but the source comment saying the index is not locked is stale relative to `LOCKED_PERFECT.md`.
 - No owner/non-owner identity, disposable >8-project dataset, migration, real upload or deploy target was available for a connected lifecycle test. A source, mocked or local browser PASS is not a production PASS.
 
-## Results By Gate
+## Results By Gate (Pre-Fix Baseline)
 
 | Gate | Status | Current evidence / limits |
 | --- | --- | --- |
@@ -47,6 +49,15 @@
 
 No subjective reskin proposed. PI-03/04 have usability implications, but their potential solutions may affect the locked staggered composition or shared cards. Present any visual alternatives with screenshots, measurable keyboard evidence and an explicit owner decision before editing them. The existing sample was free of observed clipping, failed loaded images and horizontal overflow.
 
-## Sign-off
+## Initial Sign-off (Pre-Fix)
 
 The route is locally reachable and its sampled search, cards, links, empty states, loading/error source and metadata mostly work, but **it is not production-ready**: effective index ordering is absent on the connected database, combined search/tag state is defective, desktop focus order differs from the approved visible order, and the deployed host is 404. Full accessibility, connected owner lifecycle, pagination beyond eight records and production performance are unverified. No public code or schema was changed during this checkup.
+
+## Verification After Scoped Fixes
+
+- **PI-02 - VERIFIED LOCALLY.** `ProjectsIndex.tsx` now tracks the latest intended URL parameters while debouncing Search; selecting a tag includes the current typed query. Isolated Chrome trials settled at `?tag=Cybersecurity&q=security` in both action orders; All, Back, Forward, unmatched-search recovery and input state agree. `tests/projects-index.browser.test.mjs` covers these flows without changing Home behavior.
+- **PI-03 - VERIFIED LOCALLY for sampled layouts.** The desktop scaffold maps each page item once in numbered DOM order using a grid with the original 213px stagger, center rule, card insets and 80px row rhythm. At 1280 and 1440 the six collapsed cards kept their exact measured x/y/height and section height from the pre-fix baseline; their DOM and visual top-to-bottom order now both read 01..06. Opening Details on left and right left positive space to the closing rule (62px or more) and no document overflow. A full screen-reader and long/variable-height >8-item review is still needed.
+- **PI-04 - VERIFIED LOCALLY.** Only when a tag filter is active, the index passes that tag to `CaseStudyCard` for the first visible chip; the shared Home card defaults to its old tag order. Direct `?tag=HealthCare` shows MedicaLink HMS with a visible HealthCare chip. Home and Projects cover-contract tests pass.
+- **PI-05 - VERIFIED LOCALLY.** Invalid `page` input (`999`, `2junk`, `0`, `-3`, `01`) replaces the URL with `/projects` while continuing to show the six current cards, without adding a false pagination state. Regression browser tests cover several values; >8-record pagination remains an approved-fixture gate.
+- **Responsive/regression checkpoint:** 16/16 local width/theme combinations (320/375/390/430/768/1024/1280/1440 x light/dark) returned 200 with six visible 3:2 cards, zero overflow, failed requests, broken loaded images or JS errors. `node --test --test-concurrency=1` with the seven focused Project/SEO/preview files finished **33 passed, 1 fixture skip, 0 failed**; the new browser suite finished **2 passed**, the mocked Admin-order component suite **1 passed**. Docker `npm run lint`, post-build `npx tsc --noEmit`, and `NEXT_DIST_DIR=.next-build npm run build` passed (84 generated pages; `/projects` 6.69 kB estimated route JS and 167 kB estimated first-load JS). An initial overly concurrent combined test run timed out under a slow dev server; only the completed sequential runs count as PASS. No dependency or other public presentation was modified.
+- **PI-01 / PI-06 still BLOCKED.** The read-only connected DB check returned `42703` for `index_order`; no migration or owner reorder was run. Configured HTTPS `/projects` still returns 404. Valid authenticated image upload, full WCAG/manual device testing, true >8 pagination, deployed SEO, field performance, backup/restore and other shared release gates remain open. The locally corrected page must **not** be labelled READY FOR DEPLOYMENT yet.

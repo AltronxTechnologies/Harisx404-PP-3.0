@@ -1553,6 +1553,20 @@ locked. Final re-lock awaits owner review of this limited amendment.
 The temporary Projects unlock in entry 25 is closed by this final lock. Do not
 modify any locked surface without a new explicit owner instruction.
 
+**2026-10-10 scoped owner-authorized Projects index release amendment:** The
+owner explicitly requested fixes for the verified Projects-index checkup
+findings. `app/projects/ProjectsIndex.tsx` now merges rapid search/filter/page
+intent without losing the active tag, normalizes invalid/out-of-range page
+URLs, and renders the staggered desktop cards in their numbered DOM order.
+`app/components/home/CaseStudies.tsx` accepts an optional Projects-only active
+filter tag so a matching result displays that tag first; the default Home
+cards remain unchanged. At 1280px and 1440px the measured collapsed-card
+positions, heights and section height match the approved baseline; the
+responsive, theme and keyboard checks are recorded in
+`docs/final-checkups/projects-index.md`. This scoped amendment is re-locked;
+it is **not** approval to change Home styling, apply live SQL, or declare the
+page deployed/production-ready.
+
 ## 27. FINAL OWNER LOCK - Core Public Website
 
 - **Date locked:** 2026-09-06
