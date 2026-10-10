@@ -2572,6 +2572,22 @@ targeted ESLint, and responsive light/dark browser inspection). This is a
 presentation sign-off, not a claim that every Admin save/reopen, deployed
 database mutation, or owner-authored project screenshot has been verified.
 
+### 2026-10-10 owner-authorized carousel correction
+
+The owner reported background lines during image transitions and requested
+matching caption controls on both desktop image cards. Only
+`ProjectImageCarousel.tsx` changed: its transitioning frame uses the opaque
+`bg-bg-primary` surface, and each visible image can open its own caption at
+the same inset within its card. On phones the single visible image retains
+one caption control; navigation closes captions, Escape returns focus to the
+corresponding trigger, and autoplay stays paused while a caption is open.
+The 3:2 card geometry, 16px desktop gap, controls and other project-detail
+presentation remain unchanged. `tests/project-image-carousel.browser.test.mjs`
+passed with two desktop cards in dark/light and one card at 390px; the
+project-detail source/HTTP suite, targeted lint, isolated build and TypeScript
+also passed. This narrow amendment is re-locked; it is not a full deployed
+project-detail checkup or permission to alter any other locked surface.
+
 ### 2026-09-28 owner-authorized legal-divider amendment
 
 The owner requested that Privacy and Terms horizontal dividers match the

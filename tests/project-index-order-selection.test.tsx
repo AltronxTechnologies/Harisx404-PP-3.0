@@ -53,3 +53,53 @@ test("Projects page order moves one published project at a time and saves a comp
     globalThis.fetch = originalFetch;
   }
 });
+
+test("Projects order scrolls after five measured rows, including long titles and reordering", async () => {
+  const React = await import("react");
+  const [{ createRoot }, { act }, { AppRouterContext }, { ProjectIndexOrderManager }] = await Promise.all([
+    import("react-dom/client"), import("react-dom/test-utils"),
+    import("next/dist/shared/lib/app-router-context.shared-runtime"),
+    import("../app/components/admin/ProjectIndexOrderManager"),
+  ]);
+  const oldObserver = globalThis.ResizeObserver;
+  const oldRect = browser.HTMLElement.prototype.getBoundingClientRect;
+  class MeasuredObserver {
+    constructor(private callback: ResizeObserverCallback) {}
+    observe() { this.callback([], this as unknown as ResizeObserver); }
+    disconnect() {}
+  }
+  globalThis.ResizeObserver = MeasuredObserver as unknown as typeof ResizeObserver;
+  browser.HTMLElement.prototype.getBoundingClientRect = function () {
+    if (this.tagName !== "LI" || this.parentElement?.getAttribute("aria-label") !== "Projects page order list") return oldRect.call(this);
+    const rows = [...this.parentElement.children];
+    const height = (row: Element) => row.textContent?.includes("Long Project") ? 102 : 70;
+    const top = rows.slice(0, rows.indexOf(this)).reduce((sum, row) => sum + height(row) + 8, 0);
+    return { ...oldRect.call(this), top, bottom: top + height(this) } as DOMRect;
+  };
+  const projects = Array.from({ length: 7 }, (_, index) => ({
+    id: `00000000-0000-4000-8000-${String(index + 1).padStart(12, "0")}`,
+    title: index === 5 ? "Long Project 6" : `Project ${index + 1}`,
+    status: "published", index_order: index + 1, updated_at: "2026-10-08T00:00:00Z",
+  }));
+  const host = document.createElement("div");
+  document.body.append(host);
+  const root = createRoot(host);
+  try {
+    await act(async () => root.render(React.createElement(AppRouterContext.Provider, { value: { refresh: () => {} } as any }, React.createElement(ProjectIndexOrderManager, { projects }))));
+    const list = host.querySelector<HTMLOListElement>('ol[aria-label="Projects page order list"]')!;
+    assert.equal(list.children.length, 7);
+    assert.equal(list.style.maxHeight, "382px");
+    assert.match(list.className, /overflow-y-auto/);
+    assert.equal(list.tabIndex, 0);
+    await act(async () => host.querySelector<HTMLButtonElement>('[aria-label="Move Long Project 6 up on Projects page"]')!.click());
+    assert.equal(list.style.maxHeight, "414px");
+    const fiveRows = projects.slice(0, 5).map((project) => ({ ...project, title: `Long Project ${project.id}` }));
+    await act(async () => root.render(React.createElement(AppRouterContext.Provider, { value: { refresh: () => {} } } as any, React.createElement(ProjectIndexOrderManager, { key: "five", projects: fiveRows }))));
+    assert.equal(host.querySelector<HTMLOListElement>('ol[aria-label="Projects page order list"]')!.style.maxHeight, "");
+  } finally {
+    await act(async () => root.unmount());
+    host.remove();
+    browser.HTMLElement.prototype.getBoundingClientRect = oldRect;
+    globalThis.ResizeObserver = oldObserver;
+  }
+});

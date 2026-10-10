@@ -17,7 +17,7 @@ const controlClass = "flex h-11 w-11 shrink-0 items-center justify-center rounde
 export function ProjectImageCarousel({ images, title }: { images: Slide[]; title: string }) {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
-  const [captionOpen, setCaptionOpen] = useState(false);
+  const [captionSlot, setCaptionSlot] = useState<0 | 1 | null>(null);
   const [visible, setVisible] = useState(false);
   const [pageActive, setPageActive] = useState(true);
   const [cycle, setCycle] = useState(0);
@@ -29,7 +29,7 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
   const [slideStep, setSlideStep] = useState(0);
   const figureRef = useRef<HTMLElement>(null);
   const captionBoxRef = useRef<HTMLDivElement>(null);
-  const captionButtonRef = useRef<HTMLButtonElement>(null);
+  const captionButtonRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const nextButtonRef = useRef<HTMLButtonElement>(null);
   const wantedSrcRef = useRef(images[0]?.src);
   const readyUrlsRef = useRef(new Set<string>());
@@ -38,6 +38,7 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
   const shown = displayed ?? current;
   const shownIndex = images.findIndex((image) => image.src === shown?.src);
   const following = images.length > 1 ? images[(shownIndex + 1) % images.length] : null;
+  const captionOpen = captionSlot !== null;
   const loading = Boolean(current && shown && current.src !== shown.src);
   const adjacent = images.length > 1 && visible
     ? [images[(shownIndex + 1) % images.length], images[(shownIndex - 1 + images.length) % images.length]]
@@ -66,7 +67,9 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
     if (!figure) return;
     const update = () => {
       const width = figure.getBoundingClientRect().width;
-      setSlideStep(window.matchMedia("(min-width: 1024px)").matches && images.length > 1 ? (width + 16) / 2 : width);
+      const desktop = window.matchMedia("(min-width: 1024px)").matches;
+      setSlideStep(desktop && images.length > 1 ? (width + 16) / 2 : width);
+      if (!desktop) setCaptionSlot((slot) => slot === 1 ? null : slot);
     };
     update();
     const observer = new ResizeObserver(update);
@@ -77,7 +80,7 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
 
   useEffect(() => {
     if (!canPlay) return;
-    const timer = window.setInterval(() => { setCaptionOpen(false); setDirection(1); setIndex((value) => (value + 1) % images.length); }, 5000);
+    const timer = window.setInterval(() => { setCaptionSlot(null); setDirection(1); setIndex((value) => (value + 1) % images.length); }, 5000);
     return () => window.clearInterval(timer);
   }, [canPlay, cycle, images.length]);
 
@@ -92,29 +95,47 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
   }, [current, loading]);
 
   useEffect(() => {
-    if (!captionOpen) return;
+    if (captionSlot === null) return;
     const onPointerDown = (event: PointerEvent) => {
       const target = event.target as Node;
-      if (!captionBoxRef.current?.contains(target) && !captionButtonRef.current?.contains(target)) setCaptionOpen(false);
+      if (!captionBoxRef.current?.contains(target) && !captionButtonRefs.current.some((button) => button?.contains(target))) setCaptionSlot(null);
     };
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") { setCaptionOpen(false); captionButtonRef.current?.focus(); }
+      if (event.key === "Escape") { captionButtonRefs.current[captionSlot]?.focus(); setCaptionSlot(null); }
     };
     document.addEventListener("pointerdown", onPointerDown);
     document.addEventListener("keydown", onKeyDown);
     return () => { document.removeEventListener("pointerdown", onPointerDown); document.removeEventListener("keydown", onKeyDown); };
-  }, [captionOpen]);
+  }, [captionSlot]);
 
   if (!current) return null;
 
   const goTo = (next: number) => {
     const target = (next + images.length) % images.length;
-    setCaptionOpen(false);
+    setCaptionSlot(null);
     setDirection(next < index ? -1 : 1);
     setImageError(false);
     if (readyUrlsRef.current.has(images[target].src)) setDisplayed(images[target]);
     setIndex(target);
     setCycle((value) => value + 1);
+  };
+
+  const renderCaption = (image: Slide, slot: 0 | 1) => {
+    if (!image.caption.trim()) return null;
+    const open = captionSlot === slot;
+    const imageNumber = (shownIndex + slot) % images.length + 1;
+    const position = slot === 0 ? "left-3" : "left-[calc(50%+20px)]";
+    const id = slot === 0 ? "project-image-caption" : "project-image-caption-next";
+    return <>
+      {open && <div ref={captionBoxRef} id={id} role="region" aria-label="Image caption" className={`absolute bottom-16 z-20 flex max-h-[calc(100%-5rem)] w-48 max-w-[calc(100%-1.5rem)] flex-col overflow-hidden rounded-xl border border-border-primary bg-bg-primary text-text-primary shadow-xl dark:shadow-black/50 sm:max-h-48 sm:w-72 lg:max-w-[calc(50%-1.5rem)] ${position}`}>
+        <div className="flex shrink-0 items-center justify-between border-b border-border-primary pl-3 pr-1 sm:pl-4">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-text-secondary">Caption</span>
+          <button type="button" aria-label="Close image caption" onClick={() => { captionButtonRefs.current[slot]?.focus(); setCaptionSlot(null); }} className="flex size-11 items-center justify-center rounded-lg text-text-secondary hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary"><X aria-hidden className="size-4" /></button>
+        </div>
+        <p className="min-h-0 overflow-y-auto whitespace-pre-wrap break-words px-3 py-2 text-xs leading-[18px] sm:px-4 sm:py-2.5 sm:text-[13px] sm:leading-5">{image.caption}</p>
+      </div>}
+      <button ref={(node) => { captionButtonRefs.current[slot] = node; }} type="button" aria-label={`${open ? "Hide" : "Show"} image ${imageNumber} caption`} aria-expanded={open} aria-controls={id} onClick={() => setCaptionSlot((current) => current === slot ? null : slot)} className={`absolute bottom-3 z-20 flex size-11 items-center justify-center rounded-full border border-border-primary bg-bg-primary text-text-primary shadow-md transition-colors hover:bg-neutral-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:bg-neutral-800 ${position}`}><MessageSquareText aria-hidden className="size-4" /></button>
+    </>;
   };
 
   return (
@@ -125,7 +146,7 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
         className="isolate"
       >
         <motion.div
-          className={`relative aspect-[3/2] overflow-hidden ${following ? "lg:aspect-auto lg:before:block lg:before:aspect-[3/2] lg:before:w-[calc(50%-8px)] lg:before:content-['']" : ""}`}
+          className={`relative aspect-[3/2] overflow-hidden bg-bg-primary ${following ? "lg:aspect-auto lg:before:block lg:before:aspect-[3/2] lg:before:w-[calc(50%-8px)] lg:before:content-['']" : ""}`}
         drag={images.length > 1 ? "x" : false}
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.08}
@@ -151,16 +172,8 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
             {images.length > 1 && <button type="button" onClick={() => { goTo(index + 1); requestAnimationFrame(() => nextButtonRef.current?.focus()); }} className="shrink-0 rounded-md border border-border-primary px-2 py-1 text-xs font-medium hover:border-neutral-400/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:border-white/25">Skip image</button>}
           </div>}
           {loading && showLoading && !imageError && <span role="status" className="absolute bottom-3 left-3 z-10 rounded-full bg-neutral-950 px-3 py-2 text-xs text-white">Loading image...</span>}
-          {!loading && !imageError && shown.caption.trim() && <>
-            {captionOpen && <div ref={captionBoxRef} id="project-image-caption" role="region" aria-label="Image caption" className="absolute bottom-16 left-3 z-20 flex max-h-[calc(100%-5rem)] w-48 max-w-[calc(100%-1.5rem)] flex-col overflow-hidden rounded-xl border border-border-primary bg-bg-primary text-text-primary shadow-xl dark:shadow-black/50 sm:max-h-48 sm:w-72">
-              <div className="flex shrink-0 items-center justify-between border-b border-border-primary pl-3 pr-1 sm:pl-4">
-                <span className="font-mono text-[10px] uppercase tracking-widest text-text-secondary">Caption</span>
-                <button type="button" aria-label="Close image caption" onClick={() => { setCaptionOpen(false); captionButtonRef.current?.focus(); }} className="flex size-11 items-center justify-center rounded-lg text-text-secondary hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary"><X aria-hidden className="size-4" /></button>
-              </div>
-              <p className="min-h-0 overflow-y-auto whitespace-pre-wrap break-words px-3 py-2 text-xs leading-[18px] sm:px-4 sm:py-2.5 sm:text-[13px] sm:leading-5">{shown.caption}</p>
-            </div>}
-            <button ref={captionButtonRef} type="button" aria-label={captionOpen ? "Hide image caption" : "Show image caption"} aria-expanded={captionOpen} aria-controls="project-image-caption" onClick={() => setCaptionOpen((open) => !open)} className="absolute bottom-3 left-3 z-20 flex size-11 items-center justify-center rounded-full border border-border-primary bg-bg-primary text-text-primary shadow-md transition-colors hover:bg-neutral-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:hover:bg-neutral-800"><MessageSquareText aria-hidden className="size-4" /></button>
-          </>}
+          {!loading && !imageError && renderCaption(shown, 0)}
+          {following && !loading && secondaryError !== following.src && <div className="hidden lg:block">{renderCaption(following, 1)}</div>}
         </motion.div>
       </figure>
       {images.length > 1 && <div role="group" aria-label="Carousel controls" className="mt-4 flex items-center justify-center gap-2 max-[319px]:gap-1 sm:mt-8 sm:flex-wrap sm:gap-4">

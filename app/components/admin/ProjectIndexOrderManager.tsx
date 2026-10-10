@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
@@ -25,6 +25,8 @@ export function ProjectIndexOrderManager({ projects }: { projects: ProjectOption
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [hasError, setHasError] = useState(false);
+  const [listMaxHeight, setListMaxHeight] = useState<number>();
+  const listRef = useRef<HTMLOListElement>(null);
   const byId = new Map(published.map((project) => [project.id, project]));
   const changed = ids.join(",") !== savedIds.join(",");
   const { leaveTarget, setLeaveTarget, confirmLeave } = useAdminNavigationGuard(changed || busy);
@@ -35,6 +37,21 @@ export function ProjectIndexOrderManager({ projects }: { projects: ProjectOption
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
   }, [changed, busy]);
+
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list || ids.length <= 5) { setListMaxHeight(undefined); return; }
+    const rows = Array.from(list.children).slice(0, 5) as HTMLElement[];
+    const measure = () => {
+      const first = rows[0].getBoundingClientRect();
+      const fifth = rows[4].getBoundingClientRect();
+      if (fifth.bottom > first.top) setListMaxHeight(Math.ceil(fifth.bottom - first.top));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    rows.forEach((row) => observer.observe(row));
+    return () => observer.disconnect();
+  }, [ids]);
 
   const move = (position: number, nextPosition: number) => {
     const next = [...ids];
@@ -74,7 +91,7 @@ export function ProjectIndexOrderManager({ projects }: { projects: ProjectOption
       <h2 id="project-index-order-heading" className="text-lg font-semibold text-ink-primary">Projects page order</h2>
       <p className="mt-1 text-sm text-ink-secondary">Arrange published projects on the Projects page. New projects appear first automatically. This does not change Featured on Home.</p>
     </div>
-    {published.length ? <ol className="max-h-[600px] space-y-2 overflow-y-auto pr-1">{ids.map((id, position) => {
+    {published.length ? <ol ref={listRef} aria-label="Projects page order list" tabIndex={0} style={listMaxHeight ? { maxHeight: listMaxHeight } : undefined} className="space-y-2 overflow-y-auto pr-1">{ids.map((id, position) => {
       const project = byId.get(id);
       return <li key={id} className="flex min-w-0 items-center gap-3 rounded-xl border border-border-hairline bg-surface-base p-3">
         <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border-hairline font-mono text-xs text-ink-primary" aria-label={`Projects page position ${position + 1}`}>{position + 1}</span>
