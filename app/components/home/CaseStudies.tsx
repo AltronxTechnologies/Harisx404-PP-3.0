@@ -247,9 +247,7 @@ export function CaseStudyCard({
   /** Home: hide the below-panel body at xl — the sticky side panel shows the
       same details there. Below xl (no side panel) the body stays visible. */
   bodyHiddenOnXl?: boolean;
-  /** Tailwind min-height class for the cover panel. The projects page passes
-      a smaller value so the cover keeps the same width-to-height proportion
-      as on the home page, where columns are wider. */
+  /** Tailwind min-height class for the legacy text-overlay cover panel. */
   coverMinHClass?: string;
   /** When set, renders a dotted horizontal rule between the meta row and the
       cover. The projects page uses negative margins here so the rule extends
@@ -264,14 +262,11 @@ export function CaseStudyCard({
       hover choreography (image tilt/lift) is unaffected. Defaults to true,
       preserving the home page behaviour. */
   liftOnHover?: boolean;
-  /** What the big heading inside the cover shows. Home keeps the default
-      tagline; the projects page passes "title" to show the project name. */
+  /** Title-led cards use the image-only cover and show the title below it. */
   coverHeading?: "tagline" | "title";
-  /** Projects can request the homepage's stroked line arrow while retaining
-      their title-led cover. Auto preserves the established context behavior. */
+  /** Selects the arrow style on text-overlay covers. */
   coverArrow?: "auto" | "line" | "glyph";
-  /** The Projects cover already names the project in its h3, so its screenshot
-      can be decorative instead of repeating the link name to screen readers. */
+  /** Text-overlay covers can use a decorative screenshot. */
   decorativeCoverImage?: boolean;
   /** Context-specific Next Image loading and responsive source hints. */
   imagePriority?: boolean;
@@ -467,16 +462,16 @@ export function CaseStudyCard({
 
       <Link
         href={`/projects/${project.slug}`}
-        aria-label={bodyHiddenOnXl ? `View ${project.title} case study` : undefined}
+        aria-label={coverHeading === "title" ? `View ${project.title} case study` : undefined}
         className={clsx(
           "frame-light-edge group relative block",
-          bodyHiddenOnXl && "aspect-[3/2] focus-visible:rounded-[22px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary",
+          coverHeading === "title" && "aspect-[3/2] focus-visible:rounded-[22px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary",
           /* Projects page: the cover panel itself rises 6px on hover, so the
              frame hairline must ride along or it visibly detaches. */
-          !liftOnHover && !bodyHiddenOnXl && "frame-light-edge-lift"
+          !liftOnHover && coverHeading !== "title" && "frame-light-edge-lift"
         )}
       >
-        {bodyHiddenOnXl ? (
+        {coverHeading === "title" ? (
           <div
             ref={panelRef}
             className="relative h-full w-full overflow-hidden rounded-[22px] border-8 border-white shadow-[0_0_0_0.8px_rgba(0,0,0,0.2),0_9.5px_28.5px_-11.4px_rgba(0,0,0,0.4)] dark:border-zinc-800 dark:shadow-[0_0_0_1px_#4d4d4d,0_9.5px_28.5px_-11.4px_rgba(0,0,0,0.4)]"
@@ -550,33 +545,8 @@ export function CaseStudyCard({
             )}
           >
             <div className="flex items-start justify-between gap-4">
-              <h3
-                className={clsx(
-                  "line-clamp-2 max-w-xl",
-                  coverHeading === "title"
-                    ? bodyHiddenOnXl
-                      ? /* Home: cover tagline in the body sans (same family
-                           as the card description) — softer, 18/20px. */
-                        "text-base font-medium leading-snug text-white/85 md:text-xl"
-                      : /* Identical type to the home projects-section title
-                         (font-display text-3xl font-medium leading-tight) —
-                         white for contrast on the gradient panel, lifted by a
-                         two-layer text shadow (tight contact + soft ambient)
-                         so it stays crisp on any cover hue. */
-                      "font-display text-[22px] font-medium leading-tight text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.35),0_4px_14px_rgba(0,0,0,0.22)] max-[380px]:text-[19px] sm:text-[26px] md:text-3xl"
-                    : /* Home: body-sans tagline, softer — white/70,
-                         no shadow — sized for two clamped lines. */
-                      "text-base font-medium leading-snug text-white/85 md:text-xl"
-                )}
-              >
-                {coverHeading === "title"
-                  ? bodyHiddenOnXl
-                    ? /* Home: the cover shows the description/tagline (soft
-                         serif style), while the below-panel body keeps the
-                         projects structure for mobile/tablet. */
-                      project.tagline
-                    : project.title
-                  : project.tagline}
+              <h3 className="line-clamp-2 max-w-xl text-base font-medium leading-snug text-white/85 md:text-xl">
+                {project.tagline}
               </h3>
               <span
                 aria-hidden
@@ -750,17 +720,14 @@ export function CaseStudyCard({
         )}
         {coverHeading === "title" ? (
           <>
-            {bodyHiddenOnXl && (
-              /* Home mobile/tablet: the cover shows the tagline, so the
-                 project title leads the body here (hidden at xl where the
-                 sticky panel already names the project). */
+            <h3 className="mb-2 font-display text-2xl font-medium leading-tight">
               <Link
                 href={`/projects/${project.slug}`}
-                className="mb-2 block font-display text-2xl font-medium leading-tight text-text-primary transition-colors hover:text-text-secondary"
+                className="text-text-primary transition-colors hover:text-text-secondary"
               >
                 {project.title}
               </Link>
-            )}
+            </h3>
             {/* Projects page: the description itself links to the case study —
                 the whole reading path (cover, description, CTA) navigates.
                 On the xl staggered grid it reserves two lines so paired

@@ -24,13 +24,31 @@ test("Projects index still uses the established shared card recipe", () => {
   const index = readFileSync(new URL("../app/projects/ProjectsIndex.tsx", import.meta.url), "utf8");
   const source = readFileSync(new URL("../app/components/home/CaseStudies.tsx", import.meta.url), "utf8");
   assert.doesNotMatch(index, /bodyHiddenOnXl/);
-  assert.match(source, /bodyHiddenOnXl \? \(/);
+  assert.match(index, /coverHeading="title"/);
+  assert.match(source, /coverHeading === "title" \? \(/);
   assert.match(source, /frame-light-edge group relative block/);
+  assert.match(source, /<h3 className="mb-2 font-display text-2xl/);
+});
+
+test("Projects index uses the same 3:2 image-only covers with titles below", async (t) => {
+  const response = await fetch(`${process.env.PREVIEW_BASE_URL || "http://localhost:3000"}/projects`);
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  if (!html.includes("projects found")) return t.skip("No published projects");
+  const covers = [...html.matchAll(/<a\b(?=[^>]*href="\/projects\/[^\"]+")(?=[^>]*aria-label="View [^\"]+ case study")[^>]*>([\s\S]*?)<\/a>/g)];
+  assert.ok(covers.length > 0, "Projects index has labeled image covers");
+  for (const [link, cover] of covers) {
+    assert.match(link, /aspect-\[3\/2\]/);
+    assert.match(cover, /border-8 border-white/);
+    assert.doesNotMatch(cover, /<h3\b/, "project title is not over the image");
+    assert.match(cover, /<img[^>]*alt=""/, "the cover image is decorative inside a named link");
+  }
+  assert.match(html, /<h3 class="mb-2 font-display text-2xl[^\"]*"><a[^>]*href="\/projects\//);
 });
 
 test("Home-only covers softly zoom the image and both Home layouts share the measured three-row tech stack", () => {
   const source = readFileSync(new URL("../app/components/home/CaseStudies.tsx", import.meta.url), "utf8");
-  const homeCover = source.split("{bodyHiddenOnXl ? (")[1]?.split("\n        ) : (\n        <div\n          ref={panelRef}")[0];
+  const homeCover = source.split("{coverHeading === \"title\" ? (")[1]?.split("\n        ) : (\n        <div\n          ref={panelRef}")[0];
   assert.ok(homeCover, "the Home cover has its own rendering branch");
   assert.match(homeCover, /group-hover:scale-\[1\.03\]/);
   assert.doesNotMatch(homeCover, /group-hover:border-|shadow-\[inset_/);

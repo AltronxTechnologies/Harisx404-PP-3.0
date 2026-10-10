@@ -356,12 +356,9 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
             <CaseStudyCard
               project={project}
               index={start + i}
-              coverMinHClass="xl:min-h-[384px]"
-              metaDividerClass="mx-0"
-              liftOnHover={false}
-              coverHeading="title"
-              coverArrow="line"
-              decorativeCoverImage
+               metaDividerClass="mx-0"
+               liftOnHover={false}
+               coverHeading="title"
               imagePriority={i === 0}
               imageSizes="(max-width: 1279px) 100vw, 50vw"
               highlight={q}
@@ -414,17 +411,14 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
                   <CaseStudyCard
                     project={project}
                     index={start + i}
-                    coverMinHClass="xl:min-h-[384px]"
-                    metaDividerClass={
+                     metaDividerClass={
                       col === 0
                         ? "xl:-ml-6 xl:-mr-[25px]"
                         : "xl:-ml-[25px] xl:-mr-6"
                     }
                     metaDividerJoint={col === 0 ? "right" : "left"}
-                    liftOnHover={false}
-                    coverHeading="title"
-                    coverArrow="line"
-                    decorativeCoverImage
+                     liftOnHover={false}
+                     coverHeading="title"
                     imagePriority={i === 0}
                     imageSizes="(max-width: 1279px) 100vw, 50vw"
                     highlight={q}
