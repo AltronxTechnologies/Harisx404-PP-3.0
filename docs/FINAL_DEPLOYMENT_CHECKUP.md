@@ -39,7 +39,7 @@ This is a **source inventory**, not a pass matrix. A checked route gets a separa
 
 | Public page pattern | Specific functional/content check beyond the shared protocol | Current final checkup |
 | --- | --- | --- |
-| `/` | Home featured project order, testimonial provenance, article lead, stats, CTA, chatbot and consent/privacy claims. | BLOCKED: not run for candidate |
+| `/` | Home featured project order, testimonial provenance, article lead, stats, CTA, chatbot and consent/privacy claims. | BLOCKED for release: [local Home checkup](final-checkups/home.md) completed; editorial/deployed gates open |
 | `/about` | Biography, experience/certifications source, timeline, links, images, factual owner sign-off. | BLOCKED: not run for candidate |
 | `/projects` | Published-only collection, saved Admin order/new-first, search/tag filters, pagination, cards and empty state. | BLOCKED: local render sampled only |
 | `/projects/[slug]` | Cover/gallery 3:2 carousel, captions/controls, related projects, missing/draft 404/noindex, metadata. | BLOCKED: not run for candidate |
