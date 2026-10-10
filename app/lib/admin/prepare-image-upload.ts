@@ -113,40 +113,12 @@ function convertImageToWebP(file: File): Promise<File> {
         ctx.imageSmoothingQuality = "high";
         ctx.drawImage(img, 0, 0, width, height);
 
-const SAFE_UPLOAD_THRESHOLD_BYTES = 800 * 1024; // 800 KB target to ensure multipart body stays well under 1 MB proxy limit
-
         canvas.toBlob(
           (blob) => {
             if (settled) return;
             if (!blob || blob.type !== "image/webp" || blob.size >= file.size) {
               finish(file);
               return;
-            }
-
-            // If the converted WebP is still near the 1 MB envelope boundary, run an adaptive pass at 0.88 quality
-            if (blob.size > SAFE_UPLOAD_THRESHOLD_BYTES) {
-              try {
-                canvas.toBlob(
-                  (secondBlob) => {
-                    if (settled) return;
-                    const finalBlob = (secondBlob && secondBlob.type === "image/webp" && secondBlob.size < blob.size) ? secondBlob : blob;
-                    try {
-                      const baseName = file.name.replace(/\.[^/.]+$/, "").slice(0, 250);
-                      finish(new File([finalBlob], `${baseName}.webp`, {
-                        type: "image/webp",
-                        lastModified: Date.now(),
-                      }));
-                    } catch {
-                      finish(file);
-                    }
-                  },
-                  "image/webp",
-                  0.88
-                );
-                return;
-              } catch {
-                // Fall back to first blob if second pass throws
-              }
             }
 
             try {

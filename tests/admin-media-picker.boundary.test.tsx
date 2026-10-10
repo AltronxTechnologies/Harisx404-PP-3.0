@@ -149,3 +149,39 @@ test("a small WebP rejected with non-JSON 413 reports the request boundary witho
     globalThis.fetch = originalFetch;
   }
 });
+
+test("picker sends an otherwise valid WebP above the former client-only limit to the shared upload route", async () => {
+  const React = await import("react");
+  const [{ createRoot }, { act }, { MediaPickerModal }] = await Promise.all([
+    import("react-dom/client"), import("react-dom/test-utils"), import("../app/components/admin/MediaPickerModal"),
+  ]);
+  const originalFetch = globalThis.fetch;
+  let sent = 0;
+  let uploaded = 0;
+  globalThis.fetch = async (url, options) => {
+    if (options?.method !== "POST") return Response.json({ data: [], count: 0 });
+    assert.equal(url, "/api/admin/media/upload");
+    const body = options.body as FormData;
+    assert.equal((body.get("file") as File).size, 4_600_000);
+    assert.equal(body.get("original_filename"), "sample.webp");
+    sent++;
+    return Response.json({ data: { id: "uploaded-1", url: "/blog/favicon_download_page.jpeg", secure_url: "/blog/favicon_download_page.jpeg", original_filename: "sample.webp" } });
+  };
+  const host = document.createElement("div");
+  document.body.append(host);
+  const root = createRoot(host);
+  try {
+    await act(async () => { root.render(React.createElement(MediaPickerModal, { isOpen: true, onClose: () => {}, onSelect: () => {}, onUploaded: () => { uploaded++; } })); await new Promise((resolve) => setTimeout(resolve, 0)); });
+    await act(async () => [...host.querySelectorAll<HTMLButtonElement>("button")].find((button) => button.textContent?.includes("Upload"))!.click());
+    const input = host.querySelector<HTMLInputElement>('input[type="file"]')!;
+    Object.defineProperty(input, "files", { configurable: true, value: [new File([new Uint8Array(4_600_000)], "sample.webp", { type: "image/webp" })] });
+    await act(async () => { input.dispatchEvent(new browser.Event("change", { bubbles: true }) as unknown as Event); await new Promise((resolve) => setTimeout(resolve, 0)); });
+    for (let attempt = 0; attempt < 20 && !uploaded; attempt++) await act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
+    assert.equal(sent, 1);
+    assert.equal(uploaded, 1);
+  } finally {
+    await act(async () => root.unmount());
+    host.remove();
+    globalThis.fetch = originalFetch;
+  }
+});

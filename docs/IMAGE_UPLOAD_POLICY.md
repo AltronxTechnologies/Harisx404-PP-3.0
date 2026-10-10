@@ -35,6 +35,16 @@ Verification: browser-simulated MIME/size/timeout/animation tests in
 of an existing 614x614 local PNG: 627432 source bytes vs 68646 WebP bytes at
 quality 0.94. This is one sample, not a guarantee for every image.
 
+After review of the 2026-10-10 client upload changes, the unverified 800 KB
+second encode and two selective 4.5 MiB client blocks were removed. They did
+not affect WebP (which is passed through unchanged), could return the larger
+original on an encoder timeout, and contradicted the shared 20 MiB app limit.
+Still JPEG/PNG uses one 0.94-quality pass when it produces a smaller file.
+Focused tests now cover a converted file above 800 KB, unchanged WebP, the
+shared limit and a mocked 4.6 MB picker upload. This restores the existing
+contract; it is **not** evidence that the reported authenticated sub-1 MB
+upload succeeds through the unidentified gateway.
+
 ## Reported sub-1 MB WebP HTTP 413: decision and safe path
 
 The exact observed Admin wording comes from `app/lib/admin/read-admin-response.ts`

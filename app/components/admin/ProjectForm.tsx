@@ -472,9 +472,6 @@ export function ProjectForm({ initialData, availableProjects }: ProjectFormProps
         const body = new FormData();
         body.append("file", fileToUpload);
         body.append("original_filename", staged.file.name);
-        if (fileToUpload.size > 4.5 * 1024 * 1024) {
-          throw new Error(`"${staged.file.name}" exceeds the server upload limit (${(fileToUpload.size / (1024 * 1024)).toFixed(1)} MB). Please select an image under 4.5 MB.`);
-        }
         const response = await fetch("/api/admin/media/upload", { method: "POST", body });
         const result = await readAdminResponse(response, "Project image upload");
         if (!response.ok || !result.data?.id) throw new Error(result.error || "Project image upload could not be confirmed. Check the Media Library before retrying.");

@@ -9,7 +9,7 @@ const source = readFileSync(new URL("../app/lib/admin/prepare-image-upload.ts", 
 const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
 
 function browserConversion({ blob, delayed = false }) {
-  const calls = { created: 0, revoked: 0, dimensions: null, deadline: null, finishBlob: null, quality: null };
+  const calls = { created: 0, revoked: 0, dimensions: null, deadline: null, finishBlob: null, quality: null, encodes: 0 };
   const exports = {};
   class Image {
     naturalWidth = 4000;
@@ -25,7 +25,7 @@ function browserConversion({ blob, delayed = false }) {
     document: { createElement() { return {
       width: 0, height: 0,
       getContext() { return { drawImage() { calls.dimensions = [this.canvas.width, this.canvas.height]; }, canvas: this }; },
-      toBlob(callback, _type, quality) { calls.quality = quality; if (delayed) calls.finishBlob = () => callback(blob); else callback(blob); },
+      toBlob(callback, _type, quality) { calls.encodes++; calls.quality = quality; if (delayed) calls.finishBlob = () => callback(blob); else callback(blob); },
     }; } },
     setTimeout(callback) { calls.deadline = callback; return 1; },
     clearTimeout() {},
@@ -85,6 +85,27 @@ test("large WebP files are left intact so animated images keep their frames", as
   const original = new File([new Uint8Array(900 * 1024)], "animated.webp", { type: "image/webp" });
   assert.equal(await prepare(original), original);
   assert.equal(calls.created, 0);
+});
+
+test("a still image close to a guessed proxy threshold keeps the first high-quality WebP encode", async () => {
+  const converted = new Blob([new Uint8Array(850 * 1024)], { type: "image/webp" });
+  const { prepare, calls } = browserConversion({ blob: converted });
+  const original = new File([new Uint8Array(1500 * 1024)], "photo.jpg", { type: "image/jpeg" });
+  const result = await prepare(original);
+  assert.equal(result.size, converted.size);
+  assert.equal(result.type, "image/webp");
+  assert.equal(calls.quality, 0.94);
+  assert.equal(calls.encodes, 1, "a second encode risks returning the larger original on timeout");
+  assert.equal(calls.revoked, 1);
+});
+
+test("the shared Admin upload policy has no guessed client-only cap below the route limit", () => {
+  for (const path of ["../app/components/admin/ProjectForm.tsx", "../app/components/admin/MediaPickerModal.tsx", "../app/components/admin/BlogImageManager.tsx", "../app/admin/(dashboard)/media/page.tsx"]) {
+    const caller = readFileSync(new URL(path, import.meta.url), "utf8");
+    assert.doesNotMatch(caller, /4\.5 \* 1024 \* 1024|SAFE_UPLOAD_THRESHOLD_BYTES/, path);
+  }
+  const route = readFileSync(new URL("../app/api/admin/media/upload/route.ts", import.meta.url), "utf8");
+  assert.match(route, /file\.size > 20 \* 1024 \* 1024/);
 });
 
 test("generated WebP filenames stay within the server's 255-character limit", async () => {
