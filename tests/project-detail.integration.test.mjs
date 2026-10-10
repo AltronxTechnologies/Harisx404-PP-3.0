@@ -137,9 +137,10 @@ test("project images enforce a cover, allow ordered additions, and deliver respo
   assert.doesNotMatch(detail, /title: "Gallery"/);
   assert.match(carousel, /f_webp,q_auto:good,c_limit,w_/);
   assert.match(carousel, /drag=\{images\.length > 1/);
-  assert.match(carousel, /aspect-\[3\/2\] overflow-hidden.*lg:aspect-\[3\/1\]/);
-  assert.match(carousel, /following \? "lg:grid lg:grid-cols-2"/);
-  assert.match(carousel, /following && <div className="relative hidden h-full min-w-0 border-l border-border-primary lg:block"/);
+  assert.match(carousel, /lg:before:aspect-\[3\/2\] lg:before:w-\[calc\(50%-8px\)\]/);
+  assert.match(carousel, /\(width \+ 16\) \/ 2/);
+  assert.match(carousel, /following \? "lg:flex lg:gap-4"/);
+  assert.match(carousel, /following && <div className="relative hidden h-full w-\[calc\(50%-8px\)\] shrink-0 overflow-hidden rounded-3xl border border-border-primary/);
   assert.doesNotMatch(carousel, /aspect-\[4\/3\]/);
   assert.match(carousel, /custom=\{direction\}/);
   assert.match(carousel, /exit="exit"/);
