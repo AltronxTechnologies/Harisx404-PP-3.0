@@ -327,6 +327,8 @@ export function CaseStudyCard({
     };
   }, [isTouch, reducedMotion]);
   const active = isTouch && scrollPreview && !reducedMotion;
+  const coverImage = project.images?.[0] || project.image_url;
+  const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null);
 
   /* Projects-page disclosure for highlights + tech stack (collapsed by
      default so the grid stays compact). Controlled by the parent when
@@ -465,7 +467,8 @@ export function CaseStudyCard({
         aria-label={coverHeading === "title" ? `View ${project.title} case study` : undefined}
         className={clsx(
           "frame-light-edge group relative block",
-          coverHeading === "title" && "aspect-[3/2] transition-transform duration-300 ease-out motion-safe:[@media(hover:hover)]:hover:-translate-y-1 motion-reduce:transition-none focus-visible:rounded-[22px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary",
+          coverHeading === "title" && "aspect-[3/2] transition-transform duration-300 ease-out motion-safe:[@media(hover:hover)]:hover:-translate-y-1 motion-safe:active:-translate-y-1 motion-reduce:transition-none focus-visible:rounded-[22px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary",
+          active && coverHeading === "title" && "-translate-y-1",
           /* Projects page: the cover panel itself rises 6px on hover, so the
              frame hairline must ride along or it visibly detaches. */
           !liftOnHover && coverHeading !== "title" && "frame-light-edge-lift"
@@ -474,27 +477,27 @@ export function CaseStudyCard({
         {coverHeading === "title" ? (
           <div
             ref={panelRef}
-            className="relative h-full w-full overflow-hidden rounded-[22px] border-8 border-white shadow-[0_0_0_0.8px_rgba(0,0,0,0.2),0_9.5px_28.5px_-11.4px_rgba(0,0,0,0.4)] dark:border-zinc-800 dark:shadow-[0_0_0_1px_#4d4d4d,0_9.5px_28.5px_-11.4px_rgba(0,0,0,0.4)]"
-            style={{ backgroundImage: panelGradients[i % panelGradients.length] }}
+            className="relative h-full w-full overflow-hidden rounded-[22px] border-8 border-white bg-neutral-100 shadow-[0_0_0_0.8px_rgba(0,0,0,0.2),0_9.5px_28.5px_-11.4px_rgba(0,0,0,0.4)] dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-[0_0_0_1px_#4d4d4d,0_9.5px_28.5px_-11.4px_rgba(0,0,0,0.4)]"
           >
-            {(project.images?.[0] || project.image_url) ? (
+            {coverImage && failedImageUrl !== coverImage ? (
               <Image
-                src={optimizeImageUrl(project.images?.[0] || project.image_url, 1200)}
+                src={optimizeImageUrl(coverImage, 1200)}
                 alt=""
                 fill
                 priority={imagePriority}
                 sizes={imageSizes}
+                onError={() => setFailedImageUrl(coverImage)}
                 className={clsx(
-                  "object-cover object-top transition-transform duration-500 ease-out motion-safe:[@media(hover:hover)]:group-hover:scale-[1.03] motion-reduce:transition-none",
+                  "object-cover object-top transition-transform duration-500 ease-out motion-safe:[@media(hover:hover)]:group-hover:scale-[1.03] motion-safe:group-active:scale-[1.03] motion-reduce:transition-none",
                   active && "scale-[1.03]"
                 )}
               />
             ) : (
-              <span className="absolute inset-0 flex items-center justify-center px-6 text-center font-display text-2xl text-white">
-                {project.title}
+              <span className="absolute inset-0 flex items-center justify-center px-6 text-center font-mono text-xs uppercase tracking-widest text-text-secondary">
+                Preview unavailable
               </span>
             )}
-            <span aria-hidden className="absolute right-6 top-6 text-white/85 drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] transition-transform duration-300 group-hover:translate-x-1 max-[380px]:right-4 max-[380px]:top-4 md:right-8 md:top-8">
+            <span aria-hidden className={clsx("absolute right-6 top-6 transition-transform duration-300 group-hover:translate-x-1 max-[380px]:right-4 max-[380px]:top-4 md:right-8 md:top-8", coverImage && failedImageUrl !== coverImage ? "text-white/85 drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]" : "text-text-secondary")}>
               <svg viewBox="0 0 24 16" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-6">
                 <path d="M2 8h19" />
                 <path d="m15 2 6 6-6 6" />

@@ -53,8 +53,14 @@ test("Home-only covers softly zoom the image and both Home layouts share the mea
   const homeCover = source.split("{coverHeading === \"title\" ? (")[1]?.split("\n        ) : (\n        <div\n          ref={panelRef}")[0];
   assert.ok(homeCover, "the Home cover has its own rendering branch");
   assert.match(homeCover, /group-hover:scale-\[1\.03\]/);
+  assert.match(homeCover, /group-active:scale-\[1\.03\]/);
+  assert.match(homeCover, /bg-neutral-100/);
+  assert.match(homeCover, /dark:bg-zinc-900/);
+  assert.match(homeCover, /onError=\{\(\) => setFailedImageUrl\(coverImage\)\}/);
+  assert.doesNotMatch(homeCover, /backgroundImage: panelGradients/);
   assert.doesNotMatch(homeCover, /group-hover:border-|shadow-\[inset_/);
   assert.match(homeCover, /motion-reduce:transition-none/);
+  assert.match(source, /active && coverHeading === "title" && "-translate-y-1"/);
   assert.match(source, /probe\.textContent = `\+\$\{chips\.length - count\}`/);
   assert.match(source, /<HomeTechStack tech=\{project\.tech\} className="mt-4"/);
   assert.match(source, /<HomeTechStack tech=\{project\.tech\} className="mt-\[22px\]"/);
