@@ -241,6 +241,7 @@ export function CaseStudyCard({
   detailsOpen: detailsOpenProp,
   onToggleDetails,
   highlight,
+  selectedTag,
 }: {
   project: HomeProject;
   index: number;
@@ -278,6 +279,8 @@ export function CaseStudyCard({
   /** Projects page search term — matches inside the description get a quiet
       dotted-underline emphasis so users see WHY a card matched. */
   highlight?: string;
+  /** Projects index only: show the active filter first without changing Home cards. */
+  selectedTag?: string;
 }) {
   const i = index;
   const lineArrow =
@@ -336,6 +339,8 @@ export function CaseStudyCard({
   const [detailsOpenLocal, setDetailsOpenLocal] = useState(false);
   const detailsOpen = onToggleDetails ? !!detailsOpenProp : detailsOpenLocal;
   const toggleDetails = onToggleDetails ?? (() => setDetailsOpenLocal((v) => !v));
+  const tags = projectTags(project);
+  const visibleTags = selectedTag ? [selectedTag, ...tags.filter((tag) => tag !== selectedTag)].slice(0, 3) : tags;
 
   /* Production hardening for the disclosure:
      1. `inert` on the collapsed panel — keyboard users can't tab into
@@ -398,7 +403,7 @@ export function CaseStudyCard({
               clipped mid-way; max 3 shown, min 1 guaranteed (a very long
               first tag truncates inside its pill). */}
           <div className="flex h-[26.5px] min-w-0 flex-wrap content-start items-center gap-2 overflow-hidden">
-            {projectTags(project).map((tag) => (
+            {visibleTags.map((tag) => (
               <span
                 key={tag}
                 /* Truncated long tags reveal their full name on hover. */

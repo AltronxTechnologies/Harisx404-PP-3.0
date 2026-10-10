@@ -47,7 +47,6 @@ export default function CredentialsLoading() {
           <div className="mb-6 flex flex-col gap-3 border-y border-border-primary px-2 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-4">
             <div>
               <div className={`h-3 w-36 rounded bg-border-primary/40 ${pulse}`} />
-              <div className={`mt-2 h-4 w-72 max-w-full rounded bg-border-primary/25 ${pulse}`} />
             </div>
             <div className={`h-3 w-32 rounded bg-border-primary/30 ${pulse}`} />
           </div>

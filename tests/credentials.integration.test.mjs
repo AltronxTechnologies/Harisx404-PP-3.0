@@ -10,7 +10,8 @@ test("Credentials renders the admin-controlled collection", async () => {
   const html = await response.text();
   assert.match(html, /Evidence behind the/);
   assert.match(html, /Credential collection/);
-  assert.match(html, /Professional learning with direct verification where available/);
+  assert.doesNotMatch(html, /Professional learning with direct verification where available/);
+  assert.match(html, /05(?:<!-- -->)? published<\/p>/);
   assert.match(html, /From concept to creation/);
   assert.doesNotMatch(html, /credly\.com\/users/);
   assert.equal((html.match(/<article/g) || []).length, 5);

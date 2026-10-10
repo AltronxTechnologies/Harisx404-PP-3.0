@@ -1553,6 +1553,20 @@ locked. Final re-lock awaits owner review of this limited amendment.
 The temporary Projects unlock in entry 25 is closed by this final lock. Do not
 modify any locked surface without a new explicit owner instruction.
 
+**2026-10-10 scoped owner-authorized Projects index release amendment:** The
+owner explicitly requested fixes for the verified Projects-index checkup
+findings. `app/projects/ProjectsIndex.tsx` now merges rapid search/filter/page
+intent without losing the active tag, normalizes invalid/out-of-range page
+URLs, and renders the staggered desktop cards in their numbered DOM order.
+`app/components/home/CaseStudies.tsx` accepts an optional Projects-only active
+filter tag so a matching result displays that tag first; the default Home
+cards remain unchanged. At 1280px and 1440px the measured collapsed-card
+positions, heights and section height match the approved baseline; the
+responsive, theme and keyboard checks are recorded in
+`docs/final-checkups/projects-index.md`. This scoped amendment is re-locked;
+it is **not** approval to change Home styling, apply live SQL, or declare the
+page deployed/production-ready.
+
 ## 27. FINAL OWNER LOCK - Core Public Website
 
 - **Date locked:** 2026-09-06
@@ -1720,6 +1734,21 @@ static and route checks.
 
 Do not modify Credentials, its Admin controls, schema, data source, or public
 presentation without a new explicit owner unlock.
+
+### 2026-10-10 owner-authorized Credentials toolbar copy amendment
+
+The owner requested removal of the collection subtitle "Professional learning
+with direct verification where available." and shortening the count from
+"05 published credentials" to "05 published". Only those toolbar lines in
+`app/credentials/page.tsx`, the matching loading subtitle placeholder, and
+the related integration assertion changed. Five published records, cards,
+issuer data, status copy, actions and shared UI were not modified. Local
+browser/source tests, lint, isolated build and TypeScript passed. The later
+page-specific checkup at `docs/final-checkups/credentials.md` measured a
+**pre-existing 320px and enlarged-text card clipping defect** that the old
+lock-time responsive note did not detect. This narrow copy amendment is
+re-locked; it is not permission to alter card geometry, nor a claim of
+production readiness.
 
 ### 2026-10-06 owner-authorized Certifications Admin follow-up
 
@@ -2557,6 +2586,50 @@ this lock. Prior project checks passed (11/11 project tests, TypeScript,
 targeted ESLint, and responsive light/dark browser inspection). This is a
 presentation sign-off, not a claim that every Admin save/reopen, deployed
 database mutation, or owner-authored project screenshot has been verified.
+
+### 2026-10-10 owner-authorized carousel correction
+
+The owner reported background lines during image transitions and requested
+matching caption controls on both desktop image cards. Only
+`ProjectImageCarousel.tsx` changed: its transitioning frame uses the opaque
+`bg-bg-primary` surface, and each visible image can open its own caption at
+the same inset within its card. On phones the single visible image retains
+one caption control; navigation closes captions, Escape returns focus to the
+corresponding trigger, and autoplay stays paused while a caption is open.
+The 3:2 card geometry, 16px desktop gap, controls and other project-detail
+presentation remain unchanged. `tests/project-image-carousel.browser.test.mjs`
+passed with two desktop cards in dark/light and one card at 390px; the
+project-detail source/HTTP suite, targeted lint, isolated build and TypeScript
+also passed. This narrow amendment is re-locked; it is not a full deployed
+project-detail checkup or permission to alter any other locked surface.
+
+### 2026-10-10 follow-up: overlapping carousel card edges
+
+The owner still saw pale lines at the corners when the right image moved to
+the left. A frame-by-frame desktop inspection showed the outgoing right card
+and incoming left card occupying identical x positions throughout the 480ms
+animation, so their rounded borders and translucent surfaces were drawn twice.
+The incoming duplicate is now hidden until the transition completes; backward
+navigation similarly hides the duplicated incoming right card. The outgoing
+card supplies the moving image in each case. Direct jumps that do not share
+an image retain both cards. The browser regression checks mid-transition
+visibility, settled two-card geometry, both directions, wraparound, captions,
+light/dark and phone layout. This corrects only the transition artifact;
+the rest of the approved presentation remains locked.
+
+### 2026-10-10 owner-authorized project-detail loading correction
+
+The owner requested fixes for the project-detail checkup. The parent Projects
+loading boundary was showing the index filter/card skeleton before detail
+content streamed. `app/projects/loading.tsx` now uses the route pathname to
+render `app/projects/ProjectDetailLoading.tsx` for detail URLs; `/projects`
+still renders its existing index skeleton. The detail placeholder mirrors
+the approved hero/facts/image spacing and 3:2 cards without fake controls.
+A read-only streamed-HTML browser regression checks one detail loading status
+and no index status on detail routes, plus the unchanged index loading status
+on `/projects`. The actual project-detail page, shared components, and global
+styles were not modified. This narrow loading change is re-locked; it is not
+proof of deployed readiness or an unlock of other presentation.
 
 ### 2026-09-28 owner-authorized legal-divider amendment
 
