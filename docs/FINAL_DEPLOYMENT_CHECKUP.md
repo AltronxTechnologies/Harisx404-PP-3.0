@@ -47,7 +47,7 @@ This is a **source inventory**, not a pass matrix. A checked route gets a separa
 | `/projects/[slug]` | Cover/gallery 3:2 carousel, captions/controls, related projects, missing/draft 404/noindex, metadata. | BLOCKED for release: [local Project detail checkup](final-checkups/project-detail.md) and scoped loading fix completed; connected owner/content and deployed gates remain open |
 | `/blog` | Published/scheduled eligibility, category/search/pagination, featured result and empty state. | BLOCKED for release: [local Blog index checkup](final-checkups/blog-index.md) completed; deployed host, connected owner lifecycle and manual gates remain open |
 | `/blog/[slug]` | Current and legacy slugs, missing/gone/draft, MDX/images/code, reactions/views, attribution/canonical. | BLOCKED for release: [local Blog article checkup](final-checkups/blog-article.md) completed; deployed host, connected media/reaction/slug lifecycle and manual gates remain open |
-| `/buildlog` | Entry filters, content state and pagination; only owner-approved data. | BLOCKED: not run for candidate |
+| `/buildlog` | Published release archive, shipped/planned disclosures and bounded scrolling; only owner-approved data. | BLOCKED for release: [local Buildlog checkup](final-checkups/buildlog.md) completed; host 404, owner-managed link, invalid deep link and connected/manual gates open |
 | `/community-wall` | Anonymous/authorized composer, moderation, rate limits, display/success/error states. | BLOCKED: not run for candidate |
 | `/contact` | Valid/invalid form, duplicate prevention, safe test SMTP destination and provider failure. | BLOCKED: not run for candidate |
 | `/credentials` | Issuer/claim accuracy, proof links, demo visibility, media. | BLOCKED: not run for candidate |
