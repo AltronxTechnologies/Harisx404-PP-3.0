@@ -417,13 +417,13 @@ export async function fetchCertifications(): Promise<CertificationRow[]> {
 /**
  * Published experience entries for the about-page timeline, mapped from the
  * `experience` table to the LinkedIn-parity shape in app/lib/resume/types.ts.
- * Returns [] when Supabase is unconfigured, empty, or errors — callers fall
- * back to the static resume data.
+ * An empty published list is distinct from a failed read, which callers handle
+ * without showing static entries as if they were still published.
  */
 export async function fetchExperiences(): Promise<
   import("./resume/types").Experience[]
 > {
-  if (!supabase) return [];
+  if (!supabase) throw new Error("Experience data is unavailable.");
   try {
     const { data, error } = await supabase
       .from("experience")
@@ -431,7 +431,7 @@ export async function fetchExperiences(): Promise<
       .eq("status", "published")
       .order("display_order", { ascending: true });
 
-    if (error || !data) return [];
+    if (error || !data) throw new Error("Experience data is unavailable.");
     return data.map((row: any) => {
       const highlights = Array.isArray(row.highlights)
         ? row.highlights
@@ -477,6 +477,6 @@ export async function fetchExperiences(): Promise<
       };
     });
   } catch {
-    return [];
+    throw new Error("Experience data is unavailable.");
   }
 }

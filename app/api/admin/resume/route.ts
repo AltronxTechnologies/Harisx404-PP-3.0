@@ -7,6 +7,7 @@ import {
 import createSupabaseServerClient, {
   createSupabaseAdminClient,
 } from "@/app/lib/supabase/server";
+import { z } from "zod";
 
 export const runtime = "nodejs";
 
@@ -177,17 +178,22 @@ export async function POST(request: Request) {
   }
 }
 
-export async function DELETE() {
+export async function DELETE(request: Request) {
   if (!(await isAdmin())) return unauthorized();
 
   try {
+    const parsed = z.object({ updatedAt: z.string().datetime({ offset: true }) }).strict().safeParse(await request.json().catch(() => null));
+    if (!parsed.success) return NextResponse.json({ error: "Reload Resume status before deleting." }, { status: 400 });
     const db = await createSupabaseAdminClient();
     const { data: current, error: currentError } = await db
       .from("resume_document")
-      .select("storage_path")
+      .select("storage_path, updated_at")
       .eq("id", true)
       .single();
     if (currentError) throw currentError;
+    if (current.updated_at !== parsed.data.updatedAt) {
+      return NextResponse.json({ error: "Resume changed since this page loaded. Reload before deleting." }, { status: 409 });
+    }
 
     let mutation = db
       .from("resume_document")
@@ -198,7 +204,8 @@ export async function DELETE() {
         mime_type: null,
         size_bytes: null,
       })
-      .eq("id", true);
+      .eq("id", true)
+      .eq("updated_at", parsed.data.updatedAt);
     mutation = current.storage_path
       ? mutation.eq("storage_path", current.storage_path)
       : mutation.is("storage_path", null);

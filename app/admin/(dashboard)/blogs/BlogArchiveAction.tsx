@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Archive, RotateCcw, Trash2 } from "lucide-react";
 import { AdminConfirmDialog } from "@/app/components/admin/AdminConfirmDialog";
+import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
 
 type Post = { id: string; slug: string; title: string; status: string; updated_at: string };
 
@@ -40,8 +41,9 @@ export function BlogArchiveAction({ post }: { post: Post }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: post.id, updated_at: current.updated_at, action }),
       });
-      const result = await response.json();
+      const result = await readAdminResponse(response, "Blog archive");
       if (!response.ok) throw new Error(result.error || `Could not ${action} post`);
+      if (result.status !== (action === "archive" ? "archived" : "draft") || !result.updated_at) throw new Error(`Could not confirm ${action}. Refresh before retrying.`);
       setCurrent({ status: result.status, updated_at: result.updated_at });
       showNotice(action === "archive" ? "archived" : "restored");
     } catch (error) {
@@ -66,8 +68,9 @@ export function BlogArchiveAction({ post }: { post: Post }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: post.id, updated_at: current.updated_at, confirm_slug: confirmation }),
       });
-      const result = await response.json();
+      const result = await readAdminResponse(response, "Blog deletion");
       if (!response.ok) throw new Error(result.error || "Could not permanently delete post");
+      if (result.deleted !== true) throw new Error("Deletion could not be confirmed. Refresh before retrying.");
       if (result.cleanup_warning) {
         const url = new URL(window.location.href);
         url.searchParams.delete("saved");

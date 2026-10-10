@@ -58,8 +58,7 @@ function Avatar({ src, name, tint }: { src: string | null; name: string; tint: s
 }
 
 export function Testimonials({ items: itemsProp }: { items?: Testimonial[] }) {
-  const items =
-    itemsProp && itemsProp.length > 0 ? itemsProp : fallbackTestimonials;
+  const items = itemsProp ?? fallbackTestimonials;
   // Circular loop: the track renders the list twice; index is allowed to
   // reach items.length (the first clone), then snaps back to 0 with no
   // transition — so the last card is always followed by the first one and
@@ -71,6 +70,7 @@ export function Testimonials({ items: itemsProp }: { items?: Testimonial[] }) {
   const [cycle, setCycle] = useState(0);
   const [submitOpen, setSubmitOpen] = useState(false);
   const [cardWidth, setCardWidth] = useState(CARD_WIDTH);
+  const firstCardRef = useRef<HTMLElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const prefersReducedMotion = useReducedMotion();
 
@@ -85,15 +85,17 @@ export function Testimonials({ items: itemsProp }: { items?: Testimonial[] }) {
   const paused = userPaused || hovered || items.length < 2;
 
   const extended = [...items, ...items];
-  const activeDot = index % items.length;
+  const activeDot = items.length ? index % items.length : 0;
 
   useEffect(() => {
-    const update = () =>
-      setCardWidth(Math.min(CARD_WIDTH, window.innerWidth * 0.85));
+    const card = firstCardRef.current;
+    if (!card) return;
+    const update = () => setCardWidth(card.getBoundingClientRect().width);
     update();
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
-  }, []);
+    const observer = new ResizeObserver(update);
+    observer.observe(card);
+    return () => observer.disconnect();
+  }, [items.length]);
 
   const advance = useCallback(() => {
     setIndex((prev) => {
@@ -150,9 +152,11 @@ export function Testimonials({ items: itemsProp }: { items?: Testimonial[] }) {
         </span>
       </SectionHeading>
 
+      {items.length === 0 && (
+        <p className="mt-14 text-center text-sm text-text-secondary">No testimonials to show right now.</p>
+      )}
       <div
-        className="mt-14"
-        aria-live="polite"
+        className={items.length ? "mt-14" : "hidden"}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
@@ -187,12 +191,13 @@ export function Testimonials({ items: itemsProp }: { items?: Testimonial[] }) {
           {extended.map((t, i) => (
             <motion.article
               key={`${t.name}-${i}`}
+              ref={i === 0 ? firstCardRef : undefined}
               // Clones are purely visual (they fill the loop seam) —
               // hide them from screen readers to avoid duplicate content.
               aria-hidden={i >= items.length || undefined}
               whileHover={prefersReducedMotion ? undefined : { y: -4 }}
               transition={{ type: "spring", stiffness: 400, damping: 30, mass: 0.8 }}
-              className={`card-light-edge relative flex w-[85vw] max-w-[380px] shrink-0 flex-col rounded-3xl border border-border-primary bg-white bg-gradient-to-br p-6 transition-shadow duration-300 hover:shadow-lg dark:bg-white/[0.02] sm:w-[380px] sm:p-8 ${tints[i % tints.length]}`}
+              className={`card-light-edge relative flex w-[85vw] max-w-[380px] shrink-0 flex-col rounded-3xl border border-border-primary bg-white bg-gradient-to-br p-6 transition-shadow duration-300 hover:shadow-lg dark:bg-white/[0.02] sm:w-[380px] sm:p-8 md:w-[calc(50%-8px)] ${tints[i % tints.length]}`}
             >
               {/* Title — exactly two lines reserved on every card so all
                   headlines start AND end on the same baselines. */}

@@ -82,6 +82,7 @@ export default function AdminMediaPage() {
       const fileToUpload = await prepareImageForUpload(file);
       const body = new FormData();
       body.append("file", fileToUpload);
+      body.append("original_filename", file.name);
       const res = await fetch("/api/admin/media/upload", { method: "POST", body });
       const result = await readAdminResponse(res, "Image upload");
       if (!res.ok) throw new Error(result.error || "Image upload could not be confirmed. Check Cloudinary before retrying.");

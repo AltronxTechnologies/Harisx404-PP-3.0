@@ -177,11 +177,12 @@ test("Home and About live replacement cards remain responsive and aligned", asyn
           assert.deepEqual(errors, [], `${route} ${theme} ${width}px errors`);
 
           if (route === "/" && width === 1440) {
-            const activeCell = page.locator("[data-github-contribution-calendar] > button[aria-label^='91 contributions']");
+            const activeCell = page.locator("[data-github-contribution-calendar] > button[data-contribution-day]:not([data-contribution-day=''])").last();
+            const contributionLabel = (await activeCell.getAttribute("aria-label")).split(" on ")[0];
             await activeCell.hover();
             const tooltip = page.locator("[data-github-activity-tooltip]");
             await tooltip.waitFor();
-            assert.match((await tooltip.textContent()) || "", /91 contributions/);
+            assert.ok(((await tooltip.textContent()) || "").includes(contributionLabel));
             const tooltipRect = await tooltip.boundingBox();
             const calendarRect = await page.locator("[data-github-contribution-calendar]").boundingBox();
             assert.ok(tooltipRect && calendarRect && Math.abs(tooltipRect.x + tooltipRect.width - (calendarRect.x + calendarRect.width)) < 1.5, "GitHub tooltip top-right alignment");
@@ -201,7 +202,8 @@ test("Home and About live replacement cards remain responsive and aligned", asyn
           }
 
           if (route === "/" && width === 320) {
-            const touchCell = page.locator("[data-github-contribution-calendar] > button[aria-label^='91 contributions']");
+            const touchCell = page.locator("[data-github-contribution-calendar] > button[data-contribution-day]:not([data-contribution-day=''])").last();
+            const contributionLabel = (await touchCell.getAttribute("aria-label")).split(" on ")[0];
             await touchCell.evaluate((cell) =>
               cell.dispatchEvent(
                 new PointerEvent("pointerdown", {
@@ -212,7 +214,7 @@ test("Home and About live replacement cards remain responsive and aligned", asyn
             );
             const touchTooltip = page.locator("[data-github-activity-tooltip]");
             await touchTooltip.waitFor();
-            assert.match((await touchTooltip.textContent()) || "", /91 contributions/);
+            assert.ok(((await touchTooltip.textContent()) || "").includes(contributionLabel));
           }
 
           await page.close();

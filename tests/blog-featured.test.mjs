@@ -1,20 +1,17 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createClient } from "@supabase/supabase-js";
-import fs from "fs";
 
-const envRaw = fs.readFileSync(".env.local", "utf8");
-const env = {};
-for (const line of envRaw.split("\n")) {
-  const t = line.trim();
-  if (!t || t.startsWith("#")) continue;
-  const idx = t.indexOf("=");
-  if (idx !== -1) env[t.slice(0, idx).trim()] = t.slice(idx + 1).trim().replace(/^["']|["']$/g, "");
-}
-
-const supabase = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
-
-test("single featured post enforcement in database", async () => {
+test("single featured post enforcement in database", {
+  skip: process.env.RUN_CONNECTED_BLOG_FEATURED_DESTRUCTIVE !== "1",
+}, async () => {
+  if (process.env.ISOLATED_RESTORE_TESTED_TARGET !== "yes") {
+    throw new Error("Use only a restore-tested disposable database for this destructive test.");
+  }
+  const url = process.env.BLOG_FEATURED_TEST_SUPABASE_URL;
+  const key = process.env.BLOG_FEATURED_TEST_SERVICE_ROLE_KEY;
+  if (!url || !key) throw new Error("Configure disposable Blog test credentials separately from the application.");
+  const supabase = createClient(url, key);
   const { data: posts } = await supabase.from("blog_posts").select("id, slug").limit(2);
   assert.ok(posts && posts.length >= 2, "Expected at least 2 posts for testing");
 

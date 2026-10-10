@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowDown, ArrowUp, Plus, X } from "lucide-react";
 import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
+import { useAdminNavigationGuard } from "./useAdminNavigationGuard";
+import { AdminConfirmDialog } from "./AdminConfirmDialog";
 
 export type FeaturedProjectOption = {
   id: string;
@@ -29,6 +31,14 @@ export function FeaturedProjectsManager({ projects }: { projects: FeaturedProjec
   const available = projects.filter((project) => project.status === "published" && !selectedIds.includes(project.id))
     .sort((a, b) => a.title.localeCompare(b.title));
   const changed = selectedIds.join(",") !== savedIds.join(",");
+  const { leaveTarget, setLeaveTarget, confirmLeave } = useAdminNavigationGuard(changed || busy);
+
+  useEffect(() => {
+    if (!changed && !busy) return;
+    const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [changed, busy]);
 
   const move = (index: number, nextIndex: number) => {
     const next = [...selectedIds];
@@ -66,6 +76,7 @@ export function FeaturedProjectsManager({ projects }: { projects: FeaturedProjec
   };
 
   return <section aria-labelledby="featured-projects-heading" className="space-y-4 rounded-xl border border-border-hairline bg-surface-raised p-4 sm:p-5">
+    <AdminConfirmDialog open={Boolean(leaveTarget)} title="Leave without saving?" description="Your Home project selection has unsaved changes." confirmLabel="Discard and leave" onClose={() => setLeaveTarget(null)} onConfirm={() => confirmLeave((destination) => router.push(destination))} pending={busy} />
     <div>
       <h2 id="featured-projects-heading" className="text-lg font-semibold text-ink-primary">Featured on Home</h2>
       <p className="mt-1 text-sm text-ink-secondary">Choose published projects and set their order on Home. No projects appear there until you select them.</p>

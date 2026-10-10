@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { generateEmbedding } from '@/app/lib/gemini';
 import createSupabaseServerClient, { createSupabaseAdminClient } from '@/app/lib/supabase/server';
 
+const BATCH_SIZE = 5;
+
 export async function POST(request: Request) {
   try {
     // Check if user is an admin
@@ -15,65 +17,85 @@ export async function POST(request: Request) {
     if (!adminEmail || user.email?.toLowerCase() !== adminEmail) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
+    let body: unknown;
+    try {
+      const text = await request.text();
+      body = text ? JSON.parse(text) : {};
+    } catch {
+      return NextResponse.json({ error: 'Invalid embedding cursor.' }, { status: 400 });
+    }
+    if (!body || typeof body !== 'object' || Array.isArray(body) ||
+        Object.keys(body).some(key => key !== 'cursor')) {
+      return NextResponse.json({ error: 'Invalid embedding cursor.' }, { status: 400 });
+    }
+    const { cursor } = body as { cursor?: unknown };
+    if (cursor !== undefined && (typeof cursor !== 'string' ||
+        !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cursor))) {
+      return NextResponse.json({ error: 'Invalid embedding cursor.' }, { status: 400 });
+    }
     const admin = await createSupabaseAdminClient();
 
-    // Get all blog posts that don't have an embedding
-    const { data: posts, error: fetchError } = await admin
+    let query = admin
       .from('blog_posts')
-      .select('id, title, summary, content')
+      .select('id, title, summary, content, updated_at', { count: 'exact' })
       .is('content_embedding', null);
+    if (cursor) query = query.gt('id', cursor);
+    const { data: posts, count, error: fetchError } = await query
+      .order('id', { ascending: true })
+      .limit(BATCH_SIZE);
 
-    if (fetchError) {
-      // Most common cause: pgvector extension / content_embedding column missing.
-      const hint = /content_embedding|column|vector/i.test(fetchError.message)
-        ? ' Hint: the pgvector migration has not been applied — enable the `vector` extension and add the `content_embedding` column (see supabase_schema.sql).'
-        : '';
-      throw new Error(`Failed to fetch posts: ${fetchError.message}.${hint}`);
+    if (fetchError || !posts || typeof count !== 'number') {
+      return NextResponse.json({ error: 'Unable to read posts for embedding. Please try again.' }, { status: 500 });
     }
 
-    if (!posts || posts.length === 0) {
-      return NextResponse.json({ message: 'All posts already have embeddings.' });
+    if (posts.length === 0) {
+      return NextResponse.json({ embedded: 0, failed: 0, remainingAhead: 0, hasMore: false, nextCursor: null });
     }
 
     let successCount = 0;
-    const errors: string[] = [];
+    let failureCount = 0;
 
-    // Process sequentially to avoid rate limits
     for (const post of posts) {
       try {
-        // Prepare text for embedding (Title + Summary + Content)
         const textToEmbed = `${post.title}\n\n${post.summary || ''}\n\n${post.content || ''}`;
-        
-        // Truncate if too long (Gemini embed limit is generally large enough, but safe to bound)
-        const truncatedText = textToEmbed.substring(0, 8000); 
-        
+        const truncatedText = textToEmbed.substring(0, 8000);
         const embedding = await generateEmbedding(truncatedText);
         const vectorString = `[${embedding.join(',')}]`;
 
-        const { error: updateError } = await admin
+        let update = admin
           .from('blog_posts')
           .update({ content_embedding: vectorString })
-          .eq('id', post.id);
+          .eq('id', post.id)
+          .is('content_embedding', null);
+        update = post.updated_at === null
+          ? update.is('updated_at', null)
+          : update.eq('updated_at', post.updated_at);
+        const { data: updated, error: updateError } = await update.select('id');
 
-        if (updateError) {
-          errors.push(`Post ${post.id}: ${updateError.message}`);
+        if (updateError || !updated || updated.length !== 1) {
+          failureCount++;
         } else {
           successCount++;
         }
-        
-        // Wait a small amount to avoid rate limits
-        await new Promise(resolve => setTimeout(resolve, 500));
-      } catch (err: any) {
-        errors.push(`Post ${post.id}: ${err.message}`);
+      } catch {
+        failureCount++;
       }
+      // Pace provider requests without delaying the final response.
+      if (successCount + failureCount < posts.length) await new Promise(resolve => setTimeout(resolve, 500));
     }
 
-    return NextResponse.json({
-      message: `Successfully embedded ${successCount}/${posts.length} posts.`,
-      errors: errors.length > 0 ? errors : undefined
-    });
-  } catch (error: any) {
-    console.error('Error in embed route:', error);
-    return NextResponse.json({ error: error.message || 'Failed to process embeddings' }, { status: 500 });
+    const progress = {
+      embedded: successCount,
+      failed: failureCount,
+      remainingAhead: Math.max(0, count - posts.length),
+      hasMore: count > posts.length,
+      nextCursor: posts[posts.length - 1].id,
+    };
+    if (failureCount) {
+      return NextResponse.json({ error: 'Some embeddings could not be saved. Please try again.', ...progress }, { status: 500 });
+    }
+    return NextResponse.json(progress);
+  } catch {
+    return NextResponse.json({ error: 'Unable to process embeddings. Please try again.' }, { status: 500 });
   }
 }

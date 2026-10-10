@@ -78,7 +78,8 @@ test("Blog form offers Editor, MDX and unsaved Preview without silently converti
   assert.match(unsavedPreview, /\.\.\.sharedComponents, img: BlogArticleImage, Image: BlogArticleImage/);
   assert.match(unsavedPreview, /Article content cannot be safely previewed/);
   assert.match(form, /Visual Editor.*MDX \/ Code.*Preview/);
-  assert.match(codeEditor, /preview="edit"/);
+  assert.match(codeEditor, /viewMode === "preview"/);
+  assert.match(codeEditor, /<ReactMarkdown/);
   assert.match(codeEditor, /Blog article MDX source/);
   assert.match(form, /MDX \/ Code preserves custom components/);
   assert.match(api, /refine\(\(value\) => value\.trim\(\)\.length > 0, "Content is required"\)/);

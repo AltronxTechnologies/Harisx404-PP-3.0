@@ -36,10 +36,10 @@ export default async function AdminDashboard() {
   ]);
 
   const statCards = [
-    { label: "Total Blog Posts", value: blogCountError ? "—" : blogCount ?? 0, icon: FileText, href: "/admin/blogs" },
-    { label: "Live Posts", value: publishedBlogCountError ? "—" : publishedBlogCount ?? 0, icon: FileText, href: "/admin/blogs" },
-    { label: "Draft Posts", value: draftBlogCountError ? "—" : draftBlogCount ?? 0, icon: FileText, href: "/admin/blogs" },
-    { label: "Total Projects", value: projectCountError ? "—" : projectCount ?? 0, icon: Briefcase, href: "/admin/projects" },
+    { label: "Total Blog Posts", value: blogCountError || blogCount === null ? "—" : blogCount, icon: FileText, href: "/admin/blogs" },
+    { label: "Live Posts", value: publishedBlogCountError || publishedBlogCount === null ? "—" : publishedBlogCount, icon: FileText, href: "/admin/blogs" },
+    { label: "Draft Posts", value: draftBlogCountError || draftBlogCount === null ? "—" : draftBlogCount, icon: FileText, href: "/admin/blogs" },
+    { label: "Total Projects", value: projectCountError || projectCount === null ? "—" : projectCount, icon: Briefcase, href: "/admin/projects" },
     { label: "Article Views", value: serverStats ? serverStats.totalViews : "—", icon: Eye, href: "/admin/analytics" },
     { label: "Reactions", value: serverStats ? serverStats.totalReactions : "—", icon: Heart, href: "/admin/analytics" },
   ];
@@ -60,7 +60,7 @@ export default async function AdminDashboard() {
         <h1 className="text-2xl font-bold tracking-tight text-text-primary">Dashboard</h1>
         <p className="text-sm text-text-secondary">Welcome back, Haris. Here&apos;s an overview of your portfolio.</p>
       </div>
-      {(blogCountError || publishedBlogCountError || draftBlogCountError || projectCountError || !serverStats) && <p role="alert" className="rounded-xl border border-amber-500/30 bg-amber-950/20 p-4 text-sm text-amber-200">Some dashboard totals are unavailable. A dash means the value could not be confirmed; it does not mean zero. Refresh the page to retry.</p>}
+      {(blogCountError || blogCount === null || publishedBlogCountError || publishedBlogCount === null || draftBlogCountError || draftBlogCount === null || projectCountError || projectCount === null || !serverStats) && <p role="alert" className="rounded-xl border border-amber-500/30 bg-amber-950/20 p-4 text-sm text-amber-200">Some dashboard totals are unavailable. A dash means the value could not be confirmed; it does not mean zero. Refresh the page to retry.</p>}
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

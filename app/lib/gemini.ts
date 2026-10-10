@@ -9,7 +9,7 @@ if (!apiKey) {
 const genAI = new GoogleGenerativeAI(apiKey || "");
 
 export const geminiFlash = genAI.getGenerativeModel({
-  model: 'gemini-flash-latest',
+  model: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
 });
 
 export const geminiEmbed = genAI.getGenerativeModel({
@@ -17,11 +17,12 @@ export const geminiEmbed = genAI.getGenerativeModel({
 });
 
 /**
- * Generate a text response using Gemini 1.5 Flash.
+ * Generate a text response using Gemini Flash.
  */
 export async function generateText(prompt: string, systemInstruction?: string): Promise<string> {
+  const modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
   const model = systemInstruction
-    ? genAI.getGenerativeModel({ model: 'gemini-flash-latest', systemInstruction })
+    ? genAI.getGenerativeModel({ model: modelName, systemInstruction })
     : geminiFlash;
 
   const result = await model.generateContent(prompt);

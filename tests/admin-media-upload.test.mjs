@@ -43,9 +43,10 @@ function uploadRoute({ insertErrors = [], destroyResult = "ok" } = {}) {
   return { POST: exports.POST, rows, destroyed, uploads: () => uploaded };
 }
 
-function request(name = "Exact image name.png", mimeType = "image/png", contents = "review") {
+function request(name = "Exact image name.png", mimeType = "image/png", contents = "review", originalName) {
   const form = new FormData();
   form.append("file", new File([contents], name, { type: mimeType }));
+  if (originalName !== undefined) form.append("original_filename", originalName);
   return { formData: async () => form };
 }
 
@@ -59,6 +60,18 @@ test("Media upload stores the exact original filename separately from its descri
   assert.equal(rows[0].original_filename, "Exact image name.png");
   assert.equal(uploads(), 1);
   assert.deepEqual(destroyed, []);
+});
+
+test("converted images retain the original filename as validated metadata", async () => {
+  const route = uploadRoute();
+  const response = await route.POST(request("photo.webp", "image/webp", "optimized", "photo.png"));
+  assert.equal(response.status, 200);
+  assert.equal(route.rows[0].original_filename, "photo.png");
+  assert.equal(route.rows[0].alt_text, "photo.png");
+
+  const invalid = await route.POST(request("photo.webp", "image/webp", "optimized", "a".repeat(256)));
+  assert.equal(invalid.status, 400);
+  assert.equal(route.uploads(), 1);
 });
 
 test("Missing filename migration preserves upload but reports reduced filename guarantees", async () => {

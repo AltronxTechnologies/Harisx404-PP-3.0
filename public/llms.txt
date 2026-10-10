@@ -10,7 +10,7 @@
 
 - [Home](https://harisx404.vercel.app/): Overview, selected builds, latest write-ups, testimonials, FAQ.
 - [About](https://harisx404.vercel.app/about): Background, education (BSIT, University of Malakand, CGPA 3.5/4.0, Top 15% NSCT nationwide), tech stack, experience, certifications.
-- [Projects](https://harisx404.vercel.app/projects): Case studies including IntruShield NIDS (real-time SOC platform with Suricata 7), MedicaLink-HMS (hospital management SaaS), PacketVision (network sniffer), TaskFlow Workspace, NeuroDoc AI Assistant (RAG), VisionForge ML Studio.
+- [Projects](https://harisx404.vercel.app/projects): Published case studies including TourMate Malakand, IntruShield NIDS, PacketVision Network Sniffer, Harisx404 Website, Mail-Lens AI, and MedicaLink HMS.
 - [Blog](https://harisx404.vercel.app/blog): Technical write-ups on web development, security, and AI.
 - [Buildlog](https://harisx404.vercel.app/buildlog): Real-time engineering changelog, version progression, and system architecture updates.
 - [Credentials](https://harisx404.vercel.app/credentials): Professional certifications, industry licenses, and verified skill badges.

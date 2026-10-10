@@ -14,20 +14,26 @@ import { siteMetadata } from "app/data/siteMetadata";
 
 export const revalidate = 3600;
 
+const projectsDescription = "A curated collection of case studies — web apps, mobile apps, and experiments built by Muhammad Haris.";
+
 export const metadata: Metadata = {
   title: "Projects",
-  description:
-    "A curated collection of case studies — web apps, mobile apps, and experiments built by Muhammad Haris.",
+  description: projectsDescription,
+  openGraph: { title: "Projects", description: projectsDescription, images: [{ url: `${siteMetadata.siteUrl}/brand/logo-wide.png`, width: 1200, height: 630, alt: siteMetadata.title }] },
+  twitter: { card: "summary_large_image", title: "Projects", description: projectsDescription, images: [`${siteMetadata.siteUrl}/brand/logo-wide.png`] },
 };
 
 export default async function ProjectsPage() {
   const dbProjects = await fetchProjects();
 
-  // The full collection stays newest-added first; Home has its own curated order.
+  // A separate saved rank controls this page; older databases retain newest-first order.
   const sorted = [...dbProjects].sort((a: any, b: any) => {
+    if (typeof a.index_order === "number" && typeof b.index_order === "number") {
+      return a.index_order - b.index_order || a.id.localeCompare(b.id);
+    }
     const ta = new Date(a.created_at || 0).getTime();
     const tb = new Date(b.created_at || 0).getTime();
-    return tb - ta;
+    return tb - ta || a.id.localeCompare(b.id);
   }).map((project: any) => withProjectPreview(project));
 
   const projects: HomeProject[] =

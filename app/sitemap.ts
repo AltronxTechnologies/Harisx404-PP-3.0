@@ -7,19 +7,18 @@ import { isOwnBlogCanonical } from "@/app/lib/blog-canonical";
 export const revalidate = 60;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const posts = await fetchBlogIndexPosts();
-  const projects = await fetchProjects();
+  const [posts, projects] = await Promise.all([fetchBlogIndexPosts(), fetchProjects()]);
   
   const blogUrls = posts.filter((post) => isOwnBlogCanonical(post.slug, post.canonicalUrl, siteMetadata.siteUrl)).map((post) => ({
     url: `${siteMetadata.siteUrl}/blog/${post.slug}`,
-    lastModified: new Date(post.publishedAt),
+    lastModified: new Date(post.updatedAt || post.publishedAt),
     changeFrequency: "weekly" as const,
     priority: 0.8,
   }));
   
   const projectUrls = projects.map((project: any) => ({
     url: `${siteMetadata.siteUrl}/projects/${project.slug}`,
-    lastModified: new Date(project.created_at || new Date()),
+    lastModified: project.updated_at || project.created_at ? new Date(project.updated_at || project.created_at) : undefined,
     changeFrequency: "monthly" as const,
     priority: 0.9,
   }));
@@ -27,31 +26,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     {
       url: `${siteMetadata.siteUrl}`,
-      lastModified: new Date(),
       changeFrequency: "yearly",
       priority: 1,
     },
     {
       url: `${siteMetadata.siteUrl}/about`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.7,
     },
     {
       url: `${siteMetadata.siteUrl}/credentials`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.5,
     },
     {
       url: `${siteMetadata.siteUrl}/blog`,
-      lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.8,
     },
     {
       url: `${siteMetadata.siteUrl}/projects`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.9,
     },
@@ -65,8 +59,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       "/resume",
     ].map((path) => ({
       url: `${siteMetadata.siteUrl}${path}`,
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
+        changeFrequency: "monthly" as const,
       priority: 0.5,
     })),
     ...blogUrls,

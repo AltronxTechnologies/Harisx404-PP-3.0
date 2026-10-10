@@ -80,6 +80,38 @@ test("Blog deletion announces success only after an authenticated API success", 
   }
 });
 
+test("Blog deletion keeps its row and reports an HTML gateway failure", async () => {
+  const React = await import("react");
+  (globalThis as typeof globalThis & { React: typeof React }).React = React;
+  const [{ createRoot }, { act }, { AppRouterContext }, { BlogArchiveAction }] = await Promise.all([
+    import("react-dom/client"), import("react-dom/test-utils"),
+    import("next/dist/shared/lib/app-router-context.shared-runtime"),
+    import("../app/admin/(dashboard)/blogs/BlogArchiveAction"),
+  ]);
+  const originalFetch = globalThis.fetch;
+  const destinations: string[] = [];
+  globalThis.fetch = async () => new Response("<html>gateway unavailable</html>", { status: 502, headers: { "content-type": "text/html" } });
+  const host = document.createElement("div");
+  document.body.append(host);
+  const root = createRoot(host);
+  try {
+    await act(async () => root.render(React.createElement(AppRouterContext.Provider, { value: { replace: (href: string) => destinations.push(href), refresh: () => {} } as any },
+      React.createElement(BlogArchiveAction, { post: { id: "00000000-0000-4000-8000-000000000000", slug: "review-post", title: "Review post", status: "archived", updated_at: "2026-01-01T00:00:00.000Z" } }))));
+    await act(async () => host.querySelector<HTMLButtonElement>('[aria-label="Permanently delete Review post"]')!.click());
+    await act(async () => {
+      [...document.querySelectorAll<HTMLButtonElement>("button")].find((button) => button.textContent === "Delete permanently")!.click();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    assert.match(host.querySelector('[role="alert"]')?.textContent || "", /unexpected response \(502\)/);
+    assert.deepEqual(destinations, []);
+    assert.ok(host.querySelector<HTMLButtonElement>('[aria-label="Permanently delete Review post"]'));
+  } finally {
+    await act(async () => root.unmount());
+    host.remove();
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("Admin editors do not mistake failed reads for empty data", async () => {
   const React = await import("react");
   (globalThis as typeof globalThis & { React: typeof React }).React = React;

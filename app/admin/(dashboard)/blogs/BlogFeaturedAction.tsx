@@ -11,28 +11,29 @@ interface BlogFeaturedActionProps {
     title: string;
     slug: string;
     featured: boolean;
-    status: string;
+    canFeature: boolean;
   };
 }
 
 export function BlogFeaturedAction({ post }: BlogFeaturedActionProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<{ text: string; error: boolean } | null>(null);
 
   const handleToggle = (targetFeatured: boolean) => {
     if (isPending) return;
-    setErrorMessage(null);
+    setFeedback(null);
 
     startTransition(async () => {
       try {
         const result = await setFeaturedBlogPost(post.id, targetFeatured);
         if (!result.success) {
-          throw new Error("Failed to update featured post");
+          throw new Error(result.error);
         }
+        if (result.warning) setFeedback({ text: result.warning, error: false });
         router.refresh();
       } catch (error) {
-        setErrorMessage(error instanceof Error ? error.message : "Error updating featured post");
+        setFeedback({ text: error instanceof Error ? error.message : "Error updating featured post", error: true });
       }
     });
   };
@@ -59,9 +60,9 @@ export function BlogFeaturedAction({ post }: BlogFeaturedActionProps) {
         <button
           type="button"
           onClick={() => handleToggle(true)}
-          disabled={isPending}
+          disabled={isPending || !post.canFeature}
           aria-label={`Set ${post.title} as the only featured post`}
-          title="Set this as the only featured article across the site"
+          title={post.canFeature ? "Set this as the only featured article across the site" : "Publish this article before featuring it"}
           className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-border-hairline bg-surface-base/80 px-3 py-1 text-xs font-medium text-ink-secondary transition-all hover:border-amber-400/40 hover:bg-amber-400/10 hover:text-amber-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-current disabled:opacity-50"
         >
           {isPending ? (
@@ -72,9 +73,9 @@ export function BlogFeaturedAction({ post }: BlogFeaturedActionProps) {
           <span>Set as featured</span>
         </button>
       )}
-      {errorMessage && (
-        <span role="alert" className="text-xs text-red-400" title={errorMessage}>
-          {errorMessage}
+      {feedback && (
+        <span role={feedback.error ? "alert" : "status"} className={`text-xs ${feedback.error ? "text-red-400" : "text-ink-secondary"}`} title={feedback.text}>
+          {feedback.text}
         </span>
       )}
     </div>

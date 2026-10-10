@@ -28,6 +28,7 @@ export async function POST(request: Request) {
 
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
+    const submittedFilename = formData.get("original_filename");
     const scopedPost = formData.get("blog_post_id");
     let folder = "portfolio";
     if (scopedPost !== null) {
@@ -52,6 +53,10 @@ export async function POST(request: Request) {
     if (!file.name || file.name.length > 255) {
       return NextResponse.json({ error: "Choose an image with a filename of 1 to 255 characters" }, { status: 400 });
     }
+    if (submittedFilename !== null && (typeof submittedFilename !== "string" || !submittedFilename || submittedFilename.length > 255 || /[\/\\\x00-\x1f]/.test(submittedFilename))) {
+      return NextResponse.json({ error: "Choose a valid original image filename" }, { status: 400 });
+    }
+    const originalFilename = submittedFilename ?? file.name;
     if (file.size > 20 * 1024 * 1024) {
       return NextResponse.json({ error: "Choose an image smaller than 20 MB" }, { status: 413 });
     }
@@ -82,8 +87,8 @@ export async function POST(request: Request) {
       height: uploadResult.height,
       format: uploadResult.format,
       bytes: uploadResult.bytes,
-      alt_text: file.name,
-      original_filename: file.name,
+      alt_text: originalFilename,
+      original_filename: originalFilename,
       folder,
     };
     let { data, error } = await admin

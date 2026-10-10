@@ -196,14 +196,10 @@ const hueHex = [
 ];
 
 
-// Mirrors genericFeatures on the project detail page — used when a project
-// has no owner-provided features yet (original placeholder copy).
+// Keep the missing-features state factual rather than inventing delivery claims.
 function genericBullets(title: string): string[] {
   return [
-    `Thoughtful, accessible UI with full dark and light theme support across ${title}.`,
-    "Type-safe end-to-end architecture with defensive data handling and graceful fallbacks.",
-    "Performance-first build: optimized images, minimal client JavaScript, fast transitions.",
-    "Shipped with CI checks, error monitoring, and a zero-downtime deploy pipeline.",
+    `Explore the ${title} case study for its scope, implementation, and results.`,
   ];
 }
 
@@ -245,15 +241,14 @@ export function CaseStudyCard({
   detailsOpen: detailsOpenProp,
   onToggleDetails,
   highlight,
+  selectedTag,
 }: {
   project: HomeProject;
   index: number;
   /** Home: hide the below-panel body at xl — the sticky side panel shows the
       same details there. Below xl (no side panel) the body stays visible. */
   bodyHiddenOnXl?: boolean;
-  /** Tailwind min-height class for the cover panel. The projects page passes
-      a smaller value so the cover keeps the same width-to-height proportion
-      as on the home page, where columns are wider. */
+  /** Tailwind min-height class for the legacy text-overlay cover panel. */
   coverMinHClass?: string;
   /** When set, renders a dotted horizontal rule between the meta row and the
       cover. The projects page uses negative margins here so the rule extends
@@ -268,14 +263,11 @@ export function CaseStudyCard({
       hover choreography (image tilt/lift) is unaffected. Defaults to true,
       preserving the home page behaviour. */
   liftOnHover?: boolean;
-  /** What the big heading inside the cover shows. Home keeps the default
-      tagline; the projects page passes "title" to show the project name. */
+  /** Title-led cards use the image-only cover and show the title below it. */
   coverHeading?: "tagline" | "title";
-  /** Projects can request the homepage's stroked line arrow while retaining
-      their title-led cover. Auto preserves the established context behavior. */
+  /** Selects the arrow style on text-overlay covers. */
   coverArrow?: "auto" | "line" | "glyph";
-  /** The Projects cover already names the project in its h3, so its screenshot
-      can be decorative instead of repeating the link name to screen readers. */
+  /** Text-overlay covers can use a decorative screenshot. */
   decorativeCoverImage?: boolean;
   /** Context-specific Next Image loading and responsive source hints. */
   imagePriority?: boolean;
@@ -287,6 +279,8 @@ export function CaseStudyCard({
   /** Projects page search term — matches inside the description get a quiet
       dotted-underline emphasis so users see WHY a card matched. */
   highlight?: string;
+  /** Projects index only: show the active filter first without changing Home cards. */
+  selectedTag?: string;
 }) {
   const i = index;
   const lineArrow =
@@ -336,6 +330,8 @@ export function CaseStudyCard({
     };
   }, [isTouch, reducedMotion]);
   const active = isTouch && scrollPreview && !reducedMotion;
+  const coverImage = project.images?.[0] || project.image_url;
+  const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null);
 
   /* Projects-page disclosure for highlights + tech stack (collapsed by
      default so the grid stays compact). Controlled by the parent when
@@ -343,6 +339,8 @@ export function CaseStudyCard({
   const [detailsOpenLocal, setDetailsOpenLocal] = useState(false);
   const detailsOpen = onToggleDetails ? !!detailsOpenProp : detailsOpenLocal;
   const toggleDetails = onToggleDetails ?? (() => setDetailsOpenLocal((v) => !v));
+  const tags = projectTags(project);
+  const visibleTags = selectedTag ? [selectedTag, ...tags.filter((tag) => tag !== selectedTag)].slice(0, 3) : tags;
 
   /* Production hardening for the disclosure:
      1. `inert` on the collapsed panel — keyboard users can't tab into
@@ -405,7 +403,7 @@ export function CaseStudyCard({
               clipped mid-way; max 3 shown, min 1 guaranteed (a very long
               first tag truncates inside its pill). */}
           <div className="flex h-[26.5px] min-w-0 flex-wrap content-start items-center gap-2 overflow-hidden">
-            {projectTags(project).map((tag) => (
+            {visibleTags.map((tag) => (
               <span
                 key={tag}
                 /* Truncated long tags reveal their full name on hover. */
@@ -471,13 +469,47 @@ export function CaseStudyCard({
 
       <Link
         href={`/projects/${project.slug}`}
+        aria-label={coverHeading === "title" ? `View ${project.title} case study` : undefined}
         className={clsx(
           "frame-light-edge group relative block",
+          coverHeading === "title" && "aspect-[3/2] transition-transform duration-300 ease-out motion-safe:[@media(hover:hover)]:hover:-translate-y-1 motion-safe:active:-translate-y-1 motion-reduce:transition-none focus-visible:rounded-[22px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary",
+          active && coverHeading === "title" && "-translate-y-1",
           /* Projects page: the cover panel itself rises 6px on hover, so the
              frame hairline must ride along or it visibly detaches. */
-          !liftOnHover && "frame-light-edge-lift"
+          !liftOnHover && coverHeading !== "title" && "frame-light-edge-lift"
         )}
       >
+        {coverHeading === "title" ? (
+          <div
+            ref={panelRef}
+            className="relative h-full w-full overflow-hidden rounded-[22px] border-8 border-white bg-neutral-100 shadow-[0_0_0_0.8px_rgba(0,0,0,0.2),0_9.5px_28.5px_-11.4px_rgba(0,0,0,0.4)] dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-[0_0_0_1px_#4d4d4d,0_9.5px_28.5px_-11.4px_rgba(0,0,0,0.4)]"
+          >
+            {coverImage && failedImageUrl !== coverImage ? (
+              <Image
+                src={optimizeImageUrl(coverImage, 1200)}
+                alt=""
+                fill
+                priority={imagePriority}
+                sizes={imageSizes}
+                onError={() => setFailedImageUrl(coverImage)}
+                className={clsx(
+                  "object-cover object-top transition-transform duration-500 ease-out motion-safe:[@media(hover:hover)]:group-hover:scale-[1.03] motion-safe:group-active:scale-[1.03] motion-reduce:transition-none",
+                  active && "scale-[1.03]"
+                )}
+              />
+            ) : (
+              <span className="absolute inset-0 flex items-center justify-center px-6 text-center font-mono text-xs uppercase tracking-widest text-text-secondary">
+                Preview unavailable
+              </span>
+            )}
+            <span aria-hidden className={clsx("absolute right-6 top-6 transition-transform duration-300 group-hover:translate-x-1 max-[380px]:right-4 max-[380px]:top-4 md:right-8 md:top-8", coverImage && failedImageUrl !== coverImage ? "text-white/85 drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]" : "text-text-secondary")}>
+              <svg viewBox="0 0 24 16" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-6">
+                <path d="M2 8h19" />
+                <path d="m15 2 6 6-6 6" />
+              </svg>
+            </span>
+          </div>
+        ) : (
         <div
           ref={panelRef}
           className={clsx(
@@ -521,33 +553,8 @@ export function CaseStudyCard({
             )}
           >
             <div className="flex items-start justify-between gap-4">
-              <h3
-                className={clsx(
-                  "line-clamp-2 max-w-xl",
-                  coverHeading === "title"
-                    ? bodyHiddenOnXl
-                      ? /* Home: cover tagline in the body sans (same family
-                           as the card description) — softer, 18/20px. */
-                        "text-base font-medium leading-snug text-white/85 md:text-xl"
-                      : /* Identical type to the home projects-section title
-                         (font-display text-3xl font-medium leading-tight) —
-                         white for contrast on the gradient panel, lifted by a
-                         two-layer text shadow (tight contact + soft ambient)
-                         so it stays crisp on any cover hue. */
-                      "font-display text-[22px] font-medium leading-tight text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.35),0_4px_14px_rgba(0,0,0,0.22)] max-[380px]:text-[19px] sm:text-[26px] md:text-3xl"
-                    : /* Home: body-sans tagline, softer — white/70,
-                         no shadow — sized for two clamped lines. */
-                      "text-base font-medium leading-snug text-white/85 md:text-xl"
-                )}
-              >
-                {coverHeading === "title"
-                  ? bodyHiddenOnXl
-                    ? /* Home: the cover shows the description/tagline (soft
-                         serif style), while the below-panel body keeps the
-                         projects structure for mobile/tablet. */
-                      project.tagline
-                    : project.title
-                  : project.tagline}
+              <h3 className="line-clamp-2 max-w-xl text-base font-medium leading-snug text-white/85 md:text-xl">
+                {project.tagline}
               </h3>
               <span
                 aria-hidden
@@ -697,6 +704,7 @@ export function CaseStudyCard({
             </div>
           </div>
         </div>
+        )}
       </Link>
 
       {/* Compact description + project story — visible below xl; hidden at xl
@@ -720,17 +728,14 @@ export function CaseStudyCard({
         )}
         {coverHeading === "title" ? (
           <>
-            {bodyHiddenOnXl && (
-              /* Home mobile/tablet: the cover shows the tagline, so the
-                 project title leads the body here (hidden at xl where the
-                 sticky panel already names the project). */
+            <h3 className="mb-2 font-display text-2xl font-medium leading-tight">
               <Link
                 href={`/projects/${project.slug}`}
-                className="mb-2 block font-display text-2xl font-medium leading-tight text-text-primary transition-colors hover:text-text-secondary"
+                className="text-text-primary transition-colors hover:text-text-secondary"
               >
                 {project.title}
               </Link>
-            )}
+            </h3>
             {/* Projects page: the description itself links to the case study —
                 the whole reading path (cover, description, CTA) navigates.
                 On the xl staggered grid it reserves two lines so paired
@@ -818,23 +823,20 @@ export function CaseStudyCard({
                   </li>
                 ))}
             </ul>
-            {project.tech.length > 0 && (
+            {bodyHiddenOnXl ? (
+              <HomeTechStack tech={project.tech} className="mt-4" />
+            ) : project.tech.length > 0 ? (
               <div className="mt-4 flex max-h-[124px] flex-wrap gap-2 overflow-hidden">
-                {(coverHeading === "title"
-                  ? project.tech.slice(0, 5)
-                  : project.tech
-                ).map((t) => (
+                {project.tech.slice(0, 5).map((t) => (
                   <TechChip key={t} name={t} />
                 ))}
-                {coverHeading === "title" && project.tech.length > 5 && (
-                  /* Cap at five chips — the full stack lives on the case
-                     study page. Keeps the panel tidy and even per project. */
+                {project.tech.length > 5 && (
                   <span className="inline-flex items-center rounded-full border border-dashed border-border-primary px-3 py-1 font-mono text-xs text-text-secondary">
                     +{project.tech.length - 5}
                   </span>
                 )}
               </div>
-            )}
+            ) : null}
           </div>
         </div>
         {coverHeading !== "title" && (
@@ -853,6 +855,69 @@ export function CaseStudyCard({
         )}
       </div>
     </motion.article>
+  );
+}
+
+function HomeTechStack({ tech, className }: { tech: string[]; className: string }) {
+  const techMeasureRef = useRef<HTMLDivElement>(null);
+  const [visibleTechCount, setVisibleTechCount] = useState(tech.length);
+
+  useEffect(() => {
+    const measure = () => {
+      const row = techMeasureRef.current;
+      if (!row) return;
+      const chips = [...row.children].slice(0, -1) as HTMLElement[];
+      const badge = row.lastElementChild as HTMLElement;
+      const tops = [...new Set(chips.map((chip) => chip.offsetTop))];
+      const thirdTop = tops[2];
+      let count = thirdTop === undefined
+        ? chips.length
+        : chips.findIndex((chip) => chip.offsetTop > thirdTop);
+      if (count < 0) count = chips.length;
+      if (count < chips.length && thirdTop !== undefined) {
+        const probe = badge.cloneNode(true) as HTMLElement;
+        row.appendChild(probe);
+        const edge = row.getBoundingClientRect().right;
+        while (count > 0 && chips[count - 1].offsetTop === thirdTop) {
+          probe.textContent = `+${chips.length - count}`;
+          if (chips[count - 1].getBoundingClientRect().right + 8 + probe.getBoundingClientRect().width <= edge) break;
+          count--;
+        }
+        probe.remove();
+      }
+      setVisibleTechCount(count);
+    };
+    measure();
+    const observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(measure) : null;
+    if (techMeasureRef.current) observer?.observe(techMeasureRef.current);
+    window.addEventListener("resize", measure);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [tech]);
+
+  if (!tech.length) return null;
+
+  return (
+    <div className={clsx("relative", className)}>
+      <div ref={techMeasureRef} aria-hidden="true" className="invisible pointer-events-none absolute inset-x-0 top-0 flex flex-wrap gap-2">
+        {tech.map((t) => (
+          <TechChip key={t} name={t} />
+        ))}
+        <span className="rounded-full border border-border-primary px-3 py-1 font-mono text-xs text-text-secondary">+{tech.length}</span>
+      </div>
+      <div className="flex max-h-[96px] flex-wrap gap-2 overflow-hidden">
+        {tech.slice(0, visibleTechCount).map((t) => (
+          <TechChip key={t} name={t} />
+        ))}
+        {visibleTechCount < tech.length && (
+          <span className="inline-flex items-center rounded-full border border-dashed border-border-primary px-3 py-1 font-mono text-xs text-text-secondary">
+            +{tech.length - visibleTechCount}
+          </span>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -898,13 +963,7 @@ function StickyProjectPanel({
           </li>
         ))}
       </ul>
-      {project.tech.length > 0 && (
-        <div className="mt-[22px] flex max-h-[124px] flex-wrap gap-2 overflow-hidden">
-          {project.tech.map((t) => (
-            <TechChip key={t} name={t} />
-          ))}
-        </div>
-      )}
+      <HomeTechStack tech={project.tech} className="mt-[22px]" />
       {/* CTA — mouse-clickable; tabIndex -1 keeps it out of the tab order
           since the panel is aria-hidden (the card link is the a11y path). */}
       <Link
@@ -979,7 +1038,9 @@ export function CaseStudies({ projects }: { projects: HomeProject[] }) {
                   both pages share one identical card system. */}
               <CaseStudyCard
                 project={project}
-                index={i}
+                  index={i}
+                  imagePriority={i === 0}
+                  imageSizes="(min-width: 1280px) 56vw, (min-width: 640px) calc(100vw - 64px), calc(100vw - 32px)"
                 coverMinHClass="xl:min-h-[392px]"
                 liftOnHover={false}
                 coverHeading="title"

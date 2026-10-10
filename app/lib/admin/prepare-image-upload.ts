@@ -1,27 +1,26 @@
-/**
- * Client-side utility for preparing image files before uploading.
- *
- * Problem:
- * Reverse proxies, Docker gateways, and edge functions enforce request-body
- * size limits (often 1-2 MB). Raw photos or AI-generated images are typically
- * 2.5-10 MB uncompressed JPEGs/PNGs, causing HTTP 413 (Payload Too Large) errors.
- *
- * Solution:
- * When an image exceeds the safety threshold (~800 KB), this utility converts
- * it directly in the browser to high-definition WebP (90% studio quality,
- * preserving up to 2560px 2K/4K max resolution).
- *
- * Benefits:
- * - Eliminates HTTP 413 upload errors completely.
- * - Drastically speeds up upload times (transfers ~300-600 KB instead of 3-10 MB).
- * - Zero perceptible loss in visual quality, retina-sharp, no pixelation.
- * - Preserves vector SVGs and animated GIFs automatically.
- * - Fails safely back to the original file if canvas/WebP is unsupported or throws.
- */
+/** Best-effort WebP conversion for still JPEG/PNG uploads. Keep the original
+ * when the result is larger, the browser cannot encode WebP, or animation is present. */
 
-const MAX_SAFE_UPLOAD_BYTES = 800 * 1024; // 800 KB threshold
 const MAX_DIMENSION_PX = 3840; // 4K Ultra-HD retina max dimension
 const WEBP_QUALITY = 0.94; // 94% studio master quality (pristine visual clarity)
+
+async function isAnimatedPng(file: File): Promise<boolean> {
+  // APNG's acTL chunk precedes the first IDAT. If the header is too large to
+  // reach IDAT, preserve the source rather than risk flattening its frames.
+  const bytes = new Uint8Array(await file.slice(0, 64 * 1024).arrayBuffer());
+  if (bytes.length < 8 || ![137, 80, 78, 71, 13, 10, 26, 10].every((byte, index) => bytes[index] === byte)) return false;
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  let offset = 8;
+  while (offset + 12 <= bytes.length) {
+    const length = view.getUint32(offset);
+    const type = String.fromCharCode(...bytes.subarray(offset + 4, offset + 8));
+    if (type === "acTL") return true;
+    if (type === "IDAT") return false;
+    if (length > bytes.length - offset - 12) return true;
+    offset += length + 12;
+  }
+  return true;
+}
 
 export async function prepareImageForUpload(file: File): Promise<File> {
   // If not running in a browser environment, return original safely
@@ -39,39 +38,41 @@ export async function prepareImageForUpload(file: File): Promise<File> {
     return file;
   }
 
-  // Non-images should pass through untouched
-  if (file.type && !file.type.startsWith("image/")) {
+  // Canvas exports a single frame; animated WebP must stay intact.
+  if (file.type === "image/webp" || /\.webp$/i.test(file.name)) {
     return file;
   }
 
-  // If already under the safety threshold, no risk of HTTP 413
-  if (file.size <= MAX_SAFE_UPLOAD_BYTES) {
-    return file;
-  }
+  // AVIF, HEIC, TIFF and other multi-frame or already efficient formats are
+  // kept intact. Canvas would otherwise silently export only their first frame.
+  const jpeg = file.type === "image/jpeg" || (file.type === "" && /\.jpe?g$/i.test(file.name));
+  const png = file.type === "image/png" || (file.type === "" && /\.png$/i.test(file.name));
+  if (!jpeg && !png) return file;
 
   try {
+    if (png && await isAnimatedPng(file)) return file;
     return await convertImageToWebP(file);
-  } catch (error) {
-    // Fail safe: if anything goes wrong, return the original file
-    console.warn("Client-side image preparation fallback to original:", error);
+  } catch {
+    // Browser support varies; a failed optimization must not block uploads.
     return file;
   }
 }
 
 function convertImageToWebP(file: File): Promise<File> {
   return new Promise((resolve) => {
-    // Safety timeout in case browser image loading hangs
-    const timeout = setTimeout(() => {
-      resolve(file);
-    }, 8000);
-
-    const objectUrl = URL.createObjectURL(file);
     const img = new window.Image();
-
-    const cleanup = () => {
+    const objectUrl = URL.createObjectURL(file);
+    let settled = false;
+    const finish = (result: File) => {
+      if (settled) return;
+      settled = true;
       clearTimeout(timeout);
+      img.onload = null;
+      img.onerror = null;
       URL.revokeObjectURL(objectUrl);
+      resolve(result);
     };
+    const timeout = setTimeout(() => finish(file), 8000);
 
     img.onload = () => {
       try {
@@ -82,12 +83,11 @@ function convertImageToWebP(file: File): Promise<File> {
         }
 
         if (!width || !height) {
-          cleanup();
-          resolve(file);
+          finish(file);
           return;
         }
 
-        // Scale down proportionally only if image exceeds 2560px
+        // Scale down proportionally only if image exceeds the 3840px limit.
         if (width > MAX_DIMENSION_PX || height > MAX_DIMENSION_PX) {
           if (width > height) {
             height = Math.round((height * MAX_DIMENSION_PX) / width);
@@ -104,8 +104,7 @@ function convertImageToWebP(file: File): Promise<File> {
 
         const ctx = (canvas.getContext("2d", { willReadFrequently: false, alpha: true }) || canvas.getContext("2d")) as CanvasRenderingContext2D | null;
         if (!ctx || typeof canvas.toBlob !== "function") {
-          cleanup();
-          resolve(file);
+          finish(file);
           return;
         }
 
@@ -116,36 +115,38 @@ function convertImageToWebP(file: File): Promise<File> {
 
         canvas.toBlob(
           (blob) => {
-            cleanup();
-            if (!blob || blob.size >= file.size) {
-              // If conversion failed or didn't reduce file size, keep original
-              resolve(file);
+            if (settled) return;
+            if (!blob || blob.type !== "image/webp" || blob.size >= file.size) {
+              finish(file);
               return;
             }
 
-            const baseName = file.name.replace(/\.[^/.]+$/, "");
-            const newName = `${baseName}.webp`;
-            const webpFile = new File([blob], newName, {
-              type: "image/webp",
-              lastModified: Date.now(),
-            });
-
-            resolve(webpFile);
+            try {
+              const baseName = file.name.replace(/\.[^/.]+$/, "").slice(0, 250);
+              finish(new File([blob], `${baseName}.webp`, {
+                type: "image/webp",
+                lastModified: Date.now(),
+              }));
+            } catch {
+              finish(file);
+            }
           },
           "image/webp",
           WEBP_QUALITY
         );
       } catch {
-        cleanup();
-        resolve(file);
+        finish(file);
       }
     };
 
     img.onerror = () => {
-      cleanup();
-      resolve(file);
+      finish(file);
     };
 
-    img.src = objectUrl;
+    try {
+      img.src = objectUrl;
+    } catch {
+      finish(file);
+    }
   });
 }

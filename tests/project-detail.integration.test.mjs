@@ -134,10 +134,18 @@ test("project images enforce a cover, allow ordered additions, and deliver respo
   assert.match(upload, /createSupabaseAdminClient\(\)/);
   assert.doesNotMatch(upload, /10_000_000/);
   assert.match(detail, /<ProjectImageCarousel images=\{images\}/);
+  assert.match(detail, /related\.map\(\(item\) => <Link/);
+  assert.match(detail, /<span className="relative block aspect-\[3\/2\] overflow-hidden rounded-xl bg-neutral-100/);
+  assert.doesNotMatch(detail, /aspect-\[16\/9\]|\{String\(index \+ 1\)\.padStart\(2, "0"\)\}<\/span>\s*<\/span>/);
   assert.doesNotMatch(detail, /title: "Gallery"/);
   assert.match(carousel, /f_webp,q_auto:good,c_limit,w_/);
   assert.match(carousel, /drag=\{images\.length > 1/);
-  assert.match(carousel, /className="relative aspect-\[3\/2\] overflow-hidden/);
+  assert.match(carousel, /lg:before:aspect-\[3\/2\] lg:before:w-\[calc\(50%-8px\)\]/);
+  assert.match(carousel, /\(width \+ 16\) \/ 2/);
+  assert.match(carousel, /following \? "lg:flex lg:gap-4"/);
+  assert.match(carousel, /following && <div className=\{`relative hidden h-full w-\[calc\(50%-8px\)\] shrink-0 overflow-hidden rounded-3xl border border-border-primary/);
+  assert.match(carousel, /sharedSlot === 0 && shown\.src === current\.src \? "lg:invisible"/);
+  assert.match(carousel, /sharedSlot === 1 && shown\.src === current\.src \? "lg:invisible"/);
   assert.doesNotMatch(carousel, /aspect-\[4\/3\]/);
   assert.match(carousel, /custom=\{direction\}/);
   assert.match(carousel, /exit="exit"/);
@@ -148,14 +156,17 @@ test("project images enforce a cover, allow ordered additions, and deliver respo
   assert.doesNotMatch(carousel, /Open image|createPortal|data-project-image-viewer|ZoomIn|ZoomOut/);
   assert.doesNotMatch(carousel, /<figcaption/);
   assert.match(carousel, /<MessageSquareText/);
-  assert.match(carousel, /aria-expanded=\{captionOpen\}/);
+  assert.match(carousel, /aria-expanded=\{open\}/);
+  assert.match(carousel, /renderCaption\(shown, 0\)/);
+  assert.match(carousel, /renderCaption\(following, 1\)/);
+  assert.match(carousel, /bg-bg-primary \$\{following \? "lg:aspect-auto/);
   assert.match(carousel, /role="region" aria-label="Image caption"/);
   assert.match(carousel, /border-border-primary bg-bg-primary text-text-primary shadow-xl/);
   assert.match(carousel, /aria-label="Close image caption"/);
   assert.match(carousel, /w-48 max-w-\[calc\(100%-1\.5rem\)\].*sm:w-72/);
   assert.doesNotMatch(carousel, /text-neutral-700 hover:bg-neutral-100/);
   assert.match(carousel, /document\.addEventListener\("pointerdown", onPointerDown\)/);
-  assert.match(carousel, /captionButtonRef\.current\?\.contains\(target\)/);
+  assert.match(carousel, /captionButtonRefs\.current\.some\(\(button\) => button\?\.contains\(target\)\)/);
   assert.match(carousel, /event\.key === "Escape"/);
   assert.match(carousel, /!paused && !captionOpen && !loading/);
   assert.match(detail, /caption: project\.coverCaption/);
@@ -225,7 +236,7 @@ test("project gallery and narrative are sourced from Admin-authored data", async
   assert.match(detail, /grid gap-3 text-\[15px\]/);
   assert.match(detail, /grid gap-3 text-\[15px\] md:grid-cols-2/);
   assert.doesNotMatch(detail, /<ol className="[^"]*lg:grid-cols-1/);
-  assert.match(detail, /aspect-\[16\/9\] overflow-hidden rounded-xl/);
+  assert.match(detail, /aspect-\[3\/2\] overflow-hidden rounded-xl/);
   assert.match(detail, /title=\{item\.title\} className="block max-w-full truncate/);
   assert.match(detail, /item\.tagline && <span className="mt-3 line-clamp-2/);
   assert.doesNotMatch(detail, /<span className="font-mono text-\[11px\] uppercase tracking-widest text-text-secondary">\{item\.category\}<\/span>/);
@@ -353,7 +364,7 @@ test("related projects are selected in Admin and only published choices render i
   assert.match(edit, /availableProjects=\{availableProjects \?\? \[\]\}/);
   assert.match(create, /availableProjects=\{availableProjects \?\? \[\]\}/);
   assert.match(page, /project\.relatedProjectIds\.map\(\(id\) => list\.find/);
-  assert.match(detail, /related\.map\(\(item, index\) => <Link/);
+  assert.match(detail, /related\.map\(\(item\) => <Link/);
 });
 
 test("development stage chooses between completed and in-progress project facts", async () => {

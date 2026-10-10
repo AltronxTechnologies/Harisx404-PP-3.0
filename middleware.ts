@@ -14,18 +14,7 @@ const GONE_URLS = [
 
 // Middleware runs at the edge, where the filesystem-backed draft check is unavailable.
 // Keep this list in sync with content/blog/*.mdx (verified by the route test).
-const LOCAL_BLOG_DRAFTS = new Set([
-  "10-best-custom-and-creative-developer-blogs-in-2021",
-  "10-developers-you-need-to-follow-on-twitter",
-  "8-tips-to-improve-your-ui-designs",
-  "code-on-your-ipad-pro",
-  "display-apple-music-playlist-on-your-website",
-  "gatsbyconf-2021-gatsby-v3-and-the-new-gatsby-image",
-  "how-to-implement-dark-mode-with-tailwind-2",
-  "learn-tailwind-with-tailwindplay",
-  "lighthouse-and-integrating-with-netlify",
-  "tailwind-2-is-live",
-]);
+const LOCAL_BLOG_DRAFTS = new Set<string>([]);
 
 function projectStatusPage(status: 404 | 503, request: NextRequest) {
   return NextResponse.rewrite(new URL(status === 404 ? "/__missing_project" : "/project-data-unavailable", request.url), {

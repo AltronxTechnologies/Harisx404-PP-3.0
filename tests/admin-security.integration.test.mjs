@@ -22,7 +22,7 @@ test("Admin settings use the observed singleton schema with a strict write bound
   assert.match(auth, /auth\.getUser\(\)/);
   assert.match(auth, /ADMIN_EMAIL\?\.trim\(\)\.toLowerCase\(\)/);
   assert.match(route, /\.select\(SETTINGS_COLUMNS\)\.limit\(2\)/);
-  assert.match(route, /\.update\(parsed\.data\)[\s\S]*?\.eq\("id", result\.row\.id\)/);
+  assert.match(route, /\.update\(\{ \.\.\.changes, updated_at: nextUpdatedAt \}\)[\s\S]*?\.eq\("id", result\.row\.id\)[\s\S]*?\.eq\("updated_at", updated_at\)/);
   assert.match(route, /\}\)\.strict\(\)/);
   assert.doesNotMatch(route, /\.select\(['"]key, value['"]\)|onConflict: ['"]key['"]/);
   assert.match(settingsMigration, /DROP POLICY IF EXISTS "Authenticated users manage faqs"/);
@@ -138,7 +138,7 @@ test("Admin editors and mobile lists keep labelled controls and reachable action
     }
   }
   for (const field of ["tech-stack", "tags"]) assert.match(project, new RegExp(`<ProjectPillEditor id="project-${field}"`));
-  assert.doesNotMatch(project, /id="project-end-date"|id="project-description"/);
+  assert.doesNotMatch(project, /id="project-start-date"|id="project-end-date"|id="project-description"/);
   assert.match(project, /<BuildlogSelect id="project-stage" label="Development stage"/);
   assert.match(editor, /"aria-label": label/);
   assert.match(theme, /\.ProseMirror:focus-visible/);

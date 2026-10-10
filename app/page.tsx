@@ -49,11 +49,13 @@ export const metadata: Metadata = {
     description: siteMetadata.description,
     url: siteMetadata.siteUrl,
     type: "website",
+    images: [{ url: `${siteMetadata.siteUrl}/brand/logo-wide.png`, width: 1200, height: 630, alt: siteMetadata.title }],
   },
   twitter: {
     card: "summary_large_image",
     title: siteMetadata.title,
     description: siteMetadata.description,
+    images: [`${siteMetadata.siteUrl}/brand/logo-wide.png`],
   },
 };
 
@@ -114,7 +116,7 @@ export default async function Home() {
   const reactionSummaries = await fetchBlogReactionSummaries(
     dbPosts.map((post) => post.slug),
   );
-  const featuredPost = dbPosts.reduce<BlogIndexPost | undefined>(
+  const featuredPost = dbPosts.find((post) => post.featured) || dbPosts.reduce<BlogIndexPost | undefined>(
     (best, post) =>
       !best ||
       (reactionSummaries[post.slug]?.total || 0) >
@@ -235,7 +237,7 @@ export default async function Home() {
           {projects.length > 0 && <CaseStudies projects={projects} />}
           <Writings posts={posts} formattedDates={formattedDates} />
           <AboutTeaser />
-          <Testimonials items={dbTestimonials} />
+          <Testimonials items={hasConnectedContent ? dbTestimonials : undefined} />
           <MySiteGrid credentialSummary={credentialSummary} />
           <HomeFaq />
           <CtaSection />

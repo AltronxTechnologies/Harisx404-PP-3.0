@@ -71,11 +71,8 @@ async function keywordSearch(query: string): Promise<SearchResult[]> {
         .limit(RESULTS_PER_TYPE),
     ]);
 
-  if (postTitles.error && postSummaries.error && postSlugs.error) {
-    throw new Error("Blog search failed");
-  }
-  if (projectTitles.error && projectDescriptions.error && projectSlugs.error) {
-    throw new Error("Project search failed");
+  if ([postTitles, postSummaries, postSlugs, projectTitles, projectDescriptions, projectSlugs].some((result) => result.error || !result.data)) {
+    throw new Error("Search results could not be confirmed");
   }
 
   const posts = uniqueByLink(

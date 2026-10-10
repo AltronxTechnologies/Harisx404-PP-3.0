@@ -31,6 +31,7 @@ export type BlogIndexPost = {
   title: string;
   summary: string;
   publishedAt: string;
+  updatedAt?: string;
   readingTime: string;
   imageName: string;
   categories: string[];
@@ -127,7 +128,7 @@ const loadBlogIndexPosts = async (): Promise<BlogIndexPost[]> => {
   const { data, error } = await supabase
     .from("blog_posts")
     .select(`
-      title, slug, summary, published_at, cover_image_url, canonical_url,
+      title, slug, summary, published_at, updated_at, cover_image_url, canonical_url,
       reading_time_minutes, featured,
       blog_post_tags ( tags ( name, slug ) )
     `)
@@ -181,6 +182,7 @@ const loadBlogIndexPosts = async (): Promise<BlogIndexPost[]> => {
         title: post.title,
         summary: buildCardDescription(post.summary || "", sourceContent),
         publishedAt: post.published_at,
+        updatedAt: post.updated_at || post.published_at,
         readingTime:
           Number.isFinite(minutes) && minutes > 0
             ? `${minutes} min read`

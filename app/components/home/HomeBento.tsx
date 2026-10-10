@@ -350,7 +350,7 @@ function GlobeBento() {
   }, [isDark]);
 
   return (
-    <BentoCard linkTo="/contact" height="h-[300px]" appearance="home">
+    <BentoCard linkTo="/contact" accessibleLabel="Contact me about a project" height="h-[300px]" appearance="home">
       <div className="z-20 text-center">
         <h3 className="text-base font-medium text-text-primary">
           Open to work — worldwide
@@ -631,34 +631,44 @@ function TechChip({ item }: { item: TechItem }) {
   );
 }
 
-/** One infinite marquee row: two identical groups animate translateX(-100%)
-    on the GPU (pure transform → steady 60fps). Hovering a row pauses that
-    row only, so chips are easy to read and hover-color individually. */
+/** Keep a constant pixel speed despite different row lengths or CMS additions. */
 function MarqueeRow({
   items,
-  duration,
   reverse = false,
 }: {
   items: TechItem[];
-  duration: number;
   reverse?: boolean;
 }) {
-  const groupClass = clsx(
-    "flex shrink-0 items-center gap-2 pr-2 will-change-transform group-hover/row:[animation-play-state:paused] motion-reduce:animate-none",
-    reverse ? "animate-marquee-reverse" : "animate-marquee"
+  const rowRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const row = rowRef.current;
+    const group = row?.firstElementChild?.firstElementChild;
+    if (!row || !group) return;
+    const syncSpeed = () => {
+      row.style.setProperty("--marquee-duration", `${group.getBoundingClientRect().width / 60}s`);
+    };
+    syncSpeed();
+    const observer = new ResizeObserver(syncSpeed);
+    observer.observe(group);
+    return () => observer.disconnect();
+  }, [items]);
+  const trackClass = clsx(
+    "flex w-max will-change-transform group-hover/row:[animation-play-state:paused] motion-reduce:animate-none",
+    reverse ? "animate-marquee-pair-reverse" : "animate-marquee-pair"
   );
-  const style = { "--marquee-duration": `${duration}s` } as React.CSSProperties;
   return (
-    <div className="group/row flex overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
-      <div className={groupClass} style={style}>
-        {items.map((item) => (
-          <TechChip key={item.title} item={item} />
-        ))}
-      </div>
-      <div className={groupClass} style={style} aria-hidden>
-        {items.map((item) => (
-          <TechChip key={item.title} item={item} />
-        ))}
+    <div ref={rowRef} className="group/row flex overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
+      <div className={trackClass}>
+        <div className="flex shrink-0 items-center gap-2 pr-2">
+          {items.map((item) => (
+            <TechChip key={item.title} item={item} />
+          ))}
+        </div>
+        <div className="flex shrink-0 items-center gap-2 pr-2" aria-hidden>
+          {items.map((item) => (
+            <TechChip key={item.title} item={item} />
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -675,7 +685,7 @@ function TechStackBento({
      when the (server-provided) project tech actually changes. */
   const rows = React.useMemo(() => buildStackRows(projectTech), [projectTech]);
   return (
-    <BentoCard height="h-[300px]" linkTo={linkTo} appearance="home">
+    <BentoCard height="h-[300px]" linkTo={linkTo} accessibleLabel="Explore my tech stack" appearance="home">
       {/* Header voice matches the sibling bento cards */}
       <div className="z-20 text-center">
         <h3 className="text-base font-medium text-text-primary">Tech stack</h3>
@@ -684,9 +694,9 @@ function TechStackBento({
         </p>
       </div>
       <div className="z-20 mt-5 flex flex-1 flex-col justify-center gap-2.5">
-        <MarqueeRow items={rows[0]} duration={40} />
-        <MarqueeRow items={rows[1]} duration={46} reverse />
-        <MarqueeRow items={rows[2]} duration={43} />
+        <MarqueeRow items={rows[0]} />
+        <MarqueeRow items={rows[1]} reverse />
+        <MarqueeRow items={rows[2]} />
       </div>
     </BentoCard>
   );

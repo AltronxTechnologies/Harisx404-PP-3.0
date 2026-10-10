@@ -279,15 +279,17 @@ function Highlights({
   );
 }
 
-export function Resume({ experiences }: { experiences?: Experience[] }) {
+export function Resume({ experiences }: { experiences?: Experience[] | null }) {
   const prefersReducedMotion = useReducedMotion();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const shouldReduce = mounted && prefersReducedMotion;
-  const entries =
-    experiences && experiences.length > 0
-      ? experiences
-      : resumeData.experiences;
+  if (experiences === null || (experiences && experiences.length === 0)) {
+    return <div className="-mx-2 border-y border-gray-300 px-4 py-12 text-center text-[15px] leading-relaxed text-text-secondary dark:border-white/20 sm:-mx-3 lg:mx-0" role="status">
+      {experiences === null ? "Experience is temporarily unavailable. Please try again later." : "No experience details to show right now."}
+    </div>;
+  }
+  const entries = experiences ?? resumeData.experiences;
   return (
     <div className="relative -mx-2 sm:-mx-3 lg:mx-0">
       <div className="divide-y divide-gray-200 border-y border-gray-300 dark:divide-white/10 dark:border-white/20">

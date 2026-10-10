@@ -88,6 +88,7 @@ export function BlogImageManager({ postId, images, onImagesChange, onAvailabilit
         const fileToUpload = await prepareImageForUpload(file);
         const body = new FormData();
         body.append("file", fileToUpload);
+        body.append("original_filename", file.name);
         if (postId) body.append("blog_post_id", postId);
         const response = await fetch("/api/admin/media/upload", { method: "POST", body });
         const result = await readAdminResponse(response, "Blog image upload");

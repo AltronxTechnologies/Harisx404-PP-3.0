@@ -79,15 +79,15 @@ function revalidateProjectPaths(...slugs: Array<string | null | undefined>) {
     for (const slug of new Set(slugs)) {
       if (slug) revalidatePath(`/projects/${slug}`);
     }
-  } catch (error) {
-    console.error("Revalidation failed:", error);
+  } catch {
+    console.error("Project revalidation failed");
   }
 }
 
 async function referringProjectSlugs(db: Awaited<ReturnType<typeof createSupabaseAdminClient>>, id: string) {
   const { data, error } = await db.from("projects").select("slug").contains("related_project_ids", [id]);
   if (error) {
-    console.error("Could not revalidate related project pages:", error);
+    console.error("Could not revalidate related project pages:", error.code || "unexpected");
     return [];
   }
   return data?.map((project) => project.slug) ?? [];
@@ -147,7 +147,7 @@ async function validateCoverMedia(db: Awaited<ReturnType<typeof createSupabaseAd
     }
     return null;
   } catch (error) {
-    console.error("Could not verify project cover image:", error);
+    console.error("Could not verify project cover image:", error && typeof error === "object" && "code" in error ? error.code : "unexpected");
     return NextResponse.json({ error: "Could not verify the cover image. Try again later." }, { status: 503 });
   }
 }
@@ -157,8 +157,8 @@ function fail(error: unknown) {
   if (error instanceof Error && error.message === "Gallery contains an unknown media ID") {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
-  console.error("Project admin request failed:", error);
-  return NextResponse.json({ error: error instanceof Error ? error.message : "Project request failed" }, { status: 500 });
+  console.error("Project admin request failed:", error && typeof error === "object" && "code" in error ? error.code : "unexpected");
+  return NextResponse.json({ error: "Project request could not be completed. Refresh before retrying." }, { status: 500 });
 }
 
 function projectWriteError(error: { message: string; code?: string }) {
@@ -195,7 +195,7 @@ function projectWriteError(error: { message: string; code?: string }) {
   if (["42703", "PGRST204"].includes(error.code || "") && /latest_update_label|case_study_sections|live_note|source_note/.test(error.message)) {
     return NextResponse.json({ error: "Project editor needs migration 2026_project_case_studies.sql before changes can be saved." }, { status: 503 });
   }
-  return NextResponse.json({ error: error.message }, { status: 400 });
+  return NextResponse.json({ error: "Project data could not be saved. Review the selected fields and try again." }, { status: 400 });
 }
 
 async function saveProject(db: Awaited<ReturnType<typeof createSupabaseAdminClient>>, data: z.infer<typeof projectSchema>, id?: string, expectedUpdatedAt?: string) {
@@ -219,6 +219,7 @@ export async function POST(request: Request) {
     if (!parsed.success) return NextResponse.json({ error: "Invalid project data", issues: parsed.error.flatten() }, { status: 400 });
 
     const data = parsed.data;
+    if (data.featured) return NextResponse.json({ error: "Add new projects to Home from the Projects selection list." }, { status: 400 });
     if (data.start_date && data.end_date && data.end_date < data.start_date) return NextResponse.json({ error: "End date must be on or after the start date" }, { status: 400 });
     const db = await createSupabaseAdminClient();
     const relatedError = await validateRelatedProjects(db, data.related_project_ids);
@@ -245,6 +246,11 @@ export async function PUT(request: Request) {
     const { id, updated_at, ...data } = parsed.data;
     if (data.start_date && data.end_date && data.end_date < data.start_date) return NextResponse.json({ error: "End date must be on or after the start date" }, { status: 400 });
     const db = await createSupabaseAdminClient();
+    const { data: current, error: currentError } = await db.from("projects").select("featured").eq("id", id).maybeSingle();
+    if (currentError) throw currentError;
+    if (!current) return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    if ((current.featured === true) !== data.featured) return NextResponse.json({ error: "Home selection changed. Reload the editor before saving." }, { status: 409 });
+    if (current.featured === true && data.status !== "published") return NextResponse.json({ error: "Remove this project from Home before unpublishing it." }, { status: 409 });
     const relatedError = await validateRelatedProjects(db, data.related_project_ids, id);
     if (relatedError) return NextResponse.json({ error: relatedError }, { status: 400 });
     const coverError = await validateCoverMedia(db, data.cover_image_id, data.cover_image_url);

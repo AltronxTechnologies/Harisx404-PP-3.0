@@ -1,9 +1,8 @@
 "use client";
 
-/* Temporarily unlocked for the owner-directed Blog controls/state parity amendment. */
+/* Owner-authorized final checkup: preserve the approved design while fixing index behavior. */
 
 import {
-  Fragment,
   Suspense,
   useEffect,
   useMemo,
@@ -50,13 +49,20 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
   // ── State lives in the URL ────────────────────────────────────────
   const activeTag = searchParams.get("tag") ?? "All";
   const q = searchParams.get("q") ?? "";
-  const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
+  const rawPage = searchParams.get("page");
+  const parsedPage = rawPage && /^[1-9]\d*$/.test(rawPage) ? Number(rawPage) : 1;
+  const page = Number.isSafeInteger(parsedPage) ? parsedPage : 1;
 
   const [query, setQuery] = useState(q);
+  const pendingParamsRef = useRef(searchParams.toString());
   const searchRef = useRef<HTMLInputElement | null>(null);
   const filtersRef = useRef<HTMLDivElement | null>(null);
   const [filterEdges, setFilterEdges] = useState({ left: false, right: false });
   const skipNextSearchSyncRef = useRef(false);
+
+  useEffect(() => {
+    pendingParamsRef.current = searchParams.toString();
+  }, [searchParams]);
 
   // "/" focuses the search field (ignored while typing elsewhere).
   useEffect(() => {
@@ -112,7 +118,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
     next: { tag?: string; q?: string; page?: number },
     history: "push" | "replace" = "push"
   ) {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(pendingParamsRef.current);
     const apply = (key: string, value: string | undefined, def: string) => {
       if (value === undefined) return;
       if (value === def) params.delete(key);
@@ -121,6 +127,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
     apply("tag", next.tag, "All");
     apply("q", next.q, "");
     apply("page", next.page !== undefined ? String(next.page) : undefined, "1");
+    pendingParamsRef.current = params.toString();
     const href = `${pathname}${params.size ? `?${params}` : ""}`;
     if (history === "replace") router.replace(href, { scroll: false });
     else router.push(href, { scroll: false });
@@ -187,6 +194,14 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
   const start = (safePage - 1) * PER_PAGE;
   const pageItems = filtered.slice(start, start + PER_PAGE);
 
+  useEffect(() => {
+    if (rawPage !== null && rawPage !== (safePage === 1 ? null : String(safePage)) &&
+        new URLSearchParams(pendingParamsRef.current).get("page") === rawPage) {
+      setParams({ page: safePage }, "replace");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rawPage, safePage]);
+
   // Windowed page list: always show first/last, current ±1, and collapse
   // longer runs into an ellipsis so the control stays compact at any count.
   const pageList: (number | "…")[] = (() => {
@@ -208,7 +223,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
   })();
 
   function goToPage(n: number) {
-    setParams({ page: n });
+    setParams({ page: n, q: query });
     topRef.current?.scrollIntoView({
       behavior: reducedMotion ? "auto" : "smooth",
       block: "start",
@@ -296,7 +311,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
               type="button"
               aria-pressed={activeTag === "All"}
               onFocus={handleFilterFocus}
-              onClick={() => setParams({ tag: "All", page: 1 })}
+              onClick={() => setParams({ tag: "All", q: query, page: 1 })}
               className={inlineChipClass(activeTag === "All")}
             >
               All projects
@@ -307,7 +322,7 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
                 type="button"
                 aria-pressed={activeTag === tag}
                 onFocus={handleFilterFocus}
-                onClick={() => setParams({ tag, page: 1 })}
+                onClick={() => setParams({ tag, q: query, page: 1 })}
                 className={inlineChipClass(activeTag === tag)}
               >
                 {tag}
@@ -356,15 +371,13 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
             <CaseStudyCard
               project={project}
               index={start + i}
-              coverMinHClass="xl:min-h-[384px]"
-              metaDividerClass="mx-0"
-              liftOnHover={false}
-              coverHeading="title"
-              coverArrow="line"
-              decorativeCoverImage
+               metaDividerClass="mx-0"
+               liftOnHover={false}
+               coverHeading="title"
               imagePriority={i === 0}
               imageSizes="(max-width: 1279px) 100vw, 50vw"
-              highlight={q}
+               highlight={q}
+               selectedTag={activeTag === "All" ? undefined : activeTag}
               detailsOpen={detailsOpenSlug === project.slug}
               onToggleDetails={() =>
                 setDetailsOpenSlug((cur) =>
@@ -375,70 +388,38 @@ function ProjectsIndexInner({ projects }: { projects: HomeProject[] }) {
           </motion.div>
         ))}
       </div>
-      <div className="mt-14 hidden xl:flex xl:gap-6">
-        {[0, 1].map((col) => (
-          <Fragment key={col}>
-            {col === 1 && (
-              /* Vertical divider between the two staggered columns. Starts
-                 exactly at project 01's junction node (46.5px = meta row
-                 height above the dotted rule) instead of poking above it. */
-              <div
-                aria-hidden
-                className="mt-[46.5px] -mb-20 w-px shrink-0 self-stretch"
-                style={{ backgroundColor: "color-mix(in srgb, var(--rule-color) 90%, transparent)" }}
-              />
-            )}
-            <div
-              className={`min-w-0 flex-1 space-y-20 ${
-                col === 1 ? "mr-2 mt-[213px]" : "ml-2"
-              }`}
-            >
-            {pageItems
-              .map((project, i) => ({ project, i }))
-              .filter(({ i }) => i % 2 === col)
-              .map(({ project, i }) => (
-                <motion.div
-                  key={`${activeTag}-${q}-${safePage}-${project.slug}`}
-                  onMouseEnter={() =>
-                    router.prefetch(`/projects/${project.slug}`)
-                  }
-                  initial={reducedMotion ? false : { opacity: 0, y: 18 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.1 }}
-                  transition={{
-                    duration: 0.45,
-                    delay: (i % 2) * 0.06,
-                    ease: "easeOut",
-                  }}
-                >
-                  <CaseStudyCard
-                    project={project}
-                    index={start + i}
-                    coverMinHClass="xl:min-h-[384px]"
-                    metaDividerClass={
-                      col === 0
-                        ? "xl:-ml-6 xl:-mr-[25px]"
-                        : "xl:-ml-[25px] xl:-mr-6"
-                    }
-                    metaDividerJoint={col === 0 ? "right" : "left"}
-                    liftOnHover={false}
-                    coverHeading="title"
-                    coverArrow="line"
-                    decorativeCoverImage
-                    imagePriority={i === 0}
-                    imageSizes="(max-width: 1279px) 100vw, 50vw"
-                    highlight={q}
-                    detailsOpen={detailsOpenSlug === project.slug}
-                    onToggleDetails={() =>
-                      setDetailsOpenSlug((cur) =>
-                        cur === project.slug ? null : project.slug
-                      )
-                    }
-                  />
-                </motion.div>
-              ))}
-            </div>
-          </Fragment>
+      <div className="relative mt-14 hidden xl:grid xl:grid-cols-[minmax(0,1fr)_1px_minmax(0,1fr)] xl:gap-x-6 xl:gap-y-20">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute bottom-[-80px] left-1/2 top-[46.5px] w-px -translate-x-1/2"
+          style={{ backgroundColor: "color-mix(in srgb, var(--rule-color) 90%, transparent)" }}
+        />
+        {pageItems.map((project, i) => (
+          <motion.div
+            key={`${activeTag}-${q}-${safePage}-${project.slug}`}
+            className={`${i % 2 ? "relative top-[213px] mr-2" : "ml-2"} ${i === pageItems.length - 1 && i % 2 ? "pb-[213px]" : ""}`}
+            style={{ gridColumn: i % 2 ? 3 : 1, gridRow: Math.floor(i / 2) + 1 }}
+            onMouseEnter={() => router.prefetch(`/projects/${project.slug}`)}
+            initial={reducedMotion ? false : { opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.1 }}
+            transition={{ duration: 0.45, delay: (i % 2) * 0.06, ease: "easeOut" }}
+          >
+            <CaseStudyCard
+              project={project}
+              index={start + i}
+              metaDividerClass={i % 2 ? "xl:-ml-[25px] xl:-mr-6" : "xl:-ml-6 xl:-mr-[25px]"}
+              metaDividerJoint={i % 2 ? "left" : "right"}
+              liftOnHover={false}
+              coverHeading="title"
+              imagePriority={i === 0}
+              imageSizes="(max-width: 1279px) 100vw, 50vw"
+              highlight={q}
+              selectedTag={activeTag === "All" ? undefined : activeTag}
+              detailsOpen={detailsOpenSlug === project.slug}
+              onToggleDetails={() => setDetailsOpenSlug((cur) => cur === project.slug ? null : project.slug)}
+            />
+          </motion.div>
         ))}
       </div>
       {/* Single closing dotted rule spanning both columns — frames the whole

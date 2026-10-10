@@ -338,14 +338,13 @@ export function ProjectDetail({ project, related }: { project: DetailProject; re
             <span className="animate-gradient-x text-colorfull px-1 pb-1 italic [text-shadow:none]">projects</span>
           </SectionHeading>
           <div className="mt-14 grid gap-4 sm:grid-cols-2">
-            {related.map((item, index) => <Link key={item.slug} href={`/projects/${item.slug}`} className={`group flex min-w-0 flex-col rounded-2xl border border-border-primary bg-white p-2 transition-colors hover:border-neutral-400/70 dark:bg-white/[0.02] dark:hover:border-white/25 ${focusStyle}`}>
-              <span className="relative block aspect-[16/9] overflow-hidden rounded-xl bg-neutral-100 dark:bg-white/[0.04]">
+            {related.map((item) => <Link key={item.slug} href={`/projects/${item.slug}`} className={`group flex min-w-0 flex-col rounded-2xl border border-border-primary bg-white p-2 transition-colors hover:border-neutral-400/70 dark:bg-white/[0.02] dark:hover:border-white/25 ${focusStyle}`}>
+              <span className="relative block aspect-[3/2] overflow-hidden rounded-xl bg-neutral-100 dark:bg-white/[0.04]">
                 {item.image_url && <>
                   {/* Remote project covers can come from owner-entered hosts outside Next's image allowlist. */}
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={item.image_url} alt="" loading="lazy" className="h-full w-full object-cover" />
                 </>}
-                <span className="absolute left-3 top-3 rounded-md bg-bg-primary/90 px-2.5 py-1.5 font-mono text-[11px] text-text-primary backdrop-blur-sm">{String(index + 1).padStart(2, "0")}</span>
               </span>
               <span className="flex flex-1 flex-col px-3 pb-3 pt-5 sm:px-4 sm:pb-4">
                 <span title={item.title} className="block max-w-full truncate [font-family:var(--font-instrument-serif),serif] text-[30px] leading-tight text-text-primary sm:text-[34px]">{item.title}</span>
