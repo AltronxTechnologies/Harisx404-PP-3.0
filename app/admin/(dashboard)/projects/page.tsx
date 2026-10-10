@@ -6,6 +6,7 @@ import { Plus, Edit, ChevronLeft, ChevronRight } from "lucide-react";
 import { DeleteProjectButton } from "@/app/components/admin/DeleteProjectButton";
 import { ProjectListFilters } from "@/app/components/admin/ProjectListFilters";
 import { FeaturedProjectsManager, type FeaturedProjectOption } from "@/app/components/admin/FeaturedProjectsManager";
+import { ProjectIndexOrderManager } from "@/app/components/admin/ProjectIndexOrderManager";
 
 const PAGE_SIZE = 10;
 
@@ -33,23 +34,38 @@ export default async function AdminProjectsPage({ searchParams }: { searchParams
   const { count, error: countError } = await filtered(true);
   const totalPages = count === null ? 1 : Math.max(1, Math.ceil(count / PAGE_SIZE));
   if (!countError && page > totalPages) redirect(pageHref(totalPages));
-  const { data: projects, error: listError } = countError || count === null
-    ? { data: null, error: countError }
-    : await filtered(false).order("created_at", { ascending: false }).order("id").range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
-  const error = countError || count === null || listError;
-  const allProjects: FeaturedProjectOption[] = [];
+  const allProjects: (FeaturedProjectOption & { index_order?: number | null })[] = [];
   const { count: allCount, error: allCountError } = await db.from("projects").select("id", { count: "exact", head: true });
   let featuredReadError = Boolean(allCountError) || allCount === null || (allCount ?? 0) > 10000;
+  let orderAvailable = true;
   if (!featuredReadError) {
     for (let offset = 0; offset < (allCount ?? 0); offset += 500) {
-      const { data, error: readError } = await db.from("projects")
-        .select("id, title, slug, status, featured, display_order, updated_at")
-        .order("id").range(offset, offset + 499);
+      const read = (withOrder: boolean) => withOrder
+        ? db.from("projects").select("id, title, slug, status, featured, display_order, updated_at, index_order").order("id").range(offset, offset + 499)
+        : db.from("projects").select("id, title, slug, status, featured, display_order, updated_at").order("id").range(offset, offset + 499);
+      let { data, error: readError } = await read(orderAvailable);
+      if (orderAvailable && readError && ["42703", "PGRST204"].includes(readError.code) && /index_order/.test(readError.message)) {
+        orderAvailable = false;
+        ({ data, error: readError } = await read(false));
+      }
       if (readError || !data) { featuredReadError = true; break; }
       allProjects.push(...data);
     }
     if (allProjects.length !== allCount) featuredReadError = true;
   }
+  let { data: projects, error: listError } = countError || count === null
+    ? { data: null, error: countError }
+    : await (orderAvailable
+      ? filtered(false).order("index_order").order("id")
+      : filtered(false).order("created_at", { ascending: false }).order("id"))
+      .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
+  if (orderAvailable && listError && ["42703", "PGRST204"].includes(listError.code) && /index_order/.test(listError.message)) {
+    orderAvailable = false;
+    ({ data: projects, error: listError } = await filtered(false)
+      .order("created_at", { ascending: false }).order("id")
+      .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1));
+  }
+  const error = countError || count === null || listError;
   const featuredPosition = new Map((featuredReadError ? [] : allProjects).filter((project) => project.status === "published" && project.featured)
     .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0) || a.id.localeCompare(b.id))
     .map((project, index) => [project.id, index + 1]));
@@ -70,7 +86,10 @@ export default async function AdminProjectsPage({ searchParams }: { searchParams
         </Link>
       </div>
 
-      {featuredReadError ? <p role="alert" className="rounded-xl border border-border-hairline p-4 text-sm text-ink-secondary">Home selection could not be loaded. Reload before changing featured projects.</p>
+      {featuredReadError ? <p role="alert" className="rounded-xl border border-border-hairline p-4 text-sm text-ink-secondary">Project ordering and Home selection could not be loaded. Reload before making changes.</p>
+        : orderAvailable ? <ProjectIndexOrderManager key={allProjects.map((project) => `${project.id}:${project.updated_at}:${project.index_order}`).join("|")} projects={allProjects} />
+          : <p role="status" className="rounded-xl border border-border-hairline p-4 text-sm text-ink-secondary">Projects page ordering is available after migration 2026_project_index_order.sql is applied.</p>}
+      {featuredReadError ? null
         : <FeaturedProjectsManager key={allProjects.map((project) => `${project.id}:${project.updated_at}`).join("|")} projects={allProjects} />}
       <ProjectListFilters key={`${q}:${status}`} q={q} status={status} />
       <div className="overflow-hidden rounded-xl border border-border-hairline bg-surface-raised shadow-sm">

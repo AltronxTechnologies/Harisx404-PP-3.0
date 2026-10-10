@@ -26,11 +26,14 @@ export const metadata: Metadata = {
 export default async function ProjectsPage() {
   const dbProjects = await fetchProjects();
 
-  // The full collection stays newest-added first; Home has its own curated order.
+  // A separate saved rank controls this page; older databases retain newest-first order.
   const sorted = [...dbProjects].sort((a: any, b: any) => {
+    if (typeof a.index_order === "number" && typeof b.index_order === "number") {
+      return a.index_order - b.index_order || a.id.localeCompare(b.id);
+    }
     const ta = new Date(a.created_at || 0).getTime();
     const tb = new Date(b.created_at || 0).getTime();
-    return tb - ta;
+    return tb - ta || a.id.localeCompare(b.id);
   }).map((project: any) => withProjectPreview(project));
 
   const projects: HomeProject[] =
