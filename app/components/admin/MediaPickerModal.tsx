@@ -271,7 +271,7 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
                     <p className="text-sm text-text-secondary mb-6">Select an image from your computer to upload to the media library (20 MB maximum).</p>
                   
                   {uploadError && (
-                    <div className="mb-4 text-sm text-red-500 bg-red-500/10 px-4 py-2 rounded-lg w-full">
+                    <div role="alert" className="mb-4 text-sm text-red-500 bg-red-500/10 px-4 py-2 rounded-lg w-full">
                       {uploadError}
                     </div>
                   )}

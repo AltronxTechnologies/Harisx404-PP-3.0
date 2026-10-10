@@ -1,0 +1,27 @@
+# Production-ready pages register
+
+Updated 2026-10-10. This tracks page-by-page checkups separately from deployment approval. A local PASS is not a production PASS. Only mark a route **READY FOR DEPLOYMENT** after its page report and the shared release gates in `docs/FINAL_DEPLOYMENT_CHECKUP.md` have evidence on the intended staging/production target. Do not infer a PASS for untested routes.
+
+**Currently fully production-ready pages: none.** Home and About have completed substantial local checkups, but shared release blockers and page-specific checks remain.
+
+| Page | Local checkup | Production status | What's left before READY | Evidence |
+| --- | --- | --- | --- | --- |
+| Home `/` | Local browser/route checks completed across 320-1440px in both themes; source, HTTP and control tests pass. Approved presentation unchanged. | **NOT READY** | Owner review of a placeholder-like published testimonial; true deployed host, connected content/providers, full accessibility and performance verification, shared release gates. | [Home checkup](final-checkups/home.md) |
+| About `/about` | Local browser/route checks completed across 320-1440px in both themes; About social sharing copy and Experience empty/error states corrected and locally retested. Owner confirmed biography and work-history claims. | **NOT READY** | Connected Admin publish/unpublish and read-failure/cache tests on an approved disposable target; deployed social preview, full accessibility/performance checks and shared release gates. | [About checkup](final-checkups/about.md) |
+
+All other public pages remain in the [route checkup queue](FINAL_DEPLOYMENT_CHECKUP.md#route-inventory-and-queue); they have not received a final page-specific deployment checkup in this register. Admin routes and API methods have separate connected authorization and lifecycle gates. Historic design locks mean approved UI is a baseline, not a current deployment test result.
+
+## Shared release blockers
+
+- The configured canonical HTTPS host returned 404 in the latest status-only check. Confirm the actual Vercel project/primary host before any deployed page gets a PASS.
+- Effective database migrations, RLS/RPC grants, backup/restore and owner/non-owner connected workflows require a restore-tested approved target; checked-in SQL is not installed-state proof.
+- **Image upload HTTP 413:** Project/Media/Blog image clients use `/api/admin/media/upload`. A reported sub-1 MB WebP gets the shared non-JSON HTTP 413 message, but the exact failing origin, full multipart byte count, response content type and rejecting layer have not been captured. The route itself allows files up to 20 MiB and returns a different JSON error for that limit. A synthetic 900,000-byte WebP produced a 900,280-byte multipart body with a short filename; near a 1 MB boundary, the envelope matters. Invalid anonymous multipart probes with 500,000, 900,000, 1,300,000 and 2,500,000 bytes reached the route at both local Next port 3000 and Alloy port 8080 and returned JSON 401 before any media write. This does **not** prove an authenticated upload succeeds or establish the failing production/preview gateway. The shared error copy now accurately describes an unconfirmed HTTP 413 rather than claiming the WebP exceeded the app's limit, and the Media-picker upload error is now announced to assistive technology without a visual change. Do not mark uploads fixed until a disposable authenticated valid-upload/cleanup test succeeds through the actual failing origin. [Vercel's documented function payload limit](https://vercel.com/docs/functions/limitations#request-body-size) is 4.5 MB, relevant to this route's advertised 20 MiB maximum if Vercel is the actual host, but it does not by itself explain a sub-1 MB rejection.
+- Real provider delivery, the reported PDF 413 boundary, content approval, previously disclosed credential rotation, deployed SEO, WCAG/manual device checks, field Web Vitals and rollback rehearsal remain open. See [whole-site findings](FINAL_DEPLOYMENT_CHECKUP.md#current-whole-site-findings-and-work-plan).
+
+## Image upload follow-up
+
+1. In the browser Network panel during **one** failed attempt, identify the `POST /api/admin/media/upload` request. Record the browser page origin, request pathname, selected file's exact byte count, multipart/request byte count if shown, response **status** and **Content-Type**, and non-sensitive gateway-identifying headers. Do not send a HAR, cookie, token, filename, file contents or raw response body.
+2. Compare the request against the direct app and the same preview/deployed host. A non-JSON 413 means the app's own 20 MiB JSON validation did not supply the error; identify the gateway before changing limits. Multipart boundaries/fields add bytes beyond `file.size`. Neither an image-format change nor a speculative Next config flag is a proven repair.
+3. If the identified ingress rejects the full request, review its documented bounded limit and change the **actual rejecting layer** only after measuring the necessary envelope. If the request reaches the app, diagnose route/Cloudinary/Storage behavior with redacted server logs and an approved disposable image. Verify Project, Media and Blog paths, failure feedback, safe cleanup, cache visibility and retry/no-duplicate behavior before closing this gate.
+
+No deployment, live data mutation, valid Cloudinary upload, DNS change or production gateway adjustment was performed for this register.

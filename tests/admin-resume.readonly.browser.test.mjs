@@ -228,7 +228,7 @@ test(
         failures.push("failed-upload-lost-current-file");
       await mock.locator("#resume-upload").setInputFiles({ name: "review.pdf", mimeType: "application/pdf", buffer: Buffer.from("%PDF-1.4\n") });
       await mock.getByRole("dialog", { name: "Replace the live Resume?" }).getByRole("button", { name: "Replace PDF" }).click();
-      await mock.getByRole("alert").filter({ hasText: "request-size limit" }).waitFor();
+      await mock.getByRole("alert").filter({ hasText: "HTTP 413" }).waitFor();
       if (!(await mock.getByText("review-fixture.pdf", { exact: true }).count())) failures.push("html-upload-lost-current-file");
       if (!(await mock.getByRole("button", { name: "Refresh status" }).count())) failures.push("missing-upload-status-recovery");
       await mock.locator("#resume-upload").setInputFiles({ name: "review.pdf", mimeType: "application/pdf", buffer: Buffer.from("%PDF-1.4\n") });

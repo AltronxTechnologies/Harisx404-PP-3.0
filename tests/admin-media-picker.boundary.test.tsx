@@ -118,3 +118,34 @@ test("a failed library read offers in-place Retry", async () => {
     globalThis.fetch = originalFetch;
   }
 });
+
+test("a small WebP rejected with non-JSON 413 reports the request boundary without claiming the file exceeded the app limit", async () => {
+  const React = await import("react");
+  const [{ createRoot }, { act }, { MediaPickerModal }] = await Promise.all([
+    import("react-dom/client"), import("react-dom/test-utils"), import("../app/components/admin/MediaPickerModal"),
+  ]);
+  const originalFetch = globalThis.fetch;
+  let uploaded = 0;
+  globalThis.fetch = async (_url, options) => options?.method === "POST"
+    ? new Response("<html>Request rejected</html>", { status: 413, headers: { "content-type": "text/html" } })
+    : Response.json({ data: [], count: 0 });
+  const host = document.createElement("div");
+  document.body.append(host);
+  const root = createRoot(host);
+  try {
+    await act(async () => { root.render(React.createElement(MediaPickerModal, { isOpen: true, onClose: () => {}, onSelect: () => {}, onUploaded: () => { uploaded++; } })); await new Promise((resolve) => setTimeout(resolve, 0)); });
+    await act(async () => [...host.querySelectorAll<HTMLButtonElement>("button")].find((button) => button.textContent?.includes("Upload"))!.click());
+    const input = host.querySelector<HTMLInputElement>('input[type="file"]')!;
+    Object.defineProperty(input, "files", { configurable: true, value: [new File([new Uint8Array(900_000)], "small.webp", { type: "image/webp" })] });
+    await act(async () => { input.dispatchEvent(new browser.Event("change", { bubbles: true }) as unknown as Event); await new Promise((resolve) => setTimeout(resolve, 0)); });
+    for (let attempt = 0; attempt < 20 && !host.querySelector('[role="alert"]'); attempt++) {
+      await act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
+    }
+    assert.match(host.querySelector('[role="alert"]')?.textContent || "", /HTTP 413.*even when the file is small/);
+    assert.equal(uploaded, 0);
+  } finally {
+    await act(async () => root.unmount());
+    host.remove();
+    globalThis.fetch = originalFetch;
+  }
+});

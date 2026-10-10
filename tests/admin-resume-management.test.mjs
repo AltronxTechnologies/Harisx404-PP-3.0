@@ -4,7 +4,9 @@ import test from "node:test";
 import { readAdminResponse } from "../app/lib/admin/read-admin-response.ts";
 
 test("unexpected HTML, oversized responses and expired sessions return actionable errors", async () => {
-  await assert.rejects(readAdminResponse(new Response("<html>Too large</html>", { status: 413, headers: { "content-type": "text/html" } }), "Resume"), /request-size limit/);
+  await assert.rejects(readAdminResponse(new Response("<html>Too large</html>", { status: 413, headers: { "content-type": "text/html" } }), "Resume"), /HTTP 413.*even when the file is small/);
+  await assert.rejects(readAdminResponse(new Response("<html>Too large</html>", { status: 413, headers: { "content-type": "text/html" } }), "Project image upload"), /Project image upload was rejected \(HTTP 413\)/);
+  assert.deepEqual(await readAdminResponse(Response.json({ error: "Choose an image smaller than 20 MB" }, { status: 413 }), "Project image upload"), { error: "Choose an image smaller than 20 MB" });
   await assert.rejects(readAdminResponse(new Response("<html>Error</html>", { status: 502, headers: { "content-type": "text/html" } }), "Image upload"), /unexpected response \(502\)/);
   const redirected = new Response("<html>Login</html>", { headers: { "content-type": "text/html" } });
   Object.defineProperties(redirected, { redirected: { value: true }, url: { value: "http://localhost:3000/admin/login" } });
