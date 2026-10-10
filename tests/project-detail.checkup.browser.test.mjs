@@ -175,3 +175,105 @@ test("streamed detail loading never flashes the Projects index skeleton", async 
     await browser.close();
   }
 });
+
+test("touch controls and carousel swipe work on phone and tablet in both themes", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 });
+    const errors = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    await page.goto(`${baseUrl}/projects/${slug}`, { waitUntil: "domcontentloaded" });
+    await page.getByRole("figure", { name: "Image 1 of 3" }).waitFor();
+    await page.getByRole("button", { name: "Pause carousel" }).tap();
+    for (const theme of ["dark", "light"]) {
+      const dark = await page.locator("html").evaluate((node) => node.classList.contains("dark"));
+      if (dark !== (theme === "dark")) await page.getByRole("button", { name: `Switch to ${theme} mode` }).tap();
+      for (const width of [320, 390, 768, 1024]) {
+        await page.setViewportSize({ width, height: 844 });
+        const share = page.getByRole("button", { name: "Share project" });
+        await share.tap();
+        assert.equal(await share.getAttribute("aria-expanded"), "true", `${theme} ${width}: touch share opens`);
+        await share.tap();
+        assert.equal(await share.getAttribute("aria-expanded"), "false", `${theme} ${width}: touch share closes`);
+        const figure = page.getByRole("figure", { name: "Image 1 of 3" });
+        await figure.scrollIntoViewIfNeeded();
+        const caption = page.getByRole("button", { name: "Show image 1 caption" });
+        await caption.tap();
+        assert.equal(await page.getByRole("region", { name: "Image caption" }).count(), 1);
+        await page.getByRole("button", { name: "Close image caption" }).tap();
+        assert.equal(await page.getByRole("region", { name: "Image caption" }).count(), 0);
+        assert.ok((await page.evaluate(() => document.documentElement.scrollWidth)) <= width, `${theme} ${width}: touch reflow`);
+      }
+    }
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.getByRole("figure", { name: "Image 1 of 3" }).scrollIntoViewIfNeeded();
+    const frame = await page.getByRole("figure", { name: "Image 1 of 3" }).boundingBox();
+    const y = frame.y + frame.height / 2;
+    const client = await page.context().newCDPSession(page);
+    await client.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: frame.x + frame.width * 0.8, y }] });
+    for (let index = 1; index <= 8; index++) {
+      await client.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: frame.x + frame.width * (0.8 - index * 0.08), y }] });
+    }
+    await client.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    await page.getByRole("figure", { name: "Image 2 of 3" }).waitFor();
+    assert.deepEqual(errors, []);
+  } finally {
+    await browser.close();
+  }
+});
+
+test("project detail reflows with enlarged text without losing controls", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage({ viewport: { width: 640, height: 900 } });
+    await page.goto(`${baseUrl}/projects/${slug}`, { waitUntil: "domcontentloaded" });
+    await page.getByRole("heading", { name: "MedicaLink HMS", level: 1 }).waitFor();
+    await page.addStyleTag({ content: "html { font-size: 200% !important; }" });
+    for (const width of [640, 390, 320]) {
+      await page.setViewportSize({ width, height: 900 });
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+      assert.ok(overflow <= 1, `${width}px with 200% text: ${overflow}px overflow`);
+      const share = page.getByRole("button", { name: "Share project" });
+      await share.click();
+      assert.equal(await share.getAttribute("aria-expanded"), "true");
+      await page.keyboard.press("Escape");
+      assert.equal(await share.getAttribute("aria-expanded"), "false");
+    }
+  } finally {
+    await browser.close();
+  }
+});
+
+test("every currently linked published case study renders an image and accessible details on phone and desktop", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    const indexHtml = await (await page.request.get(`${baseUrl}/projects`)).text();
+    const slugs = [...new Set([...indexHtml.matchAll(/href="\/projects\/([a-z0-9-]+)"/g)].map((match) => match[1]))];
+    assert.ok(slugs.length > 0, "connected index must supply published detail links");
+    for (const projectSlug of slugs) {
+      const response = await page.goto(`${baseUrl}/projects/${projectSlug}`, { waitUntil: "domcontentloaded" });
+      assert.equal(response.status(), 200, projectSlug);
+      await page.locator("main h1").waitFor();
+      for (const width of [390, 1440]) {
+        await page.setViewportSize({ width, height: 900 });
+        await page.waitForFunction(() => {
+          const image = document.querySelector('figure[aria-label^="Image "] img:not([alt=""])');
+          return image && image.complete && image.naturalWidth > 0;
+        }, undefined, { timeout: 15000 });
+        const state = await page.evaluate(() => ({
+          overflow: document.documentElement.scrollWidth - innerWidth,
+          headings: document.querySelectorAll("main h1").length,
+          imageAlt: document.querySelector('figure[aria-label^="Image "] img:not([alt=""])')?.alt,
+          share: Boolean(document.querySelector('button[aria-label="Share project"], button[aria-controls="project-share-options"]')),
+        }));
+        assert.ok(state.overflow <= 1, `${projectSlug} ${width}: overflow ${state.overflow}px`);
+        assert.equal(state.headings, 1, `${projectSlug} ${width}: one H1`);
+        assert.ok(state.imageAlt, `${projectSlug} ${width}: descriptive cover`);
+        assert.equal(state.share, true, `${projectSlug} ${width}: share control`);
+      }
+    }
+  } finally {
+    await browser.close();
+  }
+});
