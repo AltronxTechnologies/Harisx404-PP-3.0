@@ -45,7 +45,7 @@ This is a **source inventory**, not a pass matrix. A checked route gets a separa
 | `/about` | Biography, experience/certifications source, timeline, links, images, factual owner sign-off. | BLOCKED for release: [local About checkup](final-checkups/about.md) and scoped fixes completed; connected Experience/deployed gates open |
 | `/projects` | Published-only collection, saved Admin order/new-first, search/tag filters, pagination, cards and empty state. | BLOCKED for release: [Projects index checkup](final-checkups/projects-index.md) verified scoped UI fixes locally; index migration and deployed gates remain open |
 | `/projects/[slug]` | Cover/gallery 3:2 carousel, captions/controls, related projects, missing/draft 404/noindex, metadata. | BLOCKED for release: [local Project detail checkup](final-checkups/project-detail.md) and scoped loading fix completed; connected owner/content and deployed gates remain open |
-| `/blog` | Published/scheduled eligibility, category/search/pagination, featured result and empty state. | BLOCKED: not run for candidate |
+| `/blog` | Published/scheduled eligibility, category/search/pagination, featured result and empty state. | BLOCKED for release: [local Blog index checkup](final-checkups/blog-index.md) completed; deployed host, connected owner lifecycle and manual gates remain open |
 | `/blog/[slug]` | Current and legacy slugs, missing/gone/draft, MDX/images/code, reactions/views, attribution/canonical. | BLOCKED: not run for candidate |
 | `/buildlog` | Entry filters, content state and pagination; only owner-approved data. | BLOCKED: not run for candidate |
 | `/community-wall` | Anonymous/authorized composer, moderation, rate limits, display/success/error states. | BLOCKED: not run for candidate |
