@@ -465,7 +465,7 @@ export function CaseStudyCard({
         aria-label={coverHeading === "title" ? `View ${project.title} case study` : undefined}
         className={clsx(
           "frame-light-edge group relative block",
-          coverHeading === "title" && "aspect-[3/2] focus-visible:rounded-[22px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary",
+          coverHeading === "title" && "aspect-[3/2] transition-transform duration-300 ease-out motion-safe:[@media(hover:hover)]:hover:-translate-y-1 motion-reduce:transition-none focus-visible:rounded-[22px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary",
           /* Projects page: the cover panel itself rises 6px on hover, so the
              frame hairline must ride along or it visibly detaches. */
           !liftOnHover && coverHeading !== "title" && "frame-light-edge-lift"

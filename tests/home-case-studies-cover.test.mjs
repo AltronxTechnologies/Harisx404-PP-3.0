@@ -11,6 +11,7 @@ test("Home uses 3:2 framed cover links with the original border and line arrow",
   assert.ok(covers.length > 0, "Home Case Studies has labelled cover links");
   for (const [link, cover] of covers) {
     assert.match(link, /aspect-\[3\/2\]/);
+    assert.match(link, /hover:-translate-y-1/);
     assert.match(cover, /border-8 border-white/);
     assert.match(cover, /dark:border-zinc-800/);
     assert.match(cover, /<svg[^>]*h-4 w-6/);
@@ -39,6 +40,7 @@ test("Projects index uses the same 3:2 image-only covers with titles below", asy
   assert.ok(covers.length > 0, "Projects index has labeled image covers");
   for (const [link, cover] of covers) {
     assert.match(link, /aspect-\[3\/2\]/);
+    assert.match(link, /hover:-translate-y-1/);
     assert.match(cover, /border-8 border-white/);
     assert.doesNotMatch(cover, /<h3\b/, "project title is not over the image");
     assert.match(cover, /<img[^>]*alt=""/, "the cover image is decorative inside a named link");
