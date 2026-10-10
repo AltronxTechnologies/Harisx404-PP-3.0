@@ -2163,6 +2163,19 @@ or its frozen presentation/data-state contracts without a new explicit owner
 unlock. Work may now move to Navbar, which remains independently locked until the
 owner explicitly authorizes a specific Navbar change.
 
+**2026-10-10 scoped owner-authorized About release amendment:** The owner approved
+About-specific sharing metadata and requested that an empty Admin Experience list
+not show old built-in entries. `app/about/page.tsx` now sets About Open Graph and
+Twitter titles/descriptions, retains the existing social image and canonical,
+and uses built-in timeline entries only for disconnected development previews.
+`app/lib/utils.ts` distinguishes a failed Experience read from a valid empty
+published collection; `app/components/Resume.tsx` shows concise, accessible
+empty/unavailable messages instead of presenting static roles in those states.
+With published entries, the approved timeline presentation and interactions do
+not change. The amended source is re-locked; connected empty/error lifecycle and
+the deployed host still require release verification in
+`docs/final-checkups/about.md`. This note is not a production sign-off.
+
 ### 2026-09-24 owner-authorized Navbar More feature-image amendment
 
 The owner temporarily unlocked only the two large feature images in Navbar More.

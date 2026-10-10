@@ -19,6 +19,24 @@ test("major public entry pages expose matching canonical and social image metada
   assert.match(image.headers.get("content-type") || "", /^image\/png/);
 });
 
+test("About shares its own factual title and description without losing social images", async () => {
+  const response = await fetch(`${base}/about`);
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  const meta = (name, attribute) => html.match(new RegExp(`<meta ${attribute}="${name}" content="([^"]+)"`))?.[1];
+  const description = meta("description", "name");
+  assert.match(html, /<title>About \| harisx404<\/title>/);
+  assert.match(description || "", /^Muhammad Haris/);
+  assert.equal(meta("og:title", "property"), "About | harisx404");
+  assert.equal(meta("twitter:title", "name"), "About | harisx404");
+  assert.equal(meta("og:description", "property"), description);
+  assert.equal(meta("twitter:description", "name"), description);
+  assert.equal(meta("og:url", "property"), "https://harisx404.vercel.app/about");
+  assert.match(html, /<link rel="canonical" href="https:\/\/harisx404\.vercel\.app\/about"/);
+  assert.match(html, /<meta property="og:image" content="https:\/\/harisx404\.vercel\.app\/brand\/logo-wide\.png"/);
+  assert.match(html, /<meta name="twitter:image" content="https:\/\/harisx404\.vercel\.app\/brand\/logo-wide\.png"/);
+});
+
 test("static sitemap entries do not claim a change on every regeneration", async () => {
   const response = await fetch(`${base}/sitemap.xml`);
   assert.equal(response.status, 200);

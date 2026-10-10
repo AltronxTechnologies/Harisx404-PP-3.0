@@ -18,6 +18,8 @@ import { PaperHeroTexture } from "@/app/components/PaperHeroTexture";
 import { fetchCachedExperiences } from "@/app/lib/public-page-data";
 import { fetchCredentialCollection } from "@/app/credentials/data";
 import { summarizeCredentials } from "@/app/credentials/summary";
+import { getSupabaseEnv } from "@/app/lib/supabase/safe";
+import { siteMetadata } from "@/app/data/siteMetadata";
 import {
   GitHubActivityBentoServer,
   GitHubActivityBentoSkeleton,
@@ -25,17 +27,32 @@ import {
 
 export const revalidate = 3600; // Cache for 1 hour, revalidated on demand via admin panel
 
+const aboutDescription = "Muhammad Haris — full-stack engineer working across web development, cybersecurity, and AI/ML.";
+
 export const metadata: Metadata = {
   title: "About",
-  description:
-    "Muhammad Haris — full-stack engineer working across web development, cybersecurity, and AI/ML.",
+  description: aboutDescription,
+  openGraph: {
+    title: "About | harisx404",
+    description: aboutDescription,
+    url: `${siteMetadata.siteUrl}/about`,
+    type: "website",
+    images: [{ url: `${siteMetadata.siteUrl}/brand/logo-wide.png`, width: 1200, height: 630, alt: siteMetadata.title }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "About | harisx404",
+    description: aboutDescription,
+    images: [`${siteMetadata.siteUrl}/brand/logo-wide.png`],
+  },
 };
 
 
 export default async function AboutPage() {
+  const disconnectedPreview = process.env.NODE_ENV === "development" && !getSupabaseEnv();
   const [dbExperiences, credentials] =
     await Promise.all([
-      fetchCachedExperiences(),
+      disconnectedPreview ? Promise.resolve(undefined) : fetchCachedExperiences().catch(() => null),
       fetchCredentialCollection().catch(() => []),
     ]);
   const credentialSummary = summarizeCredentials(credentials);
