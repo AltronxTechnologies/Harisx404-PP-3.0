@@ -143,7 +143,9 @@ test("project images enforce a cover, allow ordered additions, and deliver respo
   assert.match(carousel, /lg:before:aspect-\[3\/2\] lg:before:w-\[calc\(50%-8px\)\]/);
   assert.match(carousel, /\(width \+ 16\) \/ 2/);
   assert.match(carousel, /following \? "lg:flex lg:gap-4"/);
-  assert.match(carousel, /following && <div className="relative hidden h-full w-\[calc\(50%-8px\)\] shrink-0 overflow-hidden rounded-3xl border border-border-primary/);
+  assert.match(carousel, /following && <div className=\{`relative hidden h-full w-\[calc\(50%-8px\)\] shrink-0 overflow-hidden rounded-3xl border border-border-primary/);
+  assert.match(carousel, /sharedSlot === 0 && shown\.src === current\.src \? "lg:invisible"/);
+  assert.match(carousel, /sharedSlot === 1 && shown\.src === current\.src \? "lg:invisible"/);
   assert.doesNotMatch(carousel, /aspect-\[4\/3\]/);
   assert.match(carousel, /custom=\{direction\}/);
   assert.match(carousel, /exit="exit"/);

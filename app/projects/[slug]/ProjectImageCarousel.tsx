@@ -27,6 +27,7 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
   const [secondaryError, setSecondaryError] = useState<string | null>(null);
   const [showLoading, setShowLoading] = useState(false);
   const [slideStep, setSlideStep] = useState(0);
+  const [sharedSlot, setSharedSlot] = useState<0 | 1 | null>(null);
   const figureRef = useRef<HTMLElement>(null);
   const captionBoxRef = useRef<HTMLDivElement>(null);
   const captionButtonRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -80,7 +81,7 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
 
   useEffect(() => {
     if (!canPlay) return;
-    const timer = window.setInterval(() => { setCaptionSlot(null); setDirection(1); setIndex((value) => (value + 1) % images.length); }, 5000);
+    const timer = window.setInterval(() => { setCaptionSlot(null); setSharedSlot(0); setDirection(1); setIndex((value) => (value + 1) % images.length); }, 5000);
     return () => window.clearInterval(timer);
   }, [canPlay, cycle, images.length]);
 
@@ -112,8 +113,10 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
 
   const goTo = (next: number) => {
     const target = (next + images.length) % images.length;
+    const travel = next < index ? -1 : 1;
     setCaptionSlot(null);
-    setDirection(next < index ? -1 : 1);
+    setSharedSlot(target !== shownIndex && target === (shownIndex + travel + images.length) % images.length ? (travel === 1 ? 0 : 1) : null);
+    setDirection(travel);
     setImageError(false);
     if (readyUrlsRef.current.has(images[target].src)) setDisplayed(images[target]);
     setIndex(target);
@@ -157,11 +160,11 @@ export function ProjectImageCarousel({ images, title }: { images: Slide[]; title
           {adjacent.map((image) => <Image key={`prepared-${image.src}`} src={image.src} alt="" aria-hidden fill loading="eager" sizes="(max-width: 1280px) 100vw, 1152px" loader={isCloudinary(image.src) ? cloudinaryLoader : undefined} unoptimized={!isOptimizedHost(image.src)} className="pointer-events-none opacity-0" onLoad={() => { readyUrlsRef.current.add(image.src); if (wantedSrcRef.current === image.src) { setDisplayed(image); setImageError(false); } }} onError={() => { if (wantedSrcRef.current === image.src) setImageError(true); }} />)}
           {loading && !adjacent.some((image) => image.src === current.src) && <Image src={current.src} alt="" aria-hidden fill loading="eager" sizes="(max-width: 1280px) 100vw, 1152px" loader={isCloudinary(current.src) ? cloudinaryLoader : undefined} unoptimized={!isOptimizedHost(current.src)} className="pointer-events-none opacity-0" onLoad={() => { readyUrlsRef.current.add(current.src); if (wantedSrcRef.current === current.src) { setDisplayed(current); setImageError(false); } }} onError={() => setImageError(true)} />}
           <AnimatePresence initial={false} custom={direction}>
-            <motion.div key={shown.src} custom={direction} variants={{ enter: (travel: number) => ({ x: travel * slideStep }), center: { x: 0 }, exit: (travel: number) => ({ x: -travel * slideStep }) }} initial={reducedMotion ? false : "enter"} animate="center" exit="exit" transition={{ duration: reducedMotion ? 0 : 0.48, ease: [0.22, 1, 0.36, 1] }} className={`absolute inset-0 ${following ? "lg:flex lg:gap-4" : ""}`}>
-              <div className={`relative h-full min-w-0 overflow-hidden rounded-2xl border border-border-primary bg-neutral-100 dark:bg-white/[0.04] sm:rounded-3xl ${following ? "lg:w-[calc(50%-8px)] lg:shrink-0" : ""}`}>
+            <motion.div key={shown.src} custom={direction} variants={{ enter: (travel: number) => ({ x: travel * slideStep }), center: { x: 0 }, exit: (travel: number) => ({ x: -travel * slideStep }) }} initial={reducedMotion ? false : "enter"} animate="center" exit="exit" onAnimationComplete={() => { if (shown.src === wantedSrcRef.current) setSharedSlot(null); }} transition={{ duration: reducedMotion ? 0 : 0.48, ease: [0.22, 1, 0.36, 1] }} className={`absolute inset-0 ${following ? "lg:flex lg:gap-4" : ""}`}>
+              <div className={`relative h-full min-w-0 overflow-hidden rounded-2xl border border-border-primary bg-neutral-100 dark:bg-white/[0.04] sm:rounded-3xl ${following ? "lg:w-[calc(50%-8px)] lg:shrink-0" : ""} ${!reducedMotion && sharedSlot === 0 && shown.src === current.src ? "lg:invisible" : ""}`}>
                 <Image src={shown.src} alt={shown.alt || (shownIndex === 0 ? `${title} cover image` : `${title} image ${shownIndex + 1}`)} aria-hidden={imageError && !loading} fill loading="eager" sizes={following ? "(min-width: 1280px) 576px, (min-width: 1024px) 50vw, 100vw" : "(max-width: 1280px) 100vw, 1152px"} loader={isCloudinary(shown.src) ? cloudinaryLoader : undefined} unoptimized={!isOptimizedHost(shown.src)} draggable={false} className={`pointer-events-none select-none object-cover ${imageError && !loading ? "opacity-0" : ""}`} onLoad={() => { readyUrlsRef.current.add(shown.src); if (wantedSrcRef.current === shown.src) setImageError(false); }} onError={() => { if (wantedSrcRef.current === shown.src) setImageError(true); }} />
               </div>
-              {following && <div className="relative hidden h-full w-[calc(50%-8px)] shrink-0 overflow-hidden rounded-3xl border border-border-primary bg-neutral-100 dark:bg-white/[0.04] lg:block">
+              {following && <div className={`relative hidden h-full w-[calc(50%-8px)] shrink-0 overflow-hidden rounded-3xl border border-border-primary bg-neutral-100 dark:bg-white/[0.04] lg:block ${!reducedMotion && sharedSlot === 1 && shown.src === current.src ? "lg:invisible" : ""}`}>
                 <Image src={following.src} alt={following.alt || `${title} image ${(shownIndex + 1) % images.length + 1}`} fill loading="eager" sizes="(min-width: 1280px) 576px, 50vw" loader={isCloudinary(following.src) ? cloudinaryLoader : undefined} unoptimized={!isOptimizedHost(following.src)} draggable={false} className={`pointer-events-none select-none object-cover ${secondaryError === following.src ? "opacity-0" : ""}`} onLoad={() => { readyUrlsRef.current.add(following.src); if (secondaryError === following.src) setSecondaryError(null); }} onError={() => setSecondaryError(following.src)} />
                 {secondaryError === following.src && <div role="status" className="absolute inset-0 flex items-center justify-center bg-bg-primary p-3 text-sm text-text-primary">Image unavailable.</div>}
               </div>}

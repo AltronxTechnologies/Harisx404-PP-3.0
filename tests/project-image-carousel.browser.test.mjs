@@ -57,7 +57,33 @@ test("project image cards keep their geometry and independent captions across th
 
     await page.getByRole("button", { name: "Next image" }).click();
     await page.getByRole("figure", { name: "Image 2 of 3" }).waitFor();
+    await page.waitForTimeout(100);
+    const forward = await figure.evaluate((node) => {
+      const slides = [...node.firstElementChild.children].filter((child) => child.querySelector('img:not([alt=""])'));
+      return slides.map((slide) => [...slide.children].map((card) => getComputedStyle(card).visibility));
+    });
+    assert.deepEqual(forward, [["visible", "visible"], ["hidden", "visible"]]);
+    await page.waitForTimeout(500);
+    assert.equal(await figure.locator('img:not([alt=""]):visible').count(), 2);
     assert.equal(await page.getByRole("button", { name: "Show image 3 caption" }).count(), 1);
+    await page.getByRole("button", { name: "Previous image" }).click();
+    await page.getByRole("figure", { name: "Image 1 of 3" }).waitFor();
+    await page.waitForTimeout(100);
+    const backward = await figure.evaluate((node) => {
+      const slides = [...node.firstElementChild.children].filter((child) => child.querySelector('img:not([alt=""])'));
+      return slides.map((slide) => [...slide.children].map((card) => getComputedStyle(card).visibility));
+    });
+    assert.deepEqual(backward, [["visible", "visible"], ["visible", "hidden"]]);
+    await page.waitForTimeout(500);
+    await page.getByRole("button", { name: "Previous image" }).click();
+    await page.getByRole("figure", { name: "Image 3 of 3" }).waitFor();
+    await page.waitForTimeout(600);
+    await page.getByRole("button", { name: "Next image" }).click();
+    await page.getByRole("figure", { name: "Image 1 of 3" }).waitFor();
+    await page.waitForTimeout(600);
+    await page.getByRole("button", { name: "Next image" }).click();
+    await page.getByRole("figure", { name: "Image 2 of 3" }).waitFor();
+    await page.waitForTimeout(600);
     await page.getByRole("button", { name: "Show image 3 caption" }).click();
     await page.setViewportSize({ width: 390, height: 844 });
     assert.equal(await page.getByRole("region", { name: "Image caption" }).count(), 0);

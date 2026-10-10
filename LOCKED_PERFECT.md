@@ -2588,6 +2588,20 @@ project-detail source/HTTP suite, targeted lint, isolated build and TypeScript
 also passed. This narrow amendment is re-locked; it is not a full deployed
 project-detail checkup or permission to alter any other locked surface.
 
+### 2026-10-10 follow-up: overlapping carousel card edges
+
+The owner still saw pale lines at the corners when the right image moved to
+the left. A frame-by-frame desktop inspection showed the outgoing right card
+and incoming left card occupying identical x positions throughout the 480ms
+animation, so their rounded borders and translucent surfaces were drawn twice.
+The incoming duplicate is now hidden until the transition completes; backward
+navigation similarly hides the duplicated incoming right card. The outgoing
+card supplies the moving image in each case. Direct jumps that do not share
+an image retain both cards. The browser regression checks mid-transition
+visibility, settled two-card geometry, both directions, wraparound, captions,
+light/dark and phone layout. This corrects only the transition artifact;
+the rest of the approved presentation remains locked.
+
 ### 2026-09-28 owner-authorized legal-divider amendment
 
 The owner requested that Privacy and Terms horizontal dividers match the
