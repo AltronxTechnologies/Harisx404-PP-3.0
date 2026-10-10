@@ -148,6 +148,10 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
       formData.append("original_filename", file.name);
       if (blogPostId) formData.append("blog_post_id", blogPostId);
 
+      if (fileToUpload.size > 4.5 * 1024 * 1024) {
+        throw new Error(`"${file.name}" exceeds the server upload limit (${(fileToUpload.size / (1024 * 1024)).toFixed(1)} MB). Please select an image under 4.5 MB.`);
+      }
+
       const res = await fetch("/api/admin/media/upload", {
         method: "POST",
         body: formData,
