@@ -2,12 +2,13 @@
 
 Updated 2026-10-10. This tracks page-by-page checkups separately from deployment approval. A local PASS is not a production PASS. Only mark a route **READY FOR DEPLOYMENT** after its page report and the shared release gates in `docs/FINAL_DEPLOYMENT_CHECKUP.md` have evidence on the intended staging/production target. Do not infer a PASS for untested routes.
 
-**Currently fully production-ready pages: none.** Home and About have completed substantial local checkups, but shared release blockers and page-specific checks remain.
+**Currently fully production-ready pages: none.** Home, About and Projects index have received local checkups, but shared release blockers and page-specific checks remain.
 
 | Page | Local checkup | Production status | What's left before READY | Evidence |
 | --- | --- | --- | --- | --- |
 | Home `/` | Local browser/route checks completed across 320-1440px in both themes; source, HTTP and control tests pass. Approved presentation unchanged. | **NOT READY** | Owner review of a placeholder-like published testimonial; true deployed host, connected content/providers, full accessibility and performance verification, shared release gates. | [Home checkup](final-checkups/home.md) |
 | About `/about` | Local browser/route checks completed across 320-1440px in both themes; About social sharing copy and Experience empty/error states corrected and locally retested. Owner confirmed biography and work-history claims. | **NOT READY** | Connected Admin publish/unpublish and read-failure/cache tests on an approved disposable target; deployed social preview, full accessibility/performance checks and shared release gates. | [About checkup](final-checkups/about.md) |
+| Projects index `/projects` | Local 320-1440px light/dark browser matrix, 3:2 covers, detail navigation, search, tag and empty-state tests run; local source/integration and build checks pass. | **NOT READY** | Saved order column absent in connected DB; rapid search/filter drops selected tag; desktop DOM focus order differs from visual order; >8 pagination and deployed host/AA/performance gates open. | [Projects index checkup](final-checkups/projects-index.md) |
 
 All other public pages remain in the [route checkup queue](FINAL_DEPLOYMENT_CHECKUP.md#route-inventory-and-queue); they have not received a final page-specific deployment checkup in this register. Admin routes and API methods have separate connected authorization and lifecycle gates. Historic design locks mean approved UI is a baseline, not a current deployment test result.
 
