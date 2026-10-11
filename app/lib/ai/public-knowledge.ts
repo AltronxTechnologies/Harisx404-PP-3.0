@@ -85,6 +85,7 @@ function excerpt(entry: Entry, words: string[]): string {
 export async function retrievePublicKnowledge(question: string): Promise<PublicKnowledge> {
   const query = string(question, 300);
   const words = terms(query);
+  const latestArticle = /\b(latest|recent|newest)\b/i.test(query) && /\b(blog|post|article|writing)\b/i.test(query);
   const entries: Entry[] = [
     { kind: "home profile", title: "Home and profile", path: "/", text: `${siteMetadata.author}: ${siteMetadata.description}. ${siteContent.aboutTeaser.paragraphs.join(" ")} ${siteContent.aboutTeaser.stats.map((s) => `${s.value} ${s.label}`).join("; ")}` },
     { kind: "about education", title: "About and education", path: "/about", text: "Muhammad Haris graduated with a BSIT from the University of Malakand (2022-2026), CGPA 3.5/4.0. Works across full-stack web development, cybersecurity, and AI/ML. Ranked in Pakistan's Top 15% in NSCT 2026 and scored 96% in Cybersecurity coursework." },
@@ -96,19 +97,21 @@ export async function retrievePublicKnowledge(question: string): Promise<PublicK
   const db = getPublicSupabase();
   if (db) {
     const now = new Date().toISOString();
+    const dbSignal = AbortSignal.timeout(3000);
+    const skip = Promise.resolve({ data: [] as Row[], error: null });
     // Explicit columns, status gates, stable ordering and per-source limits. Public views
     // additionally enforce publication in the database (including demo exclusion).
     const results = await Promise.allSettled([
-      db.from("projects").select("title, slug, status, tagline, description, content, case_study_sections, tech_stack, features, category, year, project_stage, source_note, latest_update_label").eq("status", "published").order("updated_at", { ascending: false }).limit(80),
-      db.from("blog_posts").select("title, slug, status, summary, content, published_at, updated_at").eq("status", "published").lte("published_at", now).order("published_at", { ascending: false }).limit(100),
-      db.from("public_certifications").select("title, issuer, credential_id").limit(80),
-      db.from("public_buildlog_projects").select("name, tagline, info, current_version, project_status, items").limit(60),
-      db.from("experience").select("role, company, location, location_type, employment_type, start_date, end_date, start_month, start_year, end_month, end_year, is_current, summary, highlights, bullets, status").eq("status", "published").order("display_order", { ascending: true }).limit(80),
-      db.from("site_settings").select("site_name, seo_description, github_url, linkedin_url, twitter_url, email_address, show_faq_section").limit(1),
-      db.from("faqs").select("question, answer, is_visible").eq("is_visible", true).order("display_order", { ascending: true }).limit(60),
-      db.from("public_community_wall_messages").select("message, creator_name").order("created_at", { ascending: false }).limit(40),
-      db.from("public_resume_document").select("is_configured, is_active, original_filename, updated_at").limit(1),
-      db.from("testimonials").select("headline, quote, name, role, status").eq("status", "published").limit(40),
+      latestArticle ? skip : db.from("projects").select("title, slug, status, tagline, description, content, case_study_sections, tech_stack, features, category, year, project_stage, source_note, latest_update_label").eq("status", "published").order("updated_at", { ascending: false }).limit(80).abortSignal(dbSignal),
+      db.from("blog_posts").select("title, slug, status, summary, content, published_at, updated_at").eq("status", "published").lte("published_at", now).order("published_at", { ascending: false }).limit(latestArticle ? 1 : 100).abortSignal(dbSignal),
+      latestArticle ? skip : db.from("public_certifications").select("title, issuer, credential_id").limit(80).abortSignal(dbSignal),
+      latestArticle ? skip : db.from("public_buildlog_projects").select("name, tagline, info, current_version, project_status, items").limit(60).abortSignal(dbSignal),
+      latestArticle ? skip : db.from("experience").select("role, company, location, location_type, employment_type, start_date, end_date, start_month, start_year, end_month, end_year, is_current, summary, highlights, bullets, status").eq("status", "published").order("display_order", { ascending: true }).limit(80).abortSignal(dbSignal),
+      latestArticle ? skip : db.from("site_settings").select("site_name, seo_description, github_url, linkedin_url, twitter_url, email_address, show_faq_section").limit(1).abortSignal(dbSignal),
+      latestArticle ? skip : db.from("faqs").select("question, answer, is_visible").eq("is_visible", true).order("display_order", { ascending: true }).limit(60).abortSignal(dbSignal),
+      latestArticle || !/\b(community|wall|visitor|message|guestbook)\b/i.test(query) ? skip : db.from("public_community_wall_messages").select("message, creator_name").order("created_at", { ascending: false }).limit(40).abortSignal(dbSignal),
+      latestArticle ? skip : db.from("public_resume_document").select("is_configured, is_active, original_filename, updated_at").limit(1).abortSignal(dbSignal),
+      latestArticle ? skip : db.from("testimonials").select("headline, quote, name, role, status").eq("status", "published").limit(40).abortSignal(dbSignal),
     ]);
     const rows = (index: number): Row[] => {
       const result = results[index];
@@ -149,7 +152,6 @@ export async function retrievePublicKnowledge(question: string): Promise<PublicK
   }
 
   for (const entry of entries) entry.text = entry.text.slice(0, MAX_SCAN_TEXT);
-  const latestArticle = /\b(latest|recent|newest)\b/i.test(query) && /\b(blog|post|article|writing)\b/i.test(query);
   const candidates = latestArticle ? entries.filter((entry) => entry.kind === "blog article").slice(0, 1) : entries;
   const ranked = candidates.map((entry) => ({ entry, relevance: latestArticle ? 1 : score(entry, words, query) }))
     .filter(({ relevance }) => relevance > 0)

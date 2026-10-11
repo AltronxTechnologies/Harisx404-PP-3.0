@@ -96,7 +96,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid messages format' }, { status: 400 });
     }
 
-    const knowledge = await retrievePublicKnowledge(messages[messages.length - 1].content);
+    const question = messages[messages.length - 1].content;
+    const previousQuestion = messages.slice(0, -1).reverse().find((message) => message.role === 'user')?.content;
+    const followUp = /^(?:and\b|what about\b|tell me more\b|when\b|where\b|why\b|how\b|is it\b|does it\b)/i.test(question.trim())
+      && !/\b(latest|newest|recent)\s+(?:blog|post|article)\b/i.test(question);
+    const knowledge = await retrievePublicKnowledge(followUp && previousQuestion
+      ? `${previousQuestion.slice(0, 150)} ${question}` : question);
 
     const systemPrompt = `You are the professional portfolio assistant for Muhammad Haris (harisx404). Speak clearly, warmly and directly, without sales language, emoji, filler or self-congratulation.
 
@@ -122,6 +127,8 @@ Rules:
         : new (require('util').TextEncoder)();
 
       let streamClosed = false;
+      let notifyCancel: (() => void) | null = null;
+      const providerAbort = new AbortController();
       const stream = new ReadableStream({
         async start(controller) {
           const sendEvent = (event: string, data: any) => {
@@ -140,6 +147,7 @@ Rules:
           // 1. Primary: Groq Streaming
           if (groqKey) {
             try {
+              AbortSignal.timeout(4500).addEventListener('abort', () => providerAbort.abort(), { once: true });
               const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                 method: 'POST',
                 headers: {
@@ -155,7 +163,7 @@ Rules:
                   max_completion_tokens: 800,
                   stream: true,
                 }),
-                signal: AbortSignal.timeout(4500),
+                signal: providerAbort.signal,
                 cache: 'no-store',
               });
 
@@ -163,6 +171,8 @@ Rules:
                 const streamDecoder = new TextDecoder();
                 const reader = response.body.getReader();
                 let lineBuffer = '';
+                let groqComplete = false;
+                let filtered = false;
 
                 while (true) {
                   if (streamClosed) {
@@ -179,19 +189,19 @@ Rules:
                   for (const line of lines) {
                     const trimmed = line.trim();
                     if (!trimmed || trimmed.startsWith(':')) continue;
-                    if (trimmed === 'data: [DONE]') break;
+                    if (trimmed === 'data: [DONE]') {
+                      groqComplete = true;
+                      break;
+                    }
                     if (trimmed.startsWith('data: ')) {
                       try {
                         const json = JSON.parse(trimmed.slice(6));
                         const choice = json.choices?.[0];
                         if (choice?.finish_reason === 'content_filter') {
-                          const refusal = "I can't help with that request.";
-                          if (tokensEmitted === 0) sendEvent('start', { provider: 'groq' });
-                          accumulatedText += refusal;
-                          tokensEmitted++;
-                          sendEvent('delta', { text: refusal });
+                          filtered = true;
                           break;
                         }
+                        if (choice?.finish_reason) groqComplete = true;
                         const deltaText = choice?.delta?.content;
                         if (typeof deltaText === 'string' && deltaText) {
                           if (tokensEmitted === 0) sendEvent('start', { provider: 'groq' });
@@ -204,6 +214,19 @@ Rules:
                       }
                     }
                   }
+                  if (filtered) break;
+                }
+                if (filtered && tokensEmitted === 0) {
+                  const refusal = "I can't help with that request.";
+                  sendEvent('start', { provider: 'groq' });
+                  accumulatedText = refusal;
+                  tokensEmitted++;
+                  sendEvent('delta', { text: refusal });
+                  groqComplete = true;
+                  filtered = false;
+                }
+                if (filtered || (tokensEmitted > 0 && !groqComplete)) {
+                  throw new Error('Groq stream did not complete safely');
                 }
               }
             } catch {
@@ -237,34 +260,38 @@ Rules:
               });
 
               const userPrompt = messages[messages.length - 1].content;
+              const deadline = new Promise<never>((_, reject) => {
+                timer = setTimeout(() => reject(new Error('AI fallback timed out')), 4500);
+                notifyCancel = () => reject(new Error('Client aborted'));
+              });
 
               if (typeof chat.sendMessageStream === 'function') {
                 const streamResult = await Promise.race([
                   chat.sendMessageStream(userPrompt),
-                  new Promise<never>((_, reject) => {
-                    timer = setTimeout(() => reject(new Error('AI stream timed out')), 4500);
-                  }),
+                  deadline,
                 ]);
-                if (timer) clearTimeout(timer);
-
-                for await (const chunk of streamResult.stream) {
-                  if (streamClosed) break;
-                  const chunkText = typeof chunk.text === 'function' ? chunk.text() : '';
-                  if (chunkText) {
-                    if (tokensEmitted === 0) sendEvent('start', { provider: 'gemini' });
-                    accumulatedText += chunkText;
-                    tokensEmitted++;
-                    sendEvent('delta', { text: chunkText });
+                const iterator = streamResult.stream[Symbol.asyncIterator]();
+                let completed = false;
+                try {
+                  while (!streamClosed) {
+                    const { value: chunk, done } = await Promise.race([iterator.next(), deadline]);
+                    if (done) { completed = true; break; }
+                    const chunkText = typeof chunk.text === 'function' ? chunk.text() : '';
+                    if (chunkText) {
+                      if (tokensEmitted === 0) sendEvent('start', { provider: 'gemini' });
+                      accumulatedText += chunkText;
+                      tokensEmitted++;
+                      sendEvent('delta', { text: chunkText });
+                    }
                   }
+                } finally {
+                  if (!completed) void iterator.return?.(undefined).catch(() => {});
                 }
               } else if (typeof chat.sendMessage === 'function') {
                 const result = await Promise.race([
                   chat.sendMessage(userPrompt),
-                  new Promise<never>((_, reject) => {
-                    timer = setTimeout(() => reject(new Error('AI fallback timed out')), 4500);
-                  }),
+                  deadline,
                 ]);
-                if (timer) clearTimeout(timer);
                 const replyText = typeof result?.response?.text === 'function' ? result.response.text().trim() : '';
                 if (replyText) {
                   sendEvent('start', { provider: 'gemini' });
@@ -274,6 +301,7 @@ Rules:
                 }
               }
             } catch {
+              if (streamClosed) return;
               if (tokensEmitted > 0) {
                 sendEvent('error', {
                   code: 'STREAM_INTERRUPTED',
@@ -284,6 +312,7 @@ Rules:
               }
             } finally {
               if (timer) clearTimeout(timer);
+              notifyCancel = null;
             }
           }
 
@@ -304,6 +333,8 @@ Rules:
         },
         cancel() {
           streamClosed = true;
+          providerAbort.abort();
+          notifyCancel?.();
           logTelemetry({ requestId, status: 499, durationMs: Date.now() - startTime, errorCategory: 'CLIENT_ABORTED' });
         },
       });

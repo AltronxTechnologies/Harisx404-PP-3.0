@@ -16,7 +16,7 @@ function createStreamingRoute({
   geminiHandler,
   sources = [],
 } = {}) {
-  const calls = { groq: 0, gemini: 0 };
+  const calls = { groq: 0, gemini: 0, retrieval: "" };
   const exports = {};
 
   runInNewContext(compiled, {
@@ -48,7 +48,7 @@ function createStreamingRoute({
         };
       }
       if (name === "@/app/lib/supabase/safe") return { getPublicSupabase: () => null };
-      if (name === "@/app/lib/ai/public-knowledge") return { retrievePublicKnowledge: async () => ({ context: "", sources }) };
+      if (name === "@/app/lib/ai/public-knowledge") return { retrievePublicKnowledge: async (question) => { calls.retrieval = question; return { context: "", sources }; } };
       if (name === "@/app/lib/utils") return { fetchProjects: async () => [], fetchAndSortBlogPosts: async () => [] };
       if (name === "@/app/lib/rate-limit") return { checkRateLimit: () => ({ success: true }) };
       if (name === "util") return { TextEncoder };
@@ -151,6 +151,19 @@ test("streaming emits verified public source metadata before completion", async 
   assert.equal(events.at(-1).event, "done");
 });
 
+test("a short follow-up retrieves using the prior user subject", async () => {
+  const { POST, calls } = createStreamingRoute();
+  await collectSSEEvents(await POST(new Request("http://localhost/api/ai/chat", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ messages: [
+      { role: "user", content: "Tell me about the Quasar project" },
+      { role: "model", content: "It is a public project." },
+      { role: "user", content: "When was it built?" },
+    ], stream: true }),
+  })));
+  assert.match(calls.retrieval, /Quasar project.*When was it built\?/);
+});
+
 test("Groq HTTP failure before first token falls back to Gemini streaming", async () => {
   const { calls, POST } = createStreamingRoute({
     groqHandler: async () => new Response("Rate limit exceeded", { status: 429 }),
@@ -218,6 +231,58 @@ test("Groq failure AFTER emitting tokens emits STREAM_INTERRUPTED and does NOT m
   const errorEvent = events.find((e) => e.event === "error");
   assert.ok(errorEvent, "Must emit an error event when stream is interrupted");
   assert.equal(errorEvent.data.code, "STREAM_INTERRUPTED");
+});
+
+test("clean EOF without completion does not mark a partial Groq answer as done", async () => {
+  const { POST, calls } = createStreamingRoute({ groqHandler: async () => new Response(
+    'data: {"choices":[{"delta":{"content":"Incomplete"}}]}\n\n',
+    { status: 200, headers: { "Content-Type": "text/event-stream" } },
+  ) });
+  const events = await collectSSEEvents(await POST(new Request("http://localhost/api/ai/chat", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ messages: [{ role: "user", content: "Tell me about Haris" }], stream: true }),
+  })));
+  assert.equal(events.at(-1).event, "error");
+  assert.equal(events.at(-1).data.code, "STREAM_INTERRUPTED");
+  assert.equal(calls.gemini, 0);
+});
+
+test("late content filter interrupts rather than approving earlier output", async () => {
+  const { POST } = createStreamingRoute({ groqHandler: async () => new Response(
+    'data: {"choices":[{"delta":{"content":"Partial"}}]}\n\ndata: {"choices":[{"finish_reason":"content_filter","delta":{}}]}\n\n',
+    { status: 200, headers: { "Content-Type": "text/event-stream" } },
+  ) });
+  const events = await collectSSEEvents(await POST(new Request("http://localhost/api/ai/chat", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ messages: [{ role: "user", content: "Tell me about Haris" }], stream: true }),
+  })));
+  assert.equal(events.at(-1).event, "error");
+  assert.equal(events.some((entry) => entry.event === "done"), false);
+});
+
+test("Gemini fallback times out while reading a stalled iterator after its first chunk", async () => {
+  let returned = false;
+  const { POST } = createStreamingRoute({
+    groqHandler: async () => new Response("upstream unavailable", { status: 503 }),
+    geminiHandler: async () => ({ stream: {
+      [Symbol.asyncIterator]() {
+        let first = true;
+        return {
+          next: () => first ? (first = false, Promise.resolve({ done: false, value: { text: () => "Partial" } })) : new Promise(() => {}),
+          return: async () => { returned = true; return { done: true }; },
+        };
+      },
+    } }),
+  });
+  const started = Date.now();
+  const events = await collectSSEEvents(await POST(new Request("http://localhost/api/ai/chat", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ messages: [{ role: "user", content: "Tell me about Haris" }], stream: true }),
+  })));
+  assert.equal(events.at(-1).event, "error");
+  assert.equal(events.some((event) => event.event === "done"), false);
+  assert.equal(returned, true);
+  assert.ok(Date.now() - started < 7500);
 });
 
 test("Both providers failing emits UNAVAILABLE error without unhandled exception", async () => {

@@ -141,3 +141,22 @@ test("assistant replies display readable Markdown and only trusted links", async
     await browser.close();
   }
 });
+
+test("an SSE connection ending without done shows retry rather than a finished answer", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage();
+    await page.route("**/api/ai/chat", (route) => route.fulfill({
+      status: 200, headers: { "content-type": "text/event-stream" },
+      body: 'event: delta\ndata: {"text":"Incomplete answer"}\n\n',
+    }));
+    await page.goto(`${baseUrl}/links`, { waitUntil: "domcontentloaded" });
+    await page.getByRole("button", { name: "Toggle chat" }).click();
+    await page.getByRole("textbox", { name: "Ask the portfolio assistant" }).fill("Tell me about the work");
+    await page.getByRole("button", { name: "Send chat message" }).click();
+    await page.getByRole("alert").getByText("The answer was interrupted. Please retry.").waitFor();
+    assert.equal(await page.getByRole("button", { name: "Retry question" }).count(), 1);
+  } finally {
+    await browser.close();
+  }
+});

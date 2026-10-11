@@ -303,6 +303,7 @@ export function ChatbotWidget() {
       const decoder = new TextDecoder();
       let buffer = "";
       let accumulated = "";
+      let complete = false;
       let sources: Source[] = [];
 
       function processEvent(rawEvent: string) {
@@ -316,7 +317,9 @@ export function ChatbotWidget() {
             dataStr = dataStr ? `${dataStr}\n${val}` : val;
           }
         }
-        if (eventType === "delta" || eventType === "sources") {
+        if (eventType === "done") {
+          complete = true;
+        } else if (eventType === "delta" || eventType === "sources") {
           try {
             const parsed = JSON.parse(dataStr);
             if (eventType === "delta" && typeof parsed.text === "string" && parsed.text) accumulated += parsed.text;
@@ -352,9 +355,8 @@ export function ChatbotWidget() {
       buffer += decoder.decode();
       if (buffer.trim()) processEvent(buffer);
 
-      if (!accumulated.trim()) {
-        throw new Error("No answer came back. Please retry.");
-      }
+      if (!complete) throw new Error("The answer was interrupted. Please retry.");
+      if (!accumulated.trim()) throw new Error("No answer came back. Please retry.");
     } catch (cause) {
       if (requestRef.current === requestId && !controller.signal.aborted) {
         setError(cause instanceof Error ? cause.message : "The connection was interrupted. Please retry.");

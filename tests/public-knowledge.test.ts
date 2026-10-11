@@ -71,12 +71,15 @@ test("published full blog body is searchable; scheduled and draft posts never be
 });
 
 test("latest article means newest publication, not an older keyword match", async () => {
+  const before = requests.length;
   tables.blog_posts = [
     { title: "Newest release", slug: "newest-release", status: "published", published_at: "2026-10-10T00:00:00Z", summary: "A new article." },
     { title: "Older blog about SOC", slug: "older-soc", status: "published", published_at: "2026-01-01T00:00:00Z", summary: "Latest blog SOC SOC SOC." },
   ];
   const result = await retrieve("summarize the latest blog about SOC");
   assert.deepEqual(result.sources, [{ title: "Newest release", path: "/blog/newest-release" }]);
+  assert.deepEqual(requests.slice(before).map((request) => request.table), ["blog_posts"]);
+  assert.equal(requests.at(-1)?.url.searchParams.get("limit"), "1");
   tables.blog_posts = [];
 });
 
