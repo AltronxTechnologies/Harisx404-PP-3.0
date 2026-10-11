@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { geminiFlash } from '@/app/lib/gemini';
 import { getPublicSupabase } from '@/app/lib/supabase/safe';
-import { fetchProjects, fetchAndSortBlogPosts } from '@/app/lib/utils';
+import { fetchAndSortBlogPosts } from '@/app/lib/utils';
 import { checkRateLimit } from '@/app/lib/rate-limit';
 
 const truncate = (value: unknown, max: number): string => {
@@ -73,28 +73,28 @@ async function buildSiteContext(): Promise<string> {
 
   // 3. Published projects
   try {
-    const projects = await fetchProjects();
-    if (Array.isArray(projects) && projects.length > 0) {
-      const lines = projects.slice(0, 10).map((p: any) => {
+    const supabase = getPublicSupabase();
+    if (supabase) {
+      const { data: projects, error } = await supabase
+        .from('projects')
+        .select('title, slug, tagline, description, tech_stack, project_stage')
+        .eq('status', 'published')
+        .order('created_at', { ascending: false })
+        .limit(10);
+      if (error) throw error;
+      const lines = (projects || []).map((p) => {
         const tech = Array.isArray(p.tech_stack)
           ? p.tech_stack.slice(0, 8).join(', ')
-          : Array.isArray(p.tags)
-            ? p.tags.slice(0, 8).join(', ')
-            : '';
+          : '';
         const desc = truncate(p.tagline || p.description, 180);
         const stage = p.project_stage ? ` [Stage: ${p.project_stage}]` : '';
         const slug = p.slug ? ` (/projects/${p.slug})` : '';
         return `- ${truncate(p.title, 80)}${slug}${stage}${desc ? `: ${desc}` : ''}${tech ? ` (Tech: ${tech})` : ''}`;
       });
-      parts.push(`[PUBLISHED PROJECTS & CASE STUDIES]\n${lines.join('\n')}`);
+      if (lines.length) parts.push(`[PUBLISHED PROJECTS & CASE STUDIES]\n${lines.join('\n')}`);
     }
   } catch {
-    // fallback project highlights
-    parts.push(`[FEATURED PROJECTS]
-- IntruShield NIDS (/projects/intrushield-nids): Enterprise-grade SOC platform with Suricata 7 deep-packet inspection
-- TourMate Malakand: Tourism exploration platform with itinerary planning and media
-- PacketVision: Network packet sniffer and traffic analysis tool
-- Mail-Lens AI: Intelligent email security and analysis assistant`);
+    // Unavailable public data is not evidence that a project is published.
   }
 
   // 4. Latest published blog posts

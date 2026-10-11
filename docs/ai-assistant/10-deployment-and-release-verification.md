@@ -1,4 +1,5 @@
 # Deployment Verification, Environment Checklist & Production Release Runbook
+> **Current-branch correction (2026-10-11):** See [12-independent-checkup.md](12-independent-checkup.md). This runbook is not proof of deployment readiness. The API's non-streaming response is `{ "text": "..." }`, not `{ "reply": "..." }`; Gemini streaming is not bounded end-to-end; `AI_ASSISTANT_DISABLED` blocks requests but does not unmount the widget. Verify environment changes on a real deployment rather than assuming instant propagation.
 
 **Phase:** Phase 9 — Preview Deployment & Production Release Verification  
 **Status:** Verification Ready  
@@ -56,7 +57,7 @@ curl -X POST https://<preview-domain>/api/ai/chat \
   -H "Content-Type: application/json" \
   -d '{"messages": [{"role": "user", "content": "What degree does Haris have?"}]}'
 ```
-- **Expected:** `200 OK`, JSON payload containing `reply` mentioning `BSIT` from `University of Malakand`, header `X-Request-ID`.
+- **Expected:** `200 OK`, JSON payload containing `text` mentioning `BSIT` from `University of Malakand` when current owner-approved context supports it, header `X-Request-ID`.
 
 ### 4.2 SSE Progressive Streaming
 ```bash

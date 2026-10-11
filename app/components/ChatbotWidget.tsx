@@ -132,6 +132,7 @@ export function ChatbotWidget() {
 
   useEffect(() => {
     if (!isOpen || !isAtBottom) return;
+    if (!messages.length && !isLoading && !error) return;
     const scroller = scrollRef.current;
     scroller?.scrollTo({
       top: scroller.scrollHeight,
@@ -143,6 +144,7 @@ export function ChatbotWidget() {
     if (!isOpen) return;
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
+        stopGeneration();
         setIsOpen(false);
         toggleRef.current?.focus();
       }
@@ -162,11 +164,12 @@ export function ChatbotWidget() {
 
   function openChat(event: React.MouseEvent<HTMLButtonElement>) {
     if (isOpen) {
+      stopGeneration();
       setIsOpen(false);
       return;
     }
     setIsOpen(true);
-    if (event.detail === 0 || window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    if (event.detail === 0 || window.matchMedia("(min-width: 640px) and (hover: hover) and (pointer: fine)").matches) {
       requestAnimationFrame(() => inputRef.current?.focus());
     }
   }
@@ -180,6 +183,7 @@ export function ChatbotWidget() {
     setInput("");
     setError("");
     setIsAtBottom(true);
+    scrollRef.current?.scrollTo(0, 0);
     inputRef.current?.focus();
   }
 
@@ -197,7 +201,7 @@ export function ChatbotWidget() {
       return;
     }
     const outgoing: Message[] = retry
-      ? messages
+      ? (messages.at(-1)?.role === "model" ? messages.slice(0, -1) : messages)
       : [...(error ? messages.slice(0, -1) : messages), { role: "user", content: text }];
     const requestId = ++requestRef.current;
     const controller = new AbortController();
@@ -338,6 +342,8 @@ export function ChatbotWidget() {
       {isOpen && (
         <section
           id="portfolio-chat-panel"
+          role="dialog"
+          aria-modal="false"
           aria-label="Haris AI assistant"
           className="relative mb-3 flex min-h-0 flex-col overflow-hidden rounded-3xl border border-border-primary bg-white text-text-primary shadow-[0_24px_80px_rgba(0,0,0,0.22)] dark:bg-[#1a1a1c] dark:shadow-[0_24px_80px_rgba(0,0,0,0.55)] sm:mb-4"
           style={{ width: "min(400px, calc(100vw - 24px))", height: "min(580px, calc(100dvh - 104px))" }}
@@ -356,7 +362,7 @@ export function ChatbotWidget() {
             <button type="button" onClick={startOver} disabled={!messages.length && !input} aria-label="Start a new chat" title="New chat" className="flex size-10 shrink-0 items-center justify-center rounded-xl text-text-secondary transition-colors hover:bg-bg-primary hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-primary disabled:opacity-40 sm:size-11">
               <RotateCcw size={18} aria-hidden="true" />
             </button>
-            <button type="button" aria-label="Close chat" onClick={() => { setIsOpen(false); toggleRef.current?.focus(); }} className="flex size-10 shrink-0 items-center justify-center rounded-xl text-text-secondary transition-colors hover:bg-bg-primary hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-primary sm:size-11">
+            <button type="button" aria-label="Close chat" onClick={() => { stopGeneration(); setIsOpen(false); toggleRef.current?.focus(); }} className="flex size-10 shrink-0 items-center justify-center rounded-xl text-text-secondary transition-colors hover:bg-bg-primary hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-primary sm:size-11">
               <X size={20} aria-hidden="true" />
             </button>
           </header>
@@ -405,7 +411,7 @@ export function ChatbotWidget() {
               <div role="alert" className="rounded-2xl border border-border-primary bg-bg-primary p-3.5 text-sm leading-5 text-text-primary">
                 <p>{error}</p>
                 <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <button type="button" onClick={() => submitMessage(messages[messages.length - 1]?.content ?? "", true)} className="inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-purple-primary/40 bg-purple-secondary/40 px-2.5 py-1 text-xs font-medium text-purple-primary transition-colors hover:bg-purple-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-purple-primary"><RotateCcw size={13} aria-hidden="true" />Retry question</button>
+                  <button type="button" onClick={() => submitMessage(messages.filter((message) => message.role === "user").at(-1)?.content ?? "", true)} className="inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-purple-primary/40 bg-purple-secondary/40 px-2.5 py-1 text-xs font-medium text-purple-primary transition-colors hover:bg-purple-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-purple-primary"><RotateCcw size={13} aria-hidden="true" />Retry question</button>
                   <Link href="/projects" className="inline-flex min-h-8 items-center rounded-lg border border-border-primary bg-white px-2.5 py-1 text-xs font-medium text-text-secondary transition-colors hover:text-text-primary dark:bg-white/[0.04]">Explore Projects</Link>
                   <Link href="/contact" className="inline-flex min-h-8 items-center rounded-lg border border-border-primary bg-white px-2.5 py-1 text-xs font-medium text-text-secondary transition-colors hover:text-text-primary dark:bg-white/[0.04]">Contact</Link>
                 </div>

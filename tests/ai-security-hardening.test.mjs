@@ -88,7 +88,10 @@ test("public chat route source code enforces strict public-only boundaries", () 
   // Never import admin client or service role key in public chat path
   assert.doesNotMatch(source, /createSupabaseAdminClient/);
   assert.doesNotMatch(source, /SUPABASE_SERVICE_ROLE_KEY/);
+  assert.doesNotMatch(source, /fetchProjects/);
   assert.match(source, /getPublicSupabase/);
+  assert.match(source, /\.from\('projects'\)/);
+  assert.match(source, /\.eq\('status', 'published'\)/);
   // Max conversation turns bounded to 20
   assert.match(source, /messages\.length > 20/);
   // Max per-message character limit bounded to 2000

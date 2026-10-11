@@ -1,5 +1,7 @@
 # Harisx404 AI Assistant: Post-Release Operator Runbook
 
+> **Current-branch warning (2026-10-11):** This is not a current production sign-off. Read [12-independent-checkup.md](12-independent-checkup.md) before operating the assistant. Vercel environment changes must be propagated to and verified on an actual deployment; the older instant/no-redeploy claims below are superseded. The Gemini key/model tested locally returned HTTP 404.
+
 **Document:** Production Operations & Maintenance Manual  
 **Phase:** Phase 10 — Post-Release Runbook & Maintenance Monitoring  
 **Target:** `harisx404-portfolio`  
@@ -12,12 +14,12 @@
 
 | Action | How to Execute | Downtime | Redeploy Needed? |
 |---|---|:---:|:---:|
-| **Emergency Pause (Disable AI)** | Set `AI_ASSISTANT_DISABLED="true"` in Vercel Environment Variables | None | **No** (Instant) |
-| **Restore AI Service** | Set `AI_ASSISTANT_DISABLED="false"` in Vercel Environment Variables | None | **No** (Instant) |
-| **Rotate Groq API Key** | Update `GROQ_API_KEY` in Vercel Environment Variables | None | **No** (Applies next invocation) |
-| **Change Groq Model ID** | Update `GROQ_MODEL` in Vercel Environment Variables | None | **No** (Applies next invocation) |
-| **Enable Telemetry Logs** | Set `ENABLE_AI_TELEMETRY="true"` in Vercel Environment Variables | None | **No** |
-| **Purge Context Cache** | Serverless function cold start automatically refreshes (10m TTL) | None | **No** |
+| **Emergency Pause (Disable AI)** | Set `AI_ASSISTANT_DISABLED="true"` in Vercel Environment Variables, propagate to an active deployment and verify HTTP 503 | Verify | **Verify deployment propagation** |
+| **Restore AI Service** | Set `AI_ASSISTANT_DISABLED="false"` in Vercel Environment Variables and verify on a new deployment | Verify | **Verify deployment propagation** |
+| **Rotate Groq API Key** | Update `GROQ_API_KEY` in Vercel Environment Variables and verify the new deployment | Verify | **Verify deployment propagation** |
+| **Change Groq Model ID** | Update `GROQ_MODEL` in Vercel Environment Variables and verify a smoke request | Verify | **Verify deployment propagation** |
+| **Enable Telemetry Logs** | Set `ENABLE_AI_TELEMETRY="true"` in Vercel Environment Variables and verify redacted output | Verify | **Verify deployment propagation** |
+| **Purge Context Cache** | Wait for the 10-minute TTL or verify a new function instance | Up to 10m | **Not an instant purge** |
 
 ---
 
@@ -32,7 +34,7 @@ If upstream providers experience unexpected outages, billing spikes, or severe r
    ```env
    AI_ASSISTANT_DISABLED="true"
    ```
-4. Save.
+4. Save, propagate the change to an active deployment, and verify the status through its actual HTTPS host. Do not assume an already-running function adopts new environment values immediately.
 
 ### 2.2 What Happens
 - Every incoming request to `/api/ai/chat` immediately returns:
@@ -48,7 +50,7 @@ If upstream providers experience unexpected outages, billing spikes, or severe r
 - Visitors seeing the assistant panel receive helpful fallback recovery links to `/projects` and `/contact`.
 
 ### 2.3 How to Restore
-Change `AI_ASSISTANT_DISABLED` back to `"false"` or delete the variable in Vercel. Service restores immediately.
+Change `AI_ASSISTANT_DISABLED` back to `"false"` or delete the variable in Vercel; propagate and verify on the deployed host before announcing restoration.
 
 ---
 
@@ -82,7 +84,7 @@ Never change model IDs blindly in production. Follow this 4-step checklist:
 - **Requests Per Minute (RPM):** 30 RPM limit on free tier.
 - **Tokens Per Minute (TPM):** 6,000–14,400 TPM depending on model tier.
 - **Application Safeguards:**
-  - Per-IP rate limiting enforces 20 requests per minute window.
+  - The current 25-request/minute limiter is in-memory **per process**, not a distributed production-wide per-IP guarantee. See AI-02 in the current checkup.
   - Bounded input: maximum 20 message turns, maximum 2,000 characters per message, maximum 20,000 characters total history.
   - Bounded output: `max_completion_tokens: 800`.
   - In-memory knowledge context cache (10-minute TTL) ensures Supabase DB reads are not executed repeatedly on warm serverless instances.

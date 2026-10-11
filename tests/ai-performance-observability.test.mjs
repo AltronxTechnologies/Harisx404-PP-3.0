@@ -96,21 +96,21 @@ test("Responses include X-Request-ID and duration tracking", async () => {
   assert.equal(calls.groq, 1);
 });
 
-test("Telemetry logs never record user message contents or secret credentials", () => {
+test("Telemetry logs never record user message contents or secret credentials", async () => {
   const { logs, POST } = createRoute({ disabled: "false", telemetry: "true" });
   const secretPrompt = "SUPER_SECRET_USER_INPUT_KEYWORD_XYZ";
 
-  POST(new Request("http://localhost/api/ai/chat", {
+  const response = await POST(new Request("http://localhost/api/ai/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       messages: [{ role: "user", content: secretPrompt }],
     }),
-  })).then(() => {
-    const rawLogs = logs.join("\n");
-    assert.doesNotMatch(rawLogs, new RegExp(secretPrompt), "User prompt must never appear in telemetry logs");
-    assert.doesNotMatch(rawLogs, /test-groq|test-gemini/, "API keys must never appear in telemetry logs");
-  });
+  }));
+  assert.equal(response.status, 200);
+  const rawLogs = logs.join("\n");
+  assert.doesNotMatch(rawLogs, new RegExp(secretPrompt), "User prompt must never appear in telemetry logs");
+  assert.doesNotMatch(rawLogs, /test-groq|test-gemini/, "API keys must never appear in telemetry logs");
 });
 
 test("Provider token budget constraints are strictly bounded in source", () => {

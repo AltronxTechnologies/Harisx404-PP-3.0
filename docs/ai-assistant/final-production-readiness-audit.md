@@ -1,4 +1,7 @@
 # Final Independent Production Readiness Audit
+
+> **Superseded verdict (2026-10-11):** The current-branch checkup in [12-independent-checkup.md](12-independent-checkup.md) finds the assistant **NOT READY FOR DEPLOYMENT**. The READY verdict, modal/focus-trap claims, timeout guarantee, kill-switch description and illustrative test transcript below are historical and must not be used as current sign-off. The configured public host returns 404; live Gemini fallback returned 404 in the current probe.
+
 ## Harisx404 Portfolio — AI Assistant, Full-Website Regression, UX, Security, Performance & Deployment Verification
 
 **Audit Date:** October 11, 2026  
@@ -6,7 +9,7 @@
 **Repository:** `d:\IT\Harisx404-PP-3.0`  
 **Current Revision / Commit:** `fcabdb9d22ed1249c68a17f306ac53cf68b227ee`  
 **Current Branch:** `haris-dev/set-up-this-codebase-for-FcY5YL`  
-**Overall Deployment Decision:** **READY FOR DEPLOYMENT (WITH DOCUMENTED LIMITATIONS)**  
+**Historical Deployment Decision (superseded):** READY FOR DEPLOYMENT (WITH DOCUMENTED LIMITATIONS)
 
 ---
 
