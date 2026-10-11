@@ -14,6 +14,7 @@ function createStreamingRoute({
   geminiKey = "test-gemini-key",
   groqHandler,
   geminiHandler,
+  sources = [],
 } = {}) {
   const calls = { groq: 0, gemini: 0 };
   const exports = {};
@@ -47,6 +48,7 @@ function createStreamingRoute({
         };
       }
       if (name === "@/app/lib/supabase/safe") return { getPublicSupabase: () => null };
+      if (name === "@/app/lib/ai/public-knowledge") return { retrievePublicKnowledge: async () => ({ context: "", sources }) };
       if (name === "@/app/lib/utils") return { fetchProjects: async () => [], fetchAndSortBlogPosts: async () => [] };
       if (name === "@/app/lib/rate-limit") return { checkRateLimit: () => ({ success: true }) };
       if (name === "util") return { TextEncoder };
@@ -134,6 +136,19 @@ test("Groq streaming delivers start, deltas, and done without calling Gemini", a
 
   assert.equal(events.at(-1).event, "done");
   assert.equal(events.at(-1).data.totalLength, "Groq streamed response".length);
+});
+
+test("streaming emits verified public source metadata before completion", async () => {
+  const source = { title: "Published case study", path: "/projects/case-study" };
+  const { POST } = createStreamingRoute({ sources: [source] });
+  const response = await POST(new Request("http://localhost/api/ai/chat", {
+    method: "POST", headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
+    body: JSON.stringify({ messages: [{ role: "user", content: "Tell me about Haris" }], stream: true }),
+  }));
+  const events = await collectSSEEvents(response);
+  assert.equal(events.at(-2).event, "sources");
+  assert.equal(events.at(-2).data.sources[0].path, source.path);
+  assert.equal(events.at(-1).event, "done");
 });
 
 test("Groq HTTP failure before first token falls back to Gemini streaming", async () => {

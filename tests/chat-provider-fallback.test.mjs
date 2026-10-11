@@ -23,6 +23,7 @@ function route({ groqKey = "test-only", geminiKey = "test-only", groq, gemini })
         return { response: { text: () => gemini ?? "Gemini answer" } };
       } }) } };
       if (name === "@/app/lib/supabase/safe") return { getPublicSupabase: () => null };
+      if (name === "@/app/lib/ai/public-knowledge") return { retrievePublicKnowledge: async () => ({ context: "", sources: [] }) };
       if (name === "@/app/lib/utils") return { fetchProjects: async () => [], fetchAndSortBlogPosts: async () => [] };
       if (name === "@/app/lib/rate-limit") return { checkRateLimit: () => ({ success: true }) };
       throw new Error(`Unexpected dependency: ${name}`);
@@ -55,7 +56,7 @@ test("Groq answers first without billing Gemini or exposing provider details", a
   const { calls, POST } = route({});
   const result = await send(POST);
   assert.equal(result.status, 200);
-  assert.deepEqual(await result.json(), { text: "Groq answer" });
+  assert.deepEqual(await result.json(), { text: "Groq answer", sources: [] });
   assert.deepEqual(calls, { groq: 1, gemini: 0 });
   assert.equal(result.headers.get("cache-control"), "no-store");
 });
@@ -70,14 +71,14 @@ test("Gemini silently handles Groq HTTP, network, malformed and empty replies", 
     const { calls, POST } = route({ groq });
     const result = await send(POST);
     assert.equal(result.status, 200);
-    assert.deepEqual(await result.json(), { text: "Gemini answer" });
+    assert.deepEqual(await result.json(), { text: "Gemini answer", sources: [] });
     assert.deepEqual(calls, { groq: 1, gemini: 1 });
   }
 });
 
 test("missing Groq key uses Gemini; neither provider available fails honestly", async () => {
   const withFallback = route({ groqKey: "" });
-  assert.deepEqual(await (await send(withFallback.POST)).json(), { text: "Gemini answer" });
+  assert.deepEqual(await (await send(withFallback.POST)).json(), { text: "Gemini answer", sources: [] });
   assert.deepEqual(withFallback.calls, { groq: 0, gemini: 1 });
 
   const noKeys = route({ groqKey: "", geminiKey: "" });

@@ -1,14 +1,20 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { ArrowDown, ArrowRight, Bot, MessageCircle, RotateCcw, Send, Sparkles, Square, WifiOff, X } from "lucide-react";
+import { ArrowDown, ArrowRight, Bot, RotateCcw, Send, Sparkles, Square, X } from "lucide-react";
+
+interface Source {
+  title: string;
+  path: string;
+}
 
 interface Message {
   role: "user" | "model";
   content: string;
+  sources?: Source[];
 }
 
 const suggestions = [
@@ -17,51 +23,64 @@ const suggestions = [
   { label: "Contact & collaboration", prompt: "How can I contact Haris or collaborate with him on a project?" },
 ];
 
-const localPath = /^\/(?:projects|blog|about|contact|resume|credentials|links|buildlog|community-wall)(?:\/[a-z0-9-]+)?$/;
+const localPath = /^\/(?:projects|blog|about|contact|resume|credentials|links|buildlog|community-wall)(?:\/[a-z0-9-]+)?$|^\/resume\/file$/;
+const publicPage = new Set(["/projects", "/blog", "/about", "/contact", "/resume", "/credentials", "/links", "/buildlog", "/community-wall"]);
 
-function AssistantOrb() {
+function safeSources(value: unknown): Source[] {
+  if (!Array.isArray(value)) return [];
+  return value.slice(0, 8).filter((item): item is Source =>
+    item !== null && typeof item === "object" &&
+    typeof item.title === "string" && item.title.trim().length > 0 && item.title.length <= 100 &&
+    typeof item.path === "string" && localPath.test(item.path)
+  ).map(({ title, path }) => ({ title: title.trim(), path }));
+}
+
+function AssistantRobot() {
   return (
-    <span className="relative flex size-8 shrink-0 items-center justify-center">
+    <span className="relative flex size-11 shrink-0 items-center justify-center [perspective:160px]">
+      <style jsx>{`@keyframes robot-idle { 0%, 100% { transform: translateY(0) rotateY(-5deg); } 50% { transform: translateY(-3px) rotateY(6deg); } } @media (prefers-reduced-motion: no-preference) { .robot-idle { animation: robot-idle 4.8s ease-in-out infinite; } .robot-idle:hover { animation-play-state: paused; transform: translateY(-4px) rotateY(-18deg) rotateZ(-4deg); } }`}</style>
       <svg
-        viewBox="0 0 32 32"
+        viewBox="0 0 64 64"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="size-7 transition-transform duration-300 motion-safe:group-hover:scale-110 motion-safe:group-hover:-rotate-3 motion-reduce:transform-none"
+        className="robot-idle size-11 drop-shadow-[0_6px_7px_rgba(0,0,0,0.3)] motion-reduce:transform-none"
         aria-hidden="true"
       >
         <defs>
-          <linearGradient id="orbGrad" x1="4" y1="4" x2="28" y2="28" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#8B5CF6" />
-            <stop offset="0.5" stopColor="#6C47FF" />
-            <stop offset="1" stopColor="#4F46E5" />
+          <linearGradient id="robotShell" x1="12" y1="9" x2="51" y2="54" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#F8F5FF" />
+            <stop offset="0.48" stopColor="#BDB3DC" />
+            <stop offset="1" stopColor="#615484" />
           </linearGradient>
-          <linearGradient id="orbGloss" x1="8" y1="6" x2="24" y2="18" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#FFFFFF" stopOpacity="0.55" />
-            <stop offset="1" stopColor="#FFFFFF" stopOpacity="0" />
+          <linearGradient id="robotVisor" x1="15" y1="23" x2="48" y2="43" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#202344" />
+            <stop offset="1" stopColor="#080D21" />
           </linearGradient>
-          <linearGradient id="orbVisor" x1="10" y1="13" x2="22" y2="19" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#06B6D4" />
-            <stop offset="1" stopColor="#3B82F6" />
+          <linearGradient id="robotEye" x1="21" y1="29" x2="40" y2="36" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#A9FAFF" />
+            <stop offset="1" stopColor="#66A6FF" />
           </linearGradient>
         </defs>
-        <circle cx="16" cy="16" r="14" stroke="currentColor" strokeOpacity="0.2" strokeWidth="1.2" strokeDasharray="3 3" className="animate-[spin_20s_linear_infinite] motion-reduce:animate-none" />
-        <circle cx="16" cy="16" r="11" fill="url(#orbGrad)" />
-        <ellipse cx="16" cy="10" rx="7" ry="3.5" fill="url(#orbGloss)" />
-        <rect x="10.5" y="13.5" width="11" height="5" rx="2.5" fill="url(#orbVisor)" />
-        <circle cx="13.5" cy="16" r="1" fill="#FFFFFF" />
-        <circle cx="18.5" cy="16" r="1" fill="#FFFFFF" />
-        <circle cx="16" cy="3.5" r="1.5" fill="#A855F7" />
-        <line x1="16" y1="5" x2="16" y2="7.5" stroke="currentColor" strokeWidth="1" strokeOpacity="0.5" />
+        <path d="M32 8V14" stroke="#C9BDF5" strokeWidth="2" strokeLinecap="round" />
+        <circle cx="32" cy="7" r="3" fill="#9F8CFF" />
+        <path d="M10 30C10 19 19 13 32 13S54 19 54 30v10c0 12-10 18-22 18S10 52 10 40V30Z" fill="url(#robotShell)" stroke="#DCD4F5" strokeWidth="1.5" />
+        <path d="M13 26c4-8 11-11 22-10" stroke="white" strokeOpacity=".8" strokeWidth="2" strokeLinecap="round" />
+        <path d="M15 30c0-5 4-8 9-8h16c5 0 9 3 9 8v8c0 5-4 8-9 8H24c-5 0-9-3-9-8v-8Z" fill="url(#robotVisor)" />
+        <path d="M19 28c2-3 5-4 10-4h10" stroke="white" strokeOpacity=".22" strokeWidth="2" strokeLinecap="round" />
+        <rect x="22" y="31" width="7" height="6" rx="3" fill="url(#robotEye)" />
+        <rect x="35" y="31" width="7" height="6" rx="3" fill="url(#robotEye)" />
+        <path d="M29 42c2 1 4 1 6 0" stroke="#8CD9F7" strokeWidth="1.5" strokeLinecap="round" />
+        <path d="M21 51c6 4 16 4 22 0" stroke="white" strokeOpacity=".55" strokeWidth="1.5" strokeLinecap="round" />
       </svg>
-      <span className="absolute -bottom-0.5 -right-0.5 flex size-2.5">
-        <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75 motion-reduce:hidden" />
+      <span className="absolute bottom-0 right-0 flex size-2.5">
+        <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-60 motion-reduce:hidden" />
         <span className="relative inline-flex size-2.5 rounded-full border-2 border-text-primary bg-emerald-400" />
       </span>
     </span>
   );
 }
 
-function Reply({ text }: { text: string }) {
+function Reply({ text, sources = [] }: { text: string; sources?: Source[] }) {
   const withLinks = text.replace(/(^|\s)(\/(?:projects|blog|about|contact|resume|credentials|links|buildlog|community-wall)(?:\/[a-z0-9-]+)?)(?=$|[\s.,!?;)])/gm,
     (_match, space: string, path: string) => `${space}[${path}](${path})`);
   return (
@@ -81,7 +100,7 @@ function Reply({ text }: { text: string }) {
           a: ({ href, children }) => {
             let path = href || "";
             if (path.startsWith("https://harisx404.com/")) path = new URL(path).pathname;
-            if (localPath.test(path)) return <Link href={path} className="font-medium underline decoration-purple-primary/60 underline-offset-4 hover:decoration-purple-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-purple-primary">{children}</Link>;
+            if (localPath.test(path) && (publicPage.has(path) || sources.some((source) => source.path === path))) return <Link href={path} className="font-medium underline decoration-purple-primary/60 underline-offset-4 hover:decoration-purple-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-purple-primary">{children}</Link>;
             if (path === "mailto:itsharis.tech@gmail.com") return <a href={path} className="font-medium underline decoration-purple-primary/60 underline-offset-4 hover:decoration-purple-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-purple-primary">{children}</a>;
             return <span>{children}</span>;
           },
@@ -98,12 +117,34 @@ export function ChatbotWidget() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [isAtBottom, setIsAtBottom] = useState(true);
+  const [showHint, setShowHint] = useState(false);
   const pendingRef = useRef(false);
   const requestRef = useRef(0);
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const swipeRef = useRef<{ x: number; y: number } | null>(null);
+
+  function dismissHint() {
+    setShowHint(false);
+    try { sessionStorage.setItem("portfolio-chat-hint-seen", "1"); } catch { /* storage may be disabled */ }
+  }
+
+  const stopGeneration = useCallback(() => {
+    requestRef.current++;
+    abortRef.current?.abort();
+    abortRef.current = null;
+    pendingRef.current = false;
+    setIsLoading(false);
+  }, []);
+
+  const closeChat = useCallback((restoreFocus = true) => {
+    stopGeneration();
+    setIsOpen(false);
+    if (restoreFocus) toggleRef.current?.focus();
+  }, [stopGeneration]);
 
   function handleScroll() {
     const scroller = scrollRef.current;
@@ -135,13 +176,42 @@ export function ChatbotWidget() {
     if (!isOpen) return;
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        stopGeneration();
-        setIsOpen(false);
-        toggleRef.current?.focus();
+        closeChat();
+      }
+    };
+    const closeOutside = (event: PointerEvent) => {
+      if (!wrapperRef.current?.contains(event.target as Node)) {
+        closeChat(false);
       }
     };
     document.addEventListener("keydown", closeOnEscape);
-    return () => document.removeEventListener("keydown", closeOnEscape);
+    document.addEventListener("pointerdown", closeOutside);
+    return () => {
+      document.removeEventListener("keydown", closeOnEscape);
+      document.removeEventListener("pointerdown", closeOutside);
+    };
+  }, [isOpen, closeChat]);
+
+  useEffect(() => {
+    if (isOpen) return;
+    try { if (sessionStorage.getItem("portfolio-chat-hint-seen")) return; } catch { return; }
+    let timer: ReturnType<typeof setTimeout>;
+    const schedule = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        if (document.visibilityState === "visible") {
+          setShowHint(true);
+          try { sessionStorage.setItem("portfolio-chat-hint-seen", "1"); } catch { /* storage may be disabled */ }
+          for (const name of ["pointerdown", "keydown", "scroll", "touchstart"]) window.removeEventListener(name, schedule);
+        }
+      }, 12000);
+    };
+    for (const name of ["pointerdown", "keydown", "scroll", "touchstart"]) window.addEventListener(name, schedule, { passive: true });
+    schedule();
+    return () => {
+      clearTimeout(timer);
+      for (const name of ["pointerdown", "keydown", "scroll", "touchstart"]) window.removeEventListener(name, schedule);
+    };
   }, [isOpen]);
 
   useEffect(() => {
@@ -154,9 +224,9 @@ export function ChatbotWidget() {
   }, []);
 
   function openChat(event: React.MouseEvent<HTMLButtonElement>) {
+    dismissHint();
     if (isOpen) {
-      stopGeneration();
-      setIsOpen(false);
+      closeChat();
       return;
     }
     setIsOpen(true);
@@ -176,12 +246,6 @@ export function ChatbotWidget() {
     setIsAtBottom(true);
     scrollRef.current?.scrollTo(0, 0);
     inputRef.current?.focus();
-  }
-
-  function stopGeneration() {
-    abortRef.current?.abort();
-    pendingRef.current = false;
-    setIsLoading(false);
   }
 
   async function submitMessage(value: string, retry = false) {
@@ -213,7 +277,7 @@ export function ChatbotWidget() {
           "Accept": "text/event-stream",
         },
         body: JSON.stringify({
-          messages: outgoing.slice(-20),
+          messages: outgoing.slice(-20).map(({ role, content }) => ({ role, content })),
           stream: true,
         }),
         signal: controller.signal,
@@ -230,7 +294,7 @@ export function ChatbotWidget() {
         // Deterministic non-streaming fallback
         const data = await response.json();
         if (typeof data.text !== "string" || !data.text.trim()) throw new Error("No answer came back. Please retry.");
-        if (requestRef.current === requestId) setMessages([...outgoing, { role: "model", content: data.text.trim() }]);
+        if (requestRef.current === requestId) setMessages([...outgoing, { role: "model", content: data.text.trim(), sources: safeSources(data.sources) }]);
         return;
       }
 
@@ -239,6 +303,39 @@ export function ChatbotWidget() {
       const decoder = new TextDecoder();
       let buffer = "";
       let accumulated = "";
+      let sources: Source[] = [];
+
+      function processEvent(rawEvent: string) {
+        if (!rawEvent.trim()) return;
+        let eventType = "message";
+        let dataStr = "";
+        for (const line of rawEvent.split(/\r?\n/)) {
+          if (line.startsWith("event:")) eventType = line.slice(6).trim();
+          else if (line.startsWith("data:")) {
+            const val = line.slice(5).trim();
+            dataStr = dataStr ? `${dataStr}\n${val}` : val;
+          }
+        }
+        if (eventType === "delta" || eventType === "sources") {
+          try {
+            const parsed = JSON.parse(dataStr);
+            if (eventType === "delta" && typeof parsed.text === "string" && parsed.text) accumulated += parsed.text;
+            if (eventType === "sources") sources = safeSources(parsed.sources);
+            if (accumulated && requestRef.current === requestId) {
+              setMessages([...outgoing, { role: "model", content: accumulated, sources }]);
+            }
+          } catch {
+            // Ignore malformed stream events.
+          }
+        } else if (eventType === "error") {
+          try {
+            const parsed = JSON.parse(dataStr);
+            throw new Error(parsed.message || "Failed to generate answer.");
+          } catch (e) {
+            throw (e instanceof Error ? e : new Error("Failed to generate answer."));
+          }
+        }
+      }
 
       while (true) {
         const { done, value } = await reader.read();
@@ -248,69 +345,12 @@ export function ChatbotWidget() {
         const events = buffer.split(/\r?\n\r?\n/);
         buffer = events.pop() || "";
 
-        for (const rawEvent of events) {
-          if (!rawEvent.trim()) continue;
-          let eventType = "message";
-          let dataStr = "";
-          const lines = rawEvent.split(/\r?\n/);
-          for (const line of lines) {
-            if (line.startsWith("event:")) eventType = line.slice(6).trim();
-            else if (line.startsWith("data:")) {
-              const val = line.slice(5).trim();
-              dataStr = dataStr ? `${dataStr}\n${val}` : val;
-            }
-          }
-
-          if (eventType === "delta") {
-            try {
-              const parsed = JSON.parse(dataStr);
-              if (typeof parsed.text === "string" && parsed.text) {
-                accumulated += parsed.text;
-                if (requestRef.current === requestId) {
-                  setMessages([...outgoing, { role: "model", content: accumulated }]);
-                }
-              }
-            } catch {
-              // ignore malformed delta
-            }
-          } else if (eventType === "error") {
-            try {
-              const errData = JSON.parse(dataStr);
-              throw new Error(errData.message || "Failed to generate answer.");
-            } catch (e) {
-              throw (e instanceof Error ? e : new Error("Failed to generate answer."));
-            }
-          }
-        }
+        for (const rawEvent of events) processEvent(rawEvent);
       }
 
       // Flush decoder and process any trailing event in buffer
       buffer += decoder.decode();
-      if (buffer.trim()) {
-        const lines = buffer.split(/\r?\n/);
-        let eventType = "message";
-        let dataStr = "";
-        for (const line of lines) {
-          if (line.startsWith("event:")) eventType = line.slice(6).trim();
-          else if (line.startsWith("data:")) {
-            const val = line.slice(5).trim();
-            dataStr = dataStr ? `${dataStr}\n${val}` : val;
-          }
-        }
-        if (eventType === "delta") {
-          try {
-            const parsed = JSON.parse(dataStr);
-            if (typeof parsed.text === "string" && parsed.text) {
-              accumulated += parsed.text;
-              if (requestRef.current === requestId) {
-                setMessages([...outgoing, { role: "model", content: accumulated }]);
-              }
-            }
-          } catch {
-            // ignore
-          }
-        }
-      }
+      if (buffer.trim()) processEvent(buffer);
 
       if (!accumulated.trim()) {
         throw new Error("No answer came back. Please retry.");
@@ -329,7 +369,7 @@ export function ChatbotWidget() {
   }
 
   return (
-    <div className="fixed bottom-3 right-3 z-[5500] flex flex-col items-end sm:bottom-6 sm:right-6">
+    <div ref={wrapperRef} className="fixed bottom-3 right-3 z-[5500] flex flex-col items-end sm:bottom-6 sm:right-6">
       {isOpen && (
         <section
           id="portfolio-chat-panel"
@@ -339,7 +379,16 @@ export function ChatbotWidget() {
           className="relative mb-3 flex min-h-0 flex-col overflow-hidden rounded-3xl border border-border-primary bg-white text-text-primary shadow-[0_24px_80px_rgba(0,0,0,0.22)] dark:bg-[#1a1a1c] dark:shadow-[0_24px_80px_rgba(0,0,0,0.55)] sm:mb-4"
           style={{ width: "min(400px, calc(100vw - 24px))", height: "min(580px, calc(100dvh - 104px))" }}
         >
-          <header className="flex shrink-0 items-start gap-3 border-b border-border-primary px-4 py-4 sm:px-5">
+          <header onTouchStart={(event) => {
+            if ((event.target as Element).closest("button")) return;
+            swipeRef.current = { x: event.touches[0].clientX, y: event.touches[0].clientY };
+          }} onTouchEnd={(event) => {
+            if (!swipeRef.current) return;
+            const dx = event.changedTouches[0].clientX - swipeRef.current.x;
+            const dy = event.changedTouches[0].clientY - swipeRef.current.y;
+            swipeRef.current = null;
+            if ((dy > 75 && dy > Math.abs(dx) * 1.3) || (Math.abs(dx) > 90 && Math.abs(dx) > Math.abs(dy) * 1.3)) closeChat();
+          }} onTouchCancel={() => { swipeRef.current = null; }} className="flex shrink-0 items-start gap-3 border-b border-border-primary px-4 py-4 sm:px-5">
             <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-purple-secondary text-purple-primary" aria-hidden="true">
               <Sparkles size={21} strokeWidth={1.8} />
             </span>
@@ -353,7 +402,7 @@ export function ChatbotWidget() {
             <button type="button" onClick={startOver} disabled={!messages.length && !input} aria-label="Start a new chat" title="New chat" className="flex size-10 shrink-0 items-center justify-center rounded-xl text-text-secondary transition-colors hover:bg-bg-primary hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-primary disabled:opacity-40 sm:size-11">
               <RotateCcw size={18} aria-hidden="true" />
             </button>
-            <button type="button" aria-label="Close chat" onClick={() => { stopGeneration(); setIsOpen(false); toggleRef.current?.focus(); }} className="flex size-10 shrink-0 items-center justify-center rounded-xl text-text-secondary transition-colors hover:bg-bg-primary hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-primary sm:size-11">
+            <button type="button" aria-label="Close chat" onClick={() => closeChat()} className="flex size-10 shrink-0 items-center justify-center rounded-xl text-text-secondary transition-colors hover:bg-bg-primary hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-primary sm:size-11">
               <X size={20} aria-hidden="true" />
             </button>
           </header>
@@ -377,7 +426,16 @@ export function ChatbotWidget() {
               <div key={index} className={`flex flex-col gap-1.5 ${message.role === "user" ? "items-end" : "items-start"}`}>
                 <span className="px-1 font-mono text-[10px] font-medium uppercase tracking-widest text-text-secondary">{message.role === "user" ? "You" : "Haris AI"}</span>
                 <div aria-live={message.role === "model" ? "polite" : undefined} className={`max-w-[92%] rounded-2xl px-4 py-3 ${message.role === "user" ? "bg-text-primary text-bg-primary" : "border border-border-primary bg-bg-primary text-text-primary"}`}>
-                  <Reply text={message.content} />
+                  <Reply text={message.content} sources={message.sources} />
+                  {message.role === "model" && !!message.sources?.length && (
+                    <div aria-label="Relevant pages" className="mt-3 flex flex-wrap gap-1.5 border-t border-border-primary pt-3">
+                      {message.sources.map((source, sourceIndex) => (
+                        <Link key={`${source.path}-${sourceIndex}`} href={source.path} className="inline-flex max-w-full items-center rounded-full border border-purple-primary/40 bg-purple-secondary/30 px-2.5 py-1 text-xs font-medium text-purple-primary transition-colors hover:bg-purple-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-purple-primary">
+                          <span className="truncate">{source.title}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -438,6 +496,12 @@ export function ChatbotWidget() {
           </form>
         </section>
       )}
+      {showHint && !isOpen && (
+        <div role="status" className="mb-2 flex max-w-[min(280px,calc(100vw-24px))] items-center gap-2 rounded-2xl border border-border-primary bg-white px-3 py-2.5 text-sm text-text-primary shadow-lg dark:bg-[#1a1a1c]">
+          <span>Questions about my work? Ask the assistant.</span>
+          <button type="button" aria-label="Dismiss assistant tip" onClick={dismissHint} className="flex size-9 shrink-0 items-center justify-center rounded-lg hover:bg-bg-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-purple-primary"><X size={16} aria-hidden="true" /></button>
+        </div>
+      )}
       <button
         ref={toggleRef}
         type="button"
@@ -448,7 +512,7 @@ export function ChatbotWidget() {
         title="Ask Haris AI Assistant"
         className="group relative flex min-h-14 items-center gap-3 rounded-full border border-border-primary bg-text-primary pl-3.5 pr-5 text-sm font-medium text-bg-primary shadow-[0_12px_36px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(108,71,255,0.25)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-primary dark:shadow-[0_12px_36px_rgba(0,0,0,0.6)] motion-reduce:transform-none motion-reduce:transition-none"
       >
-        <AssistantOrb />
+        <AssistantRobot />
         <div className="flex flex-col items-start text-left">
           <span className="font-semibold leading-tight tracking-tight">Ask Haris AI</span>
           <span className="font-mono text-[10px] font-normal uppercase tracking-wider text-bg-primary/70">Assistant</span>

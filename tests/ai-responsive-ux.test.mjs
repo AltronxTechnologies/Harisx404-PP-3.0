@@ -4,19 +4,18 @@ import test from "node:test";
 
 const source = readFileSync(new URL("../app/components/ChatbotWidget.tsx", import.meta.url), "utf8");
 
-test("Launcher button exposes correct accessibility attributes, title, and orb iconography", () => {
+test("Launcher button exposes correct accessibility attributes, title, and robot iconography", () => {
   assert.match(source, /aria-label="Toggle chat"/);
   assert.match(source, /aria-expanded=\{isOpen\}/);
   assert.match(source, /aria-controls="portfolio-chat-panel"/);
   assert.match(source, /title="Ask Haris AI Assistant"/);
-  assert.match(source, /<AssistantOrb \/>/);
+  assert.match(source, /<AssistantRobot \/>/);
 });
 
-test("AssistantOrb includes responsive styling, SVG gradients, and reduced-motion compliance", () => {
-  assert.match(source, /id="orbGrad"/);
-  assert.match(source, /id="orbGloss"/);
-  assert.match(source, /id="orbVisor"/);
-  assert.match(source, /motion-reduce:animate-none/);
+test("Robot includes shaded SVG and reduced-motion compliance", () => {
+  assert.match(source, /id="robotShell"/);
+  assert.match(source, /id="robotEye"/);
+  assert.match(source, /id="robotVisor"/);
   assert.match(source, /motion-reduce:transform-none/);
   assert.match(source, /motion-reduce:hidden/);
 });

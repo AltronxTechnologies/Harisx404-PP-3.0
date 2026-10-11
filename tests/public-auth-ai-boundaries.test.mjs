@@ -54,6 +54,7 @@ test("chat rejects oversized, malformed and invalid histories before any provide
     "next/server": { NextResponse: { json: (body, options) => Response.json(body, options) } },
     "@/app/lib/gemini": { geminiFlash: { startChat: () => { calls++; return { sendMessage: async () => ({ response: { text: () => "Answer" } }) }; } } },
     "@/app/lib/supabase/safe": { getPublicSupabase: () => { calls++; return null; } },
+    "@/app/lib/ai/public-knowledge": { retrievePublicKnowledge: async () => { calls++; return { context: "", sources: [] }; } },
     "@/app/lib/utils": { fetchProjects: async () => { calls++; return []; }, fetchAndSortBlogPosts: async () => { calls++; return []; } },
     "@/app/lib/rate-limit": { checkRateLimit: () => ({ success: true }) },
   });

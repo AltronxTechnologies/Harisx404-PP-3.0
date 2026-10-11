@@ -121,7 +121,7 @@ test("assistant replies display readable Markdown and only trusted links", async
     await page.route("**/api/ai/chat", (route) => route.fulfill({
       status: 200,
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ text: "### Latest post\n\nA concise summary with **emphasis**.\n\n- First point\n- Read [the article](/blog/example-post) or /contact.\n\n[Untrusted](javascript:alert(1)) <script>alert(1)</script>" }),
+      body: JSON.stringify({ text: "### Latest post\n\nA concise summary with **emphasis**.\n\n- First point\n- Read [the article](/blog/example-post) or /contact.\n\n[Untrusted](javascript:alert(1)) <script>alert(1)</script>", sources: [{ title: "Example post", path: "/blog/example-post" }] }),
     }));
     await page.goto(`${baseUrl}/links`, { waitUntil: "domcontentloaded" });
     await page.getByRole("button", { name: "Toggle chat" }).click();
@@ -131,7 +131,7 @@ test("assistant replies display readable Markdown and only trusted links", async
     await panel.getByRole("heading", { name: "Latest post" }).waitFor();
     assert.equal(await panel.locator("li").count(), 2);
     assert.equal(await panel.locator("strong").innerText(), "emphasis");
-    assert.equal(await panel.locator('a[href="/blog/example-post"]').count(), 1);
+    assert.equal(await panel.locator('a[href="/blog/example-post"]').count(), 2);
     assert.equal(await panel.locator('a[href="/contact"]').count(), 1);
     assert.equal(await panel.locator('a[href^="javascript:"]').count(), 0);
     assert.equal(await panel.locator("script").count(), 0);

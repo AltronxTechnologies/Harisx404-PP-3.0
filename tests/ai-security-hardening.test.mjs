@@ -19,6 +19,7 @@ function loadRoute(mocks = {}) {
       if (name === "next/server") return { NextResponse: { json: (body, options) => Response.json(body, options) } };
       if (name === "@/app/lib/gemini") return { geminiFlash: { startChat: () => ({ sendMessage: async () => ({ response: { text: () => "Mock response" } }) }) } };
       if (name === "@/app/lib/supabase/safe") return { getPublicSupabase: () => null };
+      if (name === "@/app/lib/ai/public-knowledge") return { retrievePublicKnowledge: async () => ({ context: "", sources: [] }) };
       if (name === "@/app/lib/utils") return { fetchProjects: async () => [], fetchAndSortBlogPosts: async () => [] };
       if (name === "@/app/lib/rate-limit") return { checkRateLimit: mocks.checkRateLimit || (() => ({ success: true })) };
       throw new Error(`Unexpected dependency: ${name}`);
@@ -85,13 +86,16 @@ test("rate limiting prioritizes edge-verified x-real-ip and x-vercel-ip over cli
 
 test("public chat route source code enforces strict public-only boundaries", () => {
   const source = readFileSync(new URL("../app/api/ai/chat/route.ts", import.meta.url), "utf8");
+  const knowledge = readFileSync(new URL("../app/lib/ai/public-knowledge.ts", import.meta.url), "utf8");
   // Never import admin client or service role key in public chat path
   assert.doesNotMatch(source, /createSupabaseAdminClient/);
   assert.doesNotMatch(source, /SUPABASE_SERVICE_ROLE_KEY/);
   assert.doesNotMatch(source, /fetchProjects/);
-  assert.match(source, /getPublicSupabase/);
-  assert.match(source, /\.from\('projects'\)/);
-  assert.match(source, /\.eq\('status', 'published'\)/);
+  assert.match(source, /retrievePublicKnowledge/);
+  assert.match(knowledge, /getPublicSupabase/);
+  assert.match(knowledge, /\.from\("projects"\)/);
+  assert.match(knowledge, /\.eq\("status", "published"\)/);
+  assert.doesNotMatch(knowledge, /SUPABASE_SERVICE_ROLE_KEY|createSupabaseAdminClient/);
   // Max conversation turns bounded to 20
   assert.match(source, /messages\.length > 20/);
   // Max per-message character limit bounded to 2000

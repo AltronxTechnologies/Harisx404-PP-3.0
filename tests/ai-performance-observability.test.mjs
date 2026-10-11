@@ -31,6 +31,7 @@ function createRoute({ disabled = "false", telemetry = "true", groqKey = "test-g
         return { response: { text: () => "Gemini answer" } };
       } }) } };
       if (name === "@/app/lib/supabase/safe") return { getPublicSupabase: () => null };
+      if (name === "@/app/lib/ai/public-knowledge") return { retrievePublicKnowledge: async () => ({ context: "", sources: [] }) };
       if (name === "@/app/lib/utils") return { fetchProjects: async () => [], fetchAndSortBlogPosts: async () => [] };
       if (name === "@/app/lib/rate-limit") return { checkRateLimit: () => ({ success: true }) };
       if (name === "util") return { TextEncoder };
