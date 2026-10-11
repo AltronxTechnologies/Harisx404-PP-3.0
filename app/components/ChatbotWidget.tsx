@@ -72,10 +72,6 @@ function AssistantRobot() {
         <path d="M29 42c2 1 4 1 6 0" stroke="#8CD9F7" strokeWidth="1.5" strokeLinecap="round" />
         <path d="M21 51c6 4 16 4 22 0" stroke="white" strokeOpacity=".55" strokeWidth="1.5" strokeLinecap="round" />
       </svg>
-      <span className="absolute bottom-0 right-0 flex size-2.5">
-        <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-60 motion-reduce:hidden" />
-        <span className="relative inline-flex size-2.5 rounded-full border-2 border-text-primary bg-emerald-400" />
-      </span>
     </span>
   );
 }
@@ -512,13 +508,9 @@ export function ChatbotWidget() {
         aria-expanded={isOpen}
         aria-controls="portfolio-chat-panel"
         title="Ask Haris AI Assistant"
-        className="group relative flex min-h-14 items-center gap-3 rounded-full border border-border-primary bg-text-primary pl-3.5 pr-5 text-sm font-medium text-bg-primary shadow-[0_12px_36px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(108,71,255,0.25)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-primary dark:shadow-[0_12px_36px_rgba(0,0,0,0.6)] motion-reduce:transform-none motion-reduce:transition-none"
+        className="group relative flex size-14 items-center justify-center rounded-full border border-border-primary bg-text-primary text-bg-primary shadow-[0_12px_36px_rgba(0,0,0,0.18)] transition-shadow duration-300 hover:shadow-[0_16px_40px_rgba(108,71,255,0.25)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-primary dark:shadow-[0_12px_36px_rgba(0,0,0,0.6)] motion-reduce:transition-none"
       >
         <AssistantRobot />
-        <div className="flex flex-col items-start text-left">
-          <span className="font-semibold leading-tight tracking-tight">Ask Haris AI</span>
-          <span className="font-mono text-[10px] font-normal uppercase tracking-wider text-bg-primary/70">Assistant</span>
-        </div>
       </button>
     </div>
   );

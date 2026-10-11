@@ -13,6 +13,9 @@ test("robot launcher, outside click, Escape and header swipe preserve focus and 
     const launcher = page.getByRole("button", { name: "Toggle chat" });
     await launcher.waitFor();
     assert.equal(await launcher.locator("svg").count(), 1);
+    const launcherBox = await launcher.boundingBox();
+    assert.ok(launcherBox && launcherBox.width === 56 && launcherBox.height === 56);
+    assert.equal((await launcher.innerText()).trim(), "");
     await launcher.click();
     const panel = page.locator("#portfolio-chat-panel");
     const box = await panel.boundingBox();
