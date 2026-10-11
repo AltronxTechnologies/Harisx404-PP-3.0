@@ -113,3 +113,31 @@ test("closing a pending chat cancels its request and restores launcher focus", a
     await browser.close();
   }
 });
+
+test("assistant replies display readable Markdown and only trusted links", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage({ viewport: { width: 320, height: 568 } });
+    await page.route("**/api/ai/chat", (route) => route.fulfill({
+      status: 200,
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ text: "### Latest post\n\nA concise summary with **emphasis**.\n\n- First point\n- Read [the article](/blog/example-post) or /contact.\n\n[Untrusted](javascript:alert(1)) <script>alert(1)</script>" }),
+    }));
+    await page.goto(`${baseUrl}/links`, { waitUntil: "domcontentloaded" });
+    await page.getByRole("button", { name: "Toggle chat" }).click();
+    await page.getByRole("textbox", { name: "Ask the portfolio assistant" }).fill("latest blog");
+    await page.getByRole("button", { name: "Send chat message" }).click();
+    const panel = page.locator("#portfolio-chat-panel");
+    await panel.getByRole("heading", { name: "Latest post" }).waitFor();
+    assert.equal(await panel.locator("li").count(), 2);
+    assert.equal(await panel.locator("strong").innerText(), "emphasis");
+    assert.equal(await panel.locator('a[href="/blog/example-post"]').count(), 1);
+    assert.equal(await panel.locator('a[href="/contact"]').count(), 1);
+    assert.equal(await panel.locator('a[href^="javascript:"]').count(), 0);
+    assert.equal(await panel.locator("script").count(), 0);
+    const box = await panel.boundingBox();
+    assert.ok(box.x >= 0 && box.x + box.width <= 321);
+  } finally {
+    await browser.close();
+  }
+});

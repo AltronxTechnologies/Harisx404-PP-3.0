@@ -48,8 +48,9 @@ test("Offline resilience protects user from silent disconnects", () => {
   assert.match(source, /You appear to be offline/);
 });
 
-test("Message rendering is 100% XSS-safe without dangerouslySetInnerHTML and formats markdown safely", () => {
+test("Message rendering uses restricted Markdown and local links without raw HTML", () => {
   assert.doesNotMatch(source, /dangerouslySetInnerHTML/);
-  assert.match(source, /formatInline/);
+  assert.match(source, /allowedElements=/);
+  assert.match(source, /ReactMarkdown/);
   assert.match(source, /localPath\.test/);
 });

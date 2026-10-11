@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { ArrowDown, ArrowRight, Bot, MessageCircle, RotateCcw, Send, Sparkles, Square, WifiOff, X } from "lucide-react";
 
 interface Message {
@@ -15,7 +17,7 @@ const suggestions = [
   { label: "Contact & collaboration", prompt: "How can I contact Haris or collaborate with him on a project?" },
 ];
 
-const localPath = /^\/(?:projects|blog|about|contact|resume|credentials|buildlog|community-wall)(?:\/[a-z0-9-]+)?$/;
+const localPath = /^\/(?:projects|blog|about|contact|resume|credentials|links|buildlog|community-wall)(?:\/[a-z0-9-]+)?$/;
 
 function AssistantOrb() {
   return (
@@ -59,43 +61,32 @@ function AssistantOrb() {
   );
 }
 
-function formatInline(str: string): React.ReactNode {
-  const parts = str.split(/(`[^`]+`|\*\*[^*]+\*\*)/g);
-  return parts.map((part, i) => {
-    if (part.startsWith('`') && part.endsWith('`') && part.length > 2) {
-      return (
-        <code key={i} className="rounded bg-black/[0.07] px-1 py-0.5 font-mono text-[11px] font-semibold text-text-primary dark:bg-white/[0.09]">
-          {part.slice(1, -1)}
-        </code>
-      );
-    }
-    if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
-      return (
-        <strong key={i} className="font-semibold text-text-primary">
-          {part.slice(2, -2)}
-        </strong>
-      );
-    }
-    return part;
-  });
-}
-
 function Reply({ text }: { text: string }) {
+  const withLinks = text.replace(/(^|\s)(\/(?:projects|blog|about|contact|resume|credentials|links|buildlog|community-wall)(?:\/[a-z0-9-]+)?)(?=$|[\s.,!?;)])/gm,
+    (_match, space: string, path: string) => `${space}[${path}](${path})`);
   return (
-    <div className="whitespace-pre-wrap break-words text-sm leading-6">
-      {text.split(/(^|[\s(])(\/(?:projects|blog|about|contact|resume|credentials|buildlog|community-wall)(?:\/[a-z0-9-]+)?)(?=$|[\s.,!?;)])/g).map((part, index) =>
-        localPath.test(part) ? (
-          <Link
-            key={index}
-            href={part}
-            className="font-medium underline decoration-purple-primary/60 underline-offset-4 hover:decoration-purple-primary focus-visible:rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-purple-primary"
-          >
-            {part}
-          </Link>
-        ) : (
-          <span key={index}>{formatInline(part)}</span>
-        )
-      )}
+    <div className="min-w-0 break-words text-sm leading-6 [&>*+*]:mt-2">
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        allowedElements={["p", "strong", "em", "a", "ul", "ol", "li", "h1", "h2", "h3", "h4", "code", "br", "blockquote"]}
+        unwrapDisallowed
+        components={{
+          h1: ({ children }) => <h3 className="font-semibold text-text-primary">{children}</h3>,
+          h2: ({ children }) => <h3 className="font-semibold text-text-primary">{children}</h3>,
+          h3: ({ children }) => <h3 className="font-semibold text-text-primary">{children}</h3>,
+          h4: ({ children }) => <h3 className="font-semibold text-text-primary">{children}</h3>,
+          ul: ({ children }) => <ul className="list-disc space-y-1 pl-5">{children}</ul>,
+          ol: ({ children }) => <ol className="list-decimal space-y-1 pl-5">{children}</ol>,
+          code: ({ children }) => <code className="break-all rounded bg-black/[0.07] px-1 py-0.5 font-mono text-xs dark:bg-white/[0.09]">{children}</code>,
+          a: ({ href, children }) => {
+            let path = href || "";
+            if (path.startsWith("https://harisx404.com/")) path = new URL(path).pathname;
+            if (localPath.test(path)) return <Link href={path} className="font-medium underline decoration-purple-primary/60 underline-offset-4 hover:decoration-purple-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-purple-primary">{children}</Link>;
+            if (path === "mailto:itsharis.tech@gmail.com") return <a href={path} className="font-medium underline decoration-purple-primary/60 underline-offset-4 hover:decoration-purple-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-purple-primary">{children}</a>;
+            return <span>{children}</span>;
+          },
+        }}
+      >{withLinks}</ReactMarkdown>
     </div>
   );
 }
