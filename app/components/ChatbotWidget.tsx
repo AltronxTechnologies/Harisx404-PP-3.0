@@ -130,6 +130,13 @@ export function ChatbotWidget() {
 
   useEffect(() => setIsMounted(true), []);
 
+  useEffect(() => {
+    const textarea = inputRef.current;
+    if (!textarea) return;
+    textarea.style.height = "auto";
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 112)}px`;
+  }, [input, isOpen]);
+
   function dismissHint() {
     setShowHint(false);
     try { sessionStorage.setItem("portfolio-chat-hint-seen", "1"); } catch { /* storage may be disabled */ }
@@ -146,7 +153,7 @@ export function ChatbotWidget() {
   const closeChat = useCallback((restoreFocus = true) => {
     stopGeneration();
     setIsOpen(false);
-    if (restoreFocus) toggleRef.current?.focus();
+    if (restoreFocus) requestAnimationFrame(() => toggleRef.current?.focus());
   }, [stopGeneration]);
 
   function handleScroll() {
@@ -391,8 +398,7 @@ export function ChatbotWidget() {
           role="dialog"
           aria-modal="false"
           aria-label="Haris AI assistant"
-          className="relative mb-3 flex h-[min(580px,calc(100dvh-88px))] min-h-0 flex-col overflow-hidden rounded-3xl border border-border-primary bg-white text-text-primary shadow-[0_24px_80px_rgba(0,0,0,0.22)] dark:bg-[#1a1a1c] dark:shadow-[0_24px_80px_rgba(0,0,0,0.55)] sm:mb-4 sm:h-[min(580px,calc(100dvh-100px))]"
-          style={{ width: "min(400px, calc(100vw - 24px))" }}
+          className="fixed inset-x-2 bottom-[max(8px,env(safe-area-inset-bottom))] top-[max(8px,env(safe-area-inset-top))] z-10 flex min-h-0 flex-col overflow-hidden rounded-2xl border border-border-primary bg-white text-text-primary shadow-[0_24px_80px_rgba(0,0,0,0.22)] dark:bg-[#1a1a1c] dark:shadow-[0_24px_80px_rgba(0,0,0,0.55)] sm:relative sm:inset-auto sm:mb-4 sm:h-[min(560px,calc(100dvh-100px))] sm:w-[min(420px,calc(100vw-48px))] sm:rounded-3xl"
         >
           <header onTouchStart={(event) => {
             if ((event.target as Element).closest("button")) return;
@@ -403,35 +409,32 @@ export function ChatbotWidget() {
             const dy = event.changedTouches[0].clientY - swipeRef.current.y;
             swipeRef.current = null;
             if ((dy > 75 && dy > Math.abs(dx) * 1.3) || (Math.abs(dx) > 90 && Math.abs(dx) > Math.abs(dy) * 1.3)) closeChat();
-          }} onTouchCancel={() => { swipeRef.current = null; }} className="flex shrink-0 items-start gap-3 border-b border-border-primary px-4 py-4 [@media(max-height:420px)]:py-2 sm:px-5">
-            <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-purple-secondary text-purple-primary" aria-hidden="true">
-              <Sparkles size={21} strokeWidth={1.8} />
+          }} onTouchCancel={() => { swipeRef.current = null; }} className="flex shrink-0 items-center gap-2 border-b border-border-primary px-3 py-2.5 sm:px-4 sm:py-3">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-purple-secondary text-purple-primary" aria-hidden="true">
+              <Sparkles size={19} strokeWidth={1.8} />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="flex items-center gap-2 font-mono text-[10px] font-medium uppercase tracking-widest text-text-secondary">
-                <span className="size-1.5 rounded-full bg-purple-primary" aria-hidden="true" />
-                <span className="sm:hidden">Assistant</span><span className="hidden sm:inline">Portfolio assistant</span>
-              </p>
-              <h2 className="mt-1 font-display text-[28px] leading-none text-text-primary">Ask Haris.</h2>
+              <h2 className="font-display text-[25px] leading-none text-text-primary">Haris AI</h2>
+              <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-text-secondary">Portfolio assistant</p>
             </div>
-            <button type="button" onClick={startOver} disabled={!messages.length && !input} aria-label="Start a new chat" title="New chat" className="flex size-10 shrink-0 items-center justify-center rounded-xl text-text-secondary transition-colors hover:bg-bg-primary hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-primary disabled:opacity-40 sm:size-11">
+            <button type="button" onClick={startOver} disabled={!messages.length && !input} aria-label="Start a new chat" title="New chat" className="flex size-10 shrink-0 items-center justify-center rounded-xl text-text-secondary transition-colors hover:bg-bg-primary hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-primary disabled:opacity-40">
               <RotateCcw size={18} aria-hidden="true" />
             </button>
-            <button type="button" aria-label="Close chat" onClick={() => closeChat()} className="flex size-10 shrink-0 items-center justify-center rounded-xl text-text-secondary transition-colors hover:bg-bg-primary hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-primary sm:size-11">
+            <button type="button" aria-label="Close chat" onClick={() => closeChat()} className="flex size-10 shrink-0 items-center justify-center rounded-xl text-text-secondary transition-colors hover:bg-bg-primary hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-primary">
               <X size={20} aria-hidden="true" />
             </button>
           </header>
 
-          <div ref={scrollRef} onScroll={handleScroll} className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-4 py-5 sm:px-5">
+          <div ref={scrollRef} onScroll={handleScroll} className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-4 py-4 sm:px-5">
             {messages.length === 0 && (
-              <div className="rounded-2xl border border-border-primary bg-bg-primary p-5">
+              <div className="flex min-h-full flex-col justify-center py-3 sm:py-6">
                 <span className="flex size-9 items-center justify-center rounded-xl bg-purple-secondary text-purple-primary" aria-hidden="true"><Bot size={18} /></span>
-                <h3 className="mt-4 font-display text-[28px] leading-[1.08] text-text-primary">Curious about the work?</h3>
-                <p className="mt-2 text-sm leading-6 text-text-secondary">Ask about projects, technical skills, writing, or how to get in touch.</p>
-                <div className="mt-5 flex flex-col gap-2" aria-label="Suggested questions">
+                <h3 className="mt-4 font-display text-[28px] leading-[1.08] text-text-primary">Hi, I&apos;m Haris AI.</h3>
+                <p className="mt-2 max-w-[34ch] text-sm leading-6 text-text-secondary">Ask about the work, technical skills, writing, or getting in touch.</p>
+                <div className="mt-5 flex flex-wrap gap-2" aria-label="Suggested questions">
                   {suggestions.map(({ label, prompt }) => (
-                    <button key={label} type="button" onClick={() => submitMessage(prompt)} disabled={isLoading} className="flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border border-border-primary bg-white px-3.5 py-2.5 text-left text-sm font-medium text-text-primary transition-colors hover:border-purple-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-primary disabled:opacity-50 dark:bg-white/[0.04]">
-                      {label}<ArrowRight size={16} className="shrink-0 text-purple-primary" aria-hidden="true" />
+                    <button key={label} type="button" onClick={() => submitMessage(prompt)} disabled={isLoading} className="inline-flex min-h-10 items-center gap-1.5 rounded-full border border-border-primary bg-bg-primary px-3 py-1.5 text-left text-xs font-medium text-text-primary transition-colors hover:border-purple-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-primary disabled:opacity-50">
+                      {label}<ArrowRight size={13} className="shrink-0 text-purple-primary" aria-hidden="true" />
                     </button>
                   ))}
                 </div>
@@ -440,7 +443,7 @@ export function ChatbotWidget() {
             {messages.map((message, index) => (
               <div key={index} className={`flex flex-col gap-1.5 ${message.role === "user" ? "items-end" : "items-start"}`}>
                 <span className="px-1 font-mono text-[10px] font-medium uppercase tracking-widest text-text-secondary">{message.role === "user" ? "You" : "Haris AI"}</span>
-                <div aria-live={message.role === "model" ? "polite" : undefined} className={`max-w-[92%] rounded-2xl px-4 py-3 ${message.role === "user" ? "bg-text-primary text-bg-primary" : "border border-border-primary bg-bg-primary text-text-primary"}`}>
+                <div aria-live={message.role === "model" ? "polite" : undefined} className={message.role === "user" ? "max-w-[85%] rounded-2xl rounded-tr-md bg-text-primary px-4 py-2.5 text-bg-primary" : "w-full min-w-0 px-1 py-1 text-text-primary"}>
                   <Reply text={message.content} sources={message.sources} />
                   {message.role === "model" && !!message.sources?.length && (
                     <div aria-label="Relevant pages" className="mt-3 flex flex-wrap gap-1.5 border-t border-border-primary pt-3">
@@ -480,24 +483,23 @@ export function ChatbotWidget() {
                   <Link href="/contact" className="inline-flex min-h-8 items-center rounded-lg border border-border-primary bg-white px-2.5 py-1 text-xs font-medium text-text-secondary transition-colors hover:text-text-primary dark:bg-white/[0.04]">Contact</Link>
                 </div>
               </div>
-            )}
+                )}
+                {!isAtBottom && (isLoading || messages.length > 0) && (
+                  <div className="sticky bottom-2 flex justify-center">
+                    <button
+                      type="button"
+                      onClick={scrollToBottom}
+                      aria-label="Jump to latest messages"
+                      className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-border-primary bg-text-primary px-3 py-1.5 text-xs font-medium text-bg-primary shadow-[0_8px_20px_rgba(0,0,0,0.2)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-purple-primary"
+                    >
+                      <ArrowDown size={12} aria-hidden="true" />
+                      <span>Jump to latest</span>
+                    </button>
+                  </div>
+                )}
           </div>
 
-          {!isAtBottom && (isLoading || messages.length > 0) && (
-            <div className="pointer-events-none absolute bottom-20 left-0 right-0 flex justify-center">
-              <button
-                type="button"
-                onClick={scrollToBottom}
-                aria-label="Jump to latest messages"
-                className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full border border-border-primary bg-text-primary px-3 py-1.5 text-xs font-medium text-bg-primary shadow-[0_8px_20px_rgba(0,0,0,0.2)] transition-all hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-purple-primary"
-              >
-                <ArrowDown size={12} aria-hidden="true" />
-                <span>Jump to latest</span>
-              </button>
-            </div>
-          )}
-
-          <form onSubmit={(event) => { event.preventDefault(); submitMessage(input); }} className="shrink-0 border-t border-border-primary bg-white px-4 pb-3 pt-3 dark:bg-[#1a1a1c] sm:px-5">
+          <form onSubmit={(event) => { event.preventDefault(); submitMessage(input); }} className="shrink-0 border-t border-border-primary bg-white px-3 pb-[max(8px,env(safe-area-inset-bottom))] pt-2 dark:bg-[#1a1a1c] sm:px-4 sm:pb-3">
             <div className="flex items-end gap-2 rounded-2xl border border-border-primary bg-bg-primary p-1.5 focus-within:border-purple-primary">
               <textarea ref={inputRef} value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => {
                 if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
@@ -507,7 +509,7 @@ export function ChatbotWidget() {
               }} aria-label="Ask the portfolio assistant" placeholder="Ask a question..." rows={1} maxLength={2000} disabled={isLoading} className="max-h-28 min-h-11 min-w-0 flex-1 resize-none bg-transparent px-2 py-2.5 text-sm leading-5 text-text-primary placeholder:text-text-secondary focus:outline-none disabled:opacity-60" />
               <button type="submit" aria-label="Send chat message" disabled={!input.trim() || isLoading} className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-text-primary text-bg-primary transition-colors hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-primary disabled:opacity-40"><Send size={17} aria-hidden="true" /></button>
             </div>
-            <p className="mt-2 text-center text-[11px] leading-4 text-text-secondary">Answers may be imperfect. Check important details.</p>
+            <p className="mt-2 text-center text-[11px] leading-4 text-text-secondary">AI can make mistakes. Verify important details.</p>
           </form>
         </section>
       )}
@@ -528,7 +530,7 @@ export function ChatbotWidget() {
         aria-expanded={isOpen}
         aria-controls="portfolio-chat-panel"
         title="Ask Haris AI Assistant"
-        className="group relative flex size-14 items-center justify-center rounded-full border-2 border-[#a99cce] bg-[#20202b] p-0 shadow-[0_8px_18px_rgba(19,16,35,0.18)] transition-[border-color,box-shadow] duration-200 hover:border-[#c2b6ef] hover:shadow-[0_10px_22px_rgba(55,41,111,0.22)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-primary dark:shadow-[0_10px_28px_rgba(0,0,0,0.5)] dark:hover:shadow-[0_12px_30px_rgba(55,41,111,0.35)] motion-reduce:transition-none"
+        className={`group relative flex size-14 items-center justify-center rounded-full border-2 border-[#a99cce] bg-[#20202b] p-0 shadow-[0_8px_18px_rgba(19,16,35,0.18)] transition-[border-color,box-shadow] duration-200 hover:border-[#c2b6ef] hover:shadow-[0_10px_22px_rgba(55,41,111,0.22)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-primary dark:shadow-[0_10px_28px_rgba(0,0,0,0.5)] dark:hover:shadow-[0_12px_30px_rgba(55,41,111,0.35)] motion-reduce:transition-none ${isOpen ? "max-sm:hidden" : ""}`}
       >
         <AssistantRobot />
       </button>

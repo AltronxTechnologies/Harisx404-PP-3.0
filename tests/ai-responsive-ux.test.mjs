@@ -10,7 +10,7 @@ test("Launcher button exposes correct accessibility attributes, title, and robot
   assert.match(source, /aria-controls="portfolio-chat-panel"/);
   assert.match(source, /title="Ask Haris AI Assistant"/);
   assert.match(source, /<AssistantRobot \/>/);
-  assert.match(source, /className="group relative flex size-14 items-center justify-center rounded-full/);
+  assert.match(source, /group relative flex size-14 items-center justify-center rounded-full/);
   assert.doesNotMatch(source, /<span className="font-semibold leading-tight tracking-tight">Ask Haris AI/);
 });
 
@@ -25,7 +25,8 @@ test("Robot includes shaded SVG and reduced-motion compliance", () => {
 test("Chat panel enforces responsive bounds, dynamic viewport height, and dialog accessibility", () => {
   assert.match(source, /id="portfolio-chat-panel"/);
   assert.match(source, /aria-label="Haris AI assistant"/);
-  assert.match(source, /width: "min\(400px, calc\(100vw - 24px\)\)"/);
+  assert.match(source, /sm:w-\[min\(420px,calc\(100vw-48px\)\)\]/);
+  assert.match(source, /bottom-\[max\(8px,env\(safe-area-inset-bottom\)\)\]/);
   assert.match(source, /100dvh/);
   assert.match(source, /overscroll-contain/);
 });

@@ -30,6 +30,8 @@ test("chat launcher and panel fit across themes and viewport sizes with keyboard
           await page.setViewportSize({ width, height });
           const box = await panel.boundingBox();
           assert.ok(box && box.x >= 0 && box.y >= 0 && box.x + box.width <= width + 1 && box.y + box.height <= height + 1, `${theme} ${width}x${height}: ${JSON.stringify(box)}`);
+          assert.equal(await launcher.isVisible(), width >= 640, `${theme} ${width}x${height}: only desktop keeps the launcher beside the panel`);
+          if (width === 1440) assert.equal(box.width, 420);
           assert.ok((await panel.getByRole("textbox", { name: "Ask the portfolio assistant" }).boundingBox()).height > 0);
           assert.ok((await panel.getByRole("button", { name: "Close chat" }).boundingBox()).width >= 40);
           if (width === 320) {
@@ -85,6 +87,58 @@ test("short viewports keep header, composer and a usable message scroller inside
   }
 });
 
+test("phone sheet keeps compact suggestions, expandable composer and jump control usable in both themes", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    for (const theme of ["light", "dark"]) {
+      const context = await browser.newContext({ viewport: { width: 320, height: 568 } });
+      await context.addInitScript((value) => localStorage.setItem("theme", value), theme);
+      const page = await context.newPage();
+      await page.route("**/api/ai/chat", (route) => route.fulfill({
+        status: 200, headers: { "content-type": "application/json" },
+        body: JSON.stringify({ text: "A detailed answer. ".repeat(100), sources: [{ title: "About Haris", path: "/about" }] }),
+      }));
+      try {
+        await page.goto(`${baseUrl}/links`, { waitUntil: "domcontentloaded" });
+        const launcher = page.getByRole("button", { name: "Toggle chat" });
+        await launcher.click();
+        const panel = page.getByRole("dialog", { name: "Haris AI assistant" });
+        const box = await panel.boundingBox();
+        assert.ok(box && Math.abs(box.x - 8) < 1 && Math.abs(box.y - 8) < 1 && box.width === 304 && box.height === 552);
+        assert.equal(await launcher.isVisible(), false);
+        const scroll = panel.locator("header + div");
+        const form = panel.locator("form");
+        const formBox = await form.boundingBox();
+        for (const label of ["Featured projects", "Technical skills & stack", "Contact & collaboration"]) {
+          const chip = panel.getByRole("button", { name: label });
+          const chipBox = await chip.boundingBox();
+          assert.ok(chipBox && chipBox.y + chipBox.height < formBox.y, `${theme}: ${label} starts above the composer`);
+        }
+        const input = panel.getByRole("textbox", { name: "Ask the portfolio assistant" });
+        const initialHeight = (await input.boundingBox()).height;
+        await input.fill("First line\nSecond line\nThird line\nFourth line");
+        await page.waitForFunction((height) => document.querySelector('#portfolio-chat-panel textarea').getBoundingClientRect().height > height, initialHeight);
+        assert.ok((await input.boundingBox()).height <= 112);
+        await input.fill("Tell me more");
+        await panel.getByRole("button", { name: "Send chat message" }).click();
+        await panel.getByRole("link", { name: "About Haris" }).waitFor();
+        await scroll.evaluate((node) => { node.scrollTop = 0; node.dispatchEvent(new Event("scroll")); });
+        const jump = panel.getByRole("button", { name: "Jump to latest messages" });
+        await jump.waitFor();
+        const jumpBox = await jump.boundingBox();
+        assert.ok(jumpBox && jumpBox.y + jumpBox.height <= (await form.boundingBox()).y, `${theme}: jump button stays above the composer`);
+        await panel.getByRole("button", { name: "Close chat" }).click();
+        await page.waitForFunction(() => document.activeElement?.getAttribute("aria-label") === "Toggle chat");
+        assert.equal(await launcher.isVisible(), true);
+      } finally {
+        await context.close();
+      }
+    }
+  } finally {
+    await browser.close();
+  }
+});
+
 test("retry after a partial interrupted answer resends the original user question", async () => {
   const browser = await chromium.launch({ headless: true });
   try {
@@ -115,7 +169,7 @@ test("retry after a partial interrupted answer resends the original user questio
     await page.waitForTimeout(250);
     const scroller = page.locator("#portfolio-chat-panel > div").first();
     assert.equal(await scroller.evaluate((node) => node.scrollTop), 0);
-    assert.equal(await page.getByRole("heading", { name: "Curious about the work?" }).isVisible(), true);
+    assert.equal(await page.getByRole("heading", { name: "Hi, I'm Haris AI." }).isVisible(), true);
   } finally {
     await browser.close();
   }
