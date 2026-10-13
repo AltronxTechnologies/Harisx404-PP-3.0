@@ -38,7 +38,7 @@ function safeSources(value: unknown): Source[] {
 function AssistantRobot() {
   return (
     <span className="relative flex size-11 shrink-0 items-center justify-center [perspective:160px]">
-      <style jsx>{`@keyframes robot-idle { 0%, 100% { transform: translateY(0) rotateY(-5deg); } 50% { transform: translateY(-3px) rotateY(6deg); } } @media (prefers-reduced-motion: no-preference) { .robot-idle { animation: robot-idle 4.8s ease-in-out infinite; } .robot-idle:hover { animation-play-state: paused; transform: translateY(-4px) rotateY(-18deg) rotateZ(-4deg); } }`}</style>
+      <style jsx>{`@keyframes robot-idle { 0%, 100% { transform: translateY(0) rotateY(-5deg); } 50% { transform: translateY(-2px) rotateY(5deg); } } @keyframes robot-blink { 0%, 44%, 48%, 100% { transform: scaleY(1); } 46% { transform: scaleY(.15); } } @keyframes robot-signal { 0%, 100% { opacity: .7; } 50% { opacity: 1; } } @media (prefers-reduced-motion: no-preference) { .robot-idle { animation: robot-idle 5s ease-in-out infinite; } .robot-eyes { animation: robot-blink 6s ease-in-out infinite; transform-origin: 32px 34px; } .robot-signal { animation: robot-signal 3s ease-in-out infinite; } .robot-idle:hover { animation-play-state: paused; transform: translateY(-3px) rotateY(-14deg); } }`}</style>
       <svg
         viewBox="0 0 64 64"
         fill="none"
@@ -62,13 +62,15 @@ function AssistantRobot() {
           </linearGradient>
         </defs>
         <path d="M32 8V14" stroke="#C9BDF5" strokeWidth="2" strokeLinecap="round" />
-        <circle cx="32" cy="7" r="3" fill="#9F8CFF" />
+        <circle className="robot-signal" cx="32" cy="7" r="3" fill="#9F8CFF" />
         <path d="M10 30C10 19 19 13 32 13S54 19 54 30v10c0 12-10 18-22 18S10 52 10 40V30Z" fill="url(#robotShell)" stroke="#DCD4F5" strokeWidth="1.5" />
         <path d="M13 26c4-8 11-11 22-10" stroke="white" strokeOpacity=".8" strokeWidth="2" strokeLinecap="round" />
         <path d="M15 30c0-5 4-8 9-8h16c5 0 9 3 9 8v8c0 5-4 8-9 8H24c-5 0-9-3-9-8v-8Z" fill="url(#robotVisor)" />
         <path d="M19 28c2-3 5-4 10-4h10" stroke="white" strokeOpacity=".22" strokeWidth="2" strokeLinecap="round" />
-        <rect x="22" y="31" width="7" height="6" rx="3" fill="url(#robotEye)" />
-        <rect x="35" y="31" width="7" height="6" rx="3" fill="url(#robotEye)" />
+        <g className="robot-eyes">
+          <rect x="22" y="31" width="7" height="6" rx="3" fill="url(#robotEye)" />
+          <rect x="35" y="31" width="7" height="6" rx="3" fill="url(#robotEye)" />
+        </g>
         <path d="M29 42c2 1 4 1 6 0" stroke="#8CD9F7" strokeWidth="1.5" strokeLinecap="round" />
         <path d="M21 51c6 4 16 4 22 0" stroke="white" strokeOpacity=".55" strokeWidth="1.5" strokeLinecap="round" />
       </svg>
@@ -495,9 +497,12 @@ export function ChatbotWidget() {
         </section>
       )}
       {showHint && !isOpen && (
-        <div role="status" className="mb-2 flex max-w-[min(280px,calc(100vw-24px))] items-center gap-2 rounded-2xl border border-border-primary bg-white px-3 py-2.5 text-sm text-text-primary shadow-lg dark:bg-[#1a1a1c]">
-          <span>Questions about my work? Ask the assistant.</span>
-          <button type="button" aria-label="Dismiss assistant tip" onClick={dismissHint} className="flex size-9 shrink-0 items-center justify-center rounded-lg hover:bg-bg-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-purple-primary"><X size={16} aria-hidden="true" /></button>
+        <div role="status" className="mb-2 flex max-w-[calc(100vw-24px)] items-center gap-0.5 rounded-full border border-border-primary bg-white p-1.5 pl-2 text-text-primary shadow-[0_12px_32px_rgba(0,0,0,0.16)] dark:bg-[#1a1a1c] dark:shadow-[0_12px_32px_rgba(0,0,0,0.45)]">
+          <button type="button" onClick={openChat} className="flex min-h-8 min-w-0 items-center gap-2 whitespace-nowrap rounded-full px-2 text-xs font-medium transition-colors hover:text-purple-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-purple-primary sm:text-sm">
+            <Sparkles size={15} className="shrink-0 text-purple-primary" aria-hidden="true" />
+            Need a hand? Ask me.
+          </button>
+          <button type="button" aria-label="Dismiss assistant tip" onClick={dismissHint} className="flex size-8 shrink-0 items-center justify-center rounded-full text-text-secondary transition-colors hover:bg-bg-primary hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-purple-primary"><X size={15} aria-hidden="true" /></button>
         </div>
       )}
       <button

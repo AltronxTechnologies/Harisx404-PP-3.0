@@ -13,6 +13,7 @@ test("robot launcher, outside click, Escape and header swipe preserve focus and 
     const launcher = page.getByRole("button", { name: "Toggle chat" });
     await launcher.waitFor();
     assert.equal(await launcher.locator("svg").count(), 1);
+    assert.notEqual(await launcher.locator(".robot-eyes").evaluate((node) => getComputedStyle(node).animationName), "none");
     const launcherBox = await launcher.boundingBox();
     assert.ok(launcherBox && launcherBox.width === 56 && launcherBox.height === 56);
     assert.equal((await launcher.innerText()).trim(), "");
@@ -90,8 +91,15 @@ test("JSON sources and one-time idle hint respect reduced motion and session dis
     await page.goto(`${baseUrl}/links`, { waitUntil: "domcontentloaded" });
     const launcher = page.getByRole("button", { name: "Toggle chat" });
     await launcher.waitFor();
+    assert.equal(await launcher.locator(".robot-eyes").evaluate((node) => getComputedStyle(node).animationName), "none");
     await page.clock.runFor(12500);
-    await page.getByRole("status").filter({ hasText: "Questions about my work?" }).waitFor();
+    const hint = page.getByRole("status").filter({ hasText: "Need a hand? Ask me." });
+    await hint.waitFor();
+    const hintLayout = await hint.evaluate((node) => {
+      const label = node.querySelector("button").getBoundingClientRect();
+      return { width: node.getBoundingClientRect().width, height: node.getBoundingClientRect().height, labelHeight: label.height };
+    });
+    assert.ok(hintLayout.width <= 296 && hintLayout.height <= 48 && hintLayout.labelHeight <= 36);
     await page.getByRole("button", { name: "Dismiss assistant tip" }).click();
     await page.reload({ waitUntil: "domcontentloaded" });
     await page.getByRole("button", { name: "Toggle chat" }).waitFor();
@@ -105,6 +113,24 @@ test("JSON sources and one-time idle hint respect reduced motion and session dis
     assert.equal(await panel.getByRole("link", { name: "Bad" }).count(), 0);
     assert.equal(await panel.locator('a[href="/contact"]').count(), 2);
     await context.close();
+  } finally {
+    await browser.close();
+  }
+});
+
+test("the one-line help pill opens the assistant without covering the robot", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage({ viewport: { width: 320, height: 568 } });
+    await page.clock.install();
+    await page.goto(`${baseUrl}/links`, { waitUntil: "domcontentloaded" });
+    await page.getByRole("button", { name: "Toggle chat" }).waitFor();
+    await page.clock.runFor(12500);
+    const pill = page.getByRole("button", { name: "Need a hand? Ask me." });
+    await pill.waitFor();
+    await pill.click();
+    await page.getByRole("dialog", { name: "Haris AI assistant" }).waitFor();
+    assert.equal(await page.getByRole("button", { name: "Dismiss assistant tip" }).count(), 0);
   } finally {
     await browser.close();
   }

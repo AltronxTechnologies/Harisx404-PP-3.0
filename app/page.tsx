@@ -38,7 +38,6 @@ import { Testimonials } from "./components/home/Testimonials";
 import { MySiteGrid } from "./components/home/MySiteGrid";
 import { CtaSection } from "./components/home/CtaSection";
 import { HomeFaq } from "./components/home/HomeFaq";
-import { ChatbotIconConcepts } from "./components/home/ChatbotIconConcepts";
 
 export const revalidate = 60;
 
@@ -226,7 +225,6 @@ export default async function Home() {
       <div className="bg-bg-primary">
         <HomeHero latestLaunch={latestLaunch} />
         <StatusRow data={statusData} />
-        <ChatbotIconConcepts />
         <div className="mt-16 space-y-28 md:mt-24">
           <HomeBento
             projectTech={projectTech}
