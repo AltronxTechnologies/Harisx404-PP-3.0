@@ -125,7 +125,8 @@ test("JSON sources and one-time idle hint respect reduced motion and session dis
 test("the one-line help pill opens the assistant without covering the robot", async () => {
   const browser = await chromium.launch({ headless: true });
   try {
-    const page = await browser.newPage({ viewport: { width: 320, height: 568 } });
+    const context = await browser.newContext({ viewport: { width: 320, height: 568 } });
+    const page = await context.newPage();
     await page.clock.install();
     await page.goto(`${baseUrl}/links`, { waitUntil: "domcontentloaded" });
     await page.getByRole("button", { name: "Toggle chat" }).waitFor();
@@ -136,6 +137,19 @@ test("the one-line help pill opens the assistant without covering the robot", as
     await pill.click();
     await page.getByRole("dialog", { name: "Haris AI assistant" }).waitFor();
     assert.equal(await page.getByRole("button", { name: "Dismiss assistant tip" }).count(), 0);
+    for (const copy of ["Explore the projects.", "Ask about Haris's work."]) {
+      const nextPage = await context.newPage();
+      await nextPage.clock.install();
+      await nextPage.goto(`${baseUrl}/links`, { waitUntil: "domcontentloaded" });
+      await nextPage.getByRole("button", { name: "Toggle chat" }).waitFor();
+      await nextPage.clock.runFor(12500);
+      const nextHint = nextPage.getByRole("status").filter({ hasText: copy });
+      await nextHint.waitFor();
+      const box = await nextHint.boundingBox();
+      assert.ok(box && box.width <= 296 && box.height <= 48, `${copy}: remains a single-row pill`);
+      await nextPage.close();
+    }
+    await context.close();
   } finally {
     await browser.close();
   }

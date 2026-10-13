@@ -22,6 +22,7 @@ const suggestions = [
   { label: "Technical skills & stack", prompt: "What technologies, languages, and frameworks does Haris specialize in?" },
   { label: "Contact & collaboration", prompt: "How can I contact Haris or collaborate with him on a project?" },
 ];
+const hintMessages = ["Need a hand? Ask me.", "Explore the projects.", "Ask about Haris's work."];
 
 const localPath = /^\/(?:projects|blog|about|contact|resume|credentials|links|buildlog|community-wall)(?:\/[a-z0-9-]+)?$|^\/resume\/file$/;
 const publicPage = new Set(["/projects", "/blog", "/about", "/contact", "/resume", "/credentials", "/links", "/buildlog", "/community-wall"]);
@@ -117,6 +118,7 @@ export function ChatbotWidget() {
   const [error, setError] = useState("");
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [showHint, setShowHint] = useState(false);
+  const [hintText, setHintText] = useState(hintMessages[0]);
   const pendingRef = useRef(false);
   const requestRef = useRef(0);
   const abortRef = useRef<AbortController | null>(null);
@@ -201,6 +203,13 @@ export function ChatbotWidget() {
       clearTimeout(timer);
       timer = setTimeout(() => {
         if (document.visibilityState === "visible") {
+          let next = 0;
+          try {
+            const stored = Number(localStorage.getItem("portfolio-chat-hint-next"));
+            if (Number.isSafeInteger(stored) && stored >= 0) next = stored % hintMessages.length;
+            localStorage.setItem("portfolio-chat-hint-next", String((next + 1) % hintMessages.length));
+          } catch { /* storage may be disabled */ }
+          setHintText(hintMessages[next]);
           setShowHint(true);
           try { sessionStorage.setItem("portfolio-chat-hint-seen", "1"); } catch { /* storage may be disabled */ }
           for (const name of ["pointerdown", "keydown", "scroll", "touchstart"]) window.removeEventListener(name, schedule);
@@ -506,7 +515,7 @@ export function ChatbotWidget() {
         <div role="status" className="chat-hint mb-2 flex max-w-[calc(100vw-24px)] items-center gap-0.5 rounded-full border border-border-primary bg-white p-1.5 pl-2 text-text-primary shadow-[0_12px_32px_rgba(0,0,0,0.16)] dark:bg-[#1a1a1c] dark:shadow-[0_12px_32px_rgba(0,0,0,0.45)]">
           <button type="button" onClick={openChat} className="flex min-h-8 min-w-0 items-center gap-2 whitespace-nowrap rounded-full px-2 text-xs font-medium transition-colors hover:text-purple-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-purple-primary sm:text-sm">
             <Sparkles size={15} className="shrink-0 text-purple-primary" aria-hidden="true" />
-            Need a hand? Ask me.
+            {hintText}
           </button>
           <button type="button" aria-label="Dismiss assistant tip" onClick={dismissHint} className="flex size-8 shrink-0 items-center justify-center rounded-full text-text-secondary transition-colors hover:bg-bg-primary hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-purple-primary"><X size={15} aria-hidden="true" /></button>
         </div>
