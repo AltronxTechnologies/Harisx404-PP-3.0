@@ -434,7 +434,7 @@ export function ChatbotWidget() {
           <div ref={scrollRef} onScroll={handleScroll} className="chat-scroll min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-3 py-3 sm:px-4" style={{ scrollbarWidth: "thin", scrollbarColor: "var(--text-secondary) transparent" }}>
             {messages.length === 0 && (
               <div className="flex min-h-full flex-col justify-center py-2 sm:py-3">
-                <h3 className="font-display text-[25px] leading-[1.12] text-text-primary">Hi, I&apos;m Haris AI.</h3>
+                <h3 className="font-display text-[25px] leading-[1.12] text-text-primary">Hi, I&apos;m Haris&apos;s AI assistant.</h3>
                 <p className="mt-2 max-w-[34ch] text-[13px] leading-5 text-text-secondary">Explore Haris&apos;s projects, experience and writing, or find a way to connect.</p>
                 <div className="mt-4 flex flex-wrap gap-2" aria-label="Suggested questions">
                   {suggestions.map(({ label, prompt }) => (

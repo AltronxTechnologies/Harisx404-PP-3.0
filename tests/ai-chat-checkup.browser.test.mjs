@@ -184,7 +184,7 @@ test("retry after a partial interrupted answer resends the original user questio
     await page.waitForTimeout(250);
     const scroller = page.locator("#portfolio-chat-panel > div").first();
     assert.equal(await scroller.evaluate((node) => node.scrollTop), 0);
-    assert.equal(await page.getByRole("heading", { name: "Hi, I'm Haris AI." }).isVisible(), true);
+    assert.equal(await page.getByRole("heading", { name: "Hi, I'm Haris's AI assistant." }).isVisible(), true);
   } finally {
     await browser.close();
   }
