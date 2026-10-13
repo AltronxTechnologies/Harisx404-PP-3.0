@@ -374,7 +374,8 @@ export function ChatbotWidget() {
   if (!isMounted) return null;
 
   return (
-    <div ref={wrapperRef} className="fixed bottom-3 right-4 z-[5500] flex flex-col items-end min-[360px]:right-5 sm:bottom-6 sm:right-[26px] lg:right-[max(38px,calc(50vw-602px))]">
+    <div ref={wrapperRef} className="fixed bottom-3 right-[18px] z-[5500] flex flex-col items-end min-[360px]:right-[22px] sm:bottom-6 sm:right-7 lg:right-[max(40px,calc(50vw-600px))]">
+      <style jsx>{`@keyframes chat-hint-enter { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } } @media (prefers-reduced-motion: no-preference) { .chat-hint { animation: chat-hint-enter 350ms cubic-bezier(.2,.8,.2,1) both; } }`}</style>
       {isOpen && (
         <section
           id="portfolio-chat-panel"
@@ -502,7 +503,7 @@ export function ChatbotWidget() {
         </section>
       )}
       {showHint && !isOpen && (
-        <div role="status" className="mb-2 flex max-w-[calc(100vw-24px)] items-center gap-0.5 rounded-full border border-border-primary bg-white p-1.5 pl-2 text-text-primary shadow-[0_12px_32px_rgba(0,0,0,0.16)] dark:bg-[#1a1a1c] dark:shadow-[0_12px_32px_rgba(0,0,0,0.45)]">
+        <div role="status" className="chat-hint mb-2 flex max-w-[calc(100vw-24px)] items-center gap-0.5 rounded-full border border-border-primary bg-white p-1.5 pl-2 text-text-primary shadow-[0_12px_32px_rgba(0,0,0,0.16)] dark:bg-[#1a1a1c] dark:shadow-[0_12px_32px_rgba(0,0,0,0.45)]">
           <button type="button" onClick={openChat} className="flex min-h-8 min-w-0 items-center gap-2 whitespace-nowrap rounded-full px-2 text-xs font-medium transition-colors hover:text-purple-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-purple-primary sm:text-sm">
             <Sparkles size={15} className="shrink-0 text-purple-primary" aria-hidden="true" />
             Need a hand? Ask me.

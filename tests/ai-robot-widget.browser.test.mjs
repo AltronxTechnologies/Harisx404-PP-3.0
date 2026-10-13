@@ -98,6 +98,7 @@ test("JSON sources and one-time idle hint respect reduced motion and session dis
     await page.clock.runFor(12500);
     const hint = page.getByRole("status").filter({ hasText: "Need a hand? Ask me." });
     await hint.waitFor();
+    assert.equal(await hint.evaluate((node) => getComputedStyle(node).animationName), "none");
     const hintLayout = await hint.evaluate((node) => {
       const label = node.querySelector("button").getBoundingClientRect();
       return { width: node.getBoundingClientRect().width, height: node.getBoundingClientRect().height, labelHeight: label.height };
@@ -131,6 +132,7 @@ test("the one-line help pill opens the assistant without covering the robot", as
     await page.clock.runFor(12500);
     const pill = page.getByRole("button", { name: "Need a hand? Ask me." });
     await pill.waitFor();
+    assert.notEqual(await pill.locator("..").evaluate((node) => getComputedStyle(node).animationName), "none");
     await pill.click();
     await page.getByRole("dialog", { name: "Haris AI assistant" }).waitFor();
     assert.equal(await page.getByRole("button", { name: "Dismiss assistant tip" }).count(), 0);
@@ -164,12 +166,13 @@ test("fresh server markup and hydrated launcher agree in both themes and narrow 
           await page.setViewportSize({ width, height: 800 });
           const box = await launcher.boundingBox();
           assert.ok(box && box.x >= 0 && box.x + box.width <= width + 1 && box.width === 56, `${theme} ${width}: launcher bounds`);
+          assert.ok(Math.abs(800 - box.y - box.height - (width < 640 ? 12 : 24)) < 1, `${theme} ${width}: bottom offset`);
           const stripGap = await page.evaluate(() => {
             const strip = document.querySelector("#main-content").nextElementSibling.getBoundingClientRect();
             const icon = document.querySelector('button[aria-label="Toggle chat"]').getBoundingClientRect();
             return strip.left - icon.right;
           });
-          assert.ok(Math.abs(stripGap - 6) < 1, `${theme} ${width}: right strip gap ${stripGap}`);
+          assert.ok(Math.abs(stripGap - 8) < 1, `${theme} ${width}: right strip gap ${stripGap}`);
         }
         await launcher.focus();
         const appearance = await launcher.evaluate((node) => ({ background: getComputedStyle(node).backgroundColor, border: getComputedStyle(node).borderColor, borderWidth: getComputedStyle(node).borderWidth, shadow: getComputedStyle(node).boxShadow }));
