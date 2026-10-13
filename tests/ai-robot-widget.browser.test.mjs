@@ -154,7 +154,7 @@ test("fresh server markup and hydrated launcher agree in both themes and narrow 
       try {
         const url = `${baseUrl}/links?launcher-check=${theme}`;
         const html = await (await page.request.get(url)).text();
-        assert.match(html, /background-color:#20202b/);
+        assert.doesNotMatch(html, /aria-label="Toggle chat" aria-expanded="false"/);
         await page.goto(url, { waitUntil: "domcontentloaded" });
         const launcher = page.getByRole("button", { name: "Toggle chat" });
         await launcher.waitFor();
@@ -167,7 +167,7 @@ test("fresh server markup and hydrated launcher agree in both themes and narrow 
         await launcher.focus();
         const appearance = await launcher.evaluate((node) => ({ background: getComputedStyle(node).backgroundColor, border: getComputedStyle(node).borderColor }));
         assert.equal(appearance.background, "rgb(32, 32, 43)");
-        assert.equal(appearance.border, theme === "light" ? "rgb(17, 24, 39)" : "rgb(169, 156, 206)");
+        assert.equal(appearance.border, "rgb(169, 156, 206)");
         assert.deepEqual(hydrationErrors, []);
       } finally {
         await context.close();

@@ -91,11 +91,9 @@ test("shared chat widget bounds requests and exposes named, reachable controls",
   assert.match(source, /width: "min\(400px, calc\(100vw - 24px\)\)"/);
 });
 
-test("server HTML uses the current chat widget markup before hydration", async () => {
+test("server HTML leaves the interactive chat widget to mount after hydration", async () => {
   const response = await fetch(process.env.PREVIEW_BASE_URL || "http://localhost:3000/");
   assert.equal(response.status, 200);
   const html = await response.text();
-  assert.match(html, /fixed bottom-3 right-3 z-\[5500\] flex flex-col items-end/);
-  assert.match(html, /aria-label="Toggle chat" aria-expanded="false" aria-controls="portfolio-chat-panel"/);
-  assert.doesNotMatch(html, /fixed bottom-6 right-6 z-\[4000\] flex flex-col items-end/);
+  assert.doesNotMatch(html, /aria-label="Toggle chat" aria-expanded="false" aria-controls="portfolio-chat-panel"/);
 });

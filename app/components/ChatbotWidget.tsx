@@ -109,6 +109,7 @@ function Reply({ text, sources = [] }: { text: string; sources?: Source[] }) {
 }
 
 export function ChatbotWidget() {
+  const [isMounted, setIsMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -124,6 +125,8 @@ export function ChatbotWidget() {
   const toggleRef = useRef<HTMLButtonElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const swipeRef = useRef<{ x: number; y: number } | null>(null);
+
+  useEffect(() => setIsMounted(true), []);
 
   function dismissHint() {
     setShowHint(false);
@@ -368,6 +371,8 @@ export function ChatbotWidget() {
     }
   }
 
+  if (!isMounted) return null;
+
   return (
     <div ref={wrapperRef} className="fixed bottom-3 right-3 z-[5500] flex flex-col items-end sm:bottom-6 sm:right-6">
       {isOpen && (
@@ -513,8 +518,7 @@ export function ChatbotWidget() {
         aria-expanded={isOpen}
         aria-controls="portfolio-chat-panel"
         title="Ask Haris AI Assistant"
-        className="group relative flex size-14 items-center justify-center rounded-full border border-[#111827] p-0 shadow-[0_10px_28px_rgba(19,16,35,0.26)] transition-[border-color,box-shadow] duration-200 hover:border-[#b1a3ec] hover:shadow-[0_12px_30px_rgba(55,41,111,0.35)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-primary dark:border-[#a99cce] dark:shadow-[0_10px_28px_rgba(0,0,0,0.5)] motion-reduce:transition-none"
-        style={{ backgroundColor: "#20202b" }}
+        className="group relative flex size-14 items-center justify-center rounded-full border border-[#a99cce] bg-[#20202b] p-0 shadow-[0_10px_28px_rgba(19,16,35,0.26)] transition-[border-color,box-shadow] duration-200 hover:border-[#b1a3ec] hover:shadow-[0_12px_30px_rgba(55,41,111,0.35)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-primary dark:shadow-[0_10px_28px_rgba(0,0,0,0.5)] motion-reduce:transition-none"
       >
         <AssistantRobot />
       </button>
