@@ -18,7 +18,7 @@ const routes = [
   "/legal/terms",
 ];
 
-test("header greeting appears immediately, then navigation and hero load", async () => {
+test("header remains usable without JS while hydrated greeting leads to navigation and hero", async () => {
   const browser = await chromium.launch({ headless: true });
   try {
     for (const width of [320, 1280]) {
@@ -28,16 +28,19 @@ test("header greeting appears immediately, then navigation and hero load", async
         for (const route of ["/", "/about"]) {
           const response = await page.goto(`${baseUrl}${route}`, { waitUntil: "domcontentloaded" });
           assert.equal(response?.status(), 200);
-          const greeting = page.locator("header nav").getByText(/^Good (Morning|Afternoon|Evening)$/);
-          assert.equal(await greeting.isVisible(), true, `${route} ${width}px: greeting is in server HTML`);
-          assert.equal(await greeting.locator("..").evaluate((node) => getComputedStyle(node).opacity), "1");
+          const fallbackNav = page.locator("header nav noscript").getByRole("link", { name: width < 768 ? "Explore" : "Projects" });
+          assert.equal(await fallbackNav.isVisible(), true, `${route} ${width}px: static navigation is usable without JS`);
         }
       } finally {
         await context.close();
       }
       const page = await browser.newPage({ viewport: { width, height: 800 } });
       try {
+        await page.clock.install();
         await page.goto(`${baseUrl}/`, { waitUntil: "domcontentloaded" });
+        assert.equal(await page.locator("header nav").getByText(/^Good (Morning|Afternoon|Evening)$/).isVisible(), true);
+        await page.getByRole("button", { name: "Toggle chat" }).waitFor();
+        await page.clock.runFor(3100);
         const navControl = width < 768
           ? page.getByRole("button", { name: "Open menu & search" })
           : page.getByRole("link", { name: "Projects", exact: true }).first();
@@ -96,7 +99,8 @@ test("public preview routes settle without persistent loaders or runtime errors"
       }
       await page.waitForTimeout(500);
 
-      for (let attempt = 0; attempt < 30 && [...pending].some((url) => !/\/_next\/(webpack-hmr|turbopack)/.test(url)); attempt += 1) {
+      const criticalRequest = (url) => !/\/_next\/(webpack-hmr|turbopack)/.test(url) && !/\/_next\/image\?url=https%3A%2F%2F/i.test(url);
+      for (let attempt = 0; attempt < 30 && [...pending].some(criticalRequest); attempt += 1) {
         await page.waitForTimeout(100);
       }
 
@@ -105,9 +109,7 @@ test("public preview routes settle without persistent loaders or runtime errors"
           .filter((image) => image.complete && image.naturalWidth === 0)
           .map((image) => image.currentSrc || image.src),
       );
-      const applicationPending = [...pending].filter(
-        (url) => !/\/_next\/(webpack-hmr|turbopack)/.test(url),
-      );
+      const applicationPending = [...pending].filter(criticalRequest);
 
       assert.equal(cleared, true, `${route} loading boundary should clear`);
       assert.deepEqual(

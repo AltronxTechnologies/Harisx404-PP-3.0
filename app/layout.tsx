@@ -72,9 +72,11 @@ export async function generateMetadata(): Promise<Metadata> {
   try {
     // Anonymous client (no cookies) so metadata reads don't force every route dynamic.
     const supabase = getPublicSupabase();
-    const { data: settings } = supabase
-      ? await supabase.from('site_settings').select('*').limit(1).single()
-      : { data: null };
+    const { data: settings, error } = supabase
+      ? await supabase.from('site_settings').select('site_name, seo_description').limit(1).abortSignal(AbortSignal.timeout(3000)).single()
+      : { data: null, error: null };
+
+    if (error && error.code !== "PGRST116") console.error("Site settings metadata is temporarily unavailable");
 
     if (settings) {
       if (settings.site_name) title = `${settings.site_name} | Portfolio`;

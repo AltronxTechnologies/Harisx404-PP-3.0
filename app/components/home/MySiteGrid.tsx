@@ -132,7 +132,7 @@ function CredentialArchivePreview({ count, pulse }: { count: number; pulse: bool
   );
 }
 
-export function MySiteGrid({ credentialSummary }: { credentialSummary: CredentialSummary }) {
+export function MySiteGrid({ credentialSummary, unavailable = false }: { credentialSummary: CredentialSummary; unavailable?: boolean }) {
   const prefersReducedMotion = useReducedMotion();
   const rowRef = useRef<HTMLDivElement | null>(null);
   const scrollPulse = useScrollPulse(rowRef);
@@ -236,6 +236,7 @@ export function MySiteGrid({ credentialSummary }: { credentialSummary: Credentia
           <Link href="/credentials" className={`${cardBase} hover:ring-neutral-400/70 active:ring-neutral-400/70 dark:hover:ring-white/25 dark:active:ring-white/25`}>
             <Ambient />
             <CredentialArchivePreview count={credentialSummary.count} pulse={pulse} />
+            {unavailable && <span className="sr-only">Credential data is temporarily unavailable.</span>}
             <div>
               <p className="font-mono text-xs uppercase tracking-widest text-text-secondary">
                 CREDENTIALS

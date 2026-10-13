@@ -21,6 +21,8 @@ test("Home and About live replacement cards remain responsive and aligned", asyn
           await page.addInitScript((value) => localStorage.setItem("theme", value), theme);
           const response = await page.goto(`${baseUrl}${route}`, { waitUntil: "networkidle" });
           assert.equal(response?.status(), 200);
+          await page.locator("h3").filter({ hasText: "GitHub activity" }).first().waitFor();
+          if (route === "/") await page.locator("[data-home-credential-archive]").waitFor();
           await page.waitForFunction(() => {
             const calendar = document.querySelector("[data-github-contribution-calendar]");
             const cells = [...(calendar?.querySelectorAll("button") || [])];

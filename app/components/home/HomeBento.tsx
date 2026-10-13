@@ -79,6 +79,17 @@ const accountItems = [
 ];
 
 export function AccountsBento() {
+  const [unavailableIcons, setUnavailableIcons] = useState<string[]>([]);
+  useEffect(() => {
+    const checks = accountItems.map((item) => {
+      const image = new window.Image();
+      image.onerror = () => setUnavailableIcons((current) => current.includes(item.title) ? current : [...current, item.title]);
+      image.src = item.src;
+      return image;
+    });
+    return () => checks.forEach((image) => { image.onerror = null; });
+  }, []);
+
   return (
     <BentoCard height="h-auto sm:h-[240px] lg:h-[220px]" appearance="home">
       <div className="z-20 text-center">
@@ -120,20 +131,24 @@ export function AccountsBento() {
             >
               {/* Brand mark as a mask → gray at rest, true brand color on hover.
                   Decorative: the parent <a> already carries the label. */}
-              <span
-                aria-hidden
-                className="h-6 w-6 bg-neutral-600 transition-colors duration-300 ease-out group-hover/acct:bg-[var(--brand)] motion-reduce:transition-none dark:bg-neutral-300 dark:group-hover/acct:bg-[var(--brand-dark)] sm:h-7 sm:w-7"
-                style={{
-                  WebkitMaskImage: `url(${item.src})`,
-                  maskImage: `url(${item.src})`,
-                  WebkitMaskRepeat: "no-repeat",
-                  maskRepeat: "no-repeat",
-                  WebkitMaskPosition: "center",
-                  maskPosition: "center",
-                  WebkitMaskSize: "contain",
-                  maskSize: "contain",
-                }}
-              />
+              {unavailableIcons.includes(item.title) ? (
+                <span aria-hidden className="flex size-7 items-center justify-center font-mono text-xs font-semibold text-text-primary">{item.title.slice(0, 2).toUpperCase()}</span>
+              ) : (
+                <span
+                  aria-hidden
+                  className="h-6 w-6 bg-neutral-600 transition-colors duration-300 ease-out group-hover/acct:bg-[var(--brand)] motion-reduce:transition-none dark:bg-neutral-300 dark:group-hover/acct:bg-[var(--brand-dark)] sm:h-7 sm:w-7"
+                  style={{
+                    WebkitMaskImage: `url(${item.src})`,
+                    maskImage: `url(${item.src})`,
+                    WebkitMaskRepeat: "no-repeat",
+                    maskRepeat: "no-repeat",
+                    WebkitMaskPosition: "center",
+                    maskPosition: "center",
+                    WebkitMaskSize: "contain",
+                    maskSize: "contain",
+                  }}
+                />
+              )}
             </RecessedTile>
             {/* Handle reveals under the tile on hover */}
             <span className="absolute left-1/2 top-full mt-1.5 block -translate-x-1/2 whitespace-nowrap font-mono text-[10px] uppercase tracking-widest text-text-secondary opacity-0 transition-all duration-300 group-hover/acct:opacity-100 motion-reduce:transition-none sm:static sm:translate-x-0 sm:whitespace-normal">
@@ -236,6 +251,7 @@ const GLOBE_THETA = 0.28;
 
 function GlobeBento() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [globeReady, setGlobeReady] = useState(false);
   const labelRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const anchorsRef = useRef<Record<string, HTMLDivElement> | null>(null);
   const isDark = useIsDark();
@@ -252,6 +268,12 @@ function GlobeBento() {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    setGlobeReady(false);
+    try {
+      if (!canvas.getContext("webgl2")) return;
+    } catch {
+      return;
+    }
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     /* anchors belong to one globe instance — never reuse across re-creates */
     anchorsRef.current = null;
@@ -262,33 +284,47 @@ function GlobeBento() {
     };
     onResize();
     window.addEventListener("resize", onResize);
+    const onContextLost = (event: Event) => {
+      event.preventDefault();
+      setGlobeReady(false);
+    };
+    canvas.addEventListener("webglcontextlost", onContextLost);
 
-    const globe = createGlobe(canvas, {
-      devicePixelRatio: 2,
-      width: width * 2,
-      height: width * 2,
-      phi: 0,
-      theta: GLOBE_THETA,
-      dark: isDark ? 1 : 0,
-      diffuse: 1.2,
-      mapSamples: 18000,
-      /* Dark mode: brighter dot-matrix + lighter base so the continents
-         read crisply against the card instead of sinking into it. */
-      mapBrightness: isDark ? 6.2 : 7.2,
-      baseColor: isDark ? [0.36, 0.38, 0.5] : [0.94, 0.94, 0.98],
-      markerColor: isDark ? [0.55, 0.58, 1] : [0.39, 0.4, 0.95], // indigo accent
-      glowColor: isDark ? [0.14, 0.15, 0.26] : [0.88, 0.89, 0.98],
-      markers: GLOBE_MARKERS,
-      arcs: GLOBE_ARCS,
-      arcColor: isDark ? [0.55, 0.58, 1] : [0.39, 0.4, 0.95],
-      arcWidth: 0.22,
-      arcHeight: 0.4,
-    });
+    let globe: ReturnType<typeof createGlobe>;
+    try {
+      globe = createGlobe(canvas, {
+        devicePixelRatio: 2,
+        width: width * 2,
+        height: width * 2,
+        phi: 0,
+        theta: GLOBE_THETA,
+        dark: isDark ? 1 : 0,
+        diffuse: 1.2,
+        mapSamples: 18000,
+        /* Dark mode: brighter dot-matrix + lighter base so the continents
+           read crisply against the card instead of sinking into it. */
+        mapBrightness: isDark ? 6.2 : 7.2,
+        baseColor: isDark ? [0.36, 0.38, 0.5] : [0.94, 0.94, 0.98],
+        markerColor: isDark ? [0.55, 0.58, 1] : [0.39, 0.4, 0.95], // indigo accent
+        glowColor: isDark ? [0.14, 0.15, 0.26] : [0.88, 0.89, 0.98],
+        markers: GLOBE_MARKERS,
+        arcs: GLOBE_ARCS,
+        arcColor: isDark ? [0.55, 0.58, 1] : [0.39, 0.4, 0.95],
+        arcWidth: 0.22,
+        arcHeight: 0.4,
+      });
+    } catch {
+      window.removeEventListener("resize", onResize);
+      canvas.removeEventListener("webglcontextlost", onContextLost);
+      return;
+    }
     /* cobe v2 has no onRender — drive the 60fps spin with our own rAF
        loop; refs keep this loop free of React re-renders. City labels
        are repositioned in the same frame via direct style writes
        (transform + opacity only → compositor work, no layout). */
     let raf = 0;
+    let reveal = 0;
+    let painted = false;
     /* Pause the whole render loop while the card is off-screen — zero
        CPU/GPU cost during the rest of the page, instant resume on scroll. */
     let visible = true;
@@ -296,7 +332,16 @@ function GlobeBento() {
       if (!visible) return;
       if (!pointerRef.current.down && !reduce) phiRef.current += 0.0038;
       const phi = phiRef.current + pointerRef.current.delta;
-      globe.update({ phi, width: width * 2, height: width * 2 });
+      try {
+        globe.update({ phi, width: width * 2, height: width * 2 });
+      } catch {
+        setGlobeReady(false);
+        return;
+      }
+      if (!painted) {
+        painted = true;
+        reveal = requestAnimationFrame(() => setGlobeReady(true));
+      }
       /* cobe writes each marker's exact screen position onto tiny anchor
          divs (one per marker id). Read those back so labels are pinned
          pixel-perfectly to the WebGL dots — no math drift possible. */
@@ -336,16 +381,13 @@ function GlobeBento() {
       { rootMargin: "120px" }
     );
     io.observe(canvas);
-    /* Fade in once the first frame is painted — avoids a flash of empty canvas */
-    requestAnimationFrame(() => {
-      canvas.style.opacity = "1";
-    });
-
     return () => {
+      cancelAnimationFrame(reveal);
       cancelAnimationFrame(raf);
       io.disconnect();
       globe.destroy();
       window.removeEventListener("resize", onResize);
+      canvas.removeEventListener("webglcontextlost", onContextLost);
     };
   }, [isDark]);
 
@@ -362,9 +404,14 @@ function GlobeBento() {
       {/* Globe sits half-cropped at the card's bottom edge — the classic
           bento treatment. Pointer-drag spins it; it self-rotates at 60fps. */}
       <div className="absolute -bottom-[150px] left-1/2 z-10 aspect-square w-[320px] -translate-x-1/2 sm:-bottom-[190px] sm:w-[400px]">
+        <svg viewBox="0 0 320 320" aria-hidden="true" className={`pointer-events-none absolute inset-0 size-full text-indigo-400/50 dark:text-indigo-300/40 ${globeReady ? "opacity-0" : "opacity-100"}`}>
+          <circle cx="160" cy="160" r="126" fill="none" stroke="currentColor" strokeWidth="1.5" />
+          <ellipse cx="160" cy="160" rx="65" ry="126" fill="none" stroke="currentColor" strokeWidth="1" />
+          <path d="M34 160h252M52 98h216M52 222h216" fill="none" stroke="currentColor" strokeWidth="1" />
+        </svg>
         <canvas
           ref={canvasRef}
-          className="size-full opacity-0 transition-opacity duration-700 [contain:layout_paint_size]"
+          className={`relative size-full transition-opacity duration-700 [contain:layout_paint_size] ${globeReady ? "opacity-100" : "opacity-0"}`}
           onPointerDown={(e) => {
             pointerRef.current.down = true;
             pointerRef.current.dragged = false;

@@ -71,6 +71,7 @@ function LiveClock({ timeZone }: { timeZone: string }) {
 export type StatusRowData = {
   /** Total published projects — drives the count-up. */
   projectCount?: number;
+  projectsUnavailable?: boolean;
   /** Projects bucketed into the three hero domains. */
   domainCounts?: { web: number; cyber: number; ai: number };
   /** Latest published post title. */
@@ -109,9 +110,10 @@ function CountUp({ to, pad = 2 }: { to: number; pad?: number }) {
   }, [inView, reduced, to]);
 
   return (
-    <span ref={ref} className="tabular-nums">
-      {String(value).padStart(pad, "0")}
-    </span>
+    <>
+      <span ref={ref} className="count-up-value tabular-nums">{String(value).padStart(pad, "0")}</span>
+      <noscript><style>{`.count-up-value { display: none; }`}</style><span className="tabular-nums">{String(to).padStart(pad, "0")}</span></noscript>
+    </>
   );
 }
 
@@ -293,13 +295,13 @@ export function StatusRow({ data }: { data?: StatusRowData }) {
             </span>
           </span>
           {/* row 1 · col 2 — bar spans exactly the chips column below */}
-          <DomainBar domains={domains} />
+          {!data?.projectsUnavailable && <DomainBar domains={domains} />}
           {/* row 2 · col 1 — count-up total */}
           <span className="whitespace-nowrap text-[15px] font-medium leading-snug text-text-primary">
-            <CountUp to={total} /> {total === 1 ? "Project" : "Projects"}
+            {data?.projectsUnavailable ? "Projects temporarily unavailable" : <><CountUp to={total} /> {total === 1 ? "Project" : "Projects"}</>}
           </span>
           {/* row 2 · col 2 — domain chips; their width defines the bar's */}
-          <span className="inline-flex w-fit items-center gap-x-2 whitespace-nowrap text-[11px] font-normal text-text-secondary sm:gap-x-3 sm:text-xs">
+          {!data?.projectsUnavailable && <span className="inline-flex w-fit items-center gap-x-2 whitespace-nowrap text-[11px] font-normal text-text-secondary sm:gap-x-3 sm:text-xs">
             <DomainChip dot="bg-emerald-500" count={domains.web} name="Web" />
             <span aria-hidden className="h-3 w-px shrink-0 bg-border-primary" />
             <DomainChip
@@ -310,7 +312,7 @@ export function StatusRow({ data }: { data?: StatusRowData }) {
             />
             <span aria-hidden className="h-3 w-px shrink-0 bg-border-primary" />
             <DomainChip dot="bg-violet-500" count={domains.ai} name="AI" />
-          </span>
+          </span>}
         </span>
       </Link>
 

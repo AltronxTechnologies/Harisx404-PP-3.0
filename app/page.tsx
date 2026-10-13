@@ -22,6 +22,7 @@ import {
 } from "./data/fallback-home";
 import { withProjectPreview } from "./data/project-preview-fixtures";
 import { getSupabaseEnv } from "./lib/supabase/safe";
+import { homeRead, type HomeRead } from "./lib/home-read";
 import { fetchCredentialCollection } from "./credentials/data";
 import { summarizeCredentials } from "./credentials/summary";
 import {
@@ -81,7 +82,7 @@ const personJsonLd = {
 
 export default function Home() {
   return (
-    <Suspense fallback={<div className="bg-bg-primary"><HomeHero /></div>}>
+    <Suspense fallback={<div className="bg-bg-primary"><HomeHero latestLaunch={{ name: "Explore projects", href: "/projects", label: "Projects", subline: "Browse the full collection" }} /></div>}>
       <HomeContent />
     </Suspense>
   );
@@ -89,14 +90,15 @@ export default function Home() {
 
 async function HomeContent() {
   const hasConnectedContent = process.env.NODE_ENV !== "development" || Boolean(getSupabaseEnv());
-  const [dbProjects, dbPosts, dbTestimonials, credentials] =
-    await Promise.all([
-      fetchCachedProjects(),
-      fetchBlogIndexPosts().catch((): BlogIndexPost[] => []),
-      fetchCachedTestimonials(),
-      fetchCredentialCollection().catch(() => []),
-    ]);
-  const credentialSummary = summarizeCredentials(credentials);
+  const projectsRequest = homeRead("projects", fetchCachedProjects, []);
+  const postsRequest = homeRead<BlogIndexPost[]>("blog", fetchBlogIndexPosts, []);
+  const testimonialsRequest = homeRead("testimonials", fetchCachedTestimonials, []);
+  const credentialsRequest = homeRead("credentials", fetchCredentialCollection, []);
+  const reactionsRequest = postsRequest.then(({ value }) =>
+    homeRead("reactions", () => fetchBlogReactionSummaries(value.map((post) => post.slug)), {}, 2000),
+  );
+  const [{ value: dbProjects, available: projectsAvailable }, { value: dbPosts, available: postsAvailable }, { value: reactionSummaries }] =
+    await Promise.all([projectsRequest, postsRequest, reactionsRequest]);
 
   /* Homepage case studies are explicitly selected and ordered in Admin. */
   const featuredDb = dbProjects.filter((p: any) => p.featured);
@@ -121,9 +123,6 @@ async function HomeContent() {
       : hasConnectedContent ? [] : fallbackProjects.slice(0, 3)
   );
 
-  const reactionSummaries = await fetchBlogReactionSummaries(
-    dbPosts.map((post) => post.slug),
-  );
   const featuredPost = dbPosts.find((post) => post.featured) || dbPosts.reduce<BlogIndexPost | undefined>(
     (best, post) =>
       !best ||
@@ -215,9 +214,10 @@ async function HomeContent() {
   }
   const statusData = {
     projectCount: sourceProjects.length,
+    projectsUnavailable: hasConnectedContent && !projectsAvailable,
     domainCounts,
     latestPostLabel: hasConnectedContent && !latestPost ? "Blog" : undefined,
-    latestPostTitle: latestPost?.title ?? (hasConnectedContent ? "Articles coming soon" : undefined),
+    latestPostTitle: latestPost?.title ?? (hasConnectedContent ? (postsAvailable ? "Articles coming soon" : "Articles temporarily unavailable") : undefined),
     latestPostMeta: latestPost
       ? `${latestPost.readingTime} · ${formatDate(latestPost.publishedAt)}`
       : undefined,
@@ -245,12 +245,31 @@ async function HomeContent() {
           {projects.length > 0 && <CaseStudies projects={projects} />}
           <Writings posts={posts} formattedDates={formattedDates} />
           <AboutTeaser />
-          <Testimonials items={hasConnectedContent ? dbTestimonials : undefined} />
-          <MySiteGrid credentialSummary={credentialSummary} />
+          <Suspense fallback={<div className="min-h-[320px] px-4" role="status"><span className="sr-only">Loading testimonials</span></div>}>
+            <HomeTestimonials request={testimonialsRequest} hasConnectedContent={hasConnectedContent} />
+          </Suspense>
+          <Suspense fallback={<MySiteGrid credentialSummary={summarizeCredentials([])} />}>
+            <HomeCredentials request={credentialsRequest} />
+          </Suspense>
           <HomeFaq />
           <CtaSection />
         </div>
       </div>
     </>
   );
+}
+
+async function HomeTestimonials({ request, hasConnectedContent }: {
+  request: Promise<HomeRead<Awaited<ReturnType<typeof fetchCachedTestimonials>>>>;
+  hasConnectedContent: boolean;
+}) {
+  const { value: dbTestimonials, available } = await request;
+  return <Testimonials items={hasConnectedContent ? dbTestimonials : undefined} unavailable={hasConnectedContent && !available} />;
+}
+
+async function HomeCredentials({ request }: {
+  request: Promise<HomeRead<Awaited<ReturnType<typeof fetchCredentialCollection>>>>;
+}) {
+  const { value: credentials, available } = await request;
+  return <MySiteGrid credentialSummary={summarizeCredentials(credentials)} unavailable={!available} />;
 }

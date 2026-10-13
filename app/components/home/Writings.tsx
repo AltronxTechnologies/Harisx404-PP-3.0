@@ -4,6 +4,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { optimizeImageUrl } from "@/app/lib/image-utils";
 import type { HomePost } from "@/app/data/fallback-home";
@@ -60,6 +61,8 @@ export function Writings({
   formattedDates?: string[];
 }) {
   const reduced = useReducedMotion();
+  const [failedImages, setFailedImages] = useState<string[]>([]);
+  const markFailed = (url: string) => setFailedImages((current) => current.includes(url) ? current : [...current, url]);
   const [featured, ...rest] = posts;
   if (!featured) return null;
 
@@ -128,11 +131,12 @@ export function Writings({
                   : "aspect-[16/9] lg:aspect-[16/6]"
               }`}
             >
-              {featured.imageName ? (
+              {featured.imageName && !failedImages.includes(featured.imageName) ? (
                 <Image
                   src={optimizeImageUrl(featured.imageName, 1200)}
                   alt=""
                   fill
+                  onError={() => markFailed(featured.imageName!)}
                   sizes={
                     hasCompanions ? "(max-width: 1024px) 100vw, 60vw" : "100vw"
                   }
@@ -209,12 +213,13 @@ export function Writings({
                         flush with the card padding on top, bottom, and left,
                         mirroring the featured card's inset cover. */}
                     <div className="relative aspect-[16/10.95] w-full shrink-0 self-stretch overflow-hidden rounded-2xl md:aspect-auto md:w-[220px] lg:w-[152px]">
-                      {post.imageName ? (
+                      {post.imageName && !failedImages.includes(post.imageName) ? (
                         <>
-                          <Image
-                            src={optimizeImageUrl(post.imageName, 400)}
-                            alt=""
-                            fill
+                           <Image
+                             src={optimizeImageUrl(post.imageName, 400)}
+                             alt=""
+                             fill
+                             onError={() => markFailed(post.imageName!)}
                             sizes="140px"
                              className="object-cover transition-transform duration-500 ease-out motion-safe:[@media(hover:hover)]:group-hover:scale-[1.03] motion-reduce:transition-none"
                           />

@@ -242,7 +242,17 @@ export default function Navbar() {
                 }}
               >
                   
-                {/* Greeting transitions into the navigation after the introduction. */}
+                {/* Keep the greeting for hydrated visitors; static links remain usable without JS. */}
+                <noscript>
+                  <style>{`.nav-greeting { display: none !important; }`}</style>
+                  <div className="flex items-center gap-3 px-4 py-1 text-sm text-text-primary">
+                    <Link href="/" className="md:hidden">Home</Link>
+                    <Link href="/links" className="md:hidden">Explore</Link>
+                    <div className="hidden items-center gap-4 md:flex">
+                      {NAV_LINKS.map((link) => <Link key={link.href} href={link.href}>{link.name}</Link>)}
+                    </div>
+                  </div>
+                </noscript>
                 <AnimatePresence mode="wait">
                   {showGreeting ? (
                     <motion.div
@@ -251,7 +261,7 @@ export default function Navbar() {
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95, filter: "blur(4px)" }}
                       transition={{ duration: 0.4, ease: "easeInOut" }}
-                      className="flex items-center justify-center gap-2 px-6 py-1"
+                      className="nav-greeting flex items-center justify-center gap-2 px-6 py-1"
                     >
                       <span className="text-[15px]">{greetingIcon}</span>
                       <span className="text-[15px] font-medium text-neutral-800 dark:text-white/90 tracking-wide">

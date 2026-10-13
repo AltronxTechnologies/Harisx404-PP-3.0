@@ -57,7 +57,7 @@ function Avatar({ src, name, tint }: { src: string | null; name: string; tint: s
   );
 }
 
-export function Testimonials({ items: itemsProp }: { items?: Testimonial[] }) {
+export function Testimonials({ items: itemsProp, unavailable = false }: { items?: Testimonial[]; unavailable?: boolean }) {
   const items = itemsProp ?? fallbackTestimonials;
   // Circular loop: the track renders the list twice; index is allowed to
   // reach items.length (the first clone), then snaps back to 0 with no
@@ -153,7 +153,7 @@ export function Testimonials({ items: itemsProp }: { items?: Testimonial[] }) {
       </SectionHeading>
 
       {items.length === 0 && (
-        <p className="mt-14 text-center text-sm text-text-secondary">No testimonials to show right now.</p>
+        <p className="mt-14 text-center text-sm text-text-secondary">{unavailable ? "Testimonials are temporarily unavailable." : "No testimonials to show right now."}</p>
       )}
       <div
         className={items.length ? "mt-14" : "hidden"}
