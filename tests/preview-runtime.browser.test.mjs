@@ -18,7 +18,7 @@ const routes = [
   "/legal/terms",
 ];
 
-test("home navigation is visible before hydration and hero is visible after streaming", async () => {
+test("header greeting appears immediately, then navigation and hero load", async () => {
   const browser = await chromium.launch({ headless: true });
   try {
     for (const width of [320, 1280]) {
@@ -28,11 +28,9 @@ test("home navigation is visible before hydration and hero is visible after stre
         for (const route of ["/", "/about"]) {
           const response = await page.goto(`${baseUrl}${route}`, { waitUntil: "domcontentloaded" });
           assert.equal(response?.status(), 200);
-          const navControl = width < 768
-            ? page.getByRole("button", { name: "Open menu & search" })
-            : page.getByRole("link", { name: "Projects", exact: true }).first();
-          assert.equal(await navControl.isVisible(), true, `${route} ${width}px: real navbar is in server HTML`);
-          assert.equal(await navControl.evaluate((node) => getComputedStyle(node).opacity), "1");
+          const greeting = page.locator("header nav").getByText(/^Good (Morning|Afternoon|Evening)$/);
+          assert.equal(await greeting.isVisible(), true, `${route} ${width}px: greeting is in server HTML`);
+          assert.equal(await greeting.locator("..").evaluate((node) => getComputedStyle(node).opacity), "1");
         }
       } finally {
         await context.close();
@@ -40,6 +38,12 @@ test("home navigation is visible before hydration and hero is visible after stre
       const page = await browser.newPage({ viewport: { width, height: 800 } });
       try {
         await page.goto(`${baseUrl}/`, { waitUntil: "domcontentloaded" });
+        const navControl = width < 768
+          ? page.getByRole("button", { name: "Open menu & search" })
+          : page.getByRole("link", { name: "Projects", exact: true }).first();
+        await navControl.waitFor();
+        assert.equal(await navControl.isVisible(), true);
+        await page.waitForFunction(() => !document.querySelector("header nav [inert]"));
         await page.getByRole("region", { name: "Current status" }).waitFor();
         const portrait = page.locator('main img[alt="Muhammad Haris"]').first();
         await portrait.waitFor();
