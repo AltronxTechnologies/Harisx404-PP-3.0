@@ -60,17 +60,11 @@ export default function Navbar() {
     if (focusFirst) requestAnimationFrame(() => firstDropdownLinkRef.current?.focus());
   };
 
-  // Greeting State
-  const [greeting, setGreeting] = useState("Good Evening");
-  const [greetingIcon, setGreetingIcon] = useState("🌙");
-  const [showGreeting, setShowGreeting] = useState(true);
-  const [sideControlsReady, setSideControlsReady] = useState(false);
-
   // Mobile pill content cycle: 0 = Harisx404, 1 = logo, 2 = Explore now
   const [mobileCycle, setMobileCycle] = useState(0);
 
   useEffect(() => {
-    if (showGreeting || prefersReducedMotion) return;
+    if (prefersReducedMotion) return;
     // The cycling pill only exists below md — don't tick on larger screens.
     const mq = window.matchMedia("(max-width: 767px)");
     let interval: ReturnType<typeof setInterval> | undefined;
@@ -87,34 +81,6 @@ export default function Navbar() {
     return () => {
       clearInterval(interval);
       mq.removeEventListener("change", sync);
-    };
-  }, [prefersReducedMotion, showGreeting]);
-
-  useEffect(() => {
-    if (prefersReducedMotion) {
-      setShowGreeting(false);
-      setSideControlsReady(true);
-      return;
-    }
-    const hour = new Date().getHours();
-    if (hour >= 5 && hour < 12) {
-      setGreeting("Good Morning");
-      setGreetingIcon("🌅");
-    } else if (hour >= 12 && hour < 17) {
-      setGreeting("Good Afternoon");
-      setGreetingIcon("☀️");
-    } else {
-      setGreeting("Good Evening");
-      setGreetingIcon("🌙");
-    }
-
-    const timer = setTimeout(() => {
-      setShowGreeting(false);
-    }, 2200);
-    const controlsTimer = setTimeout(() => setSideControlsReady(true), 2600);
-    return () => {
-      clearTimeout(timer);
-      clearTimeout(controlsTimer);
     };
   }, [prefersReducedMotion]);
 
@@ -246,25 +212,9 @@ export default function Navbar() {
               >
                   
                 {/* Top Row: Nav Links */}
-                <AnimatePresence mode="wait">
-                  {showGreeting ? (
-                    <motion.div
-                      key="greeting"
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95, filter: "blur(4px)" }}
-                      transition={{ duration: 0.4, ease: "easeInOut" }}
-                      className="flex items-center justify-center gap-2 px-6 py-1"
-                    >
-                      <span className="text-[15px]">{greetingIcon}</span>
-                      <span className="text-[15px] font-medium text-neutral-800 dark:text-white/90 tracking-wide">
-                        {greeting}
-                      </span>
-                    </motion.div>
-                  ) : (
                     <motion.div
                       key="nav-links"
-                      initial={{ opacity: 0, scale: 0.95, filter: "blur(4px)" }}
+                      initial={false}
                       animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
                       transition={{ duration: 0.4, ease: "easeInOut" }}
                       className="relative flex items-center justify-center w-full"
@@ -277,11 +227,11 @@ export default function Navbar() {
                         className="flex md:hidden items-center justify-between gap-4 min-w-[182px] pl-5 pr-4 py-0.5 cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 dark:focus-visible:ring-white/25 rounded-full"
                       >
                         <span className="relative flex h-7 items-center overflow-hidden">
-                          <AnimatePresence mode="wait">
+                          <AnimatePresence mode="wait" initial={false}>
                             {mobileCycle === 0 && (
                               <motion.span
                                 key="brand-text"
-                                initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
+                                initial={false}
                                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                                 exit={{ opacity: 0, y: -10, filter: "blur(4px)" }}
                                 transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
@@ -472,8 +422,6 @@ export default function Navbar() {
                         </div>
                       </div>
                     </motion.div>
-                  )}
-                </AnimatePresence>
 
                 {/* Dropdown moved to an absolute overlay panel below (see after the pill) */}
               </motion.div>
@@ -659,20 +607,14 @@ export default function Navbar() {
                 edge so the pill stays perfectly centered at every width.
                 Lower layer: the expanding More menu covers it. */}
             <div
-              aria-hidden={!sideControlsReady || undefined}
-              inert={!sideControlsReady ? true : undefined}
               className={`absolute left-full top-0 ml-3.5 hidden md:flex items-start gap-3.5 z-0 ${
                 isDropdownOpen ? "pointer-events-none" : ""
               }`}
             >
               <motion.button
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={
-                  prefersReducedMotion
-                    ? { duration: 0 }
-                    : { delay: 2.2, duration: 0.4 }
-                }
+                 initial={false}
+                 animate={{ opacity: 1, scale: 1 }}
+                 transition={{ duration: prefersReducedMotion ? 0 : 0.4 }}
                 onClick={() => setIsCommandPaletteOpen(true)}
                 aria-label="Open search (⌘K)"
                 className={`${navCircleSurface} mt-0.5`}
@@ -682,13 +624,9 @@ export default function Navbar() {
               </motion.button>
 
               <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={
-                  prefersReducedMotion
-                    ? { duration: 0 }
-                    : { delay: 2.2, duration: 0.4 }
-                }
+                 initial={false}
+                 animate={{ opacity: 1, scale: 1 }}
+                 transition={{ duration: prefersReducedMotion ? 0 : 0.4 }}
                 className="inline-flex mt-0.5"
               >
                 <ThemeToggle />

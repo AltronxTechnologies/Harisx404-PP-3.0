@@ -616,7 +616,7 @@ export function DomainShowcase({ domain }: { domain: string }) {
       <AnimatePresence mode="sync">
         <motion.div
           key={`${domain}-${idx}`}
-          initial={still ? false : { opacity: 0, scale: 0.92 }}
+          initial={false}
           animate={{ opacity: 1, scale: 1 }}
           exit={still ? { opacity: 1 } : { opacity: 0, scale: 0.94 }}
           transition={still ? { duration: 0 } : { duration: 0.4, ease: "easeInOut" }}

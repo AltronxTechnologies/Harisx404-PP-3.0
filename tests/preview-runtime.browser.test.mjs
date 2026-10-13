@@ -18,6 +18,45 @@ const routes = [
   "/legal/terms",
 ];
 
+test("home navigation is visible before hydration and hero is visible after streaming", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    for (const width of [320, 1280]) {
+      const context = await browser.newContext({ viewport: { width, height: 800 }, javaScriptEnabled: false });
+      try {
+        const page = await context.newPage();
+        for (const route of ["/", "/about"]) {
+          const response = await page.goto(`${baseUrl}${route}`, { waitUntil: "domcontentloaded" });
+          assert.equal(response?.status(), 200);
+          const navControl = width < 768
+            ? page.getByRole("button", { name: "Open menu & search" })
+            : page.getByRole("link", { name: "Projects", exact: true }).first();
+          assert.equal(await navControl.isVisible(), true, `${route} ${width}px: real navbar is in server HTML`);
+          assert.equal(await navControl.evaluate((node) => getComputedStyle(node).opacity), "1");
+        }
+      } finally {
+        await context.close();
+      }
+      const page = await browser.newPage({ viewport: { width, height: 800 } });
+      try {
+        await page.goto(`${baseUrl}/`, { waitUntil: "domcontentloaded" });
+        await page.getByRole("region", { name: "Current status" }).waitFor();
+        const portrait = page.locator('main img[alt="Muhammad Haris"]').first();
+        await portrait.waitFor();
+        assert.equal(await portrait.isVisible(), true);
+        assert.equal(await portrait.evaluate((node) => getComputedStyle(node.parentElement.parentElement.parentElement.parentElement).opacity), "1");
+        const heroTitle = page.getByRole("heading", { level: 1 });
+        assert.equal(await heroTitle.isVisible(), true);
+        assert.equal(await heroTitle.evaluate((node) => getComputedStyle(node.parentElement).opacity), "1");
+      } finally {
+        await page.close();
+      }
+    }
+  } finally {
+    await browser.close();
+  }
+});
+
 test("public preview routes settle without persistent loaders or runtime errors", async () => {
   const browser = await chromium.launch({ headless: true });
   try {
@@ -52,6 +91,10 @@ test("public preview routes settle without persistent loaders or runtime errors"
         await page.waitForTimeout(100);
       }
       await page.waitForTimeout(500);
+
+      for (let attempt = 0; attempt < 30 && [...pending].some((url) => !/\/_next\/(webpack-hmr|turbopack)/.test(url)); attempt += 1) {
+        await page.waitForTimeout(100);
+      }
 
       const brokenImages = await page.evaluate(() =>
         [...document.images]

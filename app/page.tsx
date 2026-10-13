@@ -79,7 +79,15 @@ const personJsonLd = {
   ],
 };
 
-export default async function Home() {
+export default function Home() {
+  return (
+    <Suspense fallback={<div className="bg-bg-primary"><HomeHero /></div>}>
+      <HomeContent />
+    </Suspense>
+  );
+}
+
+async function HomeContent() {
   const hasConnectedContent = process.env.NODE_ENV !== "development" || Boolean(getSupabaseEnv());
   const [dbProjects, dbPosts, dbTestimonials, credentials] =
     await Promise.all([

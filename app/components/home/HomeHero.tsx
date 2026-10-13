@@ -49,7 +49,7 @@ function TaglineRotator() {
         <AnimatePresence mode="wait">
           <motion.span
             key={statusLines[index]}
-            initial={reduced ? false : { opacity: 0, y: 14 }}
+             initial={false}
             animate={{ opacity: 1, y: 0 }}
             exit={reduced ? { opacity: 1 } : { opacity: 0, y: -14 }}
             transition={reduced ? { duration: 0 } : { duration: 0.35, ease: "easeOut" }}
@@ -285,8 +285,7 @@ export function HomeHero({
 }: {
   latestLaunch?: HeroLaunch | null;
 }) {
-  const reduced = useReducedMotion();
-  const launch: HeroLaunch = latestLaunch ?? { ...hero.newLaunch, href: "/projects" };
+   const launch: HeroLaunch = latestLaunch ?? { ...hero.newLaunch, href: "/projects" };
   // Current headline domain, reported by the typewriter, drives the showcase.
   const [domain, setDomain] = useState<string>(headlines[0].accent);
   // Pause ambient CSS animations (ripple rings, ping dots) while the hero
@@ -312,7 +311,7 @@ export function HomeHero({
         <div className="flex flex-col items-center gap-5 text-center md:items-start md:self-start md:text-left">
           <motion.p
             variants={fadeUp}
-            initial={reduced ? false : "hidden"}
+             initial={false}
             animate="show"
             custom={0}
             className="font-display text-5xl font-medium leading-[0.95] max-[374px]:text-[2.5rem] sm:text-6xl md:text-5xl lg:text-7xl"
@@ -329,7 +328,7 @@ export function HomeHero({
 
           <motion.div
             variants={fadeUp}
-            initial={reduced ? false : "hidden"}
+             initial={false}
             animate="show"
             custom={1}
             className="flex w-fit flex-col gap-4"
@@ -343,7 +342,7 @@ export function HomeHero({
         {/* Circular portrait with concentric rings + sonar ripples */}
         <motion.div
           variants={fadeUp}
-          initial={reduced ? false : "hidden"}
+           initial={false}
           animate="show"
           custom={1}
           className="order-first flex justify-center md:order-none"
@@ -376,7 +375,7 @@ export function HomeHero({
         <div className="flex flex-col items-center text-center md:items-end md:self-start md:text-right">
           <motion.div
             variants={fadeUp}
-            initial={reduced ? false : "hidden"}
+             initial={false}
             animate="show"
             custom={1}
             className="w-fit max-w-full px-2 md:max-w-xs md:px-0 md:-mr-2 lg:mr-0"
@@ -448,7 +447,7 @@ export function HomeHero({
       {/* ── Full-width divider between the hero's upper and lower rows ── */}
       <motion.div
         variants={fadeUp}
-        initial={reduced ? false : "hidden"}
+         initial={false}
         animate="show"
         custom={2}
         aria-hidden
@@ -459,7 +458,7 @@ export function HomeHero({
       <div className="grid grid-cols-1 items-center gap-[46px] md:grid-cols-2 md:gap-6">
         <motion.div
           variants={fadeUp}
-          initial={reduced ? false : "hidden"}
+           initial={false}
           animate="show"
           custom={3}
           className="flex justify-center text-center md:justify-start md:text-left"
@@ -469,7 +468,7 @@ export function HomeHero({
 
         <motion.div
           variants={fadeUp}
-          initial={reduced ? false : "hidden"}
+           initial={false}
           animate="show"
           custom={4}
           className="flex w-full justify-center md:justify-end"
