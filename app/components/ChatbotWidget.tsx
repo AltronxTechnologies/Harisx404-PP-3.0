@@ -399,7 +399,7 @@ export function ChatbotWidget() {
           role="dialog"
           aria-modal="false"
           aria-label="Haris AI assistant"
-          className="relative mb-3 flex h-[min(480px,calc(100dvh-152px))] min-h-0 w-[min(360px,calc(100vw-24px))] flex-col overflow-hidden rounded-2xl border border-border-primary bg-white text-text-primary shadow-[0_20px_60px_rgba(0,0,0,0.2)] dark:bg-[#1a1a1c] dark:shadow-[0_20px_60px_rgba(0,0,0,0.5)] sm:mb-4 sm:h-[min(520px,calc(100dvh-172px))] sm:w-[min(390px,calc(100vw-48px))] sm:rounded-3xl [@media(max-height:420px)]:h-[calc(100dvh-88px)] sm:[@media(max-height:420px)]:h-[calc(100dvh-100px)]"
+          className="fixed bottom-20 left-1/2 flex h-[min(480px,calc(100dvh-152px))] min-h-0 w-[min(360px,calc(100vw-24px))] -translate-x-1/2 flex-col overflow-hidden rounded-2xl border border-border-primary bg-white text-text-primary shadow-[0_20px_60px_rgba(0,0,0,0.2)] dark:bg-[#1a1a1c] dark:shadow-[0_20px_60px_rgba(0,0,0,0.5)] sm:relative sm:bottom-auto sm:left-auto sm:mb-4 sm:h-[min(520px,calc(100dvh-172px))] sm:w-[min(390px,calc(100vw-48px))] sm:translate-x-0 sm:rounded-3xl [@media(max-height:420px)]:h-[calc(100dvh-88px)] sm:[@media(max-height:420px)]:h-[calc(100dvh-100px)]"
         >
           <header onTouchStart={(event) => {
             if ((event.target as Element).closest("button")) return;

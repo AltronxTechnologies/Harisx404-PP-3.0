@@ -30,6 +30,7 @@ test("chat launcher and panel fit across themes and viewport sizes with keyboard
           await page.setViewportSize({ width, height });
           const box = await panel.boundingBox();
           assert.ok(box && box.x >= 0 && box.y >= 0 && box.x + box.width <= width + 1 && box.y + box.height <= height + 1, `${theme} ${width}x${height}: ${JSON.stringify(box)}`);
+          if (width < 640) assert.ok(Math.abs(box.x - (width - box.width) / 2) < 1, `${theme} ${width}x${height}: panel centered`);
           if (height > 420) {
             const nav = await page.locator("header nav").boundingBox();
             assert.ok(box.y >= nav.y + nav.height + 8, `${theme} ${width}x${height}: panel clears the navbar`);
@@ -116,7 +117,7 @@ test("compact phone panel keeps suggestions, expandable composer and jump contro
         await launcher.click();
         const panel = page.getByRole("dialog", { name: "Haris AI assistant" });
         const box = await panel.boundingBox();
-        assert.ok(box && Math.abs(box.x - 6) < 1 && Math.abs(box.y - 72) < 1 && box.width === 296 && box.height === 416);
+        assert.ok(box && Math.abs(box.x - 12) < 1 && Math.abs(box.y - 72) < 1 && box.width === 296 && box.height === 416);
         assert.equal(await launcher.isVisible(), true);
         const scroll = panel.locator("header + div");
         assert.equal(await scroll.evaluate((node) => getComputedStyle(node).scrollbarWidth), "thin");
