@@ -37,13 +37,13 @@ function safeSources(value: unknown): Source[] {
 
 function AssistantRobot() {
   return (
-    <span className="relative flex size-14 shrink-0 items-center justify-center [perspective:160px]">
+    <span className="relative flex size-11 shrink-0 items-center justify-center [perspective:160px]">
       <style jsx>{`@keyframes robot-idle { 0%, 100% { transform: translateY(0) rotateY(-5deg); } 50% { transform: translateY(-2px) rotateY(5deg); } } @keyframes robot-blink { 0%, 44%, 48%, 100% { transform: scaleY(1); } 46% { transform: scaleY(.15); } } @keyframes robot-signal { 0%, 100% { opacity: .7; } 50% { opacity: 1; } } @media (prefers-reduced-motion: no-preference) { .robot-idle { animation: robot-idle 5s ease-in-out infinite; } .robot-eyes { animation: robot-blink 6s ease-in-out infinite; transform-origin: 32px 34px; } .robot-signal { animation: robot-signal 3s ease-in-out infinite; } .robot-idle:hover { animation-play-state: paused; transform: translateY(-3px) rotateY(-14deg); } }`}</style>
       <svg
         viewBox="0 0 64 64"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="robot-idle size-14 drop-shadow-[0_6px_7px_rgba(18,21,44,0.38)] motion-reduce:transform-none"
+        className="robot-idle size-11 drop-shadow-[0_5px_6px_rgba(0,0,0,0.32)] motion-reduce:transform-none"
         aria-hidden="true"
       >
         <defs>
@@ -513,7 +513,7 @@ export function ChatbotWidget() {
         aria-expanded={isOpen}
         aria-controls="portfolio-chat-panel"
         title="Ask Haris AI Assistant"
-        className="group relative flex size-14 items-center justify-center rounded-full bg-transparent p-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-primary"
+        className="group relative flex size-14 items-center justify-center rounded-full border border-[#8179ab] bg-[#171926] p-0 shadow-[0_10px_28px_rgba(19,16,35,0.26)] transition-[border-color,box-shadow] duration-200 hover:border-[#b1a3ec] hover:shadow-[0_12px_30px_rgba(55,41,111,0.35)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-primary dark:border-[#a99cce] dark:bg-[#20202b] dark:shadow-[0_10px_28px_rgba(0,0,0,0.5)] motion-reduce:transition-none"
       >
         <AssistantRobot />
       </button>

@@ -18,8 +18,8 @@ test("robot launcher, outside click, Escape and header swipe preserve focus and 
     assert.ok(launcherBox && launcherBox.width === 56 && launcherBox.height === 56);
     assert.equal((await launcher.innerText()).trim(), "");
     const surface = await launcher.evaluate((node) => ({ background: getComputedStyle(node).backgroundColor, border: getComputedStyle(node).borderWidth }));
-    assert.equal(surface.background, "rgba(0, 0, 0, 0)");
-    assert.equal(surface.border, "0px");
+    assert.notEqual(surface.background, "rgba(0, 0, 0, 0)");
+    assert.equal(surface.border, "1px");
     await launcher.click();
     const panel = page.locator("#portfolio-chat-panel");
     const box = await panel.boundingBox();
@@ -134,6 +134,42 @@ test("the one-line help pill opens the assistant without covering the robot", as
     await pill.click();
     await page.getByRole("dialog", { name: "Haris AI assistant" }).waitFor();
     assert.equal(await page.getByRole("button", { name: "Dismiss assistant tip" }).count(), 0);
+  } finally {
+    await browser.close();
+  }
+});
+
+test("fresh server markup and hydrated launcher agree in both themes and narrow viewports", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    for (const theme of ["light", "dark"]) {
+      const context = await browser.newContext({ viewport: { width: 320, height: 568 } });
+      await context.addInitScript((value) => localStorage.setItem("theme", value), theme);
+      const page = await context.newPage();
+      const hydrationErrors = [];
+      page.on("pageerror", (error) => hydrationErrors.push(error.message));
+      page.on("console", (message) => {
+        if (/hydration|hydrated but some attributes/i.test(message.text())) hydrationErrors.push(message.text());
+      });
+      try {
+        const url = `${baseUrl}/links?launcher-check=${theme}`;
+        const html = await (await page.request.get(url)).text();
+        assert.match(html, /bg-\[#171926\]/);
+        await page.goto(url, { waitUntil: "domcontentloaded" });
+        const launcher = page.getByRole("button", { name: "Toggle chat" });
+        await launcher.waitFor();
+        for (const width of [320, 390, 768, 1440]) {
+          await page.setViewportSize({ width, height: 800 });
+          const box = await launcher.boundingBox();
+          assert.ok(box && box.x >= 0 && box.x + box.width <= width + 1 && box.width === 56, `${theme} ${width}: launcher bounds`);
+        }
+        await launcher.focus();
+        assert.equal(await launcher.evaluate((node) => getComputedStyle(node).backgroundColor === "rgba(0, 0, 0, 0)"), false);
+        assert.deepEqual(hydrationErrors, []);
+      } finally {
+        await context.close();
+      }
+    }
   } finally {
     await browser.close();
   }
