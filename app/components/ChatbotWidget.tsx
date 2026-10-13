@@ -37,13 +37,13 @@ function safeSources(value: unknown): Source[] {
 
 function AssistantRobot() {
   return (
-    <span className="relative flex size-11 shrink-0 items-center justify-center [perspective:160px]">
+    <span className="relative flex size-14 shrink-0 items-center justify-center [perspective:160px]">
       <style jsx>{`@keyframes robot-idle { 0%, 100% { transform: translateY(0) rotateY(-5deg); } 50% { transform: translateY(-2px) rotateY(5deg); } } @keyframes robot-blink { 0%, 44%, 48%, 100% { transform: scaleY(1); } 46% { transform: scaleY(.15); } } @keyframes robot-signal { 0%, 100% { opacity: .7; } 50% { opacity: 1; } } @media (prefers-reduced-motion: no-preference) { .robot-idle { animation: robot-idle 5s ease-in-out infinite; } .robot-eyes { animation: robot-blink 6s ease-in-out infinite; transform-origin: 32px 34px; } .robot-signal { animation: robot-signal 3s ease-in-out infinite; } .robot-idle:hover { animation-play-state: paused; transform: translateY(-3px) rotateY(-14deg); } }`}</style>
       <svg
         viewBox="0 0 64 64"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="robot-idle size-11 drop-shadow-[0_6px_7px_rgba(0,0,0,0.3)] motion-reduce:transform-none"
+        className="robot-idle size-14 drop-shadow-[0_6px_7px_rgba(18,21,44,0.38)] motion-reduce:transform-none"
         aria-hidden="true"
       >
         <defs>
@@ -63,7 +63,7 @@ function AssistantRobot() {
         </defs>
         <path d="M32 8V14" stroke="#C9BDF5" strokeWidth="2" strokeLinecap="round" />
         <circle className="robot-signal" cx="32" cy="7" r="3" fill="#9F8CFF" />
-        <path d="M10 30C10 19 19 13 32 13S54 19 54 30v10c0 12-10 18-22 18S10 52 10 40V30Z" fill="url(#robotShell)" stroke="#DCD4F5" strokeWidth="1.5" />
+        <path d="M10 30C10 19 19 13 32 13S54 19 54 30v10c0 12-10 18-22 18S10 52 10 40V30Z" fill="url(#robotShell)" stroke="#B2A8CD" strokeWidth="1.5" />
         <path d="M13 26c4-8 11-11 22-10" stroke="white" strokeOpacity=".8" strokeWidth="2" strokeLinecap="round" />
         <path d="M15 30c0-5 4-8 9-8h16c5 0 9 3 9 8v8c0 5-4 8-9 8H24c-5 0-9-3-9-8v-8Z" fill="url(#robotVisor)" />
         <path d="M19 28c2-3 5-4 10-4h10" stroke="white" strokeOpacity=".22" strokeWidth="2" strokeLinecap="round" />
@@ -513,7 +513,7 @@ export function ChatbotWidget() {
         aria-expanded={isOpen}
         aria-controls="portfolio-chat-panel"
         title="Ask Haris AI Assistant"
-        className="group relative flex size-14 items-center justify-center rounded-full border border-border-primary bg-text-primary text-bg-primary shadow-[0_12px_36px_rgba(0,0,0,0.18)] transition-shadow duration-300 hover:shadow-[0_16px_40px_rgba(108,71,255,0.25)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-primary dark:shadow-[0_12px_36px_rgba(0,0,0,0.6)] motion-reduce:transition-none"
+        className="group relative flex size-14 items-center justify-center rounded-full bg-transparent p-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-primary"
       >
         <AssistantRobot />
       </button>

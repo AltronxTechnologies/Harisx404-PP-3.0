@@ -17,6 +17,9 @@ test("robot launcher, outside click, Escape and header swipe preserve focus and 
     const launcherBox = await launcher.boundingBox();
     assert.ok(launcherBox && launcherBox.width === 56 && launcherBox.height === 56);
     assert.equal((await launcher.innerText()).trim(), "");
+    const surface = await launcher.evaluate((node) => ({ background: getComputedStyle(node).backgroundColor, border: getComputedStyle(node).borderWidth }));
+    assert.equal(surface.background, "rgba(0, 0, 0, 0)");
+    assert.equal(surface.border, "0px");
     await launcher.click();
     const panel = page.locator("#portfolio-chat-panel");
     const box = await panel.boundingBox();
