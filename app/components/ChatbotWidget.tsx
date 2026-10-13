@@ -374,7 +374,7 @@ export function ChatbotWidget() {
   if (!isMounted) return null;
 
   return (
-    <div ref={wrapperRef} className="fixed bottom-3 right-[18px] z-[5500] flex flex-col items-end min-[360px]:right-[22px] sm:bottom-6 sm:right-7 lg:right-[max(40px,calc(50vw-600px))]">
+    <div ref={wrapperRef} className="fixed bottom-3 right-[18px] z-[5500] flex flex-col items-end min-[360px]:right-[22px] sm:bottom-5 sm:right-7 lg:right-[max(40px,calc(50vw-600px))]">
       <style jsx>{`@keyframes chat-hint-enter { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } } @media (prefers-reduced-motion: no-preference) { .chat-hint { animation: chat-hint-enter 350ms cubic-bezier(.2,.8,.2,1) both; } }`}</style>
       {isOpen && (
         <section

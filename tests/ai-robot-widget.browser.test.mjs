@@ -166,7 +166,7 @@ test("fresh server markup and hydrated launcher agree in both themes and narrow 
           await page.setViewportSize({ width, height: 800 });
           const box = await launcher.boundingBox();
           assert.ok(box && box.x >= 0 && box.x + box.width <= width + 1 && box.width === 56, `${theme} ${width}: launcher bounds`);
-          assert.ok(Math.abs(800 - box.y - box.height - (width < 640 ? 12 : 24)) < 1, `${theme} ${width}: bottom offset`);
+          assert.ok(Math.abs(800 - box.y - box.height - (width < 640 ? 12 : 20)) < 1, `${theme} ${width}: bottom offset`);
           const stripGap = await page.evaluate(() => {
             const strip = document.querySelector("#main-content").nextElementSibling.getBoundingClientRect();
             const icon = document.querySelector('button[aria-label="Toggle chat"]').getBoundingClientRect();
