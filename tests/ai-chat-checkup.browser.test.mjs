@@ -55,6 +55,36 @@ test("chat launcher and panel fit across themes and viewport sizes with keyboard
   }
 });
 
+test("short viewports keep header, composer and a usable message scroller inside the panel", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage({ viewport: { width: 320, height: 320 } });
+    await page.goto(`${baseUrl}/links`, { waitUntil: "domcontentloaded" });
+    await page.getByRole("button", { name: "Toggle chat" }).click();
+    const panel = page.locator("#portfolio-chat-panel");
+    for (const [width, height, fontSize] of [[320, 320, 16], [568, 320, 16], [390, 350, 16], [390, 844, 32]]) {
+      await page.setViewportSize({ width, height });
+      await page.evaluate((size) => { document.documentElement.style.fontSize = `${size}px`; }, fontSize);
+      const layout = await panel.evaluate((node) => {
+        const box = (element) => element.getBoundingClientRect();
+        const scroll = node.querySelector("header + div");
+        return {
+          panel: box(node), header: box(node.querySelector("header")), form: box(node.querySelector("form")),
+          input: box(node.querySelector("textarea")), close: box(node.querySelector('button[aria-label="Close chat"]')),
+          scrollHeight: scroll.clientHeight, labelHeight: box(node.querySelector("header p")).height,
+        };
+      });
+      assert.ok(layout.panel.top >= 0 && layout.panel.bottom <= height + 1, `${width}x${height}: panel in viewport`);
+      assert.ok(layout.form.bottom <= layout.panel.bottom + 1 && layout.input.bottom <= layout.panel.bottom, `${width}x${height}: composer visible`);
+      assert.ok(layout.close.right <= layout.panel.right && layout.header.top >= layout.panel.top, `${width}x${height}: header visible`);
+      assert.ok(layout.scrollHeight >= 32, `${width}x${height}: messages remain scrollable`);
+      if (width === 320) assert.ok(layout.labelHeight <= 16, "small-screen header label remains on one line");
+    }
+  } finally {
+    await browser.close();
+  }
+});
+
 test("retry after a partial interrupted answer resends the original user question", async () => {
   const browser = await chromium.launch({ headless: true });
   try {

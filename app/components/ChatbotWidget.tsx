@@ -391,8 +391,8 @@ export function ChatbotWidget() {
           role="dialog"
           aria-modal="false"
           aria-label="Haris AI assistant"
-          className="relative mb-3 flex min-h-0 flex-col overflow-hidden rounded-3xl border border-border-primary bg-white text-text-primary shadow-[0_24px_80px_rgba(0,0,0,0.22)] dark:bg-[#1a1a1c] dark:shadow-[0_24px_80px_rgba(0,0,0,0.55)] sm:mb-4"
-          style={{ width: "min(400px, calc(100vw - 24px))", height: "min(580px, calc(100dvh - 104px))" }}
+          className="relative mb-3 flex h-[min(580px,calc(100dvh-88px))] min-h-0 flex-col overflow-hidden rounded-3xl border border-border-primary bg-white text-text-primary shadow-[0_24px_80px_rgba(0,0,0,0.22)] dark:bg-[#1a1a1c] dark:shadow-[0_24px_80px_rgba(0,0,0,0.55)] sm:mb-4 sm:h-[min(580px,calc(100dvh-100px))]"
+          style={{ width: "min(400px, calc(100vw - 24px))" }}
         >
           <header onTouchStart={(event) => {
             if ((event.target as Element).closest("button")) return;
@@ -403,14 +403,14 @@ export function ChatbotWidget() {
             const dy = event.changedTouches[0].clientY - swipeRef.current.y;
             swipeRef.current = null;
             if ((dy > 75 && dy > Math.abs(dx) * 1.3) || (Math.abs(dx) > 90 && Math.abs(dx) > Math.abs(dy) * 1.3)) closeChat();
-          }} onTouchCancel={() => { swipeRef.current = null; }} className="flex shrink-0 items-start gap-3 border-b border-border-primary px-4 py-4 sm:px-5">
+          }} onTouchCancel={() => { swipeRef.current = null; }} className="flex shrink-0 items-start gap-3 border-b border-border-primary px-4 py-4 [@media(max-height:420px)]:py-2 sm:px-5">
             <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-purple-secondary text-purple-primary" aria-hidden="true">
               <Sparkles size={21} strokeWidth={1.8} />
             </span>
             <div className="min-w-0 flex-1">
               <p className="flex items-center gap-2 font-mono text-[10px] font-medium uppercase tracking-widest text-text-secondary">
                 <span className="size-1.5 rounded-full bg-purple-primary" aria-hidden="true" />
-                Portfolio assistant
+                <span className="sm:hidden">Assistant</span><span className="hidden sm:inline">Portfolio assistant</span>
               </p>
               <h2 className="mt-1 font-display text-[28px] leading-none text-text-primary">Ask Haris.</h2>
             </div>
@@ -504,7 +504,7 @@ export function ChatbotWidget() {
                   event.preventDefault();
                   submitMessage(input);
                 }
-              }} aria-label="Ask the portfolio assistant" placeholder="Ask a question..." rows={2} maxLength={2000} disabled={isLoading} className="max-h-28 min-h-11 min-w-0 flex-1 resize-none bg-transparent px-2 py-2.5 text-sm leading-5 text-text-primary placeholder:text-text-secondary focus:outline-none disabled:opacity-60" />
+              }} aria-label="Ask the portfolio assistant" placeholder="Ask a question..." rows={1} maxLength={2000} disabled={isLoading} className="max-h-28 min-h-11 min-w-0 flex-1 resize-none bg-transparent px-2 py-2.5 text-sm leading-5 text-text-primary placeholder:text-text-secondary focus:outline-none disabled:opacity-60" />
               <button type="submit" aria-label="Send chat message" disabled={!input.trim() || isLoading} className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-text-primary text-bg-primary transition-colors hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-primary disabled:opacity-40"><Send size={17} aria-hidden="true" /></button>
             </div>
             <p className="mt-2 text-center text-[11px] leading-4 text-text-secondary">Answers may be imperfect. Check important details.</p>
