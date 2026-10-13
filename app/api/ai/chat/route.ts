@@ -127,6 +127,7 @@ Rules:
         : new (require('util').TextEncoder)();
 
       let streamClosed = false;
+      let streamFinished = false;
       let notifyCancel: (() => void) | null = null;
       const providerAbort = new AbortController();
       const stream = new ReadableStream({
@@ -328,10 +329,12 @@ Rules:
             logTelemetry({ requestId, status: 200, durationMs, tokensEmitted });
             if (knowledge.sources.length) sendEvent('sources', { sources: knowledge.sources });
             sendEvent('done', { totalLength: accumulatedText.length, requestId, durationMs });
+            streamFinished = true;
           }
           controller.close();
         },
         cancel() {
+          if (streamFinished) return;
           streamClosed = true;
           providerAbort.abort();
           notifyCancel?.();

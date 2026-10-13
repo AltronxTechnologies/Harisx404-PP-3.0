@@ -83,7 +83,8 @@ test("chat rejects oversized, malformed and invalid histories before any provide
 
 test("shared chat widget bounds requests and exposes named, reachable controls", () => {
   const source = readFileSync(new URL("../app/components/ChatbotWidget.tsx", import.meta.url), "utf8");
-  assert.match(source, /outgoing\.slice\(-20\)/);
+  assert.match(source, /outgoing\.slice\(-10\).*content\.slice\(0, 2000\)/);
+  assert.match(source, /MAX_STREAM_BYTES = 128 \* 1024/);
   assert.match(source, /maxLength=\{2000\}/);
   assert.match(source, /aria-label="Close chat"/);
   assert.match(source, /aria-label="Send chat message"/);

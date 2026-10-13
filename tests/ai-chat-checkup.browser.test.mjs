@@ -339,3 +339,178 @@ test("stopping an in-progress reply allows a clean retry", async () => {
     await browser.close();
   }
 });
+
+test("an interrupted partial answer is not sent as history for a new question", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage();
+    const requests = [];
+    await page.route("**/api/ai/chat", (route) => {
+      requests.push(route.request().postDataJSON());
+      return route.fulfill(requests.length === 1
+        ? { status: 200, headers: { "content-type": "text/event-stream" }, body: 'event: delta\ndata: {"text":"Unfinished claim"}\n\nevent: error\ndata: {"message":"Interrupted"}\n\n' }
+        : { status: 200, headers: { "content-type": "application/json" }, body: JSON.stringify({ text: "Verified response." }) });
+    });
+    await page.goto(`${baseUrl}/links`, { waitUntil: "domcontentloaded" });
+    await page.getByRole("button", { name: "Toggle chat" }).click();
+    const panel = page.getByRole("dialog", { name: "Haris AI assistant" });
+    const input = panel.getByRole("textbox", { name: "Ask the portfolio assistant" });
+    await input.fill("First question");
+    await input.press("Enter");
+    await panel.getByText("Incomplete answer").waitFor();
+    await input.fill("A different question");
+    await input.press("Enter");
+    await panel.getByText("Verified response.").waitFor();
+    assert.deepEqual(requests[1].messages, [{ role: "user", content: "A different question" }]);
+    assert.equal(await panel.getByText("Unfinished claim").count(), 0);
+  } finally {
+    await browser.close();
+  }
+});
+
+test("a long complete answer is bounded only in follow-up history", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage();
+    const requests = [];
+    await page.route("**/api/ai/chat", (route) => {
+      requests.push(route.request().postDataJSON());
+      return route.fulfill({ status: 200, headers: { "content-type": "application/json" }, body: JSON.stringify({ text: requests.length === 1 ? "A".repeat(3500) : "Follow-up complete." }) });
+    });
+    await page.goto(`${baseUrl}/links`, { waitUntil: "domcontentloaded" });
+    await page.getByRole("button", { name: "Toggle chat" }).click();
+    const panel = page.getByRole("dialog", { name: "Haris AI assistant" });
+    const input = panel.getByRole("textbox", { name: "Ask the portfolio assistant" });
+    await input.fill("First question");
+    await input.press("Enter");
+    await panel.getByText("A".repeat(3500)).waitFor();
+    await input.fill("And then?");
+    await input.press("Enter");
+    await panel.getByText("Follow-up complete.").waitFor();
+    assert.equal(requests[1].messages[1].role, "model");
+    assert.equal(requests[1].messages[1].content.length, 2000);
+    assert.equal(requests[1].messages.at(-1).content, "And then?");
+  } finally {
+    await browser.close();
+  }
+});
+
+test("disconnect only interrupts an active request and retry clears its error", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    await page.goto(`${baseUrl}/links`, { waitUntil: "domcontentloaded" });
+    await page.evaluate(() => {
+      window.__originalFetch = window.fetch;
+      window.fetch = (_url, options) => new Promise((_resolve, reject) => {
+        window.__chatRequest = options;
+        options.signal.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")));
+      });
+    });
+    await page.getByRole("button", { name: "Toggle chat" }).click();
+    const panel = page.getByRole("dialog", { name: "Haris AI assistant" });
+    await panel.getByRole("textbox", { name: "Ask the portfolio assistant" }).fill("Question during a disconnect");
+    await panel.getByRole("button", { name: "Send chat message" }).click();
+    await panel.getByRole("button", { name: "Stop generating response" }).waitFor();
+    await context.setOffline(true);
+    await panel.getByRole("alert").getByText(/Connection lost/).waitFor();
+    assert.equal(await page.evaluate(() => window.__chatRequest.signal.aborted), true);
+    await context.setOffline(false);
+    await page.evaluate(() => { window.fetch = window.__originalFetch; });
+    await page.route("**/api/ai/chat", (route) => route.fulfill({ status: 200, headers: { "content-type": "application/json" }, body: JSON.stringify({ text: "Recovered answer." }) }));
+    await panel.getByRole("button", { name: "Retry question" }).click();
+    await panel.getByText("Recovered answer.").waitFor();
+    assert.equal(await panel.getByRole("alert").count(), 0);
+    await page.evaluate(() => window.dispatchEvent(new Event("offline")));
+    assert.equal(await panel.getByRole("alert").count(), 0);
+    await context.close();
+  } finally {
+    await browser.close();
+  }
+});
+
+test("stream completion does not wait for EOF and oversized replies fail safely", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage();
+    await page.goto(`${baseUrl}/links`, { waitUntil: "domcontentloaded" });
+    await page.evaluate(() => {
+      window.__cancelled = false;
+      window.fetch = async () => new Response(new ReadableStream({
+        start(controller) { controller.enqueue(new TextEncoder().encode('event: delta\ndata: {"text":"Complete answer"}\n\nevent: done\ndata: {}\n\n')); },
+        cancel() { window.__cancelled = true; },
+      }), { headers: { "content-type": "text/event-stream" } });
+    });
+    await page.getByRole("button", { name: "Toggle chat" }).click();
+    const panel = page.getByRole("dialog", { name: "Haris AI assistant" });
+    const input = panel.getByRole("textbox", { name: "Ask the portfolio assistant" });
+    await input.fill("First question");
+    await input.press("Enter");
+    await panel.getByText("Complete answer").waitFor();
+    await page.waitForFunction(() => window.__cancelled);
+    assert.equal(await panel.getByRole("button", { name: "Stop generating response" }).count(), 0);
+    await page.evaluate(() => {
+      window.fetch = async () => new Response(new ReadableStream({
+        start(controller) { controller.enqueue(new TextEncoder().encode('event: delta\ndata: {"text":"' + "x".repeat(13000) + '"}\n\n')); controller.close(); },
+      }), { headers: { "content-type": "text/event-stream" } });
+    });
+    await input.fill("Another question");
+    await input.press("Enter");
+    await panel.getByRole("alert").getByText(/too long/).waitFor();
+    assert.equal(await panel.getByText("Incomplete answer").count(), 0);
+  } finally {
+    await browser.close();
+  }
+});
+
+test("batched small stream events can exceed the single-event buffer limit", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage();
+    await page.goto(`${baseUrl}/links`, { waitUntil: "domcontentloaded" });
+    await page.evaluate(() => {
+      window.fetch = async () => new Response(new ReadableStream({
+        start(controller) {
+          const events = 'event: delta\ndata: {"text":"a"}\n\n'.repeat(1100) + 'event: done\ndata: {}\n\n';
+          controller.enqueue(new TextEncoder().encode(events));
+          controller.close();
+        },
+      }), { headers: { "content-type": "text/event-stream" } });
+    });
+    await page.getByRole("button", { name: "Toggle chat" }).click();
+    const panel = page.getByRole("dialog", { name: "Haris AI assistant" });
+    await panel.getByRole("textbox", { name: "Ask the portfolio assistant" }).fill("A batched reply");
+    await panel.getByRole("button", { name: "Send chat message" }).click();
+    await panel.getByText("a".repeat(1100)).waitFor();
+    assert.equal(await panel.getByRole("alert").count(), 0);
+  } finally {
+    await browser.close();
+  }
+});
+
+test("a stalled response times out and remains retryable", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage();
+    await page.clock.install();
+    await page.goto(`${baseUrl}/links`, { waitUntil: "domcontentloaded" });
+    await page.evaluate(() => {
+      window.fetch = (_url, options) => new Promise((_resolve, reject) => {
+        window.__chatRequest = options;
+        options.signal.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")));
+      });
+    });
+    await page.getByRole("button", { name: "Toggle chat" }).click();
+    const panel = page.getByRole("dialog", { name: "Haris AI assistant" });
+    await panel.getByRole("textbox", { name: "Ask the portfolio assistant" }).fill("Stalled question");
+    await panel.getByRole("button", { name: "Send chat message" }).click();
+    await panel.getByRole("button", { name: "Stop generating response" }).waitFor();
+    await page.clock.runFor(31000);
+    await panel.getByRole("alert").getByText(/took too long/).waitFor();
+    assert.equal(await page.evaluate(() => window.__chatRequest.signal.aborted), true);
+    assert.equal(await panel.getByRole("button", { name: "Retry question" }).count(), 1);
+  } finally {
+    await browser.close();
+  }
+});

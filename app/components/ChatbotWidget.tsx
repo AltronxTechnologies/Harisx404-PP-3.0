@@ -16,6 +16,7 @@ interface Message {
   role: "user" | "model";
   content: string;
   sources?: Source[];
+  complete?: boolean;
 }
 
 const suggestions = [
@@ -24,6 +25,11 @@ const suggestions = [
   { label: "Get in touch", prompt: "How can I contact Haris or collaborate with him on a project?" },
 ];
 const hintMessages = ["Need a hand? Ask me.", "Explore the projects.", "Ask about Haris's work."];
+const MAX_REPLY_CHARS = 12000;
+const MAX_EVENT_BUFFER_CHARS = 32768;
+const MAX_STREAM_BYTES = 128 * 1024;
+const CHAT_TIMEOUT_MS = 30000;
+const OFFLINE_MESSAGE = "You appear to be offline. Please check your internet connection.";
 
 const localPath = /^\/(?:projects|blog|about|contact|resume|credentials|links|buildlog|community-wall)(?:\/[a-z0-9-]+)?$|^\/resume\/file$/;
 const publicPage = new Set(["/projects", "/blog", "/about", "/contact", "/resume", "/credentials", "/links", "/buildlog", "/community-wall"]);
@@ -233,13 +239,20 @@ export function ChatbotWidget() {
   }, [isOpen]);
 
   useEffect(() => {
-    const onOffline = () => setError("Network connection lost. Please check your internet connection.");
+    const onOffline = () => {
+      if (!pendingRef.current) return;
+      stopGeneration();
+      setError("Connection lost. Please reconnect and retry your question.");
+    };
+    const onOnline = () => setError((current) => current === OFFLINE_MESSAGE ? "" : current);
     window.addEventListener("offline", onOffline);
+    window.addEventListener("online", onOnline);
     return () => {
       window.removeEventListener("offline", onOffline);
+      window.removeEventListener("online", onOnline);
       abortRef.current?.abort();
     };
-  }, []);
+  }, [stopGeneration]);
 
   function openChat(event: React.MouseEvent<HTMLButtonElement>) {
     dismissHint();
@@ -270,20 +283,24 @@ export function ChatbotWidget() {
     const text = value.trim();
     if (!text || pendingRef.current) return;
     if (typeof navigator !== "undefined" && !navigator.onLine) {
-      setError("You appear to be offline. Please check your internet connection.");
+      setError(OFFLINE_MESSAGE);
       return;
     }
     const outgoing: Message[] = retry
       ? (messages.at(-1)?.role === "model" ? messages.slice(0, -1) : messages)
-      : [...(error && messages.at(-1)?.role === "user" ? messages.slice(0, -1) : messages), { role: "user", content: text }];
+      : [...(error && messages.at(-1)?.role === "model" && messages.at(-1)?.complete === false
+        ? messages.slice(0, -2)
+        : error && messages.at(-1)?.role === "user" ? messages.slice(0, -1) : messages), { role: "user", content: text }];
     const requestId = ++requestRef.current;
     const controller = new AbortController();
+    let timedOut = false;
+    const timeout = setTimeout(() => { timedOut = true; controller.abort(); }, CHAT_TIMEOUT_MS);
     abortRef.current = controller;
     pendingRef.current = true;
     setError("");
     setIsLoading(true);
+    setMessages(outgoing);
     if (!retry) {
-      setMessages(outgoing);
       setInput("");
     }
 
@@ -295,7 +312,8 @@ export function ChatbotWidget() {
           "Accept": "text/event-stream",
         },
         body: JSON.stringify({
-          messages: outgoing.slice(-20).map(({ role, content }) => ({ role, content })),
+          // Keep rendered answers intact, but respect the API's per-turn and total history limits.
+          messages: outgoing.slice(-10).map(({ role, content }) => ({ role, content: content.slice(0, 2000) })),
           stream: true,
         }),
         signal: controller.signal,
@@ -310,8 +328,29 @@ export function ChatbotWidget() {
       const contentType = response.headers.get("content-type") || "";
       if (!contentType.includes("text/event-stream") || !response.body) {
         // Deterministic non-streaming fallback
-        const data = await response.json();
-        if (typeof data.text !== "string" || !data.text.trim()) throw new Error("No answer came back. Please retry.");
+        let body = "";
+        if (response.body) {
+          const jsonReader = response.body.getReader();
+          const jsonDecoder = new TextDecoder();
+          let bytes = 0;
+          while (true) {
+            const { done, value } = await jsonReader.read();
+            if (done) break;
+            bytes += value.byteLength;
+            if (bytes > MAX_STREAM_BYTES) {
+              await jsonReader.cancel();
+              throw new Error("The answer was too long. Please retry with a shorter question.");
+            }
+            body += jsonDecoder.decode(value, { stream: true });
+          }
+          body += jsonDecoder.decode();
+        } else {
+          body = await response.text();
+        }
+        let data: { text?: unknown; sources?: unknown };
+        try { data = JSON.parse(body); } catch { throw new Error("No answer came back. Please retry."); }
+        if (!data || typeof data !== "object" || typeof data.text !== "string" || !data.text.trim()) throw new Error("No answer came back. Please retry.");
+        if (data.text.length > MAX_REPLY_CHARS) throw new Error("The answer was too long. Please retry with a shorter question.");
         if (requestRef.current === requestId) setMessages([...outgoing, { role: "model", content: data.text.trim(), sources: safeSources(data.sources) }]);
         return;
       }
@@ -323,6 +362,7 @@ export function ChatbotWidget() {
       let accumulated = "";
       let complete = false;
       let sources: Source[] = [];
+      let receivedBytes = 0;
 
       function processEvent(rawEvent: string) {
         if (!rawEvent.trim()) return;
@@ -338,15 +378,20 @@ export function ChatbotWidget() {
         if (eventType === "done") {
           complete = true;
         } else if (eventType === "delta" || eventType === "sources") {
+          let parsed: { text?: unknown; sources?: unknown };
           try {
-            const parsed = JSON.parse(dataStr);
-            if (eventType === "delta" && typeof parsed.text === "string" && parsed.text) accumulated += parsed.text;
-            if (eventType === "sources") sources = safeSources(parsed.sources);
-            if (accumulated && requestRef.current === requestId) {
-              setMessages([...outgoing, { role: "model", content: accumulated, sources }]);
-            }
+            parsed = JSON.parse(dataStr);
           } catch {
-            // Ignore malformed stream events.
+            return;
+          }
+          if (!parsed || typeof parsed !== "object") return;
+          if (eventType === "delta" && typeof parsed.text === "string" && parsed.text) {
+            if (accumulated.length + parsed.text.length > MAX_REPLY_CHARS) throw new Error("The answer was too long. Please retry with a shorter question.");
+            accumulated += parsed.text;
+          }
+          if (eventType === "sources") sources = safeSources(parsed.sources);
+          if (accumulated && requestRef.current === requestId) {
+            setMessages([...outgoing, { role: "model", content: accumulated, sources, complete: false }]);
           }
         } else if (eventType === "error") {
           try {
@@ -362,24 +407,38 @@ export function ChatbotWidget() {
         const { done, value } = await reader.read();
         if (done) break;
 
+        receivedBytes += value.byteLength;
+        if (receivedBytes > MAX_STREAM_BYTES) throw new Error("The answer was too long. Please retry with a shorter question.");
         buffer += decoder.decode(value, { stream: true });
         const events = buffer.split(/\r?\n\r?\n/);
         buffer = events.pop() || "";
+        if (buffer.length > MAX_EVENT_BUFFER_CHARS) throw new Error("The answer was too long. Please retry with a shorter question.");
 
-        for (const rawEvent of events) processEvent(rawEvent);
+        for (const rawEvent of events) {
+          if (rawEvent.length > MAX_EVENT_BUFFER_CHARS) throw new Error("The answer was too long. Please retry with a shorter question.");
+          processEvent(rawEvent);
+          if (complete) break;
+        }
+        if (complete) {
+          try { await reader.cancel(); } catch { /* The completed response may already be closed. */ }
+          break;
+        }
       }
 
       // Flush decoder and process any trailing event in buffer
       buffer += decoder.decode();
-      if (buffer.trim()) processEvent(buffer);
+      if (!complete && buffer.trim()) processEvent(buffer);
 
       if (!complete) throw new Error("The answer was interrupted. Please retry.");
       if (!accumulated.trim()) throw new Error("No answer came back. Please retry.");
+      if (requestRef.current === requestId) setMessages([...outgoing, { role: "model", content: accumulated, sources, complete: true }]);
     } catch (cause) {
-      if (requestRef.current === requestId && !controller.signal.aborted) {
-        setError(cause instanceof Error ? cause.message : "The connection was interrupted. Please retry.");
+      if (requestRef.current === requestId && (!controller.signal.aborted || timedOut)) {
+        setError(timedOut ? "The answer took too long. Please retry." : cause instanceof Error ? cause.message : "The connection was interrupted. Please retry.");
       }
+      controller.abort();
     } finally {
+      clearTimeout(timeout);
       if (requestRef.current === requestId) {
         pendingRef.current = false;
         abortRef.current = null;
@@ -450,6 +509,7 @@ export function ChatbotWidget() {
                 <span className="px-1 font-mono text-[10px] font-medium uppercase tracking-widest text-text-secondary">{message.role === "user" ? "You" : "Haris AI"}</span>
                 <div aria-live={message.role === "model" ? "polite" : undefined} className={message.role === "user" ? "max-w-[85%] rounded-2xl rounded-tr-md bg-text-primary px-4 py-2.5 text-bg-primary" : "w-full min-w-0 px-1 py-1 text-text-primary"}>
                   <Reply text={message.content} sources={message.sources} />
+                  {message.role === "model" && message.complete === false && !isLoading && <p className="mt-2 text-xs text-text-secondary">Incomplete answer</p>}
                   {message.role === "model" && !!message.sources?.length && (
                     <div aria-label="Relevant pages" className="mt-3 flex flex-wrap gap-1.5 border-t border-border-primary pt-3">
                       {message.sources.map((source, sourceIndex) => (
@@ -483,7 +543,7 @@ export function ChatbotWidget() {
               <div role="alert" className="rounded-2xl border border-border-primary bg-bg-primary p-3.5 text-sm leading-5 text-text-primary">
                 <p>{error}</p>
                 <div className="mt-3 flex flex-wrap items-center gap-2">
-                  {messages.some((message) => message.role === "user") && <button type="button" onClick={() => submitMessage(messages.filter((message) => message.role === "user").at(-1)!.content, true)} className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-border-primary bg-white px-3 py-1 text-xs font-medium text-text-primary transition-colors hover:border-text-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:bg-white/[0.04]"><RotateCcw size={13} aria-hidden="true" />Retry question</button>}
+                  {error !== OFFLINE_MESSAGE && messages.some((message) => message.role === "user") && <button type="button" onClick={() => submitMessage(messages.filter((message) => message.role === "user").at(-1)!.content, true)} className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-border-primary bg-white px-3 py-1 text-xs font-medium text-text-primary transition-colors hover:border-text-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:bg-white/[0.04]"><RotateCcw size={13} aria-hidden="true" />Retry question</button>}
                   <Link href="/projects" className="inline-flex min-h-9 items-center rounded-lg border border-border-primary bg-white px-3 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-text-secondary hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-text-primary dark:bg-white/[0.04]">Explore projects</Link>
                   <Link href="/contact" className="inline-flex min-h-9 items-center rounded-lg border border-border-primary bg-white px-3 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-text-secondary hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-text-primary dark:bg-white/[0.04]">Contact</Link>
                 </div>
