@@ -374,7 +374,7 @@ export function ChatbotWidget() {
   if (!isMounted) return null;
 
   return (
-    <div ref={wrapperRef} className="fixed bottom-3 right-3 z-[5500] flex flex-col items-end sm:bottom-6 sm:right-6">
+    <div ref={wrapperRef} className="fixed bottom-3 right-4 z-[5500] flex flex-col items-end min-[360px]:right-5 sm:bottom-6 sm:right-[26px] lg:right-[max(38px,calc(50vw-602px))]">
       {isOpen && (
         <section
           id="portfolio-chat-panel"
@@ -518,7 +518,7 @@ export function ChatbotWidget() {
         aria-expanded={isOpen}
         aria-controls="portfolio-chat-panel"
         title="Ask Haris AI Assistant"
-        className="group relative flex size-14 items-center justify-center rounded-full border-2 border-[#a99cce] bg-[#20202b] p-0 shadow-[0_10px_28px_rgba(0,0,0,0.5)] transition-[border-color,box-shadow] duration-200 hover:border-[#c2b6ef] hover:shadow-[0_12px_30px_rgba(55,41,111,0.35)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-primary motion-reduce:transition-none"
+        className="group relative flex size-14 items-center justify-center rounded-full border-2 border-[#a99cce] bg-[#20202b] p-0 shadow-[0_8px_18px_rgba(19,16,35,0.18)] transition-[border-color,box-shadow] duration-200 hover:border-[#c2b6ef] hover:shadow-[0_10px_22px_rgba(55,41,111,0.22)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-primary dark:shadow-[0_10px_28px_rgba(0,0,0,0.5)] dark:hover:shadow-[0_12px_30px_rgba(55,41,111,0.35)] motion-reduce:transition-none"
       >
         <AssistantRobot />
       </button>

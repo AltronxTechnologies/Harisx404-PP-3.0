@@ -160,23 +160,33 @@ test("fresh server markup and hydrated launcher agree in both themes and narrow 
         const launcher = page.getByRole("button", { name: "Toggle chat" });
         await launcher.waitFor();
         await page.waitForFunction((value) => document.documentElement.classList.contains(value), theme);
-        for (const width of [320, 390, 768, 1440]) {
+        for (const width of [320, 390, 640, 768, 1024, 1280, 1440]) {
           await page.setViewportSize({ width, height: 800 });
           const box = await launcher.boundingBox();
           assert.ok(box && box.x >= 0 && box.x + box.width <= width + 1 && box.width === 56, `${theme} ${width}: launcher bounds`);
+          const stripGap = await page.evaluate(() => {
+            const strip = document.querySelector("#main-content").nextElementSibling.getBoundingClientRect();
+            const icon = document.querySelector('button[aria-label="Toggle chat"]').getBoundingClientRect();
+            return strip.left - icon.right;
+          });
+          assert.ok(Math.abs(stripGap - 6) < 1, `${theme} ${width}: right strip gap ${stripGap}`);
         }
         await launcher.focus();
         const appearance = await launcher.evaluate((node) => ({ background: getComputedStyle(node).backgroundColor, border: getComputedStyle(node).borderColor, borderWidth: getComputedStyle(node).borderWidth, shadow: getComputedStyle(node).boxShadow }));
         assert.equal(appearance.background, "rgb(32, 32, 43)");
         assert.equal(appearance.border, "rgb(169, 156, 206)");
         assert.equal(appearance.borderWidth, "2px");
+        assert.match(appearance.shadow, theme === "light" ? /rgba\(19, 16, 35, 0\.18\)/ : /rgba\(0, 0, 0, 0\.5\)/);
         appearances.push(appearance);
         assert.deepEqual(hydrationErrors, []);
       } finally {
         await context.close();
       }
     }
-    assert.deepEqual(appearances[0], appearances[1]);
+    assert.deepEqual(
+      { background: appearances[0].background, border: appearances[0].border, borderWidth: appearances[0].borderWidth },
+      { background: appearances[1].background, border: appearances[1].border, borderWidth: appearances[1].borderWidth },
+    );
   } finally {
     await browser.close();
   }
