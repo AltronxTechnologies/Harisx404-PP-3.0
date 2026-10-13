@@ -30,10 +30,22 @@ test("chat launcher and panel fit across themes and viewport sizes with keyboard
           await page.setViewportSize({ width, height });
           const box = await panel.boundingBox();
           assert.ok(box && box.x >= 0 && box.y >= 0 && box.x + box.width <= width + 1 && box.y + box.height <= height + 1, `${theme} ${width}x${height}: ${JSON.stringify(box)}`);
-          assert.equal(await launcher.isVisible(), width >= 640, `${theme} ${width}x${height}: only desktop keeps the launcher beside the panel`);
-          if (width === 1440) assert.equal(box.width, 420);
+          if (height > 420) {
+            const nav = await page.locator("header nav").boundingBox();
+            assert.ok(box.y >= nav.y + nav.height + 8, `${theme} ${width}x${height}: panel clears the navbar`);
+          }
+          assert.equal(await launcher.isVisible(), true, `${theme} ${width}x${height}: the launcher remains reachable`);
+          if (width === 1440) assert.equal(box.width, 390);
           assert.ok((await panel.getByRole("textbox", { name: "Ask the portfolio assistant" }).boundingBox()).height > 0);
           assert.ok((await panel.getByRole("button", { name: "Close chat" }).boundingBox()).width >= 40);
+          if (width === 320) {
+            await page.waitForFunction(() => {
+              const images = [...document.querySelectorAll('#portfolio-chat-panel header img')];
+              const visible = images.find((image) => getComputedStyle(image).display !== 'none');
+              return visible?.complete && visible.naturalWidth > 0;
+            });
+            assert.equal(await panel.getByRole("heading", { name: "Haris AI", exact: true }).isVisible(), true);
+          }
           if (width === 320) {
             const welcome = await panel.evaluate((node) => {
               const scroller = node.children[1];
@@ -87,7 +99,7 @@ test("short viewports keep header, composer and a usable message scroller inside
   }
 });
 
-test("phone sheet keeps compact suggestions, expandable composer and jump control usable in both themes", async () => {
+test("compact phone panel keeps suggestions, expandable composer and jump control usable in both themes", async () => {
   const browser = await chromium.launch({ headless: true });
   try {
     for (const theme of ["light", "dark"]) {
@@ -104,9 +116,10 @@ test("phone sheet keeps compact suggestions, expandable composer and jump contro
         await launcher.click();
         const panel = page.getByRole("dialog", { name: "Haris AI assistant" });
         const box = await panel.boundingBox();
-        assert.ok(box && Math.abs(box.x - 8) < 1 && Math.abs(box.y - 8) < 1 && box.width === 304 && box.height === 552);
-        assert.equal(await launcher.isVisible(), false);
+        assert.ok(box && Math.abs(box.x - 6) < 1 && Math.abs(box.y - 72) < 1 && box.width === 296 && box.height === 416);
+        assert.equal(await launcher.isVisible(), true);
         const scroll = panel.locator("header + div");
+        assert.equal(await scroll.evaluate((node) => getComputedStyle(node).scrollbarWidth), "thin");
         const form = panel.locator("form");
         const formBox = await form.boundingBox();
         for (const label of ["Featured projects", "Technical skills & stack", "Contact & collaboration"]) {
@@ -118,7 +131,8 @@ test("phone sheet keeps compact suggestions, expandable composer and jump contro
         const initialHeight = (await input.boundingBox()).height;
         await input.fill("First line\nSecond line\nThird line\nFourth line");
         await page.waitForFunction((height) => document.querySelector('#portfolio-chat-panel textarea').getBoundingClientRect().height > height, initialHeight);
-        assert.ok((await input.boundingBox()).height <= 112);
+        assert.ok((await input.boundingBox()).height <= 96);
+        assert.ok((await panel.getByRole("button", { name: "Send chat message" }).boundingBox()).height >= 40);
         await input.fill("Tell me more");
         await panel.getByRole("button", { name: "Send chat message" }).click();
         await panel.getByRole("link", { name: "About Haris" }).waitFor();

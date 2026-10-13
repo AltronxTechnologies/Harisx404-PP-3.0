@@ -88,7 +88,7 @@ test("shared chat widget bounds requests and exposes named, reachable controls",
   assert.match(source, /aria-label="Close chat"/);
   assert.match(source, /aria-label="Send chat message"/);
   assert.match(source, /toggleRef\.current\?\.focus\(\)/);
-  assert.match(source, /sm:w-\[min\(420px,calc\(100vw-48px\)\)\]/);
+  assert.match(source, /sm:w-\[min\(390px,calc\(100vw-48px\)\)\]/);
 });
 
 test("server HTML leaves the interactive chat widget to mount after hydration", async () => {

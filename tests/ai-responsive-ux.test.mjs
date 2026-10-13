@@ -25,8 +25,9 @@ test("Robot includes shaded SVG and reduced-motion compliance", () => {
 test("Chat panel enforces responsive bounds, dynamic viewport height, and dialog accessibility", () => {
   assert.match(source, /id="portfolio-chat-panel"/);
   assert.match(source, /aria-label="Haris AI assistant"/);
-  assert.match(source, /sm:w-\[min\(420px,calc\(100vw-48px\)\)\]/);
-  assert.match(source, /bottom-\[max\(8px,env\(safe-area-inset-bottom\)\)\]/);
+  assert.match(source, /w-\[min\(360px,calc\(100vw-24px\)\)\]/);
+  assert.match(source, /sm:w-\[min\(390px,calc\(100vw-48px\)\)\]/);
+  assert.match(source, /h-\[min\(480px,calc\(100dvh-152px\)\)\]/);
   assert.match(source, /100dvh/);
   assert.match(source, /overscroll-contain/);
 });
