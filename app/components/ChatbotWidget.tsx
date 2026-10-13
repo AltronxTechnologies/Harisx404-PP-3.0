@@ -513,7 +513,8 @@ export function ChatbotWidget() {
         aria-expanded={isOpen}
         aria-controls="portfolio-chat-panel"
         title="Ask Haris AI Assistant"
-        className="group relative flex size-14 items-center justify-center rounded-full border border-[#8179ab] bg-[#171926] p-0 shadow-[0_10px_28px_rgba(19,16,35,0.26)] transition-[border-color,box-shadow] duration-200 hover:border-[#b1a3ec] hover:shadow-[0_12px_30px_rgba(55,41,111,0.35)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-primary dark:border-[#a99cce] dark:bg-[#20202b] dark:shadow-[0_10px_28px_rgba(0,0,0,0.5)] motion-reduce:transition-none"
+        className="group relative flex size-14 items-center justify-center rounded-full border border-[#111827] p-0 shadow-[0_10px_28px_rgba(19,16,35,0.26)] transition-[border-color,box-shadow] duration-200 hover:border-[#b1a3ec] hover:shadow-[0_12px_30px_rgba(55,41,111,0.35)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-primary dark:border-[#a99cce] dark:shadow-[0_10px_28px_rgba(0,0,0,0.5)] motion-reduce:transition-none"
+        style={{ backgroundColor: "#20202b" }}
       >
         <AssistantRobot />
       </button>

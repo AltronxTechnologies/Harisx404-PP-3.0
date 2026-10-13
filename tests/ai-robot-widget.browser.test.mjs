@@ -18,7 +18,7 @@ test("robot launcher, outside click, Escape and header swipe preserve focus and 
     assert.ok(launcherBox && launcherBox.width === 56 && launcherBox.height === 56);
     assert.equal((await launcher.innerText()).trim(), "");
     const surface = await launcher.evaluate((node) => ({ background: getComputedStyle(node).backgroundColor, border: getComputedStyle(node).borderWidth }));
-    assert.notEqual(surface.background, "rgba(0, 0, 0, 0)");
+    assert.equal(surface.background, "rgb(32, 32, 43)");
     assert.equal(surface.border, "1px");
     await launcher.click();
     const panel = page.locator("#portfolio-chat-panel");
@@ -154,17 +154,20 @@ test("fresh server markup and hydrated launcher agree in both themes and narrow 
       try {
         const url = `${baseUrl}/links?launcher-check=${theme}`;
         const html = await (await page.request.get(url)).text();
-        assert.match(html, /bg-\[#171926\]/);
+        assert.match(html, /background-color:#20202b/);
         await page.goto(url, { waitUntil: "domcontentloaded" });
         const launcher = page.getByRole("button", { name: "Toggle chat" });
         await launcher.waitFor();
+        await page.waitForFunction((value) => document.documentElement.classList.contains(value), theme);
         for (const width of [320, 390, 768, 1440]) {
           await page.setViewportSize({ width, height: 800 });
           const box = await launcher.boundingBox();
           assert.ok(box && box.x >= 0 && box.x + box.width <= width + 1 && box.width === 56, `${theme} ${width}: launcher bounds`);
         }
         await launcher.focus();
-        assert.equal(await launcher.evaluate((node) => getComputedStyle(node).backgroundColor === "rgba(0, 0, 0, 0)"), false);
+        const appearance = await launcher.evaluate((node) => ({ background: getComputedStyle(node).backgroundColor, border: getComputedStyle(node).borderColor }));
+        assert.equal(appearance.background, "rgb(32, 32, 43)");
+        assert.equal(appearance.border, theme === "light" ? "rgb(17, 24, 39)" : "rgb(169, 156, 206)");
         assert.deepEqual(hydrationErrors, []);
       } finally {
         await context.close();
