@@ -287,8 +287,6 @@ export async function generateMetadata(
     title: post.title,
     description: post.summary,
     keywords: post.categories,
-    creator: siteMetadata.author,
-    publisher: siteMetadata.author,
     alternates: {
       canonical: safeCanonicalUrl(post.canonicalUrl, post.slug),
     },
@@ -311,7 +309,6 @@ export async function generateMetadata(
       card: "summary_large_image",
       title: post.title,
       description: post.summary,
-      creator: siteMetadata.twitterHandle,
       images: [socialImage],
     },
   };

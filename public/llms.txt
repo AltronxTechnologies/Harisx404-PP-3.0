@@ -10,7 +10,7 @@
 
 - [Home](https://harisx404.vercel.app/): Overview, selected builds, latest write-ups, testimonials, FAQ.
 - [About](https://harisx404.vercel.app/about): Background, education (BSIT, University of Malakand, CGPA 3.5/4.0, Top 15% NSCT nationwide), tech stack, experience, certifications.
-- [Projects](https://harisx404.vercel.app/projects): Published case studies including TourMate Malakand, IntruShield NIDS, PacketVision Network Sniffer, Harisx404 Website, Mail-Lens AI, and MedicaLink HMS.
+- [Projects](https://harisx404.vercel.app/projects): Current published case studies with project details and technologies.
 - [Blog](https://harisx404.vercel.app/blog): Technical write-ups on web development, security, and AI.
 - [Buildlog](https://harisx404.vercel.app/buildlog): Real-time engineering changelog, version progression, and system architecture updates.
 - [Credentials](https://harisx404.vercel.app/credentials): Professional certifications, industry licenses, and verified skill badges.
@@ -26,4 +26,4 @@
 - Specialties: secure full-stack apps (OWASP Top 10 mitigations, JWT in HTTP-only cookies, RBAC, zero-trust defaults), real-time systems (WebSockets), AI integrations.
 - Notable result: cut an API's response time by 99% by rebuilding its query layer and caching.
 - Typical stack: Next.js / React / TypeScript / Node.js / PostgreSQL / Supabase; Python / FastAPI / Suricata for security tooling; TensorFlow / LangChain / pgvector for AI.
-- Replies within ~24 hours via email or the contact page.
+- Usually replies within one business day via email or the contact page.

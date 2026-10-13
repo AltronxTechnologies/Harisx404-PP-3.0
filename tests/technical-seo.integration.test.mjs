@@ -37,6 +37,25 @@ test("About shares its own factual title and description without losing social i
   assert.match(html, /<meta name="twitter:image" content="https:\/\/harisx404\.vercel\.app\/brand\/logo-wide\.png"/);
 });
 
+test("Contact and Credentials share their own factual page descriptions", async () => {
+  for (const [path, title] of [["/contact", "Contact"], ["/credentials", "Credentials"]]) {
+    const response = await fetch(`${base}${path}`);
+    assert.equal(response.status, 200);
+    const html = await response.text();
+    const meta = (name, attribute) => html.match(new RegExp(`<meta ${attribute}="${name}" content="([^"]+)"`))?.[1];
+    const description = meta("description", "name");
+    assert.ok(description?.includes("Muhammad Haris"));
+    assert.match(html, new RegExp(`<title>${title} \\| harisx404<\\/title>`));
+    assert.equal(meta("og:title", "property"), `${title} | harisx404`);
+    assert.equal(meta("twitter:title", "name"), `${title} | harisx404`);
+    assert.equal(meta("og:description", "property"), description);
+    assert.equal(meta("twitter:description", "name"), description);
+    assert.equal(meta("og:url", "property"), `https://harisx404.vercel.app${path}`);
+    assert.match(html, /<meta property="og:image" content="https:\/\/harisx404\.vercel\.app\/brand\/logo-wide\.png"/);
+    assert.match(html, /<meta name="twitter:image" content="https:\/\/harisx404\.vercel\.app\/brand\/logo-wide\.png"/);
+  }
+});
+
 test("static sitemap entries do not claim a change on every regeneration", async () => {
   const response = await fetch(`${base}/sitemap.xml`);
   assert.equal(response.status, 200);
@@ -54,7 +73,8 @@ test("static sitemap entries do not claim a change on every regeneration", async
 test("optional llms.txt does not advertise unpublished Project case studies", async () => {
   const content = await readFile(new URL("../public/llms.txt", import.meta.url), "utf8");
   assert.doesNotMatch(content, /TaskFlow Workspace|NeuroDoc AI Assistant|VisionForge ML Studio/);
-  assert.match(content, /TourMate Malakand/);
+  assert.match(content, /Current published case studies/);
+  assert.doesNotMatch(content, /case studies including/);
 });
 
 test("representative public structured data is parseable and describes its route", async () => {

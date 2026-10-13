@@ -45,7 +45,7 @@ test("chat launcher and panel fit across themes and viewport sizes with keyboard
               const visible = images.find((image) => getComputedStyle(image).display !== 'none');
               return visible?.complete && visible.naturalWidth > 0;
             });
-            assert.equal(await panel.getByRole("heading", { name: "Haris AI", exact: true }).isVisible(), true);
+            assert.equal(await panel.getByRole("heading", { name: "Haris AI Assistant", exact: true }).isVisible(), true);
           }
           if (width === 320) {
             const welcome = await panel.evaluate((node) => {
@@ -123,7 +123,7 @@ test("compact phone panel keeps suggestions, expandable composer and jump contro
         assert.equal(await scroll.evaluate((node) => getComputedStyle(node).scrollbarWidth), "thin");
         const form = panel.locator("form");
         const formBox = await form.boundingBox();
-        for (const label of ["Featured projects", "Technical skills & stack", "Contact & collaboration"]) {
+        for (const label of ["Explore projects", "Skills & experience", "Get in touch"]) {
           const chip = panel.getByRole("button", { name: label });
           const chipBox = await chip.boundingBox();
           assert.ok(chipBox && chipBox.y + chipBox.height < formBox.y, `${theme}: ${label} starts above the composer`);
@@ -255,6 +255,86 @@ test("an SSE connection ending without done shows retry rather than a finished a
     await page.getByRole("button", { name: "Send chat message" }).click();
     await page.getByRole("alert").getByText("The answer was interrupted. Please retry.").waitFor();
     assert.equal(await page.getByRole("button", { name: "Retry question" }).count(), 1);
+  } finally {
+    await browser.close();
+  }
+});
+
+test("offline, suggested questions, new chat and keyboard send have working controls", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const context = await browser.newContext({ viewport: { width: 320, height: 568 } });
+    const page = await context.newPage();
+    const requests = [];
+    await page.route("**/api/ai/chat", (route) => {
+      requests.push(route.request().postDataJSON());
+      return route.fulfill({ status: 200, headers: { "content-type": "application/json" }, body: JSON.stringify({ text: "See /projects for case studies." }) });
+    });
+    await page.goto(`${baseUrl}/links`, { waitUntil: "domcontentloaded" });
+    await page.getByRole("button", { name: "Toggle chat" }).click();
+    const panel = page.getByRole("dialog", { name: "Haris AI assistant" });
+    assert.equal(await panel.getByRole("heading", { name: "Haris AI Assistant" }).isVisible(), true);
+    assert.equal(await panel.locator("h3 svg").count(), 0);
+    assert.equal(await panel.evaluate((node) => node.outerHTML.includes("purple-")), false);
+    await context.setOffline(true);
+    await panel.getByRole("button", { name: "Explore projects" }).click();
+    await panel.getByRole("alert").getByText(/offline/).waitFor();
+    assert.equal(await panel.getByRole("button", { name: "Retry question" }).count(), 0);
+    assert.equal(await panel.getByRole("button", { name: "Start a new chat" }).isEnabled(), true);
+    await panel.getByRole("button", { name: "Start a new chat" }).click();
+    assert.equal(await panel.getByRole("alert").count(), 0);
+    await context.setOffline(false);
+    await panel.getByRole("button", { name: "Skills & experience" }).click();
+    await panel.getByText("See /projects for case studies.").waitFor();
+    assert.match(requests[0].messages.at(-1).content, /technologies/);
+    await panel.getByRole("button", { name: "Start a new chat" }).click();
+    assert.equal(await panel.getByText("See /projects for case studies.").count(), 0);
+    const input = panel.getByRole("textbox", { name: "Ask the portfolio assistant" });
+    await input.fill("How can I collaborate?");
+    await input.press("Enter");
+    await panel.getByText("See /projects for case studies.").waitFor();
+    assert.equal(requests.length, 2);
+    assert.equal(requests[1].messages.at(-1).content, "How can I collaborate?");
+    await panel.getByRole("link", { name: "/projects" }).click();
+    await page.waitForURL("**/projects");
+    assert.equal(await panel.count(), 0);
+    await page.getByRole("button", { name: "Toggle chat" }).click();
+    await panel.getByRole("button", { name: "Close chat" }).click();
+    assert.equal(await panel.count(), 0);
+    await context.close();
+  } finally {
+    await browser.close();
+  }
+});
+
+test("stopping an in-progress reply allows a clean retry", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    const requests = [];
+    await page.goto(`${baseUrl}/links`, { waitUntil: "domcontentloaded" });
+    await page.evaluate(() => {
+      window.__originalFetch = window.fetch;
+      window.fetch = (_url, options) => new Promise((_resolve, reject) => {
+        window.__chatRequest = options;
+        options.signal.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")));
+      });
+    });
+    await page.getByRole("button", { name: "Toggle chat" }).click();
+    const panel = page.getByRole("dialog", { name: "Haris AI assistant" });
+    await panel.getByRole("textbox", { name: "Ask the portfolio assistant" }).fill("Original question");
+    await panel.getByRole("button", { name: "Send chat message" }).click();
+    await panel.getByRole("button", { name: "Stop generating response" }).click();
+    await panel.getByRole("alert").getByText(/Response stopped/).waitFor();
+    assert.equal(await page.evaluate(() => window.__chatRequest.signal.aborted), true);
+    await page.evaluate(() => { window.fetch = window.__originalFetch; });
+    await page.route("**/api/ai/chat", (route) => {
+      requests.push(route.request().postDataJSON());
+      return route.fulfill({ status: 200, headers: { "content-type": "application/json" }, body: JSON.stringify({ text: "A complete answer." }) });
+    });
+    await panel.getByRole("button", { name: "Retry question" }).click();
+    await panel.getByText("A complete answer.").waitFor();
+    assert.deepEqual(requests[0].messages.at(-1), { role: "user", content: "Original question" });
   } finally {
     await browser.close();
   }

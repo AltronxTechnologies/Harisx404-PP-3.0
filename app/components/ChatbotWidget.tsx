@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { ArrowDown, ArrowRight, Bot, RotateCcw, Send, Sparkles, Square, X } from "lucide-react";
+import { ArrowDown, ArrowRight, RotateCcw, Send, Sparkles, Square, X } from "lucide-react";
 
 interface Source {
   title: string;
@@ -19,9 +19,9 @@ interface Message {
 }
 
 const suggestions = [
-  { label: "Featured projects", prompt: "What featured projects has Haris built, like TourMate or Mail-Lens AI?" },
-  { label: "Technical skills & stack", prompt: "What technologies, languages, and frameworks does Haris specialize in?" },
-  { label: "Contact & collaboration", prompt: "How can I contact Haris or collaborate with him on a project?" },
+  { label: "Explore projects", prompt: "What featured projects has Haris built, like TourMate or Mail-Lens AI?" },
+  { label: "Skills & experience", prompt: "What technologies, languages, and frameworks does Haris specialize in?" },
+  { label: "Get in touch", prompt: "How can I contact Haris or collaborate with him on a project?" },
 ];
 const hintMessages = ["Need a hand? Ask me.", "Explore the projects.", "Ask about Haris's work."];
 
@@ -100,8 +100,8 @@ function Reply({ text, sources = [] }: { text: string; sources?: Source[] }) {
           a: ({ href, children }) => {
             let path = href || "";
             if (path.startsWith("https://harisx404.com/")) path = new URL(path).pathname;
-            if (localPath.test(path) && (publicPage.has(path) || sources.some((source) => source.path === path))) return <Link href={path} className="font-medium underline decoration-purple-primary/60 underline-offset-4 hover:decoration-purple-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-purple-primary">{children}</Link>;
-            if (path === "mailto:itsharis.tech@gmail.com") return <a href={path} className="font-medium underline decoration-purple-primary/60 underline-offset-4 hover:decoration-purple-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-purple-primary">{children}</a>;
+            if (localPath.test(path) && (publicPage.has(path) || sources.some((source) => source.path === path))) return <Link href={path} className="font-medium underline decoration-text-secondary underline-offset-4 hover:decoration-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-text-primary">{children}</Link>;
+            if (path === "mailto:itsharis.tech@gmail.com") return <a href={path} className="font-medium underline decoration-text-secondary underline-offset-4 hover:decoration-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-text-primary">{children}</a>;
             return <span>{children}</span>;
           },
         }}
@@ -275,7 +275,7 @@ export function ChatbotWidget() {
     }
     const outgoing: Message[] = retry
       ? (messages.at(-1)?.role === "model" ? messages.slice(0, -1) : messages)
-      : [...(error ? messages.slice(0, -1) : messages), { role: "user", content: text }];
+      : [...(error && messages.at(-1)?.role === "user" ? messages.slice(0, -1) : messages), { role: "user", content: text }];
     const requestId = ++requestRef.current;
     const controller = new AbortController();
     abortRef.current = controller;
@@ -399,6 +399,10 @@ export function ChatbotWidget() {
           role="dialog"
           aria-modal="false"
           aria-label="Haris AI assistant"
+          onClickCapture={(event) => {
+            if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+            if ((event.target as Element).closest("a")) closeChat(false);
+          }}
           className="fixed bottom-20 left-1/2 flex h-[min(480px,calc(100dvh-152px))] min-h-0 w-[min(360px,calc(100vw-24px))] -translate-x-1/2 flex-col overflow-hidden rounded-2xl border border-border-primary bg-white text-text-primary shadow-[0_20px_60px_rgba(0,0,0,0.2)] dark:bg-[#1a1a1c] dark:shadow-[0_20px_60px_rgba(0,0,0,0.5)] sm:relative sm:bottom-auto sm:left-auto sm:mb-4 sm:h-[min(520px,calc(100dvh-172px))] sm:w-[min(390px,calc(100vw-48px))] sm:translate-x-0 sm:rounded-3xl [@media(max-height:420px)]:h-[calc(100dvh-88px)] sm:[@media(max-height:420px)]:h-[calc(100dvh-100px)]"
         >
           <header onTouchStart={(event) => {
@@ -416,13 +420,13 @@ export function ChatbotWidget() {
               <Image src="/brand/harisx404 white transparent.png" alt="" width={28} height={28} className="hidden size-7 object-contain dark:block" />
             </span>
             <div className="min-w-0 flex-1">
-              <h2 className="text-sm font-semibold leading-tight text-text-primary sm:text-base"><span className="sm:hidden">Haris AI</span><span className="hidden sm:inline">Haris&apos;s AI Assistant</span></h2>
-              <p className="mt-0.5 text-[11px] leading-4 text-text-secondary">Portfolio guide</p>
+              <h2 className="truncate text-sm font-semibold leading-tight text-text-primary">Haris AI Assistant</h2>
+              <p className="mt-0.5 truncate text-[11px] leading-4 text-text-secondary">Projects, skills &amp; more</p>
             </div>
-            <button type="button" onClick={startOver} disabled={!messages.length && !input} aria-label="Start a new chat" title="New chat" className="flex size-10 shrink-0 items-center justify-center rounded-xl text-text-secondary transition-colors hover:bg-bg-primary hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-primary disabled:opacity-40">
+            <button type="button" onClick={startOver} disabled={!messages.length && !input && !error} aria-label="Start a new chat" title="New chat" className="flex size-10 shrink-0 items-center justify-center rounded-xl text-text-secondary transition-colors hover:bg-bg-primary hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary disabled:cursor-not-allowed disabled:opacity-40">
               <RotateCcw size={18} aria-hidden="true" />
             </button>
-            <button type="button" aria-label="Close chat" onClick={() => closeChat()} className="flex size-10 shrink-0 items-center justify-center rounded-xl text-text-secondary transition-colors hover:bg-bg-primary hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-primary">
+            <button type="button" aria-label="Close chat" title="Close chat" onClick={() => closeChat()} className="flex size-10 shrink-0 items-center justify-center rounded-xl text-text-secondary transition-colors hover:bg-bg-primary hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary">
               <X size={20} aria-hidden="true" />
             </button>
           </header>
@@ -430,13 +434,12 @@ export function ChatbotWidget() {
           <div ref={scrollRef} onScroll={handleScroll} className="chat-scroll min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-3 py-3 sm:px-4" style={{ scrollbarWidth: "thin", scrollbarColor: "var(--text-secondary) transparent" }}>
             {messages.length === 0 && (
               <div className="flex min-h-full flex-col justify-center py-2 sm:py-3">
-                <span className="flex size-8 items-center justify-center rounded-lg bg-purple-secondary text-purple-primary" aria-hidden="true"><Bot size={16} /></span>
-                <h3 className="mt-3 font-display text-[24px] leading-[1.08] text-text-primary">Hi, I&apos;m Haris AI.</h3>
-                <p className="mt-1.5 max-w-[34ch] text-[13px] leading-5 text-text-secondary">Ask about the work, technical skills, writing, or getting in touch.</p>
-                <div className="mt-3 flex flex-wrap gap-1.5" aria-label="Suggested questions">
+                <h3 className="font-display text-[25px] leading-[1.12] text-text-primary">Hi, I&apos;m Haris AI.</h3>
+                <p className="mt-2 max-w-[34ch] text-[13px] leading-5 text-text-secondary">Explore Haris&apos;s projects, experience and writing, or find a way to connect.</p>
+                <div className="mt-4 flex flex-wrap gap-2" aria-label="Suggested questions">
                   {suggestions.map(({ label, prompt }) => (
-                    <button key={label} type="button" onClick={() => submitMessage(prompt)} disabled={isLoading} className="inline-flex min-h-9 items-center gap-1 rounded-full border border-border-primary bg-bg-primary px-2.5 py-1 text-left text-xs font-medium text-text-primary transition-colors hover:border-purple-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-primary disabled:opacity-50">
-                      {label}<ArrowRight size={13} className="shrink-0 text-purple-primary" aria-hidden="true" />
+                    <button key={label} type="button" onClick={() => submitMessage(prompt)} disabled={isLoading} className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-border-primary bg-bg-primary px-3 py-1 text-left text-xs font-medium text-text-primary transition-colors hover:border-text-secondary hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary disabled:opacity-50 dark:hover:bg-white/[0.08]">
+                      {label}<ArrowRight size={13} className="shrink-0 text-text-secondary" aria-hidden="true" />
                     </button>
                   ))}
                 </div>
@@ -450,7 +453,7 @@ export function ChatbotWidget() {
                   {message.role === "model" && !!message.sources?.length && (
                     <div aria-label="Relevant pages" className="mt-3 flex flex-wrap gap-1.5 border-t border-border-primary pt-3">
                       {message.sources.map((source, sourceIndex) => (
-                        <Link key={`${source.path}-${sourceIndex}`} href={source.path} className="inline-flex max-w-full items-center rounded-full border border-purple-primary/40 bg-purple-secondary/30 px-2.5 py-1 text-xs font-medium text-purple-primary transition-colors hover:bg-purple-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-purple-primary">
+                        <Link key={`${source.path}-${sourceIndex}`} href={source.path} className="inline-flex max-w-full min-h-8 items-center rounded-full border border-border-primary bg-bg-primary px-3 py-1 text-xs font-medium text-text-primary transition-colors hover:border-text-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-text-primary">
                           <span className="truncate">{source.title}</span>
                         </Link>
                       ))}
@@ -462,14 +465,14 @@ export function ChatbotWidget() {
             {isLoading && (
               <div className="flex items-center justify-between text-sm text-text-secondary">
                 <span role="status" className="flex items-center gap-2">
-                  <span className="size-2 animate-pulse rounded-full bg-purple-primary motion-reduce:animate-none" aria-hidden="true" />
+                  <span className="size-2 animate-pulse rounded-full bg-text-primary motion-reduce:animate-none" aria-hidden="true" />
                   {messages[messages.length - 1]?.role === "model" ? "Generating response..." : "Finding an answer..."}
                 </span>
                 <button
                   type="button"
-                  onClick={stopGeneration}
+                  onClick={() => { stopGeneration(); setError("Response stopped. Retry the question to continue."); }}
                   aria-label="Stop generating response"
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-border-primary bg-bg-primary px-2.5 py-1 text-xs font-medium text-text-primary transition-colors hover:border-purple-primary hover:text-purple-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-purple-primary"
+                  className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-border-primary bg-bg-primary px-2.5 py-1 text-xs font-medium text-text-primary transition-colors hover:border-text-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-text-primary"
                 >
                   <Square size={10} fill="currentColor" aria-hidden="true" />
                   Stop
@@ -480,9 +483,9 @@ export function ChatbotWidget() {
               <div role="alert" className="rounded-2xl border border-border-primary bg-bg-primary p-3.5 text-sm leading-5 text-text-primary">
                 <p>{error}</p>
                 <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <button type="button" onClick={() => submitMessage(messages.filter((message) => message.role === "user").at(-1)?.content ?? "", true)} className="inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-purple-primary/40 bg-purple-secondary/40 px-2.5 py-1 text-xs font-medium text-purple-primary transition-colors hover:bg-purple-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-purple-primary"><RotateCcw size={13} aria-hidden="true" />Retry question</button>
-                  <Link href="/projects" className="inline-flex min-h-8 items-center rounded-lg border border-border-primary bg-white px-2.5 py-1 text-xs font-medium text-text-secondary transition-colors hover:text-text-primary dark:bg-white/[0.04]">Explore Projects</Link>
-                  <Link href="/contact" className="inline-flex min-h-8 items-center rounded-lg border border-border-primary bg-white px-2.5 py-1 text-xs font-medium text-text-secondary transition-colors hover:text-text-primary dark:bg-white/[0.04]">Contact</Link>
+                  {messages.some((message) => message.role === "user") && <button type="button" onClick={() => submitMessage(messages.filter((message) => message.role === "user").at(-1)!.content, true)} className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-border-primary bg-white px-3 py-1 text-xs font-medium text-text-primary transition-colors hover:border-text-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary dark:bg-white/[0.04]"><RotateCcw size={13} aria-hidden="true" />Retry question</button>}
+                  <Link href="/projects" className="inline-flex min-h-9 items-center rounded-lg border border-border-primary bg-white px-3 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-text-secondary hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-text-primary dark:bg-white/[0.04]">Explore projects</Link>
+                  <Link href="/contact" className="inline-flex min-h-9 items-center rounded-lg border border-border-primary bg-white px-3 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-text-secondary hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-text-primary dark:bg-white/[0.04]">Contact</Link>
                 </div>
               </div>
                 )}
@@ -492,7 +495,7 @@ export function ChatbotWidget() {
                       type="button"
                       onClick={scrollToBottom}
                       aria-label="Jump to latest messages"
-                      className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-border-primary bg-text-primary px-3 py-1.5 text-xs font-medium text-bg-primary shadow-[0_8px_20px_rgba(0,0,0,0.2)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-purple-primary"
+                       className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-border-primary bg-text-primary px-3 py-1.5 text-xs font-medium text-bg-primary shadow-[0_8px_20px_rgba(0,0,0,0.2)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-text-primary"
                     >
                       <ArrowDown size={12} aria-hidden="true" />
                       <span>Jump to latest</span>
@@ -502,16 +505,16 @@ export function ChatbotWidget() {
           </div>
 
           <form onSubmit={(event) => { event.preventDefault(); submitMessage(input); }} className="shrink-0 border-t border-border-primary bg-white px-3 pb-2 pt-2 dark:bg-[#1a1a1c] sm:px-4">
-            <div className="flex items-end gap-2 rounded-xl border border-border-primary bg-bg-primary p-1 focus-within:border-purple-primary">
+             <div className="flex items-end gap-2 rounded-xl border border-border-primary bg-bg-primary p-1 focus-within:border-text-secondary">
               <textarea ref={inputRef} value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => {
                 if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
                   event.preventDefault();
                   submitMessage(input);
                 }
               }} aria-label="Ask the portfolio assistant" placeholder="Ask a question..." rows={1} maxLength={2000} disabled={isLoading} className="max-h-24 min-h-10 min-w-0 flex-1 resize-none bg-transparent px-2 py-2 text-sm leading-5 text-text-primary placeholder:text-text-secondary focus:outline-none disabled:opacity-60" />
-              <button type="submit" aria-label="Send chat message" disabled={!input.trim() || isLoading} className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-text-primary text-bg-primary transition-colors hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-primary disabled:opacity-40"><Send size={16} aria-hidden="true" /></button>
+               <button type="submit" aria-label="Send chat message" title="Send message" disabled={!input.trim() || isLoading} className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-text-primary text-bg-primary transition-colors hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary disabled:cursor-not-allowed disabled:opacity-40"><Send size={16} aria-hidden="true" /></button>
             </div>
-            <p className="mt-1.5 text-center text-[11px] leading-4 text-text-secondary">AI can make mistakes. Verify important details.</p>
+             <p className="mt-2 text-center text-xs leading-4 text-text-secondary">AI can be wrong. Verify important details.</p>
           </form>
         </section>
       )}

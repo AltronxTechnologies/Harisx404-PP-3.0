@@ -6,13 +6,28 @@ import { PaperHeroTexture } from "@/app/components/PaperHeroTexture";
 import { CtaSection } from "@/app/components/home/CtaSection";
 import { fetchCredentialCollection } from "./data";
 import { CredentialsCollection } from "./CredentialsCollection";
+import { siteMetadata } from "@/app/data/siteMetadata";
 
 export const revalidate = 3600;
 
+const credentialsDescription = "Verified certifications earned by Muhammad Haris across web development, cybersecurity, cloud, and AI/ML.";
+
 export const metadata: Metadata = {
   title: "Credentials",
-  description:
-    "Verified certifications earned by Muhammad Haris across web development, cybersecurity, cloud, and AI/ML.",
+  description: credentialsDescription,
+  openGraph: {
+    title: "Credentials | harisx404",
+    description: credentialsDescription,
+    url: `${siteMetadata.siteUrl}/credentials`,
+    type: "website",
+    images: [{ url: `${siteMetadata.siteUrl}/brand/logo-wide.png`, width: 1200, height: 630, alt: siteMetadata.title }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Credentials | harisx404",
+    description: credentialsDescription,
+    images: [`${siteMetadata.siteUrl}/brand/logo-wide.png`],
+  },
 };
 
 export default async function CredentialsPage() {

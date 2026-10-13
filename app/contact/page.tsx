@@ -4,11 +4,26 @@ import { GridWrapper } from "@/app/components/GridWrapper";
 import { PaperHeroTexture } from "@/app/components/PaperHeroTexture";
 import { CtaSection } from "@/app/components/home/CtaSection";
 import { siteContent } from "@/app/data/site-content";
+import { siteMetadata } from "@/app/data/siteMetadata";
+
+const contactDescription = "Contact Muhammad Haris about full-time roles, freelance projects, collaborations, and technical opportunities.";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description:
-    "Contact Muhammad Haris about full-time roles, freelance projects, collaborations, and technical opportunities.",
+  description: contactDescription,
+  openGraph: {
+    title: "Contact | harisx404",
+    description: contactDescription,
+    url: `${siteMetadata.siteUrl}/contact`,
+    type: "website",
+    images: [{ url: `${siteMetadata.siteUrl}/brand/logo-wide.png`, width: 1200, height: 630, alt: siteMetadata.title }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Contact | harisx404",
+    description: contactDescription,
+    images: [`${siteMetadata.siteUrl}/brand/logo-wide.png`],
+  },
 };
 
 export default function ContactPage() {
