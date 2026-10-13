@@ -141,6 +141,7 @@ test("the one-line help pill opens the assistant without covering the robot", as
 
 test("fresh server markup and hydrated launcher agree in both themes and narrow viewports", async () => {
   const browser = await chromium.launch({ headless: true });
+  const appearances = [];
   try {
     for (const theme of ["light", "dark"]) {
       const context = await browser.newContext({ viewport: { width: 320, height: 568 } });
@@ -165,15 +166,17 @@ test("fresh server markup and hydrated launcher agree in both themes and narrow 
           assert.ok(box && box.x >= 0 && box.x + box.width <= width + 1 && box.width === 56, `${theme} ${width}: launcher bounds`);
         }
         await launcher.focus();
-        const appearance = await launcher.evaluate((node) => ({ background: getComputedStyle(node).backgroundColor, border: getComputedStyle(node).borderColor, borderWidth: getComputedStyle(node).borderWidth }));
+        const appearance = await launcher.evaluate((node) => ({ background: getComputedStyle(node).backgroundColor, border: getComputedStyle(node).borderColor, borderWidth: getComputedStyle(node).borderWidth, shadow: getComputedStyle(node).boxShadow }));
         assert.equal(appearance.background, "rgb(32, 32, 43)");
-        assert.equal(appearance.border, theme === "dark" ? "rgb(169, 156, 206)" : "rgb(17, 24, 39)");
+        assert.equal(appearance.border, "rgb(169, 156, 206)");
         assert.equal(appearance.borderWidth, "2px");
+        appearances.push(appearance);
         assert.deepEqual(hydrationErrors, []);
       } finally {
         await context.close();
       }
     }
+    assert.deepEqual(appearances[0], appearances[1]);
   } finally {
     await browser.close();
   }
