@@ -19,7 +19,7 @@ test("robot launcher, outside click, Escape and header swipe preserve focus and 
     assert.equal((await launcher.innerText()).trim(), "");
     const surface = await launcher.evaluate((node) => ({ background: getComputedStyle(node).backgroundColor, border: getComputedStyle(node).borderWidth }));
     assert.equal(surface.background, "rgb(32, 32, 43)");
-    assert.equal(surface.border, "1px");
+    assert.equal(surface.border, "2px");
     await launcher.click();
     const panel = page.locator("#portfolio-chat-panel");
     const box = await panel.boundingBox();
@@ -165,9 +165,10 @@ test("fresh server markup and hydrated launcher agree in both themes and narrow 
           assert.ok(box && box.x >= 0 && box.x + box.width <= width + 1 && box.width === 56, `${theme} ${width}: launcher bounds`);
         }
         await launcher.focus();
-        const appearance = await launcher.evaluate((node) => ({ background: getComputedStyle(node).backgroundColor, border: getComputedStyle(node).borderColor }));
+        const appearance = await launcher.evaluate((node) => ({ background: getComputedStyle(node).backgroundColor, border: getComputedStyle(node).borderColor, borderWidth: getComputedStyle(node).borderWidth }));
         assert.equal(appearance.background, "rgb(32, 32, 43)");
-        assert.equal(appearance.border, "rgb(169, 156, 206)");
+        assert.equal(appearance.border, theme === "dark" ? "rgb(169, 156, 206)" : "rgb(17, 24, 39)");
+        assert.equal(appearance.borderWidth, "2px");
         assert.deepEqual(hydrationErrors, []);
       } finally {
         await context.close();
