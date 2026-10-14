@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { ArrowDown, ArrowRight, RotateCcw, Send, Sparkles, Square, X } from "lucide-react";
+import { ArrowDown, ArrowRight, MessageSquarePlus, RotateCcw, Send, Sparkles, Square, X } from "lucide-react";
 
 interface Source {
   title: string;
@@ -31,8 +31,24 @@ const MAX_STREAM_BYTES = 128 * 1024;
 const CHAT_TIMEOUT_MS = 30000;
 const OFFLINE_MESSAGE = "You appear to be offline. Please check your internet connection.";
 
-const localPath = /^\/(?:projects|blog|about|contact|resume|credentials|links|buildlog|community-wall)(?:\/[a-z0-9-]+)?$|^\/resume\/file$/;
-const publicPage = new Set(["/projects", "/blog", "/about", "/contact", "/resume", "/credentials", "/links", "/buildlog", "/community-wall"]);
+const localPath = /^\/$|^\/(?:projects|blog|about|contact|resume|credentials|links|buildlog|community-wall)(?:\/[a-z0-9-]+)?$/;
+const publicPage = new Set(["/", "/projects", "/blog", "/about", "/contact", "/resume", "/credentials", "/links", "/buildlog", "/community-wall"]);
+const pageLabels: Record<string, string> = {
+  "/": "Home", "/projects": "Projects", "/blog": "Blog", "/about": "About", "/contact": "Contact",
+  "/resume": "Resume", "/credentials": "Credentials", "/links": "Links",
+  "/buildlog": "Buildlog", "/community-wall": "Community Wall", "/resume/file": "Resume",
+};
+
+function friendlyPage(path: string, sources: Source[]) {
+  return sources.find((source) => source.path === path)?.title || pageLabels[path] ||
+    (path.startsWith("/blog/") ? "Blog" : "Projects");
+}
+
+function safePage(path: string, sources: Source[]) {
+  if (publicPage.has(path) || sources.some((source) => source.path === path)) return path;
+  const index = `/${path.split("/")[1]}`;
+  return publicPage.has(index) ? index : "/links";
+}
 
 function safeSources(value: unknown): Source[] {
   if (!Array.isArray(value)) return [];
@@ -87,8 +103,29 @@ function AssistantRobot() {
 }
 
 function Reply({ text, sources = [] }: { text: string; sources?: Source[] }) {
-  const withLinks = text.replace(/(^|\s)(\/(?:projects|blog|about|contact|resume|credentials|links|buildlog|community-wall)(?:\/[a-z0-9-]+)?)(?=$|[\s.,!?;)])/gm,
-    (_match, space: string, path: string) => `${space}[${path}](${path})`);
+  const withLinks = text
+    .replace(/https?:\/\/(?:harisx404\.vercel\.app|harisx404\.com)\/[^\s<>)\]]*/gi, (url) => {
+      const punctuation = url.match(/[.,!?;]+$/)?.[0] || "";
+      try {
+        const path = new URL(url.slice(0, url.length - punctuation.length)).pathname;
+        return localPath.test(path) ? path === "/" ? `[Home](/)${punctuation}` : `${path}${punctuation}` : url;
+      } catch {
+        return url;
+      }
+    })
+    .replace(/(^|\s)https?:\/\/[^\s<>)]+/gim, (_match, space: string) => `${space}external link omitted`)
+    .replace(/(^|\s)\[(blog|projects|about|contact|resume|credentials|links|buildlog|community wall)\](?=$|[\s.,!?;)])/gim,
+      (_match, space: string, name: string) => {
+        const path = Object.keys(pageLabels).find((key) => pageLabels[key].toLowerCase() === name.toLowerCase());
+        return path ? `${space}[${pageLabels[path]}](${path})` : _match;
+      })
+    .replace(/(^|\s)(\/(?:projects|blog|about|contact|resume|credentials|links|buildlog|community-wall)(?:\/[a-z0-9-]+)?)(?=$|[\s.,!?;)])/gm,
+      (_match, space: string, path: string) => {
+        const destination = safePage(path, sources);
+        const label = friendlyPage(destination === path ? path : destination, sources)
+          .replace(/\s+/g, " ").replace(/([\\`*_{}\[\]()#+.!>|-])/g, "\\$1");
+        return `${space}[${label}](${destination})`;
+      });
   return (
     <div className="min-w-0 break-words text-sm leading-6 [&>*+*]:mt-2">
       <ReactMarkdown
@@ -105,10 +142,15 @@ function Reply({ text, sources = [] }: { text: string; sources?: Source[] }) {
           code: ({ children }) => <code className="break-all rounded bg-black/[0.07] px-1 py-0.5 font-mono text-xs dark:bg-white/[0.09]">{children}</code>,
           a: ({ href, children }) => {
             let path = href || "";
-            if (path.startsWith("https://harisx404.com/")) path = new URL(path).pathname;
-            if (localPath.test(path) && (publicPage.has(path) || sources.some((source) => source.path === path))) return <Link href={path} className="font-medium underline decoration-text-secondary underline-offset-4 hover:decoration-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-text-primary">{children}</Link>;
-            if (path === "mailto:itsharis.tech@gmail.com") return <a href={path} className="font-medium underline decoration-text-secondary underline-offset-4 hover:decoration-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-text-primary">{children}</a>;
-            return <span>{children}</span>;
+            if (/^https?:\/\/(?:harisx404\.vercel\.app|harisx404\.com)\//i.test(path)) path = new URL(path).pathname;
+            if (localPath.test(path)) {
+              const destination = safePage(path, sources);
+              const label = destination !== path || (typeof children === "string" && (children.startsWith("/") || /^https?:\/\//i.test(children) || children.toLowerCase() === "blog"))
+                ? friendlyPage(destination, sources) : children;
+              return <Link href={destination} className="font-semibold underline decoration-text-secondary underline-offset-4 hover:decoration-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-text-primary">{label}</Link>;
+            }
+            if (path === "mailto:itsharis.tech@gmail.com") return <a href={path} className="font-semibold underline decoration-text-secondary underline-offset-4 hover:decoration-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-text-primary">{children === path ? "Email Haris" : children}</a>;
+            return <span>{typeof children === "string" && (children.startsWith("/") || /^https?:\/\//i.test(children)) ? "External link unavailable" : children}</span>;
           },
         }}
       >{withLinks}</ReactMarkdown>
@@ -480,10 +522,11 @@ export function ChatbotWidget() {
             </span>
             <div className="min-w-0 flex-1">
               <h2 className="truncate text-sm font-semibold leading-tight text-text-primary">Haris AI Assistant</h2>
-              <p className="mt-0.5 truncate text-[11px] leading-4 text-text-secondary">Projects, skills &amp; more</p>
+              <p className="mt-0.5 truncate text-xs leading-4 text-text-secondary">Projects, skills &amp; more</p>
             </div>
-            <button type="button" onClick={startOver} disabled={!messages.length && !input && !error} aria-label="Start a new chat" title="New chat" className="flex size-10 shrink-0 items-center justify-center rounded-xl text-text-secondary transition-colors hover:bg-bg-primary hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary disabled:cursor-not-allowed disabled:opacity-40">
-              <RotateCcw size={18} aria-hidden="true" />
+            <button type="button" onClick={startOver} disabled={!messages.length && !input && !error} aria-label="Start a new chat" title="New chat" className="flex size-10 shrink-0 items-center justify-center gap-1.5 rounded-xl text-text-secondary transition-colors enabled:hover:bg-bg-primary enabled:hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:px-2.5">
+              <MessageSquarePlus size={18} aria-hidden="true" />
+              <span className="hidden text-xs font-medium sm:inline">New chat</span>
             </button>
             <button type="button" aria-label="Close chat" title="Close chat" onClick={() => closeChat()} className="flex size-10 shrink-0 items-center justify-center rounded-xl text-text-secondary transition-colors hover:bg-bg-primary hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary">
               <X size={20} aria-hidden="true" />
@@ -495,9 +538,9 @@ export function ChatbotWidget() {
               <div className="flex min-h-full flex-col justify-center py-2 sm:py-3">
                 <h3 className="font-display text-[25px] leading-[1.12] text-text-primary">Hi, I&apos;m Haris&apos;s AI assistant.</h3>
                 <p className="mt-2 max-w-[34ch] text-[13px] leading-5 text-text-secondary">Explore Haris&apos;s projects, experience and writing, or find a way to connect.</p>
-                <div className="mt-4 flex flex-wrap gap-2" aria-label="Suggested questions">
+                <div className="mt-4 grid gap-2 sm:flex sm:flex-wrap" aria-label="Suggested questions">
                   {suggestions.map(({ label, prompt }) => (
-                    <button key={label} type="button" onClick={() => submitMessage(prompt)} disabled={isLoading} className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-border-primary bg-bg-primary px-3 py-1 text-left text-xs font-medium text-text-primary transition-colors hover:border-text-secondary hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary disabled:opacity-50 dark:hover:bg-white/[0.08]">
+                    <button key={label} type="button" onClick={() => submitMessage(prompt)} disabled={isLoading} className="inline-flex min-h-9 w-full items-center justify-between gap-1.5 rounded-full border border-border-primary bg-bg-primary px-3 py-1 text-left text-xs font-medium text-text-primary transition-colors hover:border-text-secondary hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary disabled:opacity-50 dark:hover:bg-white/[0.08] sm:w-auto sm:justify-start">
                       {label}<ArrowRight size={13} className="shrink-0 text-text-secondary" aria-hidden="true" />
                     </button>
                   ))}
@@ -506,12 +549,13 @@ export function ChatbotWidget() {
             )}
             {messages.map((message, index) => (
               <div key={index} className={`flex flex-col gap-1.5 ${message.role === "user" ? "items-end" : "items-start"}`}>
-                <span className="px-1 font-mono text-[10px] font-medium uppercase tracking-widest text-text-secondary">{message.role === "user" ? "You" : "Haris AI"}</span>
+                <span className="px-1 font-mono text-[11px] font-medium uppercase tracking-wider text-text-secondary">{message.role === "user" ? "You" : "AI assistant"}</span>
                 <div aria-live={message.role === "model" ? "polite" : undefined} className={message.role === "user" ? "max-w-[85%] rounded-2xl rounded-tr-md bg-text-primary px-4 py-2.5 text-bg-primary" : "w-full min-w-0 px-1 py-1 text-text-primary"}>
                   <Reply text={message.content} sources={message.sources} />
                   {message.role === "model" && message.complete === false && !isLoading && <p className="mt-2 text-xs text-text-secondary">Incomplete answer</p>}
                   {message.role === "model" && !!message.sources?.length && (
                     <div aria-label="Relevant pages" className="mt-3 flex flex-wrap gap-1.5 border-t border-border-primary pt-3">
+                      <span className="w-full font-mono text-[11px] font-medium uppercase tracking-wider text-text-secondary">Relevant pages</span>
                       {message.sources.map((source, sourceIndex) => (
                         <Link key={`${source.path}-${sourceIndex}`} href={source.path} className="inline-flex max-w-full min-h-8 items-center rounded-full border border-border-primary bg-bg-primary px-3 py-1 text-xs font-medium text-text-primary transition-colors hover:border-text-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-text-primary">
                           <span className="truncate">{source.title}</span>
@@ -572,7 +616,7 @@ export function ChatbotWidget() {
                   submitMessage(input);
                 }
               }} aria-label="Ask the portfolio assistant" placeholder="Ask a question..." rows={1} maxLength={2000} disabled={isLoading} className="max-h-24 min-h-10 min-w-0 flex-1 resize-none bg-transparent px-2 py-2 text-sm leading-5 text-text-primary placeholder:text-text-secondary focus:outline-none disabled:opacity-60" />
-               <button type="submit" aria-label="Send chat message" title="Send message" disabled={!input.trim() || isLoading} className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-text-primary text-bg-primary transition-colors hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary disabled:cursor-not-allowed disabled:opacity-40"><Send size={16} aria-hidden="true" /></button>
+               <button type="submit" aria-label="Send chat message" title="Send message" disabled={!input.trim() || isLoading} className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-text-primary text-bg-primary transition-colors enabled:hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary disabled:cursor-not-allowed disabled:opacity-40"><Send size={16} aria-hidden="true" /></button>
             </div>
              <p className="mt-2 text-center text-xs leading-4 text-text-secondary">AI can be wrong. Verify important details.</p>
           </form>

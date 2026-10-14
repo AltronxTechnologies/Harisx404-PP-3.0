@@ -5,16 +5,40 @@ import { after, before, test } from "node:test";
 type Row = Record<string, unknown>;
 const tables: Record<string, Row[]> = {};
 const requests: { table: string; url: URL; key: string }[] = [];
+let missingProjectColumns = false;
+let missingExperienceColumns = false;
+let missingFaqTable = false;
 let retrieve: (question: string) => Promise<{ context: string; sources: { title: string; path: string }[] }>;
 
 const server = createServer((req, res) => {
   const url = new URL(req.url || "/", "http://localhost");
   const table = url.pathname.replace("/rest/v1/", "");
   requests.push({ table, url, key: String(req.headers.apikey || "") });
+  if (table === "projects" && missingProjectColumns && url.searchParams.get("select")?.includes("case_study_sections")) {
+    res.writeHead(400, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ code: "42703", message: "column case_study_sections does not exist" }));
+    return;
+  }
+  if (table === "experience" && missingExperienceColumns && url.searchParams.get("select")?.includes("location_type")) {
+    res.writeHead(400, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ code: "42703", message: "column location_type does not exist" }));
+    return;
+  }
+  if (table === "faqs" && missingFaqTable) {
+    res.writeHead(404, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ code: "PGRST205", message: "relation faqs does not exist" }));
+    return;
+  }
   let rows = tables[table] || [];
   for (const [column, value] of url.searchParams) {
     if (value.startsWith("eq.")) rows = rows.filter((row) => String(row[column]) === value.slice(3));
     if (value.startsWith("lte.")) rows = rows.filter((row) => String(row[column]) <= value.slice(4));
+    if (value.startsWith("ilike.")) rows = rows.filter((row) => String(row[column] || "").toLowerCase().includes(value.slice(6).replaceAll("%", "").toLowerCase()));
+  }
+  const order = url.searchParams.get("order")?.split(",")[0];
+  if (order) {
+    const [column, direction] = order.split(".");
+    rows = [...rows].sort((a, b) => (String(a[column] || "").localeCompare(String(b[column] || ""))) * (direction === "desc" ? -1 : 1));
   }
   rows = rows.slice(0, Number(url.searchParams.get("limit") || 100));
   res.writeHead(200, { "Content-Type": "application/json" });
@@ -83,6 +107,83 @@ test("latest article means newest publication, not an older keyword match", asyn
   tables.blog_posts = [];
 });
 
+test("latest article skips a database row whose local page is a draft", async () => {
+  const { getLocalMetadata } = await import("../app/blog/local-metadata");
+  const metadata = getLocalMetadata();
+  metadata.set("draft-shadow", { slug: "draft-shadow", title: "Draft", summary: "", content: "", publishedAt: "", categories: [], draft: true, imageName: "" });
+  tables.blog_posts = [
+    { title: "Published draft shadow", slug: "draft-shadow", status: "published", published_at: "2026-10-12T00:00:00Z", summary: "Must not be linked" },
+    { title: "Visible article", slug: "visible-article", status: "published", published_at: "2026-10-11T00:00:00Z", summary: "Visible published copy" },
+  ];
+  try {
+    const found = await retrieve("latest blog");
+    assert.deepEqual(found.sources, [{ title: "Visible article", path: "/blog/visible-article" }]);
+    assert.doesNotMatch(found.context, /Must not be linked/);
+  } finally {
+    metadata.delete("draft-shadow");
+    tables.blog_posts = [];
+  }
+});
+
+test("recent-window saturation still finds older published titles but not drafts", async () => {
+  tables.projects = [
+    ...Array.from({ length: 80 }, (_, index) => ({ title: `Recent entry ${index}`, slug: `recent-${index}`, status: "published", updated_at: "2026-10-10T00:00:00Z" })),
+    { title: "Aster archive", slug: "aster-archive", status: "published", updated_at: "2024-01-01T00:00:00Z", description: "Aster's newly expanded details." },
+    { title: "Aster private", slug: "aster-private", status: "draft", updated_at: "2023-01-01T00:00:00Z", description: "Unpublished details" },
+  ];
+  const found = await retrieve("Aster archive");
+  assert.ok(found.sources.some((source) => source.path === "/projects/aster-archive"));
+  assert.doesNotMatch(found.context, /Unpublished details/);
+  assert.ok(requests.some((request) => request.table === "projects" && request.url.searchParams.has("title") && Number(request.url.searchParams.get("limit")) <= 5));
+  tables.projects = [];
+});
+
+test("older published blog titles remain discoverable beyond the recent window", async () => {
+  tables.blog_posts = [
+    ...Array.from({ length: 100 }, (_, index) => ({ title: `Newer note ${index}`, slug: `newer-note-${index}`, status: "published", published_at: "2026-10-10T00:00:00Z", summary: "Current notes" })),
+    { title: "Aurora archive", slug: "aurora-archive", status: "published", published_at: "2024-01-01T00:00:00Z", content: "Aurora published information was revised." },
+    { title: "Aurora private", slug: "aurora-private", status: "draft", published_at: "2023-01-01T00:00:00Z", content: "Hidden content" },
+  ];
+  const found = await retrieve("Aurora archive");
+  assert.ok(found.sources.some((source) => source.path === "/blog/aurora-archive"));
+  assert.doesNotMatch(found.context, /Hidden content/);
+  assert.ok(requests.some((request) => request.table === "blog_posts" && request.url.searchParams.has("title") && Number(request.url.searchParams.get("limit")) <= 5));
+  tables.blog_posts = [];
+});
+
+test("a missing optional case-study column does not hide published project basics", async () => {
+  missingProjectColumns = true;
+  tables.projects = [{ title: "Comet project", slug: "comet-project", status: "published", description: "Recently updated public details" }];
+  try {
+    const found = await retrieve("Comet project");
+    assert.ok(found.sources.some((source) => source.path === "/projects/comet-project"));
+    assert.match(found.context, /Recently updated public details/);
+  } finally {
+    missingProjectColumns = false;
+    tables.projects = [];
+  }
+});
+
+test("published experience stays searchable when optional timeline columns are absent", async () => {
+  missingExperienceColumns = true;
+  tables.experience = [{ role: "SOC Analyst Intern", company: "SignalWorks", status: "published", summary: "New public incident response work" }];
+  try {
+    const found = await retrieve("SignalWorks experience");
+    assert.ok(found.sources.some((source) => source.path === "/about"));
+    assert.match(found.context, /New public incident response work/);
+  } finally {
+    missingExperienceColumns = false;
+    tables.experience = [];
+  }
+});
+
+test("two-letter technical questions can match fresh public project titles", async () => {
+  tables.projects = [{ title: "AI systems", slug: "ai-systems", status: "published", description: "New public AI work" }];
+  const found = await retrieve("AI");
+  assert.ok(found.sources.some((source) => source.path === "/projects/ai-systems"));
+  tables.projects = [];
+});
+
 test("short email and SOC questions rank exact site facts above incidental mentions", async () => {
   tables.blog_posts = [{ title: "Social networks", slug: "social-networks", status: "published", published_at: "2026-01-01T00:00:00Z", summary: "A social experience and email messaging." }];
   tables.experience = [{ role: "SOC Analyst Intern", company: "Tech Hierarchy", summary: "Wazuh SIEM and threat monitoring", status: "published" }];
@@ -122,6 +223,22 @@ test("public views and visible FAQs contribute, but malicious slugs and excerpt 
   tables.public_buildlog_projects = [];
   tables.public_community_wall_messages = [];
   tables.faqs = [];
+});
+
+test("the assistant uses public FAQ defaults only when Home displays them", async () => {
+  tables.site_settings = [{ show_faq_section: true }];
+  missingFaqTable = true;
+  try {
+    const visible = await retrieve("How do you approach security in your builds?");
+    assert.match(visible.context, /Security is the architecture/);
+    assert.ok(visible.sources.some((source) => source.path === "/"));
+    tables.site_settings = [{ show_faq_section: false }];
+    const hidden = await retrieve("How do you approach security in your builds?");
+    assert.doesNotMatch(hidden.context, /Security is the architecture/);
+  } finally {
+    missingFaqTable = false;
+    tables.site_settings = [];
+  }
 });
 
 test("inactive private resume never yields a PDF link; fallback and active public metadata do", async () => {

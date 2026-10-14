@@ -1,6 +1,8 @@
 import { siteContent } from "@/app/data/site-content";
+import { fallbackFaqs } from "@/app/data/home-faqs";
 import { siteMetadata } from "@/app/data/siteMetadata";
 import { getPublicSupabase } from "@/app/lib/supabase/safe";
+import { isLocalBlogDraft } from "@/app/blog/local-metadata";
 
 export type PublicKnowledge = {
   context: string;
@@ -15,6 +17,7 @@ const MAX_ENTRY = 4200;
 const MAX_SCAN_TEXT = 100000;
 const MAX_RESULTS = 5;
 const STOP = new Set(["about", "are", "can", "did", "does", "for", "from", "have", "how", "his", "into", "more", "the", "their", "this", "what", "when", "where", "which", "who", "with", "would", "your", "haris", "muhammad", "site", "tell", "me"]);
+const SHORT_TECH_TERMS = new Set(["ai", "ml", "ui", "ux", "go"]);
 
 function string(value: unknown, max = MAX_SCAN_TEXT): string {
   return typeof value === "string" ? value.trim().slice(0, max) : "";
@@ -49,7 +52,7 @@ function clean(value: string): string {
 function terms(question: string): string[] {
   const matches: string[] = question.toLowerCase().match(/[a-z0-9]+/g) || [];
   const aliases: Record<string, string> = { emal: "email", mail: "email", number: "phone", gpa: "cgpa", cv: "resume", available: "availability", worked: "work" };
-  return Array.from(new Set<string>(matches.map((term) => aliases[term] || term).filter((term) => term.length > 2 && !STOP.has(term)))).slice(0, 18);
+  return Array.from(new Set<string>(matches.map((term) => aliases[term] || term).filter((term) => (term.length > 2 || SHORT_TECH_TERMS.has(term)) && !STOP.has(term)))).slice(0, 18);
 }
 
 function score(entry: Entry, words: string[], question: string): number {
@@ -81,6 +84,15 @@ function excerpt(entry: Entry, words: string[]): string {
   return `${intro} [excerpt; full public record at source] ${passage}`.slice(0, MAX_ENTRY);
 }
 
+async function publicRows(request: PromiseLike<{ data: unknown; error: unknown }>): Promise<Row[]> {
+  try {
+    const { data, error } = await request;
+    return !error && Array.isArray(data) ? data as Row[] : [];
+  } catch {
+    return [];
+  }
+}
+
 /** Fresh anonymous reads only. Database failures are not evidence that content is published. */
 export async function retrievePublicKnowledge(question: string): Promise<PublicKnowledge> {
   const query = string(question, 300);
@@ -95,6 +107,9 @@ export async function retrievePublicKnowledge(question: string): Promise<PublicK
   ];
 
   const db = getPublicSupabase();
+  if (!db) {
+    for (const faq of fallbackFaqs) entries.push({ kind: "faq frequently asked question", title: faq.q, path: "/", text: faq.a });
+  }
   if (db) {
     const now = new Date().toISOString();
     const dbSignal = AbortSignal.timeout(3000);
@@ -118,26 +133,63 @@ export async function retrievePublicKnowledge(question: string): Promise<PublicK
       return result.status === "fulfilled" && !result.value.error && Array.isArray(result.value.data)
         ? result.value.data as Row[] : [];
     };
-    for (const row of rows(0)) {
+    let projects = rows(0);
+    const projectError = results[0].status === "fulfilled" ? results[0].value.error : null;
+    if (!latestArticle && projectError && /column|schema cache|does not exist/i.test(projectError.message)) {
+      projects = await publicRows(db.from("projects").select("title, slug, status, tagline, description, content, tech_stack, features, category, year")
+        .eq("status", "published").order("id", { ascending: true }).limit(80).abortSignal(dbSignal));
+    }
+    let blogs = rows(1);
+    if (latestArticle && blogs[0] && isLocalBlogDraft(String(blogs[0].slug))) {
+      blogs = await publicRows(db.from("blog_posts").select("title, slug, status, summary, content, published_at, updated_at")
+        .eq("status", "published").lte("published_at", now).order("published_at", { ascending: false }).limit(10).abortSignal(dbSignal));
+    }
+    // Only add targeted title searches when the recent window is full; ordinary
+    // questions keep their existing query budget and every extra read is public-gated.
+    const keyword = [...words].sort((a, b) => b.length - a.length)[0];
+    if (!latestArticle && keyword && projects.length === 80) {
+      projects.push(...await publicRows(db.from("projects").select("title, slug, status, tagline, description, content, tech_stack, features, category, year")
+        .eq("status", "published").ilike("title", `%${keyword}%`).limit(5).abortSignal(dbSignal)));
+    }
+    if (!latestArticle && keyword && blogs.length === 100) {
+      blogs.push(...await publicRows(db.from("blog_posts").select("title, slug, status, summary, content, published_at, updated_at")
+        .eq("status", "published").lte("published_at", now).ilike("title", `%${keyword}%`).limit(5).abortSignal(dbSignal)));
+    }
+    let experiences = rows(4);
+    const experienceError = results[4].status === "fulfilled" ? results[4].value.error : null;
+    if (!latestArticle && experienceError && /column|schema cache|does not exist/i.test(experienceError.message)) {
+      experiences = await publicRows(db.from("experience").select("role, company, summary, status")
+        .eq("status", "published").order("display_order", { ascending: true }).limit(80).abortSignal(dbSignal));
+    }
+    for (const row of projects) {
       const path = slugPath("/projects", row.slug);
-      if (row.status !== "published" || !path) continue;
+      if (row.status !== "published" || !path || entries.some((entry) => entry.path === path)) continue;
       entries.push({ kind: "project case study", title: string(row.title, 150), path, text: field(row, ["tagline", "description", "content", "category", "year", "project_stage", "latest_update_label", "source_note", "tech_stack", "features"]) + "\n" + JSON.stringify(row.case_study_sections ?? {}).slice(0, MAX_SCAN_TEXT) });
     }
-    for (const row of rows(1)) {
+    for (const row of blogs) {
       const path = slugPath("/blog", row.slug);
-      if (row.status !== "published" || !row.published_at || String(row.published_at) > now || !path) continue;
+      if (row.status !== "published" || !row.published_at || String(row.published_at) > now || !path || isLocalBlogDraft(String(row.slug)) || entries.some((entry) => entry.path === path)) continue;
       entries.push({ kind: "blog article", title: string(row.title, 150), path, text: field(row, ["summary", "published_at", "updated_at", "content"]) });
     }
     for (const row of rows(2)) entries.push({ kind: "credential certification", title: string(row.title, 150), path: "/credentials", text: field(row, ["issuer", "credential_id"]) });
     for (const row of rows(3)) entries.push({ kind: "buildlog release", title: string(row.name, 150), path: "/buildlog", text: field(row, ["tagline", "info", "current_version", "project_status"]) + "\n" + JSON.stringify(row.items ?? []).slice(0, MAX_SCAN_TEXT) });
-    for (const row of rows(4)) {
+    for (const row of experiences) {
       if (row.status !== "published") continue;
       entries.push({ kind: "experience work career", title: `${string(row.role, 100)} at ${string(row.company, 100)}`, path: "/about", text: field(row, ["location", "location_type", "employment_type", "start_date", "end_date", "start_month", "start_year", "end_month", "end_year", "is_current", "summary", "bullets"]) + "\n" + JSON.stringify(row.highlights ?? []).slice(0, MAX_SCAN_TEXT) });
     }
-    const setting = rows(5)[0];
+    let setting: Row | undefined = rows(5)[0];
+    const settingsError = results[5].status === "fulfilled" ? results[5].value.error : null;
+    if (!latestArticle && settingsError && /column|schema cache|does not exist/i.test(settingsError.message)) {
+      setting = (await publicRows(db.from("site_settings").select("site_name, seo_description").limit(1).abortSignal(dbSignal)))[0];
+    }
     if (setting) entries.push({ kind: "site settings contact social", title: "Site settings", path: "/links", text: field(setting, ["site_name", "seo_description", "github_url", "linkedin_url", "twitter_url", "email_address"]) });
-    if (setting?.show_faq_section !== false && rows(5).length) {
-      for (const row of rows(6)) if (row.is_visible === true) entries.push({ kind: "faq frequently asked question", title: string(row.question, 150), path: "/", text: string(row.answer) });
+    if (results[5].status === "fulfilled" && !results[5].value.error && setting?.show_faq_section !== false) {
+      const faqResult = results[6];
+      if (faqResult.status === "fulfilled" && !faqResult.value.error) {
+        for (const row of rows(6)) if (row.is_visible === true) entries.push({ kind: "faq frequently asked question", title: string(row.question, 150), path: "/", text: string(row.answer) });
+      } else {
+        for (const faq of fallbackFaqs) entries.push({ kind: "faq frequently asked question", title: faq.q, path: "/", text: faq.a });
+      }
     }
     // Visitor messages are only relevant to questions about the wall, not a source
     // of biographical claims about the site owner.

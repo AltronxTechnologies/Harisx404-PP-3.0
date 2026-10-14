@@ -232,10 +232,43 @@ test("assistant replies display readable Markdown and only trusted links", async
     assert.equal(await panel.locator("strong").innerText(), "emphasis");
     assert.equal(await panel.locator('a[href="/blog/example-post"]').count(), 2);
     assert.equal(await panel.locator('a[href="/contact"]').count(), 1);
+    assert.equal((await panel.innerText()).includes("/contact"), false);
     assert.equal(await panel.locator('a[href^="javascript:"]').count(), 0);
     assert.equal(await panel.locator("script").count(), 0);
     const box = await panel.boundingBox();
     assert.ok(box.x >= 0 && box.x + box.width <= 321);
+  } finally {
+    await browser.close();
+  }
+});
+
+test("bare paths, own-site URLs and bracketed page names become descriptive safe links", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage();
+    await page.route("**/api/ai/chat", (route) => route.fulfill({
+      status: 200, headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        text: "Read /blog/example-post or [blog]. Explore https://harisx404.vercel.app/projects/unknown-project or [other](/blog/unpublished). See [FAQ](/), [https://harisx404.vercel.app/about](https://harisx404.vercel.app/about), and https://unverified.example/path.",
+        sources: [{ title: "Example article", path: "/blog/example-post" }, { title: "Public FAQ", path: "/" }],
+      }),
+    }));
+    await page.goto(`${baseUrl}/links`, { waitUntil: "domcontentloaded" });
+    await page.getByRole("button", { name: "Toggle chat" }).click();
+    const panel = page.getByRole("dialog", { name: "Haris AI assistant" });
+    await panel.getByRole("textbox", { name: "Ask the portfolio assistant" }).fill("Which article?");
+    await panel.getByRole("button", { name: "Send chat message" }).click();
+    await panel.getByRole("link", { name: "Example article" }).first().waitFor();
+    assert.equal(await panel.locator('a[href="/blog/example-post"]').count(), 2);
+    assert.equal(await panel.locator('a[href="/blog"]').count(), 2);
+    assert.equal(await panel.locator('a[href="/projects"]').count(), 1);
+    assert.equal(await panel.locator('a[href="/"]').count(), 2);
+    assert.equal(await panel.getByRole("link", { name: "About" }).count(), 1);
+    assert.equal(await panel.locator('a[href="/blog/unpublished"],a[href="/projects/unknown-project"]').count(), 0);
+    assert.equal(await panel.locator('a[href^="https://unverified.example"]').count(), 0);
+    const text = await panel.innerText();
+    assert.doesNotMatch(text, /\/blog\/example-post|\/blog\/unpublished|https:\/\/harisx404\.vercel\.app|https:\/\/unverified\.example/);
+    assert.equal(await panel.locator('a[href="/blog/example-post"]').first().evaluate((node) => getComputedStyle(node).textDecorationLine), "underline");
   } finally {
     await browser.close();
   }
@@ -285,17 +318,17 @@ test("offline, suggested questions, new chat and keyboard send have working cont
     assert.equal(await panel.getByRole("alert").count(), 0);
     await context.setOffline(false);
     await panel.getByRole("button", { name: "Skills & experience" }).click();
-    await panel.getByText("See /projects for case studies.").waitFor();
+    await panel.getByRole("link", { name: "Projects" }).waitFor();
     assert.match(requests[0].messages.at(-1).content, /technologies/);
     await panel.getByRole("button", { name: "Start a new chat" }).click();
-    assert.equal(await panel.getByText("See /projects for case studies.").count(), 0);
+    assert.equal(await panel.getByRole("link", { name: "Projects" }).count(), 0);
     const input = panel.getByRole("textbox", { name: "Ask the portfolio assistant" });
     await input.fill("How can I collaborate?");
     await input.press("Enter");
-    await panel.getByText("See /projects for case studies.").waitFor();
+    await panel.getByRole("link", { name: "Projects" }).waitFor();
     assert.equal(requests.length, 2);
     assert.equal(requests[1].messages.at(-1).content, "How can I collaborate?");
-    await panel.getByRole("link", { name: "/projects" }).click();
+    await panel.getByRole("link", { name: "Projects" }).click();
     await page.waitForURL("**/projects");
     assert.equal(await panel.count(), 0);
     await page.getByRole("button", { name: "Toggle chat" }).click();

@@ -113,7 +113,7 @@ test("JSON sources and one-time idle hint respect reduced motion and session dis
     const panel = page.locator("#portfolio-chat-panel");
     await panel.getByRole("textbox", { name: "Ask the portfolio assistant" }).fill("How to reach out?");
     await panel.getByRole("button", { name: "Send chat message" }).click();
-    await panel.getByRole("link", { name: "Contact page" }).waitFor();
+    await panel.getByRole("link", { name: "Contact page" }).first().waitFor();
     assert.equal(await panel.getByRole("link", { name: "Bad" }).count(), 0);
     assert.equal(await panel.locator('a[href="/contact"]').count(), 2);
     await context.close();
