@@ -228,7 +228,7 @@ test("missing migration leaves post attachments untouched and picker unavailable
   }
 });
 
-test("a mapped Blog post displays its checked-in cover and diagram separately from managed uploads", async () => {
+test("a Blog post displays only its managed attachments", async () => {
   const React = await import("react");
   const [{ createRoot }, { act }, { BlogImageManager }] = await Promise.all([
     import("react-dom/client"), import("react-dom/test-utils"), import("../app/components/admin/BlogImageManager"),
@@ -240,11 +240,11 @@ test("a mapped Blog post displays its checked-in cover and diagram separately fr
   const root = createRoot(host);
   try {
     await act(async () => { root.render(React.createElement(BlogImageManager, {
-      slug: "reliable-rag", images: [], onImagesChange: () => {}, onAvailabilityChange: () => {}, onUploaded: () => {}, onRemoved: () => {}, onUploadingChange: () => {}, coverUrl: "https://example.com/old-cover.jpg", content: "", onCoverChange: () => {},
+       images: [], onImagesChange: () => {}, onAvailabilityChange: () => {}, onUploaded: () => {}, onRemoved: () => {}, onUploadingChange: () => {}, coverUrl: "https://example.com/old-cover.jpg", content: "", onCoverChange: () => {},
     })); await new Promise((resolve) => setTimeout(resolve, 0)); });
-    assert.match(host.textContent || "", /Checked-in article artwork/);
+    assert.doesNotMatch(host.textContent || "", /Checked-in article artwork/);
     assert.match(host.textContent || "", /0 \/ 20 attached/);
-    assert.equal(host.querySelectorAll('img[src^="/blog/article-images/"]').length, 2);
+    assert.equal(host.querySelectorAll('img[src^="/blog/article-images/"]').length, 0);
     assert.equal(host.querySelectorAll('section[aria-labelledby="blog-images-heading"] button[aria-label^="Delete"]').length, 0);
   } finally {
     await act(async () => root.unmount());

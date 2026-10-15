@@ -1,9 +1,3 @@
-const imageRoot = "/blog/article-images";
-const legacyAgentImages = [
-  "![h](https://res.cloudinary.com/i22q5puf/image/upload/v1792000121/portfolio/blog/c1000000-0000-0000-0000-000000000001/n5llzec1gneqawlpspxh.webp)",
-  "![j](https://res.cloudinary.com/i22q5puf/image/upload/v1792000125/portfolio/blog/c1000000-0000-0000-0000-000000000001/uesnrbe5wu7opbui9bfb.webp)",
-];
-
 export const articleImages = {
   "securing-ai-agents": {
     cover: "securing-ai-agents-cover.webp",
@@ -76,34 +70,3 @@ export const articleImages = {
     caption: "Shared contracts define types, while runtime validation still protects the network boundary.",
   },
 } as const;
-
-export function articleCover(slug: string, fallback: string) {
-  const entry = articleImages[slug as keyof typeof articleImages];
-  if (!entry) return fallback;
-  const legacyCover = !fallback || fallback === "/blog/production-placeholder.jpg" ||
-    fallback.includes("images.unsplash.com/photo-1550751827-4bd374c3f58b") ||
-    (slug === "securing-ai-agents" && fallback.includes("/n5llzec1gneqawlpspxh.webp"));
-  return legacyCover ? `${imageRoot}/${entry.cover}` : fallback;
-}
-
-export function articleIllustration(slug: string, code: string) {
-  const entry = articleImages[slug as keyof typeof articleImages];
-  if (!entry) return code;
-  // The published agent article already embeds these two older images. Hide only
-  // those exact references until the stored body can be updated after deployment.
-  const body = slug === "securing-ai-agents"
-    ? legacyAgentImages.reduce((text, image) => text.replace(image, "\n\n"), code)
-    : code;
-  if (/!\[[^\]]*\]\([^)]+\)|<Image\b|<img\b/i.test(body)) return body;
-
-  const headings = Array.from(body.matchAll(/^##[ \t]+(.+?)\s*$/gm));
-  const matches = headings.filter((heading) => heading[1]?.trim() === entry.section);
-  if (matches.length !== 1) return body;
-  const index = headings.indexOf(matches[0]);
-  const next = headings[index + 1];
-  if (!next || next.index === undefined) return body;
-
-  const image = `${imageRoot}/${entry.illustration}`;
-  if (body.includes(image)) return body;
-  return `${body.slice(0, next.index).trimEnd()}\n\n![${entry.alt}](${image} "${entry.caption}")\n\n${body.slice(next.index)}`;
-}

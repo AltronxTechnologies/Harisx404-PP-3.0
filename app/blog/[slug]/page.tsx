@@ -20,14 +20,13 @@ import {
   getBlogPostBySlug,
   formatDate,
 } from "@/app/lib/utils";
-import { optimizeImageUrl } from "@/app/lib/image-utils";
+import { isOriginalBlogWebp, optimizeImageUrl } from "@/app/lib/image-utils";
 import { fetchBlogIndexPosts, fetchBlogReactionSummaries, isLocalBlogDraft } from "@/app/blog/data";
 import { getBlogImageSrc } from "@/app/components/blog/blogImage";
 import { formatReadingTime } from "@/app/lib/reading-time";
 import { siteMetadata } from "@/app/data/siteMetadata";
 import { getPublicSupabase } from "@/app/lib/supabase/safe";
 import { articleFaqToc } from "@/app/lib/article-faq-accordions";
-import { articleCover, articleIllustration } from "@/app/blog/article-images";
 
 interface BlogPageProps {
   params: Promise<{ slug: string }>;
@@ -116,7 +115,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
     ? `${post.readingTimeMinutes} min read`
     : formatReadingTime(post.code);
 
-  const coverSrc = blogCoverSrc(articleCover(post.slug, post.imageName));
+  const coverSrc = blogCoverSrc(post.imageName);
   const modifiedAt = post.modifiedAt && Date.parse(post.modifiedAt) >= Date.parse(post.publishedAt) ? post.modifiedAt : undefined;
 
   return (
@@ -206,7 +205,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
         <div className="relative mx-auto mt-8 w-full max-w-[728px] px-4 md:px-6">
           <Image
             src={coverSrc}
-            unoptimized={coverSrc.startsWith("/blog/article-images/")}
+            unoptimized={isOriginalBlogWebp(coverSrc)}
             alt=""
             width={1200}
             height={675}
@@ -224,7 +223,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
           className="blog-article-shell prose prose-neutral dark:prose-invert mx-auto min-w-0 max-w-3xl break-words [&>*:first-child]:mt-0 [&>div>*:first-child]:mt-0"
           style={{ maxWidth: "680px" }}
         >
-          <MDXContent code={articleIllustration(post.slug, post.code)} faqAccordions components={{ img: BlogArticleImage, Image: BlogArticleImage, pre: BlogCodeWindow, code: BlogInlineCode }} />
+          <MDXContent code={post.code} faqAccordions components={{ img: BlogArticleImage, Image: BlogArticleImage, pre: BlogCodeWindow, code: BlogInlineCode }} />
         </article>
       </div>
 
@@ -295,7 +294,7 @@ export async function generateMetadata(
   }
 
   const previousImages = (await parent)?.openGraph?.images || [];
-  const coverSrc = blogCoverSrc(articleCover(post.slug, post.imageName));
+  const coverSrc = blogCoverSrc(post.imageName);
   const socialImage = coverSrc
     ? new URL(coverSrc, siteMetadata.siteUrl).href
     : `/api/og?title=${encodeURIComponent(post.title)}&category=Blog`;

@@ -59,10 +59,7 @@ test("Admin Media library renders, paginates and protects mocked actions", { ski
     assert.equal((await page.goto("http://localhost:3000/admin/media", { waitUntil: "domcontentloaded" }))?.status(), 200);
     await page.getByRole("heading", { name: "Media Library" }).waitFor();
     await page.getByRole("status").filter({ hasText: /Showing .*files/ }).waitFor();
-    const localAssets = page.locator('section[aria-labelledby="local-article-assets-heading"]');
-    assert.equal(await localAssets.getByRole("article").count(), 20);
-    assert.equal(await localAssets.getByRole("button", { name: /^Delete / }).count(), 0, "checked-in assets cannot be deleted as Cloudinary media");
-    assert.equal(await localAssets.locator('img[src="/blog/article-images/reliable-rag-cover.webp"]').count(), 1);
+    assert.equal(await page.locator('section[aria-labelledby="local-article-assets-heading"]').count(), 0);
     assert.equal(await page.getByRole("alert").filter({ hasText: "Media could not be loaded" }).count(), 0);
     const response = await context.request.get("http://localhost:3000/api/admin/media?limit=12&offset=0");
     assert.equal(response.status(), 200);
@@ -86,11 +83,6 @@ test("Admin Media library renders, paginates and protects mocked actions", { ski
     for (const [width, columns] of [[320, 1], [390, 1], [768, 3], [1280, 4], [1440, 4]]) {
       await page.setViewportSize({ width, height: 900 });
       await page.waitForTimeout(250);
-      const localMetrics = await localAssets.locator(':scope > div.grid').evaluate((grid) => ({
-        columns: getComputedStyle(grid).gridTemplateColumns.split(" ").length,
-        buttons: [...grid.querySelectorAll("button")].every((button) => button.getBoundingClientRect().height >= 44),
-      }));
-      if (localMetrics.columns !== columns || !localMetrics.buttons) failures.push(`local-assets-${width}:${JSON.stringify(localMetrics)}`);
       const metrics = await page.locator('section[aria-labelledby="media-list-heading"] > div.grid').evaluate((grid) => {
         const cards = [...grid.children];
         const buttons = cards.flatMap((card) => [...card.querySelectorAll("button")]);
@@ -125,8 +117,6 @@ test("Admin Media library renders, paginates and protects mocked actions", { ski
     }
 
     stage = "copy";
-    await localAssets.getByRole("button", { name: "Copy link for reliable-rag-cover.webp" }).click();
-    assert.equal(await page.evaluate(() => navigator.clipboard.readText()), "http://localhost:3000/blog/article-images/reliable-rag-cover.webp");
     await page.getByRole("button", { name: `Copy link for ${expectedName}` }).first().click();
     await page.getByRole("button", { name: `Copy link for ${expectedName}` }).first().getByText("Copied").waitFor();
     assert.equal(await page.evaluate(() => navigator.clipboard.readText()), first.secure_url || first.url, "Copied URL did not match the stored image");
@@ -159,12 +149,17 @@ test("Admin Media library renders, paginates and protects mocked actions", { ski
     if (postError || !post) throw new Error("Published Blog post unavailable");
     assert.equal((await page.goto(`http://localhost:3000/admin/blogs/${post.id}`, { waitUntil: "domcontentloaded" }))?.status(), 200);
     stage = "blog-cover-assets";
-    await page.getByRole("heading", { name: "Checked-in article artwork" }).waitFor();
+    await page.getByRole("heading", { name: "Post images" }).waitFor();
+    await page.getByRole("region", { name: "Post image thumbnails" }).locator("img").first().waitFor();
     stage = "blog-cover-thumbnail";
-    const preview = page.getByRole("img", { name: "Published local cover preview" });
-    assert.equal(await preview.getAttribute("src"), "/blog/article-images/reliable-rag-cover.webp");
+    const preview = page.getByRole("img", { name: "Cover preview" });
+    assert.equal(await preview.getAttribute("src"), post.cover_image_url);
+    stage = "blog-cover-input";
     assert.equal(await page.locator("#blog-cover-url").inputValue(), post.cover_image_url);
-    assert.equal(await page.locator('img[src^="/blog/article-images/"]').count(), 3, "Blog form displays the effective cover and both version-controlled assets");
+    stage = "blog-cover-local-check";
+    assert.equal(await page.locator('img[src^="/blog/article-images/"]').count(), 0);
+    stage = "blog-cover-attachments";
+    assert.equal(await page.getByRole("region", { name: "Post image thumbnails" }).locator("img").count(), 2);
     stage = "blog-cover-fill";
     await page.locator("#blog-cover-url").fill("https://example.com/new-cover.webp");
     stage = "blog-cover-verify";

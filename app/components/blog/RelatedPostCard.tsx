@@ -1,12 +1,11 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { optimizeImageUrl } from "@/app/lib/image-utils";
+import { isOriginalBlogWebp, optimizeImageUrl } from "@/app/lib/image-utils";
 import { ArticleCardArrow } from "./ArticleCardArrow";
 import { ReactionSummaryPill } from "./ReactionSummaryPill";
 import { getBlogImageSrc } from "./blogImage";
 import type { ReactionSummary } from "@/app/blog/data";
-import { articleCover } from "@/app/blog/article-images";
 
 interface RelatedPostCardProps {
   className?: string;
@@ -19,7 +18,7 @@ interface RelatedPostCardProps {
 
 /** Related-post card for the article's curated recommendations. */
 export function RelatedPostCard({ className = "flex", slug, title, summary, imageName, reactionSummary }: RelatedPostCardProps) {
-  const preferredImage = articleCover(slug, imageName || "");
+  const preferredImage = imageName || "";
   const coverSrc = preferredImage
     ? getBlogImageSrc(optimizeImageUrl(
         preferredImage.startsWith("http") || preferredImage.startsWith("/") ? preferredImage : `/blog/${preferredImage}`,
@@ -37,7 +36,7 @@ export function RelatedPostCard({ className = "flex", slug, title, summary, imag
         <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-neutral-200 dark:bg-neutral-900">
           <Image
             src={coverSrc}
-            unoptimized={coverSrc.startsWith("/blog/article-images/")}
+             unoptimized={isOriginalBlogWebp(coverSrc)}
             alt=""
             fill
              sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"

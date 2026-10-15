@@ -6,15 +6,10 @@ import { Check, ChevronLeft, ChevronRight, Copy, Image as ImageIcon, Loader2, Tr
 import { AdminConfirmDialog } from "@/app/components/admin/AdminConfirmDialog";
 import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
 import { prepareImageForUpload } from "@/app/lib/admin/prepare-image-upload";
-import { articleImages } from "@/app/blog/article-images";
 
 const PAGE_SIZE = 12;
 const MAX_UPLOAD_BYTES = 20 * 1024 * 1024;
 const supportedTypes = new Set(["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif", "image/heic", "image/heif", "image/tiff", "image/bmp", "image/x-icon"]);
-const localArticleAssets = Object.entries(articleImages).flatMap(([slug, artwork]) => [
-  { slug, filename: artwork.cover, label: "Cover" },
-  { slug, filename: artwork.illustration, label: "Article diagram" },
-]);
 
 interface MediaItem {
   id: string;
@@ -160,7 +155,7 @@ export default function AdminMediaPage() {
 
   return <div className="flex min-w-0 flex-col gap-6">
     <header className="flex flex-wrap items-center justify-between gap-4">
-        <div><h1 className="text-2xl font-bold tracking-tight text-ink-primary">Media Library</h1><p className="mt-1 text-sm text-ink-secondary">Checked-in article artwork and managed Cloudinary uploads are listed separately.</p></div>
+        <div><h1 className="text-2xl font-bold tracking-tight text-ink-primary">Media Library</h1><p className="mt-1 text-sm text-ink-secondary">Manage Cloudinary images used across the site.</p></div>
       <div>
         <input ref={fileInputRef} id="upload-input" type="file" tabIndex={-1} accept="image/jpeg,image/png,image/webp,image/gif,image/avif,image/heic,image/heif,image/tiff,image/bmp,image/x-icon" onChange={handleUpload} className="sr-only" aria-label="Choose an image to upload" />
         <button type="button" onClick={() => fileInputRef.current?.click()} disabled={isUploading || deletingId !== null} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-accent-signal px-5 text-sm font-medium text-white transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:cursor-wait disabled:opacity-50">{isUploading ? <Loader2 aria-hidden className="size-4 animate-spin" /> : <Upload aria-hidden className="size-4" />}{isUploading ? "Uploading..." : "Upload image"}</button>
@@ -168,22 +163,6 @@ export default function AdminMediaPage() {
     </header>
     <p className="text-xs text-ink-secondary">JPG, PNG, WebP, GIF, AVIF, HEIC, TIFF, BMP or ICO; 20 MB maximum. Uploaded images enter the shared library immediately.</p>
     {message.text && <div role={message.type === "error" || message.type === "warning" ? "alert" : "status"} className={`flex items-start justify-between gap-3 rounded-xl border p-4 text-sm ${message.type === "success" ? "border-emerald-500/30 bg-emerald-950/20 text-emerald-200" : message.type === "warning" ? "border-amber-500/30 bg-amber-950/20 text-amber-200" : "border-red-500/30 bg-red-950/20 text-red-200"}`}><span>{message.text}</span><button type="button" onClick={() => setMessage({ type: "", text: "" })} aria-label="Dismiss notification" className="flex size-11 shrink-0 items-center justify-center rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current"><X aria-hidden className="size-4" /></button></div>}
-    <section aria-labelledby="local-article-assets-heading" className="min-w-0 space-y-4">
-      <div><h2 id="local-article-assets-heading" className="text-base font-semibold text-ink-primary">Checked-in article assets</h2><p className="mt-1 text-sm text-ink-secondary">{localArticleAssets.length} original WebP files are checked into the site and served directly. These are not Cloudinary uploads; replace or remove them in the codebase, not with the managed-media Delete control.</p></div>
-      <div className="grid min-w-0 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
-        {localArticleAssets.map(({ slug, filename, label }) => {
-          const url = `/blog/article-images/${filename}`;
-          return <article key={filename} className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-border-hairline bg-surface-raised shadow-sm">
-            <div className="relative aspect-[16/10] bg-surface-base"><Image src={url} alt={`${label} for ${slug.replaceAll("-", " ")}`} fill unoptimized sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1280px) 33vw, 25vw" className="object-contain" /></div>
-            <div className="flex flex-1 flex-col gap-2 p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-ink-secondary">{label} · {slug.replaceAll("-", " ")}</p>
-              <p className="break-all text-xs text-ink-secondary">{filename}</p>
-              <button type="button" onClick={() => void copyUrl(url, `${location.origin}${url}`)} aria-label={`Copy link for ${filename}`} className="mt-auto inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border-hairline px-2 text-xs font-medium text-ink-primary hover:bg-surface-base focus-visible:outline focus-visible:outline-2 focus-visible:outline-current"><Copy aria-hidden className="size-4" />{copiedId === url ? "Copied" : "Copy link"}</button>
-            </div>
-          </article>;
-        })}
-      </div>
-    </section>
     <section aria-labelledby="media-list-heading" className="min-w-0 space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2"><h2 id="media-list-heading" className="text-base font-semibold text-ink-primary">Managed Cloudinary uploads</h2><p role="status" className="text-sm text-ink-secondary">{loadFailed ? "Library unavailable" : isLoading ? "Loading images..." : totalMedia === 0 ? "0 files" : `Showing ${(page - 1) * PAGE_SIZE + 1}-${(page - 1) * PAGE_SIZE + media.length} of ${totalMedia} files`}</p></div>
       {isLoading ? <p role="status" className="flex min-h-44 items-center justify-center gap-3 rounded-2xl border border-border-hairline bg-surface-raised text-sm text-ink-secondary"><Loader2 aria-hidden className="size-5 animate-spin" />Loading images...</p>

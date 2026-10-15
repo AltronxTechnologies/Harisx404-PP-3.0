@@ -9,7 +9,7 @@ import { ImageLightbox } from "@/app/components/blog/ImageLightbox";
 import { TableOfContents } from "@/app/components/TableOfContents";
 import { extractHeadingsFromMdx } from "@/app/lib/toc-utils";
 import { articleFaqToc } from "@/app/lib/article-faq-accordions";
-import { articleCover, articleIllustration } from "@/app/blog/article-images";
+import { isOriginalBlogWebp } from "@/app/lib/image-utils";
 import { getBlogImageSrc } from "@/app/components/blog/blogImage";
 import { formatReadingTime } from "@/app/lib/reading-time";
 import createSupabaseServerClient, { createSupabaseAdminClient } from "@/app/lib/supabase/server";
@@ -57,7 +57,7 @@ export default async function SavedBlogPreviewPage({
   const readingTime = Number(post.reading_time_minutes) > 0
     ? `${post.reading_time_minutes} min read`
     : formatReadingTime(post.content || "");
-  const storedCover = articleCover(post.slug, post.cover_image_url || "");
+  const storedCover = post.cover_image_url || "";
   const coverSrc = getBlogImageSrc(storedCover.startsWith("http") || storedCover.startsWith("/") ? storedCover : `/blog/${storedCover}`);
 
   return (
@@ -92,12 +92,12 @@ export default async function SavedBlogPreviewPage({
 
       {coverSrc && (
         <div className="relative mx-auto mt-8 w-full max-w-[728px] px-4 md:px-6">
-          <Image src={coverSrc} alt="" width={1200} height={675} unoptimized={coverSrc.startsWith("/blog/article-images/")} sizes="(max-width: 680px) calc(100vw - 32px), 680px" className="h-auto w-full rounded-xl object-cover" />
+          <Image src={coverSrc} alt="" width={1200} height={675} unoptimized={isOriginalBlogWebp(coverSrc)} sizes="(max-width: 680px) calc(100vw - 32px), 680px" className="h-auto w-full rounded-xl object-cover" />
         </div>
       )}
       <div className="relative mt-10 px-4 md:px-6">
         <article id="blog-article" className="blog-article-shell prose prose-neutral dark:prose-invert mx-auto min-w-0 max-w-3xl overflow-x-hidden break-words [&>*:first-child]:mt-0 [&>div>*:first-child]:mt-0" style={{ maxWidth: "680px" }}>
-          <MDXContent code={articleIllustration(post.slug, post.content || "")} faqAccordions components={{ img: BlogArticleImage, Image: BlogArticleImage, pre: BlogCodeWindow, code: BlogInlineCode }} />
+          <MDXContent code={post.content || ""} faqAccordions components={{ img: BlogArticleImage, Image: BlogArticleImage, pre: BlogCodeWindow, code: BlogInlineCode }} />
         </article>
       </div>
       <TableOfContents headings={articleFaqToc(extractHeadingsFromMdx(post.content || ""))} />

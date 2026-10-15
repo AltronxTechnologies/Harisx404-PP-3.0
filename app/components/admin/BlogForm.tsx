@@ -19,7 +19,6 @@ import { siteMetadata } from "@/app/data/siteMetadata";
 import { useAdminNavigationGuard } from "./useAdminNavigationGuard";
 import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
 import { parseBlogImportTags } from "@/app/lib/admin/blog-import-tags";
-import { articleCover, articleImages } from "@/app/blog/article-images";
 
 const TiptapEditor = dynamic(() => import("./TiptapEditor").then((module) => module.TiptapEditor), { ssr: false });
 const BlogCodeEditor = dynamic(() => import("./BlogCodeEditor").then((module) => module.BlogCodeEditor), { ssr: false });
@@ -228,9 +227,6 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
   const titleWatch = watch("title") || "";
   const summaryWatch = watch("summary") || "";
   const coverUrl = watch("cover_image_url") || "";
-  const checkedInCover = articleImages[slug as keyof typeof articleImages]?.cover;
-  const publishedCoverUrl = articleCover(slug, coverUrl);
-  const usingLocalCover = Boolean(checkedInCover && publishedCoverUrl === `/blog/article-images/${checkedInCover}`);
   const content = watch("content") || "";
   const wordCount = content.trim() ? content.trim().split(/\s+/).filter(Boolean).length : 0;
   const estimatedReadMinutes = Math.max(1, Math.ceil(wordCount / 200));
@@ -554,7 +550,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
       <div className="grid grid-cols-[minmax(0,1fr)] gap-6 md:grid-cols-2">
         <div className="min-w-0 space-y-2">
           <label htmlFor="blog-cover-url" className="text-sm font-medium">Cover image URL</label>
-           <p className="text-xs text-ink-secondary">{usingLocalCover ? "This article uses its checked-in WebP by default. The stored legacy URL below is overridden; selecting and saving a new cover replaces the default on public pages." : checkedInCover ? "A custom cover is selected. Save to publish it; the checked-in diagram remains in the article." : "Choose a managed image below for the Blog card cover, or keep an existing external URL here."}</p>
+            <p className="text-xs text-ink-secondary">Choose a managed image below for the Blog card cover, or keep an existing external URL here.</p>
           <div>
             <input
               {...register("cover_image_url", { onChange: () => setValue("cover_image_id", "", { shouldDirty: true }) })}
@@ -565,20 +561,20 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
               placeholder="https://... or choose from library"
             />
           </div>
-           {publishedCoverUrl && (
+            {coverUrl && (
              <div className="mt-2 flex items-center gap-3 rounded-xl border border-border-hairline bg-surface-base p-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                 src={publishedCoverUrl.startsWith("http") || publishedCoverUrl.startsWith("/") ? publishedCoverUrl : `/blog/${publishedCoverUrl}`}
-                 alt={usingLocalCover ? "Published local cover preview" : "Cover preview"}
+                  src={coverUrl.startsWith("http") || coverUrl.startsWith("/") ? coverUrl : `/blog/${coverUrl}`}
+                  alt="Cover preview"
                 className="h-12 w-20 rounded-lg object-cover border border-border-hairline"
                 onError={(e) => {
                   (e.target as HTMLElement).style.display = "none";
                 }}
               />
               <div className="min-w-0 flex-1 text-xs text-ink-secondary">
-                 <p className="font-medium text-ink-primary truncate">{usingLocalCover ? "Published default cover" : "Cover preview"}</p>
-                 <p className="truncate text-ink-secondary">{publishedCoverUrl}</p>
+                  <p className="font-medium text-ink-primary truncate">Cover preview</p>
+                  <p className="truncate text-ink-secondary">{coverUrl}</p>
               </div>
             </div>
           )}
@@ -601,7 +597,7 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
         </div>
       </div>
 
-       <BlogImageManager postId={initialData?.id} slug={slug} images={blogImages} onUploaded={(image) => uploadedImages.current.set(image.id, image)} onRemoved={(id) => uploadedImages.current.delete(id)} onUploadingChange={setIsUploadingImages} onImagesChange={(images, dirty = true) => {
+        <BlogImageManager postId={initialData?.id} images={blogImages} onUploaded={(image) => uploadedImages.current.set(image.id, image)} onRemoved={(id) => uploadedImages.current.delete(id)} onUploadingChange={setIsUploadingImages} onImagesChange={(images, dirty = true) => {
         setBlogImages(images);
         setValue("image_ids", images.map((image) => image.id), { shouldDirty: dirty, shouldValidate: true });
       }} onAvailabilityChange={setImageManagerAvailable} coverUrl={coverUrl} content={content} onCoverChange={(image) => {

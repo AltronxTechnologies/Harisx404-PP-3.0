@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { optimizeImageUrl } from "@/app/lib/image-utils";
+import { isOriginalBlogWebp, optimizeImageUrl } from "@/app/lib/image-utils";
 import type { HomePost } from "@/app/data/fallback-home";
 import type { ReactionSummary } from "@/app/blog/data";
 import { ArticleCardArrow } from "@/app/components/blog/ArticleCardArrow";
@@ -134,7 +134,7 @@ export function Writings({
               {featured.imageName && !failedImages.includes(featured.imageName) ? (
                 <Image
                   src={optimizeImageUrl(featured.imageName, 1200)}
-                  unoptimized={featured.imageName.startsWith("/blog/article-images/")}
+                   unoptimized={isOriginalBlogWebp(featured.imageName)}
                   alt=""
                   fill
                   onError={() => markFailed(featured.imageName!)}
@@ -218,7 +218,7 @@ export function Writings({
                         <>
                            <Image
                              src={optimizeImageUrl(post.imageName, 400)}
-                             unoptimized={post.imageName.startsWith("/blog/article-images/")}
+                              unoptimized={isOriginalBlogWebp(post.imageName)}
                              alt=""
                              fill
                              onError={() => markFailed(post.imageName!)}

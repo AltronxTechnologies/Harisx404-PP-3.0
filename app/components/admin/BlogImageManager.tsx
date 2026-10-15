@@ -8,13 +8,12 @@ import { AdminConfirmDialog } from "./AdminConfirmDialog";
 import { blogImageUrls } from "@/app/lib/admin/blog-image-urls";
 import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
 import { prepareImageForUpload } from "@/app/lib/admin/prepare-image-upload";
-import { articleCover, articleImages } from "@/app/blog/article-images";
+import { isOriginalBlogWebp } from "@/app/lib/image-utils";
 
 export type BlogMediaItem = { id: string; url: string; secure_url: string; alt_text?: string; format?: string };
 
-export function BlogImageManager({ postId, slug, images, onImagesChange, onAvailabilityChange, onUploaded, onRemoved, onUploadingChange, coverUrl, content, onCoverChange }: {
+export function BlogImageManager({ postId, images, onImagesChange, onAvailabilityChange, onUploaded, onRemoved, onUploadingChange, coverUrl, content, onCoverChange }: {
   postId?: string;
-  slug?: string;
   images: BlogMediaItem[];
   onImagesChange: (images: BlogMediaItem[], dirty?: boolean) => void;
   onAvailabilityChange: (available: boolean) => void;
@@ -34,8 +33,6 @@ export function BlogImageManager({ postId, slug, images, onImagesChange, onAvail
   const [pending, setPending] = useState(false);
   const [attachedIds, setAttachedIds] = useState<string[]>([]);
   const embeddedUrls = useMemo(() => blogImageUrls(content), [content]);
-  const localArtwork = articleImages[slug as keyof typeof articleImages];
-  const usingLocalCover = Boolean(localArtwork && articleCover(slug || "", coverUrl) === `/blog/article-images/${localArtwork.cover}`);
 
   useEffect(() => {
     let cancelled = false;
@@ -151,24 +148,8 @@ export function BlogImageManager({ postId, slug, images, onImagesChange, onAvail
     <section aria-labelledby="blog-images-heading" className="min-w-0 space-y-4 rounded-xl border border-border-hairline bg-surface-base p-4 sm:p-5">
       <div>
         <h2 id="blog-images-heading" className="text-base font-semibold">Post images</h2>
-        <p className="mt-1 text-sm text-ink-secondary">{localArtwork ? `${usingLocalCover ? "The checked-in cover is the current default." : "A custom cover is selected."} The local diagram appears in the published article. Managed Cloudinary attachments are separate; selecting and saving a new cover replaces the default. Uploads enter the Media Library immediately and must be saved to attach them.` : "Upload up to 20 images, choose one as the cover shown on Blog cards, or copy a link into your MDX. Uploads enter the Media Library immediately; save the post to attach them. Confirmed in-app discard attempts to remove unused session uploads; closing the tab cannot guarantee cleanup. Remove permanently deletes an unused file from Cloudinary and the library after confirmation. Referenced images cannot be deleted."}</p>
+        <p className="mt-1 text-sm text-ink-secondary">Upload up to 20 images, choose one as the cover shown on Blog cards, or copy a link into your MDX. Uploads enter the Media Library immediately; save the post to attach them. Confirmed in-app discard attempts to remove unused session uploads; closing the tab cannot guarantee cleanup. Remove permanently deletes an unused file from Cloudinary and the library after confirmation. Referenced images cannot be deleted.</p>
       </div>
-      {localArtwork && (
-        <div className="space-y-3 rounded-xl border border-border-hairline bg-surface-raised p-3 sm:p-4">
-          <div>
-            <h3 className="text-sm font-semibold text-ink-primary">Checked-in article artwork</h3>
-            <p className="mt-1 text-xs leading-5 text-ink-secondary">The original WebPs are version-controlled and served locally. The cover is the default until you save a new one; the diagram is placed in the article. Neither counts as a managed Cloudinary attachment.</p>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {([['Default cover', localArtwork.cover], ['Article diagram', localArtwork.illustration]] as const).map(([label, filename]) => (
-              <div key={filename} className="min-w-0 overflow-hidden rounded-lg border border-border-hairline bg-surface-base">
-                <div className="relative aspect-video"><Image src={`/blog/article-images/${filename}`} alt={`${label} for ${slug}`} fill unoptimized sizes="(max-width: 640px) 100vw, 50vw" className="object-contain" /></div>
-                <p className="truncate px-3 py-2 text-xs text-ink-secondary" title={filename}>{label} · {filename}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
       {message && <p role="status" className="rounded-lg border border-border-hairline p-3 text-sm text-ink-secondary">{message}</p>}
       {loading && <p role="status" className="text-sm text-ink-secondary">Loading post images...</p>}
       {!loading && !available && <p className="text-sm text-ink-secondary">Image management is unavailable. Existing post images will not be changed when you save.</p>}
@@ -185,7 +166,7 @@ export function BlogImageManager({ postId, slug, images, onImagesChange, onAvail
             const isCover = coverUrl === image.url || coverUrl === image.secure_url;
             const inArticle = [image.url, image.secure_url].some((source) => Boolean(source) && (embeddedUrls.includes(source) || content.includes(source)));
             return <div key={image.id} className={`min-w-0 overflow-hidden rounded-xl border bg-surface-raised ${isCover ? "border-accent-signal" : "border-border-hairline"}`}>
-               <div className="relative aspect-[4/3] bg-surface-base"><Image src={url} alt={image.alt_text || "Post image"} fill unoptimized={image.format === "webp"} sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" className="object-contain" /></div>
+               <div className="relative aspect-[4/3] bg-surface-base"><Image src={url} alt={image.alt_text || "Post image"} fill unoptimized={image.format === "webp" || isOriginalBlogWebp(url)} sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" className="object-contain" /></div>
               <div className="space-y-3 p-3">
                 <p className="truncate text-xs text-ink-secondary" title={image.alt_text || "Image"}>{image.alt_text || "Image"}</p>
                 <button type="button" disabled={pending || uploading} aria-pressed={isCover} onClick={() => onCoverChange(image)} className="flex min-h-11 w-full items-center gap-2 rounded-lg border border-border-hairline px-3 text-left text-xs font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-current disabled:opacity-50">

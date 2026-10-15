@@ -17,7 +17,7 @@ import { PaperHeroTexture } from "@/app/components/PaperHeroTexture";
 import { formatReadingTime } from "@/app/lib/reading-time";
 import { addHeadingIds, extractHeadingsFromMdx } from "@/app/lib/toc-utils";
 import { BlogMdxValidationError, validateBlogMdx } from "@/app/lib/blog-mdx-policy.mjs";
-import { articleCover, articleIllustration } from "@/app/blog/article-images";
+import { isOriginalBlogWebp } from "@/app/lib/image-utils";
 import { articleFaqAccordions, articleFaqToc } from "@/app/lib/article-faq-accordions";
 import { ArticleFaq } from "@/app/components/blog/ArticleFaq";
 import { getBlogImageSrc } from "@/app/components/blog/blogImage";
@@ -47,7 +47,7 @@ export function BlogUnsavedPreview({ snapshot: post, isNew, relatedPosts = [] }:
           throw new Error("Invalid preview fields");
         }
         validateBlogMdx(post.content);
-        const code = articleIllustration(post.slug || "", post.content).replace(
+        const code = post.content.replace(
           /<iframe\b(?=[^>]*\bsrc=["']https:\/\/codepen\.io\/([^/"']+)\/embed\/(?:preview\/)?([^?"']+)[^"']*["'])[^>]*>[\s\S]*?<\/iframe>/gi,
           (_match, author: string, penId: string) => `[Open this interactive example on CodePen](https://codepen.io/${encodeURIComponent(author)}/pen/${encodeURIComponent(penId)})`,
         );
@@ -71,7 +71,7 @@ export function BlogUnsavedPreview({ snapshot: post, isNew, relatedPosts = [] }:
   const publicationDate = post.published_at && Number.isFinite(Date.parse(post.published_at)) ? new Date(post.published_at) : null;
   const status = post.status === "draft" ? "Draft" : publicationDate && publicationDate.getTime() > Date.now() ? "Scheduled" : "Live when saved";
   const summary = post.summary?.trim() || (isNew ? defaultBlogSummary(post.content, post.title) : "");
-  const coverSrc = getBlogImageSrc(articleCover(post.slug || "", post.cover_image_url || ""));
+  const coverSrc = getBlogImageSrc(post.cover_image_url || "");
   const related = (post.related_blog_post_ids || []).map((id) => relatedPosts.find((item) => item.id === id)).filter((item): item is NonNullable<typeof item> => Boolean(item && item.status === "published" && item.published_at && Date.parse(item.published_at) <= Date.now()));
 
   return (
@@ -97,7 +97,7 @@ export function BlogUnsavedPreview({ snapshot: post, isNew, relatedPosts = [] }:
       </div>
       {coverSrc && (
         <div className="relative mx-auto mt-8 w-full max-w-[728px] px-4 md:px-6">
-          <Image src={coverSrc} alt="" width={1200} height={675} unoptimized={coverSrc.startsWith("/blog/article-images/")} sizes="(max-width: 680px) calc(100vw - 32px), 680px" className="h-auto w-full rounded-xl object-cover" />
+          <Image src={coverSrc} alt="" width={1200} height={675} unoptimized={isOriginalBlogWebp(coverSrc)} sizes="(max-width: 680px) calc(100vw - 32px), 680px" className="h-auto w-full rounded-xl object-cover" />
         </div>
       )}
       <div className="relative mb-12 mt-8 px-4 md:px-6">

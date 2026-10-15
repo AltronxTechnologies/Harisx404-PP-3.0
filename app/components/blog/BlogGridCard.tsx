@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getBlogImageSrc } from "@/app/components/blog/blogImage";
 import { ReactionSummaryPill } from "@/app/components/blog/ReactionSummaryPill";
 import type { ReactionSummary } from "@/app/blog/data";
+import { isOriginalBlogWebp } from "@/app/lib/image-utils";
 import { AdaptiveCardCopy } from "@/app/components/blog/AdaptiveCardCopy";
 import { ArticleCardArrow } from "@/app/components/blog/ArticleCardArrow";
 
@@ -43,7 +44,7 @@ export function BlogGridCard({
         {imageSrc ? (
           <Image
             src={imageSrc}
-            unoptimized={imageSrc.startsWith("/blog/article-images/")}
+            unoptimized={isOriginalBlogWebp(imageSrc)}
             alt=""
             aria-hidden
             fill
