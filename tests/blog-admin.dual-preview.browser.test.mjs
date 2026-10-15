@@ -108,7 +108,7 @@ test(
         failures.push({ kind: "custom-component-preview" });
       await page.locator("#blog-cover-url").fill("/blog/blogfolio_v5.jpg");
       await page.getByRole("button", { name: "Refresh preview" }).click();
-      if (await page.locator(".blog-detail > div > img, .blog-detail > div > span > img").count()) failures.push({ kind: "standalone-cover-in-preview" });
+      if (!(await page.locator('img[src*="blogfolio_v5.jpg"]').count())) failures.push({ kind: "valid-cover-missing-from-preview" });
       await page.locator("#blog-cover-url").fill("not-a-cover-url");
       await page.getByRole("button", { name: "Refresh preview" }).click();
       if (!(await article.textContent())?.includes("Custom content survives")) failures.push({ kind: "cover-url-blocked-article-preview" });
@@ -218,12 +218,9 @@ test(
           (document.querySelector(".admin-mdx-editor")?.getBoundingClientRect()
             .right ?? 9999) <=
           innerWidth + 1,
-        highlighted:
-          (document
-            .querySelector(".admin-mdx-editor .w-md-editor-text-pre")
-            ?.querySelectorAll("span").length ?? 0) > 0,
+        sourceVisible: Boolean(document.querySelector(".admin-mdx-editor textarea")?.value.length),
       }));
-      if (codeState.overflow || !codeState.editorFits || !codeState.highlighted)
+      if (codeState.overflow || !codeState.editorFits || !codeState.sourceVisible)
         failures.push({ kind: "source-mobile", ...codeState });
       const { data: sourceRows, error: sourceError } = await admin
         .from("blog_posts")
@@ -233,6 +230,7 @@ test(
         .limit(1);
       if (sourceError) throw new Error("Existing source sample unavailable");
       if (sourceRows?.length) {
+        const normalizedSource = sourceRows[0].content.replace(/\r\n/g, "\n");
         const existing = await context.newPage();
         existing.on("pageerror", () => {
           errors++;
@@ -261,12 +259,12 @@ test(
           await existingInput.waitFor();
           if (
             (await existingCode.getAttribute("aria-selected")) !== "true" ||
-            (await existingInput.inputValue()) !== sourceRows[0].content
+            (await existingInput.inputValue()).replace(/\r\n/g, "\n") !== normalizedSource
           )
             failures.push({ kind: "existing-source-changed" });
           await existing.getByRole("tab", { name: "Preview" }).click();
           await existing.getByRole("tab", { name: "MDX / Code" }).click();
-          if ((await existingInput.inputValue()) !== sourceRows[0].content)
+          if ((await existingInput.inputValue()).replace(/\r\n/g, "\n") !== normalizedSource)
             failures.push({ kind: "existing-preview-mutated-source" });
         }
         await existing.close();

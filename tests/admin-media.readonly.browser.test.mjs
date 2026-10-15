@@ -59,6 +59,10 @@ test("Admin Media library renders, paginates and protects mocked actions", { ski
     assert.equal((await page.goto("http://localhost:3000/admin/media", { waitUntil: "domcontentloaded" }))?.status(), 200);
     await page.getByRole("heading", { name: "Media Library" }).waitFor();
     await page.getByRole("status").filter({ hasText: /Showing .*files/ }).waitFor();
+    const localAssets = page.locator('section[aria-labelledby="local-article-assets-heading"]');
+    assert.equal(await localAssets.getByRole("article").count(), 20);
+    assert.equal(await localAssets.getByRole("button", { name: /^Delete / }).count(), 0, "checked-in assets cannot be deleted as Cloudinary media");
+    assert.equal(await localAssets.locator('img[src="/blog/article-images/reliable-rag-cover.webp"]').count(), 1);
     assert.equal(await page.getByRole("alert").filter({ hasText: "Media could not be loaded" }).count(), 0);
     const response = await context.request.get("http://localhost:3000/api/admin/media?limit=12&offset=0");
     assert.equal(response.status(), 200);
@@ -67,7 +71,13 @@ test("Admin Media library renders, paginates and protects mocked actions", { ski
     assert.ok(Number.isInteger(library.count) && library.count >= library.data.length);
     const first = library.data[0];
     const expectedName = first.original_filename || first.alt_text || `${first.public_id.split("/").pop() || "Image"}${first.format ? `.${first.format}` : ""}`;
-    const firstCard = page.getByRole("article").first();
+    const managed = page.locator('section[aria-labelledby="media-list-heading"]');
+    const uploadedArticleWebp = library.data.find((item) => item.format === "webp" && /securing-ai-agents/.test(item.original_filename || ""));
+    if (uploadedArticleWebp) {
+      const card = managed.getByRole("article").filter({ hasText: uploadedArticleWebp.original_filename }).first();
+      assert.equal(await card.locator("img").getAttribute("src"), uploadedArticleWebp.secure_url || uploadedArticleWebp.url, "WebP preview uses the original Cloudinary bytes");
+    }
+    const firstCard = managed.getByRole("article").first();
     assert.ok((await firstCard.textContent()).includes(expectedName), "Image name was not shown in full");
     assert.equal(await firstCard.getByRole("button").count(), 2, "Image card includes unrelated actions");
     assert.equal(await firstCard.getByText(/File size|Dimensions|Edit description|Open image/).count(), 0, "Image card includes retired metadata");
@@ -76,6 +86,11 @@ test("Admin Media library renders, paginates and protects mocked actions", { ski
     for (const [width, columns] of [[320, 1], [390, 1], [768, 3], [1280, 4], [1440, 4]]) {
       await page.setViewportSize({ width, height: 900 });
       await page.waitForTimeout(250);
+      const localMetrics = await localAssets.locator(':scope > div.grid').evaluate((grid) => ({
+        columns: getComputedStyle(grid).gridTemplateColumns.split(" ").length,
+        buttons: [...grid.querySelectorAll("button")].every((button) => button.getBoundingClientRect().height >= 44),
+      }));
+      if (localMetrics.columns !== columns || !localMetrics.buttons) failures.push(`local-assets-${width}:${JSON.stringify(localMetrics)}`);
       const metrics = await page.locator('section[aria-labelledby="media-list-heading"] > div.grid').evaluate((grid) => {
         const cards = [...grid.children];
         const buttons = cards.flatMap((card) => [...card.querySelectorAll("button")]);
@@ -102,7 +117,7 @@ test("Admin Media library renders, paginates and protects mocked actions", { ski
       stage = "page-two-load";
       await page.getByRole("status").filter({ hasText: /Showing 13-/ }).waitFor();
       stage = "page-two-ready";
-      assert.equal(await page.getByRole("article").count(), Math.min(12, library.count - 12));
+      assert.equal(await managed.getByRole("article").count(), Math.min(12, library.count - 12));
       stage = "page-two-count";
       await page.getByRole("button", { name: "Previous", exact: true }).click();
       stage = "page-one-load";
@@ -110,6 +125,8 @@ test("Admin Media library renders, paginates and protects mocked actions", { ski
     }
 
     stage = "copy";
+    await localAssets.getByRole("button", { name: "Copy link for reliable-rag-cover.webp" }).click();
+    assert.equal(await page.evaluate(() => navigator.clipboard.readText()), "http://localhost:3000/blog/article-images/reliable-rag-cover.webp");
     await page.getByRole("button", { name: `Copy link for ${expectedName}` }).first().click();
     await page.getByRole("button", { name: `Copy link for ${expectedName}` }).first().getByText("Copied").waitFor();
     assert.equal(await page.evaluate(() => navigator.clipboard.readText()), first.secure_url || first.url, "Copied URL did not match the stored image");
@@ -136,11 +153,27 @@ test("Admin Media library renders, paginates and protects mocked actions", { ski
     await page.locator("#upload-input").setInputFiles({ name: "review-upload.png", mimeType: "image/png", buffer: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLttAAAAABJRU5ErkJggg==", "base64") });
     await page.getByRole("alert").filter({ hasText: "Original filename migration pending" }).waitFor();
     assert.equal(mockedWrites, 2);
+
+    stage = "blog-cover-load";
+    const { data: post, error: postError } = await admin.from("blog_posts").select("id, cover_image_url").eq("slug", "reliable-rag").eq("status", "published").single();
+    if (postError || !post) throw new Error("Published Blog post unavailable");
+    assert.equal((await page.goto(`http://localhost:3000/admin/blogs/${post.id}`, { waitUntil: "domcontentloaded" }))?.status(), 200);
+    stage = "blog-cover-assets";
+    await page.getByRole("heading", { name: "Checked-in article artwork" }).waitFor();
+    stage = "blog-cover-thumbnail";
+    const preview = page.getByRole("img", { name: "Published local cover preview" });
+    assert.equal(await preview.getAttribute("src"), "/blog/article-images/reliable-rag-cover.webp");
+    assert.equal(await page.locator("#blog-cover-url").inputValue(), post.cover_image_url);
+    assert.equal(await page.locator('img[src^="/blog/article-images/"]').count(), 3, "Blog form displays the effective cover and both version-controlled assets");
+    stage = "blog-cover-fill";
+    await page.locator("#blog-cover-url").fill("https://example.com/new-cover.webp");
+    stage = "blog-cover-verify";
+    assert.equal(await page.locator('img[alt="Cover preview"]').getAttribute("src"), "https://example.com/new-cover.webp");
     assert.equal(blockedWrites, 0);
     assert.equal(pageErrors, 0);
     assert.deepEqual(failures, []);
-  } catch {
-    throw new Error("Admin Media review failed; see safe metrics");
+  } catch (error) {
+    throw new Error(`Admin Media review failed at ${stage}: ${error instanceof Error ? error.name : "unknown"}`);
   } finally {
     if (context) await context.close();
     await browser.close();

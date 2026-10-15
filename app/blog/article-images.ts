@@ -79,7 +79,11 @@ export const articleImages = {
 
 export function articleCover(slug: string, fallback: string) {
   const entry = articleImages[slug as keyof typeof articleImages];
-  return entry ? `${imageRoot}/${entry.cover}` : fallback;
+  if (!entry) return fallback;
+  const legacyCover = !fallback || fallback === "/blog/production-placeholder.jpg" ||
+    fallback.includes("images.unsplash.com/photo-1550751827-4bd374c3f58b") ||
+    (slug === "securing-ai-agents" && fallback.includes("/n5llzec1gneqawlpspxh.webp"));
+  return legacyCover ? `${imageRoot}/${entry.cover}` : fallback;
 }
 
 export function articleIllustration(slug: string, code: string) {

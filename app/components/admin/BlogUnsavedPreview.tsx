@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ComponentType } from "react";
+import Image from "next/image";
 import { evaluate } from "@mdx-js/mdx";
 import remarkGfm from "remark-gfm";
 import * as jsxRuntime from "react/jsx-runtime";
@@ -16,11 +17,16 @@ import { PaperHeroTexture } from "@/app/components/PaperHeroTexture";
 import { formatReadingTime } from "@/app/lib/reading-time";
 import { addHeadingIds, extractHeadingsFromMdx } from "@/app/lib/toc-utils";
 import { BlogMdxValidationError, validateBlogMdx } from "@/app/lib/blog-mdx-policy.mjs";
+import { articleCover, articleIllustration } from "@/app/blog/article-images";
+import { articleFaqAccordions, articleFaqToc } from "@/app/lib/article-faq-accordions";
+import { ArticleFaq } from "@/app/components/blog/ArticleFaq";
+import { getBlogImageSrc } from "@/app/components/blog/blogImage";
 
 type Snapshot = {
   title: string;
   slug?: string;
   summary?: string;
+  cover_image_url?: string;
   content: string;
   published_at?: string;
   status: "draft" | "published";
@@ -41,14 +47,14 @@ export function BlogUnsavedPreview({ snapshot: post, isNew, relatedPosts = [] }:
           throw new Error("Invalid preview fields");
         }
         validateBlogMdx(post.content);
-        const code = post.content.replace(
+        const code = articleIllustration(post.slug || "", post.content).replace(
           /<iframe\b(?=[^>]*\bsrc=["']https:\/\/codepen\.io\/([^/"']+)\/embed\/(?:preview\/)?([^?"']+)[^"']*["'])[^>]*>[\s\S]*?<\/iframe>/gi,
           (_match, author: string, penId: string) => `[Open this interactive example on CodePen](https://codepen.io/${encodeURIComponent(author)}/pen/${encodeURIComponent(penId)})`,
         );
         validateBlogMdx(code);
         const { default: content } = await evaluate(code, {
           ...(process.env.NODE_ENV === "production" ? { ...jsxRuntime, development: false } : { ...jsxDevRuntime, development: true }),
-          remarkPlugins: [remarkGfm, () => addHeadingIds],
+          remarkPlugins: [remarkGfm, () => addHeadingIds, () => articleFaqAccordions],
         } as any);
         if (!cancelled) setRendered({ content, error: "", loading: false });
       } catch (error) {
@@ -65,6 +71,7 @@ export function BlogUnsavedPreview({ snapshot: post, isNew, relatedPosts = [] }:
   const publicationDate = post.published_at && Number.isFinite(Date.parse(post.published_at)) ? new Date(post.published_at) : null;
   const status = post.status === "draft" ? "Draft" : publicationDate && publicationDate.getTime() > Date.now() ? "Scheduled" : "Live when saved";
   const summary = post.summary?.trim() || (isNew ? defaultBlogSummary(post.content, post.title) : "");
+  const coverSrc = getBlogImageSrc(articleCover(post.slug || "", post.cover_image_url || ""));
   const related = (post.related_blog_post_ids || []).map((id) => relatedPosts.find((item) => item.id === id)).filter((item): item is NonNullable<typeof item> => Boolean(item && item.status === "published" && item.published_at && Date.parse(item.published_at) <= Date.now()));
 
   return (
@@ -88,12 +95,17 @@ export function BlogUnsavedPreview({ snapshot: post, isNew, relatedPosts = [] }:
           {publicationDate && <time dateTime={publicationDate.toISOString()}>{new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" }).format(publicationDate)}</time>}
         </div>
       </div>
+      {coverSrc && (
+        <div className="relative mx-auto mt-8 w-full max-w-[728px] px-4 md:px-6">
+          <Image src={coverSrc} alt="" width={1200} height={675} unoptimized={coverSrc.startsWith("/blog/article-images/")} sizes="(max-width: 680px) calc(100vw - 32px), 680px" className="h-auto w-full rounded-xl object-cover" />
+        </div>
+      )}
       <div className="relative mb-12 mt-8 px-4 md:px-6">
         <article id="blog-article" className="blog-article-shell prose prose-neutral dark:prose-invert mx-auto min-w-0 max-w-3xl break-words [&>*:first-child]:mt-0 [&>div>*:first-child]:mt-0" style={{ maxWidth: "680px" }}>
-          <Content components={{ ...sharedComponents, img: BlogArticleImage, Image: BlogArticleImage, pre: BlogCodeWindow, code: BlogInlineCode }} />
+          <Content components={{ ...sharedComponents, ArticleFaq, img: BlogArticleImage, Image: BlogArticleImage, pre: BlogCodeWindow, code: BlogInlineCode }} />
         </article>
       </div>
-      <TableOfContents headings={extractHeadingsFromMdx(post.content)} />
+      <TableOfContents headings={articleFaqToc(extractHeadingsFromMdx(post.content))} />
       {(post.tags?.length || related.length) ? <div className="mx-auto max-w-3xl space-y-6 border-t border-border-primary px-4 pt-6" style={{ maxWidth: "680px" }}>
         <p className="text-xs uppercase tracking-wide text-text-secondary">Admin-only publishing summary, not part of the public article</p>
         {!!post.tags?.length && <div aria-label="Tags used for public Blog filters" className="flex flex-wrap gap-2">{post.tags.map((tag) => <span key={tag} className="rounded-full border border-border-primary px-3 py-1 text-xs text-text-secondary">{tag}</span>)}</div>}

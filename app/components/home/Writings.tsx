@@ -134,6 +134,7 @@ export function Writings({
               {featured.imageName && !failedImages.includes(featured.imageName) ? (
                 <Image
                   src={optimizeImageUrl(featured.imageName, 1200)}
+                  unoptimized={featured.imageName.startsWith("/blog/article-images/")}
                   alt=""
                   fill
                   onError={() => markFailed(featured.imageName!)}
@@ -217,6 +218,7 @@ export function Writings({
                         <>
                            <Image
                              src={optimizeImageUrl(post.imageName, 400)}
+                             unoptimized={post.imageName.startsWith("/blog/article-images/")}
                              alt=""
                              fill
                              onError={() => markFailed(post.imageName!)}

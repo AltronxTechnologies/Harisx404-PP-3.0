@@ -14,7 +14,7 @@ export function BlogArticleImage({ src, alt, title }: { src?: string; alt?: stri
 
   if (imageSrc) {
     image = (
-      <Image src={imageSrc} alt={alt ?? ""} width={800} height={450} className="drama-shadow rounded-xl w-full h-auto" />
+      <Image src={imageSrc} alt={alt ?? ""} width={800} height={450} unoptimized={imageSrc.startsWith("/blog/article-images/")} className="drama-shadow rounded-xl w-full h-auto" />
     );
   } else {
     let url: URL;

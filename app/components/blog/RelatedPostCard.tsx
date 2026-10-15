@@ -37,6 +37,7 @@ export function RelatedPostCard({ className = "flex", slug, title, summary, imag
         <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-neutral-200 dark:bg-neutral-900">
           <Image
             src={coverSrc}
+            unoptimized={coverSrc.startsWith("/blog/article-images/")}
             alt=""
             fill
              sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"

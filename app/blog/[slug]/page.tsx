@@ -206,6 +206,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
         <div className="relative mx-auto mt-8 w-full max-w-[728px] px-4 md:px-6">
           <Image
             src={coverSrc}
+            unoptimized={coverSrc.startsWith("/blog/article-images/")}
             alt=""
             width={1200}
             height={675}

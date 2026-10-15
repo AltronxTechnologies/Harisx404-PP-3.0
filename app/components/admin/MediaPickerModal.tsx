@@ -239,8 +239,9 @@ export function MediaPickerModal({ isOpen, onClose, onSelect, initialTab = "libr
                       selectedId === item.id ? "border-accent-signal" : "border-transparent hover:border-border-hairline"
                     }`}
                   >
-                    <Image
-                      src={item.secure_url || item.url}
+                     <Image
+                       src={item.secure_url || item.url}
+                       unoptimized={item.format === "webp"}
                       alt={item.alt_text || "Media item"}
                       className="w-full h-full object-cover"
                       fill

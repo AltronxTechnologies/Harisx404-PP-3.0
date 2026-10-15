@@ -11,8 +11,11 @@ test("each published editorial article has two real local WebP assets", async ()
       const file = new URL(`../public/blog/article-images/${name}`, import.meta.url);
       assert.ok((await stat(file)).size > 1000, `${slug}: ${name} exists`);
     }
-    assert.equal(articleCover(slug, "https://example.com/old-cover.jpg"), `/blog/article-images/${entry.cover}`);
+    assert.equal(articleCover(slug, "https://images.unsplash.com/photo-1550751827-4bd374c3f58b"), `/blog/article-images/${entry.cover}`);
+    assert.equal(articleCover(slug, "/blog/production-placeholder.jpg"), `/blog/article-images/${entry.cover}`);
+    assert.equal(articleCover(slug, "https://example.com/new-cover.webp"), "https://example.com/new-cover.webp", `${slug}: a future Admin cover is honored`);
   }
+  assert.equal(articleCover("securing-ai-agents", "https://res.cloudinary.com/i22q5puf/image/upload/v1792000121/portfolio/blog/c1000000-0000-0000-0000-000000000001/n5llzec1gneqawlpspxh.webp"), "/blog/article-images/securing-ai-agents-cover.webp");
   assert.equal(articleCover("unrelated-article", "/blog/custom.webp"), "/blog/custom.webp");
 });
 

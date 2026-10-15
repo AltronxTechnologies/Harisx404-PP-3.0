@@ -43,6 +43,7 @@ export function BlogGridCard({
         {imageSrc ? (
           <Image
             src={imageSrc}
+            unoptimized={imageSrc.startsWith("/blog/article-images/")}
             alt=""
             aria-hidden
             fill
