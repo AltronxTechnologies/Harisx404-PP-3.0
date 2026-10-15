@@ -725,10 +725,17 @@ export function BlogForm({ initialData, availablePosts }: BlogFormProps) {
                 onExtractFrontmatter={handleImportMdx}
               />
             ) : (
-              <TiptapEditor value={field.value} errorId={errors.content ? "blog-content-error" : undefined} onChange={(value) => {
-                richContentEdited.current = true;
-                field.onChange(value);
-              }} label="Blog article content" blogTools />
+               <TiptapEditor value={field.value} errorId={errors.content ? "blog-content-error" : undefined} onChange={(value) => {
+                 richContentEdited.current = true;
+                 field.onChange(value);
+               }} label="Blog article content" blogTools blogPostId={initialData?.id}
+                 imageLimitReached={!imageManagerAvailable || blogImages.length >= 20}
+                 onImageUploadingChange={setIsUploadingImages}
+                 onImageUploaded={(image) => {
+                   uploadedImages.current.set(image.id, image);
+                   setBlogImages((current) => current.some((item) => item.id === image.id) ? current : [...current, image]);
+                   setValue("image_ids", [...new Set([...(getValues("image_ids") || []), image.id])], { shouldDirty: true, shouldValidate: true });
+                 }} />
             )
           )}
         />}

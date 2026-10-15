@@ -77,40 +77,35 @@ export async function POST(request: Request) {
       uploadStream.end(buffer);
     }) as any;
 
-    // Insert into Supabase `media` table
-    const admin = await createSupabaseAdminClient();
-    const row = {
-      public_id: uploadResult.public_id,
-      url: uploadResult.secure_url,
-      secure_url: uploadResult.secure_url,
-      width: uploadResult.width,
-      height: uploadResult.height,
-      format: uploadResult.format,
-      bytes: uploadResult.bytes,
-      alt_text: originalFilename,
-      original_filename: originalFilename,
-      folder,
-    };
-    let { data, error } = await admin
-      .from("media")
-      .insert([row])
-      .select()
-      .single();
-    let warning: string | undefined;
-    if (error && ["42703", "PGRST204"].includes(error.code) && /original_filename/.test(error.message)) {
-      ({ data, error } = await admin.from("media").insert([{ ...row, original_filename: undefined }]).select().single());
-      if (!error) warning = "Image uploaded, but the original filename cannot be protected until the Media filename migration is applied.";
-    }
-
-    if (error) {
+    try {
+      const admin = await createSupabaseAdminClient();
+      const row = {
+        public_id: uploadResult.public_id,
+        url: uploadResult.secure_url,
+        secure_url: uploadResult.secure_url,
+        width: uploadResult.width,
+        height: uploadResult.height,
+        format: uploadResult.format,
+        bytes: uploadResult.bytes,
+        alt_text: originalFilename,
+        original_filename: originalFilename,
+        folder,
+      };
+      let { data, error } = await admin.from("media").insert([row]).select().single();
+      let warning: string | undefined;
+      if (error && ["42703", "PGRST204"].includes(error.code) && /original_filename/.test(error.message)) {
+        ({ data, error } = await admin.from("media").insert([{ ...row, original_filename: undefined }]).select().single());
+        if (!error) warning = "Image uploaded, but the original filename cannot be protected until the Media filename migration is applied.";
+      }
+      if (error) throw error;
+      return NextResponse.json({ data, ...(warning ? { warning } : {}) });
+    } catch {
       const cleaned = await cloudinary.uploader.destroy(uploadResult.public_id, { resource_type: "image", invalidate: true }).catch(() => null);
       if (cleaned?.result !== "ok" && cleaned?.result !== "not found") {
         return NextResponse.json({ error: "The image may remain in Cloudinary after a library save failure. Check Cloudinary before retrying." }, { status: 502 });
       }
       return NextResponse.json({ error: "The image could not be added to the library. Its Cloudinary upload was rolled back." }, { status: 503 });
     }
-
-    return NextResponse.json({ data, ...(warning ? { warning } : {}) });
   } catch {
     return NextResponse.json({ error: "Image upload could not be confirmed. Check the library and Cloudinary before retrying." }, { status: 503 });
   }

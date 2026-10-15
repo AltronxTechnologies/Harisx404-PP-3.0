@@ -28,7 +28,7 @@ coverImageAlt: "Temporary Harisx404 branded cover for Type-Safe MERN; final artw
 
 # End-to-End Type Safety: Building a Type-Safe MERN Application
 
-End-to-end type safety means the shape of your data is checked from the database to the browser, so a change in one place breaks the build instead of breaking production. In a MERN app (MongoDB, Express, React, Node) the honest version has one extra rule: TypeScript types disappear at runtime, so every boundary where outside data arrives also needs a runtime check.
+End-to-end type safety gives the database, API, and browser a shared contract. Participating code can catch shape changes at build time, but a green build cannot prove a deployed API still matches. In a MERN app (MongoDB, Express, React, Node), TypeScript types disappear at runtime, so every boundary where outside data arrives also needs validation and contract tests.
 
 This guide shows a practical setup: one schema package shared by the API and the client, validation at each boundary, and a thin mapping layer between your database and your API. It ends with the mistakes that most often undo the whole idea.
 

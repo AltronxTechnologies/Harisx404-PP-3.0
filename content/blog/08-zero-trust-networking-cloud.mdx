@@ -1,6 +1,6 @@
 ---
 title: "Zero Trust Networking for Modern Cloud Applications"
-description: "How zero trust networking works for cloud apps: policy decision and enforcement points, workload identity, microsegmentation, and a default-deny example you can run."
+description: "How zero trust networking works for cloud apps: policy decision and enforcement points, workload identity, microsegmentation, and a default-deny Kubernetes policy to adapt safely."
 slug: "zero-trust-networking-cloud"
 date: "2026-10-02"
 updated: "2026-10-02"
@@ -29,7 +29,7 @@ coverImageAlt: "Temporary Harisx404 branded cover for Zero Trust Networking; fin
 
 Zero trust networking means a connection is allowed because of who or what is asking and in what state, not because it arrived from a "trusted" network. NIST's reference document, [SP 800-207](https://csrc.nist.gov/pubs/sp/800/207/final), puts it this way: no implicit trust based on network location or asset ownership, and authentication and authorization happen before each session to a resource starts.
 
-This is the networking and architecture view for people building cloud applications. You'll see how the pieces fit together, what microsegmentation actually does, and a default-deny Kubernetes example to try.
+This is the networking and architecture view for people building cloud applications. You'll see how the pieces fit together, what microsegmentation actually does, and a default-deny Kubernetes policy to adapt in a test namespace after accounting for DNS and required service traffic.
 
 ## From castle-and-moat to per-request decisions
 

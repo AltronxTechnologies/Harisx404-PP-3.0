@@ -4,23 +4,23 @@ import { createClient } from "@supabase/supabase-js";
 
 const baseUrl = process.env.PREVIEW_BASE_URL || "http://localhost:3000";
 const articles = [
-  ["securing-ai-agents", "securing-ai-agents-cover", "securing-ai-agents-rule-of-two"],
-  ["post-quantum-cryptography-migration", "post-quantum-cryptography-migration-cover", "post-quantum-cryptography-hybrid-exchange"],
-  ["ai-security-operations-center", "ai-security-operations-center-cover", "ai-security-operations-center-autonomy-ladder"],
-  ["reliable-rag", "reliable-rag-cover", "reliable-rag-pipeline"],
-  ["small-vs-large-language-models", "small-vs-large-language-models-cover", "small-vs-large-language-models-route-escalate"],
-  ["ai-application-evaluation", "ai-application-evaluation-cover", "ai-application-evaluation-pipeline"],
-  ["ai-workloads-network-architecture", "ai-workloads-network-architecture-cover", "ai-workloads-network-clos-roce"],
-  ["zero-trust-networking-cloud", "zero-trust-networking-cloud-cover", "zero-trust-networking-pdp-pep"],
-  ["nextjs-16-cache-components", "nextjs-16-cache-components-cover", "nextjs-16-cache-mental-model"],
-  ["type-safe-mern-typescript", "type-safe-mern-typescript-cover", "type-safe-mern-single-source-of-truth"],
+  ["securing-ai-agents", "securing-ai-agents-cover", "securing-ai-agents-rule-of-two", "A design budget: the Rule of Two"],
+  ["post-quantum-cryptography-migration", "post-quantum-cryptography-migration-cover", "post-quantum-cryptography-hybrid-exchange", "Hybrid key exchange is already in production"],
+  ["ai-security-operations-center", "ai-security-operations-center-cover", "ai-security-operations-center-autonomy-ladder", "A pattern that works: the autonomy ladder"],
+  ["reliable-rag", "reliable-rag-cover", "reliable-rag-pipeline", "The pipeline, in text"],
+  ["small-vs-large-language-models", "small-vs-large-language-models-cover", "small-vs-large-language-models-route-escalate", "The pattern many teams end up with: route and escalate"],
+  ["ai-application-evaluation", "ai-application-evaluation-cover", "ai-application-evaluation-pipeline", "A minimal runner"],
+  ["ai-workloads-network-architecture", "ai-workloads-network-architecture-cover", "ai-workloads-network-clos-roce", "Up, out, and across"],
+  ["zero-trust-networking-cloud", "zero-trust-networking-cloud-cover", "zero-trust-networking-pdp-pep", "The pieces: decide, then enforce"],
+  ["nextjs-16-cache-components", "nextjs-16-cache-components-cover", "nextjs-16-cache-mental-model", "The mental model: a static shell"],
+  ["type-safe-mern-typescript", "type-safe-mern-typescript-cover", "type-safe-mern-single-source-of-truth", "A shared contracts package"],
 ];
 
 test("published articles, cards and metadata use managed covers and one inline diagram", async (t) => {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) return t.skip("Connected credentials unavailable");
   const db = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
   const index = await fetch(`${baseUrl}/blog`).then((response) => response.text());
-  for (const [slug, cover, diagram] of articles) {
+  for (const [slug, cover, diagram, section] of articles) {
     const { data: post, error } = await db.from("blog_posts").select("id, content, cover_image_id, cover_image_url").eq("slug", slug).single();
     assert.equal(error, null);
     const { data: attachments, error: attachedError } = await db.from("blog_post_media")
@@ -35,6 +35,14 @@ test("published articles, cards and metadata use managed covers and one inline d
     assert.match(attachments[0].media.original_filename, new RegExp(`^${cover}(?: \\(2\\))?\\.webp$`));
     assert.match(attachments[1].media.original_filename, new RegExp(`^${diagram}(?: \\(2\\))?\\.webp$`));
     assert.ok(post.content.includes(diagramUrl));
+    const sectionStart = post.content.indexOf(`## ${section}`);
+    const diagramStart = post.content.indexOf(diagramUrl);
+    assert.ok(sectionStart >= 0 && diagramStart > sectionStart, `${slug}: diagram follows its subject`);
+    const nextSection = post.content.indexOf("\n## ", sectionStart + section.length);
+    assert.ok(nextSection > diagramStart, `${slug}: diagram precedes the next section`);
+    if (slug === "small-vs-large-language-models") {
+      assert.ok(diagramStart < post.content.indexOf("The only way to tune this is to measure."), "routing diagram sits beside the routing explanation");
+    }
     const response = await fetch(`${baseUrl}/blog/${slug}`);
     assert.equal(response.status, 200, slug);
     const html = await response.text();

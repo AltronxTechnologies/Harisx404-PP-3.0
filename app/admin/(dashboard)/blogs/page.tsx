@@ -162,7 +162,7 @@ export default async function AdminBlogsPage({
                         </span>
                       </td>
                       <td className="px-6 py-4 text-ink-secondary">
-                        {blog.status === "published" && blog.published_at && Number.isFinite(Date.parse(blog.published_at)) ? new Date(blog.published_at).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) : "Not published"}
+                         {blog.status === "published" && blog.published_at && Number.isFinite(Date.parse(blog.published_at)) ? new Date(blog.published_at).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", timeZone: "UTC" }) : "Not published"}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">

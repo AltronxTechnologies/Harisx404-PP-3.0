@@ -114,7 +114,7 @@ Run code and browsing tools in a sandbox with no network by default, then allow-
 
 ### 5. Log for the postmortem
 
-Record the prompt, the sources retrieved, every tool call with arguments and results, approvals, and which identity acted. Alert on bursts of calls or destinations you have never seen. If a security team will triage this, [the SOC side of AI agents](/blog/ai-security-operations-center) shows what they will want from those logs.
+Record the evidence needed to reconstruct decisions: prompts and retrieved sources where authorized, tool calls and outcomes, approvals, and the acting identity. Redact credentials and personal data, restrict access to traces, and set a retention limit before collecting them. Alert on bursts of calls or destinations you have never seen. If a security team will triage this, [the SOC side of AI agents](/blog/ai-security-operations-center) shows what they will want from those logs.
 
 ## What not to lean on
 

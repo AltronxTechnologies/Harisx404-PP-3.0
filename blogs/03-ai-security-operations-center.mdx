@@ -68,12 +68,12 @@ Start every action at the lowest autonomy level, and promote it only when the tr
 actions:
   enrich_ip_reputation:  { autonomy: auto }
   summarize_case:        { autonomy: auto }
-  close_as_benign:       { autonomy: auto_with_sampling, sample_rate: 0.10 }
+  close_as_benign:       { autonomy: approval_required }
   isolate_host:          { autonomy: approval_required }
   disable_user_account:  { autonomy: approval_required }
 ```
 
-Sampling matters most for `close_as_benign`. A human re-checks a slice of the auto-closed alerts every week, which turns invisible misses into a measurable number.
+Keep benign closures under human review until replay tests and a monitored pilot establish which alert classes qualify, an acceptable miss rate, and a rollback trigger. Only then consider sampled review of low-risk auto-closures; sampling alone cannot catch every missed attack.
 
 ## Measure outcomes, not alerts processed
 
@@ -83,7 +83,7 @@ Alerts handled per hour says little. Track mean time to detect, respond, and con
 
 - AI helps most at enrichment, summarization, and query drafting.
 - Ask for evidence and measured outcomes, not demos.
-- Gate containment actions behind approval, and sample auto-closed alerts.
+- Require approval for containment and benign closures until a measured, reversible pilot justifies narrower automation.
 - Treat the SOC's own AI agent as a privileged system that can be attacked.
 
 ## Frequently Asked Questions

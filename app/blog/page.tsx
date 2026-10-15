@@ -372,12 +372,16 @@ export default async function BlogPage({
                   className="font-mono text-xs font-medium uppercase tracking-widest text-text-secondary"
                 >
                   {queryParam
-                    ? (reactionSummaries[featuredPost.slug]?.total || 0) > 0
+                    ? explicitlyFeatured === featuredPost
+                      ? "Featured result"
+                      : (reactionSummaries[featuredPost.slug]?.total || 0) > 0
                       ? "Most reacted result"
                       : "Search results"
                     : categoryParam
-                    ? `Newest in ${categoryParam}`
-                    : (reactionSummaries[featuredPost.slug]?.total || 0) > 0
+                    ? explicitlyFeatured === featuredPost ? `Featured in ${categoryParam}` : `Newest in ${categoryParam}`
+                    : explicitlyFeatured === featuredPost
+                      ? "Featured article"
+                      : (reactionSummaries[featuredPost.slug]?.total || 0) > 0
                       ? "Most reacted article"
                       : "Newest article"}
                 </h2>

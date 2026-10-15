@@ -9,6 +9,7 @@ import { Bold, Italic, List, ListOrdered, Quote, Heading2, Heading3, Minus, Link
 import { useEffect, useState } from "react";
 import { MediaPickerModal } from "./MediaPickerModal";
 import { readAdminResponse } from "@/app/lib/admin/read-admin-response";
+import type { BlogMediaItem } from "./BlogImageManager";
 
 interface TiptapEditorProps {
   value: string;
@@ -17,6 +18,10 @@ interface TiptapEditorProps {
   errorId?: string;
   story?: boolean;
   blogTools?: boolean;
+  blogPostId?: string;
+  imageLimitReached?: boolean;
+  onImageUploaded?: (image: BlogMediaItem) => void;
+  onImageUploadingChange?: (uploading: boolean) => void;
 }
 
 export function validBlogLinkUrl(input: string): boolean {
@@ -53,7 +58,11 @@ const TableTools = ({ editor }: { editor: Editor }) => {
   );
 };
 
-const MenuBar = ({ editor, story, blogTools }: { editor: Editor | null; story: boolean; blogTools: boolean }) => {
+const MenuBar = ({ editor, story, blogTools, blogPostId, imageLimitReached, onImageUploaded, onImageUploadingChange }: {
+  editor: Editor | null; story: boolean; blogTools: boolean; blogPostId?: string;
+  imageLimitReached?: boolean; onImageUploaded?: (image: BlogMediaItem) => void;
+  onImageUploadingChange?: (uploading: boolean) => void;
+}) => {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiMenuOpen, setAiMenuOpen] = useState(false);
   const [linkOpen, setLinkOpen] = useState(false);
@@ -415,7 +424,7 @@ const MenuBar = ({ editor, story, blogTools }: { editor: Editor | null; story: b
         <button type="button" onClick={() => setImageUrl("")} className="min-h-11 rounded border border-border-hairline p-2 text-sm hover:bg-surface-raised">Cancel</button>
       </div>
     )}
-    {blogTools && <MediaPickerModal isOpen={imagePickerOpen} onClose={() => setImagePickerOpen(false)} onSelect={(media) => {
+    {blogTools && <MediaPickerModal isOpen={imagePickerOpen} blogPostId={blogPostId} libraryOnly={imageLimitReached} onUploaded={onImageUploaded} onUploadingChange={onImageUploadingChange} onClose={() => setImagePickerOpen(false)} onSelect={(media) => {
       const src = media.secure_url || media.url;
       if (!/^https:\/\//i.test(src) && !/^\/(?!\/)/.test(src)) return;
       setImageUrl(src);
@@ -426,7 +435,7 @@ const MenuBar = ({ editor, story, blogTools }: { editor: Editor | null; story: b
   );
 };
 
-export function TiptapEditor({ value, onChange, label = "Case study", errorId, story = false, blogTools = false }: TiptapEditorProps) {
+export function TiptapEditor({ value, onChange, label = "Case study", errorId, story = false, blogTools = false, blogPostId, imageLimitReached, onImageUploaded, onImageUploadingChange }: TiptapEditorProps) {
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -460,7 +469,7 @@ export function TiptapEditor({ value, onChange, label = "Case study", errorId, s
 
   return (
     <div className="rounded-xl overflow-hidden border border-border-hairline bg-surface-raised flex flex-col">
-      <MenuBar editor={editor} story={story} blogTools={blogTools} />
+      <MenuBar editor={editor} story={story} blogTools={blogTools} blogPostId={blogPostId} imageLimitReached={imageLimitReached} onImageUploaded={onImageUploaded} onImageUploadingChange={onImageUploadingChange} />
       <div className="flex-1 overflow-y-auto max-h-[600px] cursor-text" onClick={() => editor?.commands.focus()}>
         <EditorContent editor={editor} />
       </div>

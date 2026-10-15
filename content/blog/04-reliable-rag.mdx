@@ -65,7 +65,7 @@ Even good chunks lose context. A chunk that says "revenue grew 3% over the previ
 
 Vector search finds text that means the same thing. Keyword search (BM25) finds exact strings such as error codes, product names, and identifiers, which embeddings often blur. Hybrid search runs both and merges the results. Microsoft's documentation describes [the same design in Azure AI Search](https://learn.microsoft.com/azure/search/hybrid-search-overview): full-text and vector queries run in parallel and are merged with Reciprocal Rank Fusion.
 
-RRF works on ranks, not scores, so you don't have to normalize BM25 scores against cosine similarities:
+[RRF works on ranks, not scores](https://learn.microsoft.com/azure/search/hybrid-search-ranking), so you don't have to normalize BM25 scores against cosine similarities:
 
 ```ts
 type Hit = { id: string };

@@ -40,13 +40,13 @@ Before writing a single test, list what "bad" means for your product. A wrong an
 
 The dataset is the real work, and it's more valuable than any tool. Collect:
 
-- real user requests, from logs or support tickets once you have them
+- authorized, de-identified user requests from logs or support tickets once you have them
 - cases written by someone who knows the domain
 - edge cases: empty input, very long input, other languages, contradictory instructions
 - adversarial cases, such as prompt injection attempts
 - cases where the right behavior is to refuse or say "I don't know"
 
-Start with 30 to 100 cases and keep them in version control. Every failure you meet in production becomes a new case, so the set grows from reality. Keep a held-out slice you never tune against, otherwise you are measuring how well you memorized your own tests.
+Start with 30 to 100 cases. Keep only synthetic or properly de-identified cases in version control; keep sensitive traces in access-controlled storage with an agreed retention period. Every failure you meet in production can inform a new case after you remove credentials, personal data, and customer-specific details. Keep a held-out slice you never tune against, otherwise you are measuring how well you memorized your own tests.
 
 ## Choose your graders
 

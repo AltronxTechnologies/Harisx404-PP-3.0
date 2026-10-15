@@ -86,7 +86,7 @@ export default async function SavedBlogPreviewPage({
         )}
         <p className="text-sm text-text-secondary">
           {readingTime}
-          {publicationDate && <> / <time dateTime={post.published_at}>{publicationDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</time></>}
+           {publicationDate && <> / <time dateTime={post.published_at}>{publicationDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" })}</time></>}
         </p>
       </header>
 

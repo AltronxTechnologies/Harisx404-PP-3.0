@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { stripRepeatedBlogHeading } from "../app/lib/blog-content.ts";
+import * as contentModule from "../app/lib/blog-content.ts";
+
+const stripRepeatedBlogHeading = contentModule.stripRepeatedBlogHeading || contentModule.default?.stripRepeatedBlogHeading;
 
 test("a repeated leading article title is not shown again inside the article", () => {
   assert.equal(stripRepeatedBlogHeading("# Article Title\n\nThe introduction.\n\n## Details", "Article Title"), "The introduction.\n\n## Details");

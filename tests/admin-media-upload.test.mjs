@@ -9,7 +9,7 @@ const require = createRequire(import.meta.url);
 const source = readFileSync(new URL("../app/api/admin/media/upload/route.ts", import.meta.url), "utf8");
 const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText;
 
-function uploadRoute({ insertErrors = [], destroyResult = "ok" } = {}) {
+function uploadRoute({ insertErrors = [], destroyResult = "ok", throwAdmin = false, throwInsert = false } = {}) {
   const rows = [];
   const destroyed = [];
   let uploaded = 0;
@@ -22,11 +22,13 @@ function uploadRoute({ insertErrors = [], destroyResult = "ok" } = {}) {
       if (name === "@/app/lib/supabase/server") return {
         __esModule: true,
         default: async () => ({ auth: { getUser: async () => ({ data: { user: { email: "owner@example.test" } }, error: null }) } }),
-        createSupabaseAdminClient: async () => ({ from: () => ({
-          insert(input) { rows.push(input[0]); return this; },
-          select() { return this; },
-          async single() { const error = insertErrors[rows.length - 1]; return error ? { data: null, error } : { data: { id: "review-id", ...rows.at(-1) }, error: null }; },
-        }) }),
+         createSupabaseAdminClient: async () => {
+           if (throwAdmin) throw new Error("Database unavailable");
+           return { from: () => ({
+           insert(input) { if (throwInsert) throw new Error("Database unavailable"); rows.push(input[0]); return this; },
+           select() { return this; },
+           async single() { const error = insertErrors[rows.length - 1]; return error ? { data: null, error } : { data: { id: "review-id", ...rows.at(-1) }, error: null }; },
+         }) }; },
       };
       if (name === "cloudinary") return { v2: {
         config() {},
@@ -91,6 +93,19 @@ test("Database failure attempts Cloudinary rollback and distinguishes failed cle
   assert.equal((await rolledBack.POST(request())).status, 503);
   assert.deepEqual(rolledBack.destroyed, ["portfolio/review"]);
   const orphaned = uploadRoute({ insertErrors: [failed], destroyResult: "error" });
+  const response = await orphaned.POST(request());
+  assert.equal(response.status, 502);
+  assert.match((await response.json()).error, /may remain in Cloudinary/);
+});
+
+test("Thrown database failures after upload also roll back the Cloudinary asset", async () => {
+  for (const options of [{ throwAdmin: true }, { throwInsert: true }]) {
+    const rolledBack = uploadRoute(options);
+    assert.equal((await rolledBack.POST(request())).status, 503);
+    assert.equal(rolledBack.uploads(), 1);
+    assert.deepEqual(rolledBack.destroyed, ["portfolio/review"]);
+  }
+  const orphaned = uploadRoute({ throwInsert: true, destroyResult: "error" });
   const response = await orphaned.POST(request());
   assert.equal(response.status, 502);
   assert.match((await response.json()).error, /may remain in Cloudinary/);

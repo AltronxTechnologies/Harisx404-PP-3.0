@@ -484,8 +484,15 @@ test(
         { name: "discard-one.png", mimeType: "image/png", buffer: smallPng },
         { name: "discard-two.png", mimeType: "image/png", buffer: smallPng },
       ]);
-      await discardPage.getByRole("region", { name: "Post image thumbnails" }).locator("img").nth(1).waitFor();
-      await discardPage.getByRole("button", { name: "Cancel", exact: true }).click();
+       await discardPage.getByRole("region", { name: "Post image thumbnails" }).locator("img").nth(1).waitFor();
+       await discardPage.getByRole("button", { name: "Insert image" }).click();
+       const editorPicker = discardPage.getByRole("dialog", { name: "Choose an image" });
+       await editorPicker.getByRole("button", { name: "Upload", exact: true }).click();
+       await editorPicker.locator('input[type="file"]').setInputFiles({ name: "discard-editor.png", mimeType: "image/png", buffer: smallPng });
+       await discardPage.getByRole("region", { name: "Post image thumbnails" }).locator("img").nth(2).waitFor();
+       await editorPicker.getByRole("button", { name: "Close media picker" }).click();
+       if (!(await discardPage.getByText("3 / 20 attached").count())) failures.push({ kind: "editor-upload-not-attached" });
+       await discardPage.getByRole("button", { name: "Cancel", exact: true }).click();
       const discardDialog = discardPage.getByRole("dialog", { name: "Discard unsaved changes?" });
       await discardDialog.getByRole("button", { name: "Discard changes" }).click();
       await discardPage.getByRole("alert").filter({ hasText: "1 uploaded image(s) could not be removed" }).waitFor();
@@ -493,7 +500,7 @@ test(
       await discardPage.getByRole("button", { name: "Cancel", exact: true }).click();
       await discardDialog.getByRole("button", { name: "Discard changes" }).click();
       await discardPage.waitForURL("**/admin/blogs");
-      if (cleanupUploads !== 2 || cleanupDeletes !== 3 || unexpectedWrites) failures.push({ kind: "session-cleanup", cleanupUploads, cleanupDeletes, unexpectedWrites });
+       if (cleanupUploads !== 3 || cleanupDeletes !== 4 || unexpectedWrites) failures.push({ kind: "session-cleanup", cleanupUploads, cleanupDeletes, unexpectedWrites });
       await discardPage.close();
       console.log(
         JSON.stringify({

@@ -9,7 +9,7 @@ test("Blog detail share controls use native keyboard behavior and accessible nam
   try {
     const page = await browser.newPage({ viewport: { width: 375, height: 900 } });
     await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
-    await page.goto(`${baseUrl}/blog/effective-use-of-beforeeach-and-aftereach-in-angular-unit-tests`);
+    await page.goto(`${baseUrl}/blog/securing-ai-agents`);
 
     const copy = page.getByRole("button", { name: "Copy URL" });
     const more = page.getByRole("button", { name: "More share options" });
@@ -61,7 +61,7 @@ test("Blog detail Copy URL failure is visible and announced", async () => {
       await context.addInitScript((value) => localStorage.setItem("theme", value), theme);
       const page = await context.newPage();
       try {
-        await page.goto(`${baseUrl}/blog/the-only-nextjs-favicon-guide-youll-need`);
+         await page.goto(`${baseUrl}/blog/securing-ai-agents`);
         const copy = page.getByRole("button", { name: "Copy URL" });
         await copy.waitFor();
         await page.evaluate(() => {
