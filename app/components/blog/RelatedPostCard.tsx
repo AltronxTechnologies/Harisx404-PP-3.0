@@ -6,6 +6,7 @@ import { ArticleCardArrow } from "./ArticleCardArrow";
 import { ReactionSummaryPill } from "./ReactionSummaryPill";
 import { getBlogImageSrc } from "./blogImage";
 import type { ReactionSummary } from "@/app/blog/data";
+import { articleCover } from "@/app/blog/article-images";
 
 interface RelatedPostCardProps {
   className?: string;
@@ -18,9 +19,10 @@ interface RelatedPostCardProps {
 
 /** Related-post card for the article's curated recommendations. */
 export function RelatedPostCard({ className = "flex", slug, title, summary, imageName, reactionSummary }: RelatedPostCardProps) {
-  const coverSrc = imageName
+  const preferredImage = articleCover(slug, imageName || "");
+  const coverSrc = preferredImage
     ? getBlogImageSrc(optimizeImageUrl(
-        imageName.startsWith("http") || imageName.startsWith("/") ? imageName : `/blog/${imageName}`,
+        preferredImage.startsWith("http") || preferredImage.startsWith("/") ? preferredImage : `/blog/${preferredImage}`,
         800,
       ))
     : null;

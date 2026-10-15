@@ -5,6 +5,7 @@ import { getPublicSupabase } from "@/app/lib/supabase/safe";
 import { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 import { formatReadingTime } from "@/app/lib/reading-time";
 import { getLocalMetadata } from "./local-metadata";
+import { articleCover } from "./article-images";
 export { isLocalBlogDraft } from "./local-metadata";
 
 export type ReactionType = "like" | "heart" | "celebrate" | "insightful";
@@ -138,7 +139,7 @@ const loadBlogIndexPosts = async (): Promise<BlogIndexPost[]> => {
             : local || contentBySlug.has(post.slug)
               ? formatReadingTime(sourceContent)
               : "Article",
-        imageName: localImagePath(post.cover_image_url || local?.imageName || ""),
+        imageName: articleCover(post.slug, localImagePath(post.cover_image_url || local?.imageName || "")),
         categories: categories
           .map((category) => category.trim())
           .filter(Boolean)

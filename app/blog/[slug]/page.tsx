@@ -1,5 +1,6 @@
 import { notFound, permanentRedirect } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Metadata, ResolvingMetadata } from "next";
 import { ArrowUpRight } from "lucide-react";
 import { MDXContent } from "@/app/components/mdx";
@@ -25,6 +26,7 @@ import { getBlogImageSrc } from "@/app/components/blog/blogImage";
 import { formatReadingTime } from "@/app/lib/reading-time";
 import { siteMetadata } from "@/app/data/siteMetadata";
 import { getPublicSupabase } from "@/app/lib/supabase/safe";
+import { articleCover, articleIllustration } from "@/app/blog/article-images";
 
 interface BlogPageProps {
   params: Promise<{ slug: string }>;
@@ -113,7 +115,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
     ? `${post.readingTimeMinutes} min read`
     : formatReadingTime(post.code);
 
-  const coverSrc = blogCoverSrc(post.imageName);
+  const coverSrc = blogCoverSrc(articleCover(post.slug, post.imageName));
   const modifiedAt = post.modifiedAt && Date.parse(post.modifiedAt) >= Date.parse(post.publishedAt) ? post.modifiedAt : undefined;
 
   return (
@@ -199,6 +201,20 @@ export default async function BlogPage({ params }: BlogPageProps) {
         </div>
       </div>
 
+      {coverSrc && (
+        <div className="relative mx-auto mt-8 w-full max-w-[728px] px-4 md:px-6">
+          <Image
+            src={coverSrc}
+            alt=""
+            width={1200}
+            height={675}
+            sizes="(max-width: 680px) calc(100vw - 32px), 680px"
+            priority
+            className="h-auto w-full rounded-xl object-cover"
+          />
+        </div>
+      )}
+
       {/* Article body — reference: prose prose-neutral, centered max-w-3xl */}
       <div className="relative mt-8 mb-12 px-4 md:px-6">
         <article
@@ -206,7 +222,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
           className="blog-article-shell prose prose-neutral dark:prose-invert mx-auto min-w-0 max-w-3xl break-words [&>*:first-child]:mt-0 [&>div>*:first-child]:mt-0"
           style={{ maxWidth: "680px" }}
         >
-          <MDXContent code={post.code} components={{ img: BlogArticleImage, Image: BlogArticleImage, pre: BlogCodeWindow, code: BlogInlineCode }} />
+          <MDXContent code={articleIllustration(post.slug, post.code)} components={{ img: BlogArticleImage, Image: BlogArticleImage, pre: BlogCodeWindow, code: BlogInlineCode }} />
         </article>
       </div>
 
@@ -277,7 +293,7 @@ export async function generateMetadata(
   }
 
   const previousImages = (await parent)?.openGraph?.images || [];
-  const coverSrc = blogCoverSrc(post.imageName);
+  const coverSrc = blogCoverSrc(articleCover(post.slug, post.imageName));
   const socialImage = coverSrc
     ? new URL(coverSrc, siteMetadata.siteUrl).href
     : `/api/og?title=${encodeURIComponent(post.title)}&category=Blog`;
