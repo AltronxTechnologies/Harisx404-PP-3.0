@@ -26,6 +26,7 @@ import { getBlogImageSrc } from "@/app/components/blog/blogImage";
 import { formatReadingTime } from "@/app/lib/reading-time";
 import { siteMetadata } from "@/app/data/siteMetadata";
 import { getPublicSupabase } from "@/app/lib/supabase/safe";
+import { articleFaqToc } from "@/app/lib/article-faq-accordions";
 import { articleCover, articleIllustration } from "@/app/blog/article-images";
 
 interface BlogPageProps {
@@ -222,7 +223,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
           className="blog-article-shell prose prose-neutral dark:prose-invert mx-auto min-w-0 max-w-3xl break-words [&>*:first-child]:mt-0 [&>div>*:first-child]:mt-0"
           style={{ maxWidth: "680px" }}
         >
-          <MDXContent code={articleIllustration(post.slug, post.code)} components={{ img: BlogArticleImage, Image: BlogArticleImage, pre: BlogCodeWindow, code: BlogInlineCode }} />
+          <MDXContent code={articleIllustration(post.slug, post.code)} faqAccordions components={{ img: BlogArticleImage, Image: BlogArticleImage, pre: BlogCodeWindow, code: BlogInlineCode }} />
         </article>
       </div>
 
@@ -238,7 +239,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
         </div>
       </section>
 
-      <TableOfContents headings={post.headings} />
+      <TableOfContents headings={articleFaqToc(post.headings)} />
       <ImageLightbox />
 
       {/* Curated recommendations retain their Admin-defined order. */}

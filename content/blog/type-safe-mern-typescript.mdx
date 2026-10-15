@@ -261,7 +261,7 @@ No. TypeScript only checks code at compile time. A request body arrives as unkno
 
 ### Do I need both Mongoose schemas and Zod schemas?
 
-They serve different purposes. The Mongoose schema describes storage and database-level rules. The Zod schema describes the API contract. Keeping them separate, with a mapper between them, avoids leaking storage details.
+They serve different purposes. Mongoose schemas define document shape and application-level model validation; Zod schemas validate data at API boundaries and describe the contract. Keep storage documents separate from API DTOs, and map between them so internal fields do not leak.
 
 ### Is Zod the only option?
 

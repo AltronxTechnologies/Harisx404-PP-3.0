@@ -48,10 +48,13 @@ import { CodePlayground } from "./CodePlayground";
 import { Details, DetailsSummary } from "./Details";
 import { addHeadingIds } from "@/app/lib/toc-utils";
 import { validateBlogMdx } from "@/app/lib/blog-mdx-policy.mjs";
+import { articleFaqAccordions } from "@/app/lib/article-faq-accordions";
+import { ArticleFaq } from "@/app/components/blog/ArticleFaq";
 
 interface MDXProps {
   code: string;
   components?: Record<string, React.ComponentType>;
+  faqAccordions?: boolean;
   [key: string]: any;
 }
 
@@ -82,6 +85,7 @@ const serverComponentsMap = {
   CodePlayground,
   Details,
   DetailsSummary,
+  ArticleFaq,
   p: MdxParagraph,
   ol: MdxOrderedList,
   ul: MdxUnorderedList,
@@ -101,14 +105,14 @@ function replaceUnavailableCodePenEmbeds(code: string) {
   );
 }
 
-export const MDXContent = async ({ code, components }: MDXProps) => {
+export const MDXContent = async ({ code, components, faqAccordions = false }: MDXProps) => {
   try {
     validateBlogMdx(code);
     const evaluatedCode = replaceUnavailableCodePenEmbeds(code);
     validateBlogMdx(evaluatedCode);
     const { default: Content } = await evaluate(
       evaluatedCode,
-      { ...runtime, remarkPlugins: [remarkGfm, () => addHeadingIds] } as any,
+      { ...runtime, remarkPlugins: [remarkGfm, () => addHeadingIds, ...(faqAccordions ? [() => articleFaqAccordions] : [])] } as any,
     );
     return (
       <Content

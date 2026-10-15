@@ -7,6 +7,7 @@ import { BlogCodeWindow, BlogInlineCode } from "@/app/components/blog/BlogCode";
 import { ImageLightbox } from "@/app/components/blog/ImageLightbox";
 import { TableOfContents } from "@/app/components/TableOfContents";
 import { extractHeadingsFromMdx } from "@/app/lib/toc-utils";
+import { articleFaqToc } from "@/app/lib/article-faq-accordions";
 import { formatReadingTime } from "@/app/lib/reading-time";
 import createSupabaseServerClient, { createSupabaseAdminClient } from "@/app/lib/supabase/server";
 import { z } from "zod";
@@ -86,10 +87,10 @@ export default async function SavedBlogPreviewPage({
 
       <div className="relative mt-10 px-4 md:px-6">
         <article id="blog-article" className="blog-article-shell prose prose-neutral dark:prose-invert mx-auto min-w-0 max-w-3xl overflow-x-hidden break-words [&>*:first-child]:mt-0 [&>div>*:first-child]:mt-0" style={{ maxWidth: "680px" }}>
-          <MDXContent code={post.content || ""} components={{ img: BlogArticleImage, Image: BlogArticleImage, pre: BlogCodeWindow, code: BlogInlineCode }} />
+          <MDXContent code={post.content || ""} faqAccordions components={{ img: BlogArticleImage, Image: BlogArticleImage, pre: BlogCodeWindow, code: BlogInlineCode }} />
         </article>
       </div>
-      <TableOfContents headings={extractHeadingsFromMdx(post.content || "")} />
+      <TableOfContents headings={articleFaqToc(extractHeadingsFromMdx(post.content || ""))} />
       <ImageLightbox />
     </div>
   );
