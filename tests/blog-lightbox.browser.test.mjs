@@ -3,7 +3,7 @@ import test from "node:test";
 import { chromium } from "playwright";
 
 const baseUrl = process.env.BLOG_BASE_URL || "http://localhost:3000";
-const articleUrl = `${baseUrl}/blog/the-only-nextjs-favicon-guide-youll-need`;
+const articleUrl = `${baseUrl}/blog/reliable-rag`;
 
 test("article image lightbox supports keyboard, focus containment and restoration", async () => {
   const browser = await chromium.launch({ headless: true });

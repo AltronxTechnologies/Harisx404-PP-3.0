@@ -20,6 +20,17 @@ test("published Blog article is readable at phone through wide desktop in both t
         const response = await page.goto(url, { waitUntil: "domcontentloaded" });
         assert.equal(response.status(), 200);
         await page.locator("#blog-article p").first().waitFor();
+        const cover = page.locator('img[src*="securing-ai-agents-cover.webp"]').first();
+        await cover.waitFor();
+        const inline = page.locator("#blog-article img");
+        assert.equal(await inline.count(), 1, "only the new local diagram remains in the published article");
+        assert.match(await inline.first().getAttribute("alt") || "", /untrusted input.*human approval/i);
+        assert.equal(await page.locator('img[src*="n5llzec1gneqawlpspxh"], img[src*="uesnrbe5wu7opbui9bfb"]').count(), 0);
+        const coverPosition = await page.evaluate(() => ({
+          meta: document.querySelector('.blog-detail time')?.closest('.border-b')?.getBoundingClientRect().bottom,
+          image: document.querySelector('img[src*="securing-ai-agents-cover.webp"]')?.getBoundingClientRect().top,
+        }));
+        assert.ok(coverPosition.image >= coverPosition.meta + 16, "cover follows the metadata divider");
         for (const width of [320, 375, 390, 430, 768, 1024, 1280, 1440, 1920]) {
           await page.setViewportSize({ width, height: 900 });
           const state = await page.evaluate(() => {

@@ -32,3 +32,17 @@ test("each diagram is inserted once after its matching section, without replacin
     assert.equal(articleIllustration(slug, `${code}\n![Editor's image](/blog/other.webp)`), `${code}\n![Editor's image](/blog/other.webp)`);
   }
 });
+
+test("only the two old agent illustrations are replaced, leaving surrounding published text intact", async () => {
+  const source = await readFile(new URL("../content/blog/securing-ai-agents.mdx", import.meta.url), "utf8");
+  const oldA = "![h](https://res.cloudinary.com/i22q5puf/image/upload/v1792000121/portfolio/blog/c1000000-0000-0000-0000-000000000001/n5llzec1gneqawlpspxh.webp)";
+  const oldB = "![j](https://res.cloudinary.com/i22q5puf/image/upload/v1792000125/portfolio/blog/c1000000-0000-0000-0000-000000000001/uesnrbe5wu7opbui9bfb.webp)";
+  const published = source.replace("An AI agent is a language model", `${oldA}\n\nAn AI agent is a language model`)
+    .replace("## Two ways untrusted text gets in", `${oldB}\n\n## Two ways untrusted text gets in`);
+  const updated = articleIllustration("securing-ai-agents", published);
+  assert.doesNotMatch(updated, /n5llzec1gneqawlpspxh|uesnrbe5wu7opbui9bfb/);
+  assert.match(updated, /An AI agent is a language model/);
+  assert.match(updated, /## Two ways untrusted text gets in/);
+  assert.equal(updated.split("/blog/article-images/securing-ai-agents-rule-of-two.webp").length - 1, 1);
+  assert.equal(articleIllustration("securing-ai-agents", updated), updated);
+});

@@ -26,6 +26,7 @@ test("published articles, cards and social metadata use the same local cover and
     assert.ok(html.includes(`<meta name="twitter:image" content="${url}"`), `${slug}: X cover`);
     assert.ok(html.includes(`"image":"${url}"`), `${slug}: BlogPosting cover`);
     assert.ok(html.includes(`${diagram}.webp`), `${slug}: article diagram`);
+    if (slug === "securing-ai-agents") assert.doesNotMatch(html, /n5llzec1gneqawlpspxh|uesnrbe5wu7opbui9bfb/, "legacy inline images are no longer rendered");
     assert.doesNotMatch(html, /This article content is unavailable because its formatting could not be safely rendered/, slug);
     assert.ok(index.includes(`${cover}.webp`), `${slug}: Blog index cover`);
     for (const name of [cover, diagram]) {

@@ -1,4 +1,8 @@
 const imageRoot = "/blog/article-images";
+const legacyAgentImages = [
+  "![h](https://res.cloudinary.com/i22q5puf/image/upload/v1792000121/portfolio/blog/c1000000-0000-0000-0000-000000000001/n5llzec1gneqawlpspxh.webp)",
+  "![j](https://res.cloudinary.com/i22q5puf/image/upload/v1792000125/portfolio/blog/c1000000-0000-0000-0000-000000000001/uesnrbe5wu7opbui9bfb.webp)",
+];
 
 export const articleImages = {
   "securing-ai-agents": {
@@ -80,16 +84,22 @@ export function articleCover(slug: string, fallback: string) {
 
 export function articleIllustration(slug: string, code: string) {
   const entry = articleImages[slug as keyof typeof articleImages];
-  if (!entry || /!\[[^\]]*\]\([^)]+\)|<Image\b|<img\b/i.test(code)) return code;
+  if (!entry) return code;
+  // The published agent article already embeds these two older images. Hide only
+  // those exact references until the stored body can be updated after deployment.
+  const body = slug === "securing-ai-agents"
+    ? legacyAgentImages.reduce((text, image) => text.replace(image, "\n\n"), code)
+    : code;
+  if (/!\[[^\]]*\]\([^)]+\)|<Image\b|<img\b/i.test(body)) return body;
 
-  const headings = Array.from(code.matchAll(/^##[ \t]+(.+?)\s*$/gm));
+  const headings = Array.from(body.matchAll(/^##[ \t]+(.+?)\s*$/gm));
   const matches = headings.filter((heading) => heading[1]?.trim() === entry.section);
-  if (matches.length !== 1) return code;
+  if (matches.length !== 1) return body;
   const index = headings.indexOf(matches[0]);
   const next = headings[index + 1];
-  if (!next || next.index === undefined) return code;
+  if (!next || next.index === undefined) return body;
 
   const image = `${imageRoot}/${entry.illustration}`;
-  if (code.includes(image)) return code;
-  return `${code.slice(0, next.index).trimEnd()}\n\n![${entry.alt}](${image} "${entry.caption}")\n\n${code.slice(next.index)}`;
+  if (body.includes(image)) return body;
+  return `${body.slice(0, next.index).trimEnd()}\n\n![${entry.alt}](${image} "${entry.caption}")\n\n${body.slice(next.index)}`;
 }
