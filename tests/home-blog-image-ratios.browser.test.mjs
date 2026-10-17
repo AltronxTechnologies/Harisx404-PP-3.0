@@ -49,6 +49,11 @@ test("Home Blog covers stay 16:9 without horizontal overflow", async () => {
                   description: Math.round(description.getBoundingClientRect().height / parseFloat(getComputedStyle(description).lineHeight)),
                 };
               }),
+              sideActionGaps: cards.slice(1).map((card) => {
+                const description = card.querySelector("h3 + p");
+                const action = description.nextElementSibling.firstElementChild;
+                return Math.round(action.getBoundingClientRect().top - description.getBoundingClientRect().bottom);
+              }),
               dates: cards.map((card) => card.querySelectorAll("time").length),
               sideReadingTimes: cards.slice(1).map((card) => /\d+ min read/i.test(card.textContent)),
             };
@@ -64,6 +69,7 @@ test("Home Blog covers stay 16:9 without horizontal overflow", async () => {
             assert.ok(Math.abs(result.cardHeights[1] - result.cardHeights[2]) <= 1, `${width}px ${theme}: tablet cards align`);
             assert.ok(result.sideTextLines.every(({ title, description }) => description <= (title === 2 ? 1 : 2)), `${width}px ${theme}: summaries adapt to title length`);
             assert.ok(result.sideTitlesFit.every(Boolean), `${width}px ${theme}: tablet titles remain readable`);
+            assert.ok(result.sideActionGaps.every((gap) => gap >= 15 && gap <= 17), `${width}px ${theme}: copy sits closer to the actions`);
           }
           if (width >= 1024) {
             const featuredShare = result.cardWidths[0] / (result.cardWidths[0] + result.cardWidths[1]);

@@ -272,7 +272,7 @@ export function Writings({
                       <p className={`mt-2 line-clamp-2 break-words text-[15px] leading-relaxed text-text-secondary ${sideTitleLines[i] === 2 ? "md:line-clamp-1 lg:line-clamp-2" : ""}`}>
                         {post.summary}
                       </p>
-                      <div className="mt-auto flex min-h-7 flex-wrap items-center justify-between gap-2.5 pt-4 md:mt-4">
+                      <div className="mt-auto flex min-h-7 flex-wrap items-center justify-between gap-2.5 pt-4 md:mt-2 md:pt-2 lg:mt-4 lg:pt-4">
                         <div className="flex min-h-7 min-w-0 items-center">
                           <ReactionSummaryPill summary={post.reactionSummary} />
                         </div>
