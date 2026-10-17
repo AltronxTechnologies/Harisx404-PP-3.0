@@ -231,6 +231,16 @@ export function Writings({
                       </span>
                     </div>
                     <div className="flex min-w-0 flex-1 flex-col px-2 pb-2 pt-5 sm:px-3 md:justify-center md:px-0 md:py-1 md:pr-2">
+                      <div className="flex items-center justify-between gap-3 font-mono text-[11px] uppercase tracking-widest text-text-secondary md:text-xs">
+                        <span className="shrink-0">{post.readingTime}</span>
+                        <time
+                          className="truncate text-right"
+                          dateTime={post.publishedAt}
+                          title={formatShortDate(post.publishedAt)}
+                        >
+                          {formatShortDate(post.publishedAt)}
+                        </time>
+                      </div>
                       <h3 className="mt-3 line-clamp-2 break-words font-display text-2xl font-medium leading-tight text-text-primary md:text-[22px]">
                         {post.title}
                       </h3>

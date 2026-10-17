@@ -33,8 +33,8 @@ test("Home Blog covers stay 16:9 without horizontal overflow", async () => {
           assert.ok(result.overflow <= 1, `${width}px ${theme}: page fits`);
           assert.equal(result.ratios.length, 3, `${width}px ${theme}: featured and two companion covers render`);
           assert.ok(result.ratios.every((ratio) => Math.abs(ratio - 16 / 9) < 0.01), `${width}px ${theme}: every cover is 16:9`);
-          assert.deepEqual(result.dates, [1, 0, 0], `${width}px ${theme}: only the featured card shows a date`);
-          assert.deepEqual(result.sideReadingTimes, [false, false], `${width}px ${theme}: side cards omit reading time`);
+          assert.deepEqual(result.dates, [1, 1, 1], `${width}px ${theme}: all cards show a date`);
+          assert.deepEqual(result.sideReadingTimes, [true, true], `${width}px ${theme}: side cards show reading time`);
           if (width === 768) assert.ok(result.coverWidths.slice(1).every((cover) => Math.abs(cover - 220) < 1), `${theme}: tablet companion images keep the earlier size`);
           if (width >= 1024) {
             const featuredShare = result.cardWidths[0] / (result.cardWidths[0] + result.cardWidths[1]);
