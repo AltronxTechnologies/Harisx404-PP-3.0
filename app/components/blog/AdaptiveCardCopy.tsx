@@ -37,12 +37,12 @@ export function AdaptiveCardCopy({
   }, [title]);
 
   return (
-    <div className={`overflow-hidden ${featured ? "h-[142px] md:h-[150px] xl:h-[166px]" : "h-[142px]"}`}>
+    <div className={`overflow-hidden ${featured ? "h-[142px] md:h-[150px] xl:h-[178px]" : "h-[142px]"}`}>
       <h3
         ref={titleRef}
         className={`mt-3 line-clamp-2 text-balance font-display font-medium text-text-primary ${featured ? "xl:mt-2" : ""} ${
           featured
-            ? "text-2xl leading-7 md:text-[26px] md:leading-8"
+             ? "text-2xl leading-7 md:text-[26px] md:leading-8 xl:text-[32px] xl:leading-[38px]"
             : "text-2xl leading-7"
         }`}
       >

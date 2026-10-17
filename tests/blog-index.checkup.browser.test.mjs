@@ -27,8 +27,9 @@ test("Blog index keeps its published cards visible across widths and themes", as
             const links = [...document.querySelectorAll(selector)].filter((link) => link.getBoundingClientRect().width > 0);
             const first = links[0].getBoundingClientRect();
              const featuredImage = links[0].querySelector("img");
-             const featuredDescription = links[0].querySelector("h3 + p");
-             const featuredActions = links[0].lastElementChild?.lastElementChild;
+              const featuredDescription = links[0].querySelector("h3 + p");
+              const featuredTitle = links[0].querySelector("h3");
+              const featuredActions = links[0].lastElementChild?.lastElementChild;
              const ratios = links.flatMap((link) => {
                const image = link.querySelector("img");
                if (!image) return [];
@@ -42,7 +43,10 @@ test("Blog index keeps its published cards visible across widths and themes", as
                cards: links.length,
                first: { left: first.left, right: first.right, width: first.width },
                 featuredHeight: first.height,
-                featuredDescriptionClamp: featuredDescription ? getComputedStyle(featuredDescription).webkitLineClamp : null,
+                 featuredDescriptionClamp: featuredDescription ? getComputedStyle(featuredDescription).webkitLineClamp : null,
+                 featuredTitleSize: featuredTitle ? getComputedStyle(featuredTitle).fontSize : null,
+                 featuredTitleHeight: featuredTitle?.getBoundingClientRect().height ?? 0,
+                 descriptionGap: featuredDescription && featuredActions ? featuredActions.getBoundingClientRect().top - featuredDescription.getBoundingClientRect().bottom : null,
                 descriptionFits: Boolean(featuredDescription && featuredActions && featuredDescription.getBoundingClientRect().bottom <= featuredActions.getBoundingClientRect().top),
               railScrolls: rail.scrollWidth > rail.clientWidth,
                image: featuredImage?.alt === "" && featuredImage.complete && featuredImage.naturalWidth > 0,
@@ -61,8 +65,10 @@ test("Blog index keeps its published cards visible across widths and themes", as
            assert.ok(state.imageRatios.every((ratio) => Math.abs(ratio - 16 / 9) < 0.01), `${width}: all Blog index covers display at 16:9`);
            if (width >= 1280) {
              assert.ok(state.featuredHeight <= 302, `${width}: featured card keeps its compact wide-screen height`);
-             assert.equal(state.featuredDescriptionClamp, "4", `${width}: featured summary allows four lines`);
-             assert.equal(state.descriptionFits, true, `${width}: summary does not overlap the actions`);
+              assert.equal(state.featuredDescriptionClamp, "4", `${width}: featured summary allows four lines`);
+              assert.equal(state.featuredTitleSize, "32px", `${width}: featured title fills the wider copy column`);
+              assert.equal(state.descriptionFits, true, `${width}: summary does not overlap the actions`);
+              if (state.featuredTitleHeight > 70) assert.ok(state.descriptionGap <= 16, `${width}: four-line summary fills the space above the actions`);
            }
         }
         assert.deepEqual(errors, [], `${theme}: console/page errors`);
