@@ -29,10 +29,10 @@ test("Home Blog covers stay 16:9 without horizontal overflow", async () => {
           assert.ok(result.overflow <= 1, `${width}px ${theme}: page fits`);
           assert.equal(result.ratios.length, 3, `${width}px ${theme}: featured and two companion covers render`);
           assert.ok(result.ratios.every((ratio) => Math.abs(ratio - 16 / 9) < 0.01), `${width}px ${theme}: every cover is 16:9`);
-          if (width === 768) assert.ok(result.coverWidths.slice(1).every((cover) => cover >= 250), `${theme}: tablet companion images have enough room`);
+          if (width === 768) assert.ok(result.coverWidths.slice(1).every((cover) => Math.abs(cover - 220) < 1), `${theme}: tablet companion images keep the earlier size`);
           if (width >= 1024) {
-            assert.ok(result.cardWidths[0] / (result.cardWidths[0] + result.cardWidths[1]) < 0.59, `${width}px ${theme}: laptop featured card stays narrower`);
-            assert.ok(result.coverWidths.slice(1).every((cover) => cover >= (width >= 1280 ? 180 : 140)), `${width}px ${theme}: companion images balance the wider cards`);
+            assert.ok(result.cardWidths[0] / (result.cardWidths[0] + result.cardWidths[1]) < 0.56, `${width}px ${theme}: laptop featured card stays narrower`);
+            assert.ok(result.coverWidths.slice(1).every((cover) => cover >= (width >= 1280 ? 200 : 150)), `${width}px ${theme}: companion images balance the wider cards`);
           }
         }
       } finally {
