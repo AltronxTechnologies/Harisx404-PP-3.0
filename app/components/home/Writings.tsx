@@ -87,8 +87,7 @@ export function Writings({
         },
       };
 
-  /* Edge case: with no companion posts the featured card owns the full
-     row instead of leaving a dead 5-column gap beside it. */
+  /* Edge case: with no companion posts the featured card owns the full row. */
   const hasCompanions = rest.length > 0;
 
   return (
@@ -107,13 +106,13 @@ export function Writings({
         </SectionHeading>
       </motion.div>
 
-      <div className="mt-14 grid grid-cols-1 gap-2 lg:grid-cols-10">
+      <div className="mt-14 grid grid-cols-1 gap-2 lg:grid-cols-12">
         {/* Featured — latest post, hero treatment with the inset cover */}
         <motion.div
           {...entrance}
           transition={{ duration: 0.6, ease: "easeOut" }}
           whileHover={hoverLift}
-          className={hasCompanions ? "lg:col-span-6" : "lg:col-span-10"}
+          className={hasCompanions ? "lg:col-span-7" : "lg:col-span-12"}
         >
           <Link
             href={featured.href ?? `/blog/${featured.slug}`}
@@ -133,7 +132,7 @@ export function Writings({
                   fill
                   onError={() => markFailed(featured.imageName!)}
                   sizes={
-                    hasCompanions ? "(max-width: 1024px) 100vw, 60vw" : "100vw"
+                     hasCompanions ? "(max-width: 1023px) 100vw, 58vw" : "100vw"
                   }
                    className="object-cover transition-transform duration-500 ease-out motion-safe:[@media(hover:hover)]:group-hover:scale-[1.03] motion-reduce:transition-none"
                 />
@@ -186,7 +185,7 @@ export function Writings({
 
         {/* Companion posts — same inset-cover card language, compact rows */}
         {hasCompanions && (
-          <div className="grid grid-cols-1 gap-2 lg:col-span-4 lg:grid-rows-2">
+           <div className="grid grid-cols-1 gap-2 lg:col-span-5 lg:grid-rows-2">
             {rest.map((post, i) => (
               <motion.div
                 key={post.slug}
@@ -205,7 +204,7 @@ export function Writings({
                 >
                   <div className="flex h-full flex-col items-stretch gap-0 md:flex-row md:gap-4">
                      {/* Keep the landscape thumb centered beside the copy on wider cards. */}
-                     <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-2xl md:w-[220px] md:self-center lg:w-[40%]">
+                      <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-2xl md:w-[252px] md:self-center lg:w-[40%]">
                       {post.imageName && !failedImages.includes(post.imageName) ? (
                         <>
                            <Image
@@ -214,7 +213,7 @@ export function Writings({
                              alt=""
                              fill
                              onError={() => markFailed(post.imageName!)}
-                             sizes="(max-width: 767px) 100vw, (max-width: 1023px) 220px, 190px"
+                              sizes="(max-width: 767px) 100vw, (max-width: 1023px) 252px, 190px"
                              className="object-cover transition-transform duration-500 ease-out motion-safe:[@media(hover:hover)]:group-hover:scale-[1.03] motion-reduce:transition-none"
                           />
                            {/* Subtle inset ring + scrim keeps landscape thumbnails legible. */}
