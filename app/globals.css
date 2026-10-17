@@ -1413,6 +1413,52 @@ blockquote p {
   color: var(--text-secondary);
 }
 
+/* References are supporting material, not another full-size article section. */
+.blog-article-shell h2#references {
+  margin: 3rem 0 0.75rem !important;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border-primary);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  line-height: 1.5 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase;
+}
+
+.blog-article-shell h2#references .anchor > span[aria-hidden] {
+  display: none;
+}
+
+.blog-article-shell h2#references + ol {
+  display: grid;
+  gap: 0;
+  margin: 0 0 2rem;
+  padding: 0;
+  list-style: none;
+  counter-reset: source;
+}
+
+.blog-article-shell h2#references + ol > li {
+  display: grid;
+  grid-template-columns: 1.5rem minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: baseline;
+  margin: 0;
+  padding: 0.625rem 0;
+  border-bottom: 1px solid var(--border-primary);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  counter-increment: source;
+}
+
+.blog-article-shell h2#references + ol > li::before {
+  content: counter(source, decimal-leading-zero);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.6875rem;
+  color: var(--text-secondary);
+}
+
 /* Code blocks — 13px/24px mono, no line numbers, filename badge, hover copy */
 .blog-article-shell pre code {
   font-size: 13px;

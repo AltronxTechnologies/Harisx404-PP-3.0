@@ -10,6 +10,7 @@ interface LinkPreviewProps {
   children: React.ReactNode;
   preview: LinkPreviewData | null;
   className?: string;
+  title?: string;
 }
 
 const POPOVER_WIDTH = 320;
@@ -36,6 +37,7 @@ export function LinkPreview({
   children,
   preview,
   className,
+  title,
 }: LinkPreviewProps) {
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
   const [isMounted, setIsMounted] = useState(false);
@@ -67,7 +69,8 @@ export function LinkPreview({
     const viewportHeight = window.innerHeight;
 
     // Default: position above the link, centered
-    let top = rect.top - POPOVER_HEIGHT_ESTIMATE - 12;
+    const estimatedHeight = preview ? POPOVER_HEIGHT_ESTIMATE : 132;
+    let top = rect.top - estimatedHeight - 12;
     let left = rect.left + rect.width / 2 - POPOVER_WIDTH / 2;
 
     // If not enough space above, position below
@@ -79,16 +82,16 @@ export function LinkPreview({
     if (left < 10) {
       left = 10;
     } else if (left + POPOVER_WIDTH > viewportWidth - 10) {
-      left = viewportWidth - POPOVER_WIDTH - 10;
+      left = Math.max(10, viewportWidth - POPOVER_WIDTH - 10);
     }
 
     // If still no space, don't show
-    if (top + POPOVER_HEIGHT_ESTIMATE > viewportHeight - 10 && top < 10) {
+    if (top + estimatedHeight > viewportHeight - 10 && top < 10) {
       return null;
     }
 
     return { top, left };
-  }, []);
+  }, [preview]);
 
   // Show/hide logic based on hover state of both link and popover
   useEffect(() => {
@@ -141,8 +144,8 @@ export function LinkPreview({
     };
   }, [isHoveringLink, isHoveringPopover, calculatePosition, supportsAnchor]);
 
-  // If no preview available or touch device, render simple link
-  if (!preview || isTouch) {
+  // Touch keeps normal link behavior; hover and keyboard focus get a preview.
+  if (isTouch) {
     return (
       <a
         href={href}
@@ -178,10 +181,11 @@ export function LinkPreview({
           <LinkPreviewPopover
             ref={popoverRef}
             id={popoverId}
-            screenshotPath={preview.screenshotPath}
+            screenshotPath={preview?.screenshotPath}
+            title={title}
             url={href}
-            width={preview.width}
-            height={preview.height}
+            width={preview?.width}
+            height={preview?.height}
             position={supportsAnchor ? null : position}
             anchorName={supportsAnchor ? anchorName : undefined}
             onMouseEnter={() => setIsHoveringPopover(true)}

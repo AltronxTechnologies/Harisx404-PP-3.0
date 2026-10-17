@@ -5,10 +5,11 @@ import { LinkPreviewImage } from "./LinkPreviewImage";
 
 interface LinkPreviewPopoverProps {
   id: string;
-  screenshotPath: string;
+  screenshotPath?: string;
+  title?: string;
   url: string;
-  width: number;
-  height: number;
+  width?: number;
+  height?: number;
   position: { top: number; left: number } | null;
   anchorName?: string;
   onMouseEnter: () => void;
@@ -42,7 +43,7 @@ function formatDisplayUrl(url: string): string {
 export const LinkPreviewPopover = forwardRef<
   HTMLDivElement,
   LinkPreviewPopoverProps
->(({ id, screenshotPath, url, width, height, position, anchorName, onMouseEnter, onMouseLeave }, ref) => {
+>(({ id, screenshotPath, title, url, width, height, position, anchorName, onMouseEnter, onMouseLeave }, ref) => {
   const displayUrl = formatDisplayUrl(url);
   const faviconUrl = getFaviconUrl(url);
 
@@ -67,21 +68,14 @@ export const LinkPreviewPopover = forwardRef<
     >
       {/* Popover Card */}
       <div className="link-preview-card drama-shadow overflow-hidden rounded-xl bg-white dark:bg-[#1A1F2B]">
-        {/* Screenshot Preview */}
-        <div className="relative">
-          <LinkPreviewImage
-            src={screenshotPath}
-            alt={`Preview of ${displayUrl}`}
-            width={width}
-            height={height}
-          />
-
-          {/* Subtle gradient overlay at bottom of image */}
-          <div
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-white/50 to-transparent"
-            aria-hidden="true"
-          />
-        </div>
+        {screenshotPath && width && height ? (
+          <LinkPreviewImage src={screenshotPath} alt={`Preview of ${displayUrl}`} width={width} height={height} />
+        ) : (
+          <div className="space-y-2 px-4 py-4">
+            <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-text-secondary">Source website</span>
+            <p className="line-clamp-3 break-words text-sm font-medium leading-5 text-text-primary">{title || displayUrl}</p>
+          </div>
+        )}
 
         {/* URL Bar */}
         <div className="flex items-center gap-2.5 border-t border-border-primary/50 px-3 py-2.5">

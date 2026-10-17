@@ -166,7 +166,7 @@ function CustomLink({ href, children, ...rest }: { href: string; children: React
   const preview = getPreviewFromManifest(manifest, href);
 
   return (
-    <LinkPreview href={href} className={styles} preview={preview}>
+    <LinkPreview href={href} className={styles} preview={preview} title={typeof children === "string" ? children : undefined}>
       {children}
     </LinkPreview>
   );
