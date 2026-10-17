@@ -73,7 +73,7 @@ export function FeaturedBlogCard({
 
         <AdaptiveCardCopy title={title} summary={summary} featured />
 
-        <div className="mt-auto flex min-h-7 items-center justify-between gap-2.5 pt-4">
+        <div className="mt-auto flex min-h-7 items-center justify-between gap-2.5 pt-4 xl:pt-0">
           <div className="flex min-h-7 min-w-0 items-center">
             <ReactionSummaryPill summary={reactionSummary} />
           </div>
