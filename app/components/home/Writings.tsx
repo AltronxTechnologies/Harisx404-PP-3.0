@@ -106,7 +106,7 @@ export function Writings({
         </SectionHeading>
       </motion.div>
 
-      <div className={`mt-14 grid grid-cols-1 gap-2 ${hasCompanions ? "lg:grid-cols-[minmax(0,54fr)_minmax(0,46fr)]" : ""}`}>
+      <div className={`mt-14 grid grid-cols-1 gap-2 ${hasCompanions ? "lg:grid-cols-2" : ""}`}>
         {/* Featured — latest post, hero treatment with the inset cover */}
         <motion.div
           {...entrance}
@@ -131,7 +131,7 @@ export function Writings({
                   fill
                   onError={() => markFailed(featured.imageName!)}
                   sizes={
-                     hasCompanions ? "(max-width: 1023px) 100vw, 54vw" : "100vw"
+                      hasCompanions ? "(max-width: 1023px) 100vw, 50vw" : "100vw"
                   }
                    className="object-cover transition-transform duration-500 ease-out motion-safe:[@media(hover:hover)]:group-hover:scale-[1.03] motion-reduce:transition-none"
                 />
@@ -155,7 +155,7 @@ export function Writings({
                </span>
              </div>
 
-            <div className="flex flex-1 flex-col px-2 pb-2 pt-5 sm:px-3 lg:flex-none">
+            <div className="flex flex-1 flex-col px-2 pb-2 pt-5 sm:px-3 lg:flex-none lg:pt-4">
               <div className="flex items-center justify-between gap-3 font-mono text-[11px] uppercase tracking-widest text-text-secondary md:text-xs">
                 <span className="shrink-0">{featured.readingTime}</span>
                 <time
@@ -166,13 +166,13 @@ export function Writings({
                   {formatShortDate(featured.publishedAt)}
                 </time>
               </div>
-              <h3 className="mt-3 line-clamp-2 break-words font-display text-2xl font-medium leading-tight text-text-primary">
+              <h3 className={`mt-3 line-clamp-2 break-words font-display text-2xl font-medium leading-tight text-text-primary ${hasCompanions ? "lg:text-[22px] lg:tracking-[-0.01em]" : ""}`}>
                 {featured.title}
               </h3>
               <p className="mt-2 line-clamp-2 break-words text-[15px] leading-relaxed text-text-secondary">
                 {featured.summary}
               </p>
-              <div className="mt-auto flex min-h-7 items-center justify-between gap-2.5 pt-4">
+              <div className="mt-auto flex min-h-7 items-center justify-between gap-2.5 pt-4 lg:pt-2">
                 <div className="flex min-h-7 min-w-0 items-center">
                   <ReactionSummaryPill summary={featured.reactionSummary} />
                 </div>
@@ -203,7 +203,7 @@ export function Writings({
                 >
                   <div className="flex h-full flex-col items-stretch gap-0 md:flex-row md:gap-4">
                      {/* Keep the landscape thumb centered beside the copy on wider cards. */}
-                      <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-2xl md:w-[220px] md:self-center lg:w-[40%]">
+                      <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-2xl md:w-[220px] md:self-center lg:w-[41%]">
                       {post.imageName && !failedImages.includes(post.imageName) ? (
                         <>
                            <Image
@@ -212,7 +212,7 @@ export function Writings({
                              alt=""
                              fill
                              onError={() => markFailed(post.imageName!)}
-                              sizes="(max-width: 767px) 100vw, (max-width: 1023px) 220px, 210px"
+                              sizes="(max-width: 767px) 100vw, (max-width: 1023px) 220px, 230px"
                              className="object-cover transition-transform duration-500 ease-out motion-safe:[@media(hover:hover)]:group-hover:scale-[1.03] motion-reduce:transition-none"
                           />
                            {/* Subtle inset ring + scrim keeps landscape thumbnails legible. */}
@@ -231,23 +231,13 @@ export function Writings({
                       </span>
                     </div>
                     <div className="flex min-w-0 flex-1 flex-col px-2 pb-2 pt-5 sm:px-3 md:justify-center md:px-0 md:py-1 md:pr-2">
-                      <div className="flex items-center justify-between gap-3 font-mono text-[11px] uppercase tracking-widest text-text-secondary md:text-xs">
-                        <span className="shrink-0">{post.readingTime}</span>
-                        <time
-                          className="truncate text-right"
-                          dateTime={post.publishedAt}
-                          title={formatShortDate(post.publishedAt)}
-                        >
-                          {formatShortDate(post.publishedAt)}
-                        </time>
-                      </div>
                       <h3 className="mt-3 line-clamp-2 break-words font-display text-2xl font-medium leading-tight text-text-primary md:text-[22px]">
                         {post.title}
                       </h3>
                       <p className="mt-2 line-clamp-2 break-words text-[15px] leading-relaxed text-text-secondary">
                         {post.summary}
                       </p>
-                      <div className="mt-auto flex min-h-7 flex-wrap items-center justify-between gap-2.5 pt-4">
+                      <div className="mt-auto flex min-h-7 flex-wrap items-center justify-between gap-2.5 pt-4 md:mt-4">
                         <div className="flex min-h-7 min-w-0 items-center">
                           <ReactionSummaryPill summary={post.reactionSummary} />
                         </div>

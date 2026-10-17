@@ -24,15 +24,21 @@ test("Home Blog covers stay 16:9 without horizontal overflow", async () => {
               ratios: covers.map((box) => box.width / box.height),
               coverWidths: covers.map((box) => box.width),
               cardWidths: cards.map((card) => card.getBoundingClientRect().width),
+              cardHeights: cards.map((card) => card.getBoundingClientRect().height),
+              dates: cards.map((card) => card.querySelectorAll("time").length),
+              sideReadingTimes: cards.slice(1).map((card) => /\d+ min read/i.test(card.textContent)),
             };
           });
           assert.ok(result.overflow <= 1, `${width}px ${theme}: page fits`);
           assert.equal(result.ratios.length, 3, `${width}px ${theme}: featured and two companion covers render`);
           assert.ok(result.ratios.every((ratio) => Math.abs(ratio - 16 / 9) < 0.01), `${width}px ${theme}: every cover is 16:9`);
+          assert.deepEqual(result.dates, [1, 0, 0], `${width}px ${theme}: only the featured card shows a date`);
+          assert.deepEqual(result.sideReadingTimes, [false, false], `${width}px ${theme}: side cards omit reading time`);
           if (width === 768) assert.ok(result.coverWidths.slice(1).every((cover) => Math.abs(cover - 220) < 1), `${theme}: tablet companion images keep the earlier size`);
           if (width >= 1024) {
-            assert.ok(result.cardWidths[0] / (result.cardWidths[0] + result.cardWidths[1]) < 0.56, `${width}px ${theme}: laptop featured card stays narrower`);
-            assert.ok(result.coverWidths.slice(1).every((cover) => cover >= (width >= 1280 ? 200 : 150)), `${width}px ${theme}: companion images balance the wider cards`);
+            assert.ok(result.cardWidths[0] / (result.cardWidths[0] + result.cardWidths[1]) <= 0.51, `${width}px ${theme}: laptop columns balance`);
+            assert.ok(result.coverWidths.slice(1).every((cover) => cover >= (width >= 1280 ? 225 : 175)), `${width}px ${theme}: companion images balance the wider cards`);
+            if (width >= 1280) assert.ok(result.cardHeights[0] <= 520, `${width}px ${theme}: featured card is shorter`);
           }
         }
       } finally {
