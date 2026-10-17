@@ -4,7 +4,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { isOriginalBlogWebp, optimizeImageUrl } from "@/app/lib/image-utils";
 import type { HomePost } from "@/app/data/fallback-home";
@@ -64,6 +64,31 @@ export function Writings({
   const [failedImages, setFailedImages] = useState<string[]>([]);
   const markFailed = (url: string) => setFailedImages((current) => current.includes(url) ? current : [...current, url]);
   const [featured, ...rest] = posts;
+  const sideTitleRefs = useRef<(HTMLHeadingElement | null)[]>([]);
+  const [sideTitleLines, setSideTitleLines] = useState<number[]>([]);
+
+  useLayoutEffect(() => {
+    let active = true;
+    const measure = () => {
+      if (!active) return;
+      const lines = posts.slice(1).map((_, index) => {
+        const title = sideTitleRefs.current[index];
+        if (!title) return 2;
+        const lineHeight = parseFloat(getComputedStyle(title).lineHeight);
+        return lineHeight ? Math.min(2, Math.max(1, Math.round(title.getBoundingClientRect().height / lineHeight))) : 2;
+      });
+      setSideTitleLines((current) => lines.length === current.length && lines.every((line, index) => line === current[index]) ? current : lines);
+    };
+    measure();
+    const observers = sideTitleRefs.current.slice(0, posts.length - 1).flatMap((title) => {
+      if (!title) return [];
+      const observer = new ResizeObserver(measure);
+      observer.observe(title);
+      return [observer];
+    });
+    document.fonts?.ready.then(measure);
+    return () => { active = false; observers.forEach((observer) => observer.disconnect()); };
+  }, [posts]);
   if (!featured) return null;
 
   /* Motion presets — collapse to static rendering for reduced-motion users
@@ -241,10 +266,10 @@ export function Writings({
                           {formatShortDate(post.publishedAt)}
                         </time>
                       </div>
-                      <h3 className="mt-3 line-clamp-2 break-words font-display text-2xl font-medium leading-tight text-text-primary md:text-[20px] lg:text-[22px]">
+                      <h3 ref={(element) => { sideTitleRefs.current[i] = element; }} className="mt-3 line-clamp-2 break-words font-display text-2xl font-medium leading-tight text-text-primary md:text-[20px] lg:text-[22px]">
                         {post.title}
                       </h3>
-                      <p className="mt-2 line-clamp-2 break-words text-[15px] leading-relaxed text-text-secondary">
+                      <p className={`mt-2 line-clamp-2 break-words text-[15px] leading-relaxed text-text-secondary ${sideTitleLines[i] === 2 ? "md:line-clamp-1 lg:line-clamp-2" : ""}`}>
                         {post.summary}
                       </p>
                       <div className="mt-auto flex min-h-7 flex-wrap items-center justify-between gap-2.5 pt-4 md:mt-4">
