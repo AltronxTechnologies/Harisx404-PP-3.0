@@ -244,10 +244,10 @@ export function Writings({
                       <h3 className="mt-3 line-clamp-2 break-words font-display text-2xl font-medium leading-tight text-text-primary md:text-[20px] lg:text-[22px]">
                         {post.title}
                       </h3>
-                      <p className={`mt-2 line-clamp-2 break-words text-[15px] leading-relaxed text-text-secondary ${i === 0 ? "md:mt-4 lg:mt-2" : ""}`}>
+                      <p className="mt-2 line-clamp-2 break-words text-[15px] leading-relaxed text-text-secondary">
                         {post.summary}
                       </p>
-                      <div className={`mt-auto flex min-h-7 flex-wrap items-center justify-between gap-2.5 pt-4 ${i === 0 ? "md:mt-2 lg:mt-4" : "md:mt-4"}`}>
+                      <div className="mt-auto flex min-h-7 flex-wrap items-center justify-between gap-2.5 pt-4 md:mt-4">
                         <div className="flex min-h-7 min-w-0 items-center">
                           <ReactionSummaryPill summary={post.reactionSummary} />
                         </div>

@@ -54,10 +54,9 @@ test("Home Blog covers stay 16:9 without horizontal overflow", async () => {
             assert.ok(result.sideTitlesFit.every(Boolean), `${width}px ${theme}: tablet titles remain readable`);
             if (width === 768 || width === 900) {
               assert.deepEqual(result.sideSpacing, [
-                { titleToDescription: 16, descriptionToActions: 8 },
                 { titleToDescription: 8, descriptionToActions: 16 },
-              ], `${width}px ${theme}: only the first card shifts its description into the action gap`);
-              assert.ok(Math.abs(result.cardHeights[1] - 229) < 1, `${width}px ${theme}: first card height stays fixed`);
+                { titleToDescription: 8, descriptionToActions: 16 },
+              ], `${width}px ${theme}: both side cards use the same spacing`);
             }
           }
           if (width >= 1024) {
