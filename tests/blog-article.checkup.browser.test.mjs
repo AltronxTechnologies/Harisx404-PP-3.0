@@ -36,9 +36,13 @@ test("published Blog article is readable at phone through wide desktop in both t
           await page.setViewportSize({ width, height: 900 });
           const state = await page.evaluate(() => {
             const article = document.querySelector("#blog-article");
-            const box = article.getBoundingClientRect();
-            const code = article.querySelector("pre");
-            return {
+           const box = article.getBoundingClientRect();
+           const code = article.querySelector("pre");
+           const ratio = (image) => {
+             const bounds = image.getBoundingClientRect();
+             return bounds.width / bounds.height;
+           };
+           return {
               theme: document.documentElement.classList.contains("dark") ? "dark" : "light",
               overflow: document.documentElement.scrollWidth - innerWidth,
               h1: document.querySelectorAll("main h1").length,
@@ -46,7 +50,13 @@ test("published Blog article is readable at phone through wide desktop in both t
               text: article.textContent.trim().length,
               codeInside: !code || (code.getBoundingClientRect().left >= 0 && code.getBoundingClientRect().right <= innerWidth + 1),
               reactions: document.querySelectorAll('[aria-labelledby="article-reactions-heading"] button').length,
-              anchorCount: article.querySelectorAll("h2[id] a.anchor, h3[id] a.anchor").length,
+               anchorCount: article.querySelectorAll("h2[id] a.anchor, h3[id] a.anchor").length,
+               imageRatios: [
+                 ratio(document.querySelector(".blog-detail img")),
+                 ratio(article.querySelector("img")),
+                 ...[...document.querySelectorAll('[aria-labelledby="related-articles-heading"] img')]
+                   .filter((image) => image.getBoundingClientRect().width > 0).map(ratio),
+               ],
             };
           });
           assert.equal(state.theme, theme, `${width}: theme`);
@@ -54,7 +64,9 @@ test("published Blog article is readable at phone through wide desktop in both t
           assert.equal(state.h1, 1, `${width}: only article title is H1`);
           assert.ok(state.articleWidth > 0 && state.articleLeft >= 0 && state.articleRight <= width + 1, `${width}: reading column fits`);
           assert.ok(state.text > 1000 && state.codeInside && state.anchorCount > 0);
-          assert.equal(state.reactions, 4, `${width}: reaction controls render, no write attempted`);
+           assert.equal(state.reactions, 4, `${width}: reaction controls render, no write attempted`);
+           assert.ok(state.imageRatios.length >= 4, `${width}: cover, diagram and related covers render`);
+           assert.ok(state.imageRatios.every((ratio) => Math.abs(ratio - 16 / 9) < 0.01), `${width}: all article images display at 16:9`);
         }
         assert.deepEqual(errors, [], `${theme}: page/console errors`);
       } finally {

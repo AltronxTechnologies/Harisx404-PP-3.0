@@ -211,7 +211,8 @@ export default async function BlogPage({ params }: BlogPageProps) {
             height={675}
             sizes="(max-width: 680px) calc(100vw - 32px), 680px"
             priority
-            className="h-auto w-full rounded-xl object-cover"
+            className="w-full rounded-xl object-cover"
+            style={{ aspectRatio: "16 / 9" }}
           />
         </div>
       )}

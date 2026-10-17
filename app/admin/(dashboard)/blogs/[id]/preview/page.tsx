@@ -92,7 +92,7 @@ export default async function SavedBlogPreviewPage({
 
       {coverSrc && (
         <div className="relative mx-auto mt-8 w-full max-w-[728px] px-4 md:px-6">
-          <Image src={coverSrc} alt="" width={1200} height={675} unoptimized={isOriginalBlogWebp(coverSrc)} sizes="(max-width: 680px) calc(100vw - 32px), 680px" className="h-auto w-full rounded-xl object-cover" />
+          <Image src={coverSrc} alt="" width={1200} height={675} unoptimized={isOriginalBlogWebp(coverSrc)} sizes="(max-width: 680px) calc(100vw - 32px), 680px" className="w-full rounded-xl object-cover" style={{ aspectRatio: "16 / 9" }} />
         </div>
       )}
       <div className="relative mt-10 px-4 md:px-6">

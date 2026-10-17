@@ -12,7 +12,8 @@ function render(props: Parameters<typeof BlogArticleImage>[0]) {
 test("local article images retain their styling and supplied alt without a caption", () => {
   const html = render({ src: "/blog/favicon_for_app.jpeg", alt: "Favicon for app directory" });
   assert.match(html, /alt="Favicon for app directory"/);
-  assert.match(html, /drama-shadow rounded-xl w-full h-auto/);
+  assert.match(html, /drama-shadow w-full rounded-xl object-contain/);
+  assert.match(html, /aspect-ratio:16 \/ 9/);
   assert.match(html, /width="800" height="450"/);
   assert.doesNotMatch(html, /View source|text-center text-sm text-text-secondary/);
 });

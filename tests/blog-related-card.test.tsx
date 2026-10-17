@@ -20,6 +20,7 @@ test("curated Blog cards have readable titles, a clear action, and no duplicate 
   assert.match(html, /Why this article is worth reading/);
   assert.match(html, /Read article/);
   assert.match(html, /alt=""/);
+  assert.match(html, /aspect-video w-full overflow-hidden/);
   assert.match(html, /aria-label="Read A Related Article\. 3 reactions\."/);
   assert.match(html, /3 reactions: 2 like, 1 heart/);
   assert.match(html, /<span class="inline-flex h-7[^>]+role="img"/);
