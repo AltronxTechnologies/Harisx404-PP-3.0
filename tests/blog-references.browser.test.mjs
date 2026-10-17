@@ -28,6 +28,13 @@ test("article sources are compact and external links show a useful hover and foc
         assert.equal(typography.item, "13px");
         assert.match(typography.columns, /24px/);
 
+        const inlineLink = page.locator('#blog-article p a[href="https://anthropic.com/news/contextual-retrieval"]');
+        await inlineLink.hover();
+        assert.deepEqual(await inlineLink.evaluate((link) => ({
+          border: getComputedStyle(link).borderBottomWidth,
+          decoration: getComputedStyle(link).textDecorationLine,
+        })), { border: "0px", decoration: "none" });
+
         const source = links.nth(1);
         await source.hover();
         const preview = page.locator('.link-preview-popover:popover-open');

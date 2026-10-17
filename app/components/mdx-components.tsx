@@ -146,7 +146,7 @@ function getPreviewFromManifest(
 function CustomLink({ href, children, ...rest }: { href: string; children: React.ReactNode; [key: string]: any }) {
   const manifest = useLinkPreviewManifest();
 
-  const styles = `font-medium border-b border-indigo-400 hover:border-b-2 text-text-primary transition-all duration-75`;
+  const styles = "font-medium text-text-primary transition-colors duration-75";
 
   // Internal links (starting with /)
   if (href.startsWith("/")) {
