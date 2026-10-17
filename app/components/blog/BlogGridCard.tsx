@@ -40,7 +40,7 @@ export function BlogGridCard({
       }
       className="group flex h-full flex-col rounded-3xl border border-border-primary bg-white p-3 transition-all hover:border-neutral-400/70 hover:shadow-lg dark:bg-white/[0.02] dark:hover:border-white/25"
     >
-      <div className="relative aspect-[16/11] overflow-hidden rounded-2xl bg-slate-900">
+      <div className="relative aspect-video overflow-hidden rounded-2xl bg-slate-900">
         {imageSrc ? (
           <Image
             src={imageSrc}

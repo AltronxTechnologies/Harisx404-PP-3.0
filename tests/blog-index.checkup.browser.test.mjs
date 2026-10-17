@@ -26,7 +26,13 @@ test("Blog index keeps its published cards visible across widths and themes", as
           const state = await page.evaluate((selector) => {
             const links = [...document.querySelectorAll(selector)].filter((link) => link.getBoundingClientRect().width > 0);
             const first = links[0].getBoundingClientRect();
-            const featuredImage = links[0].querySelector("img");
+             const featuredImage = links[0].querySelector("img");
+             const ratios = links.flatMap((link) => {
+               const image = link.querySelector("img");
+               if (!image) return [];
+               const box = image.getBoundingClientRect();
+               return box.width && box.height ? [box.width / box.height] : [];
+             });
             const rail = document.querySelector('[role="group"][aria-label="Filter articles by category"]');
             return {
               overflow: document.documentElement.scrollWidth - innerWidth,
@@ -34,7 +40,8 @@ test("Blog index keeps its published cards visible across widths and themes", as
               cards: links.length,
               first: { left: first.left, right: first.right, width: first.width },
               railScrolls: rail.scrollWidth > rail.clientWidth,
-              image: featuredImage?.alt === "" && featuredImage.complete && featuredImage.naturalWidth > 0,
+               image: featuredImage?.alt === "" && featuredImage.complete && featuredImage.naturalWidth > 0,
+               imageRatios: ratios,
               theme: document.documentElement.classList.contains("dark") ? "dark" : "light",
             };
           }, cards);
@@ -44,7 +51,9 @@ test("Blog index keeps its published cards visible across widths and themes", as
           assert.equal(state.cards, width < 1024 ? 7 : 10, `${width} ${theme}: first-page count`);
           assert.ok(state.first.width > 0 && state.first.left >= 0 && state.first.right <= width + 1);
           assert.equal(state.railScrolls, true, `${width}: category rail stays scrollable`);
-          assert.equal(state.image, true, `${width}: featured cover loads`);
+           assert.equal(state.image, true, `${width}: featured cover loads`);
+           assert.equal(state.imageRatios.length, state.cards, `${width}: every Blog card has a cover`);
+           assert.ok(state.imageRatios.every((ratio) => Math.abs(ratio - 16 / 9) < 0.01), `${width}: all Blog index covers display at 16:9`);
         }
         assert.deepEqual(errors, [], `${theme}: console/page errors`);
       } finally {
