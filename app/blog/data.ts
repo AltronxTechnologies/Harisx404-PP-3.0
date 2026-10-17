@@ -67,7 +67,7 @@ function buildCardDescription(summary: string, content = "") {
     .slice(0, 2)
     .join(" ");
 
-  return prose.length > summary.trim().length ? prose.slice(0, 360) : summary.trim();
+  return prose.length > summary.trim().length ? prose.slice(0, 600) : summary.trim();
 }
 
 const loadBlogIndexPosts = async (): Promise<BlogIndexPost[]> => {
