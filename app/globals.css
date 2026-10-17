@@ -1446,10 +1446,15 @@ blockquote p {
   align-items: baseline;
   margin: 0;
   padding: 0.625rem 0;
-  border-bottom: 1px solid var(--border-primary);
   font-size: 0.8125rem;
   line-height: 1.5;
   counter-increment: source;
+}
+
+.blog-article-shell h2#references + ol > li a,
+.blog-article-shell h2#references + ol > li a:hover {
+  border-bottom: 0;
+  text-decoration: none;
 }
 
 .blog-article-shell h2#references + ol > li::before {
