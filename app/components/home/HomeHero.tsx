@@ -53,7 +53,7 @@ function TaglineRotator() {
             animate={{ opacity: 1, y: 0 }}
             exit={reduced ? { opacity: 1 } : { opacity: 0, y: -14 }}
             transition={reduced ? { duration: 0 } : { duration: 0.35, ease: "easeOut" }}
-            className="absolute inset-x-0 top-1 block whitespace-nowrap text-center md:text-left"
+             className="absolute inset-x-0 top-0.5 block whitespace-nowrap text-left lg:top-1"
           >
             {statusLines[index]}
           </motion.span>
