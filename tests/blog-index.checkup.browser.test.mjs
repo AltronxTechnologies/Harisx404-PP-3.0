@@ -34,11 +34,12 @@ test("Blog index keeps its published cards visible across widths and themes", as
                return box.width && box.height ? [box.width / box.height] : [];
              });
             const rail = document.querySelector('[role="group"][aria-label="Filter articles by category"]');
-            return {
-              overflow: document.documentElement.scrollWidth - innerWidth,
-              headingCount: document.querySelectorAll("main h1").length,
-              cards: links.length,
-              first: { left: first.left, right: first.right, width: first.width },
+             return {
+               overflow: document.documentElement.scrollWidth - innerWidth,
+               headingCount: document.querySelectorAll("main h1").length,
+               cards: links.length,
+               first: { left: first.left, right: first.right, width: first.width },
+               featuredHeight: first.height,
               railScrolls: rail.scrollWidth > rail.clientWidth,
                image: featuredImage?.alt === "" && featuredImage.complete && featuredImage.naturalWidth > 0,
                imageRatios: ratios,
@@ -54,6 +55,7 @@ test("Blog index keeps its published cards visible across widths and themes", as
            assert.equal(state.image, true, `${width}: featured cover loads`);
            assert.equal(state.imageRatios.length, state.cards, `${width}: every Blog card has a cover`);
            assert.ok(state.imageRatios.every((ratio) => Math.abs(ratio - 16 / 9) < 0.01), `${width}: all Blog index covers display at 16:9`);
+           if (width >= 1280) assert.ok(state.featuredHeight <= 302, `${width}: featured card keeps its compact wide-screen height`);
         }
         assert.deepEqual(errors, [], `${theme}: console/page errors`);
       } finally {

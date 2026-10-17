@@ -39,7 +39,7 @@ export function FeaturedBlogCard({
       }
       className="group relative flex flex-col rounded-3xl border border-border-primary bg-white p-3 transition-all hover:border-neutral-400/70 hover:shadow-lg dark:bg-white/[0.02] dark:hover:border-white/25 md:flex-row"
     >
-      <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-2xl bg-slate-900 md:w-1/2 md:self-start">
+      <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-2xl bg-slate-900 md:w-1/2 md:self-start xl:w-[42%]">
         {imageSrc ? (
           <Image
             src={imageSrc}
@@ -63,7 +63,7 @@ export function FeaturedBlogCard({
         </span>
       </div>
 
-      <div className="flex flex-1 flex-col px-2 pb-3 pt-4 md:justify-center md:px-6 md:py-6 lg:px-8 lg:py-8">
+       <div className="flex flex-1 flex-col px-2 pb-3 pt-4 md:justify-center md:px-6 md:py-6 lg:px-8 lg:py-8 xl:py-5">
         <div className="flex items-center justify-between gap-4 font-mono text-[11px] uppercase tracking-widest text-text-secondary md:text-xs">
           <span className="shrink-0">{readingTime}</span>
           <time className="truncate text-right" dateTime={publishedAt} title={formattedDate}>
