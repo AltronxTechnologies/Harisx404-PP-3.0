@@ -117,19 +117,13 @@ export function Writings({
         >
           <Link
             href={featured.href ?? `/blog/${featured.slug}`}
-            className={`group flex h-full flex-col rounded-3xl border border-border-primary bg-white p-3 transition-all hover:border-neutral-400/70 hover:shadow-lg dark:hover:border-white/25 dark:bg-white/[0.02] ${
-              hasCompanions ? "xl:aspect-[16/10.835]" : ""
-            }`}
+            className="group flex h-full flex-col rounded-3xl border border-border-primary bg-white p-3 transition-all hover:border-neutral-400/70 hover:shadow-lg dark:hover:border-white/25 dark:bg-white/[0.02]"
           >
             {/* Inset cover — rounded on its own, floating inside the card.
                 Real covers stay clean; only gradient placeholders carry the
                 title overlay (the heading below already names the post). */}
             <div
-              className={`relative overflow-hidden rounded-2xl ${
-                hasCompanions
-                  ? "aspect-[16/10.95] md:aspect-[16/10.835] lg:aspect-auto lg:flex-1"
-                  : "aspect-[16/9] lg:aspect-[16/6]"
-              }`}
+              className="relative aspect-video w-full shrink-0 overflow-hidden rounded-2xl"
             >
               {featured.imageName && !failedImages.includes(featured.imageName) ? (
                 <Image
@@ -210,10 +204,8 @@ export function Writings({
                   className="group flex h-full flex-col rounded-3xl border border-border-primary bg-white p-3 transition-all hover:border-neutral-400/70 hover:shadow-lg dark:hover:border-white/25 dark:bg-white/[0.02]"
                 >
                   <div className="flex h-full flex-col items-stretch gap-0 md:flex-row md:gap-4">
-                    {/* Inset thumb — stretches the full card height so it sits
-                        flush with the card padding on top, bottom, and left,
-                        mirroring the featured card's inset cover. */}
-                    <div className="relative aspect-[16/10.95] w-full shrink-0 self-stretch overflow-hidden rounded-2xl md:aspect-auto md:w-[220px] lg:w-[152px]">
+                     {/* Keep the landscape thumb centered beside the copy on wider cards. */}
+                     <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-2xl md:w-[220px] md:self-center lg:w-[40%]">
                       {post.imageName && !failedImages.includes(post.imageName) ? (
                         <>
                            <Image
@@ -222,11 +214,10 @@ export function Writings({
                              alt=""
                              fill
                              onError={() => markFailed(post.imageName!)}
-                            sizes="140px"
+                             sizes="(max-width: 767px) 100vw, (max-width: 1023px) 220px, 190px"
                              className="object-cover transition-transform duration-500 ease-out motion-safe:[@media(hover:hover)]:group-hover:scale-[1.03] motion-reduce:transition-none"
                           />
-                          {/* Subtle inset ring + scrim so tall crops read as a
-                              deliberate cover panel rather than a raw photo. */}
+                           {/* Subtle inset ring + scrim keeps landscape thumbnails legible. */}
                           <div
                             aria-hidden
                             className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/25 via-transparent to-black/10 ring-1 ring-inset ring-white/10"
