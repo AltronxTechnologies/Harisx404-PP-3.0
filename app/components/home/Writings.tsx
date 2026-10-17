@@ -203,7 +203,7 @@ export function Writings({
                 >
                   <div className="flex h-full flex-col items-stretch gap-0 md:flex-row md:gap-4">
                      {/* Keep the landscape thumb centered beside the copy on wider cards. */}
-                      <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-2xl md:w-[220px] md:self-center lg:w-1/2 xl:w-[52%]">
+                      <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-2xl md:w-[320px] md:self-center lg:w-1/2 xl:w-[52%]">
                       {post.imageName && !failedImages.includes(post.imageName) ? (
                         <>
                            <Image
@@ -212,7 +212,7 @@ export function Writings({
                              alt=""
                              fill
                              onError={() => markFailed(post.imageName!)}
-                              sizes="(max-width: 767px) 100vw, (max-width: 1023px) 220px, (max-width: 1279px) 270px, 370px"
+                               sizes="(max-width: 767px) 100vw, (max-width: 1023px) 320px, (max-width: 1279px) 270px, 370px"
                              className="object-cover transition-transform duration-500 ease-out motion-safe:[@media(hover:hover)]:group-hover:scale-[1.03] motion-reduce:transition-none"
                           />
                            {/* Subtle inset ring + scrim keeps landscape thumbnails legible. */}
@@ -241,7 +241,7 @@ export function Writings({
                           {formatShortDate(post.publishedAt)}
                         </time>
                       </div>
-                      <h3 className="mt-3 line-clamp-2 break-words font-display text-2xl font-medium leading-tight text-text-primary md:text-[22px]">
+                      <h3 className="mt-3 line-clamp-2 break-words font-display text-2xl font-medium leading-tight text-text-primary md:text-[20px] lg:text-[22px]">
                         {post.title}
                       </h3>
                       <p className="mt-2 line-clamp-2 break-words text-[15px] leading-relaxed text-text-secondary">

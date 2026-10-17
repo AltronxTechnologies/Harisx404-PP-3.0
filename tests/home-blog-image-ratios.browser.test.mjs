@@ -12,7 +12,7 @@ test("Home Blog covers stay 16:9 without horizontal overflow", async () => {
       try {
         assert.equal((await page.goto(process.env.PREVIEW_BASE_URL || "http://localhost:3000", { waitUntil: "domcontentloaded" }))?.status(), 200);
         await page.getByRole("heading", { name: "Latest write-ups." }).waitFor();
-        for (const width of [320, 390, 768, 1024, 1280, 1440]) {
+        for (const width of [320, 390, 768, 900, 1023, 1024, 1280, 1440]) {
           await page.setViewportSize({ width, height: 900 });
           const result = await page.evaluate(() => {
             const heading = [...document.querySelectorAll("main h2, main h3")]
@@ -26,6 +26,10 @@ test("Home Blog covers stay 16:9 without horizontal overflow", async () => {
               cardWidths: cards.map((card) => card.getBoundingClientRect().width),
               cardHeights: cards.map((card) => card.getBoundingClientRect().height),
               sideImageGaps: cards.slice(1).map((card, index) => card.getBoundingClientRect().height - covers[index + 1].height - 26),
+              sideTitlesFit: cards.slice(1).map((card) => {
+                const title = card.querySelector("h3");
+                return title.scrollHeight <= title.clientHeight + 1;
+              }),
               dates: cards.map((card) => card.querySelectorAll("time").length),
               sideReadingTimes: cards.slice(1).map((card) => /\d+ min read/i.test(card.textContent)),
             };
@@ -35,7 +39,11 @@ test("Home Blog covers stay 16:9 without horizontal overflow", async () => {
           assert.ok(result.ratios.every((ratio) => Math.abs(ratio - 16 / 9) < 0.01), `${width}px ${theme}: every cover is 16:9`);
           assert.deepEqual(result.dates, [1, 1, 1], `${width}px ${theme}: all cards show a date`);
           assert.deepEqual(result.sideReadingTimes, [true, true], `${width}px ${theme}: side cards show reading time`);
-          if (width === 768) assert.ok(result.coverWidths.slice(1).every((cover) => Math.abs(cover - 220) < 1), `${theme}: tablet companion images keep the earlier size`);
+          if (width >= 768 && width < 1024) {
+            assert.ok(result.coverWidths.slice(1).every((cover) => Math.abs(cover - 320) < 1), `${width}px ${theme}: tablet companion images fill their frames`);
+            assert.ok(result.sideImageGaps.every((gap) => gap <= 26), `${width}px ${theme}: tablet cards have no large empty image slots`);
+            assert.ok(result.sideTitlesFit.every(Boolean), `${width}px ${theme}: tablet titles remain readable`);
+          }
           if (width >= 1024) {
             const featuredShare = result.cardWidths[0] / (result.cardWidths[0] + result.cardWidths[1]);
             assert.ok(featuredShare >= 0.39 && featuredShare <= 0.41, `${width}px ${theme}: columns balance the 16:9 images`);
