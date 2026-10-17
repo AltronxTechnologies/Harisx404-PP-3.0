@@ -106,7 +106,7 @@ export function Writings({
         </SectionHeading>
       </motion.div>
 
-      <div className={`mt-14 grid grid-cols-1 gap-2 ${hasCompanions ? "lg:grid-cols-2" : ""}`}>
+      <div className={`mt-14 grid grid-cols-1 gap-2 ${hasCompanions ? "lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]" : ""}`}>
         {/* Featured — latest post, hero treatment with the inset cover */}
         <motion.div
           {...entrance}
@@ -131,7 +131,7 @@ export function Writings({
                   fill
                   onError={() => markFailed(featured.imageName!)}
                   sizes={
-                      hasCompanions ? "(max-width: 1023px) 100vw, 50vw" : "100vw"
+                      hasCompanions ? "(max-width: 1023px) 100vw, 40vw" : "100vw"
                   }
                    className="object-cover transition-transform duration-500 ease-out motion-safe:[@media(hover:hover)]:group-hover:scale-[1.03] motion-reduce:transition-none"
                 />
@@ -203,7 +203,7 @@ export function Writings({
                 >
                   <div className="flex h-full flex-col items-stretch gap-0 md:flex-row md:gap-4">
                      {/* Keep the landscape thumb centered beside the copy on wider cards. */}
-                      <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-2xl md:w-[220px] md:self-center lg:w-[41%]">
+                      <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-2xl md:w-[220px] md:self-center lg:w-1/2 xl:w-[52%]">
                       {post.imageName && !failedImages.includes(post.imageName) ? (
                         <>
                            <Image
@@ -212,7 +212,7 @@ export function Writings({
                              alt=""
                              fill
                              onError={() => markFailed(post.imageName!)}
-                              sizes="(max-width: 767px) 100vw, (max-width: 1023px) 220px, 230px"
+                              sizes="(max-width: 767px) 100vw, (max-width: 1023px) 220px, (max-width: 1279px) 270px, 370px"
                              className="object-cover transition-transform duration-500 ease-out motion-safe:[@media(hover:hover)]:group-hover:scale-[1.03] motion-reduce:transition-none"
                           />
                            {/* Subtle inset ring + scrim keeps landscape thumbnails legible. */}

@@ -25,6 +25,7 @@ test("Home Blog covers stay 16:9 without horizontal overflow", async () => {
               coverWidths: covers.map((box) => box.width),
               cardWidths: cards.map((card) => card.getBoundingClientRect().width),
               cardHeights: cards.map((card) => card.getBoundingClientRect().height),
+              sideImageGaps: cards.slice(1).map((card, index) => card.getBoundingClientRect().height - covers[index + 1].height - 26),
               dates: cards.map((card) => card.querySelectorAll("time").length),
               sideReadingTimes: cards.slice(1).map((card) => /\d+ min read/i.test(card.textContent)),
             };
@@ -36,9 +37,13 @@ test("Home Blog covers stay 16:9 without horizontal overflow", async () => {
           assert.deepEqual(result.sideReadingTimes, [false, false], `${width}px ${theme}: side cards omit reading time`);
           if (width === 768) assert.ok(result.coverWidths.slice(1).every((cover) => Math.abs(cover - 220) < 1), `${theme}: tablet companion images keep the earlier size`);
           if (width >= 1024) {
-            assert.ok(result.cardWidths[0] / (result.cardWidths[0] + result.cardWidths[1]) <= 0.51, `${width}px ${theme}: laptop columns balance`);
-            assert.ok(result.coverWidths.slice(1).every((cover) => cover >= (width >= 1280 ? 225 : 175)), `${width}px ${theme}: companion images balance the wider cards`);
-            if (width >= 1280) assert.ok(result.cardHeights[0] <= 520, `${width}px ${theme}: featured card is shorter`);
+            const featuredShare = result.cardWidths[0] / (result.cardWidths[0] + result.cardWidths[1]);
+            assert.ok(featuredShare >= 0.39 && featuredShare <= 0.41, `${width}px ${theme}: columns balance the 16:9 images`);
+            assert.ok(result.coverWidths.slice(1).every((cover) => cover >= (width >= 1280 ? 340 : 250)), `${width}px ${theme}: companion images fill their cards`);
+            if (width >= 1280) {
+              assert.ok(result.cardHeights[0] <= 485, `${width}px ${theme}: featured card stays compact`);
+              assert.ok(result.sideImageGaps.every((gap) => gap <= 16), `${width}px ${theme}: side cards do not leave large empty image slots`);
+            }
           }
         }
       } finally {
