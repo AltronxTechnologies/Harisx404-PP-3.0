@@ -30,6 +30,15 @@ test("Home Blog covers stay 16:9 without horizontal overflow", async () => {
                 const title = card.querySelector("h3");
                 return title.scrollHeight <= title.clientHeight + 1;
               }),
+              sideSpacing: cards.slice(1).map((card) => {
+                const title = card.querySelector("h3");
+                const description = title.nextElementSibling;
+                const actions = description.nextElementSibling;
+                return {
+                  titleToDescription: Math.round(description.getBoundingClientRect().top - title.getBoundingClientRect().bottom),
+                  descriptionToActions: Math.round(actions.getBoundingClientRect().top - description.getBoundingClientRect().bottom),
+                };
+              }),
               dates: cards.map((card) => card.querySelectorAll("time").length),
               sideReadingTimes: cards.slice(1).map((card) => /\d+ min read/i.test(card.textContent)),
             };
@@ -43,6 +52,13 @@ test("Home Blog covers stay 16:9 without horizontal overflow", async () => {
             assert.ok(result.coverWidths.slice(1).every((cover) => Math.abs(cover - 320) < 1), `${width}px ${theme}: tablet companion images fill their frames`);
             assert.ok(result.sideImageGaps.every((gap) => gap <= 26), `${width}px ${theme}: tablet cards have no large empty image slots`);
             assert.ok(result.sideTitlesFit.every(Boolean), `${width}px ${theme}: tablet titles remain readable`);
+            if (width === 768 || width === 900) {
+              assert.deepEqual(result.sideSpacing, [
+                { titleToDescription: 16, descriptionToActions: 8 },
+                { titleToDescription: 8, descriptionToActions: 16 },
+              ], `${width}px ${theme}: only the first card shifts its description into the action gap`);
+              assert.ok(Math.abs(result.cardHeights[1] - 229) < 1, `${width}px ${theme}: first card height stays fixed`);
+            }
           }
           if (width >= 1024) {
             const featuredShare = result.cardWidths[0] / (result.cardWidths[0] + result.cardWidths[1]);
